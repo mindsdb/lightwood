@@ -1,0 +1,66 @@
+integration_testing/*.csv
+integration_testing/*.tsv
+integration_testing/*.sql
+integration_testing/__*
+test_data.csv
+train_data.csv
+*.ipy*
+*.test.*
+.cache*
+storage/*
+mindsdb_storage/*
+config/personal_config.py
+*.jar
+data/*
+mindsdb.egg-info
+clean_data
+.pypirc
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# visual studio code
+.DStore
+.DS_Store
+.idea
+
+# virtualenv
+.venv
+venv/
+ENV/
+
+# pyenv
+.python-version
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+docs/_build
+docs/_static
+docs/_templates
+docs/index.rst
+docs/make.bat
+docs/Makefile
+docs/source
