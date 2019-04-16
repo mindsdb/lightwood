@@ -169,10 +169,15 @@ class CesiumTsEncoder:
             for col in features_to_use:
                 val = list(row[col][0])[0]
                 val1 = 0
-                if val in ['nan', None, 'NaN', False] and col in FEATURES_WITH_DEFAULT_NONE:
+                if val in ['nan', None, 'NaN', False]:
                     val = 0
                     val1 = 1
-                vector_row += [val, val1]  # val1 is 1 if its null
+
+                if col in FEATURES_WITH_DEFAULT_NONE:
+                    vector_row += [val, val1]  # val1 is 1 if its null
+                else:
+                    vector_row += [val]
+
 
             ret += [vector_row]
         ret_tensor = torch.FloatTensor(ret)
