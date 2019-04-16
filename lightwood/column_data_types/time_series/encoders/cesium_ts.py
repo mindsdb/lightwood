@@ -1,6 +1,6 @@
 from cesium import featurize
 import numpy as np
-
+import torch
 
 
 DEFAULT_FEATURES_TO_USE = [
@@ -121,17 +121,19 @@ DEFAULT_FEATURES_TO_USE = [
 
 class CesiumTsEncoder:
 
+    def __init__(self, features = DEFAULT_FEATURES_TO_USE):
+        self._features = features
 
-
-    def encode(self, values_data, times = None, features=DEFAULT_FEATURES_TO_USE):
+    def encode(self, values_data, times = None):
         """
-        It returns a list of lists with encoded values
-        :param col: is a list of lists
-        :return: a list
+        Encode a column data into time series
+
+        :param values_data: a list of lists
+        :param times: (optional) a list of lists such that, len(times[i])=len(values_data[i]) for all i in range(len(times))
+        :return: a torch.floatTensor
         """
 
-        features_to_use = features
-
+        features_to_use = self._features
         ret = []
 
         for i,values in enumerate(values_data):
@@ -139,8 +141,6 @@ class CesiumTsEncoder:
                 times_row = np.array([float(i) for i in range(1,len(values)+1)])
             else:
                 times_row = np.array(times[i])
-
-
 
             row = featurize.featurize_time_series(times=times_row,
                                             values=np.array(values),
@@ -158,8 +158,8 @@ class CesiumTsEncoder:
                 vector_row+=[val,val1] # val1 is 1 if its null
 
             ret += [vector_row]
-
-        return ret
+        ret_tensor = torch.FloatTensor(ret)
+        return ret_tensor
 
 
 
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
     data = [[math.sin(i/100) for i in range (1,10) ] for j in range(20)]
 
-    ret = CesiumTsEncoder().encode(data, features=[
+    ret = CesiumTsEncoder(features=[
             "amplitude",
            "percent_beyond_1_std",
            "maximum",
@@ -184,7 +184,7 @@ if __name__ == "__main__":
            "skew",
            "std",
            "weighted_average"
-        ])
+        ]).encode(data)
 
     print(ret)
 
