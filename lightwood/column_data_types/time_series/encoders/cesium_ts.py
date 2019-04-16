@@ -4,9 +4,7 @@ import numpy as np
 import torch
 from cesium import featurize
 
-warnings.filterwarnings("ignore")
 DEFAULT_FEATURES_TO_USE = [
-
     "all_times_nhist_numpeaks",
     "all_times_nhist_peak1_bin",
     "all_times_nhist_peak2_bin",
@@ -121,6 +119,21 @@ DEFAULT_FEATURES_TO_USE = [
     "scatter_res_raw"
 ]
 
+FEATURES_WITH_DEFAULT_NONE = [
+    "cad_probs_1",
+    "cad_probs_10",
+    "cad_probs_20",
+    "cad_probs_30",
+    "cad_probs_40",
+    "cad_probs_50",
+    "cad_probs_100",
+    "cad_probs_500",
+    "cad_probs_1000",
+    "cads_std",
+    "std_err",
+    "freq_n_alias"
+]
+
 
 class CesiumTsEncoder:
 
@@ -156,7 +169,7 @@ class CesiumTsEncoder:
             for col in features_to_use:
                 val = list(row[col][0])[0]
                 val1 = 0
-                if val in ['nan', None, 'NaN', False]:
+                if val in ['nan', None, 'NaN', False] and col in FEATURES_WITH_DEFAULT_NONE:
                     val = 0
                     val1 = 1
                 vector_row += [val, val1]  # val1 is 1 if its null
