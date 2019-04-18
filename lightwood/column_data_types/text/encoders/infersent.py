@@ -1,7 +1,8 @@
 import torch
 
-from models import InferSent
+from lightwood.column_data_types.text.helpers.infersent import InferSent
 import nltk
+
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
