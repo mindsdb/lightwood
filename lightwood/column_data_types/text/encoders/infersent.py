@@ -27,6 +27,10 @@ W2V_PATH = "datasets/fastText/crawl-300d-2M-subword.vec"
 
 class InferSentEncoder:
 
+    def __init__(self):
+
+        self._model = None
+
     def encode(self, sentences):
         """
         Encode a column of sentences
@@ -36,19 +40,19 @@ class InferSentEncoder:
         """
         self._download_necessary_files()
 
-        model = InferSent(PARAMS_MODEL)
-        model.load_state_dict(torch.load(MODEL_PATH))
-        model.set_w2v_path(W2V_PATH)
+        if self._model is None:
+            self._model = InferSent(PARAMS_MODEL)
+            self._model.load_state_dict(torch.load(MODEL_PATH))
+            self._model.set_w2v_path(W2V_PATH)
 
-        model.build_vocab(sentences, tokenize=True)
+            self._model.build_vocab(sentences, tokenize=True)
 
-        result = model.encode(sentences, bsize=128, tokenize=False, verbose=True)
+        result = self._model.encode(sentences, bsize=128, tokenize=False, verbose=True)
         ret_tensor = torch.FloatTensor(result)
 
         return ret_tensor
 
     def _download_necessary_files(self):
-        logging.info('This is the first time you use this text encoder, we will download a pretrained model file and word embeddings, this will take about 20 minutes.')
         self._download_model_file()
         self._download_embeddings_file()
 
@@ -58,6 +62,7 @@ class InferSentEncoder:
         if not os.path.exists(pkl_dir):
             os.makedirs(pkl_dir)
         if not os.path.exists(MODEL_PATH):
+            logging.info('This is the first time you use this text encoder, we will download a pretrained model.')
             sys.stderr.write('Downloading: "{}" to {}\n'.format(pkl_url, MODEL_PATH))
             self._download_url_to_file(pkl_url, MODEL_PATH, progress=True)
 
@@ -70,6 +75,7 @@ class InferSentEncoder:
         filename = os.path.basename(parts.path)
         cached_zip_file = os.path.join(emdeddings_dir, filename)
         if not os.path.exists(W2V_PATH):
+            logging.info('We will download word embeddings, this will take about 20 minutes.')
             sys.stderr.write('Downloading: "{}" to {}\n'.format(embeddings_url, cached_zip_file))
             self._download_url_to_file(embeddings_url, cached_zip_file, progress=True)
             self._unzip_file(cached_zip_file, emdeddings_dir)
@@ -114,9 +120,20 @@ if __name__ == "__main__":
     sentences = ["Everyone really likes the newest benefits",
                  "The Government Executive articles housed on the website are not able to be searched",
                  "Most of Mrinal Sen 's work can be found in European collections . ",
-                 "Would you rise up and defeaat all evil lords in the town ? "
+                 "Would you rise up and defeaat all evil lords in the town ? ",
+
+
                  ]
 
-    ret = InferSentEncoder().encode(sentences)
+    encoder = InferSentEncoder()
+    ret = encoder.encode(sentences)
+
+    print(ret)
+
+    ret = encoder.encode(["And theyw ill fail to raise"])
+
+    print(ret)
+
+    ret = encoder.encode(["Everyone really likes the newest benefits"])
 
     print(ret)
