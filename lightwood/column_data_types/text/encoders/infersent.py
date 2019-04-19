@@ -1,20 +1,29 @@
+import os
+import shutil
+import sys
+import tempfile
+import zipfile
+from urllib.parse import urlparse
+from urllib.request import urlopen
+
+import nltk
 import torch
+from torch.utils.model_zoo import tqdm
 
 from lightwood.column_data_types.text.helpers.infersent import InferSent
-import nltk
 
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
     nltk.download('punkt')
 
+PARAMS_MODEL = {'bsize': 64, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
+                'pool_type': 'max', 'dpout_model': 0.0, 'version': 2}
+MODEL_PATH = "pkl_objects/infersent2.pkl"
+W2V_PATH = "datasets/fastText/crawl-300d-2M-subword.vec"
+
 
 class InferSentEncoder:
-
-    def __init__(self, model_version=2):
-        self._model_version = model_version
-        self.MODEL_PATH = "../../../../pkl_objects/infersent%s.pickle" % self._model_version
-        self.W2V_PATH = 'datasets/GloVe/glove.840B.300d.txt' if self._model_version == 1 else 'datasets/fastText/crawl-300d-2M-subword.vec'
 
     def encode(self, sentences):
         """
@@ -23,18 +32,78 @@ class InferSentEncoder:
         :param sentences: a list of sentences
         :return: a torch.floatTensor
         """
+        self._download_necessary_files()
 
-        params_model = {'bsize': 64, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
-                        'pool_type': 'max', 'dpout_model': 0.0, 'version': self._model_version}
-        model = InferSent(params_model)
-        model.load_state_dict(torch.load(self.MODEL_PATH))
-
-        model.set_w2v_path(self.W2V_PATH)
+        model = InferSent(PARAMS_MODEL)
+        model.load_state_dict(torch.load(MODEL_PATH))
+        model.set_w2v_path(W2V_PATH)
 
         model.build_vocab(sentences, tokenize=True)
+
         result = model.encode(sentences, bsize=128, tokenize=False, verbose=True)
         ret_tensor = torch.FloatTensor(result)
+
         return ret_tensor
+
+    def _download_necessary_files(self):
+        self._download_model_file()
+        self._download_embeddings_file()
+
+    def _download_model_file(self):
+        pkl_dir = "pkl_objects"
+        pkl_url = "https://dl.fbaipublicfiles.com/infersent/infersent2.pkl"
+        if not os.path.exists(pkl_dir):
+            os.makedirs(pkl_dir)
+        if not os.path.exists(MODEL_PATH):
+            sys.stderr.write('Downloading: "{}" to {}\n'.format(pkl_url, MODEL_PATH))
+            self._download_url_to_file(pkl_url, MODEL_PATH, progress=True)
+
+    def _download_embeddings_file(self):
+        emdeddings_dir = "datasets/fastText/"
+        embeddings_url = "https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip"
+        if not os.path.exists(emdeddings_dir):
+            os.makedirs(emdeddings_dir)
+        parts = urlparse(embeddings_url)
+        filename = os.path.basename(parts.path)
+        cached_zip_file = os.path.join(emdeddings_dir, filename)
+        if not os.path.exists(W2V_PATH):
+            sys.stderr.write('Downloading: "{}" to {}\n'.format(embeddings_url, cached_zip_file))
+            self._download_url_to_file(embeddings_url, cached_zip_file, progress=True)
+            self._unzip_file(cached_zip_file, emdeddings_dir)
+            os.remove(cached_zip_file)
+            os.remove(cached_zip_file.replace("zip", "bin"))
+
+    def _unzip_file(self, path, file_dir):
+        with zipfile.ZipFile(path, "r") as zip_ref:
+            zip_ref.extractall(file_dir)
+
+    def _download_url_to_file(self, url, dst, progress):
+        file_size = None
+        u = urlopen(url)
+        meta = u.info()
+        if hasattr(meta, 'getheaders'):
+            content_length = meta.getheaders("Content-Length")
+        else:
+            content_length = meta.get_all("Content-Length")
+        if content_length is not None and len(content_length) > 0:
+            file_size = int(content_length[0])
+
+        f = tempfile.NamedTemporaryFile(delete=False)
+        try:
+            with tqdm(total=file_size, disable=not progress) as pbar:
+                while True:
+                    buffer = u.read(8192)
+                    if len(buffer) == 0:
+                        break
+                    f.write(buffer)
+                    pbar.update(len(buffer))
+
+            f.close()
+            shutil.move(f.name, dst)
+        finally:
+            f.close()
+            if os.path.exists(f.name):
+                os.remove(f.name)
 
 
 # only run the test if this file is called from debugger
@@ -45,6 +114,6 @@ if __name__ == "__main__":
                  "Would you rise up and defeaat all evil lords in the town ? "
                  ]
 
-    ret = InferSentEncoder(2).encode(sentences)
+    ret = InferSentEncoder().encode(sentences)
 
     print(ret)
