@@ -10,6 +10,8 @@ import nltk
 import torch
 from torch.utils.model_zoo import tqdm
 
+import logging
+
 from lightwood.column_data_types.text.helpers.infersent import InferSent
 
 try:
@@ -46,6 +48,7 @@ class InferSentEncoder:
         return ret_tensor
 
     def _download_necessary_files(self):
+        logging.info('This is the first time you use this text encoder, we will download a pretrained model file and word embeddings, this will take about 20 minutes.')
         self._download_model_file()
         self._download_embeddings_file()
 
