@@ -484,10 +484,12 @@ def tensorFromSentence(lang, sentence):
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
-def tensorsFromPair(pair):
+def tensorsFromPair(pair, input_lang, output_lang):
     input_tensor = tensorFromSentence(input_lang, pair[0])
     target_tensor = tensorFromSentence(output_lang, pair[1])
     return (input_tensor, target_tensor)
+
+
 
 
 ######################################################################
@@ -547,16 +549,24 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
     if use_teacher_forcing:
         # Teacher forcing: Feed the target as the next input
         for di in range(target_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
+            if isinstance(decoder, AttnDecoderRNN):
+                decoder_output, decoder_hidden, decoder_attention = decoder(
                 decoder_input, decoder_hidden, encoder_outputs)
+            else:
+                decoder_output, decoder_hidden = decoder(
+                    decoder_input, decoder_hidden)
             loss += criterion(decoder_output, target_tensor[di])
             decoder_input = target_tensor[di]  # Teacher forcing
 
     else:
         # Without teacher forcing: use its own predictions as the next input
         for di in range(target_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
+            if isinstance(decoder, AttnDecoderRNN):
+                decoder_output, decoder_hidden, decoder_attention = decoder(
                 decoder_input, decoder_hidden, encoder_outputs)
+            else:
+                decoder_output, decoder_hidden = decoder(
+                    decoder_input, decoder_hidden)
             topv, topi = decoder_output.topk(1)
             decoder_input = topi.squeeze().detach()  # detach from history as input
 
@@ -607,7 +617,7 @@ def timeSince(since, percent):
 # of examples, time so far, estimated time) and average loss.
 #
 
-def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
+def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -615,7 +625,10 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
 
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
-    training_pairs = [tensorsFromPair(random.choice(pairs))
+
+    random_index = random.randint(0,len(input_rows))
+
+    training_pairs = [[tensorFromSentence(input_lang, input_rows[random_index]), tensorFromSentence(output_lang, output_rows[random_index])]
                       for i in range(n_iters)]
     criterion = nn.NLLLoss()
 
@@ -640,7 +653,7 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
             plot_losses.append(plot_loss_avg)
             plot_loss_total = 0
 
-    showPlot(plot_losses)
+    #showPlot(plot_losses)
 
 
 
@@ -655,7 +668,7 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
 # attention outputs for display later.
 #
 
-def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
+def evaluate(encoder, decoder, input_lang, output_lang, sentence, max_length=MAX_LENGTH):
     with torch.no_grad():
         input_tensor = tensorFromSentence(input_lang, sentence)
         input_length = input_tensor.size()[0]
@@ -696,7 +709,7 @@ def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
 # input, target, and output to make some subjective quality judgements:
 #
 
-def evaluateRandomly(encoder, decoder, n=10):
+def evaluateRandomly(encoder, pairs, decoder, n=10):
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
