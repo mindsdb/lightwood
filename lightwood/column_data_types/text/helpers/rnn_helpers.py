@@ -617,7 +617,7 @@ def timeSince(since, percent):
 # of examples, time so far, estimated time) and average loss.
 #
 
-def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
+def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, loss_breakpoint=0.0001):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -641,6 +641,15 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
                      decoder, encoder_optimizer, decoder_optimizer, criterion)
         print_loss_total += loss
         plot_loss_total += loss
+
+        print_loss_avg = print_loss_total / print_every
+
+        if print_loss_avg < loss_breakpoint:
+
+            print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
+                                         iter, iter / n_iters * 100, print_loss_avg))
+
+            break
 
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every

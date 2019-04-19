@@ -1,8 +1,13 @@
 from lightwood.column_data_types.text.helpers.rnn_helpers import *
-
+import logging
+import math
 class RnnEncoder:
 
-    def __init__(self):
+    def __init__(self, encoded_vector_size = 256, train_iters=75000, stop_on_error = 0.0001, learning_rate=0.01):
+        self._stop_on_error = stop_on_error
+        self._learning_rate = learning_rate
+        self._encoded_vector_size = encoded_vector_size
+        self._train_iters = train_iters
         self._input_lang = None
         self._output_lang = None
         self._encoder = None
@@ -12,17 +17,22 @@ class RnnEncoder:
     def encode(self, column_data):
 
         if self._trained == False:
+
+            estimated_time = 1/937*self._train_iters*len(column_data)
+            log_every = math.ceil(self._train_iters/100)
+            logging.info('We will train an encoder for this text, on a CPU it will take about {min} minutes'.format(min=estimated_time))
+
             self._input_lang = Lang('input')
             self._output_lang = self._input_lang
 
             for row in column_data:
                 self._input_lang.addSentence(row)
 
-            hidden_size = 256
+            hidden_size = self._encoded_vector_size
             self._encoder = EncoderRNN(self._input_lang.n_words, hidden_size).to(device)
-            self._decoder = DecoderRNN(hidden_size, self._output_lang.n_words, dropout_p=0.1).to(device)
+            self._decoder = DecoderRNN(hidden_size, self._output_lang.n_words).to(device)
 
-            trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, column_data, column_data, 75000)
+            trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, column_data, column_data, self._train_iters, int(log_every), self._learning_rate, self._stop_on_error)
 
             self._trained = True
 
@@ -77,3 +87,29 @@ class RnnEncoder:
                 ret += [' '.join(decoded_words)]
 
         return ret
+
+
+
+# only run the test if this file is called from debugger
+if __name__ == "__main__":
+    sentences = ["Everyone really likes the newest benefits",
+                 "The Government Executive articles housed on the website are not able to be searched",
+                 "Most of Mrinal Sen 's work can be found in European collections . ",
+                 "Would you rise up and defeaat all evil lords in the town ? ",
+
+
+                 ]
+
+    encoder = RnnEncoder(encoded_vector_size=10,train_iters=7500)
+    encoder.encode(sentences)
+
+
+
+    # test de decoder
+
+    ret = encoder.encode(["Everyone really likes the newest benefits"])
+    print('encoded vector:')
+    print(ret)
+    print('decoded vector')
+    ret2 = encoder.decode(ret)
+    print(ret2)
