@@ -48,16 +48,15 @@ class InferSentEncoder:
             self._model.build_vocab(sentences, tokenize=True)
 
         result = self._model.encode(sentences, bsize=128, tokenize=False, verbose=True)
-        ret_tensor = torch.FloatTensor(result)
 
-        return ret_tensor
+        return torch.FloatTensor(result)
 
     def _download_necessary_files(self):
         self._download_model_file()
         self._download_embeddings_file()
 
     def _download_model_file(self):
-        pkl_dir = "pkl_objects"
+        pkl_dir = "pkl_objects/"
         pkl_url = "https://dl.fbaipublicfiles.com/infersent/infersent2.pkl"
         if not os.path.exists(pkl_dir):
             os.makedirs(pkl_dir)
@@ -120,20 +119,15 @@ if __name__ == "__main__":
     sentences = ["Everyone really likes the newest benefits",
                  "The Government Executive articles housed on the website are not able to be searched",
                  "Most of Mrinal Sen 's work can be found in European collections . ",
-                 "Would you rise up and defeaat all evil lords in the town ? ",
-
-
+                 "Would you rise up and defeaat all evil lords in the town ? "
                  ]
 
     encoder = InferSentEncoder()
     ret = encoder.encode(sentences)
-
     print(ret)
 
     ret = encoder.encode(["And theyw ill fail to raise"])
-
     print(ret)
 
     ret = encoder.encode(["Everyone really likes the newest benefits"])
-
     print(ret)
