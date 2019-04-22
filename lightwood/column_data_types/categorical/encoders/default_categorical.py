@@ -50,7 +50,7 @@ class DefaultCategoricalEncoder:
                     break
             if not found:
                 ret += [None]
-                
+
         return ret
 
 
