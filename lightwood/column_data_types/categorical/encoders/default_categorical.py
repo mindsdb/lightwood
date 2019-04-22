@@ -4,7 +4,7 @@ from lightwood.column_data_types.text.helpers.rnn_helpers import Lang
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
 
-class DefaultEncoder:
+class DefaultCategoricalEncoder:
 
     def __init__(self):
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     data = 'once upon a time there where some tokens'.split(' ')
 
-    enc = DefaultEncoder()
+    enc = DefaultCategoricalEncoder()
 
     print (enc.encode(data))
 
