@@ -77,3 +77,9 @@ if __name__ == "__main__":
     print(encoder.encode([1,2,2,2,2,2,8.6]))
 
     print(encoder.decode(encoder.encode([1, 2, 2, 2, 2, 2, 8.7, 800, None])))
+
+    encoder = NumericEncoder()
+
+    print(encoder.encode([1, 2, 2, 2, 2, 2, 8.6]))
+
+    print(encoder.decode(encoder.encode([1, 2, 2, 2, 2, 2, 8.7, None])))
