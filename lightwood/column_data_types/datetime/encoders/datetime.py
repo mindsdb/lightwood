@@ -1,7 +1,7 @@
 import datetime
 import torch
 
-class DefaultDatetimeEncoder:
+class DatetimeEncoder:
 
 
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     data = [1555943147, None, 1555943147]
 
-    enc = DefaultDatetimeEncoder()
+    enc = DatetimeEncoder()
 
     print (enc.decode(enc.encode(data)))
 
