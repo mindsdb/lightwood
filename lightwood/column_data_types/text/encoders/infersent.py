@@ -39,6 +39,9 @@ class InferSentEncoder:
         :return: a torch.floatTensor
         """
         self._download_necessary_files()
+        for i, text in enumerate(sentences):
+            if text is None:
+                sentences[i] = ''
 
         if self._model is None:
             self._model = InferSent(PARAMS_MODEL)
@@ -119,7 +122,8 @@ if __name__ == "__main__":
     sentences = ["Everyone really likes the newest benefits",
                  "The Government Executive articles housed on the website are not able to be searched",
                  "Most of Mrinal Sen 's work can be found in European collections . ",
-                 "Would you rise up and defeaat all evil lords in the town ? "
+                 "Would you rise up and defeaat all evil lords in the town ? ",
+                 None
                  ]
 
     encoder = InferSentEncoder()
