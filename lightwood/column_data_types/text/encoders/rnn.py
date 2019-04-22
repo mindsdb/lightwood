@@ -26,7 +26,8 @@ class RnnEncoder:
             self._output_lang = self._input_lang
 
             for row in column_data:
-                self._input_lang.addSentence(row)
+                if row is not None:
+                    self._input_lang.addSentence(row)
 
             hidden_size = self._encoded_vector_size
             self._encoder = EncoderRNN(self._input_lang.n_words, hidden_size).to(device)
@@ -55,7 +56,7 @@ class RnnEncoder:
                     #encoder_outputs[ei] = encoder_output[0, 0]
 
                 # use the last hidden state as the encoded vector
-                ret+=[encoder_hidden.tolist()]
+                ret+=[encoder_hidden.tolist()[0][0]]
 
         return torch.FloatTensor(ret)
 
@@ -64,12 +65,13 @@ class RnnEncoder:
 
         ret = []
         with torch.no_grad():
-            for decoder_hidden in encoded_values_tensor:
+            for decoder_hiddens in encoded_values_tensor:
+                decoder_hidden = torch.FloatTensor([[decoder_hiddens.tolist()]])
+
 
                 decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 
                 decoded_words = []
-
 
                 for di in range(max_length):
                     decoder_output, decoder_hidden = self._decoder(
@@ -96,7 +98,7 @@ if __name__ == "__main__":
                  "The Government Executive articles housed on the website are not able to be searched",
                  "Most of Mrinal Sen 's work can be found in European collections . ",
                  "Would you rise up and defeaat all evil lords in the town ? ",
-
+                 None
 
                  ]
 
