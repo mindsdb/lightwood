@@ -3,7 +3,7 @@ import torch
 
 class DefaultDatetimeEncoder:
 
-    
+
 
     def encode(self, data):
         """
@@ -16,9 +16,11 @@ class DefaultDatetimeEncoder:
 
         for unix_timestamp in data:
 
-            date = datetime.datetime.fromtimestamp(unix_timestamp)
-
-            vector = [date.year/3000.0, date.month/12.0, date.day/31.0, date.hour/24.0, date.minute/60.0, date.second/60.0]
+            if unix_timestamp is None:
+                vector = [0]*6
+            else:
+                date = datetime.datetime.fromtimestamp(unix_timestamp)
+                vector = [date.year/3000.0, date.month/12.0, date.day/31.0, date.hour/24.0, date.minute/60.0, date.second/60.0]
 
             ret += [vector]
 
@@ -28,11 +30,17 @@ class DefaultDatetimeEncoder:
     def decode(self, encoded_data, return_as_datetime = False):
         ret = []
         for vector in encoded_data.tolist():
-            dt = datetime.datetime(year=round(vector[0]*3000), month=round(vector[1]*12), day=round(vector[2]*31), hour=round(vector[3]*24), minute=round(vector[4]*60), second=round(vector[5]*60))
-            if return_as_datetime == True:
-                ret += [dt]
+
+            if sum(vector) == 0:
+                ret += [None]
+
             else:
-                ret += [round(dt.timestamp())]
+
+                dt = datetime.datetime(year=round(vector[0]*3000), month=round(vector[1]*12), day=round(vector[2]*31), hour=round(vector[3]*24), minute=round(vector[4]*60), second=round(vector[5]*60))
+                if return_as_datetime == True:
+                    ret += [dt]
+                else:
+                    ret += [round(dt.timestamp())]
 
         return ret
 
@@ -41,7 +49,7 @@ class DefaultDatetimeEncoder:
 
 if __name__ == "__main__":
 
-    data = [1555943147, 1555943147]
+    data = [1555943147, None, 1555943147]
 
     enc = DefaultDatetimeEncoder()
 
