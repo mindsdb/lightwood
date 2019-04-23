@@ -1,5 +1,5 @@
 import torch
-from lightwood.column_data_types.text.helpers.rnn_helpers import Lang
+from lightwood.encoders.text.helpers.rnn_helpers import Lang
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
