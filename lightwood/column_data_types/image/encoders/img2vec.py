@@ -1,5 +1,3 @@
-import os
-
 import torch
 from PIL import Image
 
@@ -11,20 +9,19 @@ class Img2VecEncoder:
     def __init__(self):
         self._model = None
 
-    def encode(self, path):
+    def encode(self, images):
         """
             Encode all images present under a directory
 
-            :param path: directory where images present
+            :images : list of images, each image is a path image(ToDO: url to image also need to be included)
             :return: a torch.floatTensor
         """
         if self._model is None:
             self._model = Img2Vec()
 
         pics = []
-        for file in os.listdir(path):
-            filename = os.fsdecode(file)
-            img = Image.open(os.path.join(path, filename))
+        for image in images:
+            img = Image.open(image)
             vec = self._model.get_vec(img)
             pics.append(vec)
 
@@ -32,7 +29,9 @@ class Img2VecEncoder:
 
 
 if __name__ == "__main__":
-    input_path = 'test_data/'
+    images = ['test_data/cat.jpg', 'test_data/cat2.jpg', 'test_data/catdog.jpg']
+
     encoder = Img2VecEncoder()
-    ret = encoder.encode(input_path)
+
+    ret = encoder.encode(images)
     print(ret)
