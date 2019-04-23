@@ -2,7 +2,7 @@ import traceback
 
 from lightwood.data_schemas.definition import definition_schema
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES, HISTOGRAM_TYPES
-from lightwood.classes.dataset import Dataset
+
 
 class Predictor:
 

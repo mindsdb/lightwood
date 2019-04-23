@@ -1,7 +1,7 @@
 import torch
 from PIL import Image
 
-from lightwood.column_data_types.image.helpers.img_to_vec import Img2Vec
+from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 
 
 class Img2VecEncoder:
