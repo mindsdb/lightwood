@@ -1,4 +1,4 @@
-lightwood/column_data_types/text/encoders/datasets/
+*.vec
 *.pkl
 integration_testing/*.csv
 integration_testing/*.tsv
