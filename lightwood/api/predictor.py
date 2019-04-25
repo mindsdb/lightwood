@@ -8,11 +8,12 @@ class Predictor:
 
 
 
-    def __init__(self, definition):
+    def __init__(self, definition, load_from_path=None):
         """
         Start a predictor pass the
 
         :param definition: a predictor definition object (can be a dictionary or a PredictorDefinition object)
+        :param load_from_path: The path to load the predictor from
         :type definition: dictionary
         """
         try:
@@ -22,8 +23,8 @@ class Predictor:
             raise ValueError('[BAD DEFINITION] argument has errors: {err}'.format(err=error))
 
         self.definition = definition
-        self._model = None
         self._encoders = None
+        self._mixers = None
 
 
     def learn(self, from_data, test_data, validation_data):
@@ -36,22 +37,8 @@ class Predictor:
         :return:
         """
 
-        model, encoders = self._load()
 
-        validation_dataset = Dataset(df=validation_data, parent_predictor_object=self)
-        test_dataset = Dataset(df=test_data, parent_predictor_object=self)
-
-        train_dataset = Dataset(df=from_data, parent_predictor_object=self)
-        train_dataset.load_encoders(encoders) # if encoders exist start from there
-        train_dataset.encode(validation_dataset=validation_dataset)
-
-        if model is None: # build model if no model exists
-            model = Model(definition=self.definition)
-
-        model.train(train_dataset, validation_dataset = test_dataset)
-
-        self._save(model = model, encoders = train_dataset.get_encoders())
-
+        pass
 
     def predict(self, when_data):
         """
@@ -60,37 +47,22 @@ class Predictor:
         :return: a complete dataframe
         """
 
-        model, encoders = self._load()
-
-        when_dataset = Dataset(df=when_data, parent_predictor_object=self)
-        when_dataset.load_encoders(encoders)
-        when_dataset.encode(train_encoders = False)
-
-        complete_dataset = model.forward(when_dataset)
-
-        return complete_dataset.get_df()
+        pass
 
 
-    def _save(self, model, encoders):
+    def save(self, path_to):
         """
 
-        :param model:
-        :param encoders:
+        :param path:
         :return:
         """
 
         pass
 
-    def _load(self, use_cache = True):
-        """
 
-        :param use_cache: (default True) if the model already in memory use it
-        :return: model, encoders
-        """
-        model = self._model
-        encoders = self._encoders
 
-        return model, encoders
+
+
 
 
 
