@@ -1,4 +1,5 @@
 import logging
+import os
 
 from lightwood.encoders.image.helpers.nn import NnEncoderHelper
 
@@ -20,16 +21,20 @@ class NnAutoEncoder:
 
         return self._model.encode(images)
 
-    def decode(self, encoded_values_tensor):
+    def decode(self, encoded_values_tensor, save_to_path="decoded/"):
         """
-         Decoded the encoded list of image tensors and write the decoded images to "decoded" folder
+         Decoded the encoded list of image tensors and write the decoded images to give path
 
         :param encoded_values_tensor: List of encoded images tensors
-        :return: a torch.floatTensor
+        :param save_to_path: Path to store decoded images
+        :return: a list of image paths
         """
         if not self._model:
             logging.error("No model to decode, please train the model")
-        return self._model.decode(encoded_values_tensor)
+
+        if not os.path.exists(save_to_path):
+            os.makedirs(save_to_path)
+        return self._model.decode(encoded_values_tensor, save_to_path)
 
     def train(self, images):
         """
@@ -48,7 +53,5 @@ if __name__ == "__main__":
     print(encoded_data)
 
     # decoded images will be stored under decoded folder
-    decoded_data = encoder.decode(encoded_data)
+    decoded_data = encoder.decode(encoded_data, "decoded/images")
     print(decoded_data)
-
-
