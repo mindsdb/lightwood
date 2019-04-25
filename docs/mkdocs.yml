@@ -1,0 +1,7 @@
+site_name: Lightwood
+theme:
+  name: 'material'
+  logo: 'assets/logo_icon.png'
+  palette:
+    primary: 'red'
+    accent: 'red'
