@@ -1,3 +1,4 @@
+*.pth
 *.vec
 *.pkl
 integration_testing/*.csv
