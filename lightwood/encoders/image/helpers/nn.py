@@ -71,21 +71,21 @@ class NnEncoderHelper:
             data_source.append(self.model.encoder(img))
         return data_source
 
-    def decode(self, encoded_values_tensor):
+    def decode(self, encoded_values_tensor, save_to_path):
         """
-        Decoded the encoded list of image tensors and write the decoded images to "decoded" folder
+        Decoded the encoded list of image tensors and write the decoded images to give path
 
         :param encoded_values_tensor:  List of encoded images tensors
+        :param save_to_path: Path to store decoded images
         :return: a torch.floatTensor
         """
         decoded_values = []
-        if not os.path.exists('./decoded'):
-            os.mkdir('./decoded')
         for i, encoded_image in enumerate(encoded_values_tensor):
             decoded = self.model.decoder(encoded_image)
             pic = to_img(decoded.cpu().data[0:-2])
-            save_image(pic, 'decoded/output_{}.png'.format(i))
-            decoded_values.append(decoded)
+            path_to_img = os.path.join(save_to_path, 'output_{}.png'.format(i))
+            save_image(pic, path_to_img)
+            decoded_values.append(os.path.abspath(path_to_img))
         return decoded_values
 
     def _train_model(self, images):
