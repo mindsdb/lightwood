@@ -11,7 +11,7 @@ class Img2VecEncoder:
 
     def encode(self, images):
         """
-            Encode all images present under a directory
+            Encode list of images
 
             :images : list of images, each image is a path image(ToDO: url to image also need to be included)
             :return: a torch.floatTensor
