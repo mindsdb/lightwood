@@ -83,8 +83,9 @@ class NnEncoderHelper:
         for i, encoded_image in enumerate(encoded_values_tensor):
             decoded = self.model.decoder(encoded_image)
             pic = to_img(decoded.cpu().data[0:-2])
-            save_image(pic, save_to_path + '/output_{}.png'.format(i))
-            decoded_values.append(os.path.abspath(os.path.join(save_to_path + '/output_{}.png'.format(i))))
+            path_to_img = os.path.join(save_to_path, 'output_{}.png'.format(i))
+            save_image(pic, path_to_img)
+            decoded_values.append(os.path.abspath(path_to_img))
         return decoded_values
 
     def _train_model(self, images):
