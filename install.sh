@@ -23,6 +23,8 @@ if [ "$mode" = "prod" ]; then
     if [ "$publish" = "yes" ]; then
         echo "Publishing lightwood to Pypi"
         python3 -m twine upload dist/*
+	cd docs
+	mkdocs gh-deploy
     fi
 
 
