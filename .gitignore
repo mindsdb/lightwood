@@ -1,3 +1,4 @@
+docs/site
 __pycache__
 *.pth
 *.vec
