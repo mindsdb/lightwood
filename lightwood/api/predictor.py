@@ -1,8 +1,9 @@
 import traceback
 
+from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.definition import definition_schema
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES, HISTOGRAM_TYPES
-
+from lightwood.mixers.sklearn_classifier.sklearn_classifier import SklearnClassifier
 
 class Predictor:
 
@@ -27,7 +28,7 @@ class Predictor:
         self._mixers = None
 
 
-    def learn(self, from_data, test_data, validation_data):
+    def learn(self, from_data, test_data=None, validation_data= None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -36,6 +37,21 @@ class Predictor:
         :param validation_data:
         :return:
         """
+
+        from_data_ds = DataSource(from_data, self.definition)
+        if test_data:
+            test_data_ds = DataSource(test_data, self.definition)
+        else:
+            test_data_ds = None
+
+        if len(self.definition['output_features']) == 1:
+
+            model = SklearnClassifier(
+                input_column_names=[f['name'] for f in self.definition['input_features']],
+                output_column_names=[f['name'] for f in self.definition['output_features']])
+
+            model.fit(from_data_ds)
+
 
 
         pass
