@@ -44,7 +44,16 @@ class DataSource:
 
         config = self._getColumnConfig(column_name)
 
-        path = config['encoder_path']
+        if 'encoder_path' not in config:
+            path = 'lightwood.encoders.{type}'.format(type=config['type'])
+            module = importlib.import_module(path)
+            if hasattr(module, 'default'):
+                path += '.'+importlib.import_module(path).default
+            else:
+                path += '.{type}'.format(type=config['type'])
+        else:
+            path = config['encoder_path']
+
         kwargs = config['encoder_args'] if 'encoder_args' in config else {}
 
         module = importlib.import_module(path)
@@ -90,7 +99,7 @@ if __name__ == "__main__":
             {
                 'name': 'y',
                 'type': 'numeric',
-                'encoder_path': 'lightwood.encoders.numeric.numeric'
+                #'encoder_path': 'lightwood.encoders.numeric.numeric'
             }
         ],
 
@@ -98,7 +107,7 @@ if __name__ == "__main__":
             {
                 'name': 'z',
                 'type': 'categorical',
-                'encoder_path': 'lightwood.encoders.categorical.categorical'
+                #'encoder_path': 'lightwood.encoders.categorical.categorical'
             }
         ]
     }
