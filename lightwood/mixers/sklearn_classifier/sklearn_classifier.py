@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
@@ -19,55 +20,69 @@ class SkLearnClassifier:
     def fit(self, data_source):
         '''
         :param data_source: is a DataSource object
-        :return:
+        :return model: fitted model name
         '''
-        input_encoded = None
-        output_encoded = self._encoded_data(self.output_column_names, data_source)
+        logging.info('Model training started')
+        input_encoded_columns = None
+        output_encoded_column = self._encoded_data(self.output_column_names, data_source)
         for column in self.input_column_names:
-            input_single_encoded = self._encoded_data(column, data_source)
-            input_single_encoded = StandardScaler().fit_transform(input_single_encoded)
-            model = MultiOutputClassifier(KNeighborsClassifier(3), n_jobs=-1).fit(input_single_encoded,
-                                                                                  output_encoded)
-            data = (input_single_encoded, output_encoded)
+            input_encoded_column = self._encoded_data([column], data_source)
+            input_encoded_column = StandardScaler().fit_transform(input_encoded_column)
+            model = MultiOutputClassifier(KNeighborsClassifier(3), n_jobs=-1).fit(input_encoded_column,
+                                                                                  output_encoded_column)
+            data = (input_encoded_column, output_encoded_column)
             score = self._cal_score(data, model)
             if score > 0.5:
                 self.feature_columns.append(column)
-                if input_encoded is None:
-                    input_encoded = input_single_encoded
+                if input_encoded_columns is None:
+                    input_encoded_columns = input_encoded_column
                 else:
-                    np.append(input_encoded, input_single_encoded, axis=1)
-        input_encoded = StandardScaler().fit_transform(input_encoded)
-        self.model = MultiOutputClassifier(KNeighborsClassifier(3), n_jobs=-1).fit(input_encoded,
-                                                                                   output_encoded)
-        data = (input_encoded, output_encoded)
+                    np.append(input_encoded_columns, input_encoded_column, axis=1)
+        input_encoded_columns = StandardScaler().fit_transform(input_encoded_columns)
+
+        self.model = MultiOutputClassifier(KNeighborsClassifier(3), n_jobs=-1).fit(input_encoded_columns,
+                                                                                   output_encoded_column)
+        data = (input_encoded_columns, output_encoded_column)
         model_score = self._cal_score(data, model)
-        print(model_score)
+        logging.info('Model training completed with score:{}'.format(model_score))
         return self.model
 
     def predict(self, when_data_source):
         '''
-        :param when_data: is a DataSource object
-        :return:
+        :param when_data_source: is a DataSource object
+        :return predictions: numpy.ndarray predicted encoded values
         '''
+        logging.info('Model predictions starting')
         input_encoded = None
         for column in self.feature_columns:
             if input_encoded is None:
-                input_encoded = self._encoded_data(column, when_data_source)
+                input_encoded = self._encoded_data([column], when_data_source)
             else:
-                np.append(input_encoded, self._encoded_data(column, when_data_source))
+                np.append(input_encoded, self._encoded_data([column], when_data_source))
         input_encoded = StandardScaler().fit_transform(input_encoded)
         predictions = self.model.predict(input_encoded)
+        logging.info('Model predictions completed')
         return predictions
 
-    def _encoded_data(self, feature, data_source):
-        for cnt, column in enumerate(feature):
+    def _encoded_data(self, features, data_source):
+        """
+        :param features: list of column names
+        :param data_source: input data
+        :return encoded_data: numpy.ndarray encoded values
+        """
+        for cnt, column in enumerate(features):
             if cnt == 0:
                 encoded_data = data_source.getEncodedColumnData(column).numpy()
             else:
-                np.append(encoded_data, data_source.getEncodedColumnData(feature).numpy(), axis=1)
+                np.append(encoded_data, data_source.getEncodedColumnData(features).numpy(), axis=1)
         return encoded_data
 
     def _cal_score(self, data, model):
+        """
+        :param data: input data
+        :param model: trained model
+        :return score: score calculated using input data
+        """
         return model.score(data[0], data[1])
 
 
