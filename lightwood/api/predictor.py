@@ -3,7 +3,7 @@ import traceback
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.definition import definition_schema
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES, HISTOGRAM_TYPES
-from lightwood.mixers.sklearn_classifier.sklearn_classifier import SklearnClassifier
+from lightwood.mixers.sklearn_classifier.sklearn_classifier import SkLearnClassifier
 
 class Predictor:
 
@@ -46,7 +46,7 @@ class Predictor:
 
         if len(self.definition['output_features']) == 1:
 
-            model = SklearnClassifier(
+            model = SkLearnClassifier(
                 input_column_names=[f['name'] for f in self.definition['input_features']],
                 output_column_names=[f['name'] for f in self.definition['output_features']])
 
