@@ -80,9 +80,9 @@ class SkLearnClassifier:
         """
         for cnt, column in enumerate(features):
             if cnt == 0:
-                encoded_data = data_source.getEncodedColumnData(column).numpy()
+                encoded_data = data_source.get_encoded_column_data(column).numpy()
             else:
-                np.append(encoded_data, data_source.getEncodedColumnData(column).numpy(), axis=1)
+                np.append(encoded_data, data_source.get_encoded_column_data(column).numpy(), axis=1)
         return encoded_data
 
     def _decoded_data(self, features, data_source, data):

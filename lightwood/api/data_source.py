@@ -17,7 +17,7 @@ class DataSource:
         self.encoded_cache = {}
         self.decoded_cache = {}
 
-    def getColumnData(self, column_name):
+    def get_column_data(self, column_name):
 
         if column_name in self.list_cache:
             return self.list_cache[column_name]
@@ -30,15 +30,15 @@ class DataSource:
             rows = self.data_frame.shape[0]
             return [None]*rows
 
-    def getEncodedColumnData(self, column_name):
+    def get_encoded_column_data(self, column_name):
 
         if column_name in self.encoded_cache:
 
             return self.encoded_cache[column_name]
 
-        list_data = self.getColumnData(column_name)
+        list_data = self.get_column_data(column_name)
 
-        config = self._getColumnConfig(column_name)
+        config = self._get_column_config(column_name)
 
         if 'encoder_path' not in config:
             path = 'lightwood.encoders.{type}'.format(type=config['type'])
@@ -73,7 +73,7 @@ class DataSource:
         :param encoded_data: encoded data of tensor type
         :return decoded_cache : Dict :Decoded data of input column
         """
-        config = self._getColumnConfig(column_name)
+        config = self._get_column_config(column_name)
         if 'encoder_path' not in config:
             path = 'lightwood.encoders.{type}'.format(type=config['type'])
             module = importlib.import_module(path)
@@ -97,7 +97,7 @@ class DataSource:
         self.decoded_cache[column_name] = decoder_instance.decode(encoded_data)
         return self.decoded_cache[column_name]
 
-    def _getColumnConfig(self, column_name):
+    def _get_column_config(self, column_name):
         """
         Get the config info for the feature given a configuration as defined in data_schemas definition.py
         :param column_name:
@@ -148,5 +148,5 @@ if __name__ == "__main__":
 
     ds = DataSource(data_frame, config)
 
-    print(ds.getEncodedColumnData('z'))
+    print(ds.get_encoded_column_data('z'))
 
