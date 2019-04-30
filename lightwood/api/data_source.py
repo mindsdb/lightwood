@@ -15,8 +15,7 @@ class DataSource:
 
         self.list_cache = {}
         self.encoded_cache = {}
-
-
+        self.decoded_cache = {}
 
     def getColumnData(self, column_name):
 
@@ -30,9 +29,6 @@ class DataSource:
         else: # if column not in dataframe
             rows = self.data_frame.shape[0]
             return [None]*rows
-
-
-
 
     def getEncodedColumnData(self, column_name):
 
@@ -71,6 +67,35 @@ class DataSource:
 
         return self.encoded_cache[column_name]
 
+    def decoded_column_data(self, column_name, encoded_data):
+        """
+        :param column_name: column names to be decoded
+        :param encoded_data: encoded data of tensor type
+        :return decoded_cache : Dict :Decoded data of input column
+        """
+        config = self._getColumnConfig(column_name)
+        if 'encoder_path' not in config:
+            path = 'lightwood.encoders.{type}'.format(type=config['type'])
+            module = importlib.import_module(path)
+            if hasattr(module, 'default'):
+                path += '.'+importlib.import_module(path).default
+            else:
+                path += '.{type}'.format(type=config['type'])
+        else:
+            path = config['encoder_path']
+
+        kwargs = config['encoder_args'] if 'encoder_args' in config else {}
+
+        module = importlib.import_module(path)
+
+        decoder_name = path.split('.')[-1]
+        components = decoder_name.split('_')
+        decoder_classname = ''.join(x.title() for x in components)+'Encoder'
+        decoder_class = getattr(module, decoder_classname)
+        decoder_instance = decoder_class(**kwargs)
+        decoder_instance._lang = self.encoders[column_name]._lang
+        self.decoded_cache[column_name] = decoder_instance.decode(encoded_data)
+        return self.decoded_cache[column_name]
 
     def _getColumnConfig(self, column_name):
         """
