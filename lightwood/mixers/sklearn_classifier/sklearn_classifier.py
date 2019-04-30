@@ -1,5 +1,7 @@
-import numpy as np
 import logging
+
+import numpy as np
+import torch
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
@@ -15,16 +17,18 @@ class SkLearnClassifier:
         self.input_column_names = input_column_names
         self.output_column_names = output_column_names
         self.feature_columns = []
+        self.output_encoders = {}
         self.model = None
 
     def fit(self, data_source):
         '''
         :param data_source: is a DataSource object
-        :return model: fitted model name
+        :return model: fitted model
         '''
         logging.info('Model training started')
         input_encoded_columns = None
         output_encoded_column = self._encoded_data(self.output_column_names, data_source)
+        self.output_encoders = data_source.encoders
         for column in self.input_column_names:
             input_encoded_column = self._encoded_data([column], data_source)
             input_encoded_column = StandardScaler().fit_transform(input_encoded_column)
@@ -54,15 +58,19 @@ class SkLearnClassifier:
         '''
         logging.info('Model predictions starting')
         input_encoded = None
+        when_data_source.encoders = self.output_encoders
         for column in self.feature_columns:
             if input_encoded is None:
                 input_encoded = self._encoded_data([column], when_data_source)
             else:
                 np.append(input_encoded, self._encoded_data([column], when_data_source))
         input_encoded = StandardScaler().fit_transform(input_encoded)
-        predictions = self.model.predict(input_encoded)
-        logging.info('Model predictions completed')
-        return predictions
+        encoded_predictions = self.model.predict(input_encoded)
+        decoded_predictions = self._decoded_data(self.output_column_names, when_data_source,
+                                                 torch.from_numpy(encoded_predictions))
+        logging.info('Model predictions and decoding completed')
+        return {'Encoded Predictions': encoded_predictions,
+                'Actual Predictions ': decoded_predictions}
 
     def _encoded_data(self, features, data_source):
         """
@@ -74,8 +82,19 @@ class SkLearnClassifier:
             if cnt == 0:
                 encoded_data = data_source.getEncodedColumnData(column).numpy()
             else:
-                np.append(encoded_data, data_source.getEncodedColumnData(features).numpy(), axis=1)
+                np.append(encoded_data, data_source.getEncodedColumnData(column).numpy(), axis=1)
         return encoded_data
+
+    def _decoded_data(self, features, data_source, data):
+        """
+        :param features: list : columns to be decoded
+        :param data_source: is a DataSource object
+        :param data: encoded data
+        :return:  decoded data
+        """
+        for column in features:
+            decoded_data = data_source.decoded_column_data(column, data)
+        return decoded_data
 
     def _cal_score(self, data, model):
         """
@@ -129,10 +148,11 @@ if __name__ == "__main__":
     # print(data_frame)
 
     ds = DataSource(data_frame, config)
+    predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
     mixer = SkLearnClassifier(input_column_names=['x', 'y'], output_column_names=['z'])
 
     data_encoded = mixer.fit(ds)
-    predict_encoded = mixer.predict(ds)
-    print(predict_encoded)
+    predictions = mixer.predict(predict_input_ds)
+    print(predictions)
