@@ -5,11 +5,11 @@ import torch
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
-
+from sklearn import svm
 
 class SKLearnMixer:
 
-    def __init__(self, input_column_names, output_column_names, score_threshold = 0.5):
+    def __init__(self, input_column_names, output_column_names, score_threshold = 0.5, classifier_class = MultiOutputClassifier, regression_class = svm):
         """
         :param input_column_names: is a list [col_name1, col_name2]
         :param output_column_names: is a list [col_name1, col_name2]
@@ -19,6 +19,8 @@ class SKLearnMixer:
         self.feature_columns = [] # the columns that are actually used in the fit and predict
         self.output_encoders = {}
         self.score_threshold = score_threshold
+        self.classifier_class = classifier_class
+        self.regression_class = regression_class
         self.model = None
         self.feature_models = {}
         self.feature_importance = {}
@@ -35,7 +37,7 @@ class SKLearnMixer:
         for column in self.input_column_names:
             input_encoded_column = self._encoded_data([column], data_source)
             input_encoded_column = StandardScaler().fit_transform(input_encoded_column)
-            model = MultiOutputClassifier(KNeighborsClassifier(3), n_jobs=-1).fit(input_encoded_column,
+            model = self.classifier_class(KNeighborsClassifier(3), n_jobs=-1).fit(input_encoded_column,
                                                                                   output_encoded_column)
             data = (input_encoded_column, output_encoded_column)
             score = self._cal_score(data, model)
@@ -50,7 +52,7 @@ class SKLearnMixer:
                     np.append(input_encoded_columns, input_encoded_column, axis=1)
         input_encoded_columns = StandardScaler().fit_transform(input_encoded_columns)
 
-        self.model = MultiOutputClassifier(KNeighborsClassifier(3), n_jobs=-1).fit(input_encoded_columns,
+        self.model = self.classifier_class(KNeighborsClassifier(3), n_jobs=-1).fit(input_encoded_columns,
                                                                                    output_encoded_column)
         data = (input_encoded_columns, output_encoded_column)
         model_score = self._cal_score(data, model)
