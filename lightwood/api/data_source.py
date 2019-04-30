@@ -17,7 +17,7 @@ class DataSource:
         self.encoded_cache = {}
         self.decoded_cache = {}
 
-    def get_column_data(self, column_name):
+    def get_column_original_data(self, column_name):
 
         if column_name in self.list_cache:
             return self.list_cache[column_name]
@@ -36,7 +36,7 @@ class DataSource:
 
             return self.encoded_cache[column_name]
 
-        list_data = self.get_column_data(column_name)
+        list_data = self.get_column_original_data(column_name)
 
         config = self._get_column_config(column_name)
 
@@ -67,7 +67,7 @@ class DataSource:
 
         return self.encoded_cache[column_name]
 
-    def decoded_column_data(self, column_name, encoded_data):
+    def get_decoded_column_data(self, column_name, encoded_data):
         """
         :param column_name: column names to be decoded
         :param encoded_data: encoded data of tensor type

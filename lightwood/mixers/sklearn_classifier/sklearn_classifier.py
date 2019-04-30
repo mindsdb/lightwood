@@ -9,16 +9,19 @@ from sklearn.preprocessing import StandardScaler
 
 class SkLearnClassifier:
 
-    def __init__(self, input_column_names, output_column_names):
+    def __init__(self, input_column_names, output_column_names, score_threshold = 0.5):
         """
         :param input_column_names: is a list [col_name1, col_name2]
         :param output_column_names: is a list [col_name1, col_name2]
         """
         self.input_column_names = input_column_names
         self.output_column_names = output_column_names
-        self.feature_columns = []
+        self.feature_columns = [] # the columns that are actually used in the fit and predict
         self.output_encoders = {}
+        self.score_threshold = score_threshold
         self.model = None
+        self.feature_models = {}
+        self.feature_importance = {}
 
     def fit(self, data_source):
         '''
@@ -36,7 +39,10 @@ class SkLearnClassifier:
                                                                                   output_encoded_column)
             data = (input_encoded_column, output_encoded_column)
             score = self._cal_score(data, model)
-            if score > 0.5:
+            self.feature_models[column] = model
+            self.feature_importance[column] = score
+
+            if score > self.score_threshold:
                 self.feature_columns.append(column)
                 if input_encoded_columns is None:
                     input_encoded_columns = input_encoded_column
@@ -93,7 +99,7 @@ class SkLearnClassifier:
         :return:  decoded data
         """
         for column in features:
-            decoded_data = data_source.decoded_column_data(column, data)
+            decoded_data = data_source.get_decoded_column_data(column, data)
         return decoded_data
 
     def _cal_score(self, data, model):
