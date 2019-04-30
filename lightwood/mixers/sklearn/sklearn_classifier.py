@@ -7,7 +7,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 
 
-class SkLearnMixer:
+class SKLearnMixer:
 
     def __init__(self, input_column_names, output_column_names, score_threshold = 0.5):
         """
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = SkLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = SKLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)
