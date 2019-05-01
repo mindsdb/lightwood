@@ -257,13 +257,9 @@ if __name__ == "__main__":
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
 
-    data['z'] = ['low' if i < 50 else 'high' for i in nums]
     data['z'] = [i + 0.5 for i in range(10)]
 
     data_frame = pandas.DataFrame(data)
-
-    # print(data_frame)
-
     ds = DataSource(data_frame, config)
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
