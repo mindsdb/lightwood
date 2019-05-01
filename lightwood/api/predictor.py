@@ -1,13 +1,12 @@
 import traceback
 
 from lightwood.api.data_source import DataSource
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.data_schemas.definition import definition_schema
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES, HISTOGRAM_TYPES
-from lightwood.mixers.sklearn.sklearn import SKLearnMixer
+from lightwood.mixers.sklearn_mixer.sklearn_mixer import SKLearnMixer
+
 
 class Predictor:
-
-
 
     def __init__(self, definition, load_from_path=None):
         """
@@ -27,8 +26,7 @@ class Predictor:
         self._encoders = None
         self._mixers = None
 
-
-    def learn(self, from_data, test_data=None, validation_data= None):
+    def learn(self, from_data, test_data=None, validation_data=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -45,14 +43,11 @@ class Predictor:
             test_data_ds = None
 
         if len(self.definition['output_features']) == 1:
-
             model = SKLearnMixer(
                 input_column_names=[f['name'] for f in self.definition['input_features']],
                 output_column_names=[f['name'] for f in self.definition['output_features']])
 
             model.fit(from_data_ds)
-
-
 
         pass
 
@@ -65,7 +60,6 @@ class Predictor:
 
         pass
 
-
     def save(self, path_to):
         """
 
@@ -76,14 +70,6 @@ class Predictor:
         pass
 
 
-
-
-
-
-
-
-
 # only run the test if this file is called from debugger
 if __name__ == "__main__":
-    Predictor(definition = {'name':'Will', 'input_features': [{'name':'trio', 'type': COLUMN_DATA_TYPES.TEXT}]} )
-
+    Predictor(definition={'name': 'Will', 'input_features': [{'name': 'trio', 'type': COLUMN_DATA_TYPES.TEXT}]})
