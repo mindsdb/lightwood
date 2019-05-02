@@ -43,7 +43,7 @@ class Predictor:
             test_data_ds = None
 
         if len(self.definition['output_features']) == 1:
-            model = SKLearnMixer(
+            model = SkLearnMixer(
                 input_column_names=[f['name'] for f in self.definition['input_features']],
                 output_column_names=[f['name'] for f in self.definition['output_features']])
 
