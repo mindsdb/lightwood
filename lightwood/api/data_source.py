@@ -1,5 +1,6 @@
 import importlib
 
+
 class DataSource:
 
     def __init__(self, data_frame, configuration):
@@ -23,17 +24,16 @@ class DataSource:
             return self.list_cache[column_name]
 
         if column_name in self.data_frame:
-            self.list_cache[column_name] =  self.data_frame[column_name].tolist()
+            self.list_cache[column_name] = self.data_frame[column_name].tolist()
             return self.list_cache[column_name]
 
-        else: # if column not in dataframe
+        else:  # if column not in dataframe
             rows = self.data_frame.shape[0]
-            return [None]*rows
+            return [None] * rows
 
     def get_encoded_column_data(self, column_name):
 
         if column_name in self.encoded_cache:
-
             return self.encoded_cache[column_name]
 
         list_data = self.get_column_original_data(column_name)
@@ -44,7 +44,7 @@ class DataSource:
             path = 'lightwood.encoders.{type}'.format(type=config['type'])
             module = importlib.import_module(path)
             if hasattr(module, 'default'):
-                path += '.'+importlib.import_module(path).default
+                path += '.' + importlib.import_module(path).default
             else:
                 path += '.{type}'.format(type=config['type'])
         else:
@@ -56,7 +56,7 @@ class DataSource:
 
         encoder_name = path.split('.')[-1]
         components = encoder_name.split('_')
-        encoder_classname = ''.join(x.title() for x in components)+'Encoder'
+        encoder_classname = ''.join(x.title() for x in components) + 'Encoder'
 
         encoder_class = getattr(module, encoder_classname)
         encoder_instance = encoder_class(**kwargs)
@@ -67,33 +67,33 @@ class DataSource:
 
         return self.encoded_cache[column_name]
 
-    def get_decoded_column_data(self, column_name, encoded_data):
+    def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
         """
         :param column_name: column names to be decoded
         :param encoded_data: encoded data of tensor type
         :return decoded_cache : Dict :Decoded data of input column
         """
-        config = self._get_column_config(column_name)
-        if 'encoder_path' not in config:
-            path = 'lightwood.encoders.{type}'.format(type=config['type'])
-            module = importlib.import_module(path)
-            if hasattr(module, 'default'):
-                path += '.'+importlib.import_module(path).default
+        if decoder_instance is None:
+            config = self._get_column_config(column_name)
+            if 'encoder_path' not in config:
+                path = 'lightwood.encoders.{type}'.format(type=config['type'])
+                module = importlib.import_module(path)
+                if hasattr(module, 'default'):
+                    path += '.' + importlib.import_module(path).default
+                else:
+                    path += '.{type}'.format(type=config['type'])
             else:
-                path += '.{type}'.format(type=config['type'])
-        else:
-            path = config['encoder_path']
+                path = config['encoder_path']
 
-        kwargs = config['encoder_args'] if 'encoder_args' in config else {}
+            kwargs = config['encoder_args'] if 'encoder_args' in config else {}
 
-        module = importlib.import_module(path)
+            module = importlib.import_module(path)
 
-        decoder_name = path.split('.')[-1]
-        components = decoder_name.split('_')
-        decoder_classname = ''.join(x.title() for x in components)+'Encoder'
-        decoder_class = getattr(module, decoder_classname)
-        decoder_instance = decoder_class(**kwargs)
-        decoder_instance._lang = self.encoders[column_name]._lang
+            decoder_name = path.split('.')[-1]
+            components = decoder_name.split('_')
+            decoder_classname = ''.join(x.title() for x in components) + 'Encoder'
+            decoder_class = getattr(module, decoder_classname)
+            decoder_instance = decoder_class(**kwargs)
         self.decoded_cache[column_name] = decoder_instance.decode(encoded_data)
         return self.decoded_cache[column_name]
 
@@ -124,7 +124,7 @@ if __name__ == "__main__":
             {
                 'name': 'y',
                 'type': 'numeric',
-                #'encoder_path': 'lightwood.encoders.numeric.numeric'
+                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
             }
         ],
 
@@ -132,12 +132,12 @@ if __name__ == "__main__":
             {
                 'name': 'z',
                 'type': 'categorical',
-                #'encoder_path': 'lightwood.encoders.categorical.categorical'
+                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
             }
         ]
     }
 
-    data = {'x':[i for i in range(10)], 'y':[random.randint(i,i+20) for i in range(10)]}
+    data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
 
     data['z'] = ['low' if i< 50 else 'high' for i in nums]
