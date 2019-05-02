@@ -10,7 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 
 
-class SKLearnMixer:
+class SkLearnMixer:
 
     def __init__(self, input_column_names, output_column_names, score_threshold=0.5,
                  classifier_class=MultiOutputClassifier, regression_class=svm):
