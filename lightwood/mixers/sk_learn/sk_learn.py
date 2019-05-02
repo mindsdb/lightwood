@@ -40,7 +40,7 @@ class SkLearnMixer:
         logging.info('Model training started')
 
         # ToDo: Should be able to handle multiple target variables
-        model_class = [self._model_class(column, data_source) for column in self.output_column_names][0]
+        model_class = [self._determine_model_class(column, data_source) for column in self.output_column_names][0]
 
         output_encoded_column = self._output_encoded_columns(data_source)
 
@@ -147,7 +147,7 @@ class SkLearnMixer:
                 decoded_data = encoders.decode(encoded_data)
         return decoded_data
 
-    def _model_class(self, column, data_source):
+    def _determine_model_class(self, column, data_source):
         """
         :param column: name of the column
         :param data_source: is a DataSource object
