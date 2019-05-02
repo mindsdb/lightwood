@@ -219,7 +219,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = SKLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = SkLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = SKLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = SkLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)

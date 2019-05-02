@@ -3,7 +3,7 @@ import traceback
 from lightwood.api.data_source import DataSource
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.data_schemas.definition import definition_schema
-from lightwood.mixers.sklearn_mixer.sklearn_mixer import SKLearnMixer
+from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 
 
 class Predictor:
