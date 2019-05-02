@@ -74,7 +74,7 @@ class DataSource:
         :return decoded_cache : Dict :Decoded data of input column
         """
         if decoder_instance is None:
-            if column_name in self.encoders:
+            if column_name not in self.encoders:
                 raise ValueError('Data must have been encoded before at some point, you should not decode before having encoding at least once')
             decoder_instance = self.encoders[column_name]
         self.decoded_cache[column_name] = decoder_instance.decode(encoded_data)
