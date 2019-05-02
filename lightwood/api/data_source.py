@@ -74,26 +74,9 @@ class DataSource:
         :return decoded_cache : Dict :Decoded data of input column
         """
         if decoder_instance is None:
-            config = self._get_column_config(column_name)
-            if 'encoder_path' not in config:
-                path = 'lightwood.encoders.{type}'.format(type=config['type'])
-                module = importlib.import_module(path)
-                if hasattr(module, 'default'):
-                    path += '.' + importlib.import_module(path).default
-                else:
-                    path += '.{type}'.format(type=config['type'])
-            else:
-                path = config['encoder_path']
-
-            kwargs = config['encoder_args'] if 'encoder_args' in config else {}
-
-            module = importlib.import_module(path)
-
-            decoder_name = path.split('.')[-1]
-            components = decoder_name.split('_')
-            decoder_classname = ''.join(x.title() for x in components) + 'Encoder'
-            decoder_class = getattr(module, decoder_classname)
-            decoder_instance = decoder_class(**kwargs)
+            if column_name in self.encoders:
+                raise ValueError('Data must have been encoded before at some point, you should not decode before having encoding at least once')
+            decoder_instance = self.encoders[column_name]
         self.decoded_cache[column_name] = decoder_instance.decode(encoded_data)
         return self.decoded_cache[column_name]
 
