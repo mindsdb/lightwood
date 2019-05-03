@@ -13,7 +13,15 @@ class FullyConnectedNnMixer:
 
         pass
 
+    def error(self, ds):
 
+        return None
+
+    def iter_fit(self, ds):
+
+        for i in range(1):
+            mixer.fit(ds)
+            yield self.error(ds)
 
 
 
@@ -111,6 +119,8 @@ if __name__ == "__main__":
 
     mixer = FullyConnectedNnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
 
-    data_encoded = mixer.fit(ds)
+    for i in  mixer.iter_fit(ds):
+        print('training')
+
     predictions = mixer.predict(predict_input_ds)
     print(predictions)
