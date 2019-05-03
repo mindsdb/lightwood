@@ -37,6 +37,8 @@ class SkLearnMixer:
         :param data_source: is a DataSource object
         :return model: fitted model
         """
+
+
         logging.info('Model training started')
 
         # ToDo: Should be able to handle multiple target variables
@@ -54,6 +56,22 @@ class SkLearnMixer:
         logging.info('Model training completed with score:{}'.format(model_score))
         return self.model
 
+    def error(self, ds):
+        #calculate error
+        predictions = self.predict(ds)
+
+        # calculate error and return it
+        return None
+
+
+
+    def iter_fit(self, ds):
+
+        for i in range(1):
+            self.fit(ds)
+            
+            yield self.error(ds)
+
     def predict(self, when_data_source):
         """
         :param when_data_source: is a DataSource object
@@ -66,6 +84,7 @@ class SkLearnMixer:
 
         decoded_predictions = self._decoded_data(self.output_column_names, when_data_source,
                                                  torch.from_numpy(encoded_predictions))
+
         logging.info('Model predictions and decoding completed')
         return {'Encoded Predictions': encoded_predictions,
                 'Actual Predictions ': decoded_predictions}
@@ -266,6 +285,10 @@ if __name__ == "__main__":
 
     mixer = SkLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
 
-    data_encoded = mixer.fit(ds)
+    for i in  mixer.iter_fit(ds):
+        print('training')
+
+
+
     predictions = mixer.predict(predict_input_ds)
     print(predictions)

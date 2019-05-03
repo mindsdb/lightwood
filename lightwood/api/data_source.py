@@ -38,6 +38,13 @@ class DataSource:
 
         list_data = self.get_column_original_data(column_name)
 
+        if column_name in self.encoders:
+
+            self.encoded_cache[column_name] = self.encoders[column_name].encode(list_data)
+
+            return self.encoded_cache[column_name]
+
+
         config = self._get_column_config(column_name)
 
         if 'encoder_path' not in config:
