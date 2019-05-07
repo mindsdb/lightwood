@@ -10,36 +10,9 @@ from sklearn.preprocessing import StandardScaler
 
 
 class SkLearnMixerHelper:
-    def _store_results(self):
-        train_model_data = dict()
-        train_model_data['model'] = self.model
-        train_model_data['feature_columns'] = self.feature_columns
-        train_model_data['output_encoders'] = self.output_encoders
-        if not os.path.exists('lightwood_storage'):
-            os.mkdir('lightwood_storage')
-        with open(os.path.join('lightwood_storage', '{}_model_data.pickle'.format(self.model_name)), 'wb') as fp:
-            pickle.dump(train_model_data, fp)
-            fp.close()
 
-    def _load_results(self, when_data_source):
-        """
-        :param when_data_source: is a DataSource object
-        :return: model : Dict: Contains details of models
-        """
-        model_data = self._get_model_data()
-        self.feature_columns = model_data['feature_columns']
-        when_data_source.encoders = model_data['output_encoders']
-        model = model_data['model']
-        return model
 
-    def _get_model_data(self):
-        """
-        :return:train_model_data: Dict: Return Details of Training Data
-        """
-        with open(os.path.join('lightwood_storage', '{}_model_data.pickle'.format(self.model_name)), 'rb') as fp:
-            model_data = pickle.load(fp)
-            fp.close()
-        return model_data
+
 
     def _input_encoded_columns(self, target_column, when_data_source):
         """

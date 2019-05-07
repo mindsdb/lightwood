@@ -10,10 +10,9 @@ from lightwood.mixers.sk_learn.sk_learn_helper import SkLearnMixerHelper
 
 class SkLearnMixer(SkLearnMixerHelper):
 
-    def __init__(self, model_name, input_column_names, output_column_names, score_threshold=0.5,
+    def __init__(self, input_column_names, output_column_names, score_threshold=0.5,
                  classifier_class=MultiOutputClassifier, regression_class=svm):
         """
-        :param model_name: name of the model
         :param input_column_names: is a list [col_name1, col_name2]
         :param output_column_names: is a list [col_name1, col_name2]
         :param score_threshold: score to be considered for each column
@@ -22,7 +21,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         """
         self.input_column_names = input_column_names
         self.output_column_names = output_column_names
-        self.model_name = model_name
+
         self.feature_columns = {}  # the columns that are actually used in the fit and predict
         self.output_encoders = {}
         self.score_threshold = score_threshold
@@ -50,7 +49,7 @@ class SkLearnMixer(SkLearnMixerHelper):
                 self.model[column] = model_class.fit(useful_input_encoded_features, output_encoded_column)
 
             model_score = self.model[column].score(useful_input_encoded_features, output_encoded_column)
-        self._store_results()
+
         logging.info('Model training completed with score:{}'.format(model_score))
         return self.model
 
@@ -61,7 +60,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         :return predictions: numpy.ndarray predicted encoded values
         """
         logging.info('Model predictions starting')
-        model = self._load_results(when_data_source)
+        model = self.model
         predictions = dict()
         for output_column in output_column_names:
             input_encoded = self._input_encoded_columns(output_column, when_data_source)
@@ -139,7 +138,7 @@ if __name__ == "__main__":
     ds = DataSource(data_frame, config)
     input_ds_for_prediction = DataSource(data_frame[['x', 'y']], config)
 
-    mixer = SkLearnMixer(model_name='TestModel_1', input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = SkLearnMixer( input_column_names=['x', 'y'], output_column_names=['z'])
     for i in mixer.iter_fit(ds):
         print('training')
 
@@ -182,7 +181,7 @@ if __name__ == "__main__":
     ds = DataSource(data_frame, config)
     input_ds_for_prediction = DataSource(data_frame[['x', 'y']], config)
 
-    mixer = SkLearnMixer(model_name='TestModel_2', input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = SkLearnMixer( input_column_names=['x', 'y'], output_column_names=['z'])
 
     for i in mixer.iter_fit(ds):
         print('training')
@@ -232,9 +231,10 @@ if __name__ == "__main__":
     ds = DataSource(data_frame, config)
     input_ds_for_prediction = DataSource(data_frame[['x', 'y']], config)
 
-    mixer = SkLearnMixer(model_name='TestModel_3', input_column_names=['x', 'y'], output_column_names=['z1', 'z2'])
+    mixer = SkLearnMixer( input_column_names=['x', 'y'], output_column_names=['z1', 'z2'])
     for i in mixer.iter_fit(ds):
         print('training')
+        print(i)
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(input_ds_for_prediction, ['z1', 'z2'])
     print(predictions)
