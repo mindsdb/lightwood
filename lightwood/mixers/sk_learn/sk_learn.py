@@ -1,21 +1,19 @@
 import logging
 import warnings
 
-import numpy as np
 import torch
 from sklearn import svm
 from sklearn.metrics import mean_squared_error
 from sklearn.multioutput import MultiOutputClassifier
-from sklearn.multioutput import MultiOutputRegressor
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import StandardScaler
+from lightwood.mixers.sk_learn.sk_learn_helper import SkLearnMixerHelper
 
 
-class SkLearnMixer:
+class SkLearnMixer(SkLearnMixerHelper):
 
-    def __init__(self, input_column_names, output_column_names, score_threshold=0.5,
+    def __init__(self, model_name, input_column_names, output_column_names, score_threshold=0.5,
                  classifier_class=MultiOutputClassifier, regression_class=svm):
         """
+        :param model_name: name of the model
         :param input_column_names: is a list [col_name1, col_name2]
         :param output_column_names: is a list [col_name1, col_name2]
         :param score_threshold: score to be considered for each column
@@ -24,6 +22,7 @@ class SkLearnMixer:
         """
         self.input_column_names = input_column_names
         self.output_column_names = output_column_names
+        self.model_name = model_name
         self.feature_columns = {}  # the columns that are actually used in the fit and predict
         self.output_encoders = {}
         self.score_threshold = score_threshold
@@ -39,24 +38,43 @@ class SkLearnMixer:
         :return model: fitted model
         """
         logging.info('Model training started')
-
         for column in self.output_column_names:
             model_class = self._determine_model_class(column, data_source)
-
             output_encoded_column = self._output_encoded_columns(column, data_source)
 
             useful_input_encoded_features, self.feature_columns[column] = self._extract_features(data_source,
                                                                                                  model_class,
                                                                                                  output_encoded_column)
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 self.model[column] = model_class.fit(useful_input_encoded_features, output_encoded_column)
 
             model_score = self.model[column].score(useful_input_encoded_features, output_encoded_column)
-
+        self._store_results()
         logging.info('Model training completed with score:{}'.format(model_score))
         return self.model
+
+    def predict(self, when_data_source, output_column_names=[]):
+        """
+        :param when_data_source: is a DataSource object
+        :param output_column_names: is a DataSource object
+        :return predictions: numpy.ndarray predicted encoded values
+        """
+        logging.info('Model predictions starting')
+        model = self._load_results(when_data_source)
+        predictions = dict()
+        for output_column in output_column_names:
+            input_encoded = self._input_encoded_columns(output_column, when_data_source)
+
+            encoded_predictions = model.get(output_column).predict(input_encoded)
+
+            decoded_predictions = self._decoded_data([output_column], when_data_source,
+                                                     torch.from_numpy(encoded_predictions))
+            predictions[output_column] = {'Encoded Predictions': encoded_predictions,
+                                   'Actual Predictions': decoded_predictions}
+
+        logging.info('Model predictions and decoding completed')
+        return predictions
 
     def error(self, ds):
         """
@@ -64,7 +82,7 @@ class SkLearnMixer:
         :return: error :Dictionary: error of actual vs predicted encoded values
         """
         error = {}
-        predictions = self.predict(ds)
+        predictions = self.predict(ds, self.output_column_names)
         for output_column in self.output_column_names:
             error[output_column] = mean_squared_error(ds.encoded_cache[output_column].numpy(),
                                                       predictions[output_column]['Encoded Predictions'])
@@ -79,128 +97,6 @@ class SkLearnMixer:
             self.fit(ds)
             yield self.error(ds)
 
-    def predict(self, when_data_source):
-        """
-        :param when_data_source: is a DataSource object
-        :return predictions: numpy.ndarray predicted encoded values
-        """
-        predictions = {}
-        logging.info('Model predictions starting')
-        for column in self.output_column_names:
-            input_encoded = self._input_encoded_columns(column, when_data_source)
-
-            encoded_predictions = self.model.get(column).predict(input_encoded)
-
-            decoded_predictions = self._decoded_data([column], when_data_source,
-                                                     torch.from_numpy(encoded_predictions))
-            predictions[column] = {'Encoded Predictions': encoded_predictions,
-                                   'Actual Predictions': decoded_predictions}
-
-        logging.info('Model predictions and decoding completed')
-        return predictions
-
-    def _input_encoded_columns(self, target_column, when_data_source):
-        """
-        :param when_data_source: is a DataSource object
-        :return: numpy.nd array input encoded values
-        """
-        input_encoded = None
-        for column in self.feature_columns[target_column]:
-            if input_encoded is None:
-                input_encoded = self._encoded_data([column], when_data_source)
-            else:
-                input_encoded = np.append(input_encoded, self._encoded_data([column], when_data_source), axis=1)
-        return StandardScaler().fit_transform(input_encoded)
-
-    def _output_encoded_columns(self, column, data_source):
-        """
-        :param data_source: is a DataSource object
-        :return: numpy.nd array output encoded values
-        """
-        output_encoded_column = self._encoded_data([column], data_source)
-        self.output_encoders = data_source.encoders
-        return output_encoded_column
-
-    def _extract_features(self, data_source, model_class, output_encoded_column):
-        """
-        :param data_source: is a DataSource object
-        :param model_class: type of model to be fitted
-        :param output_encoded_column: target variable encoded values
-        :return: numpy.nd array: important input encoded columns
-        """
-        input_encoded_columns = None
-        feature_columns = []
-        for column in self.input_column_names:
-            input_encoded_column = self._encoded_data([column], data_source)
-            input_encoded_column = StandardScaler().fit_transform(input_encoded_column)
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                model = model_class.fit(StandardScaler().fit_transform(input_encoded_column), output_encoded_column)
-            score = model.score(input_encoded_column, output_encoded_column)
-            self.feature_models[column] = model
-            self.feature_importance[column] = score
-
-            if score > self.score_threshold:
-                feature_columns.append(column)
-                if input_encoded_columns is None:
-                    input_encoded_columns = input_encoded_column
-                else:
-                    input_encoded_columns = np.append(input_encoded_columns, input_encoded_column, axis=1)
-        return StandardScaler().fit_transform(input_encoded_columns), feature_columns
-
-    def _encoded_data(self, features, data_source):
-        """
-        :param features: list of column names
-        :param data_source: input data
-        :return encoded_data: numpy.nd array encoded values
-        """
-        for cnt, column in enumerate(features):
-            if cnt == 0:
-                encoded_data = data_source.get_encoded_column_data(column).numpy()
-            else:
-                encoded_data = np.append(encoded_data, data_source.get_encoded_column_data(column).numpy(), axis=1)
-        return encoded_data
-
-    def _decoded_data(self, features, data_source, encoded_data):
-        """
-        :param features: list : columns to be decoded
-        :param data_source: is a DataSource object
-        :param encoded_data: encoded data
-        :return:  decoded data
-        """
-        data_source.encoders = self.output_encoders
-        for column in features:
-            encoders = self.output_encoders.get(column, None)
-            if encoders is None:
-                decoded_data = data_source.get_decoded_column_data(column, encoded_data)
-            else:
-                decoded_data = encoders.decode(encoded_data)
-        return decoded_data
-
-    def _determine_model_class(self, column, data_source):
-        """
-        :param column: name of the column
-        :param data_source: is a DataSource object
-        :return: model: Model to be considered for fitting data
-        """
-        data_type = None
-        for feature in data_source.configuration['output_features']:
-            if feature['name'] == column:
-                data_type = feature['type']
-                break
-
-        if data_type is not None:
-            return self._get_model(data_type)
-
-        return None
-
-    def _get_model(self, column_type):
-        models = {
-            'categorical': self.classifier_class(KNeighborsClassifier(3), n_jobs=-1),
-            'numeric': MultiOutputRegressor(svm.SVR())
-        }
-        return models.get(column_type, None)
-
 
 if __name__ == "__main__":
     import random
@@ -210,100 +106,8 @@ if __name__ == "__main__":
     ###############
     # GENERATE DATA
     ###############
-
-    # config = {
-    #     'name': 'test',
-    #     'input_features': [
-    #         {
-    #             'name': 'x',
-    #             'type': 'numeric',
-    #             'encoder_path': 'lightwood.encoders.numeric.numeric'
-    #         },
-    #         {
-    #             'name': 'y',
-    #             'type': 'numeric',
-    #             # 'encoder_path': 'lightwood.encoders.numeric.numeric'
-    #         }
-    #     ],
-    #
-    #     'output_features': [
-    #         {
-    #             'name': 'z',
-    #             'type': 'categorical',
-    #             # 'encoder_path': 'lightwood.encoders.categorical.categorical'
-    #         }
-    #     ]
-    # }
-    #
-    # ##For Classification
-    # data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
-    # nums = [data['x'][i] * data['y'][i] for i in range(10)]
-    #
-    # data['z'] = ['low' if i < 50 else 'high' for i in nums]
-    #
-    # data_frame = pandas.DataFrame(data)
-    #
-    # # print(data_frame)
-    #
-    # ds = DataSource(data_frame, config)
-    # predict_input_ds = DataSource(data_frame[['x', 'y']], config)
-    # ####################
-    #
-    # mixer = SkLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
-    #
-    # data_encoded = mixer.fit(ds)
-    # predictions = mixer.predict(predict_input_ds)
-    # print(predictions)
-
-    ##For Regression
-
-    # GENERATE DATA
-    ###############
-
-    # config = {
-    #     'name': 'test',
-    #     'input_features': [
-    #         {
-    #             'name': 'x',
-    #             'type': 'numeric',
-    #             'encoder_path': 'lightwood.encoders.numeric.numeric'
-    #         },
-    #         {
-    #             'name': 'y',
-    #             'type': 'numeric',
-    #             # 'encoder_path': 'lightwood.encoders.numeric.numeric'
-    #         }
-    #     ],
-    #
-    #     'output_features': [
-    #         {
-    #             'name': 'z',
-    #             'type': 'numeric',
-    #             # 'encoder_path': 'lightwood.encoders.categorical.categorical'
-    #         }
-    #     ]
-    # }
-    #
-    # data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
-    # nums = [data['x'][i] * data['y'][i] for i in range(10)]
-    #
-    # data['z'] = [i + 0.5 for i in range(10)]
-    #
-    # data_frame = pandas.DataFrame(data)
-    # ds = DataSource(data_frame, config)
-    # predict_input_ds = DataSource(data_frame[['x', 'y']], config)
-    ####################
-
-    # mixer = SkLearnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
-    #
-    # for i in  mixer.iter_fit(ds):
-    #     print('training', i)
-    #
-    # predictions = mixer.predict(predict_input_ds)
-    # print(predictions)
-
-    # Test Case 3
-
+    # Test Case 1             #
+    # For Classification      #
     config = {
         'name': 'test',
         'input_features': [
@@ -318,7 +122,92 @@ if __name__ == "__main__":
                 # 'encoder_path': 'lightwood.encoders.numeric.numeric'
             }
         ],
+        'output_features': [
+            {
+                'name': 'z',
+                'type': 'categorical',
+                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
+            }
+        ]
+    }
+    data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
+    nums = [data['x'][i] * data['y'][i] for i in range(10)]
+    data['z'] = ['low' if i < 50 else 'high' for i in nums]
+    data_frame = pandas.DataFrame(data)
+    print(data_frame)
 
+    ds = DataSource(data_frame, config)
+    input_ds_for_prediction = DataSource(data_frame[['x', 'y']], config)
+
+    mixer = SkLearnMixer(model_name='TestModel_1', input_column_names=['x', 'y'], output_column_names=['z'])
+    for i in mixer.iter_fit(ds):
+        print('training')
+
+    data_encoded = mixer.fit(ds)
+    predictions = mixer.predict(input_ds_for_prediction, ['z'])
+    print(predictions)
+
+    #####################################
+    # For Regression                    #
+    # Test Case: 2                      #
+    #####################################
+    config = {
+        'name': 'test',
+        'input_features': [
+            {
+                'name': 'x',
+                'type': 'numeric',
+                'encoder_path': 'lightwood.encoders.numeric.numeric'
+            },
+            {
+                'name': 'y',
+                'type': 'numeric',
+                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+            }
+        ],
+        'output_features': [
+            {
+                'name': 'z',
+                'type': 'numeric',
+                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
+            }
+        ]
+    }
+    data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
+    nums = [data['x'][i] * data['y'][i] for i in range(10)]
+    data['z'] = [i + 0.5 for i in range(10)]
+    data_frame = pandas.DataFrame(data)
+    print(data_frame)
+
+    ds = DataSource(data_frame, config)
+    input_ds_for_prediction = DataSource(data_frame[['x', 'y']], config)
+
+    mixer = SkLearnMixer(model_name='TestModel_2', input_column_names=['x', 'y'], output_column_names=['z'])
+
+    for i in mixer.iter_fit(ds):
+        print('training')
+
+    predictions = mixer.predict(input_ds_for_prediction, ['z'])
+    print(predictions)
+
+    #########################################
+    # Multiple Target variables             #
+    # Test Case 3                           #
+    #########################################
+    config = {
+        'name': 'test',
+        'input_features': [
+            {
+                'name': 'x',
+                'type': 'numeric',
+                'encoder_path': 'lightwood.encoders.numeric.numeric'
+            },
+            {
+                'name': 'y',
+                'type': 'numeric',
+                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+            }
+        ],
         'output_features': [
             {
                 'name': 'z1',
@@ -327,7 +216,7 @@ if __name__ == "__main__":
             },
             {
                 'name': 'z2',
-                'type': 'categorical',
+                'type': 'numeric',
                 # 'encoder_path': 'lightwood.encoders.categorical.categorical'
             }
         ]
@@ -335,22 +224,17 @@ if __name__ == "__main__":
 
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
-
     data['z1'] = ['low' if i < 50 else 'high' for i in nums]
-
-    data['z2'] = ['high' if i < 50 else 'low' for i in nums]
-
+    data['z2'] = [i + 0.5 for i in range(10)]
     data_frame = pandas.DataFrame(data)
-
     print(data_frame)
 
     ds = DataSource(data_frame, config)
-    predict_input_ds = DataSource(data_frame[['x', 'y']], config)
-    ####################
+    input_ds_for_prediction = DataSource(data_frame[['x', 'y']], config)
 
-    mixer = SkLearnMixer(input_column_names=['x', 'y'], output_column_names=['z1', 'z2'])
+    mixer = SkLearnMixer(model_name='TestModel_3', input_column_names=['x', 'y'], output_column_names=['z1', 'z2'])
     for i in mixer.iter_fit(ds):
-        print('training model Error ', i)
-    # data_encoded = mixer.fit(ds)
-    predictions = mixer.predict(predict_input_ds)
+        print('training')
+    data_encoded = mixer.fit(ds)
+    predictions = mixer.predict(input_ds_for_prediction, ['z1', 'z2'])
     print(predictions)
