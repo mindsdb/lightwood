@@ -1,5 +1,6 @@
 import traceback
 import logging
+import pickle
 
 from lightwood.api.data_source import DataSource
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
@@ -9,7 +10,7 @@ from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 
 class Predictor:
 
-    def __init__(self, definition, load_from_path=None):
+    def __init__(self, definition=None, load_from_path=None):
         """
         Start a predictor pass the
 
@@ -17,6 +18,14 @@ class Predictor:
         :param load_from_path: The path to load the predictor from
         :type definition: dictionary
         """
+
+        if load_from_path is not None:
+            pickle_in = open(load_from_path, "rb")
+            self_dict = pickle.load(pickle_in)
+            pickle_in.close()
+            self.__dict__ = self_dict
+            return
+
         try:
             definition_schema.validate(definition)
         except:
@@ -73,7 +82,9 @@ class Predictor:
         :param path:
         :return:
         """
-
+        f = open(path_to, 'wb')
+        pickle.dump(self.__dict__, f, 2)
+        f.close()
         pass
 
 
@@ -126,7 +137,6 @@ if __name__ == "__main__":
 
     print(predictor.predict(when_data=pandas.DataFrame({'x':[6], 'y':[12]})))
 
-    print(data_frame['z'])
-    print(predictor.predict(when_data=data_frame))
+
 
 
