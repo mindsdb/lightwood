@@ -53,7 +53,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         logging.info('Model training completed with score:{}'.format(model_score))
         return self.model
 
-    def predict(self, when_data_source, output_column_names=[]):
+    def predict(self, when_data_source, output_column_names=None):
         """
         :param when_data_source: is a DataSource object
         :param output_column_names: is a DataSource object
@@ -61,6 +61,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         """
         logging.info('Model predictions starting')
         model = self.model
+        output_column_names = self.output_column_names if output_column_names is None else output_column_names
         predictions = dict()
         for output_column in output_column_names:
             input_encoded = self._input_encoded_columns(output_column, when_data_source)
@@ -81,7 +82,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         :return: error :Dictionary: error of actual vs predicted encoded values
         """
         error = {}
-        predictions = self.predict(ds, self.output_column_names)
+        predictions = self.predict(ds)
         for output_column in self.output_column_names:
             error[output_column] = mean_squared_error(ds.encoded_cache[output_column].numpy(),
                                                       predictions[output_column]['Encoded Predictions'])
