@@ -1,6 +1,6 @@
 import traceback
 import logging
-import pickle
+import dill
 
 from lightwood.api.data_source import DataSource
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
@@ -21,7 +21,7 @@ class Predictor:
 
         if load_from_path is not None:
             pickle_in = open(load_from_path, "rb")
-            self_dict = pickle.load(pickle_in)
+            self_dict = dill.load(pickle_in)
             pickle_in.close()
             self.__dict__ = self_dict
             return
@@ -34,7 +34,9 @@ class Predictor:
 
         self.definition = definition
         self._encoders = None
-        self._mixers = None
+        self._mixer = None
+
+        self._save_attrs = ['definition', '_encoders', '_mixer']
 
     def learn(self, from_data, test_data=None, validation_data=None):
         """
@@ -83,8 +85,10 @@ class Predictor:
         :return:
         """
         f = open(path_to, 'wb')
-        pickle.dump(self.__dict__, f, 2)
+
+        dill.dump({name: getattr(self, name) for name in self._save_attrs}, f)
         f.close()
+
         pass
 
 
@@ -138,5 +142,11 @@ if __name__ == "__main__":
     print(predictor.predict(when_data=pandas.DataFrame({'x':[6], 'y':[12]})))
 
 
+
+    predictor.save('/tmp/ok.pkl')
+
+    predictor2 = Predictor(load_from_path='/tmp/ok.pkl')
+
+    print(predictor2.predict(when_data=pandas.DataFrame({'x': [6], 'y': [12]})))
 
 
