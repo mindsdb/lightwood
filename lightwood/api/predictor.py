@@ -36,7 +36,7 @@ class Predictor:
         self._encoders = None
         self._mixer = None
 
-        self._save_attrs = ['definition', '_encoders', '_mixer']
+        
 
     def learn(self, from_data, test_data=None, validation_data=None):
         """
@@ -86,7 +86,7 @@ class Predictor:
         """
         f = open(path_to, 'wb')
 
-        dill.dump({name: getattr(self, name) for name in self._save_attrs}, f)
+        dill.dump(self.__dict__, f)
         f.close()
 
         pass
