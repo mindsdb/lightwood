@@ -36,7 +36,7 @@ class Predictor:
         self._encoders = None
         self._mixer = None
 
-        
+
 
     def learn(self, from_data, test_data=None, validation_data=None):
         """
