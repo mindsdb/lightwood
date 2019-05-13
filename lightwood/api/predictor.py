@@ -37,8 +37,7 @@ class Predictor:
         self.definition = definition
         self._encoders = None
         self._mixer = None
-        self._encoded_cache = None
-        self._Predictions = None
+        
 
     def learn(self, from_data, test_data=None, validation_data=None):
         """
@@ -65,8 +64,7 @@ class Predictor:
 
         self._mixer = mixer
         self._encoders = from_data_ds.encoders
-        self._encoded_cache = from_data_ds.encoded_cache
-        self._Predictions = mixer.output_predictions
+
 
     def predict(self, when_data):
         """
