@@ -144,20 +144,18 @@ class CesiumTsEncoder:
         """
         Encode a column data into time series
 
-        :param values_data: a list of lists
+        :param values_data: a list of timeseries data eg: ['91.0 92.0 93.0 94.0', '92.0 93.0 94.0 95.0' ...]
         :param times: (optional) a list of lists such that, len(times[i])=len(values_data[i]) for all i in range(len(times))
         :return: a torch.floatTensor
         """
-
         features_to_use = self._features
         ret = []
-
         for i, values in enumerate(values_data):
+            values = list(map(lambda x: float(x), values.split()))
             if times is None:
                 times_row = np.array([float(i) for i in range(1, len(values) + 1)])
             else:
                 times_row = np.array(times[i])
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 row = featurize.featurize_time_series(times=times_row,
@@ -169,7 +167,8 @@ class CesiumTsEncoder:
             for col in features_to_use:
                 val = list(row[col][0])[0]
                 val1 = 0
-                if val in ['nan', None, 'NaN', False]:
+                if (val in ['nan', None, 'NaN', False]) \
+                        or math.isnan(val) or math.isinf(val):
                     val = 0
                     val1 = 1
 
@@ -177,8 +176,6 @@ class CesiumTsEncoder:
                     vector_row += [val, val1]  # val1 is 1 if its null
                 else:
                     vector_row += [val]
-
-
             ret += [vector_row]
         ret_tensor = torch.FloatTensor(ret)
         return ret_tensor
@@ -188,7 +185,7 @@ class CesiumTsEncoder:
 if __name__ == "__main__":
     import math
 
-    data = [[math.sin(i / 100) for i in range(1, 10)] for j in range(20)]
+    data = [" ".join(str(math.sin(i / 100)) for i in range(1, 10)) for j in range(20)]
 
     ret = CesiumTsEncoder(features=[
         "amplitude",
