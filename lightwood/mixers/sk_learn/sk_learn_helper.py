@@ -9,9 +9,6 @@ from sklearn.preprocessing import StandardScaler
 
 class SkLearnMixerHelper:
 
-
-
-
     def _input_encoded_columns(self, target_column, when_data_source):
         """
         :param when_data_source: is a DataSource object
@@ -90,26 +87,16 @@ class SkLearnMixerHelper:
                 decoded_data = encoders.decode(encoded_data)
         return decoded_data
 
-    def _get_model(self, column_type):
-        models = {
-            'categorical': self.classifier_class(KNeighborsClassifier(3), n_jobs=-1),
-            'numeric': MultiOutputRegressor(svm.SVR())
-        }
-        return models.get(column_type, None)
-
     def _determine_model_class(self, column, data_source):
         """
         :param column: name of the column
         :param data_source: is a DataSource object
         :return: model: Model to be considered for fitting data
         """
-        data_type = None
-        for feature in data_source.configuration['output_features']:
-            if feature['name'] == column:
-                data_type = feature['type']
-                break
-
+        data_type = data_source.get_column_config(column)['type']
+        models = {
+            'categorical': self.classifier_class(KNeighborsClassifier(3), n_jobs=-1),
+            'numeric': MultiOutputRegressor(svm.SVR())
+        }
         if data_type is not None:
-            return self._get_model(data_type)
-
-        return None
+            return models.get(data_type, None)

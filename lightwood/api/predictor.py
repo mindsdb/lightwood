@@ -1,9 +1,11 @@
-import traceback
 import logging
+import traceback
+
 import dill
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import explained_variance_score
 
 from lightwood.api.data_source import DataSource
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.data_schemas.definition import definition_schema
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 
@@ -35,8 +37,8 @@ class Predictor:
         self.definition = definition
         self._encoders = None
         self._mixer = None
-
-
+        self._encoded_cache = None
+        self._Predictions = None
 
     def learn(self, from_data, test_data=None, validation_data=None):
         """
@@ -54,7 +56,6 @@ class Predictor:
         else:
             test_data_ds = None
 
-
         mixer = SkLearnMixer(
             input_column_names=[f['name'] for f in self.definition['input_features']],
             output_column_names=[f['name'] for f in self.definition['output_features']])
@@ -64,11 +65,13 @@ class Predictor:
 
         self._mixer = mixer
         self._encoders = from_data_ds.encoders
+        self._encoded_cache = from_data_ds.encoded_cache
+        self._Predictions = mixer.output_predictions
 
     def predict(self, when_data):
         """
         Predict given when conditions
-        :param when: a dataframe
+        :param when_data: a dataframe
         :return: a complete dataframe
         """
 
@@ -77,19 +80,54 @@ class Predictor:
 
         return self._mixer.predict(when_data_ds)
 
+    def accuracy(self, from_data):
+        """
+        calculates the accuracy of the model
+        :param from_data:a dataframe
+        :return accuracies: dictionaries of accuracies
+        """
+        if self._mixer is None:
+            logging.log.error("Please train the model before calculating accuracy")
+        from_data_ds = DataSource(from_data, self.definition)
+        predictions = self._mixer.predict(from_data_ds)
+        accuracies = {}
+        for output_column in self._mixer.output_column_names:
+            column_type = from_data_ds.get_column_config(output_column)['type']
+            if column_type == 'categorical':
+                accuracies[output_column] = accuracy_score(from_data_ds.get_column_original_data(output_column),
+                                                            predictions[output_column]["Actual Predictions"])
+            elif column_type == 'numeric':
+                accuracies[output_column] = 0
+            else:
+                accuracies[output_column] = None
+
+        return {'accuracies': accuracies}
+
+    def accuracy_of_columns(self, target_columns):
+        """
+        calculates the accuracy of the model
+        :param target_columns:a dataframe
+        :return accuracies: dictionaries of accuracies
+        """
+        if self._mixer is None:
+            logging.log.error("Please train the model before calculating accuracy")
+        accuracies = {}
+        for column in target_columns:
+            y_true = list(self._encoded_cache[column].numpy())
+            y_pred = list(self._Predictions[column]['Encoded Predictions'])
+            accuracies[column] = explained_variance_score(y_true, y_pred, multioutput='uniform_average')
+
+        return {'accuracies': accuracies}
 
     def save(self, path_to):
         """
-
-        :param path:
+        save trained model to a file
+        :param path_to: full path of file, where we store results
         :return:
         """
         f = open(path_to, 'wb')
-
         dill.dump(self.__dict__, f)
         f.close()
-
-        pass
 
 
 # only run the test if this file is called from debugger
@@ -125,28 +163,14 @@ if __name__ == "__main__":
 
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
-
     data['z'] = [data['x'][i] + data['y'][i] + i for i in range(10)]
-
     data_frame = pandas.DataFrame(data)
 
     ####################
-
-
-
-
     predictor = Predictor(definition=config)
-
     predictor.learn(from_data=data_frame)
+    print(predictor.predict(when_data=pandas.DataFrame({'x': [6], 'y': [12]})))
 
-    print(predictor.predict(when_data=pandas.DataFrame({'x':[6], 'y':[12]})))
-
-
-
-    predictor.save('/tmp/ok.pkl')
-
-    predictor2 = Predictor(load_from_path='/tmp/ok.pkl')
-
-    print(predictor2.predict(when_data=pandas.DataFrame({'x': [6], 'y': [12]})))
-
-
+    predictor2 = Predictor(load_from_path='tmp/ok.pkl')
+    print(predictor2.predict(when_data=pandas.DataFrame({'x': [6, 2, 3], 'y': [12, 3, 4]})))
+    print(predictor2.accuracy_of_columns(target_columns=['z']))
