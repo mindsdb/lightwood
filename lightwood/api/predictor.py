@@ -37,7 +37,6 @@ class Predictor:
         self.definition = definition
         self._encoders = None
         self._mixer = None
-        
 
     def learn(self, from_data, test_data=None, validation_data=None):
         """
@@ -65,7 +64,6 @@ class Predictor:
         self._mixer = mixer
         self._encoders = from_data_ds.encoders
 
-
     def predict(self, when_data):
         """
         Predict given when conditions
@@ -86,34 +84,18 @@ class Predictor:
         """
         if self._mixer is None:
             logging.log.error("Please train the model before calculating accuracy")
-        from_data_ds = DataSource(from_data, self.definition)
-        predictions = self._mixer.predict(from_data_ds)
+            return
+        ds = DataSource(from_data, self.definition)
+        predictions = self._mixer.predict(ds)
         accuracies = {}
         for output_column in self._mixer.output_column_names:
-            column_type = from_data_ds.get_column_config(output_column)['type']
+            column_type = ds.get_column_config(output_column)['type']
             if column_type == 'categorical':
-                accuracies[output_column] = accuracy_score(from_data_ds.get_column_original_data(output_column),
-                                                            predictions[output_column]["Actual Predictions"])
-            elif column_type == 'numeric':
-                accuracies[output_column] = 0
+                accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column),
+                                                           predictions[output_column]["Actual Predictions"])
             else:
-                accuracies[output_column] = None
-
-        return {'accuracies': accuracies}
-
-    def accuracy_of_columns(self, target_columns):
-        """
-        calculates the accuracy of the model
-        :param target_columns:a dataframe
-        :return accuracies: dictionaries of accuracies
-        """
-        if self._mixer is None:
-            logging.log.error("Please train the model before calculating accuracy")
-        accuracies = {}
-        for column in target_columns:
-            y_true = list(self._encoded_cache[column].numpy())
-            y_pred = list(self._Predictions[column]['Encoded Predictions'])
-            accuracies[column] = explained_variance_score(y_true, y_pred, multioutput='uniform_average')
+                accuracies[output_column] = explained_variance_score(ds.get_encoded_column_data(output_column),
+                                                                     predictions[output_column]["Encoded Predictions"])
 
         return {'accuracies': accuracies}
 
@@ -167,8 +149,8 @@ if __name__ == "__main__":
     ####################
     predictor = Predictor(definition=config)
     predictor.learn(from_data=data_frame)
+    print(predictor.accuracy(from_data=data_frame))
     print(predictor.predict(when_data=pandas.DataFrame({'x': [6], 'y': [12]})))
 
     predictor2 = Predictor(load_from_path='tmp/ok.pkl')
     print(predictor2.predict(when_data=pandas.DataFrame({'x': [6, 2, 3], 'y': [12, 3, 4]})))
-    print(predictor2.accuracy_of_columns(target_columns=['z']))
