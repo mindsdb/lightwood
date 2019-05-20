@@ -2,9 +2,8 @@ import logging
 import warnings
 
 import torch
-from sklearn import svm
 from sklearn.metrics import mean_squared_error
-from sklearn.multioutput import MultiOutputClassifier
+from sklearn.multioutput import MultiOutputClassifier, MultiOutputRegressor
 
 from lightwood.mixers.sk_learn.sk_learn_helper import SkLearnMixerHelper
 
@@ -12,7 +11,7 @@ from lightwood.mixers.sk_learn.sk_learn_helper import SkLearnMixerHelper
 class SkLearnMixer(SkLearnMixerHelper):
 
     def __init__(self, input_column_names, output_column_names, score_threshold=0.5,
-                 classifier_class=MultiOutputClassifier, regression_class=svm):
+                 classifier_class=MultiOutputClassifier, regression_class=MultiOutputRegressor):
         """
         :param input_column_names: is a list [col_name1, col_name2]
         :param output_column_names: is a list [col_name1, col_name2]
@@ -107,9 +106,10 @@ if __name__ == "__main__":
 
     ###############
     # GENERATE DATA
-    ###############
+    ###########################
     # Test Case 1             #
     # For Classification      #
+    ###########################
     config = {
         'name': 'test',
         'input_features': [
