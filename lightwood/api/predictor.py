@@ -2,11 +2,10 @@ import logging
 import traceback
 
 import dill
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import explained_variance_score
 
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.definition import definition_schema
+from lightwood.mixers.sk_learn.feature import FeatureFactory
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 
 
@@ -89,13 +88,8 @@ class Predictor:
         predictions = self._mixer.predict(ds)
         accuracies = {}
         for output_column in self._mixer.output_column_names:
-            column_type = ds.get_column_config(output_column)['type']
-            if column_type == 'categorical':
-                accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column),
-                                                           predictions[output_column]["Actual Predictions"])
-            else:
-                accuracies[output_column] = explained_variance_score(ds.get_encoded_column_data(output_column),
-                                                                     predictions[output_column]["Encoded Predictions"])
+            feature = FeatureFactory.create_feature(ds.get_column_config(output_column))
+            accuracies[output_column] = feature.calculate_accuracy(ds, predictions)
 
         return {'accuracies': accuracies}
 
@@ -151,6 +145,7 @@ if __name__ == "__main__":
     predictor.learn(from_data=data_frame)
     print(predictor.accuracy(from_data=data_frame))
     print(predictor.predict(when_data=pandas.DataFrame({'x': [6], 'y': [12]})))
+    predictor.save('tmp\ok.pkl')
 
-    predictor2 = Predictor(load_from_path='tmp/ok.pkl')
+    predictor2 = Predictor(load_from_path='tmp\ok.pkl')
     print(predictor2.predict(when_data=pandas.DataFrame({'x': [6, 2, 3], 'y': [12, 3, 4]})))
