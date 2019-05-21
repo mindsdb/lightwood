@@ -30,7 +30,6 @@ class SkLearnMixer(SkLearnMixerHelper):
         self.model = {}
         self.feature_models = {}
         self.feature_importance = {}
-        self.output_predictions = {}
 
     def fit(self, data_source):
         """
@@ -83,7 +82,6 @@ class SkLearnMixer(SkLearnMixerHelper):
         """
         error = {}
         predictions = self.predict(ds)
-        self.output_predictions = predictions
         for output_column in self.output_column_names:
             error[output_column] = mean_squared_error(ds.encoded_cache[output_column].numpy(),
                                                       predictions[output_column]['Encoded Predictions'])
