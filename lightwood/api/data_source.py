@@ -39,13 +39,11 @@ class DataSource:
         list_data = self.get_column_original_data(column_name)
 
         if column_name in self.encoders:
-
             self.encoded_cache[column_name] = self.encoders[column_name].encode(list_data)
 
             return self.encoded_cache[column_name]
 
-
-        config = self._get_column_config(column_name)
+        config = self.get_column_config(column_name)
 
         if 'encoder_path' not in config:
             path = 'lightwood.encoders.{type}'.format(type=config['type'])
@@ -82,12 +80,13 @@ class DataSource:
         """
         if decoder_instance is None:
             if column_name not in self.encoders:
-                raise ValueError('Data must have been encoded before at some point, you should not decode before having encoding at least once')
+                raise ValueError(
+                    'Data must have been encoded before at some point, you should not decode before having encoding at least once')
             decoder_instance = self.encoders[column_name]
         self.decoded_cache[column_name] = decoder_instance.decode(encoded_data)
         return self.decoded_cache[column_name]
 
-    def _get_column_config(self, column_name):
+    def get_column_config(self, column_name):
         """
         Get the config info for the feature given a configuration as defined in data_schemas definition.py
         :param column_name:
@@ -130,7 +129,7 @@ if __name__ == "__main__":
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
 
-    data['z'] = ['low' if i< 50 else 'high' for i in nums]
+    data['z'] = ['low' if i < 50 else 'high' for i in nums]
 
     data_frame = pandas.DataFrame(data)
 
@@ -139,4 +138,3 @@ if __name__ == "__main__":
     ds = DataSource(data_frame, config)
 
     print(ds.get_encoded_column_data('z'))
-
