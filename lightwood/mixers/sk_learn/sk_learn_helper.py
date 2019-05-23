@@ -1,16 +1,10 @@
 import warnings
 
 import numpy as np
-from sklearn import svm
-from sklearn.multioutput import MultiOutputRegressor
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 
 
 class SkLearnMixerHelper:
-
-
-
 
     def _input_encoded_columns(self, target_column, when_data_source):
         """
@@ -90,26 +84,16 @@ class SkLearnMixerHelper:
                 decoded_data = encoders.decode(encoded_data)
         return decoded_data
 
-    def _get_model(self, column_type):
-        models = {
-            'categorical': self.classifier_class(KNeighborsClassifier(3), n_jobs=-1),
-            'numeric': MultiOutputRegressor(svm.SVR())
-        }
-        return models.get(column_type, None)
-
     def _determine_model_class(self, column, data_source):
         """
         :param column: name of the column
         :param data_source: is a DataSource object
         :return: model: Model to be considered for fitting data
         """
-        data_type = None
-        for feature in data_source.configuration['output_features']:
-            if feature['name'] == column:
-                data_type = feature['type']
-                break
+        data_type = data_source.get_column_config(column)['type']
+        from lightwood.mixers.sk_learn.feature import FeatureFactory
 
         if data_type is not None:
-            return self._get_model(data_type)
-
-        return None
+            feature = FeatureFactory.create_feature(data_source.get_column_config(column))
+            model = feature.get_model_class(self.classifier_class, self.regression_class)
+            return model

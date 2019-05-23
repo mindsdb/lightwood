@@ -1,10 +1,11 @@
-import traceback
 import logging
+import traceback
+
 import dill
 
 from lightwood.api.data_source import DataSource
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.data_schemas.definition import definition_schema
+from lightwood.mixers.sk_learn.feature import FeatureFactory
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 
 
@@ -36,8 +37,6 @@ class Predictor:
         self._encoders = None
         self._mixer = None
 
-
-
     def learn(self, from_data, test_data=None, validation_data=None):
         """
         Train and save a model (you can use this to retrain model from data)
@@ -54,7 +53,6 @@ class Predictor:
         else:
             test_data_ds = None
 
-
         mixer = SkLearnMixer(
             input_column_names=[f['name'] for f in self.definition['input_features']],
             output_column_names=[f['name'] for f in self.definition['output_features']])
@@ -68,7 +66,7 @@ class Predictor:
     def predict(self, when_data):
         """
         Predict given when conditions
-        :param when: a dataframe
+        :param when_data: a dataframe
         :return: a complete dataframe
         """
 
@@ -77,19 +75,33 @@ class Predictor:
 
         return self._mixer.predict(when_data_ds)
 
+    def accuracy(self, from_data):
+        """
+        calculates the accuracy of the model
+        :param from_data:a dataframe
+        :return accuracies: dictionaries of accuracies
+        """
+        if self._mixer is None:
+            logging.log.error("Please train the model before calculating accuracy")
+            return
+        ds = DataSource(from_data, self.definition)
+        predictions = self._mixer.predict(ds)
+        accuracies = {}
+        for output_column in self._mixer.output_column_names:
+            feature = FeatureFactory.create_feature(ds.get_column_config(output_column))
+            accuracies[output_column] = feature.calculate_accuracy(ds, predictions)
+
+        return {'accuracies': accuracies}
 
     def save(self, path_to):
         """
-
-        :param path:
+        save trained model to a file
+        :param path_to: full path of file, where we store results
         :return:
         """
         f = open(path_to, 'wb')
-
         dill.dump(self.__dict__, f)
         f.close()
-
-        pass
 
 
 # only run the test if this file is called from debugger
@@ -125,28 +137,15 @@ if __name__ == "__main__":
 
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
-
     data['z'] = [data['x'][i] + data['y'][i] + i for i in range(10)]
-
     data_frame = pandas.DataFrame(data)
 
     ####################
-
-
-
-
     predictor = Predictor(definition=config)
-
     predictor.learn(from_data=data_frame)
+    print(predictor.accuracy(from_data=data_frame))
+    print(predictor.predict(when_data=pandas.DataFrame({'x': [6], 'y': [12]})))
+    predictor.save('tmp\ok.pkl')
 
-    print(predictor.predict(when_data=pandas.DataFrame({'x':[6], 'y':[12]})))
-
-
-
-    predictor.save('/tmp/ok.pkl')
-
-    predictor2 = Predictor(load_from_path='/tmp/ok.pkl')
-
-    print(predictor2.predict(when_data=pandas.DataFrame({'x': [6], 'y': [12]})))
-
-
+    predictor2 = Predictor(load_from_path='tmp\ok.pkl')
+    print(predictor2.predict(when_data=pandas.DataFrame({'x': [6, 2, 3], 'y': [12, 3, 4]})))
