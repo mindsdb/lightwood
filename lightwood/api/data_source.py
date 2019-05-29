@@ -1,7 +1,7 @@
 import importlib
+from torch.utils.data import Dataset, DataLoader
 
-
-class DataSource:
+class DataSource(Dataset):
 
     def __init__(self, data_frame, configuration):
         """
@@ -17,8 +17,44 @@ class DataSource:
         self.list_cache = {}
         self.encoded_cache = {}
         self.decoded_cache = {}
+        self.transform = None
+
+    def __len__(self):
+        """
+        return the length of the datasource (as in number of rows)
+        :return: number of rows
+        """
+        return int(self.data_frame.shape[0])
+
+    def __getitem__(self, idx):
+        """
+
+        :param idx:
+        :return:
+        """
+
+        sample = {}
+
+
+        for feature_set in ['input_features', 'output_features']:
+            sample[feature_set] = {}
+            for feature in self.configuration[feature_set]:
+                col_name = feature['name']
+                if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
+                    self.get_encoded_column_data(col_name)
+                sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
+
+        if self.transform:
+            sample = self.transform(sample)
+
+        return sample
 
     def get_column_original_data(self, column_name):
+        """
+
+        :param column_name:
+        :return:
+        """
 
         if column_name in self.list_cache:
             return self.list_cache[column_name]
@@ -32,6 +68,11 @@ class DataSource:
             return [None] * rows
 
     def get_encoded_column_data(self, column_name):
+        """
+
+        :param column_name:
+        :return:
+        """
 
         if column_name in self.encoded_cache:
             return self.encoded_cache[column_name]
@@ -85,6 +126,10 @@ class DataSource:
             decoder_instance = self.encoders[column_name]
         self.decoded_cache[column_name] = decoder_instance.decode(encoded_data)
         return self.decoded_cache[column_name]
+
+    def get_feature_names(self, where = 'input_features'):
+
+        return [feature['name'] for feature in self.configuration[where]]
 
     def get_column_config(self, column_name):
         """
