@@ -77,19 +77,52 @@ class FullyConnectedNnMixer:
 
     def __init__(self, input_column_names=None, output_column_names=None):
         self.net = None
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = nn.MSELoss()#CrossEntropyLoss()
         self.optimizer = None
         self.epochs = 2
         self.batch_size = 100
         self.input_column_names = None
         self.output_column_names = None
+        self.data_loader = None
 
         pass
 
-    def fit(self, data_source):
-        for i in self.iter_fit(data_source):
-            a = i
-        return a
+    def fit(self, ds):
+
+        if self.data_loader is None:
+
+            self.data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=4)
+            self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
+                'input_features')
+            self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
+                'output_features')
+            ds.transform = Transformation(self.input_column_names, self.output_column_names)
+
+            self.net = FullyConnectedNet(ds)
+            self.optimizer = optim.SGD(self.net.parameters(), lr=0.001, momentum=0.9)
+
+        running_loss = 0.0
+        error = 0
+        for i, data in enumerate(self.data_loader, 0):
+            # get the inputs; data is a list of [inputs, labels]
+            inputs, labels = data
+
+            # zero the parameter gradients
+            self.optimizer.zero_grad()
+
+            # forward + backward + optimize
+            outputs = self.net(inputs)
+            loss = self.criterion(outputs, labels)
+            loss.backward()
+            self.optimizer.step()
+
+            # print statistics
+            running_loss += loss.item()
+
+            error = running_loss / (i + 1)
+
+
+        return error
 
     def predict(self, when_data_source):
 
@@ -99,37 +132,11 @@ class FullyConnectedNnMixer:
 
     def iter_fit(self, ds):
 
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=4)
-        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names('input_features')
-        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names('output_features')
-        ds.transform = Transformation(self.input_column_names, self.output_column_names)
 
-        self.net = FullyConnectedNet(ds)
-        self.optimizer = optim.SGD(self.net.parameters(), lr=0.001, momentum=0.9)
 
-        for epoch in range(self.epochs):   # loop over the dataset multiple times
+        for epoch in range(4):   # loop over the dataset multiple times
 
-            running_loss = 0.0
-            error = 0
-            for i, data in enumerate(data_loader, 0):
-                # get the inputs; data is a list of [inputs, labels]
-                inputs, labels = data
-
-                # zero the parameter gradients
-                self.optimizer.zero_grad()
-
-                # forward + backward + optimize
-                outputs = self.net(inputs)
-                loss = self.criterion(outputs, labels)
-                loss.backward()
-                self.optimizer.step()
-
-                # print statistics
-                running_loss += loss.item()
-
-                error = running_loss/i
-
-            yield error
+            yield self.fit(ds)
 
 
 
