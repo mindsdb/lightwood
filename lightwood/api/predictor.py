@@ -5,8 +5,10 @@ import dill
 
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.definition import definition_schema
-from lightwood.mixers.sk_learn.feature import FeatureFactory
+
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import explained_variance_score
 
 
 class Predictor:
@@ -88,8 +90,15 @@ class Predictor:
         predictions = self._mixer.predict(ds)
         accuracies = {}
         for output_column in self._mixer.output_column_names:
-            feature = FeatureFactory.create_feature(ds.get_column_config(output_column))
-            accuracies[output_column] = feature.calculate_accuracy(ds, predictions)
+            properties = ds.get_column_config(output_column)
+            if properties['type'] == 'categorical':
+                accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["Actual Predictions"])
+
+            elif properties['type'] == 'numeric':
+                accuracies[output_column] = explained_variance_score(ds.get_encoded_column_data(output_column), predictions[output_column]["Encoded Predictions"])
+
+
+
 
         return {'accuracies': accuracies}
 
