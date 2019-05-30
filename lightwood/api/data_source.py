@@ -17,7 +17,7 @@ class DataSource(Dataset):
         self.list_cache = {}
         self.encoded_cache = {}
         self.decoded_cache = {}
-        self.transform = None
+        self.transformer = None
 
     def __len__(self):
         """
@@ -44,8 +44,8 @@ class DataSource(Dataset):
                     self.get_encoded_column_data(col_name)
                 sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
-        if self.transform:
-            sample = self.transform(sample)
+        if self.transformer:
+            sample = self.transformer.transform(sample)
 
         return sample
 
