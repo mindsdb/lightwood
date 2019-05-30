@@ -18,7 +18,7 @@ class FullyConnectedNet(nn.Module):
         :param sample_batch: this is used to understand the characteristics of the input and target, it is an object of type utils.libs.data_types.batch.Batch
         """
         super(FullyConnectedNet, self).__init__()
-        input_sample, output_sample = ds.__getitem__(0)
+        input_sample, output_sample = ds[0]
         input_size = len(input_sample)
         output_size = len(output_sample)
 
