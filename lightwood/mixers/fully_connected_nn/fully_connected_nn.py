@@ -25,7 +25,7 @@ class FullyConnectedNet(nn.Module):
         self.net = nn.Sequential(
             nn.Dropout(0.2),
             nn.Linear(input_size, output_size)
-            # torch.nn.LeakyReLU(),
+
             # nn.Dropout(0.2),
             # # nn.Linear(input_size, int(math.ceil(input_size/2))),
             # # torch.nn.LeakyReLU(),
