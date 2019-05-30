@@ -8,6 +8,7 @@ class Img2VecEncoder:
 
     def __init__(self):
         self._model = None
+        self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, images):
         """

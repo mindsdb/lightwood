@@ -3,7 +3,9 @@ import torch
 
 class DatetimeEncoder:
 
+    def __init__(self):
 
+        self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, data):
         """
@@ -24,7 +26,7 @@ class DatetimeEncoder:
 
             ret += [vector]
 
-        return torch.FloatTensor(ret)
+        return self._pytorch_wrapper(ret)
 
 
     def decode(self, encoded_data, return_as_datetime = False):

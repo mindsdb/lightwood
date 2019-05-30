@@ -9,6 +9,7 @@ class CategoricalEncoder:
     def __init__(self):
 
         self._lang = None
+        self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, column_data):
 
@@ -31,7 +32,7 @@ class CategoricalEncoder:
 
             ret += [encoded_word]
 
-        return torch.FloatTensor(ret)
+        return self._pytorch_wrapper(ret)
 
 
     def decode(self, encoded_data):

@@ -30,6 +30,7 @@ class InferSentEncoder:
     def __init__(self):
 
         self._model = None
+        self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, sentences):
         """
@@ -52,7 +53,7 @@ class InferSentEncoder:
 
         result = self._model.encode(sentences, bsize=128, tokenize=False, verbose=True)
 
-        return torch.FloatTensor(result)
+        return self._pytorch_wrapper(result)
 
     def _download_necessary_files(self):
         self._download_model_file()

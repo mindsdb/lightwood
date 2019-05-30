@@ -113,7 +113,8 @@ class DataSource(Dataset):
 
         return self.encoded_cache[column_name]
 
-    def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
+
+    def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None, cache=True):
         """
         :param column_name: column names to be decoded
         :param encoded_data: encoded data of tensor type
@@ -124,8 +125,10 @@ class DataSource(Dataset):
                 raise ValueError(
                     'Data must have been encoded before at some point, you should not decode before having encoding at least once')
             decoder_instance = self.encoders[column_name]
-        self.decoded_cache[column_name] = decoder_instance.decode(encoded_data)
-        return self.decoded_cache[column_name]
+        decoded_data = decoder_instance.decode(encoded_data)
+        if cache == True:
+            self.decoded_cache[column_name] = decoded_data
+        return decoded_data
 
     def get_feature_names(self, where = 'input_features'):
 
