@@ -23,13 +23,14 @@ class FullyConnectedNet(nn.Module):
         output_size = len(output_sample)
 
         self.net = nn.Sequential(
-            nn.Linear(input_size, input_size),
-            torch.nn.LeakyReLU(),
             nn.Dropout(0.2),
-            nn.Linear(input_size, int(math.ceil(input_size/2))),
-            torch.nn.LeakyReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(int(math.ceil(input_size/2)), output_size)
+            nn.Linear(input_size, output_size)
+            # torch.nn.LeakyReLU(),
+            # nn.Dropout(0.2),
+            # # nn.Linear(input_size, int(math.ceil(input_size/2))),
+            # # torch.nn.LeakyReLU(),
+            # # nn.Dropout(0.2),
+            # nn.Linear(input_size, output_size)
         )
 
 
@@ -124,6 +125,7 @@ class FullyConnectedNnMixer:
         when_data_source.transformer = self.transformer
         data_loader = DataLoader(when_data_source, batch_size=len(when_data_source), shuffle=False, num_workers=0)
 
+        self.net.eval()
         data = next(iter(data_loader))
         inputs, labels = data
         outputs = self.net(inputs)
@@ -148,7 +150,7 @@ class FullyConnectedNnMixer:
 
         logging.info('Model predictions and decoding completed')
 
-        return outputs
+        return predictions
 
     def error(self, ds):
         """
@@ -192,9 +194,10 @@ class FullyConnectedNnMixer:
 
         ds.transformer = self.transformer
         self.net = FullyConnectedNet(ds)
-        self.optimizer = optim.SGD(self.net.parameters(), lr=0.001, momentum=0.9)
+        self.net.train()
+        self.optimizer = optim.SGD(self.net.parameters(), lr=0.1)
 
-        for epoch in range(400):  # loop over the dataset multiple times
+        for epoch in range(4000):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
