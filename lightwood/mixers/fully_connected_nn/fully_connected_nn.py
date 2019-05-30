@@ -71,12 +71,14 @@ class Transformation:
         for input_feature in self.input_features:
             sub_vector = sample['input_features'][input_feature].tolist()
             input_vector += sub_vector
-            self.feature_len_map[input_feature] = len(sub_vector)
+            if input_feature not in self.feature_len_map:
+                self.feature_len_map[input_feature] = len(sub_vector)
 
         for output_feature in self.output_features:
             sub_vector = sample['output_features'][output_feature].tolist()
             output_vector += sub_vector
-            self.feature_len_map[input_feature] = len(sub_vector)
+            if output_feature not in self.feature_len_map:
+                self.feature_len_map[output_feature] = len(sub_vector)
 
         return torch.FloatTensor(input_vector),  torch.FloatTensor(output_vector)
 
@@ -84,10 +86,10 @@ class Transformation:
 
         start = 0
         ret = {}
-
+        list_vector = vector.tolist()
         for feature_name in getattr(self, feature_set):
             top = start+self.feature_len_map[feature_name]
-            ret[feature_name] = vector[start:top]
+            ret[feature_name] = list_vector[start:top]
             start = top
         return ret
 
@@ -102,6 +104,7 @@ class FullyConnectedNnMixer:
         self.input_column_names = None
         self.output_column_names = None
         self.data_loader = None
+        self.transformer = None
 
         pass
 
@@ -118,13 +121,30 @@ class FullyConnectedNnMixer:
         :param when_data_source:
         :return:
         """
-        when_data_source.transformer = Transformation(self.input_column_names, self.output_column_names)
+        when_data_source.transformer = self.transformer
         data_loader = DataLoader(when_data_source, batch_size=len(when_data_source), shuffle=False, num_workers=0)
 
         data = next(iter(data_loader))
         inputs, labels = data
         outputs = self.net(inputs)
+        output_encoded_vectors = {}
 
+        for output_vector in outputs:
+            output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
+            for feature in output_vectors:
+                if feature not in output_encoded_vectors:
+                    output_encoded_vectors[feature] = []
+                output_encoded_vectors[feature] += [output_vectors[feature]]
+
+
+
+        predictions = dict()
+
+        for output_column in output_encoded_vectors:
+
+            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]),  cache=False)
+            predictions[output_column] = {'Encoded Predictions': output_encoded_vectors[output_column],
+                                          'Actual Predictions': decoded_predictions}
 
         logging.info('Model predictions and decoding completed')
 
@@ -136,7 +156,7 @@ class FullyConnectedNnMixer:
         :param ds:
         :return:
         """
-        ds.transformer = Transformation(self.input_column_names, self.output_column_names)
+        ds.transformer = self.transformer
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         running_loss = 0.0
         error = 0
@@ -167,8 +187,10 @@ class FullyConnectedNnMixer:
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
             'output_features')
-        ds.transformer = Transformation(self.input_column_names, self.output_column_names)
+        self.transformer = Transformation(self.input_column_names, self.output_column_names)
 
+
+        ds.transformer = self.transformer
         self.net = FullyConnectedNet(ds)
         self.optimizer = optim.SGD(self.net.parameters(), lr=0.001, momentum=0.9)
 

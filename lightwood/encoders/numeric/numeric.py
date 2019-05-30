@@ -9,6 +9,7 @@ class NumericEncoder:
         self._max_value = None
         self._type = data_type
         self._mean = None
+        self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, data):
 
@@ -47,7 +48,7 @@ class NumericEncoder:
             ret += [vector]
 
 
-        return torch.FloatTensor(ret)
+        return self._pytorch_wrapper(ret)
 
 
     def decode(self, encoded_values):

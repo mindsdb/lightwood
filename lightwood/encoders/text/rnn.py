@@ -13,6 +13,7 @@ class RnnEncoder:
         self._encoder = None
         self._decoder = None
         self._trained = False
+        self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, column_data):
 
@@ -58,7 +59,7 @@ class RnnEncoder:
                 # use the last hidden state as the encoded vector
                 ret+=[encoder_hidden.tolist()[0][0]]
 
-        return torch.FloatTensor(ret)
+        return self._pytorch_wrapper(ret)
 
 
     def decode(self, encoded_values_tensor, max_length = 100):

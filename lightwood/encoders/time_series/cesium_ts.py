@@ -138,6 +138,7 @@ FEATURES_WITH_DEFAULT_NONE = [
 class CesiumTsEncoder:
 
     def __init__(self, features=DEFAULT_FEATURES_TO_USE):
+        self._pytorch_wrapper = torch.FloatTensor
         self._features = features
 
     def encode(self, values_data, times=None):
@@ -177,7 +178,7 @@ class CesiumTsEncoder:
                 else:
                     vector_row += [val]
             ret += [vector_row]
-        ret_tensor = torch.FloatTensor(ret)
+        ret_tensor = self._pytorch_wrapper(ret)
         return ret_tensor
 
 

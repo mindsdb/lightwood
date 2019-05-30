@@ -2,12 +2,13 @@ import logging
 import os
 
 from lightwood.encoders.image.helpers.nn import NnEncoderHelper
-
+import torch
 
 class NnAutoEncoder:
 
     def __init__(self, images):
         self._model = NnEncoderHelper(images)
+        self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, images):
         """
