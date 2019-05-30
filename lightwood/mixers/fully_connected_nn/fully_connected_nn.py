@@ -100,11 +100,13 @@ class FullyConnectedNnMixer:
         :param when_data_source:
         :return:
         """
-        data_loader = DataLoader(ds, batch_size=len(when_data_source), shuffle=False, num_workers=1)
-        data = next(iter(data_loader))
-        inputs, labels = data
-        outputs = self.net(inputs)
-        return outputs
+        when_data_source.transform = Transformation(self.input_column_names, self.output_column_names)
+        data_loader = DataLoader(when_data_source, batch_size=len(when_data_source), shuffle=False, num_workers=0)
+        for i, data in enumerate(data_loader, 0):
+            #data = next(iter(data_loader))
+            inputs, labels = data
+            outputs = self.net(inputs)
+            return outputs
 
     def error(self, ds):
         """
@@ -112,7 +114,8 @@ class FullyConnectedNnMixer:
         :param ds:
         :return:
         """
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=4)
+        ds.transform = Transformation(self.input_column_names, self.output_column_names)
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         running_loss = 0.0
         error = 0
 
@@ -137,7 +140,7 @@ class FullyConnectedNnMixer:
         :param ds:
         :return:
         """
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=4)
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(

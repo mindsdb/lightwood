@@ -7,6 +7,7 @@ from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.definition import definition_schema
 
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
+from lightwood.mixers.fully_connected_nn.fully_connected_nn import FullyConnectedNnMixer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import explained_variance_score
 
@@ -55,7 +56,7 @@ class Predictor:
         else:
             test_data_ds = None
 
-        mixer = SkLearnMixer(
+        mixer = FullyConnectedNnMixer(
             input_column_names=[f['name'] for f in self.definition['input_features']],
             output_column_names=[f['name'] for f in self.definition['output_features']])
 
