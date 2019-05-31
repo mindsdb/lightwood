@@ -44,13 +44,17 @@ class CategoricalEncoder:
 
         for vector in encoded_data_list:
             found = False
-            for i, val in enumerate(vector):
-                if int(val) == 1:
-                    found = True
-                    ret += [self._lang.index2word[i]]
-                    break
-            if not found:
-                ret += [None]
+
+
+            max_i = 0
+            max_val = 0
+            for i in range(len(vector)):
+                val = vector[i]
+                if val > max_val:
+                    max_i = i
+                    max_val = val
+            ret += [self._lang.index2word[max_i]]
+
 
         return ret
 

@@ -39,6 +39,7 @@ class Predictor:
         self.definition = definition
         self._encoders = None
         self._mixer = None
+        self._mixers = {}
 
     def learn(self, from_data, test_data=None, validation_data=None):
         """
@@ -56,15 +57,24 @@ class Predictor:
         else:
             test_data_ds = None
 
-        mixer = FullyConnectedNnMixer(
-            input_column_names=[f['name'] for f in self.definition['input_features']],
-            output_column_names=[f['name'] for f in self.definition['output_features']])
+
+        if 'default_mixer' in self.definition:
+            default_mixer_class = self.definition['default_mixer']['class']
+            default_mixer_args = self.definition['default_mixer']['args']
+        else:
+            default_mixer_class = FullyConnectedNnMixer
+            default_mixer_args = {}
+
+        default_mixer_args['input_column_names'] = [f['name'] for f in self.definition['input_features']]
+        default_mixer_args['output_column_names'] = [f['name'] for f in self.definition['output_features']]
+
+        mixer = default_mixer_class(**default_mixer_args)
 
         for i, mix_i in enumerate(mixer.iter_fit(from_data_ds)):
             logging.info('training iteration {iter_i}'.format(iter_i=i))
 
         self._mixer = mixer
-        self._encoders = from_data_ds.encoders
+        self._mixer.encoders = from_data_ds.encoders
 
     def predict(self, when_data):
         """
@@ -74,7 +84,7 @@ class Predictor:
         """
 
         when_data_ds = DataSource(when_data, self.definition)
-        when_data_ds.encoders = self._encoders
+        when_data_ds.encoders = self._mixer.encoders
 
         return self._mixer.predict(when_data_ds)
 
@@ -95,7 +105,7 @@ class Predictor:
             if properties['type'] == 'categorical':
                 accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["Actual Predictions"])
 
-            elif properties['type'] == 'numeric':
+            else:
                 accuracies[output_column] = explained_variance_score(ds.get_encoded_column_data(output_column), predictions[output_column]["Encoded Predictions"])
 
 
