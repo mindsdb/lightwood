@@ -30,6 +30,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         self.model = {}
         self.feature_models = {}
         self.feature_importance = {}
+        self.encoders = None
 
     def fit(self, data_source):
         """
@@ -51,6 +52,7 @@ class SkLearnMixer(SkLearnMixerHelper):
             model_score = self.model[column].score(useful_input_encoded_features, output_encoded_column)
 
         logging.info('Model training completed with score:{}'.format(model_score))
+        self.encoders = ds.encoders
         return self.model
 
     def predict(self, when_data_source, output_column_names=None):
@@ -61,6 +63,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         """
         logging.info('Model predictions starting')
         model = self.model
+        when_data_source.encoders = self.encoders
         output_column_names = self.output_column_names if output_column_names is None else output_column_names
         predictions = dict()
         for output_column in output_column_names:
@@ -92,6 +95,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         :param ds:  is a DataSource object
         :return error : Dictionary: error of actual vs predicted encoded values
         """
+        self.encoders = ds.encoders
         for i in range(1):
             self.fit(ds)
             yield self.error(ds)

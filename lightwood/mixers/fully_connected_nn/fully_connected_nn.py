@@ -106,14 +106,16 @@ class FullyConnectedNnMixer:
         self.output_column_names = None
         self.data_loader = None
         self.transformer = None
+        self.encoders = None
 
         pass
 
     def fit(self, ds= None, callback=None):
+
         ret = 0
         for i in self.iter_fit(ds):
             ret = i
-
+        self.encoders = ds.encoders
         return ret
 
     def predict(self, when_data_source):
@@ -123,6 +125,7 @@ class FullyConnectedNnMixer:
         :return:
         """
         when_data_source.transformer = self.transformer
+        when_data_source.encoders = self.encoders
         data_loader = DataLoader(when_data_source, batch_size=len(when_data_source), shuffle=False, num_workers=0)
 
         self.net.eval()
@@ -196,6 +199,7 @@ class FullyConnectedNnMixer:
         self.net = FullyConnectedNet(ds)
         self.net.train()
         self.optimizer = optim.SGD(self.net.parameters(), lr=0.1)
+        self.encoders = ds.encoders
 
         for epoch in range(4000):  # loop over the dataset multiple times
             running_loss = 0.0
