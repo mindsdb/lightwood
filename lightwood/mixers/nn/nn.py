@@ -5,6 +5,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import torch
 import math
+import copy
 import logging
 import numpy as np
 
@@ -24,7 +25,7 @@ class FullyConnectedNet(nn.Module):
         output_size = len(output_sample)
 
         self.net = nn.Sequential(
-            
+
             nn.Linear(input_size, 2*input_size),
             torch.nn.ReLU(),
             nn.Linear(2*input_size, output_size)
@@ -271,7 +272,8 @@ class NnMixer:
                     last_test_error = test_error
 
                 if is_lowest_error:
-                    last_good_model = True#copy(self.net)
+                    last_good_model = copy.deepcopy(self.net)
+
 
                 delta_error = last_test_error - test_error
                 last_test_error = test_error
@@ -279,10 +281,14 @@ class NnMixer:
                 error_delta_buffer += [delta_error]
                 error_delta_buffer = error_delta_buffer[-10:]
                 delta_mean = np.mean(error_delta_buffer)
-                print(delta_mean)
+                logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
 
                 if delta_mean < 0:
                     break
+
+        if last_good_model is not None:
+            print('restoring last good model')
+            self.net = last_good_model
 
 
 
