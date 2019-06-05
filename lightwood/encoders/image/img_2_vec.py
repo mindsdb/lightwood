@@ -6,7 +6,7 @@ from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 
 class Img2VecEncoder:
 
-    def __init__(self):
+    def __init__(self, is_target = False):
         self._model = None
         self._pytorch_wrapper = torch.FloatTensor
 

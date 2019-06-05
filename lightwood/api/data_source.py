@@ -1,4 +1,5 @@
 import importlib
+import numpy as np
 from torch.utils.data import Dataset, DataLoader
 
 class DataSource(Dataset):
@@ -18,6 +19,17 @@ class DataSource(Dataset):
         self.encoded_cache = {}
         self.decoded_cache = {}
         self.transformer = None
+
+
+    def extractRandomSubset(self, percentage):
+
+        msk = np.random.rand(len(self.data_frame)) < (1-percentage)
+        test_df = self.data_frame[~msk]
+        self.data_frame = self.data_frame[msk]
+
+        return DataSource(test_df, self.configuration)
+
+
 
     def __len__(self):
         """
@@ -41,7 +53,7 @@ class DataSource(Dataset):
             for feature in self.configuration[feature_set]:
                 col_name = feature['name']
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
-                    self.get_encoded_column_data(col_name)
+                    self.get_encoded_column_data(col_name, feature_set)
                 sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
         if self.transformer:
@@ -67,7 +79,7 @@ class DataSource(Dataset):
             rows = self.data_frame.shape[0]
             return [None] * rows
 
-    def get_encoded_column_data(self, column_name):
+    def get_encoded_column_data(self, column_name, feature_set = 'input_features'):
         """
 
         :param column_name:
@@ -97,7 +109,7 @@ class DataSource(Dataset):
             path = config['encoder_path']
 
         kwargs = config['encoder_args'] if 'encoder_args' in config else {}
-
+        kwargs['is_target'] = True if feature_set == 'output_features' else False
         module = importlib.import_module(path)
 
         encoder_name = path.split('.')[-1]

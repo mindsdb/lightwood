@@ -16,15 +16,15 @@ output_feature_schema = Schema({
 
 default_mixer_schema = Schema({
     'class': object,
-    'argument': dict
+    Optional('params'): dict
 })
 
 mixer_schema = Schema({
     'name': str,
     'input': list,
-    'output': list,
+    Optional('output'): list,
     'class': object,
-    'argument': dict
+    Optional('params'): dict
 })
 
 definition_schema = Schema({
