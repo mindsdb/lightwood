@@ -81,8 +81,8 @@ class Predictor:
             else:
                 logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
 
-        for i, mix_i in enumerate(mixer.iter_fit(from_data_ds)):
-            logging.info('training iteration {iter_i}'.format(iter_i=i))
+        for i, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+            logging.info('training iteration {iter_i}, error {error}'.format(iter_i=i, error=mix_error))
 
         self._mixer = mixer
         self._mixer.encoders = from_data_ds.encoders
