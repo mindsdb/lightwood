@@ -137,7 +137,7 @@ FEATURES_WITH_DEFAULT_NONE = [
 
 class CesiumTsEncoder:
 
-    def __init__(self, features=DEFAULT_FEATURES_TO_USE):
+    def __init__(self, features=DEFAULT_FEATURES_TO_USE, is_target = False):
         self._pytorch_wrapper = torch.FloatTensor
         self._features = features
 

@@ -7,9 +7,9 @@ from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.definition import definition_schema
 
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
-from lightwood.mixers.fully_connected_nn.fully_connected_nn import FullyConnectedNnMixer
+from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import explained_variance_score
+from sklearn.metrics import explained_variance_score, r2_score
 
 
 class Predictor:
@@ -40,6 +40,7 @@ class Predictor:
         self._encoders = None
         self._mixer = None
         self._mixers = {}
+        self.train_accuracy = None
 
     def learn(self, from_data, test_data=None, validation_data=None):
         """
@@ -55,26 +56,41 @@ class Predictor:
         if test_data:
             test_data_ds = DataSource(test_data, self.definition)
         else:
-            test_data_ds = None
+            test_data_ds = from_data_ds.extractRandomSubset(0.1)
 
+        default_mixer_params = {}
 
         if 'default_mixer' in self.definition:
             default_mixer_class = self.definition['default_mixer']['class']
-            default_mixer_args = self.definition['default_mixer']['args']
+            if 'params' in  self.definition['default_mixer']:
+                default_mixer_params = self.definition['default_mixer']['params']
         else:
-            default_mixer_class = FullyConnectedNnMixer
-            default_mixer_args = {}
+            default_mixer_class = NnMixer
 
+
+
+        default_mixer_args = {}
         default_mixer_args['input_column_names'] = [f['name'] for f in self.definition['input_features']]
         default_mixer_args['output_column_names'] = [f['name'] for f in self.definition['output_features']]
 
         mixer = default_mixer_class(**default_mixer_args)
+
+        for param in default_mixer_params:
+            if hasattr(mixer, param):
+                setattr(mixer, param, default_mixer_params[param])
+            else:
+                logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
 
         for i, mix_i in enumerate(mixer.iter_fit(from_data_ds)):
             logging.info('training iteration {iter_i}'.format(iter_i=i))
 
         self._mixer = mixer
         self._mixer.encoders = from_data_ds.encoders
+
+        self.train_accuracy =  self.accuracy(test_data_ds)
+
+
+
 
     def predict(self, when_data):
         """
@@ -97,7 +113,7 @@ class Predictor:
         if self._mixer is None:
             logging.log.error("Please train the model before calculating accuracy")
             return
-        ds = DataSource(from_data, self.definition)
+        ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.definition)
         predictions = self._mixer.predict(ds)
         accuracies = {}
         for output_column in self._mixer.output_column_names:
@@ -106,7 +122,7 @@ class Predictor:
                 accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["Actual Predictions"])
 
             else:
-                accuracies[output_column] = explained_variance_score(ds.get_encoded_column_data(output_column), predictions[output_column]["Encoded Predictions"])
+                accuracies[output_column] = r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["Encoded Predictions"])
 
 
 
@@ -130,6 +146,7 @@ if __name__ == "__main__":
     ###############
     import pandas
     import random
+    import torch.nn as nn
 
     config = {
         'name': 'test',
@@ -152,20 +169,40 @@ if __name__ == "__main__":
                 'type': 'numeric',
                 # 'encoder_path': 'lightwood.encoders.categorical.categorical'
             }
-        ]
+        ],
+
+        'default_mixer': {
+            'class': NnMixer,
+            'params': {
+                'epochs': 1000,
+                'criterion': nn.MSELoss(),
+                'optimizer_args' : {'lr': 0.01}
+            }
+        }
+
+        # 'default_mixer': {
+        #     'class': SkLearnMixer
+        # }
     }
 
-    data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
-    nums = [data['x'][i] * data['y'][i] for i in range(10)]
-    data['z'] = [data['x'][i] + data['y'][i] + i for i in range(10)]
+    datapoints = 10000
+
+    data = {'x': [random.randint(-10,10) for i in range(datapoints)], 'y': [random.randint(-10,10) for i in range(datapoints)]}
+    nums = [data['x'][i] * data['y'][i] for i in range(datapoints)]
+    data['z'] = [data['x'][i] * data['y'][i]  for i in range(datapoints)]
+    #data['z2'] = [data['x'][i] * data['y'][i] for i in range(100)]
     data_frame = pandas.DataFrame(data)
+
+    print(data_frame)
 
     ####################
     predictor = Predictor(definition=config)
     predictor.learn(from_data=data_frame)
+    print(predictor.train_accuracy)
     print(predictor.accuracy(from_data=data_frame))
-    print(predictor.predict(when_data=pandas.DataFrame({'x': [6], 'y': [12]})))
+    print(predictor.predict(when_data=pandas.DataFrame({'x': [1], 'y': [0]})))
     predictor.save('tmp\ok.pkl')
 
     predictor2 = Predictor(load_from_path='tmp\ok.pkl')
-    print(predictor2.predict(when_data=pandas.DataFrame({'x': [6, 2, 3], 'y': [12, 3, 4]})))
+    print(predictor2.predict(when_data=pandas.DataFrame({'x': [0, 0, 1, -1, 1], 'y': [0, 1, -1, -1, 1]})))
+    print(predictor2.predict(when_data=pandas.DataFrame({'x': [0, 3, 1, -5, 1], 'y': [0, 1, -5, -4, 7]})))

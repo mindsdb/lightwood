@@ -1,9 +1,10 @@
 import torch
+import math
 
 class NumericEncoder:
 
-    def __init__(self, data_type = None):
-
+    def __init__(self, data_type = None, is_target = False):
+        self._is_target = True
         self._trained = False
         self._min_value = None
         self._max_value = None
@@ -35,16 +36,28 @@ class NumericEncoder:
 
         for number in data:
 
-            vector = [0]*2
+            vector = [0]*4
 
             if number is None:
                 ret += [vector]
                 continue
 
+            if number < 0:
+                vector[0] = 1
+
+            if number == 0:
+                vector[1] = 1
+
+            else:
+                vector[2] = math.log(abs(number))
+
             vector[-1] = 1 # is not null
 
-            new_number = (number - self._mean)/(self._max_value-self._min_value)
-            vector[0] = new_number
+
+
+            if self._is_target:
+                vector=vector[:-1]
+
             ret += [vector]
 
 
@@ -54,13 +67,18 @@ class NumericEncoder:
     def decode(self, encoded_values):
         ret = []
         for vector in encoded_values.tolist():
-            if vector[-1] == 0: # is not null = false
+            if vector[-1] == 0 and self._is_target == False: # is not null = false
                 ret += [None]
                 continue
 
-            encoded_value = vector[0]
 
-            real_value = (self._max_value-self._min_value)*encoded_value + self._mean
+            if abs(round(vector[1])) == 1:
+                real_value = 0
+            else:
+                is_negative = True if abs(round(vector[0])) == 1 else False
+                encoded_value = vector[2]
+                real_value = -math.exp(encoded_value) if is_negative else math.exp(encoded_value) #(self._max_value-self._min_value)*encoded_value + self._mean
+
 
             if self._type == 'int':
                 real_value = round(real_value)

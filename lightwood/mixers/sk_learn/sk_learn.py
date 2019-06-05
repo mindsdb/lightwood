@@ -52,7 +52,7 @@ class SkLearnMixer(SkLearnMixerHelper):
             model_score = self.model[column].score(useful_input_encoded_features, output_encoded_column)
 
         logging.info('Model training completed with score:{}'.format(model_score))
-        self.encoders = ds.encoders
+        self.encoders = data_source.encoders
         return self.model
 
     def predict(self, when_data_source, output_column_names=None):

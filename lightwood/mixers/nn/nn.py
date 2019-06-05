@@ -6,6 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 import math
 import logging
+import numpy as np
 
 USE_CUDA = False
 
@@ -23,14 +24,11 @@ class FullyConnectedNet(nn.Module):
         output_size = len(output_sample)
 
         self.net = nn.Sequential(
-            nn.Dropout(0.2),
-            nn.Linear(input_size, output_size)
+            
+            nn.Linear(input_size, 2*input_size),
+            torch.nn.ReLU(),
+            nn.Linear(2*input_size, output_size)
 
-            # nn.Dropout(0.2),
-            # # nn.Linear(input_size, int(math.ceil(input_size/2))),
-            # # torch.nn.LeakyReLU(),
-            # # nn.Dropout(0.2),
-            # nn.Linear(input_size, output_size)
         )
 
 
@@ -94,19 +92,26 @@ class Transformation:
             start = top
         return ret
 
-class FullyConnectedNnMixer:
+class NnMixer:
 
     def __init__(self, input_column_names=None, output_column_names=None):
         self.net = None
-        self.criterion = nn.MSELoss()#CrossEntropyLoss()
         self.optimizer = None
-        self.epochs = 2
-        self.batch_size = 100
         self.input_column_names = None
         self.output_column_names = None
         self.data_loader = None
         self.transformer = None
         self.encoders = None
+
+
+        self.criterion = nn.SmoothL1Loss()#MSELoss()#CrossEntropyLoss()
+        self.epochs = 120000
+        self.eval_every = 0.03
+        self.optimizer_class = optim.Adadelta
+        self.optimizer_args = {'lr': 0.01}
+        self.nn_class = FullyConnectedNet
+        self.batch_size = 100
+
 
         pass
 
@@ -181,27 +186,48 @@ class FullyConnectedNnMixer:
 
         return error
 
-    def iter_fit(self, ds):
+    def iter_fit(self, ds, test_ds = None):
         """
 
         :param ds:
         :return:
         """
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
         self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
             'output_features')
         self.transformer = Transformation(self.input_column_names, self.output_column_names)
+        self.encoders = ds.encoders
+
+        if test_ds is None:
+
+            test_ds = ds.extractRandomSubset(0.1)
+
+
+
+
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
 
 
         ds.transformer = self.transformer
-        self.net = FullyConnectedNet(ds)
+        self.net = self.nn_class(ds)
         self.net.train()
-        self.optimizer = optim.SGD(self.net.parameters(), lr=0.1)
-        self.encoders = ds.encoders
+        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-        for epoch in range(4000):  # loop over the dataset multiple times
+
+        total_epochs = self.epochs
+        epoch_eval_jump = int(total_epochs*self.eval_every)
+        eval_next_on_epoch = epoch_eval_jump
+
+        error_delta_buffer = [] # this is a buffer of the delta of test and train error
+        delta_mean = 0
+        last_test_error = None
+        lowest_error = None
+        last_good_model = None
+
+        for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
@@ -219,11 +245,44 @@ class FullyConnectedNnMixer:
 
                 # print statistics
                 running_loss += loss.item()
-
                 error = running_loss / (i + 1)
 
             yield error
 
+            if epoch >= eval_next_on_epoch and test_ds:
+
+                tmp_next = eval_next_on_epoch + epoch_eval_jump
+                eval_next_on_epoch = tmp_next if tmp_next < total_epochs else total_epochs-1
+
+                test_error = self.error(test_ds)
+                if lowest_error is None:
+                    lowest_error = test_error
+                    is_lowest_error = True
+
+                else:
+                    if test_error < lowest_error:
+                        lowest_error = test_error
+                        is_lowest_error = True
+                    else:
+                        is_lowest_error = False
+
+
+                if last_test_error is None:
+                    last_test_error = test_error
+
+                if is_lowest_error:
+                    last_good_model = True#copy(self.net)
+
+                delta_error = last_test_error - test_error
+                last_test_error = test_error
+
+                error_delta_buffer += [delta_error]
+                error_delta_buffer = error_delta_buffer[-10:]
+                delta_mean = np.mean(error_delta_buffer)
+                print(delta_mean)
+
+                if delta_mean < 0:
+                    break
 
 
 
@@ -277,7 +336,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = FullyConnectedNnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = NnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)
@@ -322,7 +381,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = FullyConnectedNnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = NnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
 
     for i in  mixer.iter_fit(ds):
         print(i)
