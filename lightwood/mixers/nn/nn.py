@@ -9,89 +9,9 @@ import copy
 import logging
 import numpy as np
 
-USE_CUDA = False
+from lightwood.mixers.nn.helpers.default_net import DefaultNet
+from lightwood.mixers.nn.helpers.transformer import Transformer
 
-class FullyConnectedNet(nn.Module):
-
-    def __init__(self, ds):
-
-        """
-        Here we define the basic building blocks of our model, in forward we define how we put it all together along wiht an input
-        :param sample_batch: this is used to understand the characteristics of the input and target, it is an object of type utils.libs.data_types.batch.Batch
-        """
-        super(FullyConnectedNet, self).__init__()
-        input_sample, output_sample = ds[0]
-        input_size = len(input_sample)
-        output_size = len(output_sample)
-
-        self.net = nn.Sequential(
-
-            nn.Linear(input_size, 2*input_size),
-            torch.nn.ReLU(),
-            nn.Linear(2*input_size, output_size)
-
-        )
-
-
-
-        if USE_CUDA:
-            self.net.cuda()
-
-
-
-    def forward(self, input):
-        """
-        In this particular model, we just need to forward the network defined in setup, with our input
-        :param input: a pytorch tensor with the input data of a batch
-        :return:
-        """
-
-        if USE_CUDA:
-            input.cuda()
-
-        output = self.net(input)
-        return output
-
-
-class Transformation:
-
-    def __init__(self, input_features, output_features):
-
-        self.input_features = input_features
-        self.output_features = output_features
-
-        self.feature_len_map = {}
-
-
-    def transform(self, sample):
-
-        input_vector = []
-        output_vector = []
-
-        for input_feature in self.input_features:
-            sub_vector = sample['input_features'][input_feature].tolist()
-            input_vector += sub_vector
-            if input_feature not in self.feature_len_map:
-                self.feature_len_map[input_feature] = len(sub_vector)
-
-        for output_feature in self.output_features:
-            sub_vector = sample['output_features'][output_feature].tolist()
-            output_vector += sub_vector
-            if output_feature not in self.feature_len_map:
-                self.feature_len_map[output_feature] = len(sub_vector)
-
-        return torch.FloatTensor(input_vector),  torch.FloatTensor(output_vector)
-
-    def revert(self, vector, feature_set = 'output_features'):
-
-        start = 0
-        ret = {}
-        list_vector = vector.tolist()
-        for feature_name in getattr(self, feature_set):
-            top = start+self.feature_len_map[feature_name]
-            ret[feature_name] = list_vector[start:top]
-            start = top
-        return ret
 
 class NnMixer:
 
@@ -105,12 +25,12 @@ class NnMixer:
         self.encoders = None
 
 
-        self.criterion = nn.SmoothL1Loss()#MSELoss()#CrossEntropyLoss()
+        self.criterion = nn.MSELoss()#MSELoss()#CrossEntropyLoss()
         self.epochs = 120000
         self.eval_every = 0.03
         self.optimizer_class = optim.Adadelta
         self.optimizer_args = {'lr': 0.01}
-        self.nn_class = FullyConnectedNet
+        self.nn_class = DefaultNet
         self.batch_size = 100
 
 
@@ -198,7 +118,7 @@ class NnMixer:
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
             'output_features')
-        self.transformer = Transformation(self.input_column_names, self.output_column_names)
+        self.transformer = Transformer(self.input_column_names, self.output_column_names)
         self.encoders = ds.encoders
 
         if test_ds is None:
