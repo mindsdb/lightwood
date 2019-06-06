@@ -4,8 +4,8 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES, HISTOGRAM_TYPES
 input_feature_schema = Schema({
     'name': str,
     'type': And(str, Use(str.lower), lambda s: s in COLUMN_DATA_TYPES.get_attributes().values()),
-    Optional('encoder_path'): str,
-    Optional('encoder_args'): dict
+    Optional('encoder_class'): str,
+    Optional('encoder_params'): dict
 })
 
 output_feature_schema = Schema({
