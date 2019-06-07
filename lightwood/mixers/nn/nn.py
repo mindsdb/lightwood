@@ -140,6 +140,7 @@ class NnMixer:
 
         total_epochs = self.epochs
         epoch_eval_jump = int(total_epochs*self.eval_every)
+        epoch_eval_jump = epoch_eval_jump if epoch_eval_jump < 100 else 100
         eval_next_on_epoch = epoch_eval_jump
 
         error_delta_buffer = [] # this is a buffer of the delta of test and train error

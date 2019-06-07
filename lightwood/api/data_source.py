@@ -98,26 +98,23 @@ class DataSource(Dataset):
 
         config = self.get_column_config(column_name)
 
-        if 'encoder_path' not in config:
+        if 'encoder_class' not in config:
             path = 'lightwood.encoders.{type}'.format(type=config['type'])
             module = importlib.import_module(path)
             if hasattr(module, 'default'):
-                path += '.' + importlib.import_module(path).default
+                encoder_class = importlib.import_module(path).default
+                encoder_attrs = {}
             else:
-                path += '.{type}'.format(type=config['type'])
+                raise ValueError('No default encoder for {type}'.format(type=config['type']))
         else:
-            path = config['encoder_path']
+            encoder_class = config['encoder_class']
+            encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
 
-        kwargs = config['encoder_args'] if 'encoder_args' in config else {}
-        kwargs['is_target'] = True if feature_set == 'output_features' else False
-        module = importlib.import_module(path)
+        encoder_instance = encoder_class()
 
-        encoder_name = path.split('.')[-1]
-        components = encoder_name.split('_')
-        encoder_classname = ''.join(x.title() for x in components) + 'Encoder'
-
-        encoder_class = getattr(module, encoder_classname)
-        encoder_instance = encoder_class(**kwargs)
+        for attr in encoder_attrs:
+            if hasattr(encoder_instance, attr):
+                setattr(encoder_instance, attr, encoder_attrs[attr])
 
         self.encoders[column_name] = encoder_instance
 
