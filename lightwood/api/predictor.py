@@ -2,6 +2,9 @@ import logging
 import traceback
 
 import dill
+import copy
+
+import numpy as np
 
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
@@ -110,10 +113,61 @@ class Predictor:
             else:
                 logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
 
-        for i, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
-            logging.info('training iteration {iter_i}, error {error}'.format(iter_i=i, error=mix_error))
-            if callback_on_iter is not None:
-                callback_on_iter(i, mix_error, self)
+
+
+        epoch_eval_jump = 1000
+        eval_next_on_epoch = epoch_eval_jump
+
+        error_delta_buffer = []  # this is a buffer of the delta of test and train error
+        delta_mean = 0
+        last_test_error = None
+        lowest_error = None
+        last_good_model = None
+
+        for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+            logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=mix_error))
+
+            if epoch >= eval_next_on_epoch and test_data_ds:
+
+                tmp_next = eval_next_on_epoch + epoch_eval_jump
+                eval_next_on_epoch = tmp_next
+
+                test_error = mixer.error(test_data_ds)
+                if lowest_error is None:
+                    lowest_error = test_error
+                    is_lowest_error = True
+
+                else:
+                    if test_error < lowest_error:
+                        lowest_error = test_error
+                        is_lowest_error = True
+                    else:
+                        is_lowest_error = False
+
+                if last_test_error is None:
+                    last_test_error = test_error
+
+                if is_lowest_error:
+                    last_good_model = mixer.get_model_copy()
+
+                delta_error = last_test_error - test_error
+                last_test_error = test_error
+
+                error_delta_buffer += [delta_error]
+                error_delta_buffer = error_delta_buffer[-10:]
+                delta_mean = np.mean(error_delta_buffer)
+                logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
+
+                if callback_on_iter is not None:
+                    callback_on_iter(epoch, mix_error, test_error, delta_mean, self)
+
+                if delta_mean < 0:
+                    mixer.update_model(last_good_model)
+                    break
+
+
+
+
 
         self._mixer = mixer
         self._mixer.encoders = from_data_ds.encoders
@@ -205,7 +259,7 @@ if __name__ == "__main__":
         'default_mixer': {
             'class': NnMixer,
             'attrs': {
-                'epochs': 100,
+                'epochs': 2000,
                 'criterion': nn.MSELoss(),
                 'optimizer_args' : {'lr': 0.01}
             }
@@ -216,9 +270,9 @@ if __name__ == "__main__":
         # }
     }
 
-    datapoints = 1000
+    datapoints = 100
 
-    data = {'x': [random.randint(-1,1) for i in range(datapoints)], 'y': [random.randint(-1,1) for i in range(datapoints)]}
+    data = {'x': [random.randint(-10,10) for i in range(datapoints)], 'y': [random.randint(-10,10) for i in range(datapoints)]}
     nums = [data['x'][i] * data['y'][i] for i in range(datapoints)]
     data['z'] = [data['x'][i] * data['y'][i]  for i in range(datapoints)]
     #data['z2'] = [data['x'][i] * data['y'][i] for i in range(100)]
@@ -228,11 +282,11 @@ if __name__ == "__main__":
 
     ####################
     predictor = Predictor(output=['z'])
-    def feedback(iter, error, predictor):
-        print('iteration: {iter}, error: {error}'.format(iter=iter, error=error))
+    def feedback(iter, error, test_error, test_error_gradient, predictor):
+        print('iteration: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}'.format(iter=iter, error=error, test_error=test_error, test_error_gradient=test_error_gradient))
 
 
-    predictor.learn(from_data=data_frame)#, callback_on_iter=feedback )
+    predictor.learn(from_data=data_frame, callback_on_iter=feedback )
     print(predictor.train_accuracy)
     print(predictor.accuracy(from_data=data_frame))
     print(predictor.predict(when_data=pandas.DataFrame({'x': [1], 'y': [0]})))
