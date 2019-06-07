@@ -177,12 +177,17 @@ class Predictor:
 
 
 
-    def predict(self, when_data):
+    def predict(self, when_data=None, when=None):
         """
         Predict given when conditions
         :param when_data: a dataframe
+        :param when: a dictionary
         :return: a complete dataframe
         """
+
+        if when is not None:
+
+            when_data = pandas.DataFrame(when)
 
         when_data_ds = DataSource(when_data, self.config)
         when_data_ds.encoders = self._mixer.encoders
