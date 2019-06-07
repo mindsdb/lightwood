@@ -5,3 +5,5 @@ theme:
   palette:
     primary: 'red'
     accent: 'red'
+markdown_extensions:
+  - codehilite
