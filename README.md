@@ -2,9 +2,13 @@
 ![Lightwood](https://mindsdb.github.io/lightwood/assets/logo.png) 
 
 
-Lightwood is a minimalist ML framework based on Pytorch and scikit-learn, inspired by MindsDB and Ludwig.
+Think of Lightwood as [Keras](https://keras.io/)+[Ludwig](https://github.com/uber/ludwig) but for Pytorch, with two objectives:
+
+- Make it so simple that you can build models with just a line of code.
+- Make it so flexible that change and customize everything.
+
 
 ```python
 pip3 install lightwood
 ```
-We invite you to explore the [Lightwood's documentation site](https://mindsdb.github.io/lightwood/) to learn everything there is to know about the latest release.
+We invite you to explore the [Lightwood's documentation site](https://www.github.io/lightwood/) to learn everything there is to know about the latest release.
