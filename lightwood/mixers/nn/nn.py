@@ -29,7 +29,7 @@ class NnMixer:
         self.epochs = 120000
         self.eval_every = 0.03
         self.optimizer_class = optim.Adadelta
-        self.optimizer_args = {'lr': 0.01}
+        self.optimizer_args = {'lr': 0.1}
         self.nn_class = DefaultNet
         self.batch_size = 100
 
@@ -107,7 +107,23 @@ class NnMixer:
 
         return error
 
-    def iter_fit(self, ds, test_ds = None):
+    def get_model_copy(self):
+        """
+        get the actual mixer model
+        :return: self.net
+        """
+        return copy.deepcopy(self.net)
+
+    def update_model(self, model):
+        """
+        replace the current model with a model object
+        :param model: a model object
+        :return: None
+        """
+
+        self.net = model
+
+    def iter_fit(self, ds):
         """
 
         :param ds:
@@ -121,12 +137,6 @@ class NnMixer:
         self.transformer = Transformer(self.input_column_names, self.output_column_names)
         self.encoders = ds.encoders
 
-        if test_ds is None:
-
-            test_ds = ds.extractRandomSubset(0.1)
-
-
-
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
@@ -137,17 +147,7 @@ class NnMixer:
         self.net.train()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-
         total_epochs = self.epochs
-        epoch_eval_jump = int(total_epochs*self.eval_every)
-        epoch_eval_jump = epoch_eval_jump if epoch_eval_jump < 100 else 100
-        eval_next_on_epoch = epoch_eval_jump
-
-        error_delta_buffer = [] # this is a buffer of the delta of test and train error
-        delta_mean = 0
-        last_test_error = None
-        lowest_error = None
-        last_good_model = None
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
@@ -171,45 +171,9 @@ class NnMixer:
 
             yield error
 
-            if epoch >= eval_next_on_epoch and test_ds:
-
-                tmp_next = eval_next_on_epoch + epoch_eval_jump
-                eval_next_on_epoch = tmp_next if tmp_next < total_epochs else total_epochs-1
-
-                test_error = self.error(test_ds)
-                if lowest_error is None:
-                    lowest_error = test_error
-                    is_lowest_error = True
-
-                else:
-                    if test_error < lowest_error:
-                        lowest_error = test_error
-                        is_lowest_error = True
-                    else:
-                        is_lowest_error = False
 
 
-                if last_test_error is None:
-                    last_test_error = test_error
 
-                if is_lowest_error:
-                    last_good_model = copy.deepcopy(self.net)
-
-
-                delta_error = last_test_error - test_error
-                last_test_error = test_error
-
-                error_delta_buffer += [delta_error]
-                error_delta_buffer = error_delta_buffer[-10:]
-                delta_mean = np.mean(error_delta_buffer)
-                logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
-
-                if delta_mean < 0:
-                    break
-
-        if last_good_model is not None:
-            print('restoring last good model')
-            self.net = last_good_model
 
 
 
