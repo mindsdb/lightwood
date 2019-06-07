@@ -11,4 +11,4 @@ Think of Lightwood as [Keras](https://keras.io/)+[Ludwig](https://github.com/ube
 ```python
 pip3 install lightwood
 ```
-We invite you to explore the [Lightwood's documentation site](https://www.github.io/lightwood/) to learn everything there is to know about the latest release.
+We invite you to explore the [Lightwood's documentation site](https://mindsdb.github.io/lightwood/) to learn everything there is to know about the latest release.
