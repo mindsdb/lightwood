@@ -3,6 +3,7 @@ import traceback
 
 import dill
 import copy
+import pandas
 
 import numpy as np
 
@@ -211,8 +212,8 @@ class Predictor:
         """
 
         if when is not None:
-
-            when_data = pandas.DataFrame(when)
+            when_dict = {key:[when[key]] for key in when }
+            when_data = pandas.DataFrame(when_dict)
 
         when_data_ds = DataSource(when_data, self.config)
         when_data_ds.encoders = self._mixer.encoders
@@ -258,81 +259,5 @@ class Predictor:
         self._stop_training_flag = True
 
 
-# only run the test if this file is called from debugger
-if __name__ == "__main__":
-    # GENERATE DATA
-    ###############
-    import pandas
-    import random
-    import torch.nn as nn
 
-    config = {
-
-        'input_features': [
-            {
-                'name': 'x',
-                'type': 'numeric',
-                #'encoder_path': 'lightwood.encoders.numeric.numeric'
-            },
-            {
-                'name': 'y',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
-            }
-        ],
-
-        'output_features': [
-            {
-                'name': 'z',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
-            }
-        ],
-
-        'default_mixer': {
-            'class': NnMixer,
-            'attrs': {
-                #'epochs': 2000,
-                'criterion': nn.MSELoss(),
-                'optimizer_args' : {'lr': 0.01}
-            }
-        }
-
-        # 'default_mixer': {q
-        #     'class': SkLearnMixer
-        # }
-    }
-
-    datapoints = 100
-
-    data = {'x': [random.randint(-10,10) for i in range(datapoints)], 'y': [random.randint(-10,10) for i in range(datapoints)]}
-    nums = [data['x'][i] * data['y'][i] for i in range(datapoints)]
-    data['z'] = [data['x'][i] * data['y'][i]  for i in range(datapoints)]
-    #data['z2'] = [data['x'][i] * data['y'][i] for i in range(100)]
-    data_frame = pandas.DataFrame(data) #read_csv('/Users/jorgetorres/Downloads/home_rentals.csv')
-
-    print(data_frame)
-
-    ####################
-    # config = {'input_features': [{'name': 'number_of_rooms', 'type': 'numeric'},
-    #                     {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric'},
-    #                     {'name': 'location', 'type': 'categorical'}, {'name': 'days_on_market', 'type': 'numeric'},
-    #                     {'name': 'initial_price', 'type': 'numeric'}, {'name': 'neighborhood', 'type': 'categorical'}],
-    #  'output_features': [{'name': 'rental_price', 'type': 'numeric'}]}
-
-    predictor = Predictor(config=config)
-    def feedback(iter, error, test_error, test_error_gradient):
-        #predictor.stop_training()
-        print('iteration: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, accuracy: {accuracy}'.format(iter=iter, error=error, test_error=test_error, test_error_gradient=test_error_gradient, accuracy=predictor.train_accuracy))
-
-
-    predictor.learn(from_data=data_frame, callback_on_iter=feedback )
-    print(predictor.train_accuracy)
-    print(predictor.calculate_accuracy(from_data=data_frame))
-    print(predictor.predict(when_data=pandas.DataFrame({'x': [1], 'y': [0]})))
-    predictor.save('tmp\ok.pkl')
-
-    predictor2 = Predictor(load_from_path='tmp\ok.pkl')
-    print(predictor2.predict(when_data=pandas.DataFrame({'x': [0, 0, 1, -1, 1], 'y': [0, 1, -1, -1, 1]})))
-    print(predictor2.predict(when_data=pandas.DataFrame({'x': [0, 3, 1, -5, 1], 'y': [0, 1, -5, -4, 7]})))
     
