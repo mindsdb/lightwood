@@ -2,8 +2,8 @@
 
 Think of Lightwood as [Keras](https://keras.io/)+[Ludwig](https://github.com/uber/ludwig) but for Pytorch, with two objectives:
 
-- Make it so simple that you can build models with just a line of code.
-- Make it so flexible that change and customize everything.
+- Make it so simple that you can build models with just a few lines of code.
+- Make it so flexible that you can change and customize everything.
 
 
 

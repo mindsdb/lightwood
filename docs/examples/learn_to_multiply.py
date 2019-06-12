@@ -3,7 +3,7 @@ import random
 from lightwood import Predictor
 
 ### Generate a dataset
-datapoints = 100
+datapoints = 1000
 
 # generate random numbers between -10 and 10
 data = {'x': [random.randint(-10, 10) for i in range(datapoints)],
