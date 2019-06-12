@@ -15,7 +15,7 @@ from lightwood.mixers.nn.helpers.transformer import Transformer
 
 class NnMixer:
 
-    def __init__(self, input_column_names=None, output_column_names=None):
+    def __init__(self):
         self.net = None
         self.optimizer = None
         self.input_column_names = None
@@ -25,9 +25,8 @@ class NnMixer:
         self.encoders = None
 
 
-        self.criterion = nn.MSELoss()#MSELoss()#CrossEntropyLoss()
+        self.criterion = nn.MSELoss()
         self.epochs = 120000
-        self.eval_every = 0.03
         self.optimizer_class = optim.Adadelta
         self.optimizer_args = {'lr': 0.1}
         self.nn_class = DefaultNet
@@ -44,7 +43,7 @@ class NnMixer:
         self.encoders = ds.encoders
         return ret
 
-    def predict(self, when_data_source):
+    def predict(self, when_data_source, include_encoded_predictions = False):
         """
 
         :param when_data_source:
@@ -74,8 +73,9 @@ class NnMixer:
         for output_column in output_encoded_vectors:
 
             decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]),  cache=False)
-            predictions[output_column] = {'Encoded Predictions': output_encoded_vectors[output_column],
-                                          'Actual Predictions': decoded_predictions}
+            predictions[output_column] = {'predictions': decoded_predictions}
+            if include_encoded_predictions:
+                predictions[output_column]['encoded_predictions'] = output_encoded_vectors[output_column]
 
         logging.info('Model predictions and decoding completed')
 
@@ -239,12 +239,11 @@ if __name__ == "__main__":
     ###############
 
     config = {
-        'name': 'test',
         'input_features': [
             {
                 'name': 'x',
                 'type': 'numeric',
-                'encoder_path': 'lightwood.encoders.numeric.numeric'
+                #'encoder_path': 'lightwood.encoders.numeric.numeric'
             },
             {
                 'name': 'y',
