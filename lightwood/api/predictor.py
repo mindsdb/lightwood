@@ -33,6 +33,7 @@ class Predictor:
             pickle_in.close()
             self.__dict__ = self_dict
             return
+
         if output is None and config is None:
             raise ValueError('You must give one argument to the Predictor constructor')
         try:
@@ -44,9 +45,11 @@ class Predictor:
 
         self.config = config
 
-        self._generate_config = True if output is not None else False
+        self._generate_config = True if output is not None else False # this is if we need to automatically generate a configuration variable
+
         self._output_columns = output
         self._input_columns = None
+
         self._encoders = None
         self._mixer = None
         self._mixers = {}
@@ -54,29 +57,38 @@ class Predictor:
 
         self.train_accuracy = None
 
-    def learn(self, from_data, test_data=None, validation_data=None, callback_on_iter = None):
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 10):
         """
         Train and save a model (you can use this to retrain model from data)
 
-        :param from_data:
-        :param test_data:
-        :param validation_data:
-        :return:
+        :param from_data: (Pandas DataFrame) The data to learn from
+        :param test_data: (Pandas DataFrame) The data to test accuracy and learn_error from
+        :param callback_on_iter: This is function that can be called on every X evaluation cycle
+        :param eval_every_x_epochs: This is every how many epochs we want to calculate the test error and accuracy
+
+        :return: None
         """
         self._stop_training_flag = False
+
+        # This is a helper function that will help us auto-determine roughly what data types are in each column
+        # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
         def type_map(col_name):
             col_pd_type =  from_data[col_name].dtype
             col_pd_type = str(col_pd_type)
+
             if col_pd_type in ['int64', 'float64', 'timedelta']:
                 return COLUMN_DATA_TYPES.NUMERIC
             elif col_pd_type in ['bool', 'category']:
                 return COLUMN_DATA_TYPES.CATEGORICAL
             else:
+                # if the number of uniques is elss than 100 or less than 10% of the total number of rows then keep it as categorical
                 unique = from_data[col_name].nunique()
-                if  unique < 100 or unique < len(from_data[col_name]):
+                if  unique < 100 or unique < len(from_data[col_name])/10:
                     return COLUMN_DATA_TYPES.CATEGORICAL
+                # else asume its text
                 return COLUMN_DATA_TYPES.TEXT
 
+        # generate the configuration and set the order for the input and output columns
         if self._generate_config == True:
             self._input_columns = [col for col in from_data if col not in self._output_columns]
             self.config = {
@@ -84,7 +96,6 @@ class Predictor:
                 'output_features': [{'name': col, 'type': type_map(col)} for col in self._output_columns]
             }
             logging.info('Automatically generated a configuration')
-            print(self.config)
             logging.info(self.config)
         else:
             self._output_columns = [col['name'] for col in self.config['input_features']]
@@ -115,34 +126,36 @@ class Predictor:
             else:
                 logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
 
-
-
-        eval_every_x_epochs = 10
         eval_next_on_epoch = eval_every_x_epochs
-
         error_delta_buffer = []  # this is a buffer of the delta of test and train error
         delta_mean = 0
         last_test_error = None
         lowest_error = None
         last_good_model = None
 
+        #iterate over the iter_fit and see what the epoch and mixer error is
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
             if self._stop_training_flag == True:
                 logging.info('Learn has been stopped')
                 break
+
             logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=mix_error))
 
+            # see if it needs to be evaluated
             if epoch >= eval_next_on_epoch and test_data_ds:
 
                 tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
 
                 test_error = mixer.error(test_data_ds)
+
+                # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
                     lowest_error = test_error
                     is_lowest_error = True
 
                 else:
+                    # define if this is the lowest test error we have had thus far
                     if test_error < lowest_error:
                         lowest_error = test_error
                         is_lowest_error = True
@@ -152,34 +165,39 @@ class Predictor:
                 if last_test_error is None:
                     last_test_error = test_error
 
+                # it its the lowest error, make a FULL copy of the mixer so we can return only the best mixer at the end
                 if is_lowest_error:
                     last_good_model = mixer.get_model_copy()
 
                 delta_error = last_test_error - test_error
                 last_test_error = test_error
 
+                # keep a stream of training errors delta, so that we can calculate if the mixer is starting to overfit.
+                # We assume if the delta of training error starts to increase
+                # delta is assumed as the difference between the test and train error
                 error_delta_buffer += [delta_error]
                 error_delta_buffer = error_delta_buffer[-10:]
                 delta_mean = np.mean(error_delta_buffer)
+
+                # update mixer and calculate accuracy
                 self._mixer = mixer
                 accuracy = self.calculate_accuracy(test_data_ds)
-
                 self.train_accuracy = { var: accuracy[var] if accuracy[var] > 0 else 0 for var in accuracy}
                 logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
 
+                # if there is a callback function now its the time to call it
                 if callback_on_iter is not None:
                     callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
+                # if the model is overfitting that is, that the the test error is becoming greater than the train error
                 if delta_mean < 0 and len(error_delta_buffer) > 5:
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
 
 
-
+        # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers
         self._mixer.encoders = from_data_ds.encoders
-
-
 
 
 
