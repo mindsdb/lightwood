@@ -57,6 +57,7 @@ class NnMixer:
         data = next(iter(data_loader))
         inputs, labels = data
         outputs = self.net(inputs)
+
         output_encoded_vectors = {}
 
         for output_vector in outputs:
