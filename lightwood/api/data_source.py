@@ -14,11 +14,17 @@ class DataSource(Dataset):
         self.data_frame = data_frame
         self.configuration = configuration
         self.encoders = {}
+        self.transformer = None
+
+        self._clear_cache()
+
+
+    def _clear_cache(self):
 
         self.list_cache = {}
         self.encoded_cache = {}
+        self.transformed_cache = None
         self.decoded_cache = {}
-        self.transformer = None
 
 
     def extractRandomSubset(self, percentage):
@@ -26,8 +32,13 @@ class DataSource(Dataset):
         msk = np.random.rand(len(self.data_frame)) < (1-percentage)
         test_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]
+        # clear caches
+        self._clear_cache()
 
-        return DataSource(test_df, self.configuration)
+        ds = DataSource(test_df, self.configuration)
+        ds.encoders = self.encoders
+        ds.transformer = self.transformer
+        return ds
 
 
 
@@ -47,6 +58,12 @@ class DataSource(Dataset):
 
         sample = {}
 
+        if self.transformed_cache is None:
+            self.transformed_cache = [None]*self.__len__()
+
+        cached_sample = self.transformed_cache[idx]
+        if cached_sample is not None:
+            return cached_sample
 
         for feature_set in ['input_features', 'output_features']:
             sample[feature_set] = {}
@@ -59,7 +76,8 @@ class DataSource(Dataset):
         if self.transformer:
             sample = self.transformer.transform(sample)
 
-        return sample
+        self.transformed_cache[idx] = sample
+        return self.transformed_cache[idx]
 
     def get_column_original_data(self, column_name):
         """

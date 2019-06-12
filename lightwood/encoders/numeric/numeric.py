@@ -1,5 +1,6 @@
 import torch
 import math
+import logging
 
 class NumericEncoder:
 
@@ -18,6 +19,11 @@ class NumericEncoder:
             count = 0
             value_type = 'int'
             for number in data:
+                try:
+                    number = float(number)
+                except:
+                    continue
+
                 if number is None:
                     continue
                 self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
@@ -36,9 +42,18 @@ class NumericEncoder:
 
         for number in data:
 
-            vector = [0]*4
+            vector_len = 3 if self._is_target else 4
+            vector = [0]*vector_len
+
 
             if number is None:
+                ret += [vector]
+                continue
+
+            try:
+                number = float(number)
+            except:
+                logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
                 ret += [vector]
                 continue
 
@@ -51,12 +66,9 @@ class NumericEncoder:
             else:
                 vector[2] = math.log(abs(number))
 
-            vector[-1] = 1 # is not null
+            if not self._is_target:
+                vector[-1] = 1 # is not null
 
-
-
-            if self._is_target:
-                vector=vector[:-1]
 
             ret += [vector]
 

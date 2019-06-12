@@ -156,7 +156,7 @@ Use this method to save the predictor into a desired path
 ## Accuracy
 
 ```python
-print(my_predictor.accuracy())
+print(my_predictor.calculate_accuracy(from_data=data_source))
 
 ```
 

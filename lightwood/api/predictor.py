@@ -50,6 +50,8 @@ class Predictor:
         self._encoders = None
         self._mixer = None
         self._mixers = {}
+        self._stop_training_flag = False
+
         self.train_accuracy = None
 
     def learn(self, from_data, test_data=None, validation_data=None, callback_on_iter = None):
@@ -61,23 +63,28 @@ class Predictor:
         :param validation_data:
         :return:
         """
-
-        def type_map(col_pd_type):
-
+        self._stop_training_flag = False
+        def type_map(col_name):
+            col_pd_type =  from_data[col_name].dtype
+            col_pd_type = str(col_pd_type)
             if col_pd_type in ['int64', 'float64', 'timedelta']:
                 return COLUMN_DATA_TYPES.NUMERIC
             elif col_pd_type in ['bool', 'category']:
                 return COLUMN_DATA_TYPES.CATEGORICAL
             else:
+                unique = from_data[col_name].nunique()
+                if  unique < 100 or unique < len(from_data[col_name]):
+                    return COLUMN_DATA_TYPES.CATEGORICAL
                 return COLUMN_DATA_TYPES.TEXT
 
         if self._generate_config == True:
             self._input_columns = [col for col in from_data if col not in self._output_columns]
             self.config = {
-                'input_features': [{'name': col, 'type': type_map(from_data[col].dtype)} for col in self._input_columns],
-                'output_features': [{'name': col, 'type': type_map(from_data[col].dtype)} for col in self._output_columns]
+                'input_features': [{'name': col, 'type': type_map(col)} for col in self._input_columns],
+                'output_features': [{'name': col, 'type': type_map(col)} for col in self._output_columns]
             }
             logging.info('Automatically generated a configuration')
+            print(self.config)
             logging.info(self.config)
         else:
             self._output_columns = [col['name'] for col in self.config['input_features']]
@@ -100,12 +107,7 @@ class Predictor:
             default_mixer_class = NnMixer
 
 
-
-        default_mixer_args = {}
-        default_mixer_args['input_column_names'] = [f['name'] for f in self.config['input_features']]
-        default_mixer_args['output_column_names'] = [f['name'] for f in self.config['output_features']]
-
-        mixer = default_mixer_class(**default_mixer_args)
+        mixer = default_mixer_class()
 
         for param in default_mixer_params:
             if hasattr(mixer, param):
@@ -115,8 +117,8 @@ class Predictor:
 
 
 
-        epoch_eval_jump = 1000
-        eval_next_on_epoch = epoch_eval_jump
+        eval_every_x_epochs = 10
+        eval_next_on_epoch = eval_every_x_epochs
 
         error_delta_buffer = []  # this is a buffer of the delta of test and train error
         delta_mean = 0
@@ -125,11 +127,14 @@ class Predictor:
         last_good_model = None
 
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+            if self._stop_training_flag == True:
+                logging.info('Learn has been stopped')
+                break
             logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=mix_error))
 
             if epoch >= eval_next_on_epoch and test_data_ds:
 
-                tmp_next = eval_next_on_epoch + epoch_eval_jump
+                tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
 
                 test_error = mixer.error(test_data_ds)
@@ -156,23 +161,25 @@ class Predictor:
                 error_delta_buffer += [delta_error]
                 error_delta_buffer = error_delta_buffer[-10:]
                 delta_mean = np.mean(error_delta_buffer)
+                self._mixer = mixer
+                accuracy = self.calculate_accuracy(test_data_ds)
+
+                self.train_accuracy = { var: accuracy[var] if accuracy[var] > 0 else 0 for var in accuracy}
                 logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
 
                 if callback_on_iter is not None:
-                    callback_on_iter(epoch, mix_error, test_error, delta_mean, self)
+                    callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
-                if delta_mean < 0:
+                if delta_mean < 0 and len(error_delta_buffer) > 5:
                     mixer.update_model(last_good_model)
+                    self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
 
 
 
-
-
-        self._mixer = mixer
         self._mixer.encoders = from_data_ds.encoders
 
-        self.train_accuracy =  self.accuracy(test_data_ds)
+
 
 
 
@@ -194,7 +201,7 @@ class Predictor:
 
         return self._mixer.predict(when_data_ds)
 
-    def accuracy(self, from_data):
+    def calculate_accuracy(self, from_data):
         """
         calculates the accuracy of the model
         :param from_data:a dataframe
@@ -204,20 +211,20 @@ class Predictor:
             logging.log.error("Please train the model before calculating accuracy")
             return
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
-        predictions = self._mixer.predict(ds)
+        predictions = self._mixer.predict(ds, include_encoded_predictions=True)
         accuracies = {}
         for output_column in self._mixer.output_column_names:
             properties = ds.get_column_config(output_column)
             if properties['type'] == 'categorical':
-                accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["Actual Predictions"])
+                accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
 
             else:
-                accuracies[output_column] = r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["Encoded Predictions"])
+                accuracies[output_column] = r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["encoded_predictions"])
 
 
 
 
-        return {'accuracies': accuracies}
+        return accuracies
 
     def save(self, path_to):
         """
@@ -228,6 +235,9 @@ class Predictor:
         f = open(path_to, 'wb')
         dill.dump(self.__dict__, f)
         f.close()
+
+    def stop_training(self):
+        self._stop_training_flag = True
 
 
 # only run the test if this file is called from debugger
@@ -264,13 +274,13 @@ if __name__ == "__main__":
         'default_mixer': {
             'class': NnMixer,
             'attrs': {
-                'epochs': 2000,
+                #'epochs': 2000,
                 'criterion': nn.MSELoss(),
                 'optimizer_args' : {'lr': 0.01}
             }
         }
 
-        # 'default_mixer': {
+        # 'default_mixer': {q
         #     'class': SkLearnMixer
         # }
     }
@@ -281,19 +291,26 @@ if __name__ == "__main__":
     nums = [data['x'][i] * data['y'][i] for i in range(datapoints)]
     data['z'] = [data['x'][i] * data['y'][i]  for i in range(datapoints)]
     #data['z2'] = [data['x'][i] * data['y'][i] for i in range(100)]
-    data_frame = pandas.DataFrame(data)
+    data_frame = pandas.DataFrame(data) #read_csv('/Users/jorgetorres/Downloads/home_rentals.csv')
 
     print(data_frame)
 
     ####################
-    predictor = Predictor(output=['z'])
-    def feedback(iter, error, test_error, test_error_gradient, predictor):
-        print('iteration: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}'.format(iter=iter, error=error, test_error=test_error, test_error_gradient=test_error_gradient))
+    # config = {'input_features': [{'name': 'number_of_rooms', 'type': 'numeric'},
+    #                     {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric'},
+    #                     {'name': 'location', 'type': 'categorical'}, {'name': 'days_on_market', 'type': 'numeric'},
+    #                     {'name': 'initial_price', 'type': 'numeric'}, {'name': 'neighborhood', 'type': 'categorical'}],
+    #  'output_features': [{'name': 'rental_price', 'type': 'numeric'}]}
+
+    predictor = Predictor(config=config)
+    def feedback(iter, error, test_error, test_error_gradient):
+        #predictor.stop_training()
+        print('iteration: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, accuracy: {accuracy}'.format(iter=iter, error=error, test_error=test_error, test_error_gradient=test_error_gradient, accuracy=predictor.train_accuracy))
 
 
     predictor.learn(from_data=data_frame, callback_on_iter=feedback )
     print(predictor.train_accuracy)
-    print(predictor.accuracy(from_data=data_frame))
+    print(predictor.calculate_accuracy(from_data=data_frame))
     print(predictor.predict(when_data=pandas.DataFrame({'x': [1], 'y': [0]})))
     predictor.save('tmp\ok.pkl')
 
