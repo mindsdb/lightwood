@@ -200,6 +200,7 @@ class Predictor:
         # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers
         self._mixer.encoders = from_data_ds.encoders
 
+        return self
 
 
 
