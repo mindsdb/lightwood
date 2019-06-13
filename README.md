@@ -7,8 +7,31 @@ Think of Lightwood as [Keras](https://keras.io/)+[Ludwig](https://github.com/ube
 - Make it so simple that you can build models with just a few lines of code.
 - Make it so flexible that you can change and customize everything.
 
+# Documentation
+Learn more  [Lightwood's docs](https://mindsdb.github.io/lightwood/)  
 
+# Quick start
 ```python
 pip3 install lightwood
 ```
-We invite you to explore the [Lightwood's documentation site](https://mindsdb.github.io/lightwood/) to learn everything there is to know about the latest release.
+
+### Learn
+
+You can train a Predictor as follows:
+
+```python
+from lightwood import Predictor
+sensor3_predictor = Predictor(output=['sensor3']).learn(from_data=pandas.read_csv('sensor_data.csv'))
+
+```
+
+### Predict 
+
+You can now given new readings from *sensor1* and *sensor2* predict what *sensor3* will be.
+
+```python
+
+prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
+
+```
+
