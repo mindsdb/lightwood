@@ -1,1 +1,1 @@
-lightwood_version = '0.6.2'
+lightwood_version = '0.6.4'

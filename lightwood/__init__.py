@@ -5,5 +5,8 @@ if sys.version_info < (3,3):
 import lightwood.constants.lightwood as  CONST
 
 from lightwood.api.predictor import Predictor
+from lightwood.mixers import BUILTIN_MIXERS
 
 COLUMN_DATA_TYPES = CONST.COLUMN_DATA_TYPES
+
+
