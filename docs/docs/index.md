@@ -1,4 +1,4 @@
-# Intro
+
 
 Think of Lightwood as [Keras](https://keras.io/)+[Ludwig](https://github.com/uber/ludwig) but for Pytorch, with two objectives:
 
@@ -57,4 +57,4 @@ prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
 print(prediction)
 ```
 
-Of course that example was just the tip of the iceberg, please read about the main concepts of lightwood, the API and then jump into examples.
+Of course that example was just the tip of the iceberg, please read about the main concepts of lightwood, [the API](API.md) and then jump into examples.
