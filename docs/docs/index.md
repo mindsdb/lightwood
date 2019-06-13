@@ -1,10 +1,11 @@
 
 
-Think of Lightwood as [Keras](https://keras.io/)+[Ludwig](https://github.com/uber/ludwig) but for Pytorch, with two objectives:
+Lightwood is a Pytorch based framework with two objectives:
 
-- Make it so simple that you can build models with just a few lines of code.
+- Make it so simple that you can build predictive models with a line of code.
 - Make it so flexible that you can change and customize everything.
 
+Lightwood was inspired on [Keras](https://keras.io/)+[Ludwig](https://github.com/uber/ludwig) but runs on Pytorch and gives you full control of what you can do.
 
 
 ## Installing Lightwood
