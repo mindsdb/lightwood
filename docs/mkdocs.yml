@@ -20,5 +20,3 @@ extra:
 markdown_extensions:
   - codehilite
   - admonition
-  - toc:
-    permalink: Link
