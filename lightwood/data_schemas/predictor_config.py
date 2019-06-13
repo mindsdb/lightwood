@@ -8,19 +8,21 @@ feature_schema = Schema({
     Optional('encoder_attrs'): dict
 })
 
-
-default_mixer_schema = Schema({
-    'class': object,
-    Optional('attrs'): dict
-})
-
-mixer_schema = Schema({
+mixer_graph_schema = Schema({
     'name': str,
     'input': list,
     Optional('output'): list,
     'class': object,
     Optional('attrs'): dict
 })
+
+mixer_schema = Schema({
+    'class': object,
+    Optional('attrs'): dict,
+    Optional('mixer_graph'): [mixer_graph_schema]
+})
+
+
 
 predictor_config_schema = Schema({
 
@@ -30,8 +32,7 @@ predictor_config_schema = Schema({
     'output_features': [
         feature_schema
     ],
-    Optional('default_mixer'): default_mixer_schema,
-    Optional('mixers'): [mixer_schema]
+    Optional('mixer'): mixer_schema
 
 })
 

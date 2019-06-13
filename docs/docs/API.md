@@ -64,7 +64,7 @@ config = {
         ],
         
         ## OPTIONAL
-        'default_mixer': {
+        'mixer': {
             'class': BUILTIN_MIXERS.NnMixer
         }
         
@@ -100,12 +100,12 @@ Both **input_features** and **output_features** configs are simple dicts that ha
         * **encoder_attrs**: These are the attributes that you want to setup on the encoder once the class its initialized 
         
 
-#### default_mixer
+#### mixer
 
 The **default_mixer** key, provides information as to what mixer to use. The schema for this variable is as follows:
 
 ```python
-default_mixer_schema = Schema({
+mixer_schema = Schema({
     'class': object,
     Optional('attrs'): dict
 })

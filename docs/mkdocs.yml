@@ -23,5 +23,5 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - API: API.md
+  - Predictor: API.md
   - Examples: 'https://github.com/mindsdb/lightwood/tree/master/docs/examples'
