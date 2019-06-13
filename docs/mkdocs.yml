@@ -20,3 +20,8 @@ extra:
 markdown_extensions:
   - codehilite
   - admonition
+
+nav:
+  - Home: index.md
+  - API: API.md
+  - Examples: 'https://github.com/mindsdb/lightwood/tree/master/docs/examples'
