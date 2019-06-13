@@ -2,10 +2,12 @@
 ![Lightwood](https://mindsdb.github.io/lightwood/assets/logo.png) 
 
 
-Think of Lightwood as [Keras](https://keras.io/)+[Ludwig](https://github.com/uber/ludwig) but for Pytorch, with two objectives:
+Lightwood has two objectives:
 
-- Make it so simple that you can build models with just a few lines of code.
+- Make it so simple that you can build predictive models with a line of code.
 - Make it so flexible that you can change and customize everything.
+
+Lightwood was inspired on [Keras](https://keras.io/)+[Ludwig](https://github.com/uber/ludwig) but runs on Pytorch and gives you full control of what you can do.
 
 # Documentation
 Learn more  [Lightwood's docs](https://mindsdb.github.io/lightwood/)  
