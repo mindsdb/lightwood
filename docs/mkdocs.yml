@@ -1,9 +1,24 @@
 site_name: Lightwood
+repo_name: 'mindsdb/lightwood'
+repo_url: 'https://github.com/mindsdb/lightwood'
 theme:
   name: 'material'
   logo: 'assets/logo_icon.png'
   palette:
     primary: 'red'
     accent: 'red'
+extra:
+  search:
+    language: 'en'
+  social:
+    - type: 'github'
+      link: 'https://github.com/mindsdb/lightwood'
+    - type: 'twitter'
+      link: 'https://twitter.com/mindsdb'
+    - type: 'link'
+      link: 'https://www.mindsdb.com'
 markdown_extensions:
   - codehilite
+  - admonition
+  - toc:
+    permalink: Link

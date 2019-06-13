@@ -13,7 +13,7 @@ from lightwood import Predictor
 
 The main concept is that ML models can be very modular, and each building block is something that you can thinker with. There are 3 main building blocks (*features, encoders, mixers*).
 
-![building_blocks](https://1fykyq3mdn5r21tpna3wkdyi-wpengine.netdna-ssl.com/wp-content/uploads/2019/02/image3-1068x927.png)
+![building_blocks](https://docs.google.com/drawings/d/e/2PACX-1vTrzcXyqDeaGWOwG-3BWOV5wj1U2M5v7ojracqv39z2Ljv-oFqxh4bxFiJxjjtd7CgehptMeBlLYx6w/pub?w=1399&h=818&a=1)
 
 
 * **Features**:
