@@ -1,3 +1,1 @@
-* Start repo mindsdb server
-* Respond to Alex 
-* 
+* Include Botorch/AX to the mixer and encoder parameters

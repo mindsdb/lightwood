@@ -109,21 +109,21 @@ class Predictor:
         else:
             test_data_ds = from_data_ds.extractRandomSubset(0.1)
 
-        default_mixer_params = {}
+        mixer_params = {}
 
-        if 'default_mixer' in self.config:
-            default_mixer_class = self.config['default_mixer']['class']
-            if 'attrs' in  self.config['default_mixer']:
-                default_mixer_params = self.config['default_mixer']['attrs']
+        if 'mixer' in self.config:
+            mixer_class = self.config['mixer']['class']
+            if 'attrs' in  self.config['mixer']:
+                mixer_params = self.config['mixer']['attrs']
         else:
-            default_mixer_class = NnMixer
+            mixer_class = NnMixer
 
 
-        mixer = default_mixer_class()
+        mixer = mixer_class()
 
-        for param in default_mixer_params:
+        for param in mixer_params:
             if hasattr(mixer, param):
-                setattr(mixer, param, default_mixer_params[param])
+                setattr(mixer, param, mixer_params[param])
             else:
                 logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
 
