@@ -10,7 +10,7 @@ Lightwood has two objectives:
 Lightwood was inspired on [Ludwig](https://github.com/uber/ludwig) but runs on Pytorch and gives you full control of what you can do.
 
 # Documentation
-Learn more  [Lightwood's docs](https://mindsdb.github.io/lightwood/)  
+Learn more  [Lightwood's docs](https://mindsdb.github.io/lightwood/API/)  
 
 # Quick start
 ```python
