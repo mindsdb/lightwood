@@ -104,7 +104,7 @@ class Predictor:
 
 
         from_data_ds = DataSource(from_data, self.config)
-        if test_data:
+        if test_data is not None:
             test_data_ds = DataSource(test_data, self.config)
         else:
             test_data_ds = from_data_ds.extractRandomSubset(0.1)
@@ -258,7 +258,3 @@ class Predictor:
 
     def stop_training(self):
         self._stop_training_flag = True
-
-
-
-    
