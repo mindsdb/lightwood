@@ -40,6 +40,6 @@ class DefaultNet(nn.Module):
 
         if CONFIG.USE_CUDA:
             input.cuda()
-
+        
         output = self.net(input)
         return output
