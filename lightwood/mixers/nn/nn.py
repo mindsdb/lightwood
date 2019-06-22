@@ -137,13 +137,12 @@ class NnMixer:
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
             'output_features')
-        self.transformer = Transformer(self.input_column_names, self.output_column_names)
+        ds.transformer = Transformer(self.input_column_names, self.output_column_names)
 
         self.encoders = ds.encoders
-        ds.transformer = self.transformer
+        self.transformer = ds.transformer
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
-
 
         self.net = self.nn_class(ds)
         self.net.train()
