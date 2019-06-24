@@ -89,6 +89,8 @@ class NnMixer:
         :return:
         """
         ds.transformer = self.transformer
+        ds.encoders = self.encoders
+
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         running_loss = 0.0
         error = 0
@@ -135,15 +137,13 @@ class NnMixer:
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
             'output_features')
-        self.transformer = Transformer(self.input_column_names, self.output_column_names)
-        self.encoders = ds.encoders
+        ds.transformer = Transformer(self.input_column_names, self.output_column_names)
 
+        self.encoders = ds.encoders
+        self.transformer = ds.transformer
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
-
-
-        ds.transformer = self.transformer
         self.net = self.nn_class(ds)
         self.net.train()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
