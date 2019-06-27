@@ -17,11 +17,10 @@ class DefaultNet(nn.Module):
         output_size = len(output_sample)
 
         self.net = nn.Sequential(
-
+            #nn.Dropout(p=0.15),
             nn.Linear(input_size, 2*input_size),
             nn.ReLU(),
             nn.Linear(2*input_size, output_size)
-
         )
 
 
@@ -40,6 +39,6 @@ class DefaultNet(nn.Module):
 
         if CONFIG.USE_CUDA:
             input.cuda()
-        
+
         output = self.net(input)
         return output

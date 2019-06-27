@@ -103,9 +103,9 @@ class Predictor:
             self._input_columns = [col['name'] for col in self.config['output_features']]
 
 
-        from_data_ds = DataSource(from_data, self.config)
+        from_data_ds = DataSource(from_data, self.config, input_col_droput_p=0.15)
         if test_data is not None:
-            test_data_ds = DataSource(test_data, self.config)
+            test_data_ds = DataSource(test_data, self.config, input_col_droput_p=0.15)
         else:
             test_data_ds = from_data_ds.extractRandomSubset(0.1)
 

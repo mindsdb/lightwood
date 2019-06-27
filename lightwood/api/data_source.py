@@ -1,10 +1,13 @@
 import importlib
 import numpy as np
+import torch
 from torch.utils.data import Dataset
+from random import random
+
 
 class DataSource(Dataset):
 
-    def __init__(self, data_frame, configuration):
+    def __init__(self, data_frame, configuration, input_col_droput_p=0):
         """
         Create a lightwood datasource from the data frame
         :param data_frame:
@@ -15,6 +18,7 @@ class DataSource(Dataset):
         self.configuration = configuration
         self.encoders = {}
         self.transformer = None
+        self.input_col_droput_p = input_col_droput_p
 
         self._clear_cache()
 
@@ -112,33 +116,40 @@ class DataSource(Dataset):
         if column_name in self.encoders:
             self.encoded_cache[column_name] = self.encoders[column_name].encode(list_data)
 
-            return self.encoded_cache[column_name]
-
-        config = self.get_column_config(column_name)
-
-        if 'encoder_class' not in config:
-            path = 'lightwood.encoders.{type}'.format(type=config['type'])
-            module = importlib.import_module(path)
-            if hasattr(module, 'default'):
-                encoder_class = importlib.import_module(path).default
-                encoder_attrs = {}
-            else:
-                raise ValueError('No default encoder for {type}'.format(type=config['type']))
         else:
-            encoder_class = config['encoder_class']
-            encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
 
-        encoder_instance = encoder_class()
+            config = self.get_column_config(column_name)
 
-        for attr in encoder_attrs:
-            if hasattr(encoder_instance, attr):
-                setattr(encoder_instance, attr, encoder_attrs[attr])
+            if 'encoder_class' not in config:
+                path = 'lightwood.encoders.{type}'.format(type=config['type'])
+                module = importlib.import_module(path)
+                if hasattr(module, 'default'):
+                    encoder_class = importlib.import_module(path).default
+                    encoder_attrs = {}
+                else:
+                    raise ValueError('No default encoder for {type}'.format(type=config['type']))
+            else:
+                encoder_class = config['encoder_class']
+                encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
 
-        self.encoders[column_name] = encoder_instance
+            encoder_instance = encoder_class()
 
-        self.encoded_cache[column_name] = encoder_instance.encode(list_data)
+            for attr in encoder_attrs:
+                if hasattr(encoder_instance, attr):
+                    setattr(encoder_instance, attr, encoder_attrs[attr])
 
-        return self.encoded_cache[column_name]
+            self.encoders[column_name] = encoder_instance
+
+            self.encoded_cache[column_name] = encoder_instance.encode(list_data)
+            
+        dropout_tensor = self.encoded_cache[column_name].clone()
+        for i in range(len(dropout_tensor)):
+            droput_nr = random()
+            if droput_nr < self.input_col_droput_p:
+                print(f'Droping out at index {i}')
+                dropout_tensor[i] = torch.zeros(len(dropout_tensor[i]), dtype=dropout_tensor[i].dtype)
+
+        return dropout_tensor
 
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None, cache=True):
