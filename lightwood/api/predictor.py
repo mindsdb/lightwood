@@ -104,8 +104,8 @@ class Predictor:
 
         training_set_dropout = 0
         if len(self._input_columns) > 1:
-            training_set_dropout = 0.1
-            
+            training_set_dropout = 0.08
+
         from_data_ds = DataSource(from_data, self.config, input_col_droput_p=training_set_dropout)
         if test_data is not None:
             test_data_ds = DataSource(test_data, self.config, input_col_droput_p=0)

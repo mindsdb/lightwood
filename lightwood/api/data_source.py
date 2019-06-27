@@ -142,8 +142,11 @@ class DataSource(Dataset):
 
             self.encoded_cache[column_name] = encoder_instance.encode(list_data)
 
+        if self.input_col_droput_p == 0:
+            return self.encoded_cache[column_name]
+            
         dropout_tensor = self.encoded_cache[column_name].clone()
-        
+
         for i in range(len(dropout_tensor)):
             droput_nr = random()
             if droput_nr < self.input_col_droput_p:
