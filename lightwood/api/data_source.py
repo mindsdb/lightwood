@@ -141,12 +141,12 @@ class DataSource(Dataset):
             self.encoders[column_name] = encoder_instance
 
             self.encoded_cache[column_name] = encoder_instance.encode(list_data)
-            
+
         dropout_tensor = self.encoded_cache[column_name].clone()
+        
         for i in range(len(dropout_tensor)):
             droput_nr = random()
             if droput_nr < self.input_col_droput_p:
-                print(f'Droping out at index {i}')
                 dropout_tensor[i] = torch.zeros(len(dropout_tensor[i]), dtype=dropout_tensor[i].dtype)
 
         return dropout_tensor
