@@ -102,10 +102,13 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['input_features']]
             self._input_columns = [col['name'] for col in self.config['output_features']]
 
-
-        from_data_ds = DataSource(from_data, self.config, input_col_droput_p=0.15)
+        training_set_dropout = 0
+        if len(self._input_columns) > 1:
+            training_set_dropout = 0.1
+            
+        from_data_ds = DataSource(from_data, self.config, input_col_droput_p=training_set_dropout)
         if test_data is not None:
-            test_data_ds = DataSource(test_data, self.config, input_col_droput_p=0.15)
+            test_data_ds = DataSource(test_data, self.config, input_col_droput_p=0)
         else:
             test_data_ds = from_data_ds.extractRandomSubset(0.1)
 
