@@ -107,14 +107,20 @@ class DataSource(Dataset):
         if column_name in self.encoded_cache:
             return self.encoded_cache[column_name]
 
-        list_data = self.get_column_original_data(column_name)
+        args = [self.get_column_original_data(column_name)]
+
+        config = self.get_column_config(column_name)
+        # see if the feature has dependencies in other columns
+        if 'depends_on_column' in config:
+            arg2 = self.get_column_original_data(config['depends_on_column'])
+            args += [arg2]
 
         if column_name in self.encoders:
-            self.encoded_cache[column_name] = self.encoders[column_name].encode(list_data)
+            self.encoded_cache[column_name] = self.encoders[column_name].encode(*args)
 
             return self.encoded_cache[column_name]
 
-        config = self.get_column_config(column_name)
+
 
         if 'encoder_class' not in config:
             path = 'lightwood.encoders.{type}'.format(type=config['type'])
@@ -136,7 +142,7 @@ class DataSource(Dataset):
 
         self.encoders[column_name] = encoder_instance
 
-        self.encoded_cache[column_name] = encoder_instance.encode(list_data)
+        self.encoded_cache[column_name] = encoder_instance.encode(*args)
 
         return self.encoded_cache[column_name]
 
