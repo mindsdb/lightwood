@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 import torch
 from cesium import featurize
+import math
 
 DEFAULT_FEATURES_TO_USE = [
     "all_times_nhist_numpeaks",
@@ -156,7 +157,7 @@ class CesiumTsEncoder:
             if times is None:
                 times_row = np.array([float(i) for i in range(1, len(values) + 1)])
             else:
-                times_row = np.array(times[i])
+                times_row = np.array(list(map(lambda x: float(x), times[i].split()))) # np.array(times[i])
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 row = featurize.featurize_time_series(times=times_row,
