@@ -105,7 +105,7 @@ class Predictor:
         training_set_dropout = 0
         if len(self._input_columns) > 1:
             # @TODO Make this number yield from a equation based on the data types and do the size of the input
-            training_set_dropout = 0.08
+            training_set_dropout = 0.15
 
         from_data_ds = DataSource(from_data, self.config, input_col_droput_p=training_set_dropout)
         if test_data is not None:
