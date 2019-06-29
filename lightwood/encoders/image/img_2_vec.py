@@ -21,9 +21,9 @@ class Img2VecEncoder:
         """
         if self._model is None:
             if self.aim == 'speed':
-                self._model = Img2Vec(model='alexnet')
+                self._model = Img2Vec(model='resnet18')
             elif self.aim == 'balance':
-                self._model = Img2Vec(model='resnet-18')
+                self._model = Img2Vec(model='resnext-50-small')#(model='resnet-18')
             elif self.aim == 'accuracy':
                 self._model = Img2Vec(model='resnext-50')
             else:
