@@ -7,7 +7,7 @@ from random import random
 
 class DataSource(Dataset):
 
-    def __init__(self, data_frame, configuration, input_col_droput_p=0):
+    def __init__(self, data_frame, configuration, dropout_dict=None):
         """
         Create a lightwood datasource from the data frame
         :param data_frame:
@@ -18,7 +18,7 @@ class DataSource(Dataset):
         self.configuration = configuration
         self.encoders = {}
         self.transformer = None
-        self.input_col_droput_p = input_col_droput_p
+        self.dropout_dict = dropout_dict
 
         self._clear_cache()
 
@@ -146,14 +146,14 @@ class DataSource(Dataset):
 
             self.encoded_cache[column_name] = encoder_instance.encode(*args)
 
-        if self.input_col_droput_p == 0:
+        if column_name not in self.dropout_dict:
             return self.encoded_cache[column_name]
 
         dropout_tensor = self.encoded_cache[column_name].clone()
 
         for i in range(len(dropout_tensor)):
             droput_nr = random()
-            if droput_nr < self.input_col_droput_p:
+            if droput_nr < self.dropout_dict[column_name]:
                 dropout_tensor[i] = torch.zeros(len(dropout_tensor[i]), dtype=dropout_tensor[i].dtype)
 
         return dropout_tensor

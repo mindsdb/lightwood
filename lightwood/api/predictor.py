@@ -102,12 +102,14 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['input_features']]
             self._input_columns = [col['name'] for col in self.config['output_features']]
 
-        training_set_dropout = 0
-        if len(self._input_columns) > 1:
-            # @TODO Make this number yield from a equation based on the data types and do the size of the input
-            training_set_dropout = 0.15
+        dropout_dict = {}
+        for col in self.config['input_features']:
+            dropout = 0
+            if 'dropout' in self.config['input_features']:
+                dropout = self.config['input_features']['dropout']
+            dropout_dict[col['name']] = dropout
 
-        from_data_ds = DataSource(from_data, self.config, input_col_droput_p=training_set_dropout)
+        from_data_ds = DataSource(from_data, self.config, dropout_dict=dropout_dict)
         if test_data is not None:
             test_data_ds = DataSource(test_data, self.config, input_col_droput_p=0)
         else:
