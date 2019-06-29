@@ -22,7 +22,7 @@ class Img2VecEncoder:
         if self._model is None:
             if self.speed == 'fast':
                 self._model = Img2Vec(model='alexnet')
-            elif self.speed == 'balacned':
+            elif self.speed == 'balanced':
                 self._model = Img2Vec(model='resnet-18')
             elif self.speed == 'accurate':
                 self._model = Img2Vec(model='resnext-50')
