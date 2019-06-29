@@ -6,8 +6,10 @@ from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 
 class Img2VecEncoder:
 
-    def __init__(self, is_target = False):
+    def __init__(self):
         self._model = None
+        # I think we should make this an enum, something like: fast, balanced, accurate
+        self.speed = 'balanced'
         self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, images):
@@ -18,7 +20,14 @@ class Img2VecEncoder:
             :return: a torch.floatTensor
         """
         if self._model is None:
-            self._model = Img2Vec()
+            if self.speed == 'fast':
+                self._model = Img2Vec(model='alexnet')
+            elif self.speed == 'balacned':
+                self._model = Img2Vec(model='resnet-18')
+            elif self.speed == 'accurate':
+                self._model = Img2Vec(model='resnext-50')
+            else:
+                self._model = Img2Vec()
 
         pics = []
         for image in images:
