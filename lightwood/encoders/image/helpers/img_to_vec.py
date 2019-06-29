@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 
 class Img2Vec():
 
-    def __init__(self, cuda=False, model='resnet-18', layer='default', layer_output_size=2048):
+    def __init__(self, cuda=False, model='resnet-18', layer='default', layer_output_size=512):
         """ Img2Vec
         :param cuda: If set to True, will run forward pass on GPU
         :param model: String name of requested model
@@ -36,11 +36,10 @@ class Img2Vec():
         """
         image = self.normalize(self.to_tensor(self.scaler(img))).unsqueeze(0).to(self.device)
 
-        if self.model_name == 'alexnet':
+        if self.model_name in ('alexnet', 'mobilenet'):
             my_embedding = torch.zeros(1, self.layer_output_size)
-        else:
-            #my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
-            my_embedding = torch.zeros(1, self.layer_output_size)
+        elif self.model_name in ('resnet-18', 'resnext-50'):
+            my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
 
         def copy_data(m, i, o):
             my_embedding.copy_(o.data)
@@ -52,11 +51,10 @@ class Img2Vec():
         if tensor:
             return my_embedding
         else:
-            if self.model_name == 'alexnet':
+            if self.model_name in ('alexnet', 'mobilenet'):
                 return my_embedding.numpy()[0, :]
-            else:
-                #return my_embedding.numpy()[0, :, 0, 0]
-                return my_embedding.numpy()[0, :]
+            elif self.model_name in ('resnet-18', 'resnext-50'):
+                return my_embedding.numpy()[0, :, 0, 0]
 
     def _get_model_and_layer(self, model_name, layer):
         """ Internal method for getting layer from model
@@ -66,21 +64,32 @@ class Img2Vec():
         """
 
         # DEBUGING
-        model = models.mobilenet_v2(pretrained=True)
-        if layer == 'default':
-            layer = model._modules.get('classifier')
-            self.layer_output_size = 1000
-        else:
-            layer = model._modules.get(layer)
 
-        return model, layer
-        # DEBUGING
+        if model_name = 'mobilenet':
+            model = models.mobilenet_v2(pretrained=True)
+            if layer == 'default':
+                layer = model._modules.get('classifier')
+                self.layer_output_size = 1000
+            else:
+                layer = model._modules.get(layer)
+
+            return model, layer
+
+        if model_name == 'resnext-50':
+            model = models.resnext50_32x4d(pretrained=True)
+            if layer == 'default':
+                layer = model._modules.get('avgpool')
+                self.layer_output_size = 2048
+            else:
+                layer = model._modules.get(layer)
+
+            return model, layer
 
         if model_name == 'resnet-18':
             model = models.resnet18(pretrained=True)
             if layer == 'default':
                 layer = model._modules.get('avgpool')
-                self.layer_output_size = 2048
+                self.layer_output_size = 512
             else:
                 layer = model._modules.get(layer)
 
