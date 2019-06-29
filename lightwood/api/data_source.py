@@ -149,6 +149,9 @@ class DataSource(Dataset):
         if column_name not in self.dropout_dict:
             return self.encoded_cache[column_name]
 
+        if self.dropout_dict[column_name] <= 0.0001:
+            return self.encoded_cache[column_name]
+
         dropout_tensor = self.encoded_cache[column_name].clone()
 
         for i in range(len(dropout_tensor)):
