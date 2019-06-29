@@ -39,7 +39,8 @@ class Img2Vec():
         if self.model_name == 'alexnet':
             my_embedding = torch.zeros(1, self.layer_output_size)
         else:
-            my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
+            #my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
+            my_embedding = torch.zeros(1, self.layer_output_size)
 
         def copy_data(m, i, o):
             my_embedding.copy_(o.data)
@@ -54,7 +55,8 @@ class Img2Vec():
             if self.model_name == 'alexnet':
                 return my_embedding.numpy()[0, :]
             else:
-                return my_embedding.numpy()[0, :, 0, 0]
+                #return my_embedding.numpy()[0, :, 0, 0]
+                return my_embedding.numpy()[0, :]
 
     def _get_model_and_layer(self, model_name, layer):
         """ Internal method for getting layer from model
@@ -64,16 +66,16 @@ class Img2Vec():
         """
 
         # DEBUGING
-        model = models.resnext50_32x4d(pretrained=True)
+        model = models.mobilenet_v2(pretrained=True)
         if layer == 'default':
-            layer = model._modules.get('avgpool')
-            self.layer_output_size = 2048
+            layer = model._modules.get('classifier')
+            self.layer_output_size = 1000
         else:
             layer = model._modules.get(layer)
 
         return model, layer
-
         # DEBUGING
+
         if model_name == 'resnet-18':
             model = models.resnet18(pretrained=True)
             if layer == 'default':
