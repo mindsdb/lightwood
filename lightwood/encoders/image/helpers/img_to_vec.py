@@ -65,7 +65,7 @@ class Img2Vec():
 
         # DEBUGING
 
-        if model_name = 'mobilenet':
+        if model_name == 'mobilenet':
             model = models.mobilenet_v2(pretrained=True)
             if layer == 'default':
                 layer = model._modules.get('classifier')
@@ -96,6 +96,8 @@ class Img2Vec():
             return model, layer
 
         elif model_name == 'alexnet':
+            print('USING ALEXNET !')
+            exit()
             model = models.alexnet(pretrained=True)
             if layer == 'default':
                 layer = model.classifier[-2]
