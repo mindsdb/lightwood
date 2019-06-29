@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 
 class Img2Vec():
 
-    def __init__(self, cuda=False, model='resnet-18', layer='default', layer_output_size=512):
+    def __init__(self, cuda=False, model='resnet-18', layer='default', layer_output_size=2048):
         """ Img2Vec
         :param cuda: If set to True, will run forward pass on GPU
         :param model: String name of requested model
@@ -16,7 +16,7 @@ class Img2Vec():
         self.device = torch.device("cuda" if cuda else "cpu")
         self.layer_output_size = layer_output_size
         self.model_name = model
-        
+
         self.model, self.extraction_layer = self._get_model_and_layer(model, layer)
 
         self.model = self.model.to(self.device)
@@ -62,11 +62,23 @@ class Img2Vec():
         :param layer: layer as a string for resnet-18 or int for alexnet
         :returns: pytorch model, selected layer
         """
+
+        # DEBUGING
+        model = models.resnext50_32x4d(pretrained=True)
+        if layer == 'default':
+            layer = model._modules.get('avgpool')
+            self.layer_output_size = 2048
+        else:
+            layer = model._modules.get(layer)
+
+        return model, layer
+
+        # DEBUGING
         if model_name == 'resnet-18':
             model = models.resnet18(pretrained=True)
             if layer == 'default':
                 layer = model._modules.get('avgpool')
-                self.layer_output_size = 512
+                self.layer_output_size = 2048
             else:
                 layer = model._modules.get(layer)
 
