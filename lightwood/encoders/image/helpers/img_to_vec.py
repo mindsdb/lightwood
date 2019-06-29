@@ -96,8 +96,6 @@ class Img2Vec():
             return model, layer
 
         elif model_name == 'alexnet':
-            print('USING ALEXNET !')
-            exit()
             model = models.alexnet(pretrained=True)
             if layer == 'default':
                 layer = model.classifier[-2]
