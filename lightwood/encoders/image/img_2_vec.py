@@ -9,7 +9,7 @@ class Img2VecEncoder:
     def __init__(self):
         self._model = None
         # I think we should make this an enum, something like: fast, balanced, accurate
-        self.speed = 'balanced'
+        self.encoding_aim = 'balanced'
         self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, images):
@@ -20,11 +20,11 @@ class Img2VecEncoder:
             :return: a torch.floatTensor
         """
         if self._model is None:
-            if self.speed == 'fast':
+            if self.encoding_aim == 'fast':
                 self._model = Img2Vec(model='alexnet')
-            elif self.speed == 'balanced':
+            elif self.encoding_aim == 'balanced':
                 self._model = Img2Vec(model='resnet-18')
-            elif self.speed == 'accurate':
+            elif self.encoding_aim == 'accurate':
                 self._model = Img2Vec(model='resnext-50')
             else:
                 self._model = Img2Vec()

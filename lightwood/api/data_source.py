@@ -133,7 +133,9 @@ class DataSource(Dataset):
             encoder_class = config['encoder_class']
 
         encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
-
+        print(encoder_attrs)
+        exit()
+        
         encoder_instance = encoder_class()
 
         for attr in encoder_attrs:
