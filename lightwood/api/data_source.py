@@ -20,10 +20,6 @@ class DataSource(Dataset):
         self.transformer = None
         self.dropout_dict = dropout_dict
         self.input_feature_length = []
-        
-        self.dropout_dict = {
-
-        }
 
         self._clear_cache()
 
@@ -64,7 +60,7 @@ class DataSource(Dataset):
             return sample
 
         dropout_at_indexes = []
-        for col_index, feature in self.configuration['input_features']:
+        for col_index, feature in enumerate(self.configuration['input_features']):
             column_name = feature['name']
             column_indexes = self.input_feature_length[col_index]
 
@@ -78,12 +74,12 @@ class DataSource(Dataset):
         if len(dropout_at_indexes) == 0:
             return sample
 
-        new_sample = sample.clone()
+        new_input_sample = sample[0].clone()
         for index_pair in dropout_at_indexes:
             for dropout_at_index in range(*index_pair):
-                new_sample[0][dropout_at_index] = 0
+                new_input_sample[dropout_at_index] = 0
 
-        return new_sample
+        return (new_input_sample,sample[1])
 
     def __getitem__(self, idx):
         """

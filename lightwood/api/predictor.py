@@ -104,7 +104,7 @@ class Predictor:
 
         dropout_dict = {}
         for col in self.config['input_features']:
-            dropout = 0
+            dropout = 0.1
             if 'dropout' in self.config['input_features']:
                 dropout = self.config['input_features']['dropout']
             dropout_dict[col['name']] = dropout
