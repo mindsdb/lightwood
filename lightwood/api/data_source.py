@@ -19,6 +19,11 @@ class DataSource(Dataset):
         self.encoders = {}
         self.transformer = None
         self.dropout_dict = dropout_dict
+        self.input_feature_length = []
+        
+        self.dropout_dict = {
+
+        }
 
         self._clear_cache()
 
@@ -36,7 +41,7 @@ class DataSource(Dataset):
         msk = np.random.rand(len(self.data_frame)) < (1-percentage)
         test_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]
-        self.input_feature_length = []
+
         # clear caches
         self._clear_cache()
 
@@ -59,7 +64,7 @@ class DataSource(Dataset):
             return sample
 
         dropout_at_indexes = []
-        for col_index, feature in self.configuration['input_features']
+        for col_index, feature in self.configuration['input_features']:
             column_name = feature['name']
             column_indexes = self.input_feature_length[col_index]
 
@@ -67,7 +72,7 @@ class DataSource(Dataset):
                 if self.dropout_dict[column_name] >= 0.0001:
                     # @TODO: Maybe use model name as seed initially to get reproduceable dropouts ?
                     droput_nr = random()
-                    droput_nr < self.dropout_dict[column_name]:
+                    if droput_nr < self.dropout_dict[column_name]:
                         dropout_at_indexes.append(column_indexes)
 
         if len(dropout_at_indexes) == 0:
@@ -114,7 +119,7 @@ class DataSource(Dataset):
 
         if self.transformer:
             sample = self.transformer.transform(sample)
-            
+
         self.transformed_cache[idx] = sample
 
         return self._apply_dropout(self.transformed_cache[idx])
