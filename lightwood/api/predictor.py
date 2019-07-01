@@ -111,10 +111,10 @@ class Predictor:
 
         from_data_ds = DataSource(from_data, self.config, dropout_dict=dropout_dict)
         if test_data is not None:
-            test_data_ds = DataSource(test_data, self.config, input_col_droput_p=0)
+            test_data_ds = DataSource(test_data, self.config, dropout_dict=None)
         else:
             test_data_ds = from_data_ds.extractRandomSubset(0.1)
-            test_data_ds.input_col_droput_p = 0
+            test_data_ds.dropout_dict=None
 
         mixer_params = {}
 
