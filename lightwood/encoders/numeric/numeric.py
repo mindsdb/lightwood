@@ -89,8 +89,10 @@ class NumericEncoder:
             else:
                 is_negative = True if abs(round(vector[0])) == 1 else False
                 encoded_value = vector[2]
-                real_value = -math.exp(encoded_value) if is_negative else math.exp(encoded_value) #(self._max_value-self._min_value)*encoded_value + self._mean
-
+                try:
+                    real_value = -math.exp(encoded_value) if is_negative else math.exp(encoded_value) #(self._max_value-self._min_value)*encoded_value + self._mean
+                except:
+                    real_value = float('inf')
 
             if self._type == 'int':
                 real_value = round(real_value)
