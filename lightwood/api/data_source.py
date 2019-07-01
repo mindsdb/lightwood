@@ -36,6 +36,7 @@ class DataSource(Dataset):
         msk = np.random.rand(len(self.data_frame)) < (1-percentage)
         test_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]
+        self.input_feature_length = []
         # clear caches
         self._clear_cache()
 
@@ -53,6 +54,32 @@ class DataSource(Dataset):
         """
         return int(self.data_frame.shape[0])
 
+    def _apply_dropout(self, sample):
+        if self.dropout_dict is None:
+            return sample
+
+        dropout_at_indexes = []
+        for col_index, feature in self.configuration['input_features']
+            column_name = feature['name']
+            column_indexes = self.input_feature_length[col_index]
+
+            if column_name in self.dropout_dict:
+                if self.dropout_dict[column_name] >= 0.0001:
+                    # @TODO: Maybe use model name as seed initially to get reproduceable dropouts ?
+                    droput_nr = random()
+                    droput_nr < self.dropout_dict[column_name]:
+                        dropout_at_indexes.append(column_indexes)
+
+        if len(dropout_at_indexes) == 0:
+            return sample
+
+        new_sample = sample.clone()
+        for index_pair in dropout_at_indexes:
+            for dropout_at_index in range(*index_pair):
+                new_sample[0][dropout_at_index] = 0
+
+        return new_sample
+
     def __getitem__(self, idx):
         """
 
@@ -67,7 +94,7 @@ class DataSource(Dataset):
 
         cached_sample = self.transformed_cache[idx]
         if cached_sample is not None:
-            return cached_sample
+            return self._apply_dropout(cached_sample)
 
         for feature_set in ['input_features', 'output_features']:
             sample[feature_set] = {}
@@ -77,26 +104,20 @@ class DataSource(Dataset):
                     self.get_encoded_column_data(col_name, feature_set)
                 sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
+                # Information required to implement dropout once the transform has run
+                if feature_set == 'input_features' and len(self.input_feature_length) < len(self.configuration['input_features']):
+                    last_index = 0
+                    if len(self.input_feature_length) > 0:
+                        last_index = self.input_feature_length[-1][1]
+                    next_index = last_index + len(self.encoded_cache[col_name][idx])
+                    self.input_feature_length.append((last_index, next_index))
+
         if self.transformer:
             sample = self.transformer.transform(sample)
-
-        if column_name not in self.dropout_dict:
-            return self.encoded_cache[column_name]
-        '''
-        if self.dropout_dict[column_name] <= 0.0001:
-            return self.encoded_cache[column_name]
-
-        dropout_tensor = self.encoded_cache[column_name].clone()
-
-        for i in range(len(dropout_tensor)):
-            droput_nr = random()
-            if droput_nr < self.dropout_dict[column_name]:
-                dropout_tensor[i] = torch.zeros(len(dropout_tensor[i]), dtype=dropout_tensor[i].dtype)
-
-        return dropout_tensor
-        '''
+            
         self.transformed_cache[idx] = sample
-        return self.transformed_cache[idx]
+
+        return self._apply_dropout(self.transformed_cache[idx])
 
     def get_column_original_data(self, column_name):
         """
