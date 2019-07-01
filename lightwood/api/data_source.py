@@ -80,11 +80,22 @@ class DataSource(Dataset):
         if self.transformer:
             sample = self.transformer.transform(sample)
 
+        if column_name not in self.dropout_dict:
+            return self.encoded_cache[column_name]
+        '''
+        if self.dropout_dict[column_name] <= 0.0001:
+            return self.encoded_cache[column_name]
+
+        dropout_tensor = self.encoded_cache[column_name].clone()
+
+        for i in range(len(dropout_tensor)):
+            droput_nr = random()
+            if droput_nr < self.dropout_dict[column_name]:
+                dropout_tensor[i] = torch.zeros(len(dropout_tensor[i]), dtype=dropout_tensor[i].dtype)
+
+        return dropout_tensor
+        '''
         self.transformed_cache[idx] = sample
-
-        print(self.transformed_cahce[idx])
-        exit()
-
         return self.transformed_cache[idx]
 
     def get_column_original_data(self, column_name):
