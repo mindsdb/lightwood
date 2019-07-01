@@ -127,12 +127,12 @@ class DataSource(Dataset):
             module = importlib.import_module(path)
             if hasattr(module, 'default'):
                 encoder_class = importlib.import_module(path).default
-                encoder_attrs = {}
             else:
                 raise ValueError('No default encoder for {type}'.format(type=config['type']))
         else:
             encoder_class = config['encoder_class']
-            encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
+
+        encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
 
         encoder_instance = encoder_class()
 
