@@ -16,14 +16,24 @@ class DefaultNet(nn.Module):
         input_size = len(input_sample)
         output_size = len(output_sample)
 
-        self.net = nn.Sequential(
-
-            nn.Linear(input_size, 2*input_size),
-            nn.ReLU(),
-            nn.Linear(2*input_size, output_size)
-
-        )
-
+        if input_size <= output_size or input_size < 3 * pow(10,1):
+            print('HERE 1')
+            self.net = nn.Sequential(
+                nn.Linear(input_size, 2*input_size),
+                nn.ReLU(),
+                nn.Linear(2*input_size, output_size)
+            )
+        else:
+            print('HERE 2')
+            deep_layer_in = round(min(input_size/2, max(output_size*16,input_size/16)))
+            deep_layer_out = round(min(deep_layer_in,output_size*2))
+            self.net = nn.Sequential(
+                nn.Linear(input_size, deep_layer_in),
+                nn.SELU(),
+                nn.Linear(deep_layer_in, deep_layer_out),
+                nn.SELU(),
+                nn.Linear(deep_layer_out, output_size)
+            )
 
 
         if CONFIG.USE_CUDA:
@@ -40,6 +50,6 @@ class DefaultNet(nn.Module):
 
         if CONFIG.USE_CUDA:
             input.cuda()
-        
+
         output = self.net(input)
         return output

@@ -58,7 +58,7 @@ class Predictor:
 
         self.train_accuracy = None
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 100):
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -144,7 +144,6 @@ class Predictor:
 
             # see if it needs to be evaluated
             if epoch >= eval_next_on_epoch and test_data_ds:
-
                 tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
 
@@ -195,6 +194,10 @@ class Predictor:
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
+                print('\n\n-------------------\n\n')
+                print(delta_mean)
+                print(len(error_delta_buffer))
+                print(test_error)
 
 
         # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers
