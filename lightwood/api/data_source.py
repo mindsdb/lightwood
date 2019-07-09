@@ -17,6 +17,19 @@ class DataSource(Dataset):
         self.encoders = {}
         self.transformer = None
         self.training = False # Flip this flag if you are using the datasource while training
+
+        self.dropout_dict = {}
+        for col in self.configuration['input_features']:
+            if len(self.configuration['input_features']) > 1:
+                dropout = 0.2
+            else:
+                dropout = 0.0
+
+            if 'dropout' in self.configuration['input_features']:
+                dropout = self.configuration['input_features']['dropout']
+
+            self.dropout_dict[col['name']] = dropout
+
         self._clear_cache()
 
 
@@ -62,7 +75,7 @@ class DataSource(Dataset):
         dropout_features = None
 
         if self.training == True and random.randint(0,2) == 1:
-            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.randint(0,10) >= 8]
+            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random(0,1) > self.dropout_dict[feature['name']]]
 
         if self.transformed_cache is None:
             self.transformed_cache = [None] * self.__len__()

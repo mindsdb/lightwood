@@ -103,7 +103,6 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['input_features']]
             self._input_columns = [col['name'] for col in self.config['output_features']]
 
-
         from_data_ds = DataSource(from_data, self.config)
 
         if test_data is not None:
