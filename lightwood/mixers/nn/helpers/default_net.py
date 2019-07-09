@@ -24,11 +24,8 @@ class DefaultNet(nn.Module):
                 nn.Linear(2*input_size, output_size)
             )
         else:
-            print('HERE 2')
-            #deep_layer_in = round(min(input_size/2, max(output_size*16,input_size/16)))
-            #deep_layer_out = round(min(deep_layer_in,output_size*2))
-            deep_layer_in = 20
-            deep_layer_out = 10
+            deep_layer_in = round(min(128, max(output_size*4,input_size/4)))
+            deep_layer_out = round(min(deep_layer_in,output_size*2))
             self.net = nn.Sequential(
                 nn.Linear(input_size, deep_layer_in),
                 nn.SELU(),

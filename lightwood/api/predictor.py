@@ -1,5 +1,6 @@
 import logging
 import traceback
+import time
 
 import dill
 import copy
@@ -58,7 +59,7 @@ class Predictor:
 
         self.train_accuracy = None
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20):
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=800):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -135,6 +136,7 @@ class Predictor:
         lowest_error_epoch = None
         last_good_model = None
 
+        started_training_at = int(time.time())
         #iterate over the iter_fit and see what the epoch and mixer error is
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
             if self._stop_training_flag == True:
@@ -193,10 +195,11 @@ class Predictor:
                     callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
                 # if the model is overfitting that is, that the the test error is becoming greater than the train error
-                if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.0005) or (lowest_error_epoch + round(max(eval_every_x_epochs+2,epoch*1.2)) < epoch):
+                if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.005) or (test_error < 0.0005) or (lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*1.2)) < epoch) or ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
+                    
                 print('\n\n-------------------\n\n')
                 print(delta_mean)
                 print(len(error_delta_buffer))
