@@ -1,6 +1,7 @@
 import importlib
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
+import random
 
 class DataSource(Dataset):
 
@@ -15,7 +16,7 @@ class DataSource(Dataset):
         self.configuration = configuration
         self.encoders = {}
         self.transformer = None
-
+        self.training = False # Flip this flag if you are using the datasource while training
         self._clear_cache()
 
 
@@ -58,26 +59,49 @@ class DataSource(Dataset):
 
         sample = {}
 
-        if self.transformed_cache is None:
-            self.transformed_cache = [None]*self.__len__()
+        dropout_features = None
 
-        cached_sample = self.transformed_cache[idx]
-        if cached_sample is not None:
-            return cached_sample
+        if self.training == True and random.randint(0,2) == 1:
+            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.randint(0,10) >= 8]
+
+        if self.transformed_cache is None:
+            self.transformed_cache = [None] * self.__len__()
+
+        if dropout_features is None:
+
+            cached_sample = self.transformed_cache[idx]
+            if cached_sample is not None:
+                return cached_sample
 
         for feature_set in ['input_features', 'output_features']:
             sample[feature_set] = {}
             for feature in self.configuration[feature_set]:
                 col_name = feature['name']
+                col_config = self.get_column_config(feature)
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
                     self.get_encoded_column_data(col_name, feature_set)
-                sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
+
+                # if we are dropping this feature, get the encoded value of None
+                if dropout_features is not None and feature in dropout_features:
+
+                    custom_data = {feature:[None]}
+                    # if the dropout feature depends on another column, also pass a None array as the dependant column
+                    if 'depends_on_column' in col_config:
+                        custom_data[custom_data['depends_on_column']]= [None]
+                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
+
+                else:
+                    sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
         if self.transformer:
             sample = self.transformer.transform(sample)
 
-        self.transformed_cache[idx] = sample
-        return self.transformed_cache[idx]
+        # only cache if no dropout features
+        if dropout_features is None:
+            self.transformed_cache[idx] = sample
+            return self.transformed_cache[idx]
+        else:
+            return sample
 
     def get_column_original_data(self, column_name):
         """
@@ -97,7 +121,7 @@ class DataSource(Dataset):
             rows = self.data_frame.shape[0]
             return [None] * rows
 
-    def get_encoded_column_data(self, column_name, feature_set = 'input_features'):
+    def get_encoded_column_data(self, column_name, feature_set = 'input_features', custom_data = None):
         """
 
         :param column_name:
@@ -107,12 +131,20 @@ class DataSource(Dataset):
         if column_name in self.encoded_cache:
             return self.encoded_cache[column_name]
 
-        args = [self.get_column_original_data(column_name)]
+        # first argument of encoder is the data, so we either pass the custom data or we get the column data
+        if custom_data is not None:
+            args = [custom_data[column_name]]
+        else:
+            args = [self.get_column_original_data(column_name)]
 
         config = self.get_column_config(column_name)
+
         # see if the feature has dependencies in other columns
         if 'depends_on_column' in config:
-            arg2 = self.get_column_original_data(config['depends_on_column'])
+            if custom_data is not None:
+                arg2 = custom_data[config['depends_on_column']]
+            else:
+                arg2 = self.get_column_original_data(config['depends_on_column'])
             args += [arg2]
 
         if column_name in self.encoders:
