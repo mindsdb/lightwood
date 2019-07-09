@@ -69,7 +69,6 @@ class DataSource(Dataset):
         :param idx:
         :return:
         """
-
         sample = {}
 
         dropout_features = None
@@ -102,7 +101,7 @@ class DataSource(Dataset):
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']]= [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
-
+                    
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
