@@ -1,5 +1,6 @@
 import logging
 import traceback
+import time
 
 import dill
 import copy
@@ -58,7 +59,7 @@ class Predictor:
 
         self.train_accuracy = None
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 100):
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 24 * 5):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -135,8 +136,10 @@ class Predictor:
         delta_mean = 0
         last_test_error = None
         lowest_error = None
+        lowest_error_epoch = None
         last_good_model = None
 
+        started_training_at = int(time.time())
         #iterate over the iter_fit and see what the epoch and mixer error is
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
             if self._stop_training_flag == True:
@@ -147,7 +150,6 @@ class Predictor:
 
             # see if it needs to be evaluated
             if epoch >= eval_next_on_epoch and test_data_ds:
-
                 tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
 
@@ -156,12 +158,14 @@ class Predictor:
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
                     lowest_error = test_error
+                    lowest_error_epoch = epoch
                     is_lowest_error = True
 
                 else:
                     # define if this is the lowest test error we have had thus far
                     if test_error < lowest_error:
                         lowest_error = test_error
+                        lowest_error_epoch = epoch
                         is_lowest_error = True
                     else:
                         is_lowest_error = False
@@ -194,7 +198,7 @@ class Predictor:
                     callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
                 # if the model is overfitting that is, that the the test error is becoming greater than the train error
-                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1:
+                if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.005) or (test_error < 0.0005) or (lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*1.2)) < epoch) or ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
