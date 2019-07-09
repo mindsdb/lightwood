@@ -199,11 +199,6 @@ class Predictor:
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
-                    
-                print('\n\n-------------------\n\n')
-                print(delta_mean)
-                print(len(error_delta_buffer))
-                print(test_error)
 
 
         # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers
