@@ -75,7 +75,7 @@ class DataSource(Dataset):
         dropout_features = None
 
         if self.training == True and random.randint(0,2) == 1:
-            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random(0,1) > self.dropout_dict[feature['name']]]
+            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > self.dropout_dict[feature['name']]]
 
         if self.transformed_cache is None:
             self.transformed_cache = [None] * self.__len__()
