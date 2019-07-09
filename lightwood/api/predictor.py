@@ -132,6 +132,7 @@ class Predictor:
         delta_mean = 0
         last_test_error = None
         lowest_error = None
+        lowest_error_epoch = None
         last_good_model = None
 
         #iterate over the iter_fit and see what the epoch and mixer error is
@@ -152,12 +153,14 @@ class Predictor:
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
                     lowest_error = test_error
+                    lowest_error_epoch = epoch
                     is_lowest_error = True
 
                 else:
                     # define if this is the lowest test error we have had thus far
                     if test_error < lowest_error:
                         lowest_error = test_error
+                        lowest_error_epoch = epoch
                         is_lowest_error = True
                     else:
                         is_lowest_error = False
@@ -190,7 +193,7 @@ class Predictor:
                     callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
                 # if the model is overfitting that is, that the the test error is becoming greater than the train error
-                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1:
+                if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.0005) or (lowest_error_epoch + round(max(eval_every_x_epochs+2,epoch*1.2)) < epoch):
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
