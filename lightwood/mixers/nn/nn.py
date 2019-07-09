@@ -102,7 +102,6 @@ class NnMixer:
             # forward + backward + optimize
             outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
-            loss.backward()
 
             # print statistics
             running_loss += loss.item()
@@ -132,7 +131,6 @@ class NnMixer:
         :param ds:
         :return:
         """
-
         self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
