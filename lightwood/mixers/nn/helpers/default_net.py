@@ -16,14 +16,14 @@ class DefaultNet(nn.Module):
         input_size = len(input_sample)
         output_size = len(output_sample)
 
-        if input_size <= output_size or input_size < 3 * pow(10,3):
+        if input_size < 3 * pow(10,3):
             self.net = nn.Sequential(
                 nn.Linear(input_size, 2*input_size),
                 nn.ReLU(),
                 nn.Linear(2*input_size, output_size)
             )
         else:
-            deep_layer_in = round(min(128, max(output_size*4,input_size/4)))
+            deep_layer_in = 128
             deep_layer_out = round(min(deep_layer_in,output_size*2))
             self.net = nn.Sequential(
                 nn.Linear(input_size, deep_layer_in),
