@@ -536,7 +536,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
 
     loss = 0
 
-    for ei in range(input_length):
+    for ei in range(min(input_length,len(encoder_outputs))):
         encoder_output, encoder_hidden = encoder(
             input_tensor[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0, 0]
@@ -618,7 +618,7 @@ def timeSince(since, percent):
 # of examples, time so far, estimated time) and average loss.
 #
 
-def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, loss_breakpoint=0.0001):
+def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, loss_breakpoint=0.0001, max_length=MAX_LENGTH):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -639,7 +639,7 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
         target_tensor = training_pair[1]
 
         loss = train(input_tensor, target_tensor, encoder,
-                     decoder, encoder_optimizer, decoder_optimizer, criterion)
+                     decoder, encoder_optimizer, decoder_optimizer, criterion, max_length)
         print_loss_total += loss
         plot_loss_total += loss
 
@@ -719,12 +719,12 @@ def evaluate(encoder, decoder, input_lang, output_lang, sentence, max_length=MAX
 # input, target, and output to make some subjective quality judgements:
 #
 
-def evaluateRandomly(encoder, pairs, decoder, n=10):
+def evaluateRandomly(encoder, pairs, decoder, n=10, max_length=MAX_LENGTH):
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
         print('=', pair[1])
-        output_words, attentions = evaluate(encoder, decoder, pair[0])
+        output_words, attentions = evaluate(encoder, decoder, pair[0], max_length=MAX_LENGTH)
         output_sentence = ' '.join(output_words)
         print('<', output_sentence)
         print('')
@@ -753,4 +753,3 @@ def showAttention(input_sentence, output_words, attentions):
     ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
 
     plt.show()
-
