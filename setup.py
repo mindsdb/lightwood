@@ -5,16 +5,17 @@ with open("README.md", "r") as fh:
 
 with open('requirements.txt') as req_file:
     requirements = req_file.read().splitlines()
+
 print(lightwood_version)
 setuptools.setup(
     name="lightwood",
     version=lightwood_version,
     author="MindsDB Inc",
     author_email="jorge@mindsdb.com",
-    description="MindsDB's goal is to make it very simple for developers to use the power of artificial neural networks in their projects. ",
+    description="Lightwood's goal is to make it very simple for developers to use the power of artificial neural networks in their projects. ",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/mindsdb/mindsdb",
+    url="https://github.com/mindsdb/lightwood",
     packages=setuptools.find_packages(),
     install_requires=requirements,
     classifiers=(
@@ -22,5 +23,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
-    python_requires=">=3.3"
+    python_requires=">=3.6"
 )
