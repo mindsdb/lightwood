@@ -33,5 +33,5 @@ install:
 before_script: cd tests/ci_tests
 # run tests
 script:
-  - travis_wait if [ "$TRAVIS_OS_NAME" = "windows" ]; then python full_test.py; fi
-  - travis_wait if [ "$TRAVIS_OS_NAME" != "windows" ]; then python full_test.py; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; travis_wait then python full_test.py; fi
+  - if [ "$TRAVIS_OS_NAME" != "windows" ]; travis_wait then python full_test.py; fi
