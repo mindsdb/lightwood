@@ -11,5 +11,6 @@ cache: pip
 install:
   - travis_wait pip install -r requirements.txt
 # run tests
-script:
-  - pytest
+# no tests in repository
+#script:
+#  - pytest
