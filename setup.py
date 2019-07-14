@@ -27,15 +27,15 @@ if os == 'Darwin':
 
 # Windows specific requirements
 if os == 'Windows':
-    print('HERE !')
     requirements = remove_requirement(requirements,'torch')
     requirements = remove_requirement(requirements,'torchvision')
-    requirements.append('torch == 1.1.0')
-    requirements.append('torchvision == 0.3')
+    requirements.append('torch == 1.1.0.0')
+    requirements.append('torchvision == 0.3.0.0')
 
-    dependency_links.append('https://download.pytorch.org/whl/cpu/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0')
-    dependency_links.append('https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3')
-
+    #dependency_links.append('https://download.pytorch.org/whl/cpu/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0.0')
+    #dependency_links.append('https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0.0')
+    dependency_links.append('https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0.0')
+    dependency_links.append('https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0.0')
 
 setuptools.setup(
     name="lightwood",
