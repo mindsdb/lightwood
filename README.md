@@ -1,6 +1,9 @@
 
-![Lightwood](https://mindsdb.github.io/lightwood/assets/logo.png) 
+![Lightwood](https://mindsdb.github.io/lightwood/assets/logo.png)
+#
 
+[![Build Status](https://travis-ci.org/mindsdb/lightwood.svg?branch=master)](https://travis-ci.org/mindsdb/lightwood)
+[![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
 
 Lightwood has two objectives:
 
@@ -27,7 +30,7 @@ sensor3_predictor = Predictor(output=['sensor3']).learn(from_data=pandas.read_cs
 
 ```
 
-### Predict 
+### Predict
 
 You can now given new readings from *sensor1* and *sensor2* predict what *sensor3* will be.
 
@@ -36,4 +39,3 @@ You can now given new readings from *sensor1* and *sensor2* predict what *sensor
 prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
 
 ```
-
