@@ -27,6 +27,7 @@ if os == 'Darwin':
 
 # Windows specific requirements
 if os == 'Windows':
+    print('HERE !')
     requirements = remove_requirement(requirements,'torch')
     requirements = remove_requirement(requirements,'torchvision')
     requirements.append('torch == 1.1.0')
