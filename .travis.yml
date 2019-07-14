@@ -1,11 +1,11 @@
 language: python
 matrix:
   include:
-    - name: "Python 3.7.3 on Ubuntu 16.0.4"
-      os: linux
-      python: 3.7.3
-      dist: xenial
-      sudo: true
+    #- name: "Python 3.7.3 on Ubuntu 16.0.4"
+    #  os: linux
+    #  python: 3.7.3
+    #  dist: xenial
+    #  sudo: true
 
     - name: "Python 3.7.2 on OSX"
       os: osx
@@ -13,23 +13,25 @@ matrix:
       dist: xcode10.2
       sudo: true
 
-    - name: "Python 3.7.3 on Windows"
-      os: windows           # Windows 10.0.17134 N/A Build 17134
-      language: shell       # 'language: python' is an error on Travis CI Windows
-      before_install:
-        - choco install python
-        - python -m pip install --upgrade pip
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+    #- name: "Python 3.7.3 on Windows"
+    #  os: windows           # Windows 10.0.17134 N/A Build 17134
+    #  language: shell       # 'language: python' is an error on Travis CI Windows
+    #  before_install:
+    #    - choco install python
+    #    - python -m pip install --upgrade pip
+    #  env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 cache: pip
 # install dependencies
 install:
   - pip3 install --upgrade pip
   #- travis_wait pip3 install -e .
-  - travis_wait python setup.py install
+  - travis_wait if [ "$TRAVIS_OS_NAME" = "windows" ]; then python setup.py install; fi
+  - travis_wait if [ "$TRAVIS_OS_NAME" != "windows" ]; then python3 setup.py install; fi
   - travis_wait pip3 install pytest
 
 before_script: cd tests/ci_tests
 # run tests
 script:
-  - python full_test.py
+  - travis_wait if [ "$TRAVIS_OS_NAME" = "windows" ]; then python full_test.py; fi
+  - travis_wait if [ "$TRAVIS_OS_NAME" != "windows" ]; then python full_test.py; fi
