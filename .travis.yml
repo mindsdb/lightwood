@@ -23,7 +23,8 @@ matrix:
 cache: pip
 # install dependencies
 install:
-  - travis_wait pip install lightwood
+  - travis_wait pip3 install -e .
+  - travis_wait pip3 install pytest
 # run tests
 script:
   - pytest
