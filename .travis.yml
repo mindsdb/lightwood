@@ -9,7 +9,7 @@ matrix:
 cache: pip
 # install dependencies
 install:
-  - travis_wait pip install lightwood
+  - travis_wait pip install -r requirements.txt
 # run tests
 script:
   - pytest
