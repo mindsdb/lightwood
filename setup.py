@@ -14,6 +14,8 @@ with open("README.md", "r") as fh:
 with open('requirements.txt') as req_file:
     requirements = req_file.read().splitlines()
 
+dependency_links = []
+
 # Linux specific requirements
 if os == 'Linux':
     requirements = remove_requirement(requirements,'torch')
@@ -39,6 +41,7 @@ setuptools.setup(
     url="https://github.com/mindsdb/lightwood",
     packages=setuptools.find_packages(),
     install_requires=requirements,
+    dependency_links=dependency_links,
     classifiers=(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
