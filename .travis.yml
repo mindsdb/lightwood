@@ -32,4 +32,4 @@ install:
 before_script: cd tests/ci_tests
 # run tests
 script:
-  - python3 full_test.py
+  - python full_test.py
