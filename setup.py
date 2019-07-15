@@ -3,6 +3,11 @@ import platform
 import setuptools
 
 
+about = {}
+with open("mindsdb/__about__.py") as fp:
+    exec(fp.read(), about)
+
+
 def remove_requirement(requirements, name):
     return [x for x in requirements if name != x.split(' ')[0]]
 
@@ -38,14 +43,16 @@ if os == 'Windows':
     dependency_links.append('https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0.0')
 
 setuptools.setup(
-    name="lightwood",
-    version='0.7.1',
-    author="MindsDB Inc",
-    author_email="jorge@mindsdb.com",
-    description="Lightwood's goal is to make it very simple for developers to use the power of artificial neural networks in their projects. ",
+    name=about['__title__'],
+    version=about['__version__'],
+    url=about['__github__'],
+    download_url=about['__pypi__'],
+    license=about['__license__'],
+    author=about['__author__'],
+    author_email=about['__email__'],
+    description=about['__description__'],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/mindsdb/lightwood",
     packages=setuptools.find_packages(),
     install_requires=requirements,
     dependency_links=dependency_links,
