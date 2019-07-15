@@ -90,7 +90,7 @@ Both **input_features** and **output_features** configs are simple dicts that ha
 ```
 !!! note ""
     * **name**: is the name of the column as it is in the input data frame
-    * **type**: is the type od data contained. Where out of the box, supported COLUMN_DATA_TYPES are ```NUMERIC, CATEGORICAL, DATETIME, IMAGE, TEXT, TIME_SERIES```:
+    * **type**: is the type of data contained. Where out of the box, supported COLUMN_DATA_TYPES are ```NUMERIC, CATEGORICAL, DATETIME, IMAGE, TEXT, TIME_SERIES```:
 
 
     !!! info "If you specify the type, lightwood will use the default encoder for that type, however, you can specify/define any encoder that you want to use. "    
