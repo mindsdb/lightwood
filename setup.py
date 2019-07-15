@@ -4,7 +4,7 @@ import setuptools
 
 
 about = {}
-with open("mindsdb/__about__.py") as fp:
+with open("lightwood/__about__.py") as fp:
     exec(fp.read(), about)
 
 
