@@ -47,7 +47,7 @@ class Img2Vec():
         if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
             my_embedding = torch.zeros(1, self.layer_output_size)
         elif self.model_name in ('resnet-18', 'resnext-50'):
-            my_embedding = torch.zeros(1, self.layer_output_size)
+            my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
 
         def copy_data(m, i, o):
             my_embedding.copy_(o.data)
