@@ -16,6 +16,12 @@ pip3 install lightwood
 
 You would need python 3.5 or higher.
 
+Note on MacOS, you need to install libomp:
+
+```bash
+brew install libomp
+```
+
 
 ## Quick example
 
