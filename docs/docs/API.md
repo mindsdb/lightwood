@@ -40,12 +40,14 @@ my_predictor = Predictor( output=[] | config={...} | load_from_path=<file_path>)
 The config argument allows you to pass a dictionary that defines and gives you absolute control over how to build your predictive model.
 A config example goes as follows:
 ```python
-from lightwood import COLUMN_DATA_TYPES, BUILTIN_MIXERS
+from lightwood import COLUMN_DATA_TYPES, BUILTIN_MIXERS, BUILTIN_ENCODERS
 
 config = {
 
         ## REQUIRED:
         'input_features': [
+        
+            # by default each feature has an encoder, so all you have to do is specify the data type
             {
                 'name': 'sensor1',
                 'type': COLUMN_DATA_TYPES.NUMERIC
@@ -53,6 +55,19 @@ config = {
             {
                 'name': 'sensor2',
                 'type': COLUMN_DATA_TYPES.NUMERIC
+            },
+            
+            # some encoders have attributes that can be specified on configuration
+            # in this particular lets assume we have a photo of the product, we would like to encode this image and optimize for speed
+            {
+                'name': 'product_photo',
+                'type': COLUMN_DATA_TYPES.IMAGE,
+                'encoder_class': BUILTIN_ENCODERS.Image.Img2VecEncoder, # note that this is just a class, you can build your own if you wish
+                'encoder_attrs': {
+                    'aim': 'speed' 
+                    # you can check the encoder attributes here: 
+                    #  https://github.com/mindsdb/lightwood/blob/master/lightwood/encoders/image/img_2_vec.py
+                }
             }
         ],
 
