@@ -28,7 +28,7 @@ if os == 'Linux':
 # OSX specific requirements
 elif os == 'Darwin':
     requirements = remove_requirement(requirements,'torch')
-    requirements.append('torch == 1.1.0.post')
+    requirements.append('torch == 1.1.0.post2')
 
 # Windows specific requirements
 elif os == 'Windows':
