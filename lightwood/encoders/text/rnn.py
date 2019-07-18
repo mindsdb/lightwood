@@ -30,11 +30,14 @@ class RnnEncoder:
                 if row is not None:
                     self._input_lang.addSentence(row)
 
+            max_length = max(map(len, column_data))
+
             hidden_size = self._encoded_vector_size
             self._encoder = EncoderRNN(self._input_lang.n_words, hidden_size).to(device)
             self._decoder = DecoderRNN(hidden_size, self._output_lang.n_words).to(device)
 
-            trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, column_data, column_data, self._train_iters, int(log_every), self._learning_rate, self._stop_on_error)
+            trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, column_data, column_data, self._train_iters, int(log_every), self._learning_rate, self._stop_on_error,
+            max_length)
 
             self._trained = True
 
