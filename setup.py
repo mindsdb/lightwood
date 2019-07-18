@@ -35,6 +35,7 @@ elif os == 'Windows':
     requirements = remove_requirement(requirements,'torch')
     requirements = remove_requirement(requirements,'torchvision')
 
+    requirements.append('cwrap')
     requirements.append('torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
     requirements.append('torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
 
