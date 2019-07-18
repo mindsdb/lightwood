@@ -23,12 +23,12 @@ dependency_links = []
 
 # Linux specific requirements
 if os == 'Linux':
-    requirements = remove_requirement(requirements,'torch')
-    requirements.append('torch == 1.1.0')
+    pass
 
 # OSX specific requirements
 elif os == 'Darwin':
-    requirements = requirements
+    requirements = remove_requirement(requirements,'torch')
+    requirements.append('torch == 1.1.0.post')
 
 # Windows specific requirements
 elif os == 'Windows':
@@ -37,8 +37,6 @@ elif os == 'Windows':
     requirements.append('torch == 1.1.0.0')
     requirements.append('torchvision == 0.3.0.0')
 
-    #dependency_links.append('https://download.pytorch.org/whl/cpu/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0.0')
-    #dependency_links.append('https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0.0')
     dependency_links.append('https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0.0')
     dependency_links.append('https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0.0')
 
