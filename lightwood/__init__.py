@@ -1,8 +1,8 @@
 import sys
 
 
-if sys.version_info < (3,):
-    sys.exit('Sorry, For Lightwood Python < 3.3 is not supported')
+if sys.version_info < (3,6):
+    sys.exit('Sorry, For Lightwood Python < 3.6 is not supported')
 
 import lightwood.constants.lightwood as  CONST
 
