@@ -23,6 +23,8 @@ dependency_links = []
 
 # Linux specific requirements
 if os == 'Linux':
+    print('Debugging !')
+    exit()
     pass
 
 # OSX specific requirements
