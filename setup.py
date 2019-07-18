@@ -41,6 +41,7 @@ elif os == 'Windows':
     #requirements.append('torch == 1.1.0')
     #requirements.append('torchvision == 0.3.0')
 
+    # This doens't work as well as the `@` version
     #dependency_links.append('https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0')
     #dependency_links.append('https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0')
 
