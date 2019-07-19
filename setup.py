@@ -8,7 +8,7 @@ with open("lightwood/__about__.py") as fp:
     exec(fp.read(), about)
 
 
-def remove_requirement(requirements, name):
+def remove_requirements(requirements, name):
     return [x for x in requirements if name != x.split(' ')[0]]
 
 os = platform.system()
@@ -17,7 +17,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 with open('requirements.txt') as req_file:
-    requirements = req_file.read().splitlines()
+    requirements = [req.strip() for req in req_file.read().splitlines()]
 
 dependency_links = []
 
@@ -27,13 +27,13 @@ if os == 'Linux':
 
 # OSX specific requirements
 elif os == 'Darwin':
-    requirements = remove_requirement(requirements,'torch')
+    requirements = remove_requirements(requirements,'torch')
     requirements.append('torch == 1.1.0.post2')
 
 # Windows specific requirements
 elif os == 'Windows':
-    requirements = remove_requirement(requirements,'torch')
-    requirements = remove_requirement(requirements,'torchvision')
+    requirements = remove_requirements(requirements,'torch')
+    requirements = remove_requirements(requirements,'torchvision')
 
     requirements.append('cwrap')
     requirements.append('torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
@@ -48,7 +48,7 @@ elif os == 'Windows':
 
 # Docker and other unknown OS-es
 else:
-    requirements = remove_requirement(requirements,'torch')
+    requirements = remove_requirements(requirements,'torch')
     requirements.append('torch == 1.1.0')
 
 setuptools.setup(
