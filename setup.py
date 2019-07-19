@@ -1,5 +1,5 @@
 import os
-import platform
+import sys
 import setuptools
 
 
@@ -11,7 +11,7 @@ with open("lightwood/__about__.py") as fp:
 def remove_requirements(requirements, name):
     return [x for x in requirements if name != x.split(' ')[0]]
 
-os = platform.system()
+sys_platform = sys.platform
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -22,36 +22,32 @@ with open('requirements.txt') as req_file:
 dependency_links = []
 
 # Linux specific requirements
-if os == 'Linux':
+if sys_platform == 'linux' or sys_platform.startswith('linux'):
     requirements = remove_requirements(requirements,'torch')
     requirements.append('torch == 1.1.0')
     pass
 
 # OSX specific requirements
-elif os == 'Darwin':
+elif sys_platform == 'darwin':
     requirements = remove_requirements(requirements,'torch')
     requirements.append('torch == 1.1.0.post2')
 
 # Windows specific requirements
-elif os == 'Windows':
+elif sys_platform in ['win32','cygwin'] :
     requirements = remove_requirements(requirements,'torch')
     requirements = remove_requirements(requirements,'torchvision')
-
+    
     requirements.append('cwrap')
     requirements.append('torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
     requirements.append('torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
-
-    #requirements.append('torch == 1.1.0')
-    #requirements.append('torchvision == 0.3.0')
 
     # This doens't work as well as the `@` version
     #dependency_links.append('https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0')
     #dependency_links.append('https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0')
 
-# Docker and other unknown OS-es
+# For stuff like freebsd
 else:
-    requirements = remove_requirements(requirements,'torch')
-    requirements.append('torch == 1.1.0')
+    print('\n\n====================\n\nError, platform {sys_platform} not recognized, proceeding to install anyway, but lightwood might not work properly !\n\n====================\n\n')
 
 setuptools.setup(
     name=about['__title__'],
