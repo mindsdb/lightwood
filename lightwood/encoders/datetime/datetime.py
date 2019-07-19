@@ -22,7 +22,7 @@ class DatetimeEncoder:
                 vector = [0]*6
             else:
                 date = datetime.datetime.fromtimestamp(unix_timestamp)
-                vector = [date.year/3000.0, date.month/12.0, date.day/31.0, date.hour/24.0, date.minute/60.0, date.second/60.0]
+                vector = [date.year/3000.0, date.month/12.0, date.day/31.0, date.weekday()/7.0, date.hour/24.0, date.minute/60.0, date.second/60.0]
 
             ret += [vector]
 
@@ -38,7 +38,7 @@ class DatetimeEncoder:
 
             else:
 
-                dt = datetime.datetime(year=round(vector[0]*3000), month=round(vector[1]*12), day=round(vector[2]*31), hour=round(vector[3]*24), minute=round(vector[4]*60), second=round(vector[5]*60))
+                dt = datetime.datetime(year=round(vector[0]*3000), month=round(vector[1]*12), day=round(vector[2]*31), hour=round(vector[4]*24), minute=round(vector[5]*60), second=round(vector[6]*60))
                 if return_as_datetime == True:
                     ret += [dt]
                 else:
