@@ -1,3 +1,6 @@
+import os
+
+
 import pandas as pd
 from lightwood import Predictor
 
@@ -12,7 +15,7 @@ config = {'input_features': [{'name': 'number_of_rooms', 'type': 'numeric'},
 
 df=pd.read_csv("https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv")
 
-predictor = Predictor(output=['rental_price'])
+predictor = Predictor(config)
 
 def iter_function(epoch, error, test_error, test_error_gradient):
     print(
