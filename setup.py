@@ -23,6 +23,8 @@ dependency_links = []
 
 # Linux specific requirements
 if os == 'Linux':
+    requirements = remove_requirements(requirements,'torch')
+    requirements.append('torch == 1.1.0')
     pass
 
 # OSX specific requirements
