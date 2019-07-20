@@ -24,7 +24,7 @@ pip3 install --no-cache-dir -e .
 
 **Please note that, depending on your os and python setup, you might want to use `pip` instead of `pip3`, so please try the commands with `pip` if the ones above fail**
 
-You would need python 3.6 or higher.
+You need python 3.6 or higher.
 
 Note on MacOS, you need to install libomp:
 
@@ -35,7 +35,7 @@ brew install libomp
 
 ## Quick example
 
-Asume that you have a training file (sensor_data.csv) such as this one.
+Assume that you have a training file (sensor_data.csv) such as this one.
 
 | sensor1  | sensor2 | sensor3 |
 |----|----|----|
@@ -66,7 +66,7 @@ sensor3_predictor.learn(from_data=pandas.read_csv('sensor_data.csv'))
 
 ### Predict
 
-You can now given new readings from *sensor1* and *sensor2* predict what *sensor3* will be.
+You can now be given new readings from *sensor1* and *sensor2* predict what *sensor3* will be.
 
 ```python
 
@@ -74,4 +74,4 @@ prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
 print(prediction)
 ```
 
-Of course that example was just the tip of the iceberg, please read about the main concepts of lightwood, [the API](API.md) and then jump into examples.
+Of course, that example was just the tip of the iceberg, please read about the main concepts of lightwood, [the API](API.md) and then jump into examples.

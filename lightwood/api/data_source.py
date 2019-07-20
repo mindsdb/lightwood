@@ -233,12 +233,12 @@ if __name__ == "__main__":
             {
                 'name': 'x',
                 'type': 'numeric',
-                'encoder_path': 'lightwood.encoders.numeric.numeric'
+
             },
             {
                 'name': 'y',
                 'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+
             }
         ],
 
@@ -246,7 +246,7 @@ if __name__ == "__main__":
             {
                 'name': 'z',
                 'type': 'categorical',
-                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
+
             }
         ]
     }
