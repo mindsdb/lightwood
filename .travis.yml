@@ -32,8 +32,8 @@ cache: pip
 install:
   - pip3 install --upgrade pip
   #- travis_wait pip3 install -e .
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python setup.py install; fi
-  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 setup.py install; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir -e .; fi
+  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install --no-cache-dir -e .; fi
   - travis_wait pip3 install pytest
 
 before_script: cd tests/ci_tests

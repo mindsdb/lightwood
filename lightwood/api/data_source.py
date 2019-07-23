@@ -17,6 +17,19 @@ class DataSource(Dataset):
         self.encoders = {}
         self.transformer = None
         self.training = False # Flip this flag if you are using the datasource while training
+
+        self.dropout_dict = {}
+        for col in self.configuration['input_features']:
+            if len(self.configuration['input_features']) > 1:
+                dropout = 0.2
+            else:
+                dropout = 0.0
+
+            if 'dropout' in self.configuration['input_features']:
+                dropout = self.configuration['input_features']['dropout']
+
+            self.dropout_dict[col['name']] = dropout
+
         self._clear_cache()
 
 
@@ -56,13 +69,12 @@ class DataSource(Dataset):
         :param idx:
         :return:
         """
-
         sample = {}
 
         dropout_features = None
 
         if self.training == True and random.randint(0,2) == 1:
-            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.randint(0,10) >= 8]
+            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > self.dropout_dict[feature['name']]]
 
         if self.transformed_cache is None:
             self.transformed_cache = [None] * self.__len__()
@@ -89,7 +101,7 @@ class DataSource(Dataset):
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']]= [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
-
+                    
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
