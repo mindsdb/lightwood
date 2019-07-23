@@ -2,6 +2,7 @@ import os
 import sys
 import setuptools
 
+print('Installing lightwood dynamically !')
 
 about = {}
 with open("lightwood/__about__.py") as fp:
@@ -65,12 +66,13 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
+    package_data={'project': ['requirements.txt']},
     install_requires=requirements,
     dependency_links=dependency_links,
-    classifiers=(
+    classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-    ),
+    ],
     python_requires=">=3.6"
 )
