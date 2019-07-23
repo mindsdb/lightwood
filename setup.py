@@ -8,8 +8,14 @@ with open("lightwood/__about__.py") as fp:
     exec(fp.read(), about)
 
 
-def remove_requirements(requirements, name):
-    return [x for x in requirements if name != x.split(' ')[0]]
+def remove_requirements(requirements, name, replace=None):
+    new_requirements = []
+    for requirement in requirements:
+        if requirement.split(' ')[0] != name:
+            new_requirements.append(requirement)
+        elif replace is not None:
+            new_requirements.append(replace)
+    return new_requirements
 
 sys_platform = sys.platform
 
@@ -23,25 +29,21 @@ dependency_links = []
 
 # Linux specific requirements
 if sys_platform == 'linux' or sys_platform.startswith('linux'):
-    requirements = remove_requirements(requirements,'torch')
-    requirements.append('torch == 1.1.0')
+    requirements = remove_requirements(requirements,'torch',replace='torch == 1.1.0')
     pass
 
 # OSX specific requirements
 elif sys_platform == 'darwin':
-    requirements = remove_requirements(requirements,'torch')
-    requirements.append('torch == 1.1.0.post2')
+    requirements = remove_requirements(requirements,'torch',replace='torch == 1.1.0.post2')
 
 # Windows specific requirements
 elif sys_platform in ['win32','cygwin'] :
 
     # Bellow should work for python3.7 + cudnn 10... though, surprisingly, it seems to also work for no cudnn
-    requirements = remove_requirements(requirements,'torch')
-    requirements = remove_requirements(requirements,'torchvision')
+    requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
+    requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
 
     requirements.append('cwrap')
-    requirements.append('torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
-    requirements.append('torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
 
     # This doens't work as well as the `@` version
     #dependency_links.append('https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0')
