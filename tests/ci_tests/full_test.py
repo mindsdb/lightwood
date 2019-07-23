@@ -8,7 +8,7 @@ from lightwood import Predictor
 config = {'input_features': [{'name': 'number_of_rooms', 'type': 'numeric'},
                     {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric'},
                     {'name': 'location', 'type': 'categorical'}, {'name': 'days_on_market', 'type': 'numeric'},
-                    {'name': 'neighborhood', 'type': 'categorical'}],
+                    {'name': 'neighborhood', 'type': 'categorical','dropout':0.4}],
  'output_features': [{'name': 'rental_price', 'type': 'numeric'}]}
 
 

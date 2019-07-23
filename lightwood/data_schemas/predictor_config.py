@@ -6,7 +6,8 @@ feature_schema = Schema({
     'type': And(str, Use(str.lower), lambda s: s in COLUMN_DATA_TYPES.get_attributes().values()),
     Optional('encoder_class'): object,
     Optional('encoder_attrs'): dict,
-    Optional('depends_on_column'): str
+    Optional('depends_on_column'): str,
+    Optional('dropout'): float
 })
 
 mixer_graph_schema = Schema({
@@ -36,7 +37,3 @@ predictor_config_schema = Schema({
     Optional('mixer'): mixer_schema
 
 })
-
-
-
-
