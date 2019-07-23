@@ -9,14 +9,12 @@ read mode
 
 if [ "$mode" = "prod" ]; then
 
+    # @TODO: Not sure if these 2 are actually required
     python3 setup.py develop --uninstall
     python3 setup.py clean
-    python3 setup.py build
-    #python3 setup.py install
-    #python3 setup.py bdist_egg -p win32
-    #python3 setup.py sdist bdist_wheel
+
     python3 setup.py sdist
-    
+
     echo "Do you want to publish this version (yes/no)?"
 
     read publish
