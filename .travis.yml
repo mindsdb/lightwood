@@ -42,11 +42,15 @@ before_script: cd tests/ci_tests
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python full_test.py; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 full_test.py; fi
-  # deploy to pip
-  deploy:
-    provider: pypi
-    user: "mindsdb_sysadmin"
-    password: $PYPI_SYSADMIN_PASSWORD
-    on:
-      branch: master
-    distributions: sdist
+
+before_deploy:
+  - mkdocs build --verbose --clean --strict 
+
+# deploy to pip
+deploy:
+  provider: pypi
+  user: "mindsdb_sysadmin"
+  password: $PYPI_SYSADMIN_PASSWORD
+  on:
+    branch: master
+  distributions: sdist
