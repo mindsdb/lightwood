@@ -32,11 +32,11 @@ matrix:
 cache: pip
 # install dependencies
 install:
-  - pip3 install --upgrade pip
-  - travis_wait pip3 install -e .
+  -
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then pip install --upgrade pip; fi
+  - if [ "$TRAVIS_OS_NAME" != "windows" ]; pip3 install --upgrade pip; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir -e .; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install --no-cache-dir -e .; fi
-  - travis_wait pip3 install pytest
   - if [ "$DEPLOYMENT_ENV" = "true" ]; then travis_wait pip3 install mkdocs mkdocs-material pymdown-extensions pygments; fi
 
 before_script: cd tests/ci_tests
