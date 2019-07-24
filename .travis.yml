@@ -7,7 +7,7 @@ matrix:
       dist: xenial
       sudo: true
       env:
-        DEPLOYMENT_ENV=true
+        DEPLOYMENT_ENV="true"
 
     # - name: "Python 3.6 on Ubuntu 16.0.4"
       # os: linux
@@ -37,7 +37,7 @@ install:
   #- if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir -e .; fi
   #- if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install --no-cache-dir -e .; fi
   #- travis_wait pip3 install pytest
-  - travis_wait pip3 install mkdocs mkdocs-material pymdown-extensions pygments
+  - if [ "$DEPLOYMENT_ENV" = "true" ]; travis_wait pip3 install mkdocs mkdocs-material pymdown-extensions pygments
 
 before_script: cd tests/ci_tests
 # run tests
@@ -50,7 +50,8 @@ script:
 before_deploy:
   - cd docs
   - mkdocs build --verbose --clean --strict
-  # - cd ..
+  - cp -r site ../
+  - cd ..
 
 # deploy to pip
 deploy:
@@ -68,4 +69,4 @@ deploy:
     local_dir: site
     on:
       branch: publishing_changes
-      condition: $DEPLOYMENT_ENV = true
+      condition: $DEPLOYMENT_ENV = "true"
