@@ -40,7 +40,7 @@ install:
 before_script: cd tests/ci_tests
 # run tests
 script:
-  - echo "CHANGEd THIS STEP TO TEST DEPLOY"
+  - echo "fasf THIS STEP TO TEST DEPLOY"
   #- if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python full_test.py; fi
   #- if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 full_test.py; fi
   - cd ../..
