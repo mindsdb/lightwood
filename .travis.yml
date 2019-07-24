@@ -9,42 +9,42 @@ matrix:
       env:
         DEPLOYMENT_ENV="true"
 
-    # - name: "Python 3.6 on Ubuntu 16.0.4"
-      # os: linux
-      # python: 3.6
-      # dist: xenial
-      # sudo: true
-#
-    # - name: "Python 3.7.2 on OSX"
-      # os: osx
-      # language: shell
-      # dist: xcode10.2
-      # sudo: true
-#
-    # - name: "Python 3.7.3 on Windows"
-      # os: windows           # Windows 10.0.17134 N/A Build 17134
-      # language: shell       # 'language: python' is an error on Travis CI Windows
-      # before_install:
-        # - choco install python
-        # - python -m pip install --upgrade pip
+    - name: "Python 3.6 on Ubuntu 16.0.4"
+      os: linux
+      python: 3.6
+      dist: xenial
+      sudo: true
+
+    - name: "Python 3.7.2 on OSX"
+      os: osx
+      language: shell
+      dist: xcode10.2
+      sudo: true
+
+    - name: "Python 3.7.3 on Windows"
+      os: windows           # Windows 10.0.17134 N/A Build 17134
+      language: shell       # 'language: python' is an error on Travis CI Windows
+      before_install:
+        - choco install python
+
 
 
 cache: pip
 # install dependencies
 install:
-  #- pip3 install --upgrade pip
-  #- travis_wait pip3 install -e .
-  #- if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir -e .; fi
-  #- if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install --no-cache-dir -e .; fi
-  #- travis_wait pip3 install pytest
+  - pip3 install --upgrade pip
+  - travis_wait pip3 install -e .
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir -e .; fi
+  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install --no-cache-dir -e .; fi
+  - travis_wait pip3 install pytest
   - if [ "$DEPLOYMENT_ENV" = "true" ]; then travis_wait pip3 install mkdocs mkdocs-material pymdown-extensions pygments; fi
 
 before_script: cd tests/ci_tests
 # run tests
 script:
   - echo "fasf THIS STEP TO TEST DEPLOY"
-  #- if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python full_test.py; fi
-  #- if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 full_test.py; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python full_test.py; fi
+  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 full_test.py; fi
   - cd ../..
 
 before_deploy:
@@ -55,18 +55,17 @@ before_deploy:
 
 # deploy to pip
 deploy:
-  # - provider: pypi
-    # user: "mindsdb_sysadmin"
-    # password: $PYPI_SYSADMIN_PASSWORD
-    # on:
-      # - branch: publishing_changes
-      # - condition: $DEPLOYMENT_ENV = true
-
+  - provider: pypi
+    user: "mindsdb_sysadmin"
+    password: $PYPI_SYSADMIN_PASSWORD
+    on:
+      branch: master
+      condition: $DEPLOYMENT_ENV = "true"
 
   - provider: pages
     skip_cleanup: true
     github_token: $GITHUB_TOKEN
     local_dir: site
     on:
-      branch: publishing_changes
+      branch: master
       condition: $DEPLOYMENT_ENV = "true"
