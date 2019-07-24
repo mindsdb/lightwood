@@ -26,14 +26,12 @@ matrix:
       language: shell       # 'language: python' is an error on Travis CI Windows
       before_install:
         - choco install python
-
-
+        - python -m pip install --upgrade pip
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 cache: pip
 # install dependencies
 install:
-  -
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then pip install --upgrade pip; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then pip3 install --upgrade pip; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir -e .; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install --no-cache-dir -e .; fi
