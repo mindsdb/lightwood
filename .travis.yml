@@ -67,5 +67,5 @@ deploy:
     github_token: $GITHUB_TOKEN
     local_dir: site
     on:
-      - branch: publishing_changes
-      - condition: $DEPLOYMENT_ENV = true
+      branch: publishing_changes
+      condition: $DEPLOYMENT_ENV = true
