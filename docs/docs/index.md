@@ -11,7 +11,7 @@ Lightwood was inspired on [Keras](https://keras.io/)+[Ludwig](https://github.com
 ## Installing Lightwood
 
 ```bash
-pip3 install  --no-cache-dir lightwood
+pip3 install lightwood
 ```
 
 If this fails, please report the bug on github and try installing the current master branch:
