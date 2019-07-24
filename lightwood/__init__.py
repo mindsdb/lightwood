@@ -9,5 +9,5 @@ import lightwood.constants.lightwood as  CONST
 from lightwood.api.predictor import Predictor
 from lightwood.mixers import BUILTIN_MIXERS
 from lightwood.encoders import BUILTIN_ENCODERS
-print('Temporary change so that ravis actually runs stuff')
+
 COLUMN_DATA_TYPES = CONST.COLUMN_DATA_TYPES

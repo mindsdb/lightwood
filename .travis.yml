@@ -52,12 +52,12 @@ before_deploy:
 
 # deploy to pip
 deploy:
-  - provider: pypi
-    user: "mindsdb_sysadmin"
-    password: $PYPI_SYSADMIN_PASSWORD
-    on:
-      branch: publishing_changes
-    distributions: sdist
+  # - provider: pypi
+    # user: "mindsdb_sysadmin"
+    # password: $PYPI_SYSADMIN_PASSWORD
+    # on:
+      # branch: publishing_changes
+
 
   - provider: pages
     skip_cleanup: true
