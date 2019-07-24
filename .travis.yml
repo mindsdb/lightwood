@@ -7,7 +7,7 @@ matrix:
       dist: xenial
       sudo: true
       env:
-        - DEPLOYMENT_ENV=true
+        DEPLOYMENT_ENV=true
 
     # - name: "Python 3.6 on Ubuntu 16.0.4"
       # os: linux
