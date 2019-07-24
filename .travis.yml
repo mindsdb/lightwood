@@ -6,6 +6,8 @@ matrix:
       python: 3.7.3
       dist: xenial
       sudo: true
+      env:
+        - DEPLOYMENT_ENV=true
 
     # - name: "Python 3.6 on Ubuntu 16.0.4"
       # os: linux
@@ -48,7 +50,7 @@ script:
 before_deploy:
   - cd docs
   - mkdocs build --verbose --clean --strict
-  - cd ..
+  # - cd ..
 
 # deploy to pip
 deploy:
@@ -56,7 +58,8 @@ deploy:
     # user: "mindsdb_sysadmin"
     # password: $PYPI_SYSADMIN_PASSWORD
     # on:
-      # branch: publishing_changes
+      # - branch: publishing_changes
+      # - condition: $DEPLOYMENT_ENV = true
 
 
   - provider: pages
@@ -64,4 +67,5 @@ deploy:
     github_token: $GITHUB_TOKEN
     local_dir: site
     on:
-        branch: publishing_changes
+        - branch: publishing_changes
+        - condition: $DEPLOYMENT_ENV = true
