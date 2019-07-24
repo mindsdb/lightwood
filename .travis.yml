@@ -30,6 +30,7 @@ matrix:
 cache: pip
 # install dependencies
 install:
+  - echo "$PYPI_SYSADMIN_PASSWORD" = "glorpzorp"
   - pip3 install --upgrade pip
   #- travis_wait pip3 install -e .
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir -e .; fi
@@ -44,8 +45,8 @@ script:
   # deploy to pip
   deploy:
     provider: pypi
-    user: ""
-    password: ""
+    user: "mindsdb_sysadmin"
+    password: $PYPI_SYSADMIN_PASSWORD
     on:
       branch: master
     distributions: sdist
