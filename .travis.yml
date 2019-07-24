@@ -45,7 +45,7 @@ script:
   #- if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python full_test.py; fi
   #- if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 full_test.py; fi
   - cd ../..
-  
+
 before_deploy:
   - cd docs
   - mkdocs build --verbose --clean --strict
@@ -57,7 +57,7 @@ deploy:
     user: "mindsdb_sysadmin"
     password: $PYPI_SYSADMIN_PASSWORD
     on:
-      branch: master
+      branch: publishing_changes
     distributions: sdist
 
   - provider: pages
@@ -65,4 +65,4 @@ deploy:
     github_token: $GITHUB_TOKEN
     local_dir: site
     on:
-        branch: master
+        branch: publishing_changes
