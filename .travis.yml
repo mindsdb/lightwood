@@ -45,8 +45,10 @@ script:
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 full_test.py; fi
 
 before_deploy:
+  - cd docs
   - mkdocs build --verbose --clean --strict
-
+  - cd ..
+  
 # deploy to pip
 deploy:
   - provider: pypi
