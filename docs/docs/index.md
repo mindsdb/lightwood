@@ -10,8 +10,15 @@ Lightwood was inspired on [Keras](https://keras.io/)+[Ludwig](https://github.com
 
 ## Installing Lightwood
 
+
+### On Linux, OSX and all other operating systems
 ```bash
-pip3 install  --no-cache-dir lightwood
+pip3 install lightwood
+```
+
+### On Windows
+```
+pip install git+https://github.com/mindsdb/lightwood.git@master
 ```
 
 If this fails, please report the bug on github and try installing the current master branch:
@@ -19,7 +26,7 @@ If this fails, please report the bug on github and try installing the current ma
 ```bash
 git clone git@github.com:mindsdb/lightwood.git;
 cd lightwood;
-pip3 install --no-cache-dir -e .
+pip install --no-cache-dir -e .
 ```
 
 **Please note that, depending on your os and python setup, you might want to use `pip` instead of `pip3`, so please try the commands with `pip` if the ones above fail**
