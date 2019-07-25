@@ -58,6 +58,19 @@ elif sys_platform in ['win32','cygwin','windows']:
 else:
     print('\n\n====================\n\nError, platform {sys_platform} not recognized, proceeding to install anyway, but lightwood might not work properly !\n\n====================\n\n')
 
+if sys_platform in ['win32','cygwin','windows'] :
+    try:
+        subprocess.call(['pip','install','https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl'])
+        print('Successfully installed pytorch !')
+    except:
+        print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
+
+    try:
+        subprocess.call(['pip','install','torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl'])
+        print('Successfully installed Torchvision !')
+    except:
+        print('Failed to install torchvision, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
+
 setuptools.setup(
     name=about['__title__'],
     version=about['__version__'],
@@ -80,17 +93,3 @@ setuptools.setup(
     ],
     python_requires=">=3.6"
 )
-
-
-if sys_platform in ['win32','cygwin','windows'] :
-    try:
-        subprocess.call(['pip','install','https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl'])
-        print('Successfully installed pytorch !')
-    except:
-        print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
-
-    try:
-        subprocess.call(['pip','install','torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl'])
-        print('Successfully installed Torchvision !')
-    except:
-        print('Failed to install torchvision, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
