@@ -5,7 +5,7 @@ import subprocess
 
 
 # @TODO: Figure out a way to check for this
-is_installed_from_pypi = True
+is_installed_from_pypi = False
 
 about = {}
 with open("lightwood/__about__.py") as fp:
