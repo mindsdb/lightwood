@@ -1,6 +1,8 @@
 import os
 import sys
 import setuptools
+import subprocess
+
 
 print('Installing lightwood dynamically !')
 
@@ -44,8 +46,8 @@ elif sys_platform in ['win32','cygwin','windows'] :
     #requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
     #requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
     
-    requirements = remove_requirements(requirements,'torch',replace='torch >= 0.1.2.post2')
-    requirements = remove_requirements(requirements,'torchvision',replace='torchvision >= 0.2.2')
+    requirements = remove_requirements(requirements,'torch')
+    requirements = remove_requirements(requirements,'torchvision')
     requirements.append('cwrap')
 
     # This doens't work as well as the `@` version
@@ -78,3 +80,13 @@ setuptools.setup(
     ],
     python_requires=">=3.6"
 )
+
+try:
+    subprocess.call(['pip','install','https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl'])
+except:
+    print('Can\'t install pytroch')
+
+try:
+    subprocess.call(['pip','install','torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl'])
+except:
+    print('Can\'t install pytroch')
