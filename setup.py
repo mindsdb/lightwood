@@ -69,7 +69,7 @@ if is_installed_from_pypi and (sys_platform in ['win32','cygwin','windows']):
         print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
 
     try:
-        subprocess.call(['pip','install','torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl'])
+        subprocess.call(['pip','install','https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl'])
         print('Successfully installed Torchvision !')
     except:
         print('Failed to install torchvision, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
