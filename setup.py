@@ -4,7 +4,8 @@ import setuptools
 import subprocess
 
 
-print('Installing lightwood dynamically !')
+# @TODO: Figure out a way to check for this
+is_installed_from_pypi = True
 
 about = {}
 with open("lightwood/__about__.py") as fp:
@@ -42,12 +43,14 @@ elif sys_platform == 'darwin':
 # Windows specific requirements
 elif sys_platform in ['win32','cygwin','windows']:
 
-    # Bellow should work for python3.7 + cudnn 10... though, surprisingly, it seems to also work for no cudnn
-    #requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
-    #requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
+    if is_installed_from_pypi:
+        requirements = remove_requirements(requirements,'torch')
+        requirements = remove_requirements(requirements,'torchvision')
+    else:
+        # Bellow should work for python3.7 + cudnn 10... though, surprisingly, it seems to also work for no cudnn
+        requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
+        requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
 
-    requirements = remove_requirements(requirements,'torch')
-    requirements = remove_requirements(requirements,'torchvision')
     requirements.append('cwrap')
 
     # This doens't work as well as the `@` version
@@ -58,7 +61,7 @@ elif sys_platform in ['win32','cygwin','windows']:
 else:
     print('\n\n====================\n\nError, platform {sys_platform} not recognized, proceeding to install anyway, but lightwood might not work properly !\n\n====================\n\n')
 
-if sys_platform in ['win32','cygwin','windows'] :
+if is_installed_from_pypi and (sys_platform in ['win32','cygwin','windows']):
     try:
         subprocess.call(['pip','install','https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl'])
         print('Successfully installed pytorch !')
