@@ -40,12 +40,12 @@ elif sys_platform == 'darwin':
     requirements = remove_requirements(requirements,'torch',replace='torch == 1.1.0.post2')
 
 # Windows specific requirements
-elif sys_platform in ['win32','cygwin','windows'] :
+elif sys_platform in ['win32','cygwin','windows']:
 
     # Bellow should work for python3.7 + cudnn 10... though, surprisingly, it seems to also work for no cudnn
     #requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
     #requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
-    
+
     requirements = remove_requirements(requirements,'torch')
     requirements = remove_requirements(requirements,'torchvision')
     requirements.append('cwrap')
@@ -81,12 +81,16 @@ setuptools.setup(
     python_requires=">=3.6"
 )
 
-try:
-    subprocess.call(['pip','install','https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl'])
-except:
-    print('Can\'t install pytroch')
 
-try:
-    subprocess.call(['pip','install','torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl'])
-except:
-    print('Can\'t install pytroch')
+if sys_platform in ['win32','cygwin','windows'] :
+    try:
+        subprocess.call(['pip','install','https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl'])
+        print('Successfully installed pytorch !')
+    except:
+        print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
+
+    try:
+        subprocess.call(['pip','install','torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl'])
+        print('Successfully installed Torchvision !')
+    except:
+        print('Failed to install torchvision, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
