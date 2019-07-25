@@ -1,25 +1,24 @@
 language: python
 matrix:
   include:
-    # - name: "Python 3.7.3 on Ubuntu 16.0.4"
-      # os: linux
-      # python: 3.7.3
-      # dist: xenial
-      # sudo: true
-      # env:
-        # DEPLOYMENT_ENV="true"
-#
-    # - name: "Python 3.6 on Ubuntu 16.0.4"
-      # os: linux
-      # python: 3.6
-      # dist: xenial
-      # sudo: true
-#
-    # - name: "Python 3.7.2 on OSX"
-      # os: osx
-      # language: shell
-      # dist: xcode10.2
+    - name: "Python 3.7.3 on Ubuntu 16.0.4"
+      os: linux
+      python: 3.7.3
+      dist: xenial
+      sudo: true
+      env:
+        DEPLOYMENT_ENV="true"
 
+    - name: "Python 3.6 on Ubuntu 16.0.4"
+      os: linux
+      python: 3.6
+      dist: xenial
+      sudo: true
+
+    - name: "Python 3.7.2 on OSX"
+      os: osx
+      language: shell
+      dist: xcode10.2
 
     - name: "Python 3.7.3 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
