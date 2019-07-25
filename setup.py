@@ -44,7 +44,7 @@ elif sys_platform in ['win32','cygwin','windows'] :
     #requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
     #requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
     
-    requirements = remove_requirements(requirements,'torch',replace='torch == 1.1.0.post2')
+    requirements = remove_requirements(requirements,'torch',replace='torch >= 1.0.0')
     requirements = remove_requirements(requirements,'torchvision',replace='torchvision == 0.3.0')
     requirements.append('cwrap')
 
