@@ -31,14 +31,14 @@ dependency_links = []
 # Linux specific requirements
 if sys_platform == 'linux' or sys_platform.startswith('linux'):
     requirements = remove_requirements(requirements,'torch',replace='torch == 1.1.0')
-    
+
 
 # OSX specific requirements
 elif sys_platform == 'darwin':
     requirements = remove_requirements(requirements,'torch',replace='torch == 1.1.0.post2')
 
 # Windows specific requirements
-elif sys_platform in ['win32','cygwin'] :
+elif sys_platform in ['win32','cygwin','windows'] :
 
     # Bellow should work for python3.7 + cudnn 10... though, surprisingly, it seems to also work for no cudnn
     requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
