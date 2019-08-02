@@ -24,8 +24,9 @@ class NumericEncoder:
                 except:
                     continue
 
-                if number is None:
+                if number is None or math.isnan(number):
                     continue
+
                 self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
                 self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
                 count += number
