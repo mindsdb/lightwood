@@ -155,12 +155,15 @@ class NnMixer:
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
 
+                labels = labels.to(self.net.device)
+                inputs = inputs.to(self.net.device)
+
                 # zero the parameter gradients
                 self.optimizer.zero_grad()
 
                 # forward + backward + optimize
                 outputs = self.net(inputs)
-                labels = labels.to(self.net.device)
+
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 self.optimizer.step()
@@ -170,13 +173,6 @@ class NnMixer:
                 error = running_loss / (i + 1)
 
             yield error
-
-
-
-
-
-
-
 
 
 
