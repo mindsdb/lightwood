@@ -41,7 +41,6 @@ class DefaultNet(nn.Module):
         self.net = self.net.to(self.device)
 
 
-
     def forward(self, input):
         """
         In this particular model, we just need to forward the network defined in setup, with our input
@@ -49,7 +48,5 @@ class DefaultNet(nn.Module):
         :return:
         """
 
-        input = input.to(self.device)
-
-        output = self.net(input).to(self.device)
+        output = self.net(input)
         return output
