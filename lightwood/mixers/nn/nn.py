@@ -1,4 +1,3 @@
-
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -98,7 +97,8 @@ class NnMixer:
         for i, data in enumerate(data_loader, 0):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
-
+            inputs = inputs.to(self.net.device)
+            labels = labels.to(self.net.device)
             # forward + backward + optimize
             outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
@@ -160,6 +160,7 @@ class NnMixer:
 
                 # forward + backward + optimize
                 outputs = self.net(inputs)
+                labels = labels.to(self.net.device)
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 self.optimizer.step()

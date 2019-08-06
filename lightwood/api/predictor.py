@@ -141,6 +141,7 @@ class Predictor:
         started_training_at = int(time.time())
         #iterate over the iter_fit and see what the epoch and mixer error is
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+            print(lowest_error,lowest_error_epoch,epoch)
             if self._stop_training_flag == True:
                 logging.info('Learn has been stopped')
                 break
@@ -197,7 +198,13 @@ class Predictor:
                     callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
                 # if the model is overfitting that is, that the the test error is becoming greater than the train error
-                if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.0015) or (lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*1.2)) < epoch) or ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
+                print('\n=========================\n')
+                print(epoch)
+                print(lowest_error_epoch)
+                print(round(max(eval_every_x_epochs*2+2,epoch*0.3)))
+                print('\n=========================\n')
+                
+                if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.0015) or (lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*0.3)) < epoch) or ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
