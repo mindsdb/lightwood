@@ -10,7 +10,8 @@ from lightwood.mixers.sk_learn.sk_learn_helper import SkLearnMixerHelper
 
 class SkLearnMixer(SkLearnMixerHelper):
 
-    def __init__(self, score_threshold=0.5, classifier_class=MultiOutputClassifier, regression_class=MultiOutputRegressor):
+    def __init__(self, score_threshold=0.5,
+                 classifier_class=MultiOutputClassifier, regression_class=MultiOutputRegressor):
         """
         :param input_column_names: is a list [col_name1, col_name2]
         :param output_column_names: is a list [col_name1, col_name2]
@@ -39,9 +40,7 @@ class SkLearnMixer(SkLearnMixerHelper):
             model_class = self._determine_model_class(column, data_source)
             output_encoded_column = self._output_encoded_columns(column, data_source)
 
-            useful_input_encoded_features, self.feature_columns[column] = self._extract_features(data_source,
-                                                                                                 model_class,
-                                                                                                 output_encoded_column)
+            useful_input_encoded_features, self.feature_columns[column] = self._extract_features(data_source, model_class, output_encoded_column)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 self.model[column] = model_class.fit(useful_input_encoded_features, output_encoded_column)
@@ -92,6 +91,10 @@ class SkLearnMixer(SkLearnMixerHelper):
         :param ds:  is a DataSource object
         :return error : Dictionary: error of actual vs predicted encoded values
         """
+        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
+            'input_features')
+        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
+            'output_features')
         self.encoders = ds.encoders
         for i in range(1):
             self.fit(ds)
