@@ -19,7 +19,8 @@ class SkLearnMixer(SkLearnMixerHelper):
         :param classifier_class: model name for classification
         :param regression_class: model name for Regression
         """
-
+        self.input_column_names = None
+        self.output_column_names = None
         self.feature_columns = {}  # the columns that are actually used in the fit and predict
         self.output_encoders = {}
         self.score_threshold = score_threshold
@@ -91,10 +92,8 @@ class SkLearnMixer(SkLearnMixerHelper):
         :param ds:  is a DataSource object
         :return error : Dictionary: error of actual vs predicted encoded values
         """
-        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
-            'input_features')
-        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
-            'output_features')
+        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names('input_features')
+        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names('output_features')
         self.encoders = ds.encoders
         for i in range(1):
             self.fit(ds)
