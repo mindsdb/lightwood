@@ -10,8 +10,7 @@ from lightwood.mixers.sk_learn.sk_learn_helper import SkLearnMixerHelper
 
 class SkLearnMixer(SkLearnMixerHelper):
 
-    def __init__(self, input_column_names, output_column_names, score_threshold=0.5,
-                 classifier_class=MultiOutputClassifier, regression_class=MultiOutputRegressor):
+    def __init__(self, score_threshold=0.5, classifier_class=MultiOutputClassifier, regression_class=MultiOutputRegressor):
         """
         :param input_column_names: is a list [col_name1, col_name2]
         :param output_column_names: is a list [col_name1, col_name2]
@@ -19,8 +18,6 @@ class SkLearnMixer(SkLearnMixerHelper):
         :param classifier_class: model name for classification
         :param regression_class: model name for Regression
         """
-        self.input_column_names = input_column_names
-        self.output_column_names = output_column_names
 
         self.feature_columns = {}  # the columns that are actually used in the fit and predict
         self.output_encoders = {}
