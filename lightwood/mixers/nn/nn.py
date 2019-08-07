@@ -55,6 +55,9 @@ class NnMixer:
         self.net.eval()
         data = next(iter(data_loader))
         inputs, labels = data
+        inputs = inputs.to(self.net.device)
+        labels = labels.to(self.net.device)
+
         outputs = self.net(inputs)
 
         output_encoded_vectors = {}
@@ -99,6 +102,7 @@ class NnMixer:
             inputs, labels = data
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
+
             # forward + backward + optimize
             outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
