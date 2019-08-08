@@ -210,7 +210,6 @@ class Predictor:
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
 
-
         # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers
         self._mixer.encoders = from_data_ds.encoders
 
