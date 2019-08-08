@@ -119,7 +119,7 @@ class Predictor:
             if 'attrs' in  self.config['mixer']:
                 mixer_params = self.config['mixer']['attrs']
         else:
-            mixer_class = SkLearnMixer # NnMixer #
+            mixer_class = NnMixer #SkLearnMixer
 
 
         mixer = mixer_class()
