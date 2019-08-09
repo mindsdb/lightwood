@@ -207,8 +207,28 @@ class Predictor:
                 print('\n=========================\n')
                 #'''
 
-                #if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.0015) or (lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*0.5)) < epoch) or ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
-                if ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
+                # Decide if we should stop training
+                stop_training = False
+
+                # Stop if we're past the time limit alloted for training
+                if (int(time.time()) - started_training_at) > stop_training_after_seconds:
+                    stop_training = True
+
+                # Stop if the error on the testing data is close to zero (0.15%)
+                if test_error < 0.0015:
+                    stop_training = True
+
+                # If accuracy stopped improving on the testing set and the test error is small enough, stop
+                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1:
+                    stop_training = True
+
+                # If we've seen no imporvement for a long while, stop
+                if lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*0.5)) < epoch:
+                    stop_training = True
+
+
+
+                if stop_training:
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
