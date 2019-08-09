@@ -166,7 +166,6 @@ class NnMixer:
             error = 0
 
             if self.dynamic_adamw:
-                print(self.optimizer_args['lr'])
                 if epoch < 120:
                     if self.optimizer_args['lr'] < 0.01:
                         self.optimizer_args['lr']=self.optimizer_args['lr'] + 0.00025

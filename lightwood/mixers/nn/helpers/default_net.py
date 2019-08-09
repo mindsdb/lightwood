@@ -1,3 +1,4 @@
+import logging
 from lightwood.config.config import CONFIG
 from .shapes import *
 import torch.nn as nn
@@ -59,7 +60,7 @@ class DefaultNet(nn.Module):
         else:
             shape = rectangle(input_size,output_size,3)
 
-        print(f'Building network of shape: {shape}')
+        logging.info(f'Building network of shape: {shape}')
         rectifier = nn.SELU  #alternative: nn.ReLU
 
         layers = []
