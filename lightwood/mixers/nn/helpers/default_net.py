@@ -37,7 +37,7 @@ class DefaultNet(nn.Module):
         larger_input = True if input_size > output_size*2 else False
         even_input_output = larger_input and large_output
 
-        # 3. Determine shpae based on the sizes & proportions
+        # 3. Determine shpae based on the sizes & propotions
         if not large_input and not large_output:
             if larger_input:
                 shape = shapes.rombus(input_size,output_size,5,input_size*2)

@@ -196,16 +196,7 @@ class Predictor:
                 if callback_on_iter is not None:
                     callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
-                # if the model is overfitting that is, that the the test error is becoming greater than the train error
-                #'''
-                print('\n=========================\n')
-                print(epoch)
-                print(lowest_error_epoch)
-                print(round(max(eval_every_x_epochs*2+2,epoch*0.3)))
-                print(lowest_error)
-                print(( (int(time.time()) - started_training_at) - stop_training_after_seconds))
-                print('\n=========================\n')
-                #'''
+
 
                 # Decide if we should stop training
                 stop_training = False
@@ -218,7 +209,7 @@ class Predictor:
                 if test_error < 0.0015:
                     stop_training = True
 
-                # If accuracy stopped improving on the testing set and the test error is small enough, stop
+                ## Stop if the model is overfitting, that is, the test error is becoming greater than the train error and the test error is small enough, stop
                 if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1:
                     stop_training = True
 
