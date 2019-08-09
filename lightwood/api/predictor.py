@@ -248,7 +248,6 @@ class Predictor:
         when_data_ds = DataSource(when_data, self.config)
         when_data_ds.encoders = self._mixer.encoders
 
-        print(self._mixer.predict(when_data_ds))
         return self._mixer.predict(when_data_ds)
 
     def calculate_accuracy(self, from_data):
@@ -270,9 +269,6 @@ class Predictor:
 
             else:
                 accuracies[output_column] = r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["encoded_predictions"])
-
-
-
 
         return accuracies
 
