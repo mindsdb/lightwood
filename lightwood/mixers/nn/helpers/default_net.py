@@ -59,7 +59,6 @@ class DefaultNet(nn.Module):
         else:
             shape = shapes.rectangle(input_size,output_size,3)
 
-
         print(f'Building network of shape: {shape}')
         rectifier = nn.SELU  #alternative: nn.ReLU
 
