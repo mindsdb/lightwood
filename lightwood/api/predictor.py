@@ -197,15 +197,18 @@ class Predictor:
                     callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
                 # if the model is overfitting that is, that the the test error is becoming greater than the train error
-                '''
+                #'''
                 print('\n=========================\n')
                 print(epoch)
                 print(lowest_error_epoch)
                 print(round(max(eval_every_x_epochs*2+2,epoch*0.3)))
+                print(lowest_error)
+                print(( (int(time.time()) - started_training_at) - stop_training_after_seconds))
                 print('\n=========================\n')
-                '''
+                #'''
 
-                if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.0015) or (lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*0.5)) < epoch) or ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
+                #if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.0015) or (lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*0.5)) < epoch) or ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
+                if ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
