@@ -1,9 +1,10 @@
+import logging
 import math
 
 
 def funnel(in_size, out_size, depth):
     if depth < 2:
-        print('Depth must be at least 2 for the funnel function to work correctly, setting it to 2')
+        logging.warning('Depth must be at least 2 for the funnel function to work correctly, setting it to 2')
         depth = 2
 
     step_denominator = depth - 1
@@ -14,7 +15,7 @@ def funnel(in_size, out_size, depth):
 
 def rectangle(in_size,out_size,depth):
     if depth < 2:
-        print('Depth must be at least 2 for the rectangle function to work correctly, setting it to 2')
+        logging.warning('Depth must be at least 2 for the rectangle function to work correctly, setting it to 2')
         depth = 2
 
     layers = [in_size for x in range(depth - 1)]
@@ -25,7 +26,7 @@ def rombus(in_size,out_size,depth,max_size=None):
     if max_size is None:
         max_size = max(in_size,out_size)*2
     if depth < 3:
-        print('Depth must be at least 3 for the rombus function to work correctly, setting it to 3')
+        logging.warning('Depth must be at least 3 for the rombus function to work correctly, setting it to 3')
         depth = 3
 
     funnel_size = math.ceil(depth/2)
