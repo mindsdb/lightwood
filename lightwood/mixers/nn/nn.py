@@ -31,10 +31,10 @@ class NnMixer:
 
         if self.dynamic_adamw:
             self.optimizer_classs = AdamW
-            slef.optimizer_args = {amsgrad=False, 'self.optimizer_args['lr']':0.001}
+            slef.optimizer_args = {amsgrad=False, 'lr':0.001}
         else:
             self.optimizer_class = optim.Adadelta
-            self.optimizer_args = {'self.optimizer_args['lr']': 0.1}
+            self.optimizer_args = {'lr': 0.1}
 
         self.nn_class = DefaultNet
         self.batch_size = 100
