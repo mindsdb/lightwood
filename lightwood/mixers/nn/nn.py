@@ -149,14 +149,18 @@ class NnMixer:
 
         self.net = self.nn_class(ds)
         self.net.train()
-        lr = 0.001
-        self.optimizer = AdamW(self.net.parameters(), lr=lr, amsgrad=False) #self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+        #lr = 0.001
+        #self.optimizer = AdamW(self.net.parameters(), lr=lr, amsgrad=False)
+        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
         total_epochs = self.epochs
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
+
+            '''
             print(lr)
             if epoch < 120:
                 if lr < 0.01:
@@ -166,6 +170,7 @@ class NnMixer:
                 if lr > 0.001:
                     lr=lr - 0.0001
                     self.optimizer = AdamW(self.net.parameters(), lr=lr, amsgrad=False)
+            '''
 
             for i, data in enumerate(data_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
