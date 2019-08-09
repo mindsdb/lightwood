@@ -31,13 +31,13 @@ class DefaultNet(nn.Module):
             large_input = True if input_size > 1000 else False
             large_output = True if output_size > 100 else False
 
-        # 1. Determine in/out proportions
+        # 2. Determine in/out proportions
         # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case (outside of very specific things, such as text to image)
         larger_output = True if output_size > input_size*2 else False
         larger_input = True if input_size > output_size*2 else False
         even_input_output = larger_input and large_output
 
-
+        # 3. Determine shpae based on the sizes & proportions
         if not large_input and not large_output:
             if larger_input:
                 shape = shapes.rombus(input_size,output_size,5,input_size*2)
