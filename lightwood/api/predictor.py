@@ -119,10 +119,12 @@ class Predictor:
             if 'attrs' in  self.config['mixer']:
                 mixer_params = self.config['mixer']['attrs']
         else:
-            mixer_class = NnMixer #SkLearnMixer
+            #mixer_class = NnMixer
+            mixer_class = SkLearnMixer
 
 
         mixer = mixer_class()
+        self._mixer = mixer
 
         for param in mixer_params:
             if hasattr(mixer, param):
@@ -246,6 +248,7 @@ class Predictor:
         when_data_ds = DataSource(when_data, self.config)
         when_data_ds.encoders = self._mixer.encoders
 
+        print(self._mixer.predict(when_data_ds))
         return self._mixer.predict(when_data_ds)
 
     def calculate_accuracy(self, from_data):
