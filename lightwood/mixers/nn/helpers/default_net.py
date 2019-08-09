@@ -1,6 +1,7 @@
 from lightwood.config.config import CONFIG
 import torch.nn as nn
 import torch
+from shapes import rombus, rectangle, funnel
 
 
 
