@@ -70,7 +70,7 @@ class SkLearnMixer(SkLearnMixerHelper):
             decoded_predictions = self._decoded_data([output_column], when_data_source,
                                                      torch.from_numpy(encoded_predictions))
             predictions[output_column] = {'Encoded Predictions': encoded_predictions,
-                                          'Actual Predictions': decoded_predictions}
+                                          'predictions': decoded_predictions}
 
         logging.info('Model predictions and decoding completed')
         return predictions
