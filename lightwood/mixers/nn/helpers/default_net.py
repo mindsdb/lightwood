@@ -1,7 +1,7 @@
 from lightwood.config.config import CONFIG
 import torch.nn as nn
 import torch
-from shapes import rombus, rectangle, funnel
+import lightwood.mixers.nn.helpers.shapes as shapes # rombus, rectangle, funnel
 
 
 
@@ -21,31 +21,56 @@ class DefaultNet(nn.Module):
         input_size = len(input_sample)
         output_size = len(output_sample)
 
-        if input_size < 3 * pow(10,3) and True:
-            self.net = nn.Sequential(
-                nn.Linear(input_size, 2*input_size),
-                nn.SELU(),
-                nn.Linear(2*input_size, 4*input_size),
-                nn.SELU(),
-                nn.Linear(4*input_size, 8*input_size),
-                nn.SELU(),
-                nn.Linear(8*input_size, 4*input_size),
-                nn.SELU(),
-                nn.Linear(4*input_size, 2*input_size),
-                nn.SELU(),
-                nn.Linear(2*input_size, output_size)
-            )
-        else:
-            deep_layer_in = 128 * 4
-            deep_layer_out = round(min(deep_layer_in,output_size*2))
-            self.net = nn.Sequential(
-                nn.Linear(input_size, deep_layer_in),
-                nn.SELU(),
-                nn.Linear(deep_layer_in, deep_layer_out),
-                nn.SELU(),
-                nn.Linear(deep_layer_out, output_size)
-            )
+        # Select architecture
 
+        # 1. Determine, based on the machines specification, if the input/output size are "large"
+        if CONFIG.USE_CUDA:
+            large_input = True if input_size > 4000 else False
+            large_output = True if output_size > 400 else False
+        else:
+            large_input = True if input_size > 1000 else False
+            large_output = True if output_size > 100 else False
+
+        # 1. Determine in/out proportions
+        # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case (outside of very specific things, such as text to image)
+        larger_output = True if output_size > input_size*2 else False
+        larger_input = True if input_size > output_size*2 else False
+        even_input_output = larger_input and large_output
+
+
+        if not large_input and not large_output:
+            if larger_input:
+                shape = shapes.rombus(input_size,output_size,5,input_size*2)
+            else:
+                shape = shapes.rectangle(input_size,output_size,4)
+
+        elif not large_output and large_input:
+            depth = 5
+            if large_output:
+                depth = depth - 1
+            shape = shapes.funnel(input_size,output_size,depth)
+
+        elif not large_input and large_output:
+            if larger_input:
+                shape = shapes.funnel(input_size,output_size,4)
+            else:
+                shape = shapes.rectangle(input_size,output_size,4)
+
+        else:
+            shape = shapes.rectangle(input_size,output_size,3)
+
+
+        print(f'Building network of shape: {shape}')
+        rectifier = nn.SELU  #alternative: nn.ReLU
+
+        layers = []
+        for ind in range(len(shape) - 1):
+            layers.append(nn.Linear(shape[ind],shape[ind+1]))
+            if ind < len(shape) - 2:
+                layers.append(rectifier())
+
+
+        self.net = nn.Sequential(*layers)
 
         self.net = self.net.to(self.device)
 
