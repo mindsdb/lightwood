@@ -12,7 +12,7 @@ config = {'input_features': [{'name': 'number_of_rooms', 'type': 'numeric'},
  'output_features': [{'name': 'rental_price', 'type': 'numeric'}]}
 
 
-
+lightwood.CONFIG.USE_CUDA = False
 df=pd.read_csv("https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv")
 
 predictor = Predictor(config)

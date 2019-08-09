@@ -1,7 +1,7 @@
 from lightwood.config.config import CONFIG
+import lightwood.mixers.nn.helpers.shapes as shapes
 import torch.nn as nn
 import torch
-import lightwood.mixers.nn.helpers.shapes as shapes # rombus, rectangle, funnel
 
 
 
