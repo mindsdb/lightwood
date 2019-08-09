@@ -16,6 +16,7 @@ from lightwood.mixers.nn.helpers.transformer import Transformer
 class NnMixer:
 
     def __init__(self):
+        self.dynamic_adamw = False
         self.net = None
         self.optimizer = None
         self.input_column_names = None
@@ -27,8 +28,14 @@ class NnMixer:
 
         self.criterion = nn.MSELoss()
         self.epochs = 120000
-        self.optimizer_class = optim.Adadelta
-        self.optimizer_args = {'lr': 0.1}
+
+        if self.dynamic_adamw:
+            self.optimizer_classs = AdamW
+            slef.optimizer_args = {amsgrad=False, 'self.optimizer_args['lr']':0.001}
+        else:
+            self.optimizer_class = optim.Adadelta
+            self.optimizer_args = {'self.optimizer_args['lr']': 0.1}
+
         self.nn_class = DefaultNet
         self.batch_size = 100
 
@@ -150,8 +157,6 @@ class NnMixer:
         self.net = self.nn_class(ds)
         self.net.train()
 
-        #lr = 0.001
-        #self.optimizer = AdamW(self.net.parameters(), lr=lr, amsgrad=False)
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
         total_epochs = self.epochs
@@ -160,17 +165,16 @@ class NnMixer:
             running_loss = 0.0
             error = 0
 
-            '''
-            print(lr)
-            if epoch < 120:
-                if lr < 0.01:
-                    lr=lr + 0.00025
-                    self.optimizer = AdamW(self.net.parameters(), lr=lr, amsgrad=False)
-            else:
-                if lr > 0.001:
-                    lr=lr - 0.0001
-                    self.optimizer = AdamW(self.net.parameters(), lr=lr, amsgrad=False)
-            '''
+            if self.dynamic_adamw:
+                print(self.optimizer_args['lr'])
+                if epoch < 120:
+                    if self.optimizer_args['lr'] < 0.01:
+                        self.optimizer_args['lr']=self.optimizer_args['lr'] + 0.00025
+                else:
+                    if self.optimizer_args['lr'] > 0.001:
+                        self.optimizer_args['lr']=self.optimizer_args['lr'] - 0.0001
+
+                self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
             for i, data in enumerate(data_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
