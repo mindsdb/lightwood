@@ -20,10 +20,18 @@ class DefaultNet(nn.Module):
         input_size = len(input_sample)
         output_size = len(output_sample)
 
-        if input_size < 3 * pow(10,3):
+        if input_size < 3 * pow(10,3) and True:
             self.net = nn.Sequential(
                 nn.Linear(input_size, 2*input_size),
-                nn.ReLU(),
+                nn.SELU(),
+                nn.Linear(2*input_size, 4*input_size),
+                nn.SELU(),
+                nn.Linear(4*input_size, 8*input_size),
+                nn.SELU(),
+                nn.Linear(8*input_size, 4*input_size),
+                nn.SELU(),
+                nn.Linear(4*input_size, 2*input_size),
+                nn.SELU(),
                 nn.Linear(2*input_size, output_size)
             )
         else:
