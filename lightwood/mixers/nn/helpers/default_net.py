@@ -1,5 +1,5 @@
 from lightwood.config.config import CONFIG
-import lightwood.mixers.nn.helpers.shapes as shapes
+from .shapes import *
 import torch.nn as nn
 import torch
 
@@ -40,24 +40,24 @@ class DefaultNet(nn.Module):
         # 3. Determine shpae based on the sizes & propotions
         if not large_input and not large_output:
             if larger_input:
-                shape = shapes.rombus(input_size,output_size,5,input_size*2)
+                shape = rombus(input_size,output_size,5,input_size*2)
             else:
-                shape = shapes.rectangle(input_size,output_size,4)
+                shape = rectangle(input_size,output_size,4)
 
         elif not large_output and large_input:
             depth = 5
             if large_output:
                 depth = depth - 1
-            shape = shapes.funnel(input_size,output_size,depth)
+            shape = funnel(input_size,output_size,depth)
 
         elif not large_input and large_output:
             if larger_input:
-                shape = shapes.funnel(input_size,output_size,4)
+                shape = funnel(input_size,output_size,4)
             else:
-                shape = shapes.rectangle(input_size,output_size,4)
+                shape = rectangle(input_size,output_size,4)
 
         else:
-            shape = shapes.rectangle(input_size,output_size,3)
+            shape = rectangle(input_size,output_size,3)
 
         print(f'Building network of shape: {shape}')
         rectifier = nn.SELU  #alternative: nn.ReLU
