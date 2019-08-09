@@ -31,7 +31,7 @@ class NnMixer:
 
         if self.dynamic_adamw:
             self.optimizer_classs = AdamW
-            slef.optimizer_args = {'amsgrad'=False, 'lr':0.001}
+            slef.optimizer_args = {'amsgrad': False, 'lr':0.001}
         else:
             self.optimizer_class = optim.Adadelta
             self.optimizer_args = {'lr': 0.1}
