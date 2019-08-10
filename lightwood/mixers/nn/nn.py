@@ -30,7 +30,7 @@ class NnMixer:
         self.epochs = 120000
 
         if self.dynamic_adamw:
-            self.optimizer_classs = AdamW
+            self.optimizer_class = AdamW
             slef.optimizer_args = {'amsgrad': False, 'lr':0.001}
         else:
             self.optimizer_class = optim.Adadelta
