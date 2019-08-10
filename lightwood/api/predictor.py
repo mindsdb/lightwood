@@ -10,7 +10,7 @@ import numpy as np
 
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
-
+from lightwood.config.config import CONFIG
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score
@@ -59,7 +59,7 @@ class Predictor:
 
         self.train_accuracy = None
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 24 * 5):
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -123,6 +123,7 @@ class Predictor:
 
 
         mixer = mixer_class()
+        self._mixer = mixer
 
         for param in mixer_params:
             if hasattr(mixer, param):
@@ -153,7 +154,6 @@ class Predictor:
                 eval_next_on_epoch = tmp_next
 
                 test_error = mixer.error(test_data_ds)
-
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
                     lowest_error = test_error
@@ -196,12 +196,33 @@ class Predictor:
                 if callback_on_iter is not None:
                     callback_on_iter(epoch, mix_error, test_error, delta_mean)
 
-                # if the model is overfitting that is, that the the test error is becoming greater than the train error
-                if (delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1) or (test_error < 0.0015) or (lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*1.2)) < epoch) or ( (int(time.time()) - started_training_at) > stop_training_after_seconds):
+
+
+                # Decide if we should stop training
+                stop_training = False
+
+                # Stop if we're past the time limit alloted for training
+                if (int(time.time()) - started_training_at) > stop_training_after_seconds:
+                    stop_training = True
+
+                # Stop if the error on the testing data is close to zero (0.15%)
+                if test_error < 0.0015:
+                    stop_training = True
+
+                ## Stop if the model is overfitting, that is, the test error is becoming greater than the train error and the test error is small enough, stop
+                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1:
+                    stop_training = True
+
+                # If we've seen no imporvement for a long while, stop
+                if lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*0.5)) < epoch:
+                    stop_training = True
+
+
+
+                if stop_training:
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
-
 
         # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers
         self._mixer.encoders = from_data_ds.encoders
@@ -246,9 +267,6 @@ class Predictor:
 
             else:
                 accuracies[output_column] = r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["encoded_predictions"])
-
-
-
 
         return accuracies
 

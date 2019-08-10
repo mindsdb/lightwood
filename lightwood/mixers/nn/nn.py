@@ -1,4 +1,3 @@
-
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -10,12 +9,14 @@ import logging
 import numpy as np
 
 from lightwood.mixers.nn.helpers.default_net import DefaultNet
+from lightwood.mixers.nn.helpers.adamw import AdamW
 from lightwood.mixers.nn.helpers.transformer import Transformer
 
 
 class NnMixer:
 
     def __init__(self):
+        self.dynamic_adamw = False
         self.net = None
         self.optimizer = None
         self.input_column_names = None
@@ -27,8 +28,14 @@ class NnMixer:
 
         self.criterion = nn.MSELoss()
         self.epochs = 120000
-        self.optimizer_class = optim.Adadelta
-        self.optimizer_args = {'lr': 0.1}
+
+        if self.dynamic_adamw:
+            self.optimizer_class = AdamW
+            self.optimizer_args = {'amsgrad': False, 'lr':0.001}
+        else:
+            self.optimizer_class = optim.Adadelta
+            self.optimizer_args = {'lr': 0.1}
+
         self.nn_class = DefaultNet
         self.batch_size = 100
 
@@ -56,6 +63,9 @@ class NnMixer:
         self.net.eval()
         data = next(iter(data_loader))
         inputs, labels = data
+        inputs = inputs.to(self.net.device)
+        labels = labels.to(self.net.device)
+
         outputs = self.net(inputs)
 
         output_encoded_vectors = {}
@@ -98,6 +108,8 @@ class NnMixer:
         for i, data in enumerate(data_loader, 0):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
+            inputs = inputs.to(self.net.device)
+            labels = labels.to(self.net.device)
 
             # forward + backward + optimize
             outputs = self.net(inputs)
@@ -144,6 +156,7 @@ class NnMixer:
 
         self.net = self.nn_class(ds)
         self.net.train()
+
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
         total_epochs = self.epochs
@@ -151,15 +164,30 @@ class NnMixer:
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
+
+            if self.dynamic_adamw:
+                if epoch < 120:
+                    if self.optimizer_args['lr'] < 0.01:
+                        self.optimizer_args['lr']=self.optimizer_args['lr'] + 0.00025
+                else:
+                    if self.optimizer_args['lr'] > 0.001:
+                        self.optimizer_args['lr']=self.optimizer_args['lr'] - 0.0001
+
+                self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
             for i, data in enumerate(data_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
+
+                labels = labels.to(self.net.device)
+                inputs = inputs.to(self.net.device)
 
                 # zero the parameter gradients
                 self.optimizer.zero_grad()
 
                 # forward + backward + optimize
                 outputs = self.net(inputs)
+
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 self.optimizer.step()
@@ -169,13 +197,6 @@ class NnMixer:
                 error = running_loss / (i + 1)
 
             yield error
-
-
-
-
-
-
-
 
 
 
