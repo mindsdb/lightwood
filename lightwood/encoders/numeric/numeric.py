@@ -25,7 +25,7 @@ class NumericEncoder:
                     continue
 
                 if number is None or math.isnan(number):
-                    print('Lightwood does not support working with NaN values !')
+                    logging.error('Lightwood does not support working with NaN values !')
                     exit()
 
                 self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
