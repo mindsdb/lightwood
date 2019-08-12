@@ -33,12 +33,14 @@ dependency_links = []
 
 # Linux specific requirements
 if sys_platform == 'linux' or sys_platform.startswith('linux'):
-    requirements = remove_requirements(requirements,'torch',replace='torch >= 1.1.0')
+    pass
+    #requirements = remove_requirements(requirements,'torch',replace='torch >= 1.1.0')
 
 
 # OSX specific requirements
 elif sys_platform == 'darwin':
-    requirements = remove_requirements(requirements,'torch',replace='torch >= 1.1.0.post2')
+    pass
+    #requirements = remove_requirements(requirements,'torch',replace='torch >= 1.1.0.post2')
 
 # Windows specific requirements
 elif sys_platform in ['win32','cygwin','windows']:
