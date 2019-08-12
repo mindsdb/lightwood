@@ -19,7 +19,7 @@ class DatetimeEncoder:
         for unix_timestamp in data:
 
             if unix_timestamp is None:
-                vector = [0]*6
+                vector = [0]*7
             else:
                 date = datetime.datetime.fromtimestamp(unix_timestamp)
                 vector = [date.year/3000.0, date.month/12.0, date.day/31.0, date.weekday()/7.0, date.hour/24.0, date.minute/60.0, date.second/60.0]
@@ -58,6 +58,3 @@ if __name__ == "__main__":
     print (enc.decode(enc.encode(data)))
 
    # print(enc.decode(enc.encode(['not there', 'time', 'tokens'])))
-
-
-
