@@ -85,16 +85,29 @@ class NumericEncoder:
                 ret += [None]
                 continue
 
+            if math.isnan(vector[1]):
+                abs_rounded_first = 0
+            else:
+                abs_rounded_first = abs(round(vector[1]))
 
-            if abs(round(vector[1])) == 1:
+
+            if abs_rounded_first == 1:
                 real_value = 0
             else:
-                is_negative = True if abs(round(vector[0])) == 1 else False
+                if math.isnan(vector[0]):
+                    abs_rounded_zero = 0
+                else:
+                    abs_rounded_zero = abs(round(vector[0]))
+
+                is_negative = True if abs_rounded_zero == 1 else False
                 encoded_value = vector[2]
                 try:
                     real_value = -math.exp(encoded_value) if is_negative else math.exp(encoded_value) #(self._max_value-self._min_value)*encoded_value + self._mean
                 except:
-                    real_value = float('inf')
+                    if self._type == 'int':
+                        real_value = pow(2,63)
+                    else:
+                        real_value = float('inf')
 
             if self._type == 'int':
                 real_value = round(real_value)
