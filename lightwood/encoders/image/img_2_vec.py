@@ -32,12 +32,12 @@ class Img2VecEncoder:
 
         pics = []
         for image in images:
-            if img.startswith('http'):
-                response = requests.get(img)
+            if image.startswith('http'):
+                response = requests.get(image)
                 img = Image.open(StringIO(response.content))
             else:
                 img = Image.open(image)
-                
+
             vec = self._model.get_vec(img)
             pics.append(vec)
 
