@@ -126,8 +126,8 @@ class NnEncoderHelper:
         """
         data_source = []
         for image in images:
-            if img.startswith('http'):
-                response = requests.get(img)
+            if image.startswith('http'):
+                response = requests.get(image)
                 img = Image.open(StringIO(response.content))
             else:
                 img = Image.open(image)
