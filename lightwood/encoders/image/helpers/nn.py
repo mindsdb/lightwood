@@ -126,7 +126,11 @@ class NnEncoderHelper:
         """
         data_source = []
         for image in images:
-            img = Image.open(image)
+            if img.startswith('http'):
+                response = requests.get(img)
+                img = Image.open(StringIO(response.content))
+            else:
+                img = Image.open(image)
             resized_image = img.resize((128, 128), PIL.Image.ANTIALIAS)
             data_source.append(transforms.ToTensor()(resized_image))
         return data_source
