@@ -17,8 +17,9 @@ class DataSource(Dataset):
         self.encoders = {}
         self.transformer = None
         self.training = False # Flip this flag if you are using the datasource while training
-
+        self.output_weights = None
         self.dropout_dict = {}
+        
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
                 dropout = 0.2
@@ -101,7 +102,7 @@ class DataSource(Dataset):
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']]= [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
-                    
+
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
