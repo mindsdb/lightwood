@@ -8,7 +8,13 @@ config = {'input_features': [
                     {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric'},
                     {'name': 'location', 'type': 'categorical'}, {'name': 'days_on_market', 'type': 'numeric'},
                     {'name': 'neighborhood', 'type': 'categorical','dropout':0.4},{'name': 'rental_price', 'type': 'numeric'}],
- 'output_features': [{'name': 'number_of_rooms', 'type': 'numeric'}],
+ 'output_features': [{'name': 'number_of_rooms', 'type': 'categorical', 'weights':{
+    '0': 0.8,
+    '1': 0.6,
+    '2': 0.5,
+    '3': 0.7,
+    '4': 1,
+ }}],
  'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer}}
 
 lightwood.config.config.CONFIG.USE_CUDA = False
