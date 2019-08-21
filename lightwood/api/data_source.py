@@ -19,7 +19,18 @@ class DataSource(Dataset):
         self.training = False # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
-        
+
+        for col in self.configuration['output_features']:
+            if 'weights' in self.configuration['output_features']:
+                weights = self.configuration['output_features']['weights']
+                encoded_val_arr = []
+                for val in weights:
+                    encoded_val = get_encoded_column_data[col['name'],'output_features',custom_data=val]
+                    print(encoded_val)
+                    encoded_val_arr.append(encoded_val_arr)
+                print(encoded_val_arr)
+                exit()
+
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
                 dropout = 0.2
