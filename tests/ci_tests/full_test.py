@@ -4,11 +4,11 @@ from lightwood import Predictor
 import lightwood
 
 ####################
-config = {'input_features': [{'name': 'number_of_rooms', 'type': 'numeric'},
+config = {'input_features': [
                     {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric'},
                     {'name': 'location', 'type': 'categorical'}, {'name': 'days_on_market', 'type': 'numeric'},
-                    {'name': 'neighborhood', 'type': 'categorical','dropout':0.4}],
- 'output_features': [{'name': 'rental_price', 'type': 'numeric'}],
+                    {'name': 'neighborhood', 'type': 'categorical','dropout':0.4},{'name': 'rental_price', 'type': 'numeric'}],
+ 'output_features': [{'name': 'number_of_rooms', 'type': 'numeric'}],
  'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer}}
 
 lightwood.config.config.CONFIG.USE_CUDA = False
