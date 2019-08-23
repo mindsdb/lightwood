@@ -7,7 +7,8 @@ feature_schema = Schema({
     Optional('encoder_class'): object,
     Optional('encoder_attrs'): dict,
     Optional('depends_on_column'): str,
-    Optional('dropout'): float
+    Optional('dropout'): float,
+    Optional('weights'): dict
 })
 
 mixer_graph_schema = Schema({

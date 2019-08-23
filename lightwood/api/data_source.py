@@ -25,7 +25,7 @@ class DataSource(Dataset):
                 weights = self.configuration['output_features']['weights']
                 encoded_val_arr = []
                 for val in weights:
-                    encoded_val = get_encoded_column_data[col['name'],'output_features',custom_data=val]
+                    encoded_val = get_encoded_column_data(col['name'],'output_features',custom_data=val)
                     print(encoded_val)
                     encoded_val_arr.append(encoded_val_arr)
                 print(encoded_val_arr)
