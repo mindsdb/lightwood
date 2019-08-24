@@ -19,6 +19,7 @@ class DataSource(Dataset):
         self.training = False # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
+        self.weights = None
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -106,17 +107,28 @@ class DataSource(Dataset):
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
-        for col_config in self.configuration['output_features']:
-            if 'weights' in col_config:
-                weights = col_config['weights']
-                encoded_val_arr = []
-                for val in weights:
-                    encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
-                    print(val)
-                    print(encoded_val)
-                    encoded_val_arr.append(encoded_val_arr)
-                #print(encoded_val_arr)
-                #exit()
+        # Create weights if not already create
+        if self.weights is None:
+            for col_config in self.configuration['output_features']:
+                if 'weights' in col_config:
+                    weights = col_config['weights']
+                    encoded_val_arr = []
+                    for val in weights:
+                        encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
+                        print(val)
+                        print(encoded_val)
+                        encoded_val_arr.append(encoded_val_arr)
+
+                    new_weights = [None] * len(weights)
+                    for i in range(0,len(encoded_val_arr)):
+                        np_encoded_val = np.array(encoded_val_arr[i][0])
+                        value_index = np_encoded_val[np.where(np_encoded_val > 0.5)]
+                        new_weights[value_index] = weights[i]
+
+                    if self.weights is None:
+                        self.weights = new_weights
+                    else:
+                        self.weights.extend(new_weights)
 
         if self.transformer:
             sample = self.transformer.transform(sample)
