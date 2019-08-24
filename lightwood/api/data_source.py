@@ -116,7 +116,7 @@ class DataSource(Dataset):
                     print(encoded_val)
                     encoded_val_arr.append(encoded_val_arr)
                 #print(encoded_val_arr)
-                exit()
+                #exit()
 
         if self.transformer:
             sample = self.transformer.transform(sample)
@@ -173,9 +173,7 @@ class DataSource(Dataset):
             args += [arg2]
 
         if column_name in self.encoders:
-            self.encoded_cache[column_name] = self.encoders[column_name].encode(*args)
-
-            return self.encoded_cache[column_name]
+            return self.encoders[column_name].encode(*args)
 
 
 
