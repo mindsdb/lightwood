@@ -20,17 +20,6 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
 
-        for col in self.configuration['output_features']:
-            if 'weights' in self.configuration['output_features']:
-                weights = self.configuration['output_features']['weights']
-                encoded_val_arr = []
-                for val in weights:
-                    encoded_val = get_encoded_column_data(col['name'],'output_features',custom_data=val)
-                    print(encoded_val)
-                    encoded_val_arr.append(encoded_val_arr)
-                print(encoded_val_arr)
-                exit()
-
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
                 dropout = 0.2
@@ -117,6 +106,18 @@ class DataSource(Dataset):
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
+        for col_config in self.configuration['output_features']:
+            if 'weights' in col_config:
+                weights = col_config['weights']
+                encoded_val_arr = []
+                for val in weights:
+                    encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
+                    print(val)
+                    print(encoded_val)
+                    encoded_val_arr.append(encoded_val_arr)
+                #print(encoded_val_arr)
+                exit()
+
         if self.transformer:
             sample = self.transformer.transform(sample)
 
@@ -152,7 +153,7 @@ class DataSource(Dataset):
         :return:
         """
 
-        if column_name in self.encoded_cache:
+        if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
 
         # first argument of encoder is the data, so we either pass the custom data or we get the column data
