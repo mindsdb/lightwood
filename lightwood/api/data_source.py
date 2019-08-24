@@ -19,7 +19,6 @@ class DataSource(Dataset):
         self.training = False # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
-        self.weights = None
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -108,7 +107,7 @@ class DataSource(Dataset):
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
         # Create weights if not already create
-        if self.weights is None:
+        if self.output_weights is None:
             for col_config in self.configuration['output_features']:
                 if 'weights' in col_config:
                     weights = col_config['weights']
@@ -125,12 +124,12 @@ class DataSource(Dataset):
                         value_index = np_encoded_val[np.where(np_encoded_val > 0.5)]
                         new_weights[value_index] = weights[i]
 
-                    if self.weights is None:
-                        self.weights = new_weights
+                    if self.output_weights is None:
+                        self.output_weights = new_weights
                     else:
-                        self.weights.extend(new_weights)
+                        self.output_weights.extend(new_weights)
                 else:
-                    self.weights = False
+                    self.output_weights = False
 
         if self.transformer:
             sample = self.transformer.transform(sample)
