@@ -119,8 +119,8 @@ class DataSource(Dataset):
                         print(encoded_val)
                         encoded_val_arr.append(encoded_val_arr)
 
-                    new_weights = [None] * len(weights)
-                    for i in range(0,len(encoded_val_arr)):
+                    new_weights = [None] * (len(weights) + 1)
+                    for i in range(1,len(encoded_val_arr)):
                         np_encoded_val = np.array(encoded_val_arr[i][0])
                         value_index = np_encoded_val[np.where(np_encoded_val > 0.5)]
                         new_weights[value_index] = weights[i]
@@ -129,6 +129,8 @@ class DataSource(Dataset):
                         self.weights = new_weights
                     else:
                         self.weights.extend(new_weights)
+                else:
+                    self.weights = False
 
         if self.transformer:
             sample = self.transformer.transform(sample)
