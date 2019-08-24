@@ -12,13 +12,13 @@ class CategoricalEncoder:
         self._pytorch_wrapper = torch.FloatTensor
 
     def encode(self, column_data):
-
         if self._lang is None:
             self._lang = Lang('default')
             self._lang.index2word =  {UNCOMMON_TOKEN: UNCOMMON_WORD}
             self._lang.n_words = 1
             for word in column_data:
                 if word != None:
+                    word = str(word)
                     self._lang.addWord(word)
 
         ret = []
@@ -27,6 +27,7 @@ class CategoricalEncoder:
         for word in column_data:
             encoded_word = [0]*v_len
             if word != None:
+                word = str(word)
                 index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
                 encoded_word[index] = 1
 
@@ -68,6 +69,3 @@ if __name__ == "__main__":
     print (enc.encode(data))
 
     print(enc.decode(enc.encode(['not there', 'time', 'tokens', None])))
-
-
-
