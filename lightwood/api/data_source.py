@@ -92,6 +92,7 @@ class DataSource(Dataset):
                 col_name = feature['name']
                 col_config = self.get_column_config(feature)
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
+                    print('encoding columns')
                     self.get_encoded_column_data(col_name, feature_set)
 
                 # if we are dropping this feature, get the encoded value of None
@@ -103,6 +104,9 @@ class DataSource(Dataset):
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
 
                 else:
+                    if len(self.encoded_cache.keys()) < 1:
+                        print(self.data_frame)
+                        print(self.encoded_cache)
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
         # Create weights if not already create
@@ -115,19 +119,22 @@ class DataSource(Dataset):
 
                     for val in weights:
                         encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
-                        value_index = encoded_val[np.where(encoded_val > 0.5)]
+                        encoded_val = [round(x.item()) for x in encoded_val[0]]
+                        value_index = encoded_val.index(1)
+                        print('===================')
+                        print(value_index)
+                        print(weights[val])
+                        print('===================')
                         new_weights[value_index] = weights[val]
 
                     if self.output_weights is None:
                         self.output_weights = new_weights
                     else:
                         self.output_weights.extend(new_weights)
-
-                    print(self.output_weights)
                 else:
                     self.output_weights = False
 
-        print(self.output_weights)
+
         if self.transformer:
             sample = self.transformer.transform(sample)
 
@@ -183,9 +190,10 @@ class DataSource(Dataset):
             args += [arg2]
 
         if column_name in self.encoders:
-            return self.encoders[column_name].encode(*args)
-
-
+            encoded_vals = self.encoders[column_name].encode(*args)
+            if column_name not in self.encoded_cache:
+                self.encoded_cache[column_name] = encoded_vals
+            return encoded_vals
 
         if 'encoder_class' not in config:
             path = 'lightwood.encoders.{type}'.format(type=config['type'])
