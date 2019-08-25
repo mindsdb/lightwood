@@ -109,29 +109,15 @@ class DataSource(Dataset):
         if self.output_weights is None:
             for col_config in self.configuration['output_features']:
                 if 'weights' in col_config:
+
                     weights = col_config['weights']
-                    encoded_val_arr = []
+                    new_weights = [1] * len(weights)
+
                     for val in weights:
                         encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
-                        encoded_val_arr.append(encoded_val)
+                        value_index = encoded_val[np.where(encoded_val > 0.5)]
+                        new_weights[value_index] = weights[val]
 
-                    # Fails between here !
-                    print(3)
-                    new_weights = [None] * (len(weights) + 1)
-                    print(len(encoded_val_arr))
-                    for i in range(1,len(encoded_val_arr)):
-                        print(i)
-                        print(encoded_val_arr)
-                        print(encoded_val_arr[i])
-                        print(encoded_val_arr[i][0])
-                        np_encoded_val = np.array(encoded_val_arr[i][0])
-                        print('o')
-                        value_index = np_encoded_val[np.where(np_encoded_val > 0.5)]
-                        print('a')
-                        new_weights[value_index] = weights[i]
-                        print('b')
-
-                    # Fails between here !
                     if self.output_weights is None:
                         self.output_weights = new_weights
                     else:
