@@ -96,7 +96,6 @@ class DataSource(Dataset):
 
                 # if we are dropping this feature, get the encoded value of None
                 if dropout_features is not None and feature in dropout_features:
-
                     custom_data = {feature:[None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:
@@ -114,23 +113,35 @@ class DataSource(Dataset):
                     encoded_val_arr = []
                     for val in weights:
                         encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
-                        print(val)
-                        print(encoded_val)
-                        encoded_val_arr.append(encoded_val_arr)
+                        encoded_val_arr.append(encoded_val)
 
+                    # Fails between here !
+                    print(3)
                     new_weights = [None] * (len(weights) + 1)
+                    print(len(encoded_val_arr))
                     for i in range(1,len(encoded_val_arr)):
+                        print(i)
+                        print(encoded_val_arr)
+                        print(encoded_val_arr[i])
+                        print(encoded_val_arr[i][0])
                         np_encoded_val = np.array(encoded_val_arr[i][0])
+                        print('o')
                         value_index = np_encoded_val[np.where(np_encoded_val > 0.5)]
+                        print('a')
                         new_weights[value_index] = weights[i]
+                        print('b')
 
+                    # Fails between here !
                     if self.output_weights is None:
                         self.output_weights = new_weights
                     else:
                         self.output_weights.extend(new_weights)
+
+                    print(self.output_weights)
                 else:
                     self.output_weights = False
 
+        print(self.output_weights)
         if self.transformer:
             sample = self.transformer.transform(sample)
 
