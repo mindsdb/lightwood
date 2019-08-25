@@ -153,6 +153,7 @@ class Predictor:
                 tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
 
+                print('Computing test DS error !')
                 test_error = mixer.error(test_data_ds)
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
