@@ -92,7 +92,6 @@ class DataSource(Dataset):
                 col_name = feature['name']
                 col_config = self.get_column_config(feature)
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
-                    print('encoding columns')
                     self.get_encoded_column_data(col_name, feature_set)
 
                 # if we are dropping this feature, get the encoded value of None
@@ -104,9 +103,6 @@ class DataSource(Dataset):
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
 
                 else:
-                    if len(self.encoded_cache.keys()) < 1:
-                        print(self.data_frame)
-                        print(self.encoded_cache)
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
         # Create weights if not already create
@@ -121,10 +117,6 @@ class DataSource(Dataset):
                         encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
                         encoded_val = [round(x.item()) for x in encoded_val[0]]
                         value_index = encoded_val.index(1)
-                        print('===================')
-                        print(value_index)
-                        print(weights[val])
-                        print('===================')
                         new_weights[value_index] = weights[val]
 
                     if self.output_weights is None:
