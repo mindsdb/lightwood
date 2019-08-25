@@ -1,6 +1,7 @@
 import torch
 from PIL import Image
 import requests
+from io import BytesIO
 
 from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 
@@ -32,12 +33,12 @@ class Img2VecEncoder:
 
         pics = []
         for image in images:
-            if img.startswith('http'):
-                response = requests.get(img)
-                img = Image.open(StringIO(response.content))
+            if image.startswith('http'):
+                response = requests.get(image)
+                img = Image.open(BytesIO(response.content))
             else:
                 img = Image.open(image)
-                
+
             vec = self._model.get_vec(img)
             pics.append(vec)
 
