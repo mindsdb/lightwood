@@ -7,6 +7,8 @@ from torch import nn
 from torch.autograd import Variable
 from torchvision import transforms
 from torchvision.utils import save_image
+import requests
+from io import BytesIO
 
 if not os.path.exists('./mlp_img'):
     os.mkdir('./mlp_img')
@@ -126,9 +128,9 @@ class NnEncoderHelper:
         """
         data_source = []
         for image in images:
-            if img.startswith('http'):
-                response = requests.get(img)
-                img = Image.open(StringIO(response.content))
+            if image.startswith('http'):
+                response = requests.get(image)
+                img = Image.open(BytesIO(response.content))
             else:
                 img = Image.open(image)
             resized_image = img.resize((128, 128), PIL.Image.ANTIALIAS)
