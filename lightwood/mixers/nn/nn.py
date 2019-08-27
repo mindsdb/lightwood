@@ -143,6 +143,10 @@ class NnMixer:
         :param ds:
         :return:
         """
+
+        if ds.output_weights is not None and ds.output_weights is not False:
+            self.criterion = nn.CrossEntropyLossweight(weight=ds.output_weights)
+
         self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(

@@ -17,8 +17,9 @@ class DataSource(Dataset):
         self.encoders = {}
         self.transformer = None
         self.training = False # Flip this flag if you are using the datasource while training
-
+        self.output_weights = None
         self.dropout_dict = {}
+
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
                 dropout = 0.2
@@ -95,15 +96,36 @@ class DataSource(Dataset):
 
                 # if we are dropping this feature, get the encoded value of None
                 if dropout_features is not None and feature in dropout_features:
-
                     custom_data = {feature:[None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']]= [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
-                    
+
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
+
+        # Create weights if not already create
+        if self.output_weights is None:
+            for col_config in self.configuration['output_features']:
+                if 'weights' in col_config:
+
+                    weights = col_config['weights']
+                    new_weights = [1] * len(weights)
+
+                    for val in weights:
+                        encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
+                        encoded_val = [round(x.item()) for x in encoded_val[0]]
+                        value_index = encoded_val.index(1)
+                        new_weights[value_index] = weights[val]
+
+                    if self.output_weights is None:
+                        self.output_weights = new_weights
+                    else:
+                        self.output_weights.extend(new_weights)
+                else:
+                    self.output_weights = False
+
 
         if self.transformer:
             sample = self.transformer.transform(sample)
@@ -140,7 +162,7 @@ class DataSource(Dataset):
         :return:
         """
 
-        if column_name in self.encoded_cache:
+        if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
 
         # first argument of encoder is the data, so we either pass the custom data or we get the column data
@@ -160,11 +182,10 @@ class DataSource(Dataset):
             args += [arg2]
 
         if column_name in self.encoders:
-            self.encoded_cache[column_name] = self.encoders[column_name].encode(*args)
-
-            return self.encoded_cache[column_name]
-
-
+            encoded_vals = self.encoders[column_name].encode(*args)
+            if column_name not in self.encoded_cache:
+                self.encoded_cache[column_name] = encoded_vals
+            return encoded_vals
 
         if 'encoder_class' not in config:
             path = 'lightwood.encoders.{type}'.format(type=config['type'])
