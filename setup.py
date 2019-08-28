@@ -44,21 +44,8 @@ elif sys_platform == 'darwin':
 
 # Windows specific requirements
 elif sys_platform in ['win32','cygwin','windows']:
-
-    if is_installed_from_pypi:
-        requirements = remove_requirements(requirements,'torch')
-        requirements = remove_requirements(requirements,'torchvision')
-    else:
-        # Bellow should work for python3.7 + cudnn 10... though, surprisingly, it seems to also work for no cudnn
-        requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
-        requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
-
     requirements.append('cwrap')
-
-    # This doens't work as well as the `@` version
-    #dependency_links.append('https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0')
-    #dependency_links.append('https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0')
-
+    
 # For stuff like freebsd
 else:
     print('\n\n====================\n\nError, platform {sys_platform} not recognized, proceeding to install anyway, but lightwood might not work properly !\n\n====================\n\n')
