@@ -50,8 +50,9 @@ elif sys_platform in ['win32','cygwin','windows']:
         requirements = remove_requirements(requirements,'torchvision')
     else:
         # Bellow should work for python3.7 + cudnn 10... though, surprisingly, it seems to also work for no cudnn
-        requirements = remove_requirements(requirements,'torch',replace='torch==1.2.0 --find-links https://download.pytorch.org/whl/torch_stable.html')
-        requirements = remove_requirements(requirements,'torchvision',replace='torchvision==0.4.0 --find-links https://download.pytorch.org/whl/torch_stable.html')
+        requirements.append('--find-links https://download.pytorch.org/whl/torch_stable.html')
+        requirements = remove_requirements(requirements,'torch',replace='torch==1.2.0')
+        requirements = remove_requirements(requirements,'torchvision',replace='torchvision==0.4.0')
 
     requirements.append('cwrap')
 # For stuff like freebsd
