@@ -29,8 +29,6 @@ with open("README.md", "r") as fh:
 with open('requirements.txt') as req_file:
     requirements = [req.strip() for req in req_file.read().splitlines()]
 
-dependency_links = []
-
 # Linux specific requirements
 if sys_platform == 'linux' or sys_platform.startswith('linux'):
     pass
@@ -89,7 +87,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_data={'project': ['requirements.txt']},
     install_requires=requirements,
-    dependency_links=dependency_links,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
