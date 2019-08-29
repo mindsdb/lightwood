@@ -29,8 +29,6 @@ with open("README.md", "r") as fh:
 with open('requirements.txt') as req_file:
     requirements = [req.strip() for req in req_file.read().splitlines()]
 
-dependency_links = []
-
 # Linux specific requirements
 if sys_platform == 'linux' or sys_platform.startswith('linux'):
     pass
@@ -44,20 +42,19 @@ elif sys_platform == 'darwin':
 
 # Windows specific requirements
 elif sys_platform in ['win32','cygwin','windows']:
-
     if is_installed_from_pypi:
         requirements = remove_requirements(requirements,'torch')
         requirements = remove_requirements(requirements,'torchvision')
+
     else:
-        # Bellow should work for python3.7 + cudnn 10... though, surprisingly, it seems to also work for no cudnn
-        requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl')
-        requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl')
+        if sys.version_info < (3,7):
+            requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.2.0-cp36-cp36m-win_amd64.whl')
+            requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.4.0-cp36-cp36m-win_amd64.whl')
+        else:
+            requirements = remove_requirements(requirements,'torch',replace='torch @ https://download.pytorch.org/whl/cu100/torch-1.2.0-cp37-cp37m-win_amd64.whl')
+            requirements = remove_requirements(requirements,'torchvision',replace='torchvision @ https://download.pytorch.org/whl/cu100/torchvision-0.4.0-cp37-cp37m-win_amd64.whl')
 
     requirements.append('cwrap')
-
-    # This doens't work as well as the `@` version
-    #dependency_links.append('https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-win_amd64.whl#egg=torch-1.1.0')
-    #dependency_links.append('https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl#egg=torchvision-0.3.0')
 
 # For stuff like freebsd
 else:
@@ -90,7 +87,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_data={'project': ['requirements.txt']},
     install_requires=requirements,
-    dependency_links=dependency_links,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
