@@ -111,12 +111,16 @@ class DataSource(Dataset):
                 if 'weights' in col_config:
 
                     weights = col_config['weights']
-                    new_weights = [1] * len(weights)
+                    new_weights = None
 
                     for val in weights:
                         encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
                         encoded_val = [round(x.item()) for x in encoded_val[0]]
                         value_index = encoded_val.index(1)
+
+                        if new_weights is None:
+                            new_weights = [1] * len(encoded_val)
+                            
                         new_weights[value_index] = weights[val]
 
                     if self.output_weights is None:
