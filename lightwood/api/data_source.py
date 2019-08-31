@@ -120,7 +120,7 @@ class DataSource(Dataset):
 
                         if new_weights is None:
                             new_weights = [1] * len(encoded_val)
-                            
+
                         new_weights[value_index] = weights[val]
 
                     if self.output_weights is None:
