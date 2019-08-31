@@ -111,6 +111,12 @@ class NnMixer:
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
+            if ds.output_weights is not None and ds.output_weights is not False:
+                target = labels.numpy()
+                target_indexes = np.where(target>0)[1]
+                targets_c = torch.LongTensor(target_indexes)
+                labels = targets_c.to(self.net.device)
+                
             # forward + backward + optimize
             outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
@@ -143,10 +149,6 @@ class NnMixer:
         :param ds:
         :return:
         """
-
-        if ds.output_weights is not None and ds.output_weights is not False:
-            self.criterion = nn.CrossEntropyLossweight(weight=ds.output_weights)
-
         self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
@@ -179,6 +181,9 @@ class NnMixer:
 
                 self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
+            if ds.output_weights is not None and ds.output_weights is not False:
+                self.criterion = nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
+
             for i, data in enumerate(data_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
@@ -191,6 +196,12 @@ class NnMixer:
 
                 # forward + backward + optimize
                 outputs = self.net(inputs)
+
+                if ds.output_weights is not None and ds.output_weights is not False:
+                    target = labels.numpy()
+                    target_indexes = np.where(target>0)[1]
+                    targets_c = torch.LongTensor(target_indexes)
+                    labels = targets_c.to(self.net.device)
 
                 loss = self.criterion(outputs, labels)
                 loss.backward()
