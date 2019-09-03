@@ -7,6 +7,7 @@ import math
 import copy
 import logging
 import numpy as np
+import ax
 
 from lightwood.mixers.nn.helpers.default_net import DefaultNet
 from lightwood.mixers.nn.helpers.adamw import AdamW
@@ -24,7 +25,7 @@ class NnMixer:
         self.data_loader = None
         self.transformer = None
         self.encoders = None
-
+        self.error = None
 
         self.criterion = nn.MSELoss()
         self.epochs = 120000
@@ -116,7 +117,7 @@ class NnMixer:
                 target_indexes = np.where(target>0)[1]
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
-                
+
             # forward + backward + optimize
             outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
@@ -143,6 +144,52 @@ class NnMixer:
 
         self.net = model
 
+
+    def backprop(self, ds, epoch, params):
+        running_loss = 0.0
+        self.error = 0
+
+        if self.dynamic_adamw:
+            if epoch < 120:
+                if self.optimizer_args['lr'] < 0.01:
+                    self.optimizer_args['lr']=self.optimizer_args['lr'] + 0.00025
+            else:
+                if self.optimizer_args['lr'] > 0.001:
+                    self.optimizer_args['lr']=self.optimizer_args['lr'] - 0.0001
+
+        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+        if ds.output_weights is not None and ds.output_weights is not False:
+            self.criterion = nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
+
+        for i, data in enumerate(data_loader, 0):
+            # get the inputs; data is a list of [inputs, labels]
+            inputs, labels = data
+
+            labels = labels.to(self.net.device)
+            inputs = inputs.to(self.net.device)
+
+            # zero the parameter gradients
+            self.optimizer.zero_grad()
+
+            # forward + backward + optimize
+            outputs = self.net(inputs)
+
+            if ds.output_weights is not None and ds.output_weights is not False:
+                target = labels.numpy()
+                target_indexes = np.where(target>0)[1]
+                targets_c = torch.LongTensor(target_indexes)
+                labels = targets_c.to(self.net.device)
+
+            loss = self.criterion(outputs, labels)
+            loss.backward()
+            self.optimizer.step()
+
+            # print statistics
+            running_loss += loss.item()
+            self.error = running_loss / (i + 1)
+
+
     def iter_fit(self, ds):
         """
 
@@ -163,54 +210,26 @@ class NnMixer:
         self.net = self.nn_class(ds)
         self.net.train()
 
-        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+        #self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
         total_epochs = self.epochs
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
-            running_loss = 0.0
-            error = 0
+            best_parameters, best_values, experiment, model = ax.optimize(
+                parameters=[
+                    {
+                        "name":"lr",
+                        "type":"range",
+                        "bound": [0.05,0.5]
+                    }
+                ],
+                evaluable_function=lambda ax_params: self.backprop(ds,epoch,ax_params),
+                minimize=True,
+            )
 
-            if self.dynamic_adamw:
-                if epoch < 120:
-                    if self.optimizer_args['lr'] < 0.01:
-                        self.optimizer_args['lr']=self.optimizer_args['lr'] + 0.00025
-                else:
-                    if self.optimizer_args['lr'] > 0.001:
-                        self.optimizer_args['lr']=self.optimizer_args['lr'] - 0.0001
+            print(best_parameters, best_values, experiment, model)
 
-                self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
-            if ds.output_weights is not None and ds.output_weights is not False:
-                self.criterion = nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
-
-            for i, data in enumerate(data_loader, 0):
-                # get the inputs; data is a list of [inputs, labels]
-                inputs, labels = data
-
-                labels = labels.to(self.net.device)
-                inputs = inputs.to(self.net.device)
-
-                # zero the parameter gradients
-                self.optimizer.zero_grad()
-
-                # forward + backward + optimize
-                outputs = self.net(inputs)
-
-                if ds.output_weights is not None and ds.output_weights is not False:
-                    target = labels.numpy()
-                    target_indexes = np.where(target>0)[1]
-                    targets_c = torch.LongTensor(target_indexes)
-                    labels = targets_c.to(self.net.device)
-
-                loss = self.criterion(outputs, labels)
-                loss.backward()
-                self.optimizer.step()
-
-                # print statistics
-                running_loss += loss.item()
-                error = running_loss / (i + 1)
-
+            error = self.error
             yield error
 
 
