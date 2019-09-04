@@ -22,7 +22,6 @@ class NnMixer:
         self.optimizer = None
         self.input_column_names = None
         self.output_column_names = None
-        self.data_loader = None
         self.transformer = None
         self.encoders = None
         self.error = None
@@ -145,7 +144,7 @@ class NnMixer:
         self.net = model
 
 
-    def backprop(self, ds, epoch, params):
+    def backprop(self, ds, epoch, params, data_loader):
         running_loss = 0.0
         self.error = 0
 
@@ -223,7 +222,7 @@ class NnMixer:
                         "bounds": [0.05,0.5]
                     }
                 ],
-                evaluation_function=lambda ax_params: self.backprop(ds,epoch,ax_params),
+                evaluation_function=lambda ax_params: self.backprop(ds,epoch,ax_params,data_loader),
                 minimize=True,
             )
 
