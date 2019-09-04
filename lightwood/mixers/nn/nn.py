@@ -146,7 +146,7 @@ class NnMixer:
 
     def backprop(self, ds, epoch, params, data_loader):
         running_loss = 0.0
-        self.error = 0
+        error = 0
 
         if self.dynamic_adamw:
             if epoch < 120:
@@ -186,7 +186,9 @@ class NnMixer:
 
             # print statistics
             running_loss += loss.item()
-            self.error = running_loss / (i + 1)
+            error = running_loss / (i + 1)
+
+        return error
 
 
     def iter_fit(self, ds):
