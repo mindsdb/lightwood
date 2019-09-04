@@ -220,10 +220,10 @@ class NnMixer:
                     {
                         "name":"lr",
                         "type":"range",
-                        "bound": [0.05,0.5]
+                        "bounds": [0.05,0.5]
                     }
                 ],
-                evaluable_function=lambda ax_params: self.backprop(ds,epoch,ax_params),
+                evaluation_function=lambda ax_params: self.backprop(ds,epoch,ax_params),
                 minimize=True,
             )
 
