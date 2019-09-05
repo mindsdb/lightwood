@@ -15,8 +15,7 @@ from lightwood.mixers.nn.helpers.transformer import Transformer
 
 class NnMixer:
 
-    def __init__(self, dynamic_parameters=None):
-        self.dynamic_adamw = False
+    def __init__(self, dynamic_parameters):
         self.net = None
         self.optimizer = None
         self.input_column_names = None
@@ -24,25 +23,16 @@ class NnMixer:
         self.data_loader = None
         self.transformer = None
         self.encoders = None
-
-
-        self.criterion = nn.MSELoss()
+        self.optimizer_class = None
+        self.optimizer_args =  None
+        self.criterion = None
+        self.batch_size = None
         self.epochs = 120000
 
-        if self.dynamic_adamw:
-            self.optimizer_class = AdamW
-            self.optimizer_args = {'amsgrad': False, 'lr':0.001}
-        else:
-            self.optimizer_class = optim.Adadelta
-            self.optimizer_args = {'lr': 0.1}
-
         self.nn_class = DefaultNet
-        self.batch_size = 100
+        self.dynamic_parameters = dynamic_parameters
 
-
-        pass
-
-    def fit(self, ds= None, callback=None):
+    def fit(self, ds=None, callback=None):
 
         ret = 0
         for i in self.iter_fit(ds):
@@ -146,6 +136,7 @@ class NnMixer:
         :param ds:
         :return:
         """
+
         self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
             'input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
@@ -155,32 +146,37 @@ class NnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
+        ds[0]
+
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         self.net = self.nn_class(ds)
         self.net.train()
 
+        self.batch_size = 100
+
+        if ds.output_weights is not None and ds.output_weights is not False:
+            self.criterion = nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
+        else:
+            self.criterion = nn.MSELoss()
+
+
+        base_lr = self.dynamic_parameters['base_lr']
+        max_lr = self.dynamic_parameters['max_lr']
+        scheduler_mode = self.dynamic_parameters['scheduler_mode'] #triangular, triangular2, exp_range
+        step_size_up=200
+
+        self.optimizer_class = AdamW
+        self.optimizer_args = {'amsgrad': False, 'lr': base_lr}
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+        self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=None, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=True, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
 
         total_epochs = self.epochs
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
-
-            if self.dynamic_adamw:
-                if epoch < 120:
-                    if self.optimizer_args['lr'] < 0.01:
-                        self.optimizer_args['lr']=self.optimizer_args['lr'] + 0.00025
-                else:
-                    if self.optimizer_args['lr'] > 0.001:
-                        self.optimizer_args['lr']=self.optimizer_args['lr'] - 0.0001
-
-                self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
-            if ds.output_weights is not None and ds.output_weights is not False:
-                self.criterion = nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
-
             for i, data in enumerate(data_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
@@ -194,6 +190,7 @@ class NnMixer:
                 # forward + backward + optimize
                 outputs = self.net(inputs)
 
+                # If the criterion is CrossEntropyLoss, this happens when weights are present
                 if ds.output_weights is not None and ds.output_weights is not False:
                     target = labels.numpy()
                     target_indexes = np.where(target>0)[1]
@@ -202,9 +199,10 @@ class NnMixer:
 
                 loss = self.criterion(outputs, labels)
                 loss.backward()
-                self.optimizer.step()
 
-                # print statistics
+                self.optimizer.step()
+                self.scheduler.step()
+
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
 

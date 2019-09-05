@@ -64,12 +64,9 @@ class Predictor:
     def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, max_training_time, dynamic_parameters):
         started_evaluation_at = int(time.time())
         lowest_error = 1
-
-        mixer = mixer_class()
+        mixer = mixer_class(dynamic_parameters)
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
             lowest_error = min(mixer.error(test_data_ds),lowest_error)
-            print(lowest_error)
-            print(dynamic_parameters)
             if started_evaluation_at < (int(time.time()) - max_training_time):
                 return lowest_error
 
@@ -137,18 +134,17 @@ class Predictor:
 
         best_parameters, values, experiment, model = ax.optimize(
             parameters=[
-                {"name": "lr", "type": "range", "bounds": [1e-6, 0.4], "log_scale": True},
-                {"name": "momentum", "type": "range", "bounds": [0.0, 1.0]},
+                {'name': 'base_lr', 'type': 'range', 'bounds': [3 * 1e-4,3 * 1e-3]}, # , 'log_scale': True ?
+                {'name': 'max_lr', 'type': 'range', 'bounds': [5 * 1e-3,5 * 1e-2]},
+                {'name': 'scheduler_mode', 'type': 'choice', 'values': ['triangular', 'triangular2', 'exp_range']},
             ],
-            evaluation_function=lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, 30, dynamic_parameters),
+            evaluation_function=lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, 20, dynamic_parameters),
             objective_name='accuracy',
         )
 
         print(best_parameters, values, experiment, model)
-        exit()
 
-
-        mixer = mixer_class()
+        mixer = mixer_class(best_parameters)
         self._mixer = mixer
 
         for param in mixer_params:
