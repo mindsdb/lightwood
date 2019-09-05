@@ -5,8 +5,8 @@ import time
 import dill
 import copy
 import pandas
-
 import numpy as np
+import ax
 
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
@@ -16,6 +16,7 @@ from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import explained_variance_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+
 
 class Predictor:
 
@@ -58,6 +59,19 @@ class Predictor:
         self._stop_training_flag = False
 
         self.train_accuracy = None
+
+    @staticmethod
+    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, max_training_time, dynamic_parameters):
+        started_evaluation_at = int(time.time())
+        lowest_error = 1
+
+        mixer = mixer_class()
+        for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+            lowest_error = min(mixer.error(test_data_ds),lowest_error)
+            print(lowest_error)
+            print(dynamic_parameters)
+            if started_evaluation_at < (int(time.time()) - max_training_time):
+                return lowest_error
 
     def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8):
         """
@@ -138,6 +152,9 @@ class Predictor:
         lowest_error = None
         lowest_error_epoch = None
         last_good_model = None
+
+        Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, 120, 'WHATEVER !')
+        exit()
 
         started_training_at = int(time.time())
         #iterate over the iter_fit and see what the epoch and mixer error is
