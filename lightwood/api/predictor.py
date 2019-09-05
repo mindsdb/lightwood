@@ -135,6 +135,18 @@ class Predictor:
         else:
             mixer_class = NnMixer
 
+        best_parameters, values, experiment, model = optimize(
+            parameters=[
+                {"name": "lr", "type": "range", "bounds": [1e-6, 0.4], "log_scale": True},
+                {"name": "momentum", "type": "range", "bounds": [0.0, 1.0]},
+            ],
+            evaluation_function=lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, 30, dynamic_parameters),
+            objective_name='accuracy',
+        )
+
+        print(best_parameters, values, experiment, model)
+        exit()
+
 
         mixer = mixer_class()
         self._mixer = mixer
@@ -152,9 +164,6 @@ class Predictor:
         lowest_error = None
         lowest_error_epoch = None
         last_good_model = None
-
-        Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, 120, 'WHATEVER !')
-        exit()
 
         started_training_at = int(time.time())
         #iterate over the iter_fit and see what the epoch and mixer error is
