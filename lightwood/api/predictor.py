@@ -123,6 +123,10 @@ class Predictor:
 
         from_data_ds.training = True
 
+        # This should serve to "initialize" the data sources
+        from_data_ds[0]
+        test_data_ds[0]
+
         mixer_params = {}
 
         if 'mixer' in self.config:
@@ -137,6 +141,7 @@ class Predictor:
                 {'name': 'base_lr', 'type': 'range', 'bounds': [3 * 1e-4,3 * 1e-3]}, # , 'log_scale': True ?
                 {'name': 'max_lr', 'type': 'range', 'bounds': [5 * 1e-3,5 * 1e-2]},
                 {'name': 'scheduler_mode', 'type': 'choice', 'values': ['triangular', 'triangular2', 'exp_range']},
+                {'name': 'weight_decay', 'type': 'range', 'bounds': [6 * 1e-3, 4 * 1e-2]},
             ],
             evaluation_function=lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, 20, dynamic_parameters),
             objective_name='accuracy',

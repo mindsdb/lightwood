@@ -9,7 +9,6 @@ import logging
 import numpy as np
 
 from lightwood.mixers.nn.helpers.default_net import DefaultNet
-from lightwood.mixers.nn.helpers.adamw import AdamW
 from lightwood.mixers.nn.helpers.transformer import Transformer
 
 
@@ -26,7 +25,8 @@ class NnMixer:
         self.optimizer_class = None
         self.optimizer_args =  None
         self.criterion = None
-        self.batch_size = None
+
+        self.batch_size = 100
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -146,14 +146,12 @@ class NnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-        ds[0]
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         self.net = self.nn_class(ds)
         self.net.train()
 
-        self.batch_size = 100
 
         if ds.output_weights is not None and ds.output_weights is not False:
             self.criterion = nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
@@ -164,13 +162,17 @@ class NnMixer:
         base_lr = self.dynamic_parameters['base_lr']
         max_lr = self.dynamic_parameters['max_lr']
         scheduler_mode = self.dynamic_parameters['scheduler_mode'] #triangular, triangular2, exp_range
+        weight_decay = self.dynamic_parameters['weight_decay']
+
         step_size_up=200
 
-        self.optimizer_class = AdamW
-        self.optimizer_args = {'amsgrad': False, 'lr': base_lr}
+        self.optimizer_class = torch.optim.AdamW
+        cycle_momentum = False # Set to "True" if we get optimizers with momentum
+        # Note: we can probably the distance between and the values for base_momentum and max_momentum based on the poportion between base_lr and max_lr (not sure how yet, but it makes some intuitive sense that this could be done), that way we don't have to use fixed values but we don't have to search for the best values... or at least we could reduce the search space and run only a few ax iterations
+        self.optimizer_args = {'amsgrad': False, 'lr': base_lr, 'weight_decay': weight_decay}
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-        self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=None, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=True, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+        self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=None, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=cycle_momentum, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
 
         total_epochs = self.epochs
 
