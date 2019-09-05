@@ -135,7 +135,7 @@ class Predictor:
         else:
             mixer_class = NnMixer
 
-        best_parameters, values, experiment, model = optimize(
+        best_parameters, values, experiment, model = ax.optimize(
             parameters=[
                 {"name": "lr", "type": "range", "bounds": [1e-6, 0.4], "log_scale": True},
                 {"name": "momentum", "type": "range", "bounds": [0.0, 1.0]},
