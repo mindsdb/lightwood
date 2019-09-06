@@ -70,10 +70,8 @@ class Predictor:
             exit()
 
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
-            print('\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n')
-            print(test_data_ds[0])
-            print('\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n')
-            lowest_error = min(mixer.error(test_data_ds),lowest_error)
+            error = mixer.error(test_data_ds)
+            lowest_error = min(error,lowest_error)
 
             if max_epochs is not None and epoch >= max_epochs:
                 return lowest_error
@@ -135,12 +133,23 @@ class Predictor:
         from_data_ds.training = True
 
         # This should serve to "initialize" the data sources, if you remove it make sure to access some index to keep initializing them before this point
-        print('Initializing DF')
+        '''
         input_size = sum([len(x) for x in from_data_ds[0]['input_features'].values()])
         training_data_length = len(from_data_ds)
+
+        test_data_ds.transformer = from_data_ds.transformer
+        test_data_ds.encoders = from_data_ds.encoders
+
         if input_size != sum([len(x) for x in test_data_ds[0]['input_features'].values()]):
             logging.error("Test and Training dataframe members are of different size !")
-        print('Done initializing DF')
+        '''
+
+        input_size = 20
+        training_data_length = 400
+
+        test_data_ds.transformer = from_data_ds.transformer
+        test_data_ds.encoders = from_data_ds.encoders
+
 
         mixer_params = {}
 

@@ -86,9 +86,10 @@ class NnMixer:
         :param ds:
         :return:
         """
-        ds.transformer = self.transformer
-        ds.encoders = self.encoders
 
+        ds.encoders = self.encoders
+        ds.transformer = self.transformer
+        
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         running_loss = 0.0
         error = 0
