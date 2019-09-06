@@ -19,6 +19,4 @@ class BasicAxOptimizer:
             total_trials = self.total_trials,
         )
 
-        print(best_parameters, values, experiment, model)
-
         return best_parameters
