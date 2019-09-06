@@ -149,7 +149,7 @@ class NnMixer:
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
-        self.net = self.nn_class(ds, dynamic_parameters)
+        self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net.train()
 
 
