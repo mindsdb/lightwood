@@ -39,7 +39,7 @@ class DefaultNet(nn.Module):
         even_input_output = larger_input and large_output
 
         if 'network_depth' in dynamic_parameters:
-            depth = dynamic_parameters['network_shape']
+            depth = dynamic_parameters['network_depth']
         else:
             depth = 5
 
