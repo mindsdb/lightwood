@@ -41,25 +41,23 @@ class DefaultNet(nn.Module):
         even_input_output = larger_input and large_output
 
         if 'network_depth' in self.dynamic_parameters:
-            depth = self.dynamic_parameters['network_depth']
+            pass
+            #depth = self.dynamic_parameters['network_depth']
         else:
             depth = 5
 
         # 3. Determine shpae based on the sizes & propotions
-        if not large_input and not large_output:
+        if (not large_input) and (not large_output):
             if larger_input:
                 shape = rombus(input_size,output_size,depth,input_size*2)
             else:
                 shape = rectangle(input_size,output_size,depth - 1)
 
-        elif not large_output and large_input:
+        elif (not large_output) and large_input:
             shape = funnel(input_size,output_size,depth)
 
-        elif not large_input and large_output:
-            if larger_input:
-                shape = funnel(input_size,output_size,depth - 1)
-            else:
-                shape = rectangle(input_size,output_size,depth - 1)
+        elif (not large_input) and large_output:
+            shape = rectangle(input_size,output_size,depth - 1)
 
         else:
             shape = rectangle(input_size,output_size,depth - 2)

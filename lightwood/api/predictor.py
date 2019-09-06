@@ -70,6 +70,9 @@ class Predictor:
             exit()
 
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+            print('\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n')
+            print(test_data_ds[0])
+            print('\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n')
             lowest_error = min(mixer.error(test_data_ds),lowest_error)
 
             if max_epochs is not None and epoch >= max_epochs:
@@ -167,12 +170,13 @@ class Predictor:
 
             training_time_per_iteration = (stop_training_after_seconds/2)/optimizer.total_trials
 
-            print(training_time_per_iteration)
-            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration))
+            print(training_time_per_iteration, optimizer.total_trials)
+
+            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
             best_parameters = {}
-            
+
         print(best_parameters)
         mixer = mixer_class(best_parameters)
         self._mixer = mixer
