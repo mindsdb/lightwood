@@ -15,7 +15,8 @@ config = {'input_features': [
     '3': 0.7,
     '4': 1,
  }}],
- 'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer}}
+ 'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer},
+ 'optimizer':lightwood.model_building.BasicAxOptimizer}
 
 lightwood.config.config.CONFIG.USE_CUDA = False
 
