@@ -183,9 +183,8 @@ class Predictor:
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
-            best_parameters = {}
+            best_parameters = {'base_lr': 0.002815597701072693, 'max_lr': 0.04687393367290497, 'weight_decay': 0.023905532956123354, 'network_depth': 6, 'scheduler_mode': 'triangular'}
 
-        print(best_parameters)
         mixer = mixer_class(best_parameters)
         self._mixer = mixer
 
