@@ -12,8 +12,7 @@ from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 from lightwood.mixers.nn.nn import NnMixer
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import explained_variance_score, r2_score
+from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 
@@ -180,8 +179,6 @@ class Predictor:
                     break
 
             training_time_per_iteration = (stop_training_after_seconds/2)/optimizer.total_trials
-
-            print(training_time_per_iteration, optimizer.total_trials)
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
         else:

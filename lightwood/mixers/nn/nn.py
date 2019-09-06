@@ -1,11 +1,9 @@
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-import torch
-import math
 import copy
 import logging
+
+import torch
+import torch.optim as optim
+from torch.utils.data import DataLoader
 import numpy as np
 
 from lightwood.mixers.nn.helpers.default_net import DefaultNet
@@ -151,9 +149,9 @@ class NnMixer:
 
         if self.criterion is None:
             if ds.output_weights is not None and ds.output_weights is not False:
-                self.criterion = nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
+                self.criterion = torch.nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
             else:
-                self.criterion = nn.MSELoss()
+                self.criterion = torch.nn.MSELoss()
 
 
         base_lr = self.dynamic_parameters['base_lr']
