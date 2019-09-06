@@ -132,23 +132,8 @@ class Predictor:
 
         from_data_ds.training = True
 
-        # This should serve to "initialize" the data sources, if you remove it make sure to access some index to keep initializing them before this point
-        '''
-        input_size = sum([len(x) for x in from_data_ds[0]['input_features'].values()])
-        training_data_length = len(from_data_ds)
-
-        test_data_ds.transformer = from_data_ds.transformer
-        test_data_ds.encoders = from_data_ds.encoders
-
-        if input_size != sum([len(x) for x in test_data_ds[0]['input_features'].values()]):
-            logging.error("Test and Training dataframe members are of different size !")
-        '''
-
-        input_size = 20
-        training_data_length = 400
-
-        test_data_ds.transformer = from_data_ds.transformer
-        test_data_ds.encoders = from_data_ds.encoders
+        #test_data_ds.transformer = from_data_ds.transformer
+        #test_data_ds.encoders = from_data_ds.encoders
 
 
         mixer_params = {}
@@ -159,6 +144,22 @@ class Predictor:
                 mixer_params = self.config['mixer']['attrs']
         else:
             mixer_class = NnMixer
+
+        # Initialize data sources
+        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
+            'input_features')
+        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
+            'output_features')
+        ds.transformer = Transformer(self.input_column_names, self.output_column_names)
+
+        input_size = len(from_data_ds[0][0])
+        training_data_length = len(from_data_ds)
+
+        test_data_ds.transformer = from_data_ds.transformer
+        test_data_ds.encoders = from_data_ds.encoders
+
+        if input_size != len(test_data_ds[0][0]):
+            logging.error("Test and Training dataframe members are of different size !")
 
 
         if 'optimizer' in self.config:
