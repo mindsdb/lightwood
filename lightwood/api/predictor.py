@@ -146,7 +146,11 @@ class Predictor:
             mixer_class = NnMixer
 
         # Initialize data sources
-        mixer_class({}).fit_data_source(from_data_ds)
+        try:
+            mixer_class({}).fit_data_source(from_data_ds)
+        except:
+            # Not all mixers might require this
+            pass
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
@@ -167,7 +171,7 @@ class Predictor:
 
                 # Some heuristics...
                 if training_time_per_iteration > input_size:
-                    if training_time_per_iteration > (training_data_length/2*input_size):
+                    if training_time_per_iteration > (training_data_length/(4*input_size)):
                         break
 
                 optimizer.total_trials = round(optimizer.total_trials/1.5)

@@ -95,22 +95,20 @@ class NnMixer:
         error = 0
 
         for i, data in enumerate(data_loader, 0):
-            # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
+            # If the criterion is CrossEntropyLoss, this happens when weights are present
             if ds.output_weights is not None and ds.output_weights is not False:
                 target = labels.numpy()
                 target_indexes = np.where(target>0)[1]
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
 
-            # forward + backward + optimize
             outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
 
-            # print statistics
             running_loss += loss.item()
             error = running_loss / (i + 1)
 
