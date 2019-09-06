@@ -26,7 +26,7 @@ class NnMixer:
         self.optimizer_args = None
         self.criterion = None
 
-        self.batch_size = 100
+        self.batch_size = 200
         self.epochs = 120000
 
         self.nn_class = DefaultNet
