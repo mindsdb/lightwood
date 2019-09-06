@@ -186,6 +186,7 @@ class Predictor:
             # Run a bunch of models through AX and figure out some decent values to put in here
             best_parameters = {'base_lr': 0.001, 'max_lr': 0.01, 'weight_decay': 0.0001, 'network_depth': 5, 'scheduler_mode': 'triangular'}
             #{'base_lr': 0.0010908834993839263, 'max_lr': 0.017912471592426298, 'weight_decay': 0.0020115823894739154}
+            #{'base_lr': 0.002827171164751053, 'max_lr': 0.008985094726085663, 'weight_decay': 0.0019616351649165155}
         stop_training_after_seconds = stop_training_after_seconds - stop_training_after_seconds * (2/3)
         mixer = mixer_class(best_parameters)
         self._mixer = mixer
