@@ -8,7 +8,7 @@ import torch
 
 class DefaultNet(nn.Module):
 
-    def __init__(self, ds):
+    def __init__(self, ds, dynamic_parameters):
         if CONFIG.USE_CUDA:
             self.device = torch.device('cuda')
         else:
@@ -38,27 +38,29 @@ class DefaultNet(nn.Module):
         larger_input = True if input_size > output_size*2 else False
         even_input_output = larger_input and large_output
 
+        if 'network_depth' in dynamic_parameters:
+            depth = dynamic_parameters['network_shape']
+        else:
+            depth = 5
+
         # 3. Determine shpae based on the sizes & propotions
         if not large_input and not large_output:
             if larger_input:
-                shape = rombus(input_size,output_size,5,input_size*2)
+                shape = rombus(input_size,output_size,depth,input_size*2)
             else:
-                shape = rectangle(input_size,output_size,4)
+                shape = rectangle(input_size,output_size,depth - 1)
 
         elif not large_output and large_input:
-            depth = 5
-            if large_output:
-                depth = depth - 1
             shape = funnel(input_size,output_size,depth)
 
         elif not large_input and large_output:
             if larger_input:
-                shape = funnel(input_size,output_size,4)
+                shape = funnel(input_size,output_size,depth - 1)
             else:
-                shape = rectangle(input_size,output_size,4)
+                shape = rectangle(input_size,output_size,depth - 1)
 
         else:
-            shape = rectangle(input_size,output_size,3)
+            shape = rectangle(input_size,output_size,depth - 2)
 
         logging.info(f'Building network of shape: {shape}')
         rectifier = nn.SELU  #alternative: nn.ReLU
