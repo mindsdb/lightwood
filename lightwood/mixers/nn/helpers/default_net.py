@@ -1,12 +1,11 @@
 import logging
 from lightwood.config.config import CONFIG
 from .shapes import *
-import torch.nn as nn
 import torch
 
 
 
-class DefaultNet(nn.Module):
+class DefaultNet(torch.nn.Module):
 
     def __init__(self, ds, dynamic_parameters):
         if CONFIG.USE_CUDA:
@@ -62,16 +61,16 @@ class DefaultNet(nn.Module):
             shape = rectangle(input_size,output_size,depth - 2)
 
         logging.info(f'Building network of shape: {shape}')
-        rectifier = nn.SELU  #alternative: nn.ReLU
+        rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
 
         layers = []
         for ind in range(len(shape) - 1):
-            layers.append(nn.Linear(shape[ind],shape[ind+1]))
+            layers.append(torch.nn.Linear(shape[ind],shape[ind+1]))
             if ind < len(shape) - 2:
                 layers.append(rectifier())
 
 
-        self.net = nn.Sequential(*layers)
+        self.net = torch.nn.Sequential(*layers)
 
         self.net = self.net.to(self.device)
 
