@@ -15,8 +15,12 @@ config = {'input_features': [
     '3': 0.7,
     '4': 1,
  }}],
- 'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer},
- 'optimizer':lightwood.model_building.BasicAxOptimizer}
+ 'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer}}
+
+
+# AX doesn't seem to work on the travis version of windows, so don't test it there as of now
+if sys.platform not in ['win32','cygwin','windows']:
+    config['optimizer'] = lightwood.model_building.BasicAxOptimizer
 
 lightwood.config.config.CONFIG.USE_CUDA = False
 
