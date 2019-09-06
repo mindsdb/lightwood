@@ -147,7 +147,7 @@ class Predictor:
             mixer_class = NnMixer
 
 
-        if 'optimizer' in self.config['optimizer']:
+        if 'optimizer' in self.config:
             optimizer = self.config['optimizer']()
 
             while True:
