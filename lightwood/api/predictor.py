@@ -146,17 +146,14 @@ class Predictor:
             mixer_class = NnMixer
 
         # Initialize data sources
-        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
-            'input_features')
-        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
-            'output_features')
-        ds.transformer = Transformer(self.input_column_names, self.output_column_names)
+        mixer_class({}).fit_data_source(from_data_ds)
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
 
         test_data_ds.transformer = from_data_ds.transformer
         test_data_ds.encoders = from_data_ds.encoders
+        # Initialize data sources
 
         if input_size != len(test_data_ds[0][0]):
             logging.error("Test and Training dataframe members are of different size !")

@@ -132,14 +132,19 @@ class NnMixer:
 
         self.net = model
 
+    def fit_data_source(self, ds):
+        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names('input_features')
+        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names('output_features')
+        ds.transformer = Transformer(self.input_column_names, self.output_column_names)
+        self.encoders = ds.encoders
+        self.transformer = ds.transformer
+
     def iter_fit(self, ds):
         """
         :param ds:
         :return:
         """
-        self.encoders = ds.encoders
-        self.transformer = ds.transformer
-
+        self.fit_data_source(ds)
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
