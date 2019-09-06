@@ -1,9 +1,8 @@
 import ax
 
 class BasicAxOptimizer:
-    __init__(self):
+    def __init__(self):
         self.total_trials = 40
-        pass
 
     def evaluate(self, error_yielding_function):
 
