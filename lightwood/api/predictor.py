@@ -6,7 +6,6 @@ import dill
 import copy
 import pandas
 import numpy as np
-import ax
 
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
@@ -61,13 +60,22 @@ class Predictor:
         self.train_accuracy = None
 
     @staticmethod
-    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, max_training_time, dynamic_parameters):
+    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
         lowest_error = 1
         mixer = mixer_class(dynamic_parameters)
+
+        if max_training_time is None and max_epochs is None:
+            logging.log.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
+            exit()
+
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
             lowest_error = min(mixer.error(test_data_ds),lowest_error)
-            if started_evaluation_at < (int(time.time()) - max_training_time):
+
+            if max_epochs is not None and epoch >= max_epochs:
+                return lowest_error
+
+            if max_training_time is not None started_evaluation_at < (int(time.time()) - max_training_time):
                 return lowest_error
 
     def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8):
@@ -124,8 +132,10 @@ class Predictor:
         from_data_ds.training = True
 
         # This should serve to "initialize" the data sources
+        print('Initializing DF')
         from_data_ds[0]
         test_data_ds[0]
+        print('Done initializing DF')
 
         mixer_params = {}
 
@@ -136,19 +146,21 @@ class Predictor:
         else:
             mixer_class = NnMixer
 
-        best_parameters, values, experiment, model = ax.optimize(
-            parameters=[
-                {'name': 'base_lr', 'type': 'range', 'bounds': [3 * 1e-4,3 * 1e-3]}, # , 'log_scale': True ?
-                {'name': 'max_lr', 'type': 'range', 'bounds': [5 * 1e-3,5 * 1e-2]},
-                {'name': 'network_depth', 'type': 'choice', 'values': [4,5,6,7]},
-                {'name': 'scheduler_mode', 'type': 'choice', 'values': ['triangular', 'triangular2', 'exp_range']},
-                {'name': 'weight_decay', 'type': 'range', 'bounds': [6 * 1e-3, 4 * 1e-2]},
-            ],
-            evaluation_function=lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, 20, dynamic_parameters),
-            objective_name='accuracy',
-        )
 
-        print(best_parameters, values, experiment, model)
+        if 'optimizer' in self.config['optimizer']:
+            optimizer = self.config['optimizer']()
+
+            while True:
+                training_time_per_iteration = (stop_training_after_seconds/2)/optimizer.total_trials
+
+                in_len = from_data_ds[0]
+                nr_ins = len(from_data_ds)
+                print(in_len)
+                print(nr_ins)
+                print(training_time_per_iteration)
+
+            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=20))
+
 
         mixer = mixer_class(best_parameters)
         self._mixer = mixer
