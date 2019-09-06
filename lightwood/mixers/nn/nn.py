@@ -156,7 +156,12 @@ class NnMixer:
 
         base_lr = self.dynamic_parameters['base_lr']
         max_lr = self.dynamic_parameters['max_lr']
-        scheduler_mode = self.dynamic_parameters['scheduler_mode'] #triangular, triangular2, exp_range
+
+        if 'scheduler_mode' not in self.dynamic_parameters:
+            scheduler_mode = 'triangular'
+        else:
+            scheduler_mode = self.dynamic_parameters['scheduler_mode'] #triangular, triangular2, exp_range
+            
         weight_decay = self.dynamic_parameters['weight_decay']
 
         step_size_up=200

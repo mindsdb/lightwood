@@ -166,7 +166,7 @@ class Predictor:
             optimizer = self.config['optimizer']()
 
             while True:
-                training_time_per_iteration = (stop_training_after_seconds/2)/optimizer.total_trials
+                training_time_per_iteration = (stop_training_after_seconds*(2/3))/optimizer.total_trials
 
                 # Some heuristics...
                 if training_time_per_iteration > input_size:
@@ -178,13 +178,15 @@ class Predictor:
                     optimizer.total_trials = 8
                     break
 
-            training_time_per_iteration = (stop_training_after_seconds/2)/optimizer.total_trials
+            training_time_per_iteration = (stop_training_after_seconds*(2/3))/optimizer.total_trials
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
+            print(best_parameters)
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
-            best_parameters = {'base_lr': 0.0028, 'max_lr': 0.047, 'weight_decay': 0.024, 'network_depth': 6, 'scheduler_mode': 'triangular'}
+            best_parameters = {'base_lr': 0.001, 'max_lr': 0.01, 'weight_decay': 0.0001, 'network_depth': 5, 'scheduler_mode': 'triangular'}
 
+        stop_training_after_seconds = stop_training_after_seconds - stop_training_after_seconds * (2/3)
         mixer = mixer_class(best_parameters)
         self._mixer = mixer
 
