@@ -12,7 +12,7 @@ class BasicAxOptimizer:
                 {'name': 'max_lr', 'type': 'range', 'bounds': [0.005,0.02]},
                 #{'name': 'network_depth', 'type': 'choice', 'values': [5,6]},
                 #{'name': 'scheduler_mode', 'type': 'choice', 'values': ['triangular', 'triangular2', 'exp_range']},
-                {'name': 'weight_decay', 'type': 'range', 'bounds': [0.01, 0.001]},
+                {'name': 'weight_decay', 'type': 'range', 'bounds': [0.001, 0.01]},
             ],
             evaluation_function=error_yielding_function,
             objective_name='accuracy',
