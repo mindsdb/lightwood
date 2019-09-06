@@ -75,7 +75,7 @@ class Predictor:
             if max_epochs is not None and epoch >= max_epochs:
                 return lowest_error
 
-            if max_training_time is not None started_evaluation_at < (int(time.time()) - max_training_time):
+            if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
                 return lowest_error
 
     def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8):
@@ -158,6 +158,7 @@ class Predictor:
                 print(in_len)
                 print(nr_ins)
                 print(training_time_per_iteration)
+                exit()
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=20))
 
