@@ -88,7 +88,7 @@ class NnMixer:
         """
         ds.transformer = self.transformer
         ds.encoders = self.encoders
-        print(ds)
+
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         running_loss = 0.0
         error = 0
