@@ -66,7 +66,7 @@ class Predictor:
         mixer = mixer_class(dynamic_parameters)
 
         if max_training_time is None and max_epochs is None:
-            logging.log.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
+            logging.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
             exit()
 
         for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
@@ -131,10 +131,12 @@ class Predictor:
 
         from_data_ds.training = True
 
-        # This should serve to "initialize" the data sources
+        # This should serve to "initialize" the data sources, if you remove it make sure to access some index to keep initializing them before this point
         print('Initializing DF')
-        from_data_ds[0]
-        test_data_ds[0]
+        input_size = sum([len(x) for x in from_data_ds[0]['input_features'].values()])
+        training_data_length = len(from_data_ds)
+        if input_size != sum([len(x) for x in test_data_ds[0]['input_features'].values()]):
+            logging.error("Test and Training dataframe members are of different size !")
         print('Done initializing DF')
 
         mixer_params = {}
@@ -153,16 +155,25 @@ class Predictor:
             while True:
                 training_time_per_iteration = (stop_training_after_seconds/2)/optimizer.total_trials
 
-                in_len = from_data_ds[0]
-                nr_ins = len(from_data_ds)
-                print(in_len)
-                print(nr_ins)
-                print(training_time_per_iteration)
-                exit()
+                # Some heuristics...
+                if training_time_per_iteration > input_size:
+                    if training_time_per_iteration > (training_data_length/2*input_size):
+                        break
 
-            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=20))
+                optimizer.total_trials = round(optimizer.total_trials/1.5)
+                if optimizer.total_trials < 8:
+                    optimizer.total_trials = 8
+                    break
 
+            training_time_per_iteration = (stop_training_after_seconds/2)/optimizer.total_trials
 
+            print(training_time_per_iteration)
+            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration))
+        else:
+            # Run a bunch of models through AX and figure out some decent values to put in here
+            best_parameters = {}
+            
+        print(best_parameters)
         mixer = mixer_class(best_parameters)
         self._mixer = mixer
 
@@ -296,7 +307,7 @@ class Predictor:
         :return accuracies: dictionaries of accuracies
         """
         if self._mixer is None:
-            logging.log.error("Please train the model before calculating accuracy")
+            logging.error("Please train the model before calculating accuracy")
             return
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
         predictions = self._mixer.predict(ds, include_encoded_predictions=True)

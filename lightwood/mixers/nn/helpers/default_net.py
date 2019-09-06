@@ -13,6 +13,8 @@ class DefaultNet(nn.Module):
             self.device = torch.device('cuda')
         else:
             self.device = torch.device('cpu')
+
+        self.dynamic_parameters = dynamic_parameters
         """
         Here we define the basic building blocks of our model, in forward we define how we put it all together along wiht an input
         :param sample_batch: this is used to understand the characteristics of the input and target, it is an object of type utils.libs.data_types.batch.Batch
@@ -38,8 +40,8 @@ class DefaultNet(nn.Module):
         larger_input = True if input_size > output_size*2 else False
         even_input_output = larger_input and large_output
 
-        if 'network_depth' in dynamic_parameters:
-            depth = dynamic_parameters['network_depth']
+        if 'network_depth' in self.dynamic_parameters:
+            depth = self.dynamic_parameters['network_depth']
         else:
             depth = 5
 
