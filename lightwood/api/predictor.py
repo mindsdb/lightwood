@@ -78,7 +78,7 @@ class Predictor:
 
             if max(lowest_error_epoch*1.4,10) < epoch:
                 return lowest_error
-                
+
             if max_epochs is not None and epoch >= max_epochs:
                 return lowest_error
 
@@ -186,10 +186,10 @@ class Predictor:
 
                 # Some heuristics...
                 if training_time_per_iteration > input_size:
-                    if training_time_per_iteration > (training_data_length/(4*input_size)):
+                    if training_time_per_iteration > min((training_data_length/(8*input_size)), 32*input_size):
                         break
 
-                optimizer.total_trials = round(optimizer.total_trials/1.5)
+                optimizer.total_trials = optimizer.total_trials - 1
                 if optimizer.total_trials < 8:
                     optimizer.total_trials = 8
                     break
