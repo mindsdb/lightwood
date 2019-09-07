@@ -332,7 +332,7 @@ class NnMixer:
                 if total_iterations > 1000 and epoch > 20:
                     for group in self.optimizer.param_groups:
                         if self.optimizer.initial_lr * 1/50 < group['lr']:
-                            group['lr'] = self.optimizer.initial_lr * 999/1000
+                            group['lr'] = group['lr'] - self.optimizer.initial_lr * 1/1000
 
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
