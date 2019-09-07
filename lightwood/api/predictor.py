@@ -68,7 +68,7 @@ class Predictor:
             logging.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
             exit()
 
-        for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+        for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
             error = mixer.error(test_data_ds)
             lowest_error = min(error,lowest_error)
 
@@ -208,16 +208,16 @@ class Predictor:
 
         started_training_at = int(time.time())
         #iterate over the iter_fit and see what the epoch and mixer error is
-        for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+        for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
             if self._stop_training_flag == True:
                 logging.info('Learn has been stopped')
                 break
 
-            logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=mix_error))
+            logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
 
             # see if it needs to be evaluated
             if epoch >= eval_next_on_epoch and test_data_ds:
-                print(mix_error)
+                print(training_error)
                 tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
 
@@ -262,7 +262,7 @@ class Predictor:
 
                 # if there is a callback function now its the time to call it
                 if callback_on_iter is not None:
-                    callback_on_iter(epoch, mix_error, test_error, delta_mean)
+                    callback_on_iter(epoch, training_error, test_error, delta_mean)
 
 
 
