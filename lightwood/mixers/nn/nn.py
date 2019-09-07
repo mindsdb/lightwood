@@ -1,10 +1,12 @@
 import math
-import torch
 import itertools as it
 
+import torch
+from torch.optim.optimizerimport Optimizer
 
 
-class Ranger(torch.optim.optimizer.Optimizer):
+
+class Ranger(Optimizer):
     def __init__(self, params, lr=1e-3, alpha=0.5, k=6, N_sma_threshold=5, betas=(.95,0.999), eps=1e-5, weight_decay=0):
         #parameter checks
         if not 0.0 <= alpha <= 1.0:
@@ -323,7 +325,8 @@ class NnMixer:
                 loss.backward()
 
                 self.optimizer.step()
-
+                for group in self.optimizer.param_groups:
+                    print('Current learning rate: ', group['lr'])
                 # Maybe make this a scheduler later
                 # Start flat and then go into cosine annealing
                 if total_iterations > 1000 and epoch > 20:
