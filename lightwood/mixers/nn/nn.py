@@ -2,7 +2,7 @@ import math
 import itertools as it
 
 import torch
-from torch.optim.optimizerimport Optimizer
+from torch.optim.optimizer import Optimizer
 
 
 
