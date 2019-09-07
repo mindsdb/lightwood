@@ -161,10 +161,11 @@ class NnMixer:
             scheduler_mode = 'triangular'
         else:
             scheduler_mode = self.dynamic_parameters['scheduler_mode'] #triangular, triangular2, exp_range
-            
+
         weight_decay = self.dynamic_parameters['weight_decay']
 
-        step_size_up=200
+        step_size_up= 20
+        step_size_down = 600
 
         if self.optimizer_class is None:
             self.optimizer_class = torch.optim.AdamW
@@ -181,7 +182,7 @@ class NnMixer:
         cycle_momentum = False # Set to "True" if we get optimizers with momentum
         # Note: we can probably the distance between and the values for `base_momentum` and `max_momentum` based on the poportion between base_lr and max_lr (not sure how yet, but it makes some intuitive sense that this could be done), that way we don't have to use fixed values but we don't have to search for the best values... or at least we could reduce the search space and run only a few ax iterations
 
-        self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=None, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=cycle_momentum, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+        self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=step_size_down, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=cycle_momentum, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
 
         total_epochs = self.epochs
 
