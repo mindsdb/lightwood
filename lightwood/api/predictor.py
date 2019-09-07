@@ -62,7 +62,7 @@ class Predictor:
     def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
         lowest_error = 1
-        mixer = mixer_class(dynamic_parameters)
+        mixer = mixer_class(dynamic_parameters, is_categorical_output)
 
         if max_training_time is None and max_epochs is None:
             logging.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
@@ -121,6 +121,11 @@ class Predictor:
         else:
             self._output_columns = [col['name'] for col in self.config['input_features']]
             self._input_columns = [col['name'] for col in self.config['output_features']]
+
+        is_categorical_output = True
+        for output_feature in self.config['output_features']:
+            if output_feature['type'] not in (COLUMN_DATA_TYPES.CATEGORICAL):
+                is_categorical_output = False
 
         from_data_ds = DataSource(from_data, self.config)
 
@@ -184,10 +189,10 @@ class Predictor:
             print(best_parameters)
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
-            best_parameters = {'base_lr': 0.001, 'max_lr': 0.01, 'weight_decay': 0.0001, 'network_depth': 5, 'scheduler_mode': 'triangular'}
+            best_parameters = {'base_lr': 0.002, 'max_lr': 0.01, 'weight_decay': 0.01, 'network_depth': 5, 'scheduler_mode': 'triangular'}
 
         stop_training_after_seconds = stop_training_after_seconds - stop_training_after_seconds * (2/3)
-        mixer = mixer_class(best_parameters)
+        mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
         for param in mixer_params:
@@ -274,16 +279,16 @@ class Predictor:
                 if (int(time.time()) - started_training_at) > stop_training_after_seconds:
                     stop_training = True
 
-                # Stop if the error on the testing data is close to zero (0.15%)
-                if test_error < 0.0015:
+                # Stop if the error on the testing data is close to zero
+                if test_error < 0.00015:
                     stop_training = True
 
                 ## Stop if the model is overfitting, that is, the test error is becoming greater than the train error and the test error is small enough, stop
-                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.02:
+                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.002:
                     stop_training = True
 
                 # If we've seen no imporvement for a long while, stop
-                if lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*0.5)) < epoch:
+                if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
                     stop_training = True
 
 
