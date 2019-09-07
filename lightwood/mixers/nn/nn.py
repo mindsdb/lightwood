@@ -1,3 +1,129 @@
+import math
+import torch
+from torch.optim.optimizer import Optimizer, required
+import itertools as it
+
+
+
+class Ranger(Optimizer):
+
+    def __init__(self, params, lr=1e-3, alpha=0.5, k=6, N_sma_threshhold=5, betas=(.95,0.999), eps=1e-5, weight_decay=0):
+        #parameter checks
+        if not 0.0 <= alpha <= 1.0:
+            raise ValueError(f'Invalid slow update rate: {alpha}')
+        if not 1 <= k:
+            raise ValueError(f'Invalid lookahead steps: {k}')
+        if not lr > 0:
+            raise ValueError(f'Invalid Learning Rate: {lr}')
+        if not eps > 0:
+            raise ValueError(f'Invalid eps: {eps}')
+
+        #parameter comments:
+        # beta1 (momentum) of .95 seems to work better than .90...
+        #N_sma_threshold of 5 seems better in testing than 4.
+        #In both cases, worth testing on your dataset (.90 vs .95, 4 vs 5) to make sure which works best for you.
+        # @TODO Implement the above testing with AX ^
+
+        #prep defaults and init torch.optim base
+        defaults = dict(lr=lr, alpha=alpha, k=k, betas=betas, N_sma_threshhold=N_sma_threshhold, eps=eps, weight_decay=weight_decay)
+        super().__init__(params,defaults)
+
+        #adjustable threshold
+        self.N_sma_threshhold = N_sma_threshhold
+
+        #look ahead params
+        self.alpha = alpha
+        self.k = k
+
+        #radam buffer for state
+        self.radam_buffer = [[None,None,None] for ind in range(10)]
+
+
+    def __setstate__(self, state):
+        super(Ranger, self).__setstate__(state)
+
+
+    def step(self, closure=None):
+        loss = None
+
+        if closure is not None:
+            loss = closure()
+
+        #Evaluate averages and grad, update param tensors
+        for group in self.param_groups:
+            for p in group['params']:
+                if p.grad is not None:
+                    grad = p.grad.data.float()
+                    if grad.is_sparse:
+                        raise RuntimeError('Ranger optimizer does not support sparse gradients')
+
+                    p_data_fp32 = p.data.float()
+
+                    state = self.state[p]  #get state dict for this param
+
+                    # On the first run initialize the dictionary for each weight group
+                    if len(state) == 0:
+                        state['step'] = 0
+                        state['exp_avg'] = torch.zeros_like(p_data_fp32)
+                        state['exp_avg_sq'] = torch.zeros_like(p_data_fp32)
+
+                        #look ahead weight storage now in state dict
+                        state['slow_buffer'] = torch.empty_like(p.data)
+                        state['slow_buffer'].copy_(p.data)
+                    # @TODO Couldn't this branch happen after the if above is entered in thus replacing torch.zero_like) ??
+                    else:
+                        state['exp_avg'] = state['exp_avg'].type_as(p_data_fp32)
+                        state['exp_avg_sq'] = state['exp_avg_sq'].type_as(p_data_fp32)
+
+                #begin computations
+                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
+                beta1, beta2 = group['betas']
+
+                #compute variance mov avg
+                exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
+                #compute mean moving avg
+                exp_avg.mul_(beta1).add_(1 - beta1, grad)
+
+                state['step'] += 1
+
+                buffered = self.radam_buffer[int(state['step'] % 10)]
+
+                if state['step'] == buffered[0]:
+                    N_sma, step_size = buffered[1], buffered[2]
+                else:
+                    buffered[0] = state['step']
+                    beta2_t = beta2 ** state['step']
+                    N_sma_max = 2 / (1 - beta2) - 1
+                    N_sma = N_sma_max - 2 * state['step'] * beta2_t / (1 - beta2_t)
+                    buffered[1] = N_sma
+                    if N_sma > self.N_sma_threshhold:
+                        step_size = math.sqrt((1 - beta2_t) * (N_sma - 4) / (N_sma_max - 4) * (N_sma - 2) / N_sma * N_sma_max / (N_sma_max - 2)) / (1 - beta1 ** state['step'])
+                    else:
+                        step_size = 1.0 / (1 - beta1 ** state['step'])
+                    buffered[2] = step_size
+
+                if group['weight_decay'] != 0:
+                    p_data_fp32.add_(-group['weight_decay'] * group['lr'], p_data_fp32)
+
+                if N_sma > self.N_sma_threshhold:
+                    denom = exp_avg_sq.sqrt().add_(group['eps'])
+                    p_data_fp32.addcdiv_(-step_size * group['lr'], exp_avg, denom)
+                else:
+                    p_data_fp32.add_(-step_size * group['lr'], exp_avg)
+
+                p.data.copy_(p_data_fp32)
+
+                #integrated look ahead...
+                #we do it at the param level instead of group level
+                if state['step'] % group['k'] == 0:
+                    slow_p = state['slow_buffer']
+                    # Find the interpolated weight between the slower buffer (the weight `k` steps ago) and the current weight, set that as the state for RAdam
+                    slow_p.add_(self.alpha, p.data - slow_p)
+                    p.data.copy_(slow_p)
+
+        return loss
+
+
 import copy
 import logging
 
@@ -12,7 +138,8 @@ from lightwood.mixers.nn.helpers.transformer import Transformer
 
 class NnMixer:
 
-    def __init__(self, dynamic_parameters):
+    def __init__(self, dynamic_parameters, is_categorical_output=False):
+        self.is_categorical_output = is_categorical_output
         self.net = None
         self.optimizer = None
         self.input_column_names = None
@@ -24,7 +151,7 @@ class NnMixer:
         self.optimizer_args = None
         self.criterion = None
 
-        self.batch_size = 10
+        self.batch_size = 200
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -98,7 +225,7 @@ class NnMixer:
             labels = labels.to(self.net.device)
 
             # If the criterion is CrossEntropyLoss, this happens when weights are present
-            if ds.output_weights is not None and ds.output_weights is not False:
+            if is_categorical_output:
                 target = labels.numpy()
                 target_indexes = np.where(target>0)[1]
                 targets_c = torch.LongTensor(target_indexes)
@@ -147,12 +274,16 @@ class NnMixer:
 
 
         if self.criterion is None:
-            if ds.output_weights is not None and ds.output_weights is not False:
-                self.criterion = torch.nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
+            if is_categorical_output:
+                if ds.output_weights is not None and ds.output_weights is not False:
+                    output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
+                else:
+                    output_weights = None
+                self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
             else:
                 self.criterion = torch.nn.MSELoss()
 
-
+        '''
         base_lr = self.dynamic_parameters['base_lr']
         max_lr = self.dynamic_parameters['max_lr']
 
@@ -163,8 +294,8 @@ class NnMixer:
 
         weight_decay = self.dynamic_parameters['weight_decay']
 
-        step_size_up= 20
-        step_size_down = 600
+        step_size_up = 100
+        step_size_down = 3000
 
         if self.optimizer_class is None:
             self.optimizer_class = torch.optim.AdamW
@@ -181,8 +312,10 @@ class NnMixer:
         cycle_momentum = False # Set to "True" if we get optimizers with momentum
         # Note: we can probably the distance between and the values for `base_momentum` and `max_momentum` based on the poportion between base_lr and max_lr (not sure how yet, but it makes some intuitive sense that this could be done), that way we don't have to use fixed values but we don't have to search for the best values... or at least we could reduce the search space and run only a few ax iterations
 
-        #self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=step_size_down, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=cycle_momentum, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+        self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=step_size_down, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=cycle_momentum, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+        '''
 
+        self.optimizer = Ranger(self.net.parameters())
         total_epochs = self.epochs
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
@@ -202,7 +335,7 @@ class NnMixer:
                 outputs = self.net(inputs)
 
                 # If the criterion is CrossEntropyLoss, this happens when weights are present
-                if ds.output_weights is not None and ds.output_weights is not False:
+                if is_categorical_output:
                     target = labels.numpy()
                     target_indexes = np.where(target>0)[1]
                     targets_c = torch.LongTensor(target_indexes)
