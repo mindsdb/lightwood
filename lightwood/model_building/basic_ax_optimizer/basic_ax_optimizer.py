@@ -16,11 +16,10 @@ class BasicAxOptimizer:
 
         best_parameters, values, experiment, model = ax.optimize(
             parameters=[
-                {'name': 'base_lr', 'type': 'range', 'bounds': [0.0003,0.003]}, # , 'log_scale': True ?
-                {'name': 'max_lr', 'type': 'range', 'bounds': [0.005,0.02]},
-                #{'name': 'network_depth', 'type': 'choice', 'values': [5,6]},
-                #{'name': 'scheduler_mode', 'type': 'choice', 'values': ['triangular', 'triangular2', 'exp_range']},
-                {'name': 'weight_decay', 'type': 'range', 'bounds': [0.00005, 0.0003]},
+                {'name': 'beta1', 'type': 'range', 'bounds': [0.95,0.90]},
+                {'name': 'lr', 'type': 'range', 'bounds': [1e-4 * 5, 1e-3 * 2]},
+                {'name': 'N_sma_threshold', 'type': 'choice', 'values': [4,5]},
+                {'name': 'k', 'type': 'choice', 'values': [6,12]},
             ],
             evaluation_function=error_yielding_function,
             objective_name='accuracy',

@@ -281,39 +281,18 @@ class NnMixer:
             else:
                 self.criterion = torch.nn.MSELoss()
 
-        '''
-        base_lr = self.dynamic_parameters['base_lr']
-        max_lr = self.dynamic_parameters['max_lr']
-
-        if 'scheduler_mode' not in self.dynamic_parameters:
-            scheduler_mode = 'triangular'
-        else:
-            scheduler_mode = self.dynamic_parameters['scheduler_mode'] #triangular, triangular2, exp_range
-
-        weight_decay = self.dynamic_parameters['weight_decay']
-
-        step_size_up = 100
-        step_size_down = 3000
-
-        if self.optimizer_class is None:
-            self.optimizer_class = torch.optim.AdamW
-
+        self.optimizer_class = Ranger
         if self.optimizer_args is None:
             self.optimizer_args = {}
 
-        self.optimizer_args['amsgrad'] = False
-        self.optimizer_args['lr'] = base_lr
-        self.optimizer_args['weight_decay'] = weight_decay
+        if 'beta1' in self.dynamic_parameters:
+            self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
+
+        for optimizer_arg_name in ['lr','k','N_sma_threshold']:
+            if optimizer_arg_name in self.dynamic_parameters:
+                self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
-        cycle_momentum = False # Set to "True" if we get optimizers with momentum
-        # Note: we can probably the distance between and the values for `base_momentum` and `max_momentum` based on the poportion between base_lr and max_lr (not sure how yet, but it makes some intuitive sense that this could be done), that way we don't have to use fixed values but we don't have to search for the best values... or at least we could reduce the search space and run only a few ax iterations
-
-        self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=step_size_down, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=cycle_momentum, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
-        '''
-
-        self.optimizer = Ranger(self.net.parameters())
         total_epochs = self.epochs
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
@@ -342,7 +321,6 @@ class NnMixer:
                 loss.backward()
 
                 self.optimizer.step()
-                #self.scheduler.step()
 
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
