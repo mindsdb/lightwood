@@ -99,7 +99,7 @@ class Predictor:
         self._stop_training_flag = False
 
         if stop_model_building_after_seconds is None:
-            stop_model_building_after_seconds = stop_training_after_seconds*2
+            stop_model_building_after_seconds = stop_training_after_seconds*3
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
         # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'

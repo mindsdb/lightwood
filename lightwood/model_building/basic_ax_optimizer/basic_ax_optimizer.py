@@ -2,7 +2,7 @@ import ax
 
 class BasicAxOptimizer:
     def __init__(self):
-        self.total_trials = 40
+        self.total_trials = 32
 
     def evaluate(self, error_yielding_function):
         best_parameters, values, experiment, model = ax.optimize(
