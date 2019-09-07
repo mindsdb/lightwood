@@ -279,7 +279,7 @@ class Predictor:
                     stop_training = True
 
                 ## Stop if the model is overfitting, that is, the test error is becoming greater than the train error and the test error is small enough, stop
-                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1:
+                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.02:
                     stop_training = True
 
                 # If we've seen no imporvement for a long while, stop

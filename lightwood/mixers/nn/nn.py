@@ -24,7 +24,7 @@ class NnMixer:
         self.optimizer_args = None
         self.criterion = None
 
-        self.batch_size = 200
+        self.batch_size = 10
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -106,7 +106,6 @@ class NnMixer:
 
             outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
-
             running_loss += loss.item()
             error = running_loss / (i + 1)
 
@@ -182,7 +181,7 @@ class NnMixer:
         cycle_momentum = False # Set to "True" if we get optimizers with momentum
         # Note: we can probably the distance between and the values for `base_momentum` and `max_momentum` based on the poportion between base_lr and max_lr (not sure how yet, but it makes some intuitive sense that this could be done), that way we don't have to use fixed values but we don't have to search for the best values... or at least we could reduce the search space and run only a few ax iterations
 
-        self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=step_size_down, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=cycle_momentum, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+        #self.scheduler = torch.optim.lr_scheduler.CyclicLR(self.optimizer, base_lr, max_lr, step_size_up=step_size_up, step_size_down=step_size_down, mode=scheduler_mode, gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=cycle_momentum, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
 
         total_epochs = self.epochs
 
@@ -213,7 +212,7 @@ class NnMixer:
                 loss.backward()
 
                 self.optimizer.step()
-                self.scheduler.step()
+                #self.scheduler.step()
 
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
