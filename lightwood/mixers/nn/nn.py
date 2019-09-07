@@ -6,7 +6,6 @@ import itertools as it
 
 
 class Ranger(Optimizer):
-
     def __init__(self, params, lr=1e-3, alpha=0.5, k=6, N_sma_threshhold=5, betas=(.95,0.999), eps=1e-5, weight_decay=0):
         #parameter checks
         if not 0.0 <= alpha <= 1.0:
@@ -224,9 +223,8 @@ class NnMixer:
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
-            # If the criterion is CrossEntropyLoss, this happens when weights are present
             if self.is_categorical_output:
-                target = labels.numpy()
+                target = labels.cpu().numpy()
                 target_indexes = np.where(target>0)[1]
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
@@ -334,9 +332,8 @@ class NnMixer:
                 # forward + backward + optimize
                 outputs = self.net(inputs)
 
-                # If the criterion is CrossEntropyLoss, this happens when weights are present
                 if self.is_categorical_output:
-                    target = labels.numpy()
+                    target = labels.cpu().numpy()
                     target_indexes = np.where(target>0)[1]
                     targets_c = torch.LongTensor(target_indexes)
                     labels = targets_c.to(self.net.device)
