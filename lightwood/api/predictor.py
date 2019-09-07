@@ -185,9 +185,7 @@ class Predictor:
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
             best_parameters = {'base_lr': 0.001, 'max_lr': 0.01, 'weight_decay': 0.0001, 'network_depth': 5, 'scheduler_mode': 'triangular'}
-            # {'base_lr': 0.0027174610376358033, 'max_lr': 0.01383078157901764, 'weight_decay': 0.000192725259065628}
-            # {'base_lr': 0.0010908834993839263, 'max_lr': 0.017912471592426298, 'weight_decay': 0.0020115823894739154}
-            # {'base_lr': 0.002827171164751053, 'max_lr': 0.008985094726085663, 'weight_decay': 0.0019616351649165155}
+
         stop_training_after_seconds = stop_training_after_seconds - stop_training_after_seconds * (2/3)
         mixer = mixer_class(best_parameters)
         self._mixer = mixer
@@ -217,11 +215,14 @@ class Predictor:
 
             # see if it needs to be evaluated
             if epoch >= eval_next_on_epoch and test_data_ds:
-                print(training_error)
                 tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
 
                 test_error = mixer.error(test_data_ds)
+
+                print(f'Training error: {training_error}')
+                print(f'Testing error: {test_error}')
+
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
                     lowest_error = test_error
@@ -286,7 +287,7 @@ class Predictor:
                     stop_training = True
 
 
-
+                print(f'Is lowest error: {is_lowest_error}')
                 if stop_training:
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
