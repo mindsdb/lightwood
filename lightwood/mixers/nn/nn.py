@@ -1,11 +1,10 @@
 import math
 import torch
-from torch.optim.optimizer import Optimizer, required
 import itertools as it
 
 
 
-class Ranger(Optimizer):
+class Ranger(torch.optim.optimizer.Optimizer):
     def __init__(self, params, lr=1e-3, alpha=0.5, k=6, N_sma_threshold=5, betas=(.95,0.999), eps=1e-5, weight_decay=0):
         #parameter checks
         if not 0.0 <= alpha <= 1.0:
@@ -31,6 +30,7 @@ class Ranger(Optimizer):
         self.N_sma_threshold = N_sma_threshold
 
         #look ahead params
+        self.initial_lr = lr
         self.alpha = alpha
         self.k = k
 
@@ -295,10 +295,12 @@ class NnMixer:
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
+        total_iterations = 0
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
+                total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
 
@@ -321,6 +323,13 @@ class NnMixer:
                 loss.backward()
 
                 self.optimizer.step()
+
+                # Maybe make this a scheduler later
+                # Start flat and then go into cosine annealing
+                if total_iterations > 1000 and epoch > 20:
+                    for group in self.optimizer.param_groups:
+                        if self.optimizer.initial_lr * 1/50 < group['lr']:
+                            group['lr'] = self.optimizer.initial_lr * 999/1000
 
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
