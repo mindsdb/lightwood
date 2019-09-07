@@ -68,17 +68,24 @@ class Predictor:
             logging.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
             exit()
 
+        lowest_error_epoch = 0
         for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
             error = mixer.error(test_data_ds)
-            lowest_error = min(error,lowest_error)
 
+            if lowest_error > error:
+                lowest_error = error
+                lowest_error_epoch = epoch
+
+            if max(lowest_error_epoch*1.4,10) < epoch:
+                return lowest_error
+                
             if max_epochs is not None and epoch >= max_epochs:
                 return lowest_error
 
             if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
                 return lowest_error
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8):
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -90,6 +97,9 @@ class Predictor:
         :return: None
         """
         self._stop_training_flag = False
+
+        if stop_model_building_after_seconds is None:
+            stop_model_building_after_seconds = stop_training_after_seconds*2
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
         # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
@@ -172,7 +182,7 @@ class Predictor:
             optimizer = self.config['optimizer']()
 
             while True:
-                training_time_per_iteration = (stop_training_after_seconds*(2/3))/optimizer.total_trials
+                training_time_per_iteration = stop_model_building_after_seconds/optimizer.total_trials
 
                 # Some heuristics...
                 if training_time_per_iteration > input_size:
@@ -184,7 +194,7 @@ class Predictor:
                     optimizer.total_trials = 8
                     break
 
-            training_time_per_iteration = (stop_training_after_seconds*(2/3))/optimizer.total_trials
+            training_time_per_iteration = stop_model_building_after_seconds/optimizer.total_trials
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=training_time_per_iteration, max_epochs=None))
             print(best_parameters)
@@ -192,7 +202,6 @@ class Predictor:
             # Run a bunch of models through AX and figure out some decent values to put in here
             best_parameters = {'base_lr': 0.002, 'max_lr': 0.01, 'weight_decay': 0.01, 'network_depth': 5, 'scheduler_mode': 'triangular'}
 
-        stop_training_after_seconds = stop_training_after_seconds - stop_training_after_seconds * (2/3)
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
