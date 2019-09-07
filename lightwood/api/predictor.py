@@ -59,7 +59,7 @@ class Predictor:
         self.train_accuracy = None
 
     @staticmethod
-    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=None, max_epochs=None):
+    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
         lowest_error = 1
         mixer = mixer_class(dynamic_parameters, is_categorical_output)
@@ -186,7 +186,7 @@ class Predictor:
 
             training_time_per_iteration = (stop_training_after_seconds*(2/3))/optimizer.total_trials
 
-            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
+            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=training_time_per_iteration, max_epochs=None))
             print(best_parameters)
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
