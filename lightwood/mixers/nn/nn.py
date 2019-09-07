@@ -225,7 +225,7 @@ class NnMixer:
             labels = labels.to(self.net.device)
 
             # If the criterion is CrossEntropyLoss, this happens when weights are present
-            if is_categorical_output:
+            if self.is_categorical_output:
                 target = labels.numpy()
                 target_indexes = np.where(target>0)[1]
                 targets_c = torch.LongTensor(target_indexes)
@@ -274,7 +274,7 @@ class NnMixer:
 
 
         if self.criterion is None:
-            if is_categorical_output:
+            if self.is_categorical_output:
                 if ds.output_weights is not None and ds.output_weights is not False:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
@@ -335,7 +335,7 @@ class NnMixer:
                 outputs = self.net(inputs)
 
                 # If the criterion is CrossEntropyLoss, this happens when weights are present
-                if is_categorical_output:
+                if self.is_categorical_output:
                     target = labels.numpy()
                     target_indexes = np.where(target>0)[1]
                     targets_c = torch.LongTensor(target_indexes)
