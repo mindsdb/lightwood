@@ -7,7 +7,7 @@ from torch.optim.optimizer import Optimizer
 
 
 class Ranger(Optimizer):
-    def __init__(self, params, lr=0.045, alpha=0.5, k=6, N_sma_threshold=5, betas=(.95,0.999), eps=1e-5, weight_decay=0):
+    def __init__(self, params, lr=0.03, alpha=0.5, k=6, N_sma_threshold=5, betas=(.95,0.999), eps=1e-5, weight_decay=0):
         #parameter checks
         if not 0.0 <= alpha <= 1.0:
             raise ValueError(f'Invalid slow update rate: {alpha}')
@@ -279,8 +279,12 @@ class NnMixer:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
+                print('\n\n\n==================')
+                print(output_weights)
+                print('==================')
                 self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
             else:
+                print('HERE USING MSE LOSS !!!')
                 self.criterion = torch.nn.MSELoss()
 
         self.optimizer_class = Ranger
@@ -327,7 +331,7 @@ class NnMixer:
                 self.optimizer.step()
                 # Maybe make this a scheduler later
                 # Start flat and then go into cosine annealing
-                if total_iterations > 1000 and epoch > 20:
+                if total_iterations > 1200 and epoch > 60:
                     for group in self.optimizer.param_groups:
                         if self.optimizer.initial_lr * 1/100 < group['lr']:
                             group['lr'] = group['lr'] - self.optimizer.initial_lr * 1/400
