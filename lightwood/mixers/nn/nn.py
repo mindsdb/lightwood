@@ -7,7 +7,7 @@ from torch.optim.optimizer import Optimizer
 
 
 class Ranger(Optimizer):
-    def __init__(self, params, lr=1e-3, alpha=0.5, k=6, N_sma_threshold=5, betas=(.95,0.999), eps=1e-5, weight_decay=0):
+    def __init__(self, params, lr=0.045, alpha=0.5, k=6, N_sma_threshold=5, betas=(.95,0.999), eps=1e-5, weight_decay=0):
         #parameter checks
         if not 0.0 <= alpha <= 1.0:
             raise ValueError(f'Invalid slow update rate: {alpha}')
@@ -332,7 +332,7 @@ class NnMixer:
                 if total_iterations > 1000 and epoch > 20:
                     for group in self.optimizer.param_groups:
                         if self.optimizer.initial_lr * 1/50 < group['lr']:
-                            group['lr'] = group['lr'] - self.optimizer.initial_lr * 1/1000
+                            group['lr'] = group['lr'] - self.optimizer.initial_lr * 1/400
 
                 running_loss += loss.item()
                 error = running_loss / (i + 1)

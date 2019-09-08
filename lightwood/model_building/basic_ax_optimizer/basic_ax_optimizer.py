@@ -8,7 +8,7 @@ class BasicAxOptimizer:
         best_parameters, values, experiment, model = ax.optimize(
             parameters=[
                 {'name': 'beta1', 'type': 'range', 'bounds': [0.90,0.95]},
-                {'name': 'lr', 'type': 'range', 'bounds': [1e-4 * 5, 1e-3 * 2]},
+                {'name': 'lr', 'type': 'range', 'bounds': [0.001, 0.01]},
                 {'name': 'N_sma_threshold', 'type': 'choice', 'values': [4,5]},
                 {'name': 'k', 'type': 'choice', 'values': [6,12]},
             ],
