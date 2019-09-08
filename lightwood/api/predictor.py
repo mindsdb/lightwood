@@ -133,7 +133,7 @@ class Predictor:
             self._input_columns = [col['name'] for col in self.config['output_features']]
 
         # @TODO Make Cross Entropy Loss work with multiple outputs
-        if len(self.config['output_features']) == 0 and self.config['output_features'][0]['type'] in (COLUMN_DATA_TYPES.CATEGORICAL):
+        if len(self.config['output_features']) == 1 and self.config['output_features'][0]['type'] in (COLUMN_DATA_TYPES.CATEGORICAL):
             is_categorical_output = True
         else:
             is_categorical_output = False
