@@ -279,12 +279,8 @@ class NnMixer:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
-                print('\n\n\n==================')
-                print(output_weights)
-                print('==================')
                 self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
             else:
-                print('HERE USING MSE LOSS !!!')
                 self.criterion = torch.nn.MSELoss()
 
         self.optimizer_class = Ranger
