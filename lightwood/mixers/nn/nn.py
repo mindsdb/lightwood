@@ -327,11 +327,14 @@ class NnMixer:
                 self.optimizer.step()
                 # Maybe make this a scheduler later
                 # Start flat and then go into cosine annealing
-                #if total_iterations > 1200 and epoch > 60:
-                #    for group in self.optimizer.param_groups:
-                #        if self.optimizer.initial_lr * 1/100 < group['lr']:
-                #            group['lr'] = group['lr'] - self.optimizer.initial_lr * 1/400
 
+                """
+                if total_iterations > 600 and epoch > 20:
+                    for group in self.optimizer.param_groups:
+                        if self.optimizer.initial_lr * 1/100 < group['lr']:
+                            group['lr'] = group['lr'] - self.optimizer.initial_lr * 1/400
+                """
+                
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
 
