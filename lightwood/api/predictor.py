@@ -234,9 +234,6 @@ class Predictor:
 
                 test_error = mixer.error(test_data_ds)
 
-                print(f'Training error: {training_error}')
-                print(f'Testing error: {test_error}')
-
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
                     lowest_error = test_error
@@ -300,8 +297,6 @@ class Predictor:
                 if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
                     stop_training = True
 
-
-                print(f'Is lowest error: {is_lowest_error}')
                 if stop_training:
                     mixer.update_model(last_good_model)
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
