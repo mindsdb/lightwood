@@ -283,20 +283,20 @@ class Predictor:
                 stop_training = False
 
                 # Stop if we're past the time limit alloted for training
-                if (int(time.time()) - started_training_at) > stop_training_after_seconds:
-                    stop_training = True
+                #if (int(time.time()) - started_training_at) > stop_training_after_seconds:
+                #    stop_training = True
 
                 # Stop if the error on the testing data is close to zero
-                if test_error < 0.00015:
-                    stop_training = True
+                #if test_error < 0.00015:
+                #    stop_training = True
 
                 ## Stop if the model is overfitting, that is, the test error is becoming greater than the train error and the test error is small enough, stop
-                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.002:
+                if delta_mean < 0 and len(error_delta_buffer) > 5:
                     stop_training = True
 
                 # If we've seen no imporvement for a long while, stop
-                if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
-                    stop_training = True
+                #if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
+                #    stop_training = True
 
                 if stop_training:
                     mixer.update_model(last_good_model)
