@@ -158,7 +158,7 @@ class NnMixer:
                 print('\n\n')
                 self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
             else:
-                self.criterion = torch.nn.MSELoss()
+                self.criterion = torch.nn.L1Loss() #torch.nn.MSELoss()
 
         self.optimizer_class = Ranger
         if self.optimizer_args is None:
