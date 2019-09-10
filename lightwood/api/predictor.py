@@ -186,7 +186,7 @@ class Predictor:
 
                 # Some heuristics...
                 if training_time_per_iteration > input_size:
-                    if training_time_per_iteration > min((training_data_length/(8*input_size)), 32*input_size):
+                    if training_time_per_iteration > min((training_data_length/(4*input_size)), 16*input_size):
                         break
 
                 optimizer.total_trials = optimizer.total_trials - 1
@@ -197,6 +197,7 @@ class Predictor:
             training_time_per_iteration = stop_model_building_after_seconds/optimizer.total_trials
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=training_time_per_iteration, max_epochs=None))
+            logging.info('Using hyperparameter set: ', best_parameters)
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
             best_parameters = {}
