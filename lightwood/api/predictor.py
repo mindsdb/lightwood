@@ -270,8 +270,6 @@ class Predictor:
                 # update mixer and calculate accuracy
                 self._mixer = mixer
                 accuracy = self.calculate_accuracy(test_data_ds)
-                self.train_accuracy = { var: accuracy[var] if accuracy[var] > 0 else 0 for var in accuracy}
-                logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
 
                 # if there is a callback function now its the time to call it
                 if callback_on_iter is not None:
@@ -346,10 +344,15 @@ class Predictor:
         for output_column in self._mixer.output_column_names:
             properties = ds.get_column_config(output_column)
             if properties['type'] == 'categorical':
-                accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
-
+                accuracies[output_column] = {
+                    'function': 'accuracy_score',
+                    'value': accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
+                }
             else:
-                accuracies[output_column] = r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["encoded_predictions"])
+                accuracies[output_column] = {
+                    'function': 'r2_score',
+                    'value': r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["encoded_predictions"])
+                }
 
         return accuracies
 
