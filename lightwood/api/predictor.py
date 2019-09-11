@@ -270,6 +270,7 @@ class Predictor:
                 # update mixer and calculate accuracy
                 self._mixer = mixer
                 accuracy = self.calculate_accuracy(test_data_ds)
+                logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
 
                 # if there is a callback function now its the time to call it
                 if callback_on_iter is not None:
