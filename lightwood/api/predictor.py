@@ -291,7 +291,6 @@ class Predictor:
                 '''
 
                 ## Stop if the model is overfitting
-                print(delta_mean)
                 if delta_mean < 0 and len(error_delta_buffer) > 5:
                     stop_training = True
 
