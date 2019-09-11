@@ -268,13 +268,11 @@ class Predictor:
                 delta_mean = np.mean(error_delta_buffer)
 
                 # update mixer and calculate accuracy
-                self._mixer = mixer
-                accuracy = self.calculate_accuracy(test_data_ds)
                 logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
 
                 # if there is a callback function now its the time to call it
                 if callback_on_iter is not None:
-                    callback_on_iter(epoch, training_error, test_error, delta_mean)
+                    callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
 
 
@@ -303,6 +301,7 @@ class Predictor:
 
                 if stop_training:
                     mixer.update_model(last_good_model)
+                    self._mixer = mixer
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
 
