@@ -34,10 +34,10 @@ class Predictor:
             pickle_in.close()
             self.__dict__ = self_dict
 
-            self._mixer.nn.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
+            self._mixer.net.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
             for e in self._mixer.encoders:
                 e.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
-                
+
             return
 
         if output is None and config is None:
@@ -369,7 +369,7 @@ class Predictor:
         f = open(path_to, 'wb')
 
         # Dump everything relevant to cpu before saving
-        self._mixer.nn.to(torch.device("cpu"))
+        self._mixer.net.to(torch.device("cpu"))
         for e in self._mixer.encoders:
             e.to(torch.device("cpu"))
 
