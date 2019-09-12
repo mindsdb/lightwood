@@ -1,22 +1,20 @@
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-import torch
-import math
 import copy
 import logging
+
+import torch
+import torch.optim as optim
+from torch.utils.data import DataLoader
 import numpy as np
 
 from lightwood.mixers.nn.helpers.default_net import DefaultNet
-from lightwood.mixers.nn.helpers.adamw import AdamW
 from lightwood.mixers.nn.helpers.transformer import Transformer
+from lightwood.mixers.nn.helpers.ranger import Ranger
 
 
 class NnMixer:
 
-    def __init__(self):
-        self.dynamic_adamw = False
+    def __init__(self, dynamic_parameters, is_categorical_output=False):
+        self.is_categorical_output = is_categorical_output
         self.net = None
         self.optimizer = None
         self.input_column_names = None
@@ -24,25 +22,17 @@ class NnMixer:
         self.data_loader = None
         self.transformer = None
         self.encoders = None
+        self.optimizer_class = None
+        self.optimizer_args = None
+        self.criterion = None
 
-
-        self.criterion = nn.MSELoss()
+        self.batch_size = 200
         self.epochs = 120000
 
-        if self.dynamic_adamw:
-            self.optimizer_class = AdamW
-            self.optimizer_args = {'amsgrad': False, 'lr':0.001}
-        else:
-            self.optimizer_class = optim.Adadelta
-            self.optimizer_args = {'lr': 0.1}
-
         self.nn_class = DefaultNet
-        self.batch_size = 100
+        self.dynamic_parameters = dynamic_parameters
 
-
-        pass
-
-    def fit(self, ds= None, callback=None):
+    def fit(self, ds=None, callback=None):
 
         ret = 0
         for i in self.iter_fit(ds):
@@ -52,7 +42,6 @@ class NnMixer:
 
     def predict(self, when_data_source, include_encoded_predictions = False):
         """
-
         :param when_data_source:
         :return:
         """
@@ -94,34 +83,30 @@ class NnMixer:
 
     def error(self, ds):
         """
-
         :param ds:
         :return:
         """
-        ds.transformer = self.transformer
+
         ds.encoders = self.encoders
+        ds.transformer = self.transformer
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         running_loss = 0.0
         error = 0
 
         for i, data in enumerate(data_loader, 0):
-            # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
-            if ds.output_weights is not None and ds.output_weights is not False:
-                target = labels.numpy()
+            if self.is_categorical_output:
+                target = labels.cpu().numpy()
                 target_indexes = np.where(target>0)[1]
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
-                
-            # forward + backward + optimize
+
             outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
-
-            # print statistics
             running_loss += loss.item()
             error = running_loss / (i + 1)
 
@@ -143,48 +128,55 @@ class NnMixer:
 
         self.net = model
 
-    def iter_fit(self, ds):
-        """
-
-        :param ds:
-        :return:
-        """
-        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
-            'input_features')
-        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
-            'output_features')
+    def fit_data_source(self, ds):
+        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names('input_features')
+        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names('output_features')
         ds.transformer = Transformer(self.input_column_names, self.output_column_names)
-
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
+    def iter_fit(self, ds):
+        """
+        :param ds:
+        :return:
+        """
+        self.fit_data_source(ds)
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
-        self.net = self.nn_class(ds)
+        self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net.train()
 
-        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
+        if self.criterion is None:
+            if self.is_categorical_output:
+                if ds.output_weights is not None and ds.output_weights is not False:
+                    output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
+                else:
+                    output_weights = None
+                self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
+            else:
+                self.criterion = torch.nn.MSELoss()
+
+        self.optimizer_class = Ranger
+        if self.optimizer_args is None:
+            self.optimizer_args = {}
+
+        if 'beta1' in self.dynamic_parameters:
+            self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
+
+        for optimizer_arg_name in ['lr','k','N_sma_threshold']:
+            if optimizer_arg_name in self.dynamic_parameters:
+                self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
+
+        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
+        total_iterations = 0
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
-
-            if self.dynamic_adamw:
-                if epoch < 120:
-                    if self.optimizer_args['lr'] < 0.01:
-                        self.optimizer_args['lr']=self.optimizer_args['lr'] + 0.00025
-                else:
-                    if self.optimizer_args['lr'] > 0.001:
-                        self.optimizer_args['lr']=self.optimizer_args['lr'] - 0.0001
-
-                self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
-            if ds.output_weights is not None and ds.output_weights is not False:
-                self.criterion = nn.CrossEntropyLoss(weight=torch.Tensor(ds.output_weights).to(self.net.device))
-
             for i, data in enumerate(data_loader, 0):
+                total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
 
@@ -197,17 +189,26 @@ class NnMixer:
                 # forward + backward + optimize
                 outputs = self.net(inputs)
 
-                if ds.output_weights is not None and ds.output_weights is not False:
-                    target = labels.numpy()
+                if self.is_categorical_output:
+                    target = labels.cpu().numpy()
                     target_indexes = np.where(target>0)[1]
                     targets_c = torch.LongTensor(target_indexes)
                     labels = targets_c.to(self.net.device)
 
                 loss = self.criterion(outputs, labels)
                 loss.backward()
-                self.optimizer.step()
 
-                # print statistics
+                self.optimizer.step()
+                # Maybe make this a scheduler later
+                # Start flat and then go into cosine annealing
+
+                """
+                if total_iterations > 600 and epoch > 20:
+                    for group in self.optimizer.param_groups:
+                        if self.optimizer.initial_lr * 1/100 < group['lr']:
+                            group['lr'] = group['lr'] - self.optimizer.initial_lr * 1/400
+                """
+
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
 
