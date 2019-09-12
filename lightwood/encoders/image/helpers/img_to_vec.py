@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
 
+
 class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
     def forward(self, input):
         n, c = input.size()

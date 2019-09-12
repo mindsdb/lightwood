@@ -33,6 +33,11 @@ class Predictor:
             self_dict = dill.load(pickle_in)
             pickle_in.close()
             self.__dict__ = self_dict
+
+            self._mixer.nn.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
+            for e in self._mixer.encoders:
+                e.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
+                
             return
 
         if output is None and config is None:
@@ -362,6 +367,12 @@ class Predictor:
         :return:
         """
         f = open(path_to, 'wb')
+
+        # Dump everything relevant to cpu before saving
+        self._mixer.nn.to(torch.device("cpu"))
+        for e in self._mixer.encoders:
+            e.to(torch.device("cpu"))
+
         dill.dump(self.__dict__, f)
         f.close()
 
