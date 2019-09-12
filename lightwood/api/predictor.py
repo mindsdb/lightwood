@@ -34,11 +34,7 @@ class Predictor:
             self_dict = dill.load(pickle_in)
             pickle_in.close()
             self.__dict__ = self_dict
-
-            self._mixer.net.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
-            for e in self._mixer.encoders:
-                self._mixer.encoders[e]._model.model.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
-
+            self.convert_to_device()
             return
 
         if output is None and config is None:
@@ -90,6 +86,19 @@ class Predictor:
 
             if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
                 return lowest_error
+
+    def convert_to_device(self,device=None):
+        if device is None:
+            device = torch.device("cuda" if CONFIG.USE_CUDA else "cpu")
+        else:
+            device = torch.device(device)
+            
+        self._mixer.net.to(device)
+        for e in self._mixer.encoders:
+            try:
+                self._mixer.encoders[e]._model.model.to(device)
+            except:
+                pass
 
     def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8, stop_model_building_after_seconds=None):
         """
@@ -370,9 +379,8 @@ class Predictor:
         f = open(path_to, 'wb')
 
         # Dump everything relevant to cpu before saving
-        self._mixer.net.to(torch.device("cpu"))
-        for e in self._mixer.encoders:
-            self._mixer.encoders[e]._model.model.to(torch.device("cpu"))
+        convert_to_device("cpu")
+        convert_to_device()
 
         dill.dump(self.__dict__, f)
         f.close()
