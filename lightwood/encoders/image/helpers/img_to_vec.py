@@ -3,6 +3,8 @@ import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
 
+from lightwood.config.config import CONFIG
+
 
 class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
     def forward(self, input):
@@ -15,14 +17,14 @@ class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
 
 class Img2Vec():
 
-    def __init__(self, cuda=False, model='resnet-18', layer='default', layer_output_size=512):
+    def __init__(self, model='resnet-18', layer='default', layer_output_size=512):
         """ Img2Vec
         :param cuda: If set to True, will run forward pass on GPU
         :param model: String name of requested model
         :param layer: String or Int depending on model.  See more docs: https://github.com/christiansafka/img2vec.git
         :param layer_output_size: Int depicting the output size of the requested layer
         """
-        self.device = torch.device("cuda" if cuda else "cpu")
+        self.device = torch.device("cuda" if CONFIG.USE_CUDA else "cpu")
         self.layer_output_size = layer_output_size
         self.model_name = model
 
