@@ -97,8 +97,7 @@ class Predictor:
         for e in self._mixer.encoders:
             try:
                 self._mixer.encoders[e]._model.model.to(device)
-            except Exception as e:
-                print(e)
+            except:
                 pass
 
     def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8, stop_model_building_after_seconds=None):
