@@ -37,7 +37,7 @@ class Predictor:
 
             self._mixer.net.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
             for e in self._mixer.encoders:
-                e.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
+                self._mixer.encoders[e]._model.model.to(torch.device("cuda" if CONFIG.USE_CUDA else "cpu"))
 
             return
 
@@ -372,7 +372,7 @@ class Predictor:
         # Dump everything relevant to cpu before saving
         self._mixer.net.to(torch.device("cpu"))
         for e in self._mixer.encoders:
-            e.to(torch.device("cpu"))
+            self._mixer.encoders[e]._model.model.to(torch.device("cpu"))
 
         dill.dump(self.__dict__, f)
         f.close()
