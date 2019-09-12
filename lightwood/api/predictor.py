@@ -87,16 +87,17 @@ class Predictor:
             if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
                 return lowest_error
 
-    def convert_to_device(self,device=None):
-        if device is None:
-            device = torch.device("cuda" if CONFIG.USE_CUDA else "cpu")
-        else:
-            device = torch.device(device)
+    def convert_to_device(self,device_str=None):
+        if device_str is None:
+            device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
+
+        device = torch.device(device_str)
 
         self._mixer.net.to(device)
         for e in self._mixer.encoders:
             try:
                 self._mixer.encoders[e]._model.model.to(device)
+                self._mixer.encoders[e]._model.device = device_str
             except:
                 pass
 
@@ -380,9 +381,8 @@ class Predictor:
 
         # Dump everything relevant to cpu before saving
         self.convert_to_device("cpu")
-        self.convert_to_device()
-
         dill.dump(self.__dict__, f)
+        self.convert_to_device()
         f.close()
 
     def stop_training(self):
