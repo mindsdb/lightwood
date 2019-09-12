@@ -28,13 +28,12 @@ mixer_schema = Schema({
 
 
 predictor_config_schema = Schema({
-
     'input_features': [
         feature_schema
     ],
     'output_features': [
         feature_schema
     ],
-    Optional('mixer'): mixer_schema
-
+    Optional('mixer'): mixer_schema,
+    Optional('optimizer'): object
 })

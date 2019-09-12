@@ -5,7 +5,6 @@ import time
 import dill
 import copy
 import pandas
-
 import numpy as np
 
 from lightwood.api.data_source import DataSource
@@ -13,9 +12,9 @@ from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 from lightwood.mixers.nn.nn import NnMixer
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import explained_variance_score, r2_score
+from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+
 
 class Predictor:
 
@@ -59,7 +58,34 @@ class Predictor:
 
         self.train_accuracy = None
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8):
+    @staticmethod
+    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=None, max_epochs=None):
+        started_evaluation_at = int(time.time())
+        lowest_error = 1
+        mixer = mixer_class(dynamic_parameters, is_categorical_output)
+
+        if max_training_time is None and max_epochs is None:
+            logging.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
+            exit()
+
+        lowest_error_epoch = 0
+        for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
+            error = mixer.error(test_data_ds)
+
+            if lowest_error > error:
+                lowest_error = error
+                lowest_error_epoch = epoch
+
+            if max(lowest_error_epoch*1.4,10) < epoch:
+                return lowest_error
+
+            if max_epochs is not None and epoch >= max_epochs:
+                return lowest_error
+
+            if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
+                return lowest_error
+
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -71,6 +97,9 @@ class Predictor:
         :return: None
         """
         self._stop_training_flag = False
+
+        if stop_model_building_after_seconds is None:
+            stop_model_building_after_seconds = stop_training_after_seconds*3
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
         # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
@@ -103,6 +132,12 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['input_features']]
             self._input_columns = [col['name'] for col in self.config['output_features']]
 
+        # @TODO Make Cross Entropy Loss work with multiple outputs
+        if len(self.config['output_features']) == 1 and self.config['output_features'][0]['type'] in (COLUMN_DATA_TYPES.CATEGORICAL):
+            is_categorical_output = True
+        else:
+            is_categorical_output = False
+
         from_data_ds = DataSource(from_data, self.config)
 
         if test_data is not None:
@@ -111,6 +146,10 @@ class Predictor:
             test_data_ds = from_data_ds.extractRandomSubset(0.1)
 
         from_data_ds.training = True
+
+        #test_data_ds.transformer = from_data_ds.transformer
+        #test_data_ds.encoders = from_data_ds.encoders
+
 
         mixer_params = {}
 
@@ -121,8 +160,49 @@ class Predictor:
         else:
             mixer_class = NnMixer
 
+        # Initialize data sources
+        try:
+            mixer_class({}).fit_data_source(from_data_ds)
+        except:
+            # Not all mixers might require this
+            pass
 
-        mixer = mixer_class()
+        input_size = len(from_data_ds[0][0])
+        training_data_length = len(from_data_ds)
+
+        test_data_ds.transformer = from_data_ds.transformer
+        test_data_ds.encoders = from_data_ds.encoders
+        # Initialize data sources
+
+        if input_size != len(test_data_ds[0][0]):
+            logging.error("Test and Training dataframe members are of different size !")
+
+
+        if 'optimizer' in self.config:
+            optimizer = self.config['optimizer']()
+
+            while True:
+                training_time_per_iteration = stop_model_building_after_seconds/optimizer.total_trials
+
+                # Some heuristics...
+                if training_time_per_iteration > input_size:
+                    if training_time_per_iteration > min((training_data_length/(4*input_size)), 16*input_size):
+                        break
+
+                optimizer.total_trials = optimizer.total_trials - 1
+                if optimizer.total_trials < 8:
+                    optimizer.total_trials = 8
+                    break
+
+            training_time_per_iteration = stop_model_building_after_seconds/optimizer.total_trials
+
+            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=training_time_per_iteration, max_epochs=None))
+            logging.info('Using hyperparameter set: ', best_parameters)
+        else:
+            # Run a bunch of models through AX and figure out some decent values to put in here
+            best_parameters = {}
+
+        mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
         for param in mixer_params:
@@ -141,12 +221,12 @@ class Predictor:
 
         started_training_at = int(time.time())
         #iterate over the iter_fit and see what the epoch and mixer error is
-        for epoch, mix_error in enumerate(mixer.iter_fit(from_data_ds)):
+        for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
             if self._stop_training_flag == True:
                 logging.info('Learn has been stopped')
                 break
 
-            logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=mix_error))
+            logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
 
             # see if it needs to be evaluated
             if epoch >= eval_next_on_epoch and test_data_ds:
@@ -154,6 +234,7 @@ class Predictor:
                 eval_next_on_epoch = tmp_next
 
                 test_error = mixer.error(test_data_ds)
+
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
                     lowest_error = test_error
@@ -194,7 +275,7 @@ class Predictor:
 
                 # if there is a callback function now its the time to call it
                 if callback_on_iter is not None:
-                    callback_on_iter(epoch, mix_error, test_error, delta_mean)
+                    callback_on_iter(epoch, training_error, test_error, delta_mean)
 
 
 
@@ -205,19 +286,17 @@ class Predictor:
                 if (int(time.time()) - started_training_at) > stop_training_after_seconds:
                     stop_training = True
 
-                # Stop if the error on the testing data is close to zero (0.15%)
-                if test_error < 0.0015:
+                # Stop if the error on the testing data is close to zero
+                if test_error < 0.00015:
                     stop_training = True
 
                 ## Stop if the model is overfitting, that is, the test error is becoming greater than the train error and the test error is small enough, stop
-                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.1:
+                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.002:
                     stop_training = True
 
                 # If we've seen no imporvement for a long while, stop
-                if lowest_error_epoch + round(max(eval_every_x_epochs*2+2,epoch*0.5)) < epoch:
+                if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
                     stop_training = True
-
-
 
                 if stop_training:
                     mixer.update_model(last_good_model)
@@ -255,7 +334,7 @@ class Predictor:
         :return accuracies: dictionaries of accuracies
         """
         if self._mixer is None:
-            logging.log.error("Please train the model before calculating accuracy")
+            logging.error("Please train the model before calculating accuracy")
             return
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
         predictions = self._mixer.predict(ds, include_encoded_predictions=True)
