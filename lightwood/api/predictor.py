@@ -94,6 +94,7 @@ class Predictor:
         device = torch.device(device_str)
 
         self._mixer.net.to(device)
+        self._mixer.net.device = device
         for e in self._mixer.encoders:
             try:
                 self._mixer.encoders[e]._model.model.to(device)
