@@ -6,6 +6,7 @@ import dill
 import copy
 import pandas
 import numpy as np
+import torch
 
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
@@ -33,6 +34,7 @@ class Predictor:
             self_dict = dill.load(pickle_in)
             pickle_in.close()
             self.__dict__ = self_dict
+            self.convert_to_device()
             return
 
         if output is None and config is None:
@@ -84,6 +86,21 @@ class Predictor:
 
             if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
                 return lowest_error
+
+    def convert_to_device(self,device_str=None):
+        if device_str is None:
+            device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
+
+        device = torch.device(device_str)
+
+        self._mixer.net.to(device)
+        self._mixer.net.device = device
+        for e in self._mixer.encoders:
+            try:
+                self._mixer.encoders[e]._model.model.to(device)
+                self._mixer.encoders[e]._model.device = device_str
+            except:
+                pass
 
     def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8, stop_model_building_after_seconds=None):
         """
@@ -268,38 +285,39 @@ class Predictor:
                 delta_mean = np.mean(error_delta_buffer)
 
                 # update mixer and calculate accuracy
-                self._mixer = mixer
-                accuracy = self.calculate_accuracy(test_data_ds)
-                self.train_accuracy = { var: accuracy[var] if accuracy[var] > 0 else 0 for var in accuracy}
                 logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
 
                 # if there is a callback function now its the time to call it
                 if callback_on_iter is not None:
-                    callback_on_iter(epoch, training_error, test_error, delta_mean)
+                    callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
 
 
                 # Decide if we should stop training
                 stop_training = False
 
-                # Stop if we're past the time limit alloted for training
-                if (int(time.time()) - started_training_at) > stop_training_after_seconds:
-                    stop_training = True
-
+                '''
+                # Two other potential conditions, not using them for now
                 # Stop if the error on the testing data is close to zero
-                if test_error < 0.00015:
-                    stop_training = True
-
-                ## Stop if the model is overfitting, that is, the test error is becoming greater than the train error and the test error is small enough, stop
-                if delta_mean < 0 and len(error_delta_buffer) > 5 and test_error < 0.002:
+                if test_error < 0.000015:
                     stop_training = True
 
                 # If we've seen no imporvement for a long while, stop
                 if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
                     stop_training = True
+                '''
+
+                ## Stop if the model is overfitting
+                if delta_mean < 0 and len(error_delta_buffer) > 5:
+                    stop_training = True
+
+                # Stop if we're past the time limit alloted for training
+                if (int(time.time()) - started_training_at) > stop_training_after_seconds:
+                   stop_training = True
 
                 if stop_training:
                     mixer.update_model(last_good_model)
+                    self._mixer = mixer
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     break
 
@@ -342,10 +360,15 @@ class Predictor:
         for output_column in self._mixer.output_column_names:
             properties = ds.get_column_config(output_column)
             if properties['type'] == 'categorical':
-                accuracies[output_column] = accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
-
+                accuracies[output_column] = {
+                    'function': 'accuracy_score',
+                    'value': accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
+                }
             else:
-                accuracies[output_column] = r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["encoded_predictions"])
+                accuracies[output_column] = {
+                    'function': 'r2_score',
+                    'value': r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["encoded_predictions"])
+                }
 
         return accuracies
 
@@ -356,7 +379,11 @@ class Predictor:
         :return:
         """
         f = open(path_to, 'wb')
+
+        # Dump everything relevant to cpu before saving
+        self.convert_to_device("cpu")
         dill.dump(self.__dict__, f)
+        self.convert_to_device()
         f.close()
 
     def stop_training(self):
