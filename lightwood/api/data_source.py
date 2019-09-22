@@ -209,7 +209,7 @@ class DataSource(Dataset):
             if hasattr(encoder_instance, attr):
                 setattr(encoder_instance, attr, encoder_attrs[attr])
 
-        encoder_instance.prepare_encoder(*args)
+        encoder_instance.prepare_encoder(args[0])
         self.encoders[column_name] = encoder_instance
         self.encoded_cache[column_name] = encoder_instance.encode(*args)
 
