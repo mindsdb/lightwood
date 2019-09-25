@@ -16,6 +16,9 @@ class RnnEncoder:
         self._prepared = False
 
     def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            
         no_null_sentences = [x if x is not None else '' for x in priming_data]
         estimated_time = 1/937*self._train_iters*len(no_null_sentences)
         log_every = math.ceil(self._train_iters/100)
