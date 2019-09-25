@@ -6,9 +6,13 @@ import torch
 
 class NnAutoEncoder:
 
-    def __init__(self, images, is_target = False):
-        self._model = NnEncoderHelper(images)
+    def __init__(self):
+        self._model = None
         self._pytorch_wrapper = torch.FloatTensor
+
+    def fit(self, images):
+        self._model = NnEncoderHelper(images)
+        pass
 
     def encode(self, images):
         """
