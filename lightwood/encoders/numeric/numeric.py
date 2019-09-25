@@ -106,13 +106,20 @@ class NumericEncoder:
 
 
 if __name__ == "__main__":
+    data = [1,1.1,2,8.6,None]
 
     encoder = NumericEncoder()
-    data = [1,1.1,2,8.6,None]
-    assert
+
     encoder.fit(data)
     encoded_vals = encoder.encode(data)
-    print(encoded_vals)
+
+    assert(sum(encoded_vals[0]) == 0)
+    assert(encoded_vals[1][2] > 0)
+    assert(encoded_vals[2][2] > 0)
+    assert(encoded_vals[3][2] > 0)
+    for i in range(0,4):
+        assert(encoded_vals[i][3] == 0)
+    assert(encoded_vals[4][3] == 1)
     exit()
 
     print(encoder.decode(encoder.encode([1, 2, 2, 2, 2, 2, 8.7, 800, None])))
