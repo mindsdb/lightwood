@@ -67,5 +67,5 @@ if __name__ == "__main__":
         assert(encoded_data[0][i] == UNCOMMON_TOKEN)
         assert(decoded_data[i] == UNCOMMON_WORD)
 
-    print(f'Encoded values: {encoded_data}')
-    print(f'Decoded values: {decoded_data}')
+    print(f'Encoded values: \n{encoded_data}')
+    print(f'Decoded values: \n{decoded_data}')
