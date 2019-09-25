@@ -70,11 +70,9 @@ if __name__ == "__main__":
     encoded_data = enc.encode(data)
     decoded_data = enc.decode(enc.encode(['category 2', 'category 1', 'category 3', None]))
 
-    print(decoded_data)
-
     assert(len(encoded_data) == 4)
     assert(decoded_data[1] == 'category 1')
     assert(decoded_data[2] == 'category 3')
     for i in [0,3]:
-        assert(encoded_data[i] == UNCOMMON_TOKEN)
+        assert(encoded_data[0][i] == UNCOMMON_TOKEN)
         assert(decoded_data[i] == UNCOMMON_WORD)
