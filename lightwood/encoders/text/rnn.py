@@ -15,31 +15,33 @@ class RnnEncoder:
         self._pytorch_wrapper = torch.FloatTensor
 
     def fit(self, priming_data):
-        estimated_time = 1/937*self._train_iters*len(priming_data)
+        no_null_sentences = [x if x is not None else '' for x in priming_data]
+        estimated_time = 1/937*self._train_iters*len(no_null_sentences)
         log_every = math.ceil(self._train_iters/100)
         logging.info('We will train an encoder for this text, on a CPU it will take about {min} minutes'.format(min=estimated_time))
 
         self._input_lang = Lang('input')
         self._output_lang = self._input_lang
 
-        for row in priming_data:
+        for row in no_null_sentences:
             if row is not None:
                 self._input_lang.addSentence(row)
 
-        max_length = max(map(len, priming_data))
+        max_length = max(map(len, no_null_sentences))
 
         hidden_size = self._encoded_vector_size
         self._encoder = EncoderRNN(self._input_lang.n_words, hidden_size).to(device)
         self._decoder = DecoderRNN(hidden_size, self._output_lang.n_words).to(device)
 
-        trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, priming_data, priming_data, self._train_iters, int(log_every), self._learning_rate, self._stop_on_error,
+        trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, no_null_sentences, no_null_sentences, self._train_iters, int(log_every), self._learning_rate, self._stop_on_error,
         max_length)
 
 
     def encode(self, column_data):
+        no_null_sentences = [x if x is not None else '' for x in column_data]
         ret = []
         with torch.no_grad():
-            for row in column_data:
+            for row in no_null_sentences:
 
                 encoder_hidden = self._encoder.initHidden()
                 input_tensor = tensorFromSentence(self._input_lang, row)
