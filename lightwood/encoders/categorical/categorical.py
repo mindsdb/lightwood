@@ -9,8 +9,9 @@ class CategoricalEncoder:
     def __init__(self, is_target = False):
         self._lang = None
         self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
 
-    def fit(self, priming_data):
+    def prepare_encoder(self, priming_data):
         self._lang = Lang('default')
         self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
         self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
@@ -20,7 +21,12 @@ class CategoricalEncoder:
             if category != None:
                 self._lang.addWord(str(category))
 
+        self._prepared = True
+
     def encode(self, column_data):
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            
         ret = []
         v_len = self._lang.n_words
 

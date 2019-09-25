@@ -9,10 +9,11 @@ class NnAutoEncoder:
     def __init__(self):
         self._model = None
         self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
 
-    def fit(self, priming_data):
+    def prepare_encoder(self, priming_data):
         self._model = NnEncoderHelper(images)
-        pass
+        self._prepared = True
 
     def encode(self, images):
         """
@@ -21,6 +22,9 @@ class NnAutoEncoder:
         :param images: List of images paths
         :return: a torch.floatTensor
         """
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+
         if not self._model:
             logging.error("No model to encode, please train the model")
 

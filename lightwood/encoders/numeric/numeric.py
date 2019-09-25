@@ -10,8 +10,9 @@ class NumericEncoder:
         self._max_value = None
         self._mean = None
         self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
 
-    def fit(self, priming_data):
+    def prepare_encoder(self, priming_data):
         count = 0
         value_type = 'int'
         for number in priming_data:
@@ -33,8 +34,12 @@ class NumericEncoder:
 
         self._type = value_type if self._type is None else self._type
         self._mean = count / len(priming_data)
+        self._prepared = True
 
     def encode(self, data):
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+
         ret = []
 
         for number in data:
