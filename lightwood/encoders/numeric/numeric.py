@@ -4,7 +4,8 @@ import logging
 
 class NumericEncoder:
 
-    def __init__(self):
+    def __init__(self, data_type=None):
+        self._type = data_type
         self._is_target = True
         self._min_value = None
         self._max_value = None
@@ -110,14 +111,11 @@ class NumericEncoder:
 if __name__ == "__main__":
 
     encoder = NumericEncoder()
+    data = [1,2,8.6,None]
 
-    print(encoder.encode([1,2,2,2,2,2,8.6]))
-    eixt()
+    encoder.fit(data)
+    encoded_vals = encoder.encode(data)
+    print(encoded_vals)
+    exit()
 
     print(encoder.decode(encoder.encode([1, 2, 2, 2, 2, 2, 8.7, 800, None])))
-
-    encoder = NumericEncoder()
-
-    print(encoder.encode([1, 2, 2, 2, 2, 2, 8.6]))
-
-    print(encoder.decode(encoder.encode([1, 2, 2, 2, 2, 2, 8.7, None])))
