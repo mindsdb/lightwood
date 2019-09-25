@@ -124,6 +124,6 @@ if __name__ == "__main__":
     decoded_vals = encoder.decode(encoded_vals)
     for i in range(len(encoded_vals)):
         if decoded_vals[i] is None:
-            assert(decoded_vals[i],data[i])
+            assert(decoded_vals[i] == data[i])
         else:
             assert(round(decoded_vals[i],5) == round(data[i],5))
