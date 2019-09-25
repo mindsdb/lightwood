@@ -16,7 +16,7 @@ class CategoricalEncoder:
         self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
         self._lang.word2count[UNCOMMON_WORD] = 0
         self._lang.n_words = 1
-        for category in column_data:
+        for category in priming_data:
             if category != None:
                 self._lang.addWord(str(category))
 
