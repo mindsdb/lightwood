@@ -4,8 +4,11 @@ import torch
 class DatetimeEncoder:
 
     def __init__(self, is_target = False):
-
         self._pytorch_wrapper = torch.FloatTensor
+
+    def fit(self, data):
+        # No fitting required
+        pass
 
     def encode(self, data):
         """
