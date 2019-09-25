@@ -13,8 +13,9 @@ class RnnEncoder:
         self._encoder = None
         self._decoder = None
         self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
 
-    def fit(self, priming_data):
+    def prepare_encoder(self, priming_data):
         no_null_sentences = [x if x is not None else '' for x in priming_data]
         estimated_time = 1/937*self._train_iters*len(no_null_sentences)
         log_every = math.ceil(self._train_iters/100)
@@ -36,8 +37,13 @@ class RnnEncoder:
         trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, no_null_sentences, no_null_sentences, self._train_iters, int(log_every), self._learning_rate, self._stop_on_error,
         max_length)
 
+        self._prepared = True
+
 
     def encode(self, column_data):
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+
         no_null_sentences = [x if x is not None else '' for x in column_data]
         ret = []
         with torch.no_grad():

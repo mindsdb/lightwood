@@ -14,8 +14,9 @@ class Img2VecEncoder:
         # I think we should make this an enum, something like: speed, balance, accuracy
         self.aim = 'balance'
         self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
 
-    def fit(self, priming_data):
+    def prepare_encoder(self, priming_data):
         if self._model is None:
             if self.aim == 'speed':
                 self._model = Img2Vec(model='resnet-18')
@@ -25,6 +26,7 @@ class Img2VecEncoder:
                 self._model = Img2Vec(model='resnext-50')
             else:
                 self._model = Img2Vec()
+        self._prepared = True
 
     def encode(self, images):
         """
@@ -33,6 +35,9 @@ class Img2VecEncoder:
             :images : list of images, each image is a path image(ToDO: url to image also need to be included)
             :return: a torch.floatTensor
         """
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+
         pics = []
         for image in images:
             if image.startswith('http'):

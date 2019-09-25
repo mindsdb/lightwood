@@ -30,8 +30,9 @@ class InferSentEncoder:
     def __init__(self, is_target = False):
         self._model = None
         self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
 
-    def fit(self, priming_data):
+    def prepare_encoder(self, priming_data):
         self._download_necessary_files()
 
         no_null_sentences = [x if x is not None else '' for x in priming_data]
@@ -43,6 +44,8 @@ class InferSentEncoder:
 
             self._model.build_vocab(no_null_sentences, tokenize=True)
 
+        self._prepared = True
+
     def encode(self, sentences):
         """
         Encode a column of sentences
@@ -50,6 +53,9 @@ class InferSentEncoder:
         :param sentences: a list of sentences
         :return: a torch.floatTensor
         """
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+
         no_null_sentences = [x if x is not None else '' for x in sentences]
         result = self._model.encode(no_null_sentences, bsize=128, tokenize=False, verbose=True)
         return self._pytorch_wrapper(result)
