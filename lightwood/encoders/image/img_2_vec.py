@@ -15,13 +15,7 @@ class Img2VecEncoder:
         self.aim = 'balance'
         self._pytorch_wrapper = torch.FloatTensor
 
-    def encode(self, images):
-        """
-            Encode list of images
-
-            :images : list of images, each image is a path image(ToDO: url to image also need to be included)
-            :return: a torch.floatTensor
-        """
+    def fit(self, data):
         if self._model is None:
             if self.aim == 'speed':
                 self._model = Img2Vec(model='resnet-18')
@@ -32,6 +26,13 @@ class Img2VecEncoder:
             else:
                 self._model = Img2Vec()
 
+    def encode(self, images):
+        """
+            Encode list of images
+
+            :images : list of images, each image is a path image(ToDO: url to image also need to be included)
+            :return: a torch.floatTensor
+        """
         pics = []
         for image in images:
             if image.startswith('http'):
