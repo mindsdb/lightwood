@@ -32,7 +32,7 @@ class NumericEncoder:
                 value_type = 'float'
 
         self._type = value_type if self._type is None else self._type
-        self._mean = count / len(data)
+        self._mean = count / len(priming_data)
 
     def encode(self, data):
         ret = []
