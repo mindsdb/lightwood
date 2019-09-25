@@ -62,12 +62,18 @@ class CategoricalEncoder:
 
 if __name__ == "__main__":
 
-    data = 'once upon a time there where some tokens'.split(' ') + [None]
+    date = ['cateogry 1', 'cateogry 3', 'cateogry 4', None]
 
     enc = CategoricalEncoder()
 
     enc.fit(data)
 
-    print(enc.encode(data))
+    encoded_data = enc.encode(data)
+    decoded_data = enc.decode(enc.encode(['cateogry 2', 'cateogry 1', 'cateogry 3', None]))
 
-    print(enc.decode(enc.encode(['not there', 'time', 'tokens', None])))
+    assert(len(encoded_data) == 4)
+    assert(decoded_data[1] == 'category 1')
+    assert(decoded_data[2] == 'category 3')
+    for i in [0,3]:
+        assert(encoded_data[i] == UNCOMMON_TOKEN)
+        assert(decoded_data[i] == UNCOMMON_WORD)
