@@ -13,13 +13,12 @@ class CategoricalEncoder:
     def fit(self, priming_data):
         self._lang = Lang('default')
         self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
-        self.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
-        self.word2count[UNCOMMON_WORD] = 0
+        self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
+        self._lang.word2count[UNCOMMON_WORD] = 0
         self._lang.n_words = 1
         for category in column_data:
             if category != None:
-                category = str(category)
-                self._lang.addWord(category)
+                self._lang.addWord(str(category))
 
     def encode(self, column_data):
         ret = []
@@ -32,7 +31,7 @@ class CategoricalEncoder:
                 index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
                 encoded_word[index] = 1
 
-            ret += [encoded_word]
+            ret.append(encoded_word)
 
         return self._pytorch_wrapper(ret)
 
@@ -67,6 +66,8 @@ if __name__ == "__main__":
 
     enc = CategoricalEncoder()
 
-    print (enc.encode(data))
+    enc.fit(data)
+
+    print(enc.encode(data))
 
     print(enc.decode(enc.encode(['not there', 'time', 'tokens', None])))
