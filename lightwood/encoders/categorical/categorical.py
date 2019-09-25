@@ -41,17 +41,12 @@ class CategoricalEncoder:
         ret = []
 
         for vector in encoded_data_list:
-            print(encoded_data_list)
-            found = False
-            max_i = 0
-            max_val = 0
-            for i in range(len(vector)):
-                val = vector[i]
-                if val > max_val:
-                    max_i = i
-                    max_val = val
-            ret += [self._lang.index2word[max_i]]
+            try:
+                ohe_index = vector.index(1)
+            except:
+                ohe_index = 0
 
+            ret.append(self._lang.index2word[ohe_index])
         return ret
 
 
@@ -71,3 +66,6 @@ if __name__ == "__main__":
     for i in [0,3]:
         assert(encoded_data[0][i] == UNCOMMON_TOKEN)
         assert(decoded_data[i] == UNCOMMON_WORD)
+
+    print(f'Encoded values: {encoded_data}')
+    print(f'Decoded values: {decoded_data}')
