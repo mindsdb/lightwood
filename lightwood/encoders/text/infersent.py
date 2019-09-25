@@ -33,6 +33,9 @@ class InferSentEncoder:
         self._prepared = False
 
     def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            
         self._download_necessary_files()
 
         no_null_sentences = [x if x is not None else '' for x in priming_data]

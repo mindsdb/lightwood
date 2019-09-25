@@ -13,6 +13,9 @@ class NumericEncoder:
         self._prepared = False
 
     def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            
         count = 0
         value_type = 'int'
         for number in priming_data:

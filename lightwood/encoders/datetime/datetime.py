@@ -8,6 +8,9 @@ class DatetimeEncoder:
         self._prepared = False
 
     def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            
         self._prepared = True
 
     def encode(self, data):

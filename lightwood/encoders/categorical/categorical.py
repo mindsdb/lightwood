@@ -12,6 +12,9 @@ class CategoricalEncoder:
         self._prepared = False
 
     def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+
         self._lang = Lang('default')
         self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
         self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
@@ -26,7 +29,7 @@ class CategoricalEncoder:
     def encode(self, column_data):
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
-            
+
         ret = []
         v_len = self._lang.n_words
 

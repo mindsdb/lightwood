@@ -17,6 +17,9 @@ class Img2VecEncoder:
         self._prepared = False
 
     def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            
         if self._model is None:
             if self.aim == 'speed':
                 self._model = Img2Vec(model='resnet-18')

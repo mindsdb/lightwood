@@ -12,6 +12,9 @@ class NnAutoEncoder:
         self._prepared = False
 
     def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            
         self._model = NnEncoderHelper(images)
         self._prepared = True
 
