@@ -39,10 +39,8 @@ class NumericEncoder:
         ret = []
 
         for number in data:
-
             vector_len = 3 if self._is_target else 4
             vector = [0]*vector_len
-
 
             if number is None:
                 ret += [vector]
@@ -60,16 +58,13 @@ class NumericEncoder:
 
             if number == 0:
                 vector[1] = 1
-
             else:
                 vector[2] = math.log(abs(number))
 
             if not self._is_target:
                 vector[-1] = 1 # is not null
 
-
             ret += [vector]
-
 
         return self._pytorch_wrapper(ret)
 
@@ -85,7 +80,6 @@ class NumericEncoder:
                 abs_rounded_first = 0
             else:
                 abs_rounded_first = abs(round(vector[1]))
-
 
             if abs_rounded_first == 1:
                 real_value = 0
