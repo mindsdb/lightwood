@@ -62,14 +62,15 @@ class CategoricalEncoder:
 
 if __name__ == "__main__":
 
-    date = ['cateogry 1', 'cateogry 3', 'cateogry 4', None]
+    data = ['category 1', 'category 3', 'category 4', None]
 
     enc = CategoricalEncoder()
 
     enc.fit(data)
-
     encoded_data = enc.encode(data)
-    decoded_data = enc.decode(enc.encode(['cateogry 2', 'cateogry 1', 'cateogry 3', None]))
+    decoded_data = enc.decode(enc.encode(['category 2', 'category 1', 'category 3', None]))
+
+    print(decoded_data)
 
     assert(len(encoded_data) == 4)
     assert(decoded_data[1] == 'category 1')
