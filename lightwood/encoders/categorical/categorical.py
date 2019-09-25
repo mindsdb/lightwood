@@ -37,16 +37,12 @@ class CategoricalEncoder:
 
 
     def decode(self, encoded_data):
-
         encoded_data_list = encoded_data.tolist()
-
         ret = []
 
-
         for vector in encoded_data_list:
+            print(encoded_data_list)
             found = False
-
-
             max_i = 0
             max_val = 0
             for i in range(len(vector)):
@@ -55,7 +51,6 @@ class CategoricalEncoder:
                     max_i = i
                     max_val = val
             ret += [self._lang.index2word[max_i]]
-
 
         return ret
 
