@@ -112,6 +112,7 @@ if __name__ == "__main__":
     encoder = NumericEncoder()
 
     print(encoder.encode([1,2,2,2,2,2,8.6]))
+    eixt()
 
     print(encoder.decode(encoder.encode([1, 2, 2, 2, 2, 2, 8.7, 800, None])))
 
