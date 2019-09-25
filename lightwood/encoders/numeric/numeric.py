@@ -6,40 +6,36 @@ class NumericEncoder:
 
     def __init__(self, data_type = None, is_target = False):
         self._is_target = True
-        self._trained = False
         self._min_value = None
         self._max_value = None
         self._type = data_type
         self._mean = None
         self._pytorch_wrapper = torch.FloatTensor
 
+    def fit(self, data):
+        count = 0
+        value_type = 'int'
+        for number in data:
+            try:
+                number = float(number)
+            except:
+                continue
+
+            if math.isnan(number):
+                logging.error('Lightwood does not support working with NaN values !')
+                exit()
+
+            self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
+            self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
+            count += number
+
+            if int(number) != number:
+                value_type = 'float'
+
+        self._type = value_type if self._type is None else self._type
+        self._mean = count / len(data)
+
     def encode(self, data):
-
-        if self._trained == False:
-            count = 0
-            value_type = 'int'
-            for number in data:
-                try:
-                    number = float(number)
-                except:
-                    continue
-
-                if number is None or math.isnan(number):
-                    logging.error('Lightwood does not support working with NaN values !')
-                    exit()
-
-                self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
-                self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
-                count += number
-
-                if int(number) != number:
-                    value_type = 'float'
-
-            self._type = value_type if self._type is None else self._type
-            self._mean = count / len(data)
-
-            self._trained = True
-
         ret = []
 
         for number in data:
