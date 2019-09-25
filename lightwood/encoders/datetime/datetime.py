@@ -6,7 +6,7 @@ class DatetimeEncoder:
     def __init__(self, is_target = False):
         self._pytorch_wrapper = torch.FloatTensor
 
-    def fit(self, data):
+    def fit(self, priming_data):
         # No fitting required
         pass
 

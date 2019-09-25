@@ -11,7 +11,7 @@ class NumericEncoder:
         self._mean = None
         self._pytorch_wrapper = torch.FloatTensor
 
-    def fit(self, data):
+    def fit(self, priming_data):
         count = 0
         value_type = 'int'
         for number in data:

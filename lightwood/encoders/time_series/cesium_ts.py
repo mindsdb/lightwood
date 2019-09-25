@@ -142,7 +142,7 @@ class CesiumTsEncoder:
         self._pytorch_wrapper = torch.FloatTensor
         self._features = features
 
-    def fit(self):
+    def fit(self, priming_data):
         pass
 
     def encode(self, values_data, times=None):

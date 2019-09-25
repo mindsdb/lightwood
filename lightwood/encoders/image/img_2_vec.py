@@ -15,7 +15,7 @@ class Img2VecEncoder:
         self.aim = 'balance'
         self._pytorch_wrapper = torch.FloatTensor
 
-    def fit(self, data):
+    def fit(self, priming_data):
         if self._model is None:
             if self.aim == 'speed':
                 self._model = Img2Vec(model='resnet-18')
