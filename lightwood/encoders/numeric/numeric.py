@@ -14,7 +14,7 @@ class NumericEncoder:
     def fit(self, priming_data):
         count = 0
         value_type = 'int'
-        for number in data:
+        for number in priming_data:
             try:
                 number = float(number)
             except:
