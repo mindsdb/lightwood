@@ -15,6 +15,8 @@ class RnnEncoder:
         self._trained = False
         self._pytorch_wrapper = torch.FloatTensor
 
+    def fit(self, pr)
+
     def encode(self, column_data):
 
         if self._trained == False:

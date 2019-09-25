@@ -10,7 +10,7 @@ class NnAutoEncoder:
         self._model = None
         self._pytorch_wrapper = torch.FloatTensor
 
-    def fit(self, images):
+    def fit(self, priming_data):
         self._model = NnEncoderHelper(images)
         pass
 
