@@ -7,20 +7,21 @@ UNCOMMON_TOKEN = 0
 class CategoricalEncoder:
 
     def __init__(self, is_target = False):
-
         self._lang = None
         self._pytorch_wrapper = torch.FloatTensor
 
-    def encode(self, column_data):
-        if self._lang is None:
-            self._lang = Lang('default')
-            self._lang.index2word =  {UNCOMMON_TOKEN: UNCOMMON_WORD}
-            self._lang.n_words = 1
-            for word in column_data:
-                if word != None:
-                    word = str(word)
-                    self._lang.addWord(word)
+    def fit(self, priming_data):
+        self._lang = Lang('default')
+        self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
+        self.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
+        self.word2count[UNCOMMON_WORD] = 0
+        self._lang.n_words = 1
+        for category in column_data:
+            if category != None:
+                category = str(category)
+                self._lang.addWord(category)
 
+    def encode(self, column_data):
         ret = []
         v_len = self._lang.n_words
 
