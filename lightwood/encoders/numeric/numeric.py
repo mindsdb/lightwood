@@ -4,11 +4,10 @@ import logging
 
 class NumericEncoder:
 
-    def __init__(self, data_type = None, is_target = False):
+    def __init__(self):
         self._is_target = True
         self._min_value = None
         self._max_value = None
-        self._type = data_type
         self._mean = None
         self._pytorch_wrapper = torch.FloatTensor
 
@@ -110,7 +109,7 @@ class NumericEncoder:
 
 if __name__ == "__main__":
 
-    encoder = NumericEncoder(data_type='int')
+    encoder = NumericEncoder()
 
     print(encoder.encode([1,2,2,2,2,2,8.6]))
 
