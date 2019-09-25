@@ -6,7 +6,6 @@ class NumericEncoder:
 
     def __init__(self, data_type=None):
         self._type = data_type
-        self._is_target = True
         self._min_value = None
         self._max_value = None
         self._mean = None
@@ -39,18 +38,19 @@ class NumericEncoder:
         ret = []
 
         for number in data:
-            vector_len = 3 if self._is_target else 4
+            vector_len = 4
             vector = [0]*vector_len
 
             if number is None:
-                ret += [vector]
+                vector[3] = 1
+                ret.append(vector)
                 continue
 
             try:
                 number = float(number)
             except:
                 logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
-                ret += [vector]
+                ret.append(vector)
                 continue
 
             if number < 0:
@@ -61,10 +61,7 @@ class NumericEncoder:
             else:
                 vector[2] = math.log(abs(number))
 
-            if not self._is_target:
-                vector[-1] = 1 # is not null
-
-            ret += [vector]
+            ret.append(vector)
 
         return self._pytorch_wrapper(ret)
 
@@ -72,8 +69,8 @@ class NumericEncoder:
     def decode(self, encoded_values):
         ret = []
         for vector in encoded_values.tolist():
-            if vector[-1] == 0 and self._is_target == False: # is not null = false
-                ret += [None]
+            if vector[3] == 1:
+                ret.append(None)
                 continue
 
             if math.isnan(vector[1]):
@@ -92,7 +89,7 @@ class NumericEncoder:
                 is_negative = True if abs_rounded_zero == 1 else False
                 encoded_value = vector[2]
                 try:
-                    real_value = -math.exp(encoded_value) if is_negative else math.exp(encoded_value) #(self._max_value-self._min_value)*encoded_value + self._mean
+                    real_value = -math.exp(encoded_value) if is_negative else math.exp(encoded_value)
                 except:
                     if self._type == 'int':
                         real_value = pow(2,63)
@@ -102,7 +99,7 @@ class NumericEncoder:
             if self._type == 'int':
                 real_value = round(real_value)
 
-            ret += [real_value]
+            ret.append(real_value)
 
         return ret
 
@@ -111,8 +108,8 @@ class NumericEncoder:
 if __name__ == "__main__":
 
     encoder = NumericEncoder()
-    data = [1,2,8.6,None]
-
+    data = [1,1.1,2,8.6,None]
+    assert
     encoder.fit(data)
     encoded_vals = encoder.encode(data)
     print(encoded_vals)
