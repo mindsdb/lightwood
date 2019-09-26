@@ -28,9 +28,26 @@ W2V_PATH = "datasets/fastText/crawl-300d-2M-subword.vec"
 class InferSentEncoder:
 
     def __init__(self, is_target = False):
-
         self._model = None
         self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
+
+    def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            
+        self._download_necessary_files()
+
+        no_null_sentences = [x if x is not None else '' for x in priming_data]
+
+        if self._model is None:
+            self._model = InferSent(PARAMS_MODEL)
+            self._model.load_state_dict(torch.load(MODEL_PATH))
+            self._model.set_w2v_path(W2V_PATH)
+
+            self._model.build_vocab(no_null_sentences, tokenize=True)
+
+        self._prepared = True
 
     def encode(self, sentences):
         """
@@ -39,20 +56,11 @@ class InferSentEncoder:
         :param sentences: a list of sentences
         :return: a torch.floatTensor
         """
-        self._download_necessary_files()
-        for i, text in enumerate(sentences):
-            if text is None:
-                sentences[i] = ''
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
 
-        if self._model is None:
-            self._model = InferSent(PARAMS_MODEL)
-            self._model.load_state_dict(torch.load(MODEL_PATH))
-            self._model.set_w2v_path(W2V_PATH)
-
-            self._model.build_vocab(sentences, tokenize=True)
-
-        result = self._model.encode(sentences, bsize=128, tokenize=False, verbose=True)
-
+        no_null_sentences = [x if x is not None else '' for x in sentences]
+        result = self._model.encode(no_null_sentences, bsize=128, tokenize=False, verbose=True)
         return self._pytorch_wrapper(result)
 
     def _download_necessary_files(self):

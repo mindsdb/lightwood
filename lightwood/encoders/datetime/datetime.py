@@ -4,8 +4,14 @@ import torch
 class DatetimeEncoder:
 
     def __init__(self, is_target = False):
-
         self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
+
+    def prepare_encoder(self, priming_data):
+        if self._prepared:
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            
+        self._prepared = True
 
     def encode(self, data):
         """
@@ -13,6 +19,8 @@ class DatetimeEncoder:
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
         :return: a list of vectors
         """
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
 
         ret = []
 
