@@ -14,12 +14,11 @@ df=pd.read_csv("https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_ren
 
 predictor = Predictor(output=['rental_price'])
 
-def iter_function(epoch, error, test_error, test_error_gradient):
+def iter_function(epoch, error, test_error, test_error_gradient, test_accuracy):
     print(
-        'epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, accuracy: {accuracy}'.format(
+        'epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, accuracy: {accuracy}, test_accuracy: {test_accuracy}'.format(
             iter=epoch, error=error, test_error=test_error, test_error_gradient=test_error_gradient,
-            accuracy=predictor.train_accuracy))
-
+            accuracy=predictor.train_accuracy, test_accuracy=test_accuracy))
 
 predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=10)
 
