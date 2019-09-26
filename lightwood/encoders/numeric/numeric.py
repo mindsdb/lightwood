@@ -15,7 +15,7 @@ class NumericEncoder:
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
-            
+
         count = 0
         value_type = 'int'
         for number in priming_data:
@@ -50,9 +50,11 @@ class NumericEncoder:
             vector = [0]*vector_len
 
             if number is None:
-                vector[3] = 1
+                vector[3] = 0
                 ret.append(vector)
                 continue
+            else:
+                vector[3] = 1
 
             try:
                 number = float(number)
@@ -65,9 +67,9 @@ class NumericEncoder:
                 vector[0] = 1
 
             if number == 0:
-                vector[1] = 1
+                vector[2] = 1
             else:
-                vector[2] = math.log(abs(number))
+                vector[1] = math.log(abs(number))
 
             ret.append(vector)
 
