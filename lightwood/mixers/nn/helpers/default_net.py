@@ -8,10 +8,11 @@ import torch
 class DefaultNet(torch.nn.Module):
 
     def __init__(self, ds, dynamic_parameters):
-        if CONFIG.USE_CUDA:
-            self.device = torch.device('cuda')
-        else:
-            self.device = torch.device('cpu')
+        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
+        if CONFIG.USE_DEVICE is not None:
+            device_str = CONFIG.USE_DEVICE
+
+        self.device = torch.device(device_str)
 
         self.dynamic_parameters = dynamic_parameters
         """
@@ -26,7 +27,7 @@ class DefaultNet(torch.nn.Module):
         # Select architecture
 
         # 1. Determine, based on the machines specification, if the input/output size are "large"
-        if CONFIG.USE_CUDA:
+        if CONFIG.USE_CUDA or CONFIG.USE_DEVICE is not None:
             large_input = True if input_size > 4000 else False
             large_output = True if output_size > 400 else False
         else:

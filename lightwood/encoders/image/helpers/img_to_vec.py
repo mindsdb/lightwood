@@ -24,7 +24,11 @@ class Img2Vec():
         :param layer: String or Int depending on model.  See more docs: https://github.com/christiansafka/img2vec.git
         :param layer_output_size: Int depicting the output size of the requested layer
         """
-        self.device = torch.device("cuda" if CONFIG.USE_CUDA else "cpu")
+        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
+        if CONFIG.USE_DEVICE is not None:
+            device_str = CONFIG.USE_DEVICE
+
+        self.device = torch.device(device_str)
         self.layer_output_size = layer_output_size
         self.model_name = model
 

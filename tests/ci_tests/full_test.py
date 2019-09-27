@@ -25,7 +25,6 @@ if sys.platform not in ['win32','cygwin','windows']:
 
 lightwood.config.config.CONFIG.USE_CUDA = False
 
-
 df=pd.read_csv("https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv")
 
 predictor = Predictor(config)
