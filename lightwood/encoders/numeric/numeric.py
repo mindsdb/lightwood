@@ -42,7 +42,6 @@ class NumericEncoder:
     def encode(self, data):
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
-
         ret = []
 
         for number in data:
