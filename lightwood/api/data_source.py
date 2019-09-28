@@ -29,7 +29,7 @@ class DataSource(Dataset):
             if 'dropout' in col:
                 dropout = col['dropout']
 
-            self.dropout_dict[col['name']] = 0 #dropout
+            self.dropout_dict[col['name']] = dropout
 
         self._clear_cache()
 
