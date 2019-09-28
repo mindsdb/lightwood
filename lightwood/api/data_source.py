@@ -104,7 +104,7 @@ class DataSource(Dataset):
                         custom_data[custom_data['depends_on_column']]= [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
                 elif 'disable_cache' in feature and feature['disable_cache'] is True:
-                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
+                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data={col_name: [self.data_frame[col_name].iloc[idx]]})
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
