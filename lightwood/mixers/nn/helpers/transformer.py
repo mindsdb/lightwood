@@ -27,8 +27,6 @@ class Transformer:
             if output_feature not in self.feature_len_map:
                 self.feature_len_map[output_feature] = len(sub_vector)
 
-        print(input_vector)
-        print(output_vector)
         return torch.FloatTensor(input_vector), torch.FloatTensor(output_vector)
 
     def revert(self, vector, feature_set = 'output_features'):
