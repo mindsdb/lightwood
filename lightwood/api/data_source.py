@@ -81,7 +81,6 @@ class DataSource(Dataset):
             self.transformed_cache = [None] * self.__len__()
 
         if dropout_features is None:
-
             cached_sample = self.transformed_cache[idx]
             if cached_sample is not None:
                 return cached_sample
@@ -90,7 +89,10 @@ class DataSource(Dataset):
             sample[feature_set] = {}
             for feature in self.configuration[feature_set]:
                 col_name = feature['name']
-                col_config = self.get_column_config(feature)
+                col_config = self.get_column_config(col_name)
+                #print('\n\n\n\n!!!!!!!!!!!!!!!')
+                #print(feature)
+                #print('!!!!!!!!!!!!!!!\n\n\n\n')
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
                     if not ('disable_cache' in feature and feature['disable_cache'] is True):
                         self.get_encoded_column_data(col_name, feature_set)
@@ -133,12 +135,11 @@ class DataSource(Dataset):
                 else:
                     self.output_weights = False
 
-
         if self.transformer:
             sample = self.transformer.transform(sample)
 
         # only cache if no dropout features
-        if dropout_features is None:
+        if dropout_features is None or ('disable_cache' in feature and feature['disable_cache'] is True):
             self.transformed_cache[idx] = sample
             return self.transformed_cache[idx]
         else:
