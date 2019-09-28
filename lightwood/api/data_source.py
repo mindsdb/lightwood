@@ -26,8 +26,8 @@ class DataSource(Dataset):
             else:
                 dropout = 0.0
 
-            if 'dropout' in self.configuration['input_features']:
-                dropout = self.configuration['input_features']['dropout']
+            if 'dropout' in col:
+                dropout = col['dropout']
 
             self.dropout_dict[col['name']] = dropout
 
@@ -75,13 +75,12 @@ class DataSource(Dataset):
         dropout_features = None
 
         if self.training == True and random.randint(0,2) == 1:
-            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > self.dropout_dict[feature['name']]]
+            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
         if self.transformed_cache is None:
             self.transformed_cache = [None] * self.__len__()
 
         if dropout_features is None:
-
             cached_sample = self.transformed_cache[idx]
             if cached_sample is not None:
                 return cached_sample
@@ -90,18 +89,21 @@ class DataSource(Dataset):
             sample[feature_set] = {}
             for feature in self.configuration[feature_set]:
                 col_name = feature['name']
-                col_config = self.get_column_config(feature)
+                col_config = self.get_column_config(col_name)
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
-                    self.get_encoded_column_data(col_name, feature_set)
+                    if not ('disable_cache' in feature and feature['disable_cache'] is True):
+                        self.get_encoded_column_data(col_name, feature_set)
+
 
                 # if we are dropping this feature, get the encoded value of None
-                if dropout_features is not None and feature in dropout_features:
-                    custom_data = {feature:[None]}
+                if dropout_features is not None and col_name in dropout_features:
+                    custom_data = {col_name:[None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']]= [None]
-                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
-
+                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)[0]
+                elif 'disable_cache' in feature and feature['disable_cache'] is True:
+                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data={col_name: [self.data_frame[col_name].iloc[idx]]})[0]
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
@@ -130,12 +132,11 @@ class DataSource(Dataset):
                 else:
                     self.output_weights = False
 
-
         if self.transformer:
             sample = self.transformer.transform(sample)
 
         # only cache if no dropout features
-        if dropout_features is None:
+        if dropout_features is None or ('disable_cache' in feature and feature['disable_cache'] is True):
             self.transformed_cache[idx] = sample
             return self.transformed_cache[idx]
         else:
