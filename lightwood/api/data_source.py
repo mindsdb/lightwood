@@ -92,16 +92,19 @@ class DataSource(Dataset):
                 col_name = feature['name']
                 col_config = self.get_column_config(feature)
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
-                    self.get_encoded_column_data(col_name, feature_set)
+                    if not ('disable_cache' in feature and feature['disable_cache'] is True):
+                        self.get_encoded_column_data(col_name, feature_set)
+
 
                 # if we are dropping this feature, get the encoded value of None
-                if dropout_features is not None and feature in dropout_features:
-                    custom_data = {feature:[None]}
+                if dropout_features is not None and col_name in dropout_features:
+                    custom_data = {col_name:[None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']]= [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
-
+                elif 'disable_cache' in feature and feature['disable_cache'] is True:
+                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
