@@ -6,7 +6,7 @@ import lightwood
 
 ####################
 config = {'input_features': [
-                    {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric', 'disable_cache': False},
+                    {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric', 'disable_cache': True},
                     {'name': 'location', 'type': 'categorical'}, {'name': 'days_on_market', 'type': 'numeric'},
                     {'name': 'neighborhood', 'type': 'categorical','dropout':0.4},{'name': 'rental_price', 'type': 'numeric'}],
  'output_features': [{'name': 'number_of_rooms', 'type': 'categorical', 'weights':{
@@ -21,8 +21,7 @@ config = {'input_features': [
 
 # AX doesn't seem to work on the travis version of windows, so don't test it there as of now
 if sys.platform not in ['win32','cygwin','windows']:
-    pass
-    #config['optimizer'] = lightwood.model_building.BasicAxOptimizer
+    config['optimizer'] = lightwood.model_building.BasicAxOptimizer
 
 lightwood.config.config.CONFIG.USE_CUDA = False
 
