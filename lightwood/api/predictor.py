@@ -166,10 +166,6 @@ class Predictor:
 
         from_data_ds.training = True
 
-        #test_data_ds.transformer = from_data_ds.transformer
-        #test_data_ds.encoders = from_data_ds.encoders
-
-
         mixer_params = {}
 
         if 'mixer' in self.config:
@@ -191,6 +187,7 @@ class Predictor:
 
         test_data_ds.transformer = from_data_ds.transformer
         test_data_ds.encoders = from_data_ds.encoders
+        test_data_ds.output_weights = from_data_ds.output_weights
         # Initialize data sources
 
         if input_size != len(test_data_ds[0][0]):
@@ -362,8 +359,6 @@ class Predictor:
         for output_column in self._mixer.output_column_names:
             properties = ds.get_column_config(output_column)
             if properties['type'] == 'categorical':
-                print(ds.get_column_original_data(output_column))
-                print( predictions[output_column]["predictions"])
                 accuracies[output_column] = {
                     'function': 'accuracy_score',
                     'value': accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
