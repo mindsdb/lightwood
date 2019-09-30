@@ -34,7 +34,6 @@ class CategoricalEncoder:
     def encode(self, column_data):
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
-        print(column_data)
         ret = []
         v_len = self._lang.n_words
 
@@ -46,9 +45,7 @@ class CategoricalEncoder:
                 encoded_word[index] = 1
 
             ret.append(encoded_word)
-        print(ret)
-        print(self.decode(ret))
-        exit()
+
         return self._pytorch_wrapper(ret)
 
 
