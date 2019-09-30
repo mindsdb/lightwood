@@ -76,7 +76,7 @@ class DataSource(Dataset):
 
         if self.training == True and random.randint(0,2) == 1:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
-            
+
         if self.transformed_cache is None:
             self.transformed_cache = [None] * self.__len__()
 
@@ -116,12 +116,11 @@ class DataSource(Dataset):
                     new_weights = None
 
                     for val in weights:
-                        encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:val})
-                        encoded_val = [round(x.item()) for x in encoded_val[0]]
-                        value_index = encoded_val.index(1)
+                        encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:[val]})
+                        value_index = np.argmax(encoded_val[0])
 
                         if new_weights is None:
-                            new_weights = [0.2] * len(encoded_val)
+                            new_weights = [0.2] * len(encoded_val[0])
 
                         new_weights[value_index] = weights[val]
 
