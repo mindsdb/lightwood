@@ -1,5 +1,7 @@
 import torch
 from lightwood.encoders.text.helpers.rnn_helpers import Lang
+import numpy as np
+
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
@@ -12,6 +14,9 @@ class CategoricalEncoder:
         self._prepared = False
 
     def prepare_encoder(self, priming_data):
+        print('\n\n')
+        print(priming_data)
+        print('\n\n')
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
@@ -29,7 +34,7 @@ class CategoricalEncoder:
     def encode(self, column_data):
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
-
+        print(column_data)
         ret = []
         v_len = self._lang.n_words
 
@@ -41,7 +46,9 @@ class CategoricalEncoder:
                 encoded_word[index] = 1
 
             ret.append(encoded_word)
-
+        print(ret)
+        print(self.decode(ret))
+        exit()
         return self._pytorch_wrapper(ret)
 
 
@@ -50,10 +57,7 @@ class CategoricalEncoder:
         ret = []
 
         for vector in encoded_data_list:
-            try:
-                ohe_index = vector.index(1)
-            except:
-                ohe_index = 0
+            ohe_index = np.argmax(vector)
 
             ret.append(self._lang.index2word[ohe_index])
         return ret
