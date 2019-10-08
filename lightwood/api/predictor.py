@@ -366,7 +366,7 @@ class Predictor:
             else:
                 accuracies[output_column] = {
                     'function': 'r2_score',
-                    'value': r2_score(ds.get_encoded_column_data(output_column), predictions[output_column]["encoded_predictions"])
+                    'value': r2_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
                 }
 
         return accuracies
