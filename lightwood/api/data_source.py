@@ -80,7 +80,7 @@ class DataSource(Dataset):
         if self.transformed_cache is None:
             self.transformed_cache = [None] * self.__len__()
 
-        if dropout_features is None:
+        if dropout_features is None or len(dropout_features) < 1:
             cached_sample = self.transformed_cache[idx]
             if cached_sample is not None:
                 return cached_sample
