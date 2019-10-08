@@ -78,32 +78,47 @@ class NumericEncoder:
     def decode(self, encoded_values):
         ret = []
         for vector in encoded_values.tolist():
-            if vector[3] == 1:
+            if not math.isnan(vector[0]):
+                is_negative = True if abs(round(vector[0])) == 1 else False
+            else:
+                logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                is_negative = False
+
+            if not math.isnan(vector[1]):
+                encoded_nr = vector[1]
+            else:
+                logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                encoded_nr = 0
+
+            if not math.isnan(vector[2]):
+                is_zero = True if abs(round(vector[2])) == 1 else False
+            else:
+                logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                is_zero = False
+
+            if not math.isnan(vector[3]):
+                is_none = True if abs(round(vector[3])) == 0 else False
+            else:
+                logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                is_none = True
+
+            if is_none:
                 ret.append(None)
                 continue
 
-            if math.isnan(vector[1]):
-                abs_rounded_first = 0
-            else:
-                abs_rounded_first = abs(round(vector[1]))
+            if is_zero:
+                ret.append(0)
+                continue
 
-            if abs_rounded_first == 1:
-                real_value = 0
-            else:
-                if math.isnan(vector[0]):
-                    abs_rounded_zero = 0
+            try:
+                real_value = math.exp(encoded_nr)
+                if is_negative:
+                    real_value = -real_value
+            except:
+                if self._type == 'int':
+                    real_value = pow(2,63)
                 else:
-                    abs_rounded_zero = abs(round(vector[0]))
-
-                is_negative = True if abs_rounded_zero == 1 else False
-                encoded_value = vector[2]
-                try:
-                    real_value = -math.exp(encoded_value) if is_negative else math.exp(encoded_value)
-                except:
-                    if self._type == 'int':
-                        real_value = pow(2,63)
-                    else:
-                        real_value = float('inf')
+                    real_value = float('inf')
 
             if self._type == 'int':
                 real_value = round(real_value)
@@ -115,22 +130,24 @@ class NumericEncoder:
 
 
 if __name__ == "__main__":
-    data = [1,1.1,2,8.6,None]
+    data = [1,1.1,2,-8.6,None,0]
 
     encoder = NumericEncoder()
 
-    encoder.fit(data)
+    encoder.prepare_encoder(data)
     encoded_vals = encoder.encode(data)
 
-    assert(sum(encoded_vals[0]) == 0)
-    assert(encoded_vals[1][2] > 0)
-    assert(encoded_vals[2][2] > 0)
-    assert(encoded_vals[3][2] > 0)
+    assert(sum(encoded_vals[4]) == 0)
+    assert(sum(encoded_vals[0]) == 1)
+    assert(encoded_vals[1][1] > 0)
+    assert(encoded_vals[2][1] > 0)
+    assert(encoded_vals[3][1] > 0)
     for i in range(0,4):
-        assert(encoded_vals[i][3] == 0)
-    assert(encoded_vals[4][3] == 1)
+        assert(encoded_vals[i][3] == 1)
+    assert(encoded_vals[4][3] == 0)
 
     decoded_vals = encoder.decode(encoded_vals)
+
     for i in range(len(encoded_vals)):
         if decoded_vals[i] is None:
             assert(decoded_vals[i] == data[i])
