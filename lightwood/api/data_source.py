@@ -35,15 +35,14 @@ class DataSource(Dataset):
 
 
     def _clear_cache(self):
-
         self.list_cache = {}
         self.encoded_cache = {}
         self.transformed_cache = None
         self.decoded_cache = {}
+        self.disable_cache = False
 
 
     def extractRandomSubset(self, percentage):
-
         msk = np.random.rand(len(self.data_frame)) < (1-percentage)
         test_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]
@@ -77,7 +76,7 @@ class DataSource(Dataset):
         if self.training == True and random.randint(0,2) == 1:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
-        if self.transformed_cache is None:
+        if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
 
         if dropout_features is None or len(dropout_features) < 1:
