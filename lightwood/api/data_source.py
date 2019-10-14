@@ -72,9 +72,11 @@ class DataSource(Dataset):
         """
 
         if idx % 200 == 0:
+            print('-------------------')
             print(self.list_cache)
             print(self.encoded_cache)
             print(self.transformed_cache)
+            print('=======================')
 
         sample = {}
 
@@ -141,7 +143,7 @@ class DataSource(Dataset):
         if self.transformer:
             sample = self.transformer.transform(sample)
 
-        if not disable_cache:
+        if not self.disable_cache:
             self.transformed_cache[idx] = sample
             return self.transformed_cache[idx]
         else:
@@ -195,7 +197,7 @@ class DataSource(Dataset):
 
         if column_name in self.encoders:
             encoded_vals = self.encoders[column_name].encode(*args)
-            if column_name not in self.encoded_cache or custom_data is not None:
+            if column_name not in self.encoded_cache and custom_data is not None:
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
 
