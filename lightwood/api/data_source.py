@@ -41,7 +41,6 @@ class DataSource(Dataset):
         self.list_cache = {}
         self.encoded_cache = {}
         self.transformed_cache = None
-        self.decoded_cache = {}
 
 
     def extractRandomSubset(self, percentage):
@@ -71,6 +70,12 @@ class DataSource(Dataset):
         :param idx:
         :return:
         """
+
+        if idx % 200 == 0:
+            print(self.list_cache)
+            print(self.encoded_cache)
+            print(self.transformed_cache)
+            
         sample = {}
         disable_cache = self.disable_cache
 
@@ -230,7 +235,7 @@ class DataSource(Dataset):
         """
         :param column_name: column names to be decoded
         :param encoded_data: encoded data of tensor type
-        :return decoded_cache : Dict :Decoded data of input column
+        :return decoded_data : Dict :Decoded data of input column
         """
         if decoder_instance is None:
             if column_name not in self.encoders:
@@ -238,8 +243,7 @@ class DataSource(Dataset):
                     'Data must have been encoded before at some point, you should not decode before having encoding at least once')
             decoder_instance = self.encoders[column_name]
         decoded_data = decoder_instance.decode(encoded_data)
-        if self.disable_cache == True:
-            self.decoded_cache[column_name] = decoded_data
+
         return decoded_data
 
     def get_feature_names(self, where = 'input_features'):

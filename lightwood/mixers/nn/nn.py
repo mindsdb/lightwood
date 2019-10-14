@@ -72,7 +72,7 @@ class NnMixer:
 
         for output_column in output_encoded_vectors:
 
-            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]),  cache=False)
+            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]))
             predictions[output_column] = {'predictions': decoded_predictions}
             if include_encoded_predictions:
                 predictions[output_column]['encoded_predictions'] = output_encoded_vectors[output_column]
