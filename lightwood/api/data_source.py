@@ -75,23 +75,19 @@ class DataSource(Dataset):
             print(self.list_cache)
             print(self.encoded_cache)
             print(self.transformed_cache)
-            
+
         sample = {}
-        disable_cache = self.disable_cache
 
         dropout_features = None
 
         if self.training == True and random.randint(0,2) == 1:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
-        if not disable_cache:
-            if dropout_features is not None and len(dropout_features) > 0:
-                disable_cache = True
 
-        if self.transformed_cache is None and not disable_cache:
+        if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
 
-        if not disable_cache:
+        if not self.disable_cache and not (dropout_features is not None and len(dropout_features) > 0):
             cached_sample = self.transformed_cache[idx]
             if cached_sample is not None:
                 return cached_sample
@@ -102,7 +98,7 @@ class DataSource(Dataset):
                 col_name = feature['name']
                 col_config = self.get_column_config(col_name)
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
-                    if not ('disable_cache' in feature and feature['disable_cache'] is True):
+                    if not ((dropout_features is not None and  col_name in dropout_features) or self.disable_cache):
                         self.get_encoded_column_data(col_name, feature_set)
 
 
@@ -113,7 +109,7 @@ class DataSource(Dataset):
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']]= [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)[0]
-                elif disable_cache:
+                elif self.disable_cache:
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data={col_name: [self.data_frame[col_name].iloc[idx]]})[0]
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
