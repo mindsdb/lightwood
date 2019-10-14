@@ -19,6 +19,9 @@ class DataSource(Dataset):
         self.training = False # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
+        self.disable_cache = False
+        # Testing
+        self.disable_cache = True
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -39,8 +42,7 @@ class DataSource(Dataset):
         self.encoded_cache = {}
         self.transformed_cache = None
         self.decoded_cache = {}
-        self.disable_cache = False
-        self.disable_cache = True
+
 
     def extractRandomSubset(self, percentage):
         msk = np.random.rand(len(self.data_frame)) < (1-percentage)
@@ -84,7 +86,7 @@ class DataSource(Dataset):
         if self.transformed_cache is None and not disable_cache:
             self.transformed_cache = [None] * self.__len__()
 
-        if disable_cache:
+        if not disable_cache:
             cached_sample = self.transformed_cache[idx]
             if cached_sample is not None:
                 return cached_sample
@@ -150,6 +152,8 @@ class DataSource(Dataset):
         :param column_name:
         :return:
         """
+        if self.disable_cache:
+            return self.data_frame[column_name].tolist()
 
         if column_name in self.list_cache:
             return self.list_cache[column_name]
@@ -222,7 +226,7 @@ class DataSource(Dataset):
         return encoded_val
 
 
-    def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None, cache=True):
+    def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
         """
         :param column_name: column names to be decoded
         :param encoded_data: encoded data of tensor type
@@ -234,7 +238,7 @@ class DataSource(Dataset):
                     'Data must have been encoded before at some point, you should not decode before having encoding at least once')
             decoder_instance = self.encoders[column_name]
         decoded_data = decoder_instance.decode(encoded_data)
-        if cache == True:
+        if self.disable_cache == True:
             self.decoded_cache[column_name] = decoded_data
         return decoded_data
 
