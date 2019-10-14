@@ -70,14 +70,6 @@ class DataSource(Dataset):
         :param idx:
         :return:
         """
-
-        if idx % 200 == 0:
-            print('-------------------')
-            print(self.list_cache)
-            print(self.encoded_cache)
-            print(self.transformed_cache)
-            print('=======================')
-
         sample = {}
 
         dropout_features = None
