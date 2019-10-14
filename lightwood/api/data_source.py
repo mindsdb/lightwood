@@ -197,7 +197,7 @@ class DataSource(Dataset):
 
         if column_name in self.encoders:
             encoded_vals = self.encoders[column_name].encode(*args)
-            if column_name not in self.encoded_cache and custom_data is not None:
+            if column_name not in self.encoded_cache and custom_data is None:
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
 
@@ -223,7 +223,7 @@ class DataSource(Dataset):
         self.encoders[column_name] = encoder_instance
         encoded_val = encoder_instance.encode(*args)
 
-        if custom_data is not None:
+        if custom_data is None:
             self.encoded_cache[column_name] = encoded_val
 
         return encoded_val
