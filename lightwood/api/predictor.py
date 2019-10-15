@@ -327,7 +327,6 @@ class Predictor:
         return self
 
 
-
     def predict(self, when_data=None, when=None):
         """
         Predict given when conditions
@@ -365,11 +364,11 @@ class Predictor:
                     'value': accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
                 }
             else:
-                real = [pow(2,63) if math.isnan(x) or math.isinf(x) else x for x in ds.get_column_original_data(output_column)]
-                predicted = [pow(2,63) if math.isnan(x) or math.isinf(x) else x for x in predictions[output_column]["predictions"]]
+                # Note: We use this method instead of using `encoded_predictions` since the values in encoded_predictions are never prefectly 0 or 1, and this leads to rather large unwaranted different in the r2 score, re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
+                encoded_predictions = ds.encoders[output_column].encode(predictions[output_column]["predictions"])
                 accuracies[output_column] = {
                     'function': 'r2_score',
-                    'value': r2_score(real, predicted)
+                    'value': r2_score(ds.get_encoded_column_data(output_column), encoded_predictions)
                 }
 
         return accuracies

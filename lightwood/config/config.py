@@ -8,3 +8,4 @@ class CONFIG:
 
 
     USE_DEVICE = None
+    USE_CACHE = True
