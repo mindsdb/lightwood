@@ -2,6 +2,8 @@ import importlib
 import numpy as np
 from torch.utils.data import Dataset
 import random
+from lightwood.config.config import CONFIG
+
 
 class DataSource(Dataset):
 
@@ -19,9 +21,8 @@ class DataSource(Dataset):
         self.training = False # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
-        self.disable_cache = False
-        # Testing
-        self.disable_cache = True
+        self.disable_cache = not CONFIG.USE_CACHE
+        
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
