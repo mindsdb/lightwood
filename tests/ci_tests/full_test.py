@@ -6,7 +6,7 @@ import lightwood
 
 ####################
 config = {'input_features': [
-                    {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric', 'disable_cache': True},
+                    {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric'},
                     {'name': 'location', 'type': 'categorical'}, {'name': 'days_on_market', 'type': 'numeric'},
                     {'name': 'neighborhood', 'type': 'categorical','dropout':0.4},{'name': 'rental_price', 'type': 'numeric'}],
  'output_features': [{'name': 'number_of_rooms', 'type': 'categorical', 'weights':{

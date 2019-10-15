@@ -1,6 +1,7 @@
 import logging
 import traceback
 import time
+import math
 
 import dill
 import copy
@@ -364,9 +365,11 @@ class Predictor:
                     'value': accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
                 }
             else:
+                real = [pow(2,63) if math.isnan(x) or math.isinf(x) else x for x in ds.get_column_original_data(output_column)]
+                predicted = [pow(2,63) if math.isnan(x) or math.isinf(x) else x for x in predictions[output_column]["predictions"]]
                 accuracies[output_column] = {
                     'function': 'r2_score',
-                    'value': r2_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
+                    'value': r2_score(real, predicted)
                 }
 
         return accuracies
