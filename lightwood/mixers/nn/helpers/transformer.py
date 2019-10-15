@@ -6,7 +6,7 @@ class Transformer:
 
         self.input_features = input_features
         self.output_features = output_features
-
+        
         self.feature_len_map = {}
 
 

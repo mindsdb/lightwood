@@ -45,6 +45,7 @@ class NnMixer:
         :param when_data_source:
         :return:
         """
+
         when_data_source.transformer = self.transformer
         when_data_source.encoders = self.encoders
         data_loader = DataLoader(when_data_source, batch_size=len(when_data_source), shuffle=False, num_workers=0)
@@ -131,7 +132,17 @@ class NnMixer:
     def fit_data_source(self, ds):
         self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names('input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names('output_features')
-        ds.transformer = Transformer(self.input_column_names, self.output_column_names)
+
+        transformer_already_initialized = False
+        try:
+            if len(list(ds.transformer.feature_len_map.keys())) > 0:
+                transformer_already_initialized = True
+        except:
+            pass
+
+        if not transformer_already_initialized:
+            ds.transformer = Transformer(self.input_column_names, self.output_column_names)
+            
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 

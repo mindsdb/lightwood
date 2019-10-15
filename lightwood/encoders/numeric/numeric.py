@@ -1,6 +1,8 @@
 import torch
 import math
 import logging
+import sys
+
 
 class NumericEncoder:
 
@@ -26,7 +28,7 @@ class NumericEncoder:
 
             if math.isnan(number):
                 logging.error('Lightwood does not support working with NaN values !')
-                exit()
+                sys.exit(1)
 
             self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
             self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
