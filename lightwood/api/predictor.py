@@ -361,7 +361,7 @@ class Predictor:
             if properties['type'] == 'categorical':
                 accuracies[output_column] = {
                     'function': 'accuracy_score',
-                    'value': accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
+                    'value': accuracy_score(list(map(str,ds.get_column_original_data(output_column))), list(map(str,predictions[output_column]["predictions"])))
                 }
             else:
                 # Note: We use this method instead of using `encoded_predictions` since the values in encoded_predictions are never prefectly 0 or 1, and this leads to rather large unwaranted different in the r2 score, re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
