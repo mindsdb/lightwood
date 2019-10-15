@@ -2,9 +2,10 @@ import logging
 import traceback
 import time
 import math
+import copy
+import sys
 
 import dill
-import copy
 import pandas
 import numpy as np
 import torch
@@ -69,7 +70,7 @@ class Predictor:
 
         if max_training_time is None and max_epochs is None:
             logging.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
-            exit()
+            sys.exit(1)
 
         lowest_error_epoch = 0
         for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
@@ -175,7 +176,6 @@ class Predictor:
                 mixer_params = self.config['mixer']['attrs']
         else:
             mixer_class = NnMixer
-
         # Initialize data sources
         try:
             mixer_class({}).fit_data_source(from_data_ds)
@@ -218,7 +218,6 @@ class Predictor:
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
             best_parameters = {}
-
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
