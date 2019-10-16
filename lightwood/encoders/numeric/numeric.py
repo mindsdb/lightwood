@@ -27,8 +27,9 @@ class NumericEncoder:
                 continue
 
             if math.isnan(number):
-                logging.error('Lightwood does not support working with NaN values !')
-                sys.exit(1)
+                err = 'Lightwood does not support working with NaN values !'
+                logging.error(err)
+                raise Exception(err)
 
             self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
             self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
