@@ -69,8 +69,9 @@ class Predictor:
         mixer = mixer_class(dynamic_parameters, is_categorical_output)
 
         if max_training_time is None and max_epochs is None:
-            logging.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
-            sys.exit(1)
+            err = "Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`"
+            logging.error(err)
+            raise Exception(err)
 
         lowest_error_epoch = 0
         for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
