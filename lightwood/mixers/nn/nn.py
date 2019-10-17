@@ -45,6 +45,7 @@ class NnMixer:
         :param when_data_source:
         :return:
         """
+
         when_data_source.transformer = self.transformer
         when_data_source.encoders = self.encoders
         data_loader = DataLoader(when_data_source, batch_size=len(when_data_source), shuffle=False, num_workers=0)
@@ -72,7 +73,7 @@ class NnMixer:
 
         for output_column in output_encoded_vectors:
 
-            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]),  cache=False)
+            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]))
             predictions[output_column] = {'predictions': decoded_predictions}
             if include_encoded_predictions:
                 predictions[output_column]['encoded_predictions'] = output_encoded_vectors[output_column]
@@ -131,7 +132,17 @@ class NnMixer:
     def fit_data_source(self, ds):
         self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names('input_features')
         self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names('output_features')
-        ds.transformer = Transformer(self.input_column_names, self.output_column_names)
+
+        transformer_already_initialized = False
+        try:
+            if len(list(ds.transformer.feature_len_map.keys())) > 0:
+                transformer_already_initialized = True
+        except:
+            pass
+
+        if not transformer_already_initialized:
+            ds.transformer = Transformer(self.input_column_names, self.output_column_names)
+            
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
