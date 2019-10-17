@@ -1,9 +1,11 @@
 import logging
 import traceback
 import time
+import math
+import copy
+import sys
 
 import dill
-import copy
 import pandas
 import numpy as np
 import torch
@@ -67,8 +69,9 @@ class Predictor:
         mixer = mixer_class(dynamic_parameters, is_categorical_output)
 
         if max_training_time is None and max_epochs is None:
-            logging.error("Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`")
-            exit()
+            err = "Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`"
+            logging.error(err)
+            raise Exception(err)
 
         lowest_error_epoch = 0
         for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
@@ -174,7 +177,6 @@ class Predictor:
                 mixer_params = self.config['mixer']['attrs']
         else:
             mixer_class = NnMixer
-
         # Initialize data sources
         try:
             mixer_class({}).fit_data_source(from_data_ds)
@@ -217,7 +219,6 @@ class Predictor:
         else:
             # Run a bunch of models through AX and figure out some decent values to put in here
             best_parameters = {}
-
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
@@ -326,7 +327,6 @@ class Predictor:
         return self
 
 
-
     def predict(self, when_data=None, when=None):
         """
         Predict given when conditions
@@ -361,12 +361,14 @@ class Predictor:
             if properties['type'] == 'categorical':
                 accuracies[output_column] = {
                     'function': 'accuracy_score',
-                    'value': accuracy_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
+                    'value': accuracy_score(list(map(str,ds.get_column_original_data(output_column))), list(map(str,predictions[output_column]["predictions"])))
                 }
             else:
+                # Note: We use this method instead of using `encoded_predictions` since the values in encoded_predictions are never prefectly 0 or 1, and this leads to rather large unwaranted different in the r2 score, re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
+                encoded_predictions = ds.encoders[output_column].encode(predictions[output_column]["predictions"])
                 accuracies[output_column] = {
                     'function': 'r2_score',
-                    'value': r2_score(ds.get_column_original_data(output_column), predictions[output_column]["predictions"])
+                    'value': r2_score(ds.get_encoded_column_data(output_column), encoded_predictions)
                 }
 
         return accuracies
