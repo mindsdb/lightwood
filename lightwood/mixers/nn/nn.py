@@ -5,6 +5,7 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
+import pyro
 
 from lightwood.mixers.nn.helpers.default_net import DefaultNet
 from lightwood.mixers.nn.helpers.transformer import Transformer
@@ -142,9 +143,38 @@ class NnMixer:
 
         if not transformer_already_initialized:
             ds.transformer = Transformer(self.input_column_names, self.output_column_names)
-            
+
         self.encoders = ds.encoders
         self.transformer = ds.transformer
+
+    # Do we need it ?
+    def pyro_model(self):
+        pyro.module("net", self.net)
+
+        inputs = pyro.sample('mixer_inputs', pyro.distributions.Normal(loc=torch.zeros(self.net.input_size), scale=torch.ones(self.net.input_size)))
+
+        outputs = pyro.sample('mixer_outputs', pyro.distributions.Normal(loc=torch.zeros(self.net.output_size), scale=torch.ones(self.net.output_size)))
+
+    def pyro_guide(self,x_data, y_data):
+        softplus = torch.nn.Softplus()
+
+        # First layer bias distribution priors
+        fc1b_mu = torch.randn(self.net.input_size)
+        fc1b_sigma = torch.randn(self.net.input_size)
+        fc1b_mu_param = pyro.param("fc1b_mu", fc1b_mu)
+        fc1b_sigma_param = softplus(pyro.param("fc1b_sigma", fc1b_sigma))
+        fc1b_prior = pyro.distributions.Normal(loc=fc1b_mu_param, scale=fc1b_sigma_param)
+
+        # Output layer bias distribution priors
+        outb_mu = torch.randn(self.net.output_size)
+        outb_sigma =torch.randn(self.net.output_size)
+        outb_mu_param = pyro.param("outb_mu", outb_mu)
+        outb_sigma_param = softplus(pyro.param("outb_sigma", outb_sigma))
+        outb_prior = pyro.distributions.Normal(loc=outb_mu_param, scale=outb_sigma_param)
+        priors = {'input_bias': fc1b_prior,  'output_bias': outb_prior}
+
+        module = pyro.random_module("module", self.net, priors)
+        return module()
 
     def iter_fit(self, ds):
         """
@@ -179,7 +209,10 @@ class NnMixer:
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
-        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+        #self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+        self.optimizer = pyro.optim.Adam({"lr": 0.01})
+        svi = pyro.infer.SVI(self.net, self.pyro_guide, self.optimizer, loss=pyro.infer.Trace_ELBO())
+
         total_epochs = self.epochs
 
         total_iterations = 0
@@ -193,6 +226,10 @@ class NnMixer:
 
                 labels = labels.to(self.net.device)
                 inputs = inputs.to(self.net.device)
+
+                running_loss += svi.step(inputs, labels)
+                error = running_loss / (i + 1)
+                continue
 
                 # zero the parameter gradients
                 self.optimizer.zero_grad()
@@ -274,7 +311,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = NnMixer(dynamic_parameters={'network_depth':3})
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)
