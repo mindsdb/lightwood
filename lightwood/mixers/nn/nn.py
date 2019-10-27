@@ -272,7 +272,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = NnMixer({})
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)
@@ -316,7 +316,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = NnMixer({})
 
     for i in  mixer.iter_fit(ds):
         print(i)
