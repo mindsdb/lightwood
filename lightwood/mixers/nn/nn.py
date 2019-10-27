@@ -35,7 +35,6 @@ class NnMixer:
 
         #Pyro stuff
         self.softplus = torch.nn.Softplus()
-        self.log_softmax = torch.nn.LogSoftmax(dim=1)
 
     def fit(self, ds=None, callback=None):
 
@@ -165,7 +164,7 @@ class NnMixer:
         # sample a regressor (which also samples w and b)
         lifted_reg_model = lifted_module()
 
-        lhat = self.log_softmax(lifted_reg_model(input_data))
+        lhat = lifted_reg_model(input_data)
 
         pyro.sample("obs", pyro.distributions.Categorical(logits=lhat), obs=output_data)
 
@@ -210,7 +209,7 @@ class NnMixer:
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
 
-        self.net.train()
+        #self.net.train()
 
 
         if self.criterion is None:
@@ -252,7 +251,9 @@ class NnMixer:
                 labels = labels.to(self.net.device)
                 inputs = inputs.to(self.net.device)
 
-                running_loss += svi.step(inputs, labels)
+                #mi = inputs.view(8,len(self.net.net[0].bias))
+                mi = inputs
+                running_loss += svi.step(mi[0], labels)
                 error = running_loss / (i + 1)
                 continue
 
@@ -380,7 +381,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = NnMixer(dynamic_parameters={})
 
     for i in  mixer.iter_fit(ds):
         print(i)
