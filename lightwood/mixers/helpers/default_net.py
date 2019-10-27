@@ -44,7 +44,7 @@ class DefaultNet(torch.nn.Module):
             depth = self.dynamic_parameters['network_depth']
         else:
             depth = 5
-            
+
         # 3. Determine shpae based on the sizes & propotions
         if (not large_input) and (not large_output):
             if larger_input:

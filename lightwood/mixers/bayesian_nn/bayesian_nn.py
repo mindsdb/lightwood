@@ -67,7 +67,7 @@ class BayesianNnMixer:
         inw_mu_param = pyro.param("inw_mu", inw_mu)
         inw_sigma_param = self.softplus(pyro.param("inw_sigma", inw_sigma))
         inw_prior = pyro.distributions.Normal(loc=inw_mu_param, scale=inw_sigma_param)
-        
+
         # First layer bias distribution priors
         inb_mu = torch.randn_like(self.net.net[0].bias, device=self.net.device)
         inb_sigma = torch.randn_like(self.net.net[0].bias, device=self.net.device)
@@ -111,11 +111,16 @@ class BayesianNnMixer:
         inputs = inputs.to(self.net.device)
         labels = labels.to(self.net.device)
 
-        outputs = self.net(inputs)
+        sampled_models = [self.pyro_guide(None, None) for _ in range(len(inputs))]
+        out_hats = [model(inputs).data for model in sampled_models]
+        out_hats_np = np.asarray(out_hats)
+        outputs_mean = torch.mean(torch.stack(out_hats), 0))
 
         output_encoded_vectors = {}
 
-        for output_vector in outputs:
+        for output_vector in outputs_mean:
+
+            
             output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
             for feature in output_vectors:
                 if feature not in output_encoded_vectors:
@@ -162,10 +167,8 @@ class BayesianNnMixer:
                 labels = targets_c.to(self.net.device)
 
             sampled_models = [self.pyro_guide(None, None) for _ in range(len(inputs))]
-            yhats = [model(inputs).data for model in sampled_models]
-            #print(yhats[0])
-            outputs_mean = torch.mean(torch.stack(yhats), 0)
-            #print(outputs_mean[0])
+            out_hats = [model(inputs).data for model in sampled_models]
+            outputs_mean = torch.mean(torch.stack(out_hats), 0)
 
             loss = self.criterion(outputs_mean, labels)
             running_loss += loss.item()

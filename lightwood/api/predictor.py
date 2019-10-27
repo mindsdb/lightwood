@@ -250,8 +250,7 @@ class Predictor:
                 tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
 
-                #test_data_ds <--- replace from_data_ds when not debugging
-                test_error = mixer.error(from_data_ds)
+                test_error = mixer.error(test_data_ds)
 
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
