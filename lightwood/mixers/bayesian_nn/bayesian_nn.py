@@ -42,6 +42,59 @@ class BayesianNnMixer:
         self.encoders = ds.encoders
         return ret
 
+    def pyro_model(self, input_data, output_data):
+
+        inw_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[0].weight, device=self.net.device), scale=torch.ones_like(self.net.net[0].weight))
+        inb_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[0].bias, device=self.net.device), scale=torch.ones_like(self.net.net[0].bias))
+
+        outw_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[-1].weight, device=self.net.device), scale=torch.ones_like(self.net.net[-1].weight))
+        outb_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[-1].bias, device=self.net.device), scale=torch.ones_like(self.net.net[-1].bias))
+
+        priors = {'net[0].weight': inw_prior, 'net[0].bias': inb_prior,  'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
+        # lift module parameters to random variables sampled from the priors
+        lifted_module = pyro.random_module("module", self.net, priors)
+        # sample a regressor (which also samples w and b)
+        lifted_reg_model = lifted_module()
+
+        lhat = lifted_reg_model(input_data)
+
+        pyro.sample("obs", pyro.distributions.Categorical(logits=lhat), obs=output_data)
+
+    def pyro_guide(self, input_data, output_data):
+        # First layer weight distribution priors
+        inw_mu = torch.randn_like(self.net.net[0].weight, device=self.net.device)
+        inw_sigma = torch.randn_like(self.net.net[0].weight, device=self.net.device)
+        inw_mu_param = pyro.param("inw_mu", inw_mu)
+        inw_sigma_param = self.softplus(pyro.param("inw_sigma", inw_sigma))
+        inw_prior = pyro.distributions.Normal(loc=inw_mu_param, scale=inw_sigma_param)
+        
+        # First layer bias distribution priors
+        inb_mu = torch.randn_like(self.net.net[0].bias, device=self.net.device)
+        inb_sigma = torch.randn_like(self.net.net[0].bias, device=self.net.device)
+        inb_mu_param = pyro.param("inb_mu", inb_mu)
+        inb_sigma_param = self.softplus(pyro.param("inb_sigma", inb_sigma))
+        inb_prior = pyro.distributions.Normal(loc=inb_mu_param, scale=inb_sigma_param)
+
+        # Output layer weight distribution priors
+        outw_mu = torch.randn_like(self.net.net[-1].weight, device=self.net.device)
+        outw_sigma = torch.randn_like(self.net.net[-1].weight, device=self.net.device)
+        outw_mu_param = pyro.param("outw_mu", outw_mu)
+        outw_sigma_param = self.softplus(pyro.param("outw_sigma", outw_sigma))
+        outw_prior = pyro.distributions.Normal(loc=outw_mu_param, scale=outw_sigma_param).independent(1)
+
+        # Output layer bias distribution priors
+        outb_mu = torch.randn_like(self.net.net[-1].bias, device=self.net.device)
+        outb_sigma = torch.randn_like(self.net.net[-1].bias, device=self.net.device)
+        outb_mu_param = pyro.param("outb_mu", outb_mu)
+        outb_sigma_param = self.softplus(pyro.param("outb_sigma", outb_sigma))
+
+        outb_prior = pyro.distributions.Normal(loc=outb_mu_param, scale=outb_sigma_param)
+        priors = {'net[0].weight': inw_prior, 'net[0].bias': inb_prior, 'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
+
+        lifted_module = pyro.random_module("module", self.net, priors)
+
+        return lifted_module()
+
     def predict(self, when_data_source, include_encoded_predictions = False):
         """
         :param when_data_source:
@@ -108,8 +161,13 @@ class BayesianNnMixer:
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
 
-            outputs = self.net(inputs)
-            loss = self.criterion(outputs, labels)
+            sampled_models = [self.pyro_guide(None, None) for _ in range(len(inputs))]
+            yhats = [model(inputs).data for model in sampled_models]
+            #print(yhats[0])
+            outputs_mean = torch.mean(torch.stack(yhats), 0)
+            #print(outputs_mean[0])
+
+            loss = self.criterion(outputs_mean, labels)
             running_loss += loss.item()
             error = running_loss / (i + 1)
 
@@ -148,55 +206,6 @@ class BayesianNnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-    def pyro_model(self, input_data, output_data):
-
-        inlw_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[0].weight), scale=torch.ones_like(self.net.net[0].weight))
-        inlb_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[0].bias), scale=torch.ones_like(self.net.net[0].bias))
-
-        outw_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[-1].weight), scale=torch.ones_like(self.net.net[-1].weight))
-        outb_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[-1].bias), scale=torch.ones_like(self.net.net[-1].bias))
-
-        priors = {'net[0].weight': inlw_prior, 'net[0].bias': inlb_prior,  'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
-        # lift module parameters to random variables sampled from the priors
-        lifted_module = pyro.random_module("module", self.net, priors)
-        # sample a regressor (which also samples w and b)
-        lifted_reg_model = lifted_module()
-
-        lhat = lifted_reg_model(input_data)
-
-        pyro.sample("obs", pyro.distributions.Categorical(logits=lhat), obs=output_data)
-
-    def pyro_guide(self, input_data, output_data):
-        # First layer weight distribution priors
-        fc1w_mu = torch.randn_like(self.net.net[0].weight)
-        fc1w_sigma = torch.randn_like(self.net.net[0].weight)
-        fc1w_mu_param = pyro.param("fc1w_mu", fc1w_mu)
-        fc1w_sigma_param = self.softplus(pyro.param("fc1w_sigma", fc1w_sigma))
-        inlw_prior = pyro.distributions.Normal(loc=fc1w_mu_param, scale=fc1w_sigma_param)
-        # First layer bias distribution priors
-        fc1b_mu = torch.randn_like(self.net.net[0].bias)
-        fc1b_sigma = torch.randn_like(self.net.net[0].bias)
-        fc1b_mu_param = pyro.param("fc1b_mu", fc1b_mu)
-        fc1b_sigma_param = self.softplus(pyro.param("fc1b_sigma", fc1b_sigma))
-        inlb_prior = pyro.distributions.Normal(loc=fc1b_mu_param, scale=fc1b_sigma_param)
-        # Output layer weight distribution priors
-        outw_mu = torch.randn_like(self.net.net[-1].weight)
-        outw_sigma = torch.randn_like(self.net.net[-1].weight)
-        outw_mu_param = pyro.param("outw_mu", outw_mu)
-        outw_sigma_param = self.softplus(pyro.param("outw_sigma", outw_sigma))
-        outw_prior = pyro.distributions.Normal(loc=outw_mu_param, scale=outw_sigma_param).independent(1)
-        # Output layer bias distribution priors
-        outb_mu = torch.randn_like(self.net.net[-1].bias)
-        outb_sigma = torch.randn_like(self.net.net[-1].bias)
-        outb_mu_param = pyro.param("outb_mu", outb_mu)
-        outb_sigma_param = self.softplus(pyro.param("outb_sigma", outb_sigma))
-        outb_prior = pyro.distributions.Normal(loc=outb_mu_param, scale=outb_sigma_param)
-        priors = {'net[0].weight': inlw_prior, 'net[0].bias': inlb_prior, 'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
-
-        lifted_module = pyro.random_module("module", self.net, priors)
-
-        return lifted_module()
-
     def iter_fit(self, ds):
         """
         :param ds:
@@ -220,7 +229,8 @@ class BayesianNnMixer:
             else:
                 self.criterion = torch.nn.MSELoss()
 
-        self.optimizer = pyro.optim.Adam({"lr": 0.01})
+        #self.optimizer = pyro.optim.Adadelta({"lr": 0.1})
+        self.optimizer = pyro.optim.Adam({"lr": 0.005, "betas": (0.95, 0.999)})
         svi = pyro.infer.SVI(self.pyro_model, self.pyro_guide, self.optimizer, loss=pyro.infer.Trace_ELBO())
 
         total_epochs = self.epochs
