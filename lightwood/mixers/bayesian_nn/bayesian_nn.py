@@ -128,7 +128,7 @@ class BayesianNnMixer:
                 print(histo_exp)
 
         '''
-        output_trasnformed_vectors_arr = []
+        predictions_arr_dict = {}
         for outputs in out_hats:
             output_trasnformed_vectors = {}
 
@@ -140,12 +140,29 @@ class BayesianNnMixer:
                     output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
             output_trasnformed_vectors_arr.append(output_trasnformed_vectors)
 
-        print(output_trasnformed_vectors_arr)
-        print('\n\n----------------\n\n')
-        print(output_trasnformed_vectors_arr[0])
-        exit()
-        predictions = dict()
+            for output_column in output_trasnformed_vectors:
 
+                decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
+
+                if output_column not in predictions_arr_dict:
+                    predictions_arr_dict[output_column] = []
+
+                predictions_arr_dict[output_column].append(decoded_predictions)
+
+        final_predictions = []
+        final_predictions_confidence = []
+        possible_predictions = []
+        possible_predictions_confidence = []
+
+        for output_column in predictions_arr_dict:
+            predictions_arr = predictions_arr_dict[output_column]
+            print('\n------------\n')
+            for i in range(len(predictions_arr)):
+                print(predictions_arr[i])
+        exit()
+
+
+        ##########################
         for output_column in output_trasnformed_vectors:
 
             decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
