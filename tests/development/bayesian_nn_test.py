@@ -25,7 +25,7 @@ predictor = Predictor(config)
 
 def iter_function(epoch, error, test_error, test_error_gradient, test_accuracy):
     print(
-        'epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, accuracy: {accuracy}, test_accuracy: {test_accuracy}'.format(
+        'epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, test_accuracy: {test_accuracy}'.format(
             iter=epoch, error=error, test_error=test_error, test_error_gradient=test_error_gradient,
             accuracy=predictor.train_accuracy, test_accuracy=test_accuracy))
 
