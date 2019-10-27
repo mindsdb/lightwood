@@ -52,9 +52,8 @@ class NnMixer:
 
         self.net.eval()
         data = next(iter(data_loader))
-        inputs, labels = data
+        inputs, _ = data
         inputs = inputs.to(self.net.device)
-        labels = labels.to(self.net.device)
 
         outputs = self.net(inputs)
 
