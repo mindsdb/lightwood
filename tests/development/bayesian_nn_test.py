@@ -25,6 +25,6 @@ def iter_function(epoch, error, test_error, test_error_gradient, test_accuracy):
             accuracy=predictor.train_accuracy, test_accuracy=test_accuracy))
 
 
-predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=2, stop_training_after_seconds=120)
+predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=2, stop_training_after_seconds=20)
 
 print(predictor.predict(when={'number_of_rooms':3, 'number_of_bathrooms':2, 'sqft':700, 'location':'great'}))

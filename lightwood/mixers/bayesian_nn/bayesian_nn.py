@@ -116,11 +116,18 @@ class BayesianNnMixer:
         outputs_mean = torch.mean(torch.stack(out_hats), 0))
 
         output_encoded_vectors = {}
+        histo_exp = []
 
-        for output_vector in out_hats_np:
-            for i in range(len(classes))
+        for output_vectors in out_hats_np:
+            for i in range(len(outputs_mean[0])):
+                for j in range(len(output_vectors)):
+                    histo_exp.append(np.exp(output_vectors[i][j]))
 
-            output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
+            meadian_probability = np.percentile(histo_exp, 50)
+            print(meadian_probability)
+            print(histo_exp)
+            
+            transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
             for feature in output_vectors:
                 if feature not in output_encoded_vectors:
                     output_encoded_vectors[feature] = []
