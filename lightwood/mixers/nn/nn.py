@@ -33,6 +33,10 @@ class NnMixer:
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
 
+        #Pyro stuff
+        self.softplus = torch.nn.Softplus()
+        self.log_softmax = torch.nn.LogSoftmax(dim=1)
+
     def fit(self, ds=None, callback=None):
 
         ret = 0
@@ -147,34 +151,54 @@ class NnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-    # Do we need it ?
-    def pyro_model(self):
-        pyro.module("net", self.net)
+    def pyro_model(self, input_data, output_data):
 
-        inputs = pyro.sample('mixer_inputs', pyro.distributions.Normal(loc=torch.zeros(self.net.input_size), scale=torch.ones(self.net.input_size)))
+        inlw_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[0].weight), scale=torch.ones_like(self.net.net[0].weight))
+        inlb_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[0].bias), scale=torch.ones_like(self.net.net[0].bias))
 
-        outputs = pyro.sample('mixer_outputs', pyro.distributions.Normal(loc=torch.zeros(self.net.output_size), scale=torch.ones(self.net.output_size)))
+        outw_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[-1].weight), scale=torch.ones_like(self.net.net[-1].weight))
+        outb_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[-1].bias), scale=torch.ones_like(self.net.net[-1].bias))
 
-    def pyro_guide(self,x_data, y_data):
-        softplus = torch.nn.Softplus()
+        priors = {'net[0].weight': inlw_prior, 'net[0].bias': inlb_prior,  'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
+        # lift module parameters to random variables sampled from the priors
+        lifted_module = pyro.random_module("module", self.net, priors)
+        # sample a regressor (which also samples w and b)
+        lifted_reg_model = lifted_module()
 
+        lhat = self.log_softmax(lifted_reg_model(input_data))
+
+        pyro.sample("obs", pyro.distributions.Categorical(logits=lhat), obs=output_data)
+
+    def pyro_guide(self, input_data, output_data):
+        # First layer weight distribution priors
+        fc1w_mu = torch.randn_like(self.net.net[0].weight)
+        fc1w_sigma = torch.randn_like(self.net.net[0].weight)
+        fc1w_mu_param = pyro.param("fc1w_mu", fc1w_mu)
+        fc1w_sigma_param = self.softplus(pyro.param("fc1w_sigma", fc1w_sigma))
+        inlw_prior = pyro.distributions.Normal(loc=fc1w_mu_param, scale=fc1w_sigma_param)
         # First layer bias distribution priors
-        fc1b_mu = torch.randn(self.net.input_size)
-        fc1b_sigma = torch.randn(self.net.input_size)
+        fc1b_mu = torch.randn_like(self.net.net[0].bias)
+        fc1b_sigma = torch.randn_like(self.net.net[0].bias)
         fc1b_mu_param = pyro.param("fc1b_mu", fc1b_mu)
-        fc1b_sigma_param = softplus(pyro.param("fc1b_sigma", fc1b_sigma))
-        fc1b_prior = pyro.distributions.Normal(loc=fc1b_mu_param, scale=fc1b_sigma_param)
-
+        fc1b_sigma_param = self.softplus(pyro.param("fc1b_sigma", fc1b_sigma))
+        inlb_prior = pyro.distributions.Normal(loc=fc1b_mu_param, scale=fc1b_sigma_param)
+        # Output layer weight distribution priors
+        outw_mu = torch.randn_like(self.net.net[-1].weight)
+        outw_sigma = torch.randn_like(self.net.net[-1].weight)
+        outw_mu_param = pyro.param("outw_mu", outw_mu)
+        outw_sigma_param = self.softplus(pyro.param("outw_sigma", outw_sigma))
+        outw_prior = pyro.distributions.Normal(loc=outw_mu_param, scale=outw_sigma_param).independent(1)
         # Output layer bias distribution priors
-        outb_mu = torch.randn(self.net.output_size)
-        outb_sigma =torch.randn(self.net.output_size)
+        outb_mu = torch.randn_like(self.net.net[-1].bias)
+        outb_sigma = torch.randn_like(self.net.net[-1].bias)
         outb_mu_param = pyro.param("outb_mu", outb_mu)
-        outb_sigma_param = softplus(pyro.param("outb_sigma", outb_sigma))
+        outb_sigma_param = self.softplus(pyro.param("outb_sigma", outb_sigma))
         outb_prior = pyro.distributions.Normal(loc=outb_mu_param, scale=outb_sigma_param)
-        priors = {'input_bias': fc1b_prior,  'output_bias': outb_prior}
+        priors = {'net[0].weight': inlw_prior, 'net[0].bias': inlb_prior, 'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
 
-        module = pyro.random_module("module", self.net, priors)
-        return module()
+        lifted_module = pyro.random_module("module", self.net, priors)
+
+        return lifted_module()
 
     def iter_fit(self, ds):
         """
@@ -185,6 +209,7 @@ class NnMixer:
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
+
         self.net.train()
 
 
@@ -211,7 +236,7 @@ class NnMixer:
 
         #self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         self.optimizer = pyro.optim.Adam({"lr": 0.01})
-        svi = pyro.infer.SVI(self.net, self.pyro_guide, self.optimizer, loss=pyro.infer.Trace_ELBO())
+        svi = pyro.infer.SVI(self.pyro_model, self.pyro_guide, self.optimizer, loss=pyro.infer.Trace_ELBO())
 
         total_epochs = self.epochs
 
@@ -311,7 +336,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(dynamic_parameters={'network_depth':3})
+    mixer = NnMixer(dynamic_parameters={'network_depth':4})
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)
