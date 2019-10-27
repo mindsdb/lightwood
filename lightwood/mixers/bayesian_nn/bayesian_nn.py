@@ -337,7 +337,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(dynamic_parameters={'network_depth':4})
+    mixer = BayesianNnMixer(dynamic_parameters={'network_depth':4})
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(dynamic_parameters={})
+    mixer = BayesianNnMixer(dynamic_parameters={})
 
     for i in  mixer.iter_fit(ds):
         print(i)
