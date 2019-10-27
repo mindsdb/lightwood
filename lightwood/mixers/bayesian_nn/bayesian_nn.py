@@ -111,38 +111,47 @@ class BayesianNnMixer:
         inputs = inputs.to(self.net.device)
 
         sampled_models = [self.pyro_guide(None, None) for _ in range(len(inputs))]
+        # A tensor of tensors representing the whole batch of predictions for each "model" pyro built
         out_hats = [model(inputs).data for model in sampled_models]
-        out_hats_np = np.asarray(out_hats)
-        outputs_mean = torch.mean(torch.stack(out_hats), 0))
+        outputs_mean = torch.mean(torch.stack(out_hats), 0)
 
-        output_encoded_vectors = {}
-        histo_exp = []
 
-        for output_vectors in out_hats_np:
+        '''
+                histo_exp = []
+
+            print(output_vectors)
             for i in range(len(outputs_mean[0])):
                 for j in range(len(output_vectors)):
                     histo_exp.append(np.exp(output_vectors[i][j]))
+                meadian_probability = np.percentile(histo_exp, 50)
+                print(meadian_probability)
+                print(histo_exp)
 
-            meadian_probability = np.percentile(histo_exp, 50)
-            print(meadian_probability)
-            print(histo_exp)
-            
-            transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
-            for feature in output_vectors:
-                if feature not in output_encoded_vectors:
-                    output_encoded_vectors[feature] = []
-                output_encoded_vectors[feature] += [output_vectors[feature]]
+        '''
+        output_trasnformed_vectors_arr = []
+        for outputs in out_hats:
+            output_trasnformed_vectors = {}
 
+            for output_vector in outputs:
+                transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
+                for feature in transformed_output_vectors:
+                    if feature not in output_trasnformed_vectors:
+                        output_trasnformed_vectors[feature] = []
+                    output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
+            output_trasnformed_vectors_arr.append(output_trasnformed_vectors)
 
-
+        print(output_trasnformed_vectors_arr)
+        print('\n\n----------------\n\n')
+        print(output_trasnformed_vectors_arr[0])
+        exit()
         predictions = dict()
 
-        for output_column in output_encoded_vectors:
+        for output_column in output_trasnformed_vectors:
 
-            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]))
+            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
             predictions[output_column] = {'predictions': decoded_predictions}
             if include_encoded_predictions:
-                predictions[output_column]['encoded_predictions'] = output_encoded_vectors[output_column]
+                predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
         logging.info('Model predictions and decoding completed')
 
