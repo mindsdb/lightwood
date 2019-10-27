@@ -6,9 +6,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
 
-from lightwood.mixers.nn.helpers.default_net import DefaultNet
-from lightwood.mixers.nn.helpers.transformer import Transformer
-from lightwood.mixers.nn.helpers.ranger import Ranger
+from lightwood.mixers.helpers.default_net import DefaultNet
+from lightwood.mixers.helpers.transformer import Transformer
+from lightwood.mixers.helpers.ranger import Ranger
 
 
 class NnMixer:
