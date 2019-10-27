@@ -57,25 +57,25 @@ class NnMixer:
 
         outputs = self.net(inputs)
 
-        output_encoded_vectors = {}
+        output_trasnformed_vectors = {}
 
         for output_vector in outputs:
-            output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
-            for feature in output_vectors:
-                if feature not in output_encoded_vectors:
-                    output_encoded_vectors[feature] = []
-                output_encoded_vectors[feature] += [output_vectors[feature]]
+            transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
+            for feature in transformed_output_vectors:
+                if feature not in output_trasnformed_vectors:
+                    output_trasnformed_vectors[feature] = []
+                output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
 
 
 
         predictions = dict()
 
-        for output_column in output_encoded_vectors:
+        for output_column in output_trasnformed_vectors:
 
-            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]))
+            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
             predictions[output_column] = {'predictions': decoded_predictions}
             if include_encoded_predictions:
-                predictions[output_column]['encoded_predictions'] = output_encoded_vectors[output_column]
+                predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
         logging.info('Model predictions and decoding completed')
 
