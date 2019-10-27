@@ -107,9 +107,8 @@ class BayesianNnMixer:
 
         self.net.eval()
         data = next(iter(data_loader))
-        inputs, labels = data
+        inputs, _ = data
         inputs = inputs.to(self.net.device)
-        labels = labels.to(self.net.device)
 
         sampled_models = [self.pyro_guide(None, None) for _ in range(len(inputs))]
         out_hats = [model(inputs).data for model in sampled_models]
@@ -118,9 +117,9 @@ class BayesianNnMixer:
 
         output_encoded_vectors = {}
 
-        for output_vector in outputs_mean:
+        for output_vector in out_hats_np:
+            for i in range(len(classes))
 
-            
             output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
             for feature in output_vectors:
                 if feature not in output_encoded_vectors:
