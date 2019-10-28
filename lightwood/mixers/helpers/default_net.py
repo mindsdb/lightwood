@@ -13,7 +13,7 @@ class DefaultNet(torch.nn.Module):
             device_str = CONFIG.USE_DEVICE
 
         if device_str == 'cuda':
-            torch.manual_seed(len(ds))
+            torch.manual_seed(74551)
         else:
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
