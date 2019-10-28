@@ -1,5 +1,6 @@
 import copy
 import logging
+from collections import Counter
 
 import torch
 import torch.optim as optim
@@ -148,26 +149,32 @@ class BayesianNnMixer:
 
                 predictions_arr_dict[output_column].append(decoded_predictions)
 
-        final_predictions = []
-        final_predictions_confidence = []
-        possible_predictions = []
-        possible_predictions_confidence = []
-
+        predictions = {}
         for output_column in predictions_arr_dict:
+            final_predictions = []
+            final_predictions_confidence = []
+            possible_predictions = []
+            possible_predictions_confidence = []
+
+
             predictions_arr = predictions_arr_dict[output_column]
-            print('\n------------\n')
+            predictions_arr_r = [[]] * len(predictions_arr[0])
             for i in range(len(predictions_arr)):
-                print(predictions_arr[i])
-        exit()
+                for j in range(len(predictions_arr[i])):
+                    predictions_arr_r[j].append(predictions_arr[j][i])
 
+            for predictions in predictions_arr_r:
+                occurance_dict = Counter(predictions)
+                final_predictions.append(max(occurance_dict.iteritems(), key=operator.itemgetter(1))[0])
+                final_predictions_confidence.append(occurance_dict[final_predictions]/len(predictions))
 
-        ##########################
-        for output_column in output_trasnformed_vectors:
+                possible_predictions.append(list(occurance_dict.keys()))
+                possible_predictions_confidence.append([x/len(predictions) for x in list(occurance_dict.values())])
 
-            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
-            predictions[output_column] = {'predictions': decoded_predictions}
-            if include_encoded_predictions:
-                predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
+            predictions[output_column] = {'predictions': final_predictions}
+            predictions[output_column] = {'confidence': final_predictions_confidence}
+            predictions[output_column] = {'possible_predictions': possible_predictions}
+            predictions[output_column] = {'possible_predictions_confidence': possible_predictions_confidence}
 
         logging.info('Model predictions and decoding completed')
 

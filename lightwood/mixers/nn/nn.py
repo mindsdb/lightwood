@@ -68,7 +68,7 @@ class NnMixer:
 
 
 
-        predictions = dict()
+        predictions = {}
 
         for output_column in output_trasnformed_vectors:
 
