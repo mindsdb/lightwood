@@ -149,7 +149,7 @@ class BayesianNnMixer:
 
                 predictions_arr_dict[output_column].append(decoded_predictions)
 
-        predictions = {}
+        predictions_dict = {}
         for output_column in predictions_arr_dict:
             final_predictions = []
             final_predictions_confidence = []
@@ -164,21 +164,32 @@ class BayesianNnMixer:
                     predictions_arr_r[j].append(predictions_arr[j][i])
 
             for predictions in predictions_arr_r:
-                occurance_dict = Counter(predictions)
-                final_predictions.append(max(occurance_dict.iteritems(), key=operator.itemgetter(1))[0])
-                final_predictions_confidence.append(occurance_dict[final_predictions]/len(predictions))
+                if when_data_source.get_column_config(output_column)['type'] == 'categorical':
+                    occurance_dict = dict(Counter(predictions))
+                    final_prediction = max(occurance_dict, key=occurance_dict.get)
+                    final_predictions.append(final_prediction)
+                    final_predictions_confidence.append(occurance_dict[final_prediction]/len(predictions))
 
-                possible_predictions.append(list(occurance_dict.keys()))
-                possible_predictions_confidence.append([x/len(predictions) for x in list(occurance_dict.values())])
+                    possible_predictions.append(list(occurance_dict.keys()))
+                    possible_predictions_confidence.append([x/len(predictions) for x in list(occurance_dict.values())])
+                else:
+                    predictions = [x if x is not None else 0 for x in predictions]
+                    p_hist = np.histogram(np.array(predictions),10)
+                    final_predictions_confidence.append(max(p_hist[0])/sum(p_hist[0]))
+                    final_predictions.append(p_hist[1][np.where(p_hist[0] == max(p_hist[0]))][0])
+                    possible_predictions_confidence.append([x/sum(p_hist[0]) for x in p_hist[0]])
+                    possible_predictions.append(list(p_hist[1]))
 
-            predictions[output_column] = {'predictions': final_predictions}
-            predictions[output_column] = {'confidence': final_predictions_confidence}
-            predictions[output_column] = {'possible_predictions': possible_predictions}
-            predictions[output_column] = {'possible_predictions_confidence': possible_predictions_confidence}
+
+            predictions_dict[output_column] = {}
+            predictions_dict[output_column]['predictions'] = final_predictions
+            predictions_dict[output_column]['confidence'] = final_predictions_confidence
+            predictions_dict[output_column]['possible_predictions'] = possible_predictions
+            predictions_dict[output_column]['possible_predictions_confidence'] = possible_predictions_confidence
 
         logging.info('Model predictions and decoding completed')
 
-        return predictions
+        return predictions_dict
 
     def error(self, ds):
         """
