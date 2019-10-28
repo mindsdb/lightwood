@@ -15,6 +15,7 @@ class BasicAxOptimizer:
             evaluation_function=error_yielding_function,
             objective_name='accuracy',
             total_trials = self.total_trials,
+            random_seed = self.total_trials
         )
 
         return best_parameters

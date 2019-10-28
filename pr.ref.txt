@@ -1,3 +1,5 @@
-https://arxiv.org/pdf/1706.02515.pdf
-https://github.com/tonyduan/snn
-https://pytorch.org/docs/stable/notes/randomness.html
+
+Refrences for version `0.11.1` PR -- branch: initialization_seed
+SNN paper: https://arxiv.org/pdf/1706.02515.pdf
+SNN initialization code (slight modifcation): https://github.com/tonyduan/snn
+Docs on obtaining deterministic models: https://pytorch.org/docs/stable/notes/randomness.html
