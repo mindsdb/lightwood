@@ -8,3 +8,5 @@ class CONFIG:
 
     USE_DEVICE = None
     USE_CACHE = True
+
+    NUMBER_OF_PROBABILISTIC_MODELS = 20
