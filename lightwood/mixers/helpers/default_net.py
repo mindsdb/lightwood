@@ -12,6 +12,12 @@ class DefaultNet(torch.nn.Module):
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
 
+        if device_str == 'cuda':
+            torch.manual_seed(len(ds))
+        else:
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+
         self.device = torch.device(device_str)
 
         self.dynamic_parameters = dynamic_parameters
@@ -78,7 +84,7 @@ class DefaultNet(torch.nn.Module):
                 torch.nn.init.normal_(layer.weight, std=1 / math.sqrt(layer.out_features))
                 fan_in, fan_out = torch.nn.init._calculate_fan_in_and_fan_out(layer.weight)
                 bound = 1 / math.sqrt(fan_in)
-                nn.init.uniform_(layer.bias, -bound, bound)
+                torch.nn.init.uniform_(layer.bias, -bound, bound)
 
         self.net = self.net.to(self.device)
 
