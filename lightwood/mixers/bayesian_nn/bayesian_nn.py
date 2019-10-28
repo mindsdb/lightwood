@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import pyro
 
+from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
@@ -111,7 +112,7 @@ class BayesianNnMixer:
         inputs, _ = data
         inputs = inputs.to(self.net.device)
 
-        sampled_models = [self.pyro_guide(None, None) for _ in range(len(inputs))]
+        sampled_models = [self.pyro_guide(None, None) for _ in range(CONFIG.NUMBER_OF_PROBABILISTIC_MODELS)]
         # A tensor of tensors representing the whole batch of predictions for each "model" pyro built
         out_hats = [model(inputs).data for model in sampled_models]
         outputs_mean = torch.mean(torch.stack(out_hats), 0)
@@ -215,7 +216,7 @@ class BayesianNnMixer:
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
 
-            sampled_models = [self.pyro_guide(None, None) for _ in range(len(inputs))]
+            sampled_models = [self.pyro_guide(None, None) for _ in range(CONFIG.NUMBER_OF_PROBABILISTIC_MODELS)]
             out_hats = [model(inputs).data for model in sampled_models]
             outputs_mean = torch.mean(torch.stack(out_hats), 0)
 
