@@ -159,10 +159,11 @@ class BayesianNnMixer:
 
 
             predictions_arr = predictions_arr_dict[output_column]
+
             predictions_arr_r = [[]] * len(predictions_arr[0])
             for i in range(len(predictions_arr)):
                 for j in range(len(predictions_arr[i])):
-                    predictions_arr_r[j].append(predictions_arr[j][i])
+                    predictions_arr_r[j].append(predictions_arr[i][j])
 
             for predictions in predictions_arr_r:
                 if when_data_source.get_column_config(output_column)['type'] == 'categorical':
