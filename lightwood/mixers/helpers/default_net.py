@@ -21,23 +21,23 @@ class DefaultNet(torch.nn.Module):
         """
         super(DefaultNet, self).__init__()
         input_sample, output_sample = ds[0]
-        input_size = len(input_sample)
-        output_size = len(output_sample)
+        self.input_size = len(input_sample)
+        self.output_size = len(output_sample)
 
         # Select architecture
 
         # 1. Determine, based on the machines specification, if the input/output size are "large"
         if CONFIG.USE_CUDA or CONFIG.USE_DEVICE is not None:
-            large_input = True if input_size > 4000 else False
-            large_output = True if output_size > 400 else False
+            large_input = True if self.input_size > 4000 else False
+            large_output = True if self.output_size > 400 else False
         else:
-            large_input = True if input_size > 1000 else False
-            large_output = True if output_size > 100 else False
+            large_input = True if self.input_size > 1000 else False
+            large_output = True if self.output_size > 100 else False
 
         # 2. Determine in/out proportions
         # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case (outside of very specific things, such as text to image)
-        larger_output = True if output_size > input_size*2 else False
-        larger_input = True if input_size > output_size*2 else False
+        larger_output = True if self.output_size > self.input_size*2 else False
+        larger_input = True if self.input_size > self.output_size*2 else False
         even_input_output = larger_input and large_output
 
         if 'network_depth' in self.dynamic_parameters:
@@ -48,18 +48,18 @@ class DefaultNet(torch.nn.Module):
         # 3. Determine shpae based on the sizes & propotions
         if (not large_input) and (not large_output):
             if larger_input:
-                shape = rombus(input_size,output_size,depth,input_size*2)
+                shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
             else:
-                shape = rectangle(input_size,output_size,depth - 1)
+                shape = rectangle(self.input_size,self.output_size,depth - 1)
 
         elif (not large_output) and large_input:
-            shape = funnel(input_size,output_size,depth)
+            shape = funnel(self.input_size,self.output_size,depth)
 
         elif (not large_input) and large_output:
-            shape = rectangle(input_size,output_size,depth - 1)
+            shape = rectangle(self.input_size,self.output_size,depth - 1)
 
         else:
-            shape = rectangle(input_size,output_size,depth - 2)
+            shape = rectangle(self.input_size,self.output_size,depth - 2)
 
         logging.info(f'Building network of shape: {shape}')
         rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
