@@ -6,9 +6,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
 
-from lightwood.mixers.nn.helpers.default_net import DefaultNet
-from lightwood.mixers.nn.helpers.transformer import Transformer
-from lightwood.mixers.nn.helpers.ranger import Ranger
+from lightwood.mixers.helpers.default_net import DefaultNet
+from lightwood.mixers.helpers.transformer import Transformer
+from lightwood.mixers.helpers.ranger import Ranger
 
 
 class NnMixer:
@@ -52,31 +52,30 @@ class NnMixer:
 
         self.net.eval()
         data = next(iter(data_loader))
-        inputs, labels = data
+        inputs, _ = data
         inputs = inputs.to(self.net.device)
-        labels = labels.to(self.net.device)
 
         outputs = self.net(inputs)
 
-        output_encoded_vectors = {}
+        output_trasnformed_vectors = {}
 
         for output_vector in outputs:
-            output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
-            for feature in output_vectors:
-                if feature not in output_encoded_vectors:
-                    output_encoded_vectors[feature] = []
-                output_encoded_vectors[feature] += [output_vectors[feature]]
+            transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
+            for feature in transformed_output_vectors:
+                if feature not in output_trasnformed_vectors:
+                    output_trasnformed_vectors[feature] = []
+                output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
 
 
 
-        predictions = dict()
+        predictions = {}
 
-        for output_column in output_encoded_vectors:
+        for output_column in output_trasnformed_vectors:
 
-            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_encoded_vectors[output_column]))
+            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
             predictions[output_column] = {'predictions': decoded_predictions}
             if include_encoded_predictions:
-                predictions[output_column]['encoded_predictions'] = output_encoded_vectors[output_column]
+                predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
         logging.info('Model predictions and decoding completed')
 
@@ -142,7 +141,7 @@ class NnMixer:
 
         if not transformer_already_initialized:
             ds.transformer = Transformer(self.input_column_names, self.output_column_names)
-            
+
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
@@ -155,8 +154,6 @@ class NnMixer:
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
-        self.net.train()
-
 
         if self.criterion is None:
             if self.is_categorical_output:
@@ -274,7 +271,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = NnMixer({})
 
     data_encoded = mixer.fit(ds)
     predictions = mixer.predict(predict_input_ds)
@@ -318,7 +315,7 @@ if __name__ == "__main__":
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
     ####################
 
-    mixer = NnMixer(input_column_names=['x', 'y'], output_column_names=['z'])
+    mixer = NnMixer({})
 
     for i in  mixer.iter_fit(ds):
         print(i)
