@@ -163,6 +163,45 @@ class DataSource(Dataset):
             rows = self.data_frame.shape[0]
             return [None] * rows
 
+    def prepare_encoders(self):
+        for feature_set in ['input_features', 'output_features']:
+            for feature in self.configuration[feature_set]:
+                column_name = feature['name']
+                print("Prparing encoder for column: ", column_name)
+                col_config = self.get_column_config(column_name)
+                
+                args = [self.get_column_original_data(column_name)
+                arg2 = self.get_column_original_data(config['depends_on_column'])
+                args += arg2
+
+                if 'encoder_class' not in config:
+                    path = 'lightwood.encoders.{type}'.format(type=config['type'])
+                    module = importlib.import_module(path)
+                    if hasattr(module, 'default'):
+                        encoder_class = importlib.import_module(path).default
+                    else:
+                        raise ValueError('No default encoder for {type}'.format(type=config['type']))
+                else:
+                    encoder_class = config['encoder_class']
+
+                encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
+
+                encoder_instance = encoder_class()
+
+                for attr in encoder_attrs:
+                    if hasattr(encoder_instance, attr):
+                        setattr(encoder_instance, attr, encoder_attrs[attr])
+
+                encoder_instance.prepare_encoder(args[0])
+                self.encoders[column_name] = encoder_instance
+                encoded_val = encoder_instance.encode(*args)
+
+                if custom_data is None and cache_results:
+                    self.encoded_cache[column_name] = encoded_val
+
+                return encoded_val
+
+
     def get_encoded_column_data(self, column_name, feature_set = 'input_features', custom_data = None):
         """
 
@@ -195,32 +234,7 @@ class DataSource(Dataset):
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
 
-        if 'encoder_class' not in config:
-            path = 'lightwood.encoders.{type}'.format(type=config['type'])
-            module = importlib.import_module(path)
-            if hasattr(module, 'default'):
-                encoder_class = importlib.import_module(path).default
-            else:
-                raise ValueError('No default encoder for {type}'.format(type=config['type']))
-        else:
-            encoder_class = config['encoder_class']
-
-        encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
-
-        encoder_instance = encoder_class()
-
-        for attr in encoder_attrs:
-            if hasattr(encoder_instance, attr):
-                setattr(encoder_instance, attr, encoder_attrs[attr])
-
-        encoder_instance.prepare_encoder(args[0])
-        self.encoders[column_name] = encoder_instance
-        encoded_val = encoder_instance.encode(*args)
-
-        if custom_data is None:
-            self.encoded_cache[column_name] = encoded_val
-
-        return encoded_val
+        raise Exception('It looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
 
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
