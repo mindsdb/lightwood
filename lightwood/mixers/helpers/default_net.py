@@ -13,6 +13,13 @@ class DefaultNet(torch.nn.Module):
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
 
+        if CONFIG.DETERMINISTIC:
+            torch.manual_seed(74551)
+            if device_str == 'cuda':
+                    torch.backends.cudnn.deterministic = True
+                    torch.backends.cudnn.benchmark = False
+
+
         self.device = torch.device(device_str)
 
         self.dynamic_parameters = dynamic_parameters
@@ -22,6 +29,7 @@ class DefaultNet(torch.nn.Module):
         """
         super(DefaultNet, self).__init__()
         input_sample, output_sample = ds[0]
+
         self.input_size = len(input_sample)
         self.output_size = len(output_sample)
 
@@ -47,20 +55,22 @@ class DefaultNet(torch.nn.Module):
             depth = 5
 
         # 3. Determine shpae based on the sizes & propotions
+        #if CONFIG.ALWAYS_OVERFIT:
+        #    shape = funnel(self.input_size,self.output_size,depth-2)
+        #    #shape = rombus(self.input_size,self.output_size,depth + 1,self.input_size*3)
+
         if (not large_input) and (not large_output):
-            if larger_input:
-                shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
-            else:
-                shape = rectangle(self.input_size,self.output_size,depth - 1)
+            shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
 
         elif (not large_output) and large_input:
             shape = funnel(self.input_size,self.output_size,depth)
 
         elif (not large_input) and large_output:
             shape = rectangle(self.input_size,self.output_size,depth - 1)
-
         else:
             shape = rectangle(self.input_size,self.output_size,depth - 2)
+
+        print(shape)
 
         logging.info(f'Building network of shape: {shape}')
         rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
@@ -73,6 +83,11 @@ class DefaultNet(torch.nn.Module):
 
 
         self.net = torch.nn.Sequential(*layers)
+
+        for layer in self.net:
+            if isinstance(layer, torch.nn.Linear):
+                torch.nn.init.normal_(layer.weight, mean=0., std=1 / math.sqrt(layer.out_features))
+                torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
 
         self.net = self.net.to(self.device)
 

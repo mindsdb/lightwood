@@ -22,7 +22,7 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
         self.disable_cache = not CONFIG.USE_CACHE
-        
+
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -45,6 +45,7 @@ class DataSource(Dataset):
 
 
     def extractRandomSubset(self, percentage):
+        np.random.seed(int(round(percentage*100000)))
         msk = np.random.rand(len(self.data_frame)) < (1-percentage)
         test_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]
@@ -77,7 +78,6 @@ class DataSource(Dataset):
 
         if self.training == True and random.randint(0,2) == 1:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
-
 
         if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
@@ -162,6 +162,42 @@ class DataSource(Dataset):
             rows = self.data_frame.shape[0]
             return [None] * rows
 
+    def prepare_encoders(self):
+        for feature_set in ['input_features', 'output_features']:
+            for feature in self.configuration[feature_set]:
+                column_name = feature['name']
+                config = self.get_column_config(column_name)
+
+                args = [self.get_column_original_data(column_name)]
+
+                if 'depends_on_column' in config:
+                    args += [self.get_column_original_data(config['depends_on_column'])]
+
+                if 'encoder_class' not in config:
+                    path = 'lightwood.encoders.{type}'.format(type=config['type'])
+                    module = importlib.import_module(path)
+                    if hasattr(module, 'default'):
+                        encoder_class = importlib.import_module(path).default
+                    else:
+                        raise ValueError('No default encoder for {type}'.format(type=config['type']))
+                else:
+                    encoder_class = config['encoder_class']
+
+                encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
+
+                encoder_instance = encoder_class()
+
+                for attr in encoder_attrs:
+                    if hasattr(encoder_instance, attr):
+                        setattr(encoder_instance, attr, encoder_attrs[attr])
+
+                encoder_instance.prepare_encoder(args[0])
+                self.encoders[column_name] = encoder_instance
+                encoded_val = encoder_instance.encode(*args)
+
+        return True
+
+
     def get_encoded_column_data(self, column_name, feature_set = 'input_features', custom_data = None):
         """
 
@@ -194,32 +230,7 @@ class DataSource(Dataset):
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
 
-        if 'encoder_class' not in config:
-            path = 'lightwood.encoders.{type}'.format(type=config['type'])
-            module = importlib.import_module(path)
-            if hasattr(module, 'default'):
-                encoder_class = importlib.import_module(path).default
-            else:
-                raise ValueError('No default encoder for {type}'.format(type=config['type']))
-        else:
-            encoder_class = config['encoder_class']
-
-        encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
-
-        encoder_instance = encoder_class()
-
-        for attr in encoder_attrs:
-            if hasattr(encoder_instance, attr):
-                setattr(encoder_instance, attr, encoder_attrs[attr])
-
-        encoder_instance.prepare_encoder(args[0])
-        self.encoders[column_name] = encoder_instance
-        encoded_val = encoder_instance.encode(*args)
-
-        if custom_data is None:
-            self.encoded_cache[column_name] = encoded_val
-
-        return encoded_val
+        raise Exception('It looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
 
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
