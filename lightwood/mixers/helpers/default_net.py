@@ -1,6 +1,7 @@
 import logging
 from lightwood.config.config import CONFIG
-from .shapes import *
+from lightwood.mixers.helpers.shapes import *
+from lightwood.mixers.helpers.plinear import PLinear
 import torch
 
 
@@ -66,7 +67,7 @@ class DefaultNet(torch.nn.Module):
 
         layers = []
         for ind in range(len(shape) - 1):
-            layers.append(torch.nn.Linear(shape[ind],shape[ind+1]))
+            layers.append(PLinear(shape[ind],shape[ind+1]))
             if ind < len(shape) - 2:
                 layers.append(rectifier())
 
