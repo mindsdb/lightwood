@@ -13,7 +13,11 @@ class DefaultNet(torch.nn.Module):
             device_str = CONFIG.USE_DEVICE
 
         if CONFIG.DETERMINISTIC:
-            torch.manual_seed(74551)
+            '''
+                Seed that always has the same value on the same dataset plus setting the bellow CUDA options
+                In order to make sure pytroch randomly generate number will be the same every time when training on the same dataset
+            '''
+            torch.manual_seed(len(ds))
             if device_str == 'cuda':
                     torch.backends.cudnn.deterministic = True
                     torch.backends.cudnn.benchmark = False
