@@ -9,7 +9,6 @@ import numpy as np
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
-from lightwood.mixers.helpers.debugging import get_gpu_memory_map, print_gpuutil_status
 
 class NnMixer:
 
@@ -58,23 +57,8 @@ class NnMixer:
             inputs = inputs.to(self.net.device)
 
             with torch.no_grad():
-                output = self.net(inputs)
-            output = output.to('cpu')
+                output = self.net(inputs).to('cpu')
             outputs.extend(output)
-            print(get_gpu_memory_map())
-
-            del inputs
-            del output
-            '''
-            @TODO In case it runs out of GPU memroy when predicting try de-allocating manually, sometimes pytroch seems not to do it for some reason, hard to replicate, will look into it at a later date.
-
-            Code to deallocate and prin GPU memory status:
-
-            del inputs
-            del output
-            print(get_gpu_memory_map())
-            torch.cuda.empty_cache()
-            '''
 
         output_trasnformed_vectors = {}
 
