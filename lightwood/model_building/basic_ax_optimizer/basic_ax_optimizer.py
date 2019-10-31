@@ -7,7 +7,7 @@ class BasicAxOptimizer:
         self.total_trials = 32
 
     def evaluate(self, error_yielding_function):
-        if if CONFIG.DETERMINISTIC:
+        if CONFIG.DETERMINISTIC:
             random_seed = self.total_trials
         else:
             random_seed = randint(1,pow(2,32))
