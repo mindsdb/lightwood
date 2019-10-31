@@ -58,7 +58,7 @@ class NnMixer:
             inputs = inputs.to(self.net.device)
             output = self.net(inputs)
             output = output.to('cpu')
-            outputs.extend(output.clone())
+            outputs.extend(output)
 
             '''
             @TODO In case it runs out of GPU memroy when predicting try de-allocating manually, sometimes pytroch seems not to do it for some reason, hard to replicate, will look into it at a later date.
