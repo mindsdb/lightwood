@@ -79,7 +79,6 @@ class DataSource(Dataset):
         if self.training == True and random.randint(0,2) == 1:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
-
         if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
 
@@ -167,12 +166,12 @@ class DataSource(Dataset):
         for feature_set in ['input_features', 'output_features']:
             for feature in self.configuration[feature_set]:
                 column_name = feature['name']
-                print("Prparing encoder for column: ", column_name)
-                col_config = self.get_column_config(column_name)
+                config = self.get_column_config(column_name)
 
                 args = [self.get_column_original_data(column_name)]
-                arg2 = self.get_column_original_data(config['depends_on_column'])
-                args += arg2
+
+                if 'depends_on_column' in config:
+                    args += [self.get_column_original_data(config['depends_on_column'])]
 
                 if 'encoder_class' not in config:
                     path = 'lightwood.encoders.{type}'.format(type=config['type'])
@@ -196,10 +195,7 @@ class DataSource(Dataset):
                 self.encoders[column_name] = encoder_instance
                 encoded_val = encoder_instance.encode(*args)
 
-                if custom_data is None and cache_results:
-                    self.encoded_cache[column_name] = encoded_val
-
-                return encoded_val
+        return True
 
 
     def get_encoded_column_data(self, column_name, feature_set = 'input_features', custom_data = None):
