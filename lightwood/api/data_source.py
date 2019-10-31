@@ -169,8 +169,8 @@ class DataSource(Dataset):
                 column_name = feature['name']
                 print("Prparing encoder for column: ", column_name)
                 col_config = self.get_column_config(column_name)
-                
-                args = [self.get_column_original_data(column_name)
+
+                args = [self.get_column_original_data(column_name)]
                 arg2 = self.get_column_original_data(config['depends_on_column'])
                 args += arg2
 
