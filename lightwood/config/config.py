@@ -8,7 +8,7 @@ class CONFIG:
 
     USE_DEVICE = None
 
-    DETERMINISTIC = True
+    DETERMINISTIC = False
 
     USE_CACHE = True
 
