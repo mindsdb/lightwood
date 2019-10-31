@@ -56,10 +56,15 @@ class NnMixer:
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
             inputs = inputs.to(self.net.device)
-            output = self.net(inputs)
+
+            with torch.no_grad():
+                output = self.net(inputs)
             output = output.to('cpu')
             outputs.extend(output)
+            print(get_gpu_memory_map())
 
+            del inputs
+            del output
             '''
             @TODO In case it runs out of GPU memroy when predicting try de-allocating manually, sometimes pytroch seems not to do it for some reason, hard to replicate, will look into it at a later date.
 
@@ -120,10 +125,12 @@ class NnMixer:
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
 
-            outputs = self.net(inputs)
+            with torch.no_grad():
+                outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
             running_loss += loss.item()
             error = running_loss / (i + 1)
+        self.net = self.net.train()
 
         return error
 
