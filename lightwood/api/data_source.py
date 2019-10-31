@@ -172,7 +172,7 @@ class DataSource(Dataset):
             from the training dataset.
         '''
         for feature_set in ['input_features', 'output_features']:
-            for feature in feature_set:
+            for feature in self.configuration[feature_set]:
                 column_name = feature['name']
                 config = self.get_column_config(column_name)
 
