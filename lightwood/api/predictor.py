@@ -118,7 +118,7 @@ class Predictor:
 
         :return: None
         """
-        eval_every_x_epochs = 1
+        eval_every_x_epochs = 3
         self._stop_training_flag = False
 
         if stop_model_building_after_seconds is None:
@@ -253,8 +253,8 @@ class Predictor:
             if epoch >= eval_next_on_epoch and test_data_ds:
                 tmp_next = eval_next_on_epoch + eval_every_x_epochs
                 eval_next_on_epoch = tmp_next
-                #test_data_ds
-                test_error = mixer.error(from_data_ds)
+
+                test_error = mixer.error(test_data_ds)
 
                 # initialize lowest_error_variable if not initialized yet
                 if lowest_error is None:
