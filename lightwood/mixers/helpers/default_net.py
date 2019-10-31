@@ -82,10 +82,8 @@ class DefaultNet(torch.nn.Module):
 
         for layer in self.net:
             if isinstance(layer, torch.nn.Linear):
-                torch.nn.init.normal_(layer.weight, std=1 / math.sqrt(layer.out_features))
-                fan_in, fan_out = torch.nn.init._calculate_fan_in_and_fan_out(layer.weight)
-                bound = 1 / math.sqrt(fan_in)
-                torch.nn.init.uniform_(layer.bias, -bound, bound)
+                torch.nn.init.normal_(layer.weight, mean=0, std=1 / math.sqrt(layer.out_features))
+                torch.nn.init.normal_(layer.bias, mean=0, std=0)
 
         self.net = self.net.to(self.device)
 
