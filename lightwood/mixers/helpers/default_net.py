@@ -12,11 +12,11 @@ class DefaultNet(torch.nn.Module):
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
 
-        torch.manual_seed(74551)
-        if device_str == 'cuda':
-            if CONFIG.FULLY_DETERMINISTIC:
-                torch.backends.cudnn.deterministic = True
-                torch.backends.cudnn.benchmark = False
+        if CONFIG.DETERMINISTIC:
+            torch.manual_seed(74551)
+            if device_str == 'cuda':
+                    torch.backends.cudnn.deterministic = True
+                    torch.backends.cudnn.benchmark = False
 
 
         self.device = torch.device(device_str)
