@@ -1,5 +1,6 @@
 import ax
 from random import randint
+from lightwood.config.config import CONFIG
 
 
 class BasicAxOptimizer:
