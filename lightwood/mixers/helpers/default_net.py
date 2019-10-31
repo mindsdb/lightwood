@@ -69,7 +69,6 @@ class DefaultNet(torch.nn.Module):
         else:
             shape = rectangle(self.input_size,self.output_size,depth - 2)
 
-        print(shape)
 
         logging.info(f'Building network of shape: {shape}')
         rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
