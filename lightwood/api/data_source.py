@@ -163,16 +163,26 @@ class DataSource(Dataset):
             return [None] * rows
 
     def prepare_encoders(self):
+        '''
+            Get the encoder for all the output and input column and preapre them
+            with all available data for that column.
+
+            * Note: This method should only be called on the "main" training dataset, all
+            the other datasets should get their encoders and transformers
+            from the training dataset.
+        '''
         for feature_set in ['input_features', 'output_features']:
-            for feature in self.configuration[feature_set]:
+            for feature in [*self.configuration[feature_set]:
                 column_name = feature['name']
                 config = self.get_column_config(column_name)
 
                 args = [self.get_column_original_data(column_name)]
 
+                # If the column depends upon another, it's encoding *might* be influenced by that
                 if 'depends_on_column' in config:
                     args += [self.get_column_original_data(config['depends_on_column'])]
 
+                # If the encoder is not specified by the user lookup the default encoder for the column's data type
                 if 'encoder_class' not in config:
                     path = 'lightwood.encoders.{type}'.format(type=config['type'])
                     module = importlib.import_module(path)
@@ -183,14 +193,15 @@ class DataSource(Dataset):
                 else:
                     encoder_class = config['encoder_class']
 
-                encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
-
+                # Instantiate the encoder and pass any arguments given via the configuration
                 encoder_instance = encoder_class()
 
+                encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
                 for attr in encoder_attrs:
                     if hasattr(encoder_instance, attr):
                         setattr(encoder_instance, attr, encoder_attrs[attr])
 
+                # Prime the encoder using the data (for example, to get the one-hot mapping in a categorical encoder)
                 encoder_instance.prepare_encoder(args[0])
                 self.encoders[column_name] = encoder_instance
                 encoded_val = encoder_instance.encode(*args)
@@ -208,7 +219,7 @@ class DataSource(Dataset):
         if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
 
-        # first argument of encoder is the data, so we either pass the custom data or we get the column data
+        # The first argument of encoder is the data, if no custom data is specified, use all the datasource's data for this column
         if custom_data is not None:
             args = [custom_data[column_name]]
         else:
@@ -216,7 +227,7 @@ class DataSource(Dataset):
 
         config = self.get_column_config(column_name)
 
-        # see if the feature has dependencies in other columns
+        # See if the feature has dependencies in other columns
         if 'depends_on_column' in config:
             if custom_data is not None:
                 arg2 = custom_data[config['depends_on_column']]
@@ -226,11 +237,13 @@ class DataSource(Dataset):
 
         if column_name in self.encoders:
             encoded_vals = self.encoders[column_name].encode(*args)
+            # Cache the encoded data so we don't have to run the encoding,
+            # Don't cache custom_data (custom_data is usually used when running without cache or dropping out a feature for a certain pass)
             if column_name not in self.encoded_cache and custom_data is None:
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
-
-        raise Exception('It looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
+        else:
+            raise Exception('It looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
 
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
