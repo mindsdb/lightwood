@@ -17,21 +17,24 @@ class PLinear(nn.Module):
     Implementation of probabilistic weights via Linear function
     '''
     def __init__(self, in_features, out_features, bias=True):
-        '''
-        Initialization.
-        INPUT:
-            - in_features: shape of the input
-            - aplha: trainable parameter
-            aplha is initialized with zero value by default
-        '''
+        """
+
+        :param in_features:  as name suggests
+        :param out_features: this essentially the number of neurons
+        :param bias: if you want a specific bias
+        """
+
         super(PLinear ,self).__init__()
+
         self.in_features = in_features
         self.out_features = out_features
 
+        # these are the matrices that we will optimize for
         self.sigma = Parameter(torch.Tensor(out_features, in_features))
         self.mean = Parameter(torch.Tensor(out_features, in_features))
 
-        self.w_method = self.w_discrete_normal
+        # there can be various ways to sample, given various distributions, we will stick with discrete normal as it is way faster
+        self.w_sampler = self.w_discrete_normal
 
         if bias:
             self.bias = Parameter(torch.Tensor(out_features))
@@ -40,20 +43,20 @@ class PLinear(nn.Module):
 
         self.reset_parameters()
 
-        #self.w.requiresGrad = True
+        #make sure that we tell the graph that these two need to be optimized
         self.sigma.requiresGrad = True # set requiresGrad to true!
         self.mean.requiresGrad = True  # set requiresGrad to true!
+
 
     def reset_parameters(self):
         """
         This sets the initial values for the distribution parameters, mean, sigma
 
         """
-
-        if self.w_method == self.w_normal:
+        if self.w_sampler == self.w_normal:
             init.kaiming_uniform_(self.mean, a=math.sqrt(5)) # initial means (just as in original linear)
             init.uniform_(self.sigma, a=0.01, b=0.1) # initial sigmas from 0.5-2
-        elif self.w_method == self.w_discrete_normal:
+        elif self.w_sampler == self.w_discrete_normal:
             init.kaiming_uniform_(self.mean, a=math.sqrt(5))  # initial means (just as in original linear)
             init.uniform_(self.sigma, a=0.05, b=0.2)
 
@@ -64,23 +67,27 @@ class PLinear(nn.Module):
 
     def w_discrete_normal(self):
         """
-        Sample a w matrix based on a uniform distribution
+        Sample a w matrix based on a discrete normal distribution
         :return: w
         """
 
-        bucket_seed = random.uniform(0,1)
-        sigma_multiplier = 1
+        bucket_seed = random.uniform(0,1) # gett a number that can help determines which bucket of the distribution can numbers fall in
+        sigma_multiplier = 1 # this tell it how wide do we stretch the random saples
 
+        # set the widths for sampling, based on the seed
         if bucket_seed > 0.33:
             sigma_multiplier = 2
             if bucket_seed > 0.8:
                 sigma_multiplier = 4
 
-        seed = torch.Tensor(self.out_features, self.in_features)
-        init.uniform_(seed, a=-1, b=1)
+        # generate the initial tensor, this will ultimately transforms in to the weights
+        w = torch.Tensor(self.out_features, self.in_features)
+        # make sure that they are evently distributed between -1, 1
+        init.uniform_(w, a=-1, b=1)
 
-        w = self.mean*( 1+ seed * torch.abs(self.sigma) * sigma_multiplier )
-
+        # adjust based on sigma
+        w = self.mean*( 1+ w * torch.abs(self.sigma) * sigma_multiplier )
+        # you can see how the average sigma changes over trainings
         #print(torch.mean(self.sigma))
         return w
 
@@ -122,10 +129,7 @@ class PLinear(nn.Module):
         The goal is to generate values such as if they weights of the linear operation are sampled from a normal distribution
         '''
 
-
-
-
-        return F.linear(input, self.w_method(), self.bias)
+        return F.linear(input, self.w_sampler(), self.bias)
 
 
 if __name__ == "__main__":
