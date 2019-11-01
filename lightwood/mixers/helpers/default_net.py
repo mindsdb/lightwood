@@ -32,6 +32,7 @@ class DefaultNet(torch.nn.Module):
         """
         super(DefaultNet, self).__init__()
         input_sample, output_sample = ds[0]
+
         self.input_size = len(input_sample)
         self.output_size = len(output_sample)
 
@@ -56,21 +57,17 @@ class DefaultNet(torch.nn.Module):
         else:
             depth = 5
 
-        # 3. Determine shpae based on the sizes & propotions
         if (not large_input) and (not large_output):
-            if larger_input:
-                shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
-            else:
-                shape = rectangle(self.input_size,self.output_size,depth - 1)
+            shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
 
         elif (not large_output) and large_input:
             shape = funnel(self.input_size,self.output_size,depth)
 
         elif (not large_input) and large_output:
             shape = rectangle(self.input_size,self.output_size,depth - 1)
-
         else:
             shape = rectangle(self.input_size,self.output_size,depth - 2)
+
 
         logging.info(f'Building network of shape: {shape}')
         rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
