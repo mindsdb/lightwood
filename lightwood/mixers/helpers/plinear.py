@@ -31,7 +31,7 @@ class PLinear(nn.Module):
         self.sigma = Parameter(torch.Tensor(out_features, in_features))
         self.mean = Parameter(torch.Tensor(out_features, in_features))
 
-        self.w_method = self.w_uniform
+        self.w_method = self.w_discrete_normal
 
         if bias:
             self.bias = Parameter(torch.Tensor(out_features))
@@ -53,41 +53,35 @@ class PLinear(nn.Module):
         if self.w_method == self.w_normal:
             init.kaiming_uniform_(self.mean, a=math.sqrt(5)) # initial means (just as in original linear)
             init.uniform_(self.sigma, a=0.01, b=0.1) # initial sigmas from 0.5-2
-        elif self.w_method == self.w_uniform:
+        elif self.w_method == self.w_discrete_normal:
             init.kaiming_uniform_(self.mean, a=math.sqrt(5))  # initial means (just as in original linear)
-            init.uniform_(self.sigma, a=0.01, b=0.1)
+            init.uniform_(self.sigma, a=0.05, b=0.2)
 
         if self.bias is not None:
             fan_in, _ = init._calculate_fan_in_and_fan_out(self.mean)
             bound = 1 / math.sqrt(fan_in)
             init.uniform_(self.bias, -bound, bound)
 
-    def w_uniform(self):
+    def w_discrete_normal(self):
         """
         Sample a w matrix based on a uniform distribution
         :return: w
         """
 
-
         bucket_seed = random.uniform(0,1)
-
         sigma_multiplier = 1
 
-        if bucket_seed > 0.66:
-
+        if bucket_seed > 0.33:
             sigma_multiplier = 2
-        elif bucket_seed > 0.8:
-            sigma_multiplier = 4
-            print(sigma_multiplier)
+            if bucket_seed > 0.8:
+                sigma_multiplier = 4
 
         seed = torch.Tensor(self.out_features, self.in_features)
         init.uniform_(seed, a=-1, b=1)
 
-        w = self.mean*( 1+ seed * self.sigma * sigma_multiplier )
+        w = self.mean*( 1+ seed * torch.abs(self.sigma) * sigma_multiplier )
 
-        #print(w)
-        #seed | w + seed*(w*sigma) = w(1+seed*sigma)
-
+        #print(torch.mean(self.sigma))
         return w
 
 
