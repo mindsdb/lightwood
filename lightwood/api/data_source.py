@@ -22,7 +22,7 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
         self.disable_cache = not CONFIG.USE_CACHE
-        
+
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -45,6 +45,7 @@ class DataSource(Dataset):
 
 
     def extractRandomSubset(self, percentage):
+        np.random.seed(int(round(percentage*100000)))
         msk = np.random.rand(len(self.data_frame)) < (1-percentage)
         test_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]

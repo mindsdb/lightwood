@@ -12,6 +12,17 @@ class DefaultNet(torch.nn.Module):
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
 
+        if CONFIG.DETERMINISTIC:
+            '''
+                Seed that always has the same value on the same dataset plus setting the bellow CUDA options
+                In order to make sure pytroch randomly generate number will be the same every time when training on the same dataset
+            '''
+            torch.manual_seed(len(ds))
+            if device_str == 'cuda':
+                    torch.backends.cudnn.deterministic = True
+                    torch.backends.cudnn.benchmark = False
+
+
         self.device = torch.device(device_str)
 
         self.dynamic_parameters = dynamic_parameters
@@ -72,6 +83,11 @@ class DefaultNet(torch.nn.Module):
 
 
         self.net = torch.nn.Sequential(*layers)
+
+        for layer in self.net:
+            if isinstance(layer, torch.nn.Linear):
+                torch.nn.init.normal_(layer.weight, mean=0., std=1 / math.sqrt(layer.out_features))
+                torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
 
         self.net = self.net.to(self.device)
 
