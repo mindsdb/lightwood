@@ -177,6 +177,9 @@ class Predictor:
                 mixer_params = self.config['mixer']['attrs']
         else:
             mixer_class = NnMixer
+
+        from_data_ds.prepare_encoders()
+
         # Initialize data sources
         try:
             mixer_class({}).fit_data_source(from_data_ds)

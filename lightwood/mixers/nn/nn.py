@@ -10,7 +10,6 @@ from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 
-
 class NnMixer:
 
     def __init__(self, dynamic_parameters, is_categorical_output=False):
@@ -45,17 +44,21 @@ class NnMixer:
         :param when_data_source:
         :return:
         """
-
         when_data_source.transformer = self.transformer
         when_data_source.encoders = self.encoders
-        data_loader = DataLoader(when_data_source, batch_size=len(when_data_source), shuffle=False, num_workers=0)
+        data_loader = DataLoader(when_data_source, batch_size=self.batch_size, shuffle=False, num_workers=0)
 
-        self.net.eval()
-        data = next(iter(data_loader))
-        inputs, _ = data
-        inputs = inputs.to(self.net.device)
+        # set model into evaluation mode in order to skip things such as Dropout
+        self.net = self.net.eval()
 
-        outputs = self.net(inputs)
+        outputs = []
+        for i, data in enumerate(data_loader, 0):
+            inputs, _ = data
+            inputs = inputs.to(self.net.device)
+
+            with torch.no_grad():
+                output = self.net(inputs).to('cpu')
+            outputs.extend(output)
 
         output_trasnformed_vectors = {}
 
@@ -86,6 +89,7 @@ class NnMixer:
         :param ds:
         :return:
         """
+        self.net = self.net.eval()
 
         ds.encoders = self.encoders
         ds.transformer = self.transformer
@@ -105,10 +109,12 @@ class NnMixer:
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
 
-            outputs = self.net(inputs)
+            with torch.no_grad():
+                outputs = self.net(inputs)
             loss = self.criterion(outputs, labels)
             running_loss += loss.item()
             error = running_loss / (i + 1)
+        self.net = self.net.train()
 
         return error
 
@@ -154,6 +160,7 @@ class NnMixer:
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
+        self.net = self.net.train()
 
         if self.criterion is None:
             if self.is_categorical_output:
