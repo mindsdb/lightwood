@@ -19,15 +19,15 @@ print(data_frame)
 predictor = Predictor(output=['z'])
 
 
-def feedback(iter, error, test_error, test_error_gradient):
-    # predictor.stop_training()
+def iter_function(epoch, error, test_error, test_error_gradient, test_accuracy):
     print(
-        'iteration: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, accuracy: {accuracy}'.format(
-            iter=iter, error=error, test_error=test_error, test_error_gradient=test_error_gradient,
-            accuracy=predictor.train_accuracy))
+        'epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, test_accuracy: {test_accuracy}'.format(
+            iter=epoch, error=error, test_error=test_error, test_error_gradient=test_error_gradient,
+            accuracy=predictor.train_accuracy, test_accuracy=test_accuracy))
 
 
-predictor.learn(from_data=data_frame, callback_on_iter=feedback)
+
+predictor.learn(from_data=data_frame, callback_on_iter=iter_function)
 print('accuracy')
 print(predictor.train_accuracy)
 print('accuracy over all dataset')
