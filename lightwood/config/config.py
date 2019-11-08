@@ -10,6 +10,8 @@ class CONFIG:
 
     DETERMINISTIC = False
 
+    USE_PROBABILISTIC_LINEAR = True # change weights in mixer to be probabilistic
+
     USE_CACHE = True
 
     NUMBER_OF_PROBABILISTIC_MODELS = 2
