@@ -43,10 +43,10 @@ predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epoch
 
 #print(predictor.predict(when={ 'number_of_bathrooms':2, 'sqft':700, 'location':'great'}))
 
-predictor.save('/tmp/test.lw')
+predictor.save('test.pkl')
 
 #exit()
-predictor = Predictor(load_from_path='/tmp/test.lw')
+predictor = Predictor(load_from_path='test.pkl')
 preds = {}
 for j in range(100):
     pred = predictor.predict(when={  'sqft':1600})['number_of_rooms']['predictions'][0]
@@ -67,5 +67,3 @@ print(preds)
 # {'0': 30, '3': 32, '1': 20, '2': 13, '<UNCOMMON>': 0}
 
 # {'2': 12, '1': 17, '3': 27, '0': 38, '<UNCOMMON>': 1}
-
-

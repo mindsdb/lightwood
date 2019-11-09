@@ -1,6 +1,7 @@
 import pandas
 import random
 from lightwood import Predictor
+import os
 
 ### Generate a dataset
 datapoints = 1000
@@ -37,11 +38,11 @@ print('- multiply when. {when}'.format(when=when))
 print(predictor.predict(when=when))
 
 # saving the predictor
-predictor.save('/tmp/ok.pkl')
+predictor.save('ok.pkl')
 
 # loading the predictor
 
-predictor2 = Predictor(load_from_path='/tmp/ok.pkl')
+predictor2 = Predictor(load_from_path='ok.pkl')
 when = {'x': [0, 0, 1, -1, 1], 'y': [0, 1, -1, -1, 1]}
 print('- multiply when. {when}'.format(when=when))
 print(predictor2.predict(when_data=pandas.DataFrame(when)))
