@@ -162,7 +162,12 @@ class NnMixer:
         sampler = None
         if self.is_categorical_output:
             if ds.output_weights is not None and ds.output_weights is not False and CONFIG.OVERSAMPLE:
-                sampler = torch.utils.data.WeightedRandomSampler(weights=ds.output_weights,num_samples=2*self.batch_size,replacement=True)
+                weights = []
+                for row in ds:
+                    _, out = row
+                    weights.append(ds.output_weights[torch.argmax(out)])
+
+                sampler = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
         if sampler is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
