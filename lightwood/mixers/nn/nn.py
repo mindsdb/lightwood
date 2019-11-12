@@ -167,7 +167,7 @@ class NnMixer:
         if sampler is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, sampler=sampler)
+            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0, sampler=sampler)
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net = self.net.train()
@@ -197,6 +197,7 @@ class NnMixer:
         total_epochs = self.epochs
 
         total_iterations = 0
+        wmp = {}
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
@@ -204,7 +205,15 @@ class NnMixer:
                 total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
-                print(labels)
+
+                for l in labels:
+                    values, indices = torch.max(l, 0)
+                    ind = indices.item()
+                    if ind not in wmp:
+                        wmp[ind] = 0
+                    wmp[ind] += 1
+
+                    print(wmp)
 
                 labels = labels.to(self.net.device)
                 inputs = inputs.to(self.net.device)
