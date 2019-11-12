@@ -2,16 +2,19 @@ import torch
 
 
 class CONFIG:
+    """General"""
     USE_CUDA = False
     if torch.cuda.device_count() > 0:
         USE_CUDA = True
 
     USE_DEVICE = None
+    USE_CACHE = True
+    # Enable deterministic cuda flag and use seeds everywhere (static or based on features of the dataset)
+    DETERMINISTIC = True
+    OVERSAMPLE = True
 
-    DETERMINISTIC = False
-
+    """Probabilistic FC layers"""
     USE_PROBABILISTIC_LINEAR = False # change weights in mixer to be probabilistic
 
-    USE_CACHE = True
-
+    """Bayesian Network"""
     NUMBER_OF_PROBABILISTIC_MODELS = 2
