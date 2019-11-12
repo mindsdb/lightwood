@@ -9,6 +9,8 @@ import numpy as np
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.config.config import CONFIG
+
 
 class NnMixer:
 
@@ -159,7 +161,7 @@ class NnMixer:
         self.fit_data_source(ds)
         sampler = None
         if self.is_categorical_output:
-            if ds.output_weights is not None and ds.output_weights is not False and OVERSAMPLE.OVERSAMPLE:
+            if ds.output_weights is not None and ds.output_weights is not False and CONFIG.OVERSAMPLE:
                 sampler = torch.utils.data.WeightedRandomSampler(weights=ds.output_weights,num_samples=2*self.batch_size,replacement=True)
 
         if sampler is None:
