@@ -157,14 +157,22 @@ class NnMixer:
         :return:
         """
         self.fit_data_source(ds)
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        sampler = None
+        if self.is_categorical_output:
+            if ds.output_weights is not None and ds.output_weights is not False and OVERSAMPLE.OVERSAMPLE:
+                sampler = torch.utils.data.WeightedRandomSampler(weights=ds.output_weights,num_samples=2*self.batch_size,replacement=True)
+
+        if sampler is None:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        else:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, sampler=sampler)
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net = self.net.train()
 
         if self.criterion is None:
             if self.is_categorical_output:
-                if ds.output_weights is not None and ds.output_weights is not False:
+                if ds.output_weights is not None and ds.output_weights is not False and not CONFIG.OVERSAMPLE:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
@@ -194,6 +202,7 @@ class NnMixer:
                 total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
+                print(labels)
 
                 labels = labels.to(self.net.device)
                 inputs = inputs.to(self.net.device)
