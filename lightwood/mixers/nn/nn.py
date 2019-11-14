@@ -161,6 +161,7 @@ class NnMixer:
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net = self.net.train()
+        self.awareness_criterion = torch.nn.MSELoss()
 
         if self.criterion is None:
             if self.is_categorical_output:
@@ -202,18 +203,39 @@ class NnMixer:
                 self.optimizer.zero_grad()
 
                 # forward + backward + optimize
-                outputs = self.net(inputs)
+                # outputs = self.net(inputs)
+                outputs, awareness = self.net(inputs, True)  # ask it to return awareness
 
                 if self.is_categorical_output:
                     target = labels.cpu().numpy()
                     target_indexes = np.where(target>0)[1]
                     targets_c = torch.LongTensor(target_indexes)
-                    labels = targets_c.to(self.net.device)
+                    cat_labels = targets_c.to(self.net.device)
+                    loss = self.criterion(outputs, cat_labels)
+                else:
+                    loss = self.criterion(outputs, labels)
 
-                loss = self.criterion(outputs, labels)
                 loss.backward()
 
+                #######################
+                ### time to optimize AWARENESS
+                #######################
+
+                # zero the parameter gradients
+                # forward + backward + optimize
+
+
+                my_loss = torch.abs(labels - outputs)/torch.abs(labels) # error precentual to the target
+                my_loss = torch.Tensor(my_loss.tolist()) # disconnect from the graph (test if this is necessary)
+                my_loss = my_loss.to(self.net.device)
+
+                awareness_loss = self.awareness_criterion(awareness, my_loss)
+                awareness_loss.backward()
+
+                # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
                 self.optimizer.step()
+
+
                 # Maybe make this a scheduler later
                 # Start flat and then go into cosine annealing
 
