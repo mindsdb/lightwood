@@ -241,8 +241,8 @@ class NnMixer:
 
 
                 my_loss = torch.abs(labels - outputs) # error precentual to the target
-                #my_loss = torch.Tensor(my_loss.tolist()) # disconnect from the graph (test if this is necessary)
-                #my_loss = my_loss.to(self.net.device)
+                my_loss = torch.Tensor(my_loss.tolist()) # disconnect from the graph (test if this is necessary)
+                my_loss = my_loss.to(self.net.device)
 
                 awareness_loss = self.awareness_criterion(awareness, my_loss)
 
