@@ -36,7 +36,7 @@ class DefaultNet(torch.nn.Module):
 
         self.input_size = len(input_sample)
         self.output_size = len(output_sample)
-
+        self.max_variance = None
         # Select architecture
 
         # 1. Determine, based on the machines specification, if the input/output size are "large"
@@ -104,6 +104,30 @@ class DefaultNet(torch.nn.Module):
 
         self.net = self.net.to(self.device)
         self.awareness_net = self.awareness_net.to(self.device)
+
+    def calculate_overall_certainty(self):
+        """
+        Calculate overall certainty of the model
+        :return: -1 means its unknown as it is using non probabilistic layers
+        """
+        mean_variance = 0
+        count = 0
+
+        for layer in self.net:
+            if isinstance(layer, torch.nn.Linear):
+                continue
+            elif isinstance(layer, PLinear):
+
+                count +=1
+                mean_variance += torch.mean(layer.sigma).tolist()
+
+        if count == 0:
+            return -1 # Unknown
+
+        mean_variance = mean_variance / count
+        self.max_variance = mean_variance if self.max_variance is None else mean_variance if self.max_variance < mean_variance else self.max_variance
+
+        return (self.max_variance- mean_variance)/self.max_variance
 
     def forward(self, input, return_awareness = False):
         """

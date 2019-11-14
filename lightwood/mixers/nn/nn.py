@@ -30,6 +30,8 @@ class NnMixer:
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
+        self.awareness_criterion = None
+
 
     def fit(self, ds=None, callback=None):
 
@@ -83,6 +85,17 @@ class NnMixer:
         logging.info('Model predictions and decoding completed')
 
         return predictions
+
+    def overall_certainty(self):
+        """
+        return an estimate of how certain is the model about the overall predictions,
+        in this case its a measurement of how much did the variance of all the weights distributions reduced from its initial distribution
+        :return:
+        """
+        if hasattr(self.net, 'calculate_overall_certainty'):
+            return self.net.calculate_overall_certainty()
+        else:
+            return -1
 
     def error(self, ds):
         """

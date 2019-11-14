@@ -10,7 +10,7 @@ class CONFIG:
 
     DETERMINISTIC = False
 
-    USE_PROBABILISTIC_LINEAR = False # change weights in mixer to be probabilistic
+    USE_PROBABILISTIC_LINEAR = True # change weights in mixer to be probabilistic
 
     USE_CACHE = True
 
