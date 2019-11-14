@@ -26,6 +26,7 @@ class NnMixer:
         self.optimizer_class = None
         self.optimizer_args = None
         self.criterion = None
+        self.sampler = None
 
         self.batch_size = 200
         self.epochs = 120000
@@ -96,7 +97,12 @@ class NnMixer:
         ds.encoders = self.encoders
         ds.transformer = self.transformer
 
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
+        if self.sampler is None:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self.sampler, num_workers=0)
+        else:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
         running_loss = 0.0
         error = 0
 
@@ -159,7 +165,6 @@ class NnMixer:
         :return:
         """
         self.fit_data_source(ds)
-        sampler = None
         if self.is_categorical_output:
             if ds.output_weights is not None and ds.output_weights is not False and CONFIG.OVERSAMPLE:
                 weights = []
@@ -167,12 +172,12 @@ class NnMixer:
                     _, out = row
                     weights.append(ds.output_weights[torch.argmax(out).item()])
 
-                sampler = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
+                self.sampler = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
-        if sampler is None:
+        if self.sampler is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0, sampler=sampler)
+            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0, sampler=self.sampler)
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net = self.net.train()
