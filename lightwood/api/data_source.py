@@ -122,7 +122,7 @@ class DataSource(Dataset):
                         value_index = np.argmax(encoded_val[0])
 
                         if new_weights is None:
-                            new_weights = [0.2] * len(encoded_val[0])
+                            new_weights = [np.mean(list(weights.values()))] * len(encoded_val[0])
 
                         new_weights[value_index] = weights[val]
 
