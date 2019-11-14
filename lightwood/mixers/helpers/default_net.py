@@ -83,8 +83,12 @@ class DefaultNet(torch.nn.Module):
 
         self.net = torch.nn.Sequential(*layers)
 
+        self.awareness_net = linear_function(self.input_size + self.output_size, 1)
+
         if CONFIG.DETERMINISTIC: # set initial weights based on a specific distribution if we have deterministic enabled
-            for layer in self.net:
+
+            # lambda function so that we can do this for either awareness layer or the internal layers of net
+            def reset_layer_params(layer):
                 if isinstance(layer, torch.nn.Linear):
                     torch.nn.init.normal_(layer.weight, mean=0., std=1 / math.sqrt(layer.out_features))
                     torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
@@ -93,15 +97,32 @@ class DefaultNet(torch.nn.Module):
                     torch.nn.init.normal_(layer.mean, mean=0., std=1 / math.sqrt(layer.out_features))
                     torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
 
+            reset_layer_params(self.awareness_net)
+
+            for layer in self.net:
+                reset_layer_params(layer)
+
         self.net = self.net.to(self.device)
+        self.awareness_net = self.awareness_net.to(self.device)
 
-
-    def forward(self, input):
+    def forward(self, input, return_awareness = False):
         """
         In this particular model, we just need to forward the network defined in setup, with our input
+
         :param input: a pytorch tensor with the input data of a batch
-        :return:
+        :param return_awareness: This tells if we should return the awareness output
+
+        :return: either just output or (output, awareness)
         """
 
+
         output = self.net(input)
+
+        interim = torch.cat(input, output)
+        awareness = self.awareness_net(interim)
+
+        if return_awareness:
+            return output, awareness
+
+        # else return only the awareness
         return output
