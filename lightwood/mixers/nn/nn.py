@@ -215,22 +215,26 @@ class NnMixer:
                 else:
                     loss = self.criterion(outputs, labels)
 
-                loss.backward()
+                #loss.backward()
+                #self.optimizer.step()
 
                 #######################
                 ### time to optimize AWARENESS
                 #######################
 
                 # zero the parameter gradients
+                #self.optimizer.zero_grad()
                 # forward + backward + optimize
 
 
-                my_loss = torch.abs(labels - outputs)/torch.abs(labels) # error precentual to the target
-                my_loss = torch.Tensor(my_loss.tolist()) # disconnect from the graph (test if this is necessary)
-                my_loss = my_loss.to(self.net.device)
+                my_loss = torch.abs(labels - outputs) # error precentual to the target
+                #my_loss = torch.Tensor(my_loss.tolist()) # disconnect from the graph (test if this is necessary)
+                #my_loss = my_loss.to(self.net.device)
 
                 awareness_loss = self.awareness_criterion(awareness, my_loss)
-                awareness_loss.backward()
+
+                total_loss = awareness_loss + loss
+                total_loss.backward()
 
                 # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
                 self.optimizer.step()
