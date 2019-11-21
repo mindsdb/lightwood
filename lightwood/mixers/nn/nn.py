@@ -210,8 +210,13 @@ class NnMixer:
                     targets_c = torch.LongTensor(target_indexes)
                     labels = targets_c.to(self.net.device)
 
+                from lightwood.mixers.helpers.debugging import print_gpuutil_status
+
                 loss = self.criterion(outputs, labels)
+                print_gpuutil_status()
                 loss.backward()
+                print_gpuutil_status()
+                print('------------------------------\n\n')
 
                 self.optimizer.step()
                 # Maybe make this a scheduler later

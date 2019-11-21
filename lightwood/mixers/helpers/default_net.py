@@ -2,6 +2,7 @@ import logging
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.plinear import PLinear
+from lightwood.mixers.helpers.debugging import get_gpu_memory_map
 import torch
 
 
@@ -60,7 +61,10 @@ class DefaultNet(torch.nn.Module):
 
         if (not large_input) and (not large_output):
             shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
-
+            print(depth)
+            print(shape)
+            print(' HERE !')
+            exit()
         elif (not large_output) and large_input:
             shape = funnel(self.input_size,self.output_size,depth)
 
@@ -69,6 +73,11 @@ class DefaultNet(torch.nn.Module):
         else:
             shape = rectangle(self.input_size,self.output_size,depth - 2)
 
+        mem_usage = 0
+        for i in range(1,len(shape)):
+            mem_usage += shape[i]
+            mem_usage += shape[i] * shape[i-1]
+        mem_usage = mem_usage*32/pow(10,6)
 
         logging.info(f'Building network of shape: {shape}')
         rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
@@ -93,8 +102,13 @@ class DefaultNet(torch.nn.Module):
                     torch.nn.init.normal_(layer.mean, mean=0., std=1 / math.sqrt(layer.out_features))
                     torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
 
+        print(mem_usage)
+        print(shape)
+        print(get_gpu_memory_map())
         self.net = self.net.to(self.device)
+        print(get_gpu_memory_map())
 
+        exit()
 
     def forward(self, input):
         """
