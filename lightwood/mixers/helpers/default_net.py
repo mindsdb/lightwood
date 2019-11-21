@@ -2,9 +2,8 @@ import logging
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.plinear import PLinear
-from lightwood.mixers.helpers.debugging import get_gpu_memory_map
 import torch
-
+import numpy as np
 
 
 class DefaultNet(torch.nn.Module):
@@ -35,49 +34,19 @@ class DefaultNet(torch.nn.Module):
         super(DefaultNet, self).__init__()
         input_sample, output_sample = ds[0]
 
-        self.input_size = len(input_sample)
-        self.output_size = len(output_sample)
-
-        # Select architecture
-
-        # 1. Determine, based on the machines specification, if the input/output size are "large"
-        if CONFIG.USE_CUDA or CONFIG.USE_DEVICE is not None:
-            large_input = True if self.input_size > 4000 else False
-            large_output = True if self.output_size > 400 else False
-        else:
-            large_input = True if self.input_size > 1000 else False
-            large_output = True if self.output_size > 100 else False
-
-        # 2. Determine in/out proportions
-        # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case (outside of very specific things, such as text to image)
-        larger_output = True if self.output_size > self.input_size*2 else False
-        larger_input = True if self.input_size > self.output_size*2 else False
-        even_input_output = larger_input and large_output
-
         if 'network_depth' in self.dynamic_parameters:
             depth = self.dynamic_parameters['network_depth']
         else:
             depth = 5
 
-        if (not large_input) and (not large_output):
-            shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
-            print(depth)
-            print(shape)
-            print(' HERE !')
-            exit()
-        elif (not large_output) and large_input:
-            shape = funnel(self.input_size,self.output_size,depth)
-
-        elif (not large_input) and large_output:
-            shape = rectangle(self.input_size,self.output_size,depth - 1)
-        else:
-            shape = rectangle(self.input_size,self.output_size,depth - 2)
-
-        mem_usage = 0
-        for i in range(1,len(shape)):
-            mem_usage += shape[i]
-            mem_usage += shape[i] * shape[i-1]
-        mem_usage = mem_usage*32/pow(10,6)
+        if 'shape' in self.dynamic_parameters:
+            shape_name = self.dynamic_parameters['shape']
+            if shape_name == 'rombus':
+                shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
+            elif shape_name == 'funnel':
+                shape = funnel(self.input_size,self.output_size,depth)
+            elif shape_name == 'rectangle':
+                shape = rectangle(self.input_size,self.output_size,depth)
 
         logging.info(f'Building network of shape: {shape}')
         rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
@@ -102,13 +71,7 @@ class DefaultNet(torch.nn.Module):
                     torch.nn.init.normal_(layer.mean, mean=0., std=1 / math.sqrt(layer.out_features))
                     torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
 
-        print(mem_usage)
-        print(shape)
-        print(get_gpu_memory_map())
         self.net = self.net.to(self.device)
-        print(get_gpu_memory_map())
-
-        exit()
 
     def forward(self, input):
         """

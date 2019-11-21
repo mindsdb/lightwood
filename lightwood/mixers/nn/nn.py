@@ -5,10 +5,12 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
+import gc
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.mixers.helpers.size_estimation import estimate_size
 
 class NnMixer:
 
@@ -159,19 +161,6 @@ class NnMixer:
         self.fit_data_source(ds)
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
-        self.net = self.nn_class(ds, self.dynamic_parameters)
-        self.net = self.net.train()
-
-        if self.criterion is None:
-            if self.is_categorical_output:
-                if ds.output_weights is not None and ds.output_weights is not False:
-                    output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
-                else:
-                    output_weights = None
-                self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
-            else:
-                self.criterion = torch.nn.MSELoss()
-
         self.optimizer_class = Ranger
         if self.optimizer_args is None:
             self.optimizer_args = {}
@@ -183,7 +172,66 @@ class NnMixer:
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
+        input_sample, output_sample = ds[0]
+        input_size = len(input_size)
+        output_size = len(output_sample)
+        del input_sample
+        del output_sample
+
+        if 'network_depth' not in self.dynamic_parameters:
+            self.dynamic_parameters['network_depth'] = 3
+        if 'shape' not in self.dynamic_parameters:
+            self.dynamic_parameters['shape'] = 'funnel'
+
+        self.net = self.nn_class(ds, self.dynamic_parameters)
+        self.net = self.net.train()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+        # Determine what the largest network we can comfortably fit in memory is
+        for i in range(0,7):
+            try:
+                net = self.nn_class(ds, self.dynamic_parameters)
+                net = net.train()
+                optimizer = self.optimizer_class(net.parameters(), **self.optimizer_args)
+
+                input_sample, _ = ds[0]
+                input_sample = input_sample.to(net.device)
+
+                network_max_memory, percentage_left = estimate_size(net, input_sample, net.device)
+            # If we go OOM catch the exception and go with the previously obtained model
+            except:
+                # In order to properly recover from OOM errors
+                gc.collect()
+                if 'cuda' in str(self.net.device):
+                    torch.cuda.empty_cache()
+                break
+
+            if percentage_left < 0.5:
+                break
+            elif self.dynamic_parameters['shape'] == 'funnel':
+                self.dynamic_parameters['shape'] = 'rectangle'
+            elif self.dynamic_parameters['shape'] == 'rectangle':
+                self.dynamic_parameters['shape'] = 'rombus'
+            else:
+                self.dynamic_parameters['network_depth'] = self.dynamic_parameters['network_depth'] + 1
+
+            self.net = net
+            self.optimizer = optimizer
+
+        print(self.net.modules())
+        exit()
+
+        if self.criterion is None:
+            if self.is_categorical_output:
+                if ds.output_weights is not None and ds.output_weights is not False:
+                    output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
+                else:
+                    output_weights = None
+                self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
+            else:
+                self.criterion = torch.nn.MSELoss()
+
+
         total_epochs = self.epochs
 
         total_iterations = 0
@@ -213,10 +261,7 @@ class NnMixer:
                 from lightwood.mixers.helpers.debugging import print_gpuutil_status
 
                 loss = self.criterion(outputs, labels)
-                print_gpuutil_status()
                 loss.backward()
-                print_gpuutil_status()
-                print('------------------------------\n\n')
 
                 self.optimizer.step()
                 # Maybe make this a scheduler later
