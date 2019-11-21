@@ -32,6 +32,7 @@ class NnMixer:
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
+        self.size_parameters = {}
 
     def fit(self, ds=None, callback=None):
 
@@ -178,46 +179,46 @@ class NnMixer:
         del input_sample
         del output_sample
 
-        if 'network_depth' not in self.dynamic_parameters:
-            self.dynamic_parameters['network_depth'] = 3
-        if 'shape' not in self.dynamic_parameters:
-            self.dynamic_parameters['shape'] = 'funnel'
-
-        self.net = self.nn_class(ds, self.dynamic_parameters)
+        self.net = self.nn_class(ds, self.dynamic_parameters, self.size_parameters)
         self.net = self.net.train()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-        # Determine what the largest network we can comfortably fit in memory is
-        for i in range(0,7):
-            try:
-                net = self.nn_class(ds, self.dynamic_parameters)
-                net = net.train()
-                optimizer = self.optimizer_class(net.parameters(), **self.optimizer_args)
+        if 'shape' not in self.size_parameters:
+            self.size_parameters['shape'] = 'funnel'
+            if 'network_depth' not in self.size_parameters:
+                self.size_parameters['network_depth'] = 3
 
-                input_sample, _ = ds[0]
-                input_sample = input_sample.to(net.device)
+            # Determine what the largest network we can comfortably fit in memory is
+            for i in range(0,7):
+                try:
+                    net = self.nn_class(ds, self.size_parameters)
+                    net = net.train()
+                    optimizer = self.optimizer_class(net.parameters(), **self.optimizer_args)
 
-                network_max_memory, percentage_left = estimate_size(net, input_sample, net.device)
-            # If we go OOM catch the exception and go with the previously obtained model
-            except:
-                # In order to properly recover from OOM errors
-                gc.collect()
-                if 'cuda' in str(self.net.device):
-                    torch.cuda.empty_cache()
-                break
+                    input_sample, _ = ds[0]
+                    input_sample = input_sample.to(net.device)
 
-            # Don't occupy too much space, since training will allocate more memory and we want to leave some room for error
-            if percentage_left < 0.6:
-                break
-            elif self.dynamic_parameters['shape'] == 'funnel':
-                self.dynamic_parameters['shape'] = 'rectangle'
-            elif self.dynamic_parameters['shape'] == 'rectangle':
-                self.dynamic_parameters['shape'] = 'rombus'
-            else:
-                self.dynamic_parameters['network_depth'] = self.dynamic_parameters['network_depth'] + 1
+                    network_max_memory, percentage_left = estimate_size(net, input_sample, net.device)
+                # If we go OOM catch the exception and go with the previously obtained model
+                except:
+                    # In order to properly recover from OOM errors
+                    gc.collect()
+                    if 'cuda' in str(self.net.device):
+                        torch.cuda.empty_cache()
+                    break
 
-            self.net = net
-            self.optimizer = optimizer
+                # Don't occupy too much space, since training will allocate more memory and we want to leave some room for error
+                if percentage_left < 0.6:
+                    break
+                elif self.size_parameters['shape'] == 'funnel':
+                    self.size_parameters['shape'] = 'rectangle'
+                elif self.size_parameters['shape'] == 'rectangle':
+                    self.size_parameters['shape'] = 'rombus'
+                else:
+                    self.size_parameters['network_depth'] = self.size_parameters['network_depth'] + 1
+
+                self.net = net
+                self.optimizer = optimizer
 
         if self.criterion is None:
             if self.is_categorical_output:
@@ -255,8 +256,6 @@ class NnMixer:
                     target_indexes = np.where(target>0)[1]
                     targets_c = torch.LongTensor(target_indexes)
                     labels = targets_c.to(self.net.device)
-
-                from lightwood.mixers.helpers.debugging import print_gpuutil_status
 
                 loss = self.criterion(outputs, labels)
                 loss.backward()

@@ -8,7 +8,7 @@ import numpy as np
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters):
+    def __init__(self, ds, dynamic_parameters, size_parameters={}):
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
@@ -27,6 +27,7 @@ class DefaultNet(torch.nn.Module):
         self.device = torch.device(device_str)
 
         self.dynamic_parameters = dynamic_parameters
+        self.size_parameters = size_parameters
         """
         Here we define the basic building blocks of our model, in forward we define how we put it all together along wiht an input
         :param sample_batch: this is used to understand the characteristics of the input and target, it is an object of type utils.libs.data_types.batch.Batch
@@ -39,20 +40,24 @@ class DefaultNet(torch.nn.Module):
         del input_sample
         del output_sample
 
-        if 'network_depth' in self.dynamic_parameters:
-            depth = self.dynamic_parameters['network_depth']
+        if 'network_depth' in self.size_parameters:
+            depth = self.size_parameters['network_depth']
         else:
             depth = 5
 
-        if 'shape' in self.dynamic_parameters:
-            shape_name = self.dynamic_parameters['shape']
+        if 'shape' in self.size_parameters:
+            shape_name = self.size_parameters['shape']
             if shape_name == 'rombus':
                 shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
             elif shape_name == 'funnel':
                 shape = funnel(self.input_size,self.output_size,depth)
             elif shape_name == 'rectangle':
                 shape = rectangle(self.input_size,self.output_size,depth)
-                
+            else:
+                raise Exception(f'Invalid shape: "{shape}" !')
+        else:
+            shape = funnel(self.input_size,self.output_size,depth)
+
         logging.info(f'Building network of shape: {shape}')
         rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
 
