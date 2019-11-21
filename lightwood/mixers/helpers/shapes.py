@@ -9,6 +9,7 @@ def funnel(in_size, out_size, depth):
 
     step = abs(in_size-out_size)/(depth-1)
 
+    layers = []
     for k in range(0,depth-1):
             layers.append(round(max(in_size,out_size) - k * step))
     layers.append(min(in_size,out_size))
@@ -36,17 +37,11 @@ def rombus(in_size,out_size,depth,max_size=None):
     funnel_size = math.ceil(depth/2)
 
     first_funnel = funnel(in_size, max_size,funnel_size)
-    print(first_funnel)
     if depth % 2 == 1:
         first_funnel = first_funnel[:-1]
 
     second_funnel = funnel(max_size,out_size,funnel_size)
 
-    print(first_funnel)
-    print(second_funnel)
     layers = [*first_funnel,*second_funnel]
 
-    print(layers)
-    print(depth)
-    exit()
     return layers
