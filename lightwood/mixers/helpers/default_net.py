@@ -34,6 +34,11 @@ class DefaultNet(torch.nn.Module):
         super(DefaultNet, self).__init__()
         input_sample, output_sample = ds[0]
 
+        self.input_size = len(input_sample)
+        self.output_size = len(output_sample)
+        del input_sample
+        del output_sample
+
         if 'network_depth' in self.dynamic_parameters:
             depth = self.dynamic_parameters['network_depth']
         else:
