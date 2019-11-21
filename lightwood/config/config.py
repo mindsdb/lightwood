@@ -8,7 +8,7 @@ class CONFIG:
 
     USE_DEVICE = None
 
-    DETERMINISTIC = False
+    DETERMINISTIC = True
 
     USE_PROBABILISTIC_LINEAR = False # change weights in mixer to be probabilistic
 
