@@ -173,7 +173,7 @@ class NnMixer:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
         input_sample, output_sample = ds[0]
-        input_size = len(input_size)
+        input_size = len(input_sample)
         output_size = len(output_sample)
         del input_sample
         del output_sample
