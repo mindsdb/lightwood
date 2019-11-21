@@ -52,7 +52,7 @@ class DefaultNet(torch.nn.Module):
                 shape = funnel(self.input_size,self.output_size,depth)
             elif shape_name == 'rectangle':
                 shape = rectangle(self.input_size,self.output_size,depth)
-
+                
         logging.info(f'Building network of shape: {shape}')
         rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
 

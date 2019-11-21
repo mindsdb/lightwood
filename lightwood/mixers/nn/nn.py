@@ -206,7 +206,8 @@ class NnMixer:
                     torch.cuda.empty_cache()
                 break
 
-            if percentage_left < 0.5:
+            # Don't occupy too much space, since training will allocate more memory and we want to leave some room for error
+            if percentage_left < 0.6:
                 break
             elif self.dynamic_parameters['shape'] == 'funnel':
                 self.dynamic_parameters['shape'] = 'rectangle'
@@ -217,9 +218,6 @@ class NnMixer:
 
             self.net = net
             self.optimizer = optimizer
-
-        print(self.net.modules())
-        exit()
 
         if self.criterion is None:
             if self.is_categorical_output:
