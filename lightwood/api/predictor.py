@@ -384,6 +384,9 @@ class Predictor:
         """
         f = open(path_to, 'wb')
 
+        # Null out certain object we *don't* want to store
+        self._mixer.sampler = None
+
         # Dump everything relevant to cpu before saving
         self.convert_to_device("cpu")
         dill.dump(self.__dict__, f)
