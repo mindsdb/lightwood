@@ -189,7 +189,7 @@ class NnMixer:
                 self.size_parameters['network_depth'] = 3
 
             # Determine what the largest network we can comfortably fit in memory is
-            for i in range(0,7):
+            for i in range(0,6):
                 try:
                     net = self.nn_class(ds, self.size_parameters)
                     net = net.train()
@@ -212,7 +212,7 @@ class NnMixer:
                     break
                 elif self.size_parameters['shape'] == 'funnel':
                     self.size_parameters['shape'] = 'rectangle'
-                elif self.size_parameters['shape'] == 'rectangle':
+                elif self.size_parameters['shape'] == 'rectangle' and output_size < input_size:
                     self.size_parameters['shape'] = 'rombus'
                 else:
                     self.size_parameters['network_depth'] = self.size_parameters['network_depth'] + 1
