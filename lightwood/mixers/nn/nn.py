@@ -20,7 +20,6 @@ class NnMixer:
         self.optimizer = None
         self.input_column_names = None
         self.output_column_names = None
-        self.data_loader = None
         self.transformer = None
         self.encoders = None
         self.optimizer_class = None
