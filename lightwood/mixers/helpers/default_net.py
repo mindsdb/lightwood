@@ -8,7 +8,7 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters):
+    def __init__(self, ds=None, dynamic_parameters, shape=None):
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
@@ -32,42 +32,44 @@ class DefaultNet(torch.nn.Module):
         :param sample_batch: this is used to understand the characteristics of the input and target, it is an object of type utils.libs.data_types.batch.Batch
         """
         super(DefaultNet, self).__init__()
-        input_sample, output_sample = ds[0]
 
-        self.input_size = len(input_sample)
-        self.output_size = len(output_sample)
+        if shape is None:
+            input_sample, output_sample = ds[0]
 
-        # Select architecture
+            self.input_size = len(input_sample)
+            self.output_size = len(output_sample)
 
-        # 1. Determine, based on the machines specification, if the input/output size are "large"
-        if CONFIG.USE_CUDA or CONFIG.USE_DEVICE is not None:
-            large_input = True if self.input_size > 4000 else False
-            large_output = True if self.output_size > 400 else False
-        else:
-            large_input = True if self.input_size > 1000 else False
-            large_output = True if self.output_size > 100 else False
+            # Select architecture
 
-        # 2. Determine in/out proportions
-        # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case (outside of very specific things, such as text to image)
-        larger_output = True if self.output_size > self.input_size*2 else False
-        larger_input = True if self.input_size > self.output_size*2 else False
-        even_input_output = larger_input and large_output
+            # 1. Determine, based on the machines specification, if the input/output size are "large"
+            if CONFIG.USE_CUDA or CONFIG.USE_DEVICE is not None:
+                large_input = True if self.input_size > 4000 else False
+                large_output = True if self.output_size > 400 else False
+            else:
+                large_input = True if self.input_size > 1000 else False
+                large_output = True if self.output_size > 100 else False
 
-        if 'network_depth' in self.dynamic_parameters:
-            depth = self.dynamic_parameters['network_depth']
-        else:
-            depth = 5
+            # 2. Determine in/out proportions
+            # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case (outside of very specific things, such as text to image)
+            larger_output = True if self.output_size > self.input_size*2 else False
+            larger_input = True if self.input_size > self.output_size*2 else False
+            even_input_output = larger_input and large_output
 
-        if (not large_input) and (not large_output):
-            shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
+            if 'network_depth' in self.dynamic_parameters:
+                depth = self.dynamic_parameters['network_depth']
+            else:
+                depth = 5
 
-        elif (not large_output) and large_input:
-            shape = funnel(self.input_size,self.output_size,depth)
+            if (not large_input) and (not large_output):
+                shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
 
-        elif (not large_input) and large_output:
-            shape = rectangle(self.input_size,self.output_size,depth - 1)
-        else:
-            shape = rectangle(self.input_size,self.output_size,depth - 2)
+            elif (not large_output) and large_input:
+                shape = funnel(self.input_size,self.output_size,depth)
+
+            elif (not large_input) and large_output:
+                shape = rectangle(self.input_size,self.output_size,depth - 1)
+            else:
+                shape = rectangle(self.input_size,self.output_size,depth - 2)
 
 
         logging.info(f'Building network of shape: {shape}')
