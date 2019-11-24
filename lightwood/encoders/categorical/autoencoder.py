@@ -1,61 +1,81 @@
 import torch
 import numpy as np
+
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.encoders.categorical.categorical import CategoricalEncoder
+
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
+MAX_LENGTH = 100
 
 class AutoEncoder:
 
     def __init__(self, is_target = False):
-        self._lang = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
+        self.net = None
+        self.oh_encoder = CategoricalEncoder()
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
-        self._lang = Lang('default')
-        self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
-        self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
-        self._lang.word2count[UNCOMMON_WORD] = 0
-        self._lang.n_words = 1
+        self.oh_encoder.prepare_encoder(priming_data)
+
+        input_len = self.oh_encoder._lang.n_words
+        embeddings_layer_len = min(input_len/2,MAX_LENGTH)
+
+        self.net = DefaultNet(dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len])
+
         for category in priming_data:
-            if category != None:
-                self._lang.addWord(str(category))
+            encoded_category = self.oh_encoder(category)
+
+        ds = torch.utils.data.TensorDataset(priming_data)
+        data_loader = torch.utils.data.DataLoader(ds, batch_size=200, shuffle=True)
+
+        criterion = torch.nn.MSELoss()
+        optimizer = Ranger(self.net.parameters())
+
+        for epcohs in range(100):
+            running_loss = 0
+            error = 0
+            for i, data in enumerate(data_loader, 0):
+                oh_encoded_categories = data
+                oh_encoded_categories = oh_encoded_categories.to(self.net.device)
+                self.net(oh_encoded_categories)
+
+                self.optimizer.zero_grad()
+
+                outputs = self.net(inputs)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
+                running_loss += loss.item()
+                error = running_loss / (i + 1)
+                print(error)
+
+            if error < 0.02:
+                break
 
         self._prepared = True
 
     def encode(self, column_data):
-        if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
-        ret = []
-        v_len = self._lang.n_words
+        oh_encoded_tensor = self.oh_encoder.encode(column_data)
+        oh_encoded_tensor = oh_encoded_tensor.to(self.nn.device)
+        embeddings = self.nn.modules()[0:3](oh_encoded_tensor)
 
-        for word in column_data:
-            encoded_word = [0]*v_len
-            if word != None:
-                word = str(word)
-                index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
-                encoded_word[index] = 1
-
-            ret.append(encoded_word)
-
-        return self._pytorch_wrapper(ret)
+        return embeddings
 
 
     def decode(self, encoded_data):
-        encoded_data_list = encoded_data.tolist()
-        ret = []
+        oh_encoded_tensor = nn.modules()[1:4](encoded_data)
+        oh_encoded_tensor = oh_encoded_tensor.to('cpu')
+        decoded_categories = self.oh_encoder.decode(oh_encoded_tensor)
 
-        for vector in encoded_data_list:
-            ohe_index = np.argmax(vector)
-
-            ret.append(self._lang.index2word[ohe_index])
-        return ret
+        return decoded_categories
 
 
 if __name__ == "__main__":
