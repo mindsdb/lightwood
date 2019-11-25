@@ -35,12 +35,12 @@ class CategoricalAutoEncoder:
 
         encoded_priming_data = self.oh_encoder.encode(priming_data)
 
-        data_loader = torch.utils.data.DataLoader(encoded_priming_data, batch_size=200, shuffle=True)
+        data_loader = torch.utils.data.DataLoader(encoded_priming_data, batch_size=100, shuffle=True)
 
-        criterion = torch.nn.MSELoss()
+        criterion = torch.nn.CrossEntropyLoss()
         optimizer = Ranger(self.net.parameters())
 
-        for epcohs in range(20):
+        for epcohs in range(5000):
             running_loss = 0
             error = 0
             for i, data in enumerate(data_loader, 0):
@@ -52,13 +52,19 @@ class CategoricalAutoEncoder:
                 optimizer.zero_grad()
 
                 outputs = self.net(oh_encoded_categories)
-                loss = criterion(outputs, oh_encoded_categories)
+
+                target = oh_encoded_categories.cpu().numpy()
+                target_indexes = np.where(target>0)[1]
+                targets_c = torch.LongTensor(target_indexes)
+                labels = targets_c.to(self.net.device)
+
+                loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
-                print(error)
 
+            print(error)
             if error < 0.005:
                 break
 
@@ -90,12 +96,12 @@ if __name__ == "__main__":
     from sklearn.metrics import accuracy_score
 
     random.seed(2)
-    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) for x in range(1000)]
+    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) for x in range(10)]
 
     priming_data = []
     test_data = []
     for category in cateogries:
-        times = random.randint(1,600)
+        times = random.randint(1,10)
         for i in range(times):
             priming_data.append(category)
             if i % 3 == 0 or i == 1:
@@ -108,6 +114,9 @@ if __name__ == "__main__":
 
     enc.prepare_encoder(priming_data)
     encoded_data = enc.encode(test_data)
-    decoded_data = enc.decode(test_data)
+    decoded_data = enc.decode(encoded_data)
+
+    print(test_data)
+    print(decoded_data)
 
     print(accuracy_score(list(test_data), decoded_data))
