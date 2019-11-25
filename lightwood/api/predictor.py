@@ -385,7 +385,8 @@ class Predictor:
         f = open(path_to, 'wb')
 
         # Null out certain object we don't want to store
-        self._mixer.sampler = None
+        if hasattr(self._mixer, '_nonpersistent'):
+            self._mixer._nonpersistent = {}
 
         # Dump everything relevant to cpu before saving
         self.convert_to_device("cpu")
