@@ -40,7 +40,7 @@ class CategoricalAutoEncoder:
         criterion = torch.nn.MSELoss()
         optimizer = Ranger(self.net.parameters())
 
-        for epcohs in range(10000):
+        for epcohs in range(20):
             running_loss = 0
             error = 0
             for i, data in enumerate(data_loader, 0):
@@ -59,10 +59,10 @@ class CategoricalAutoEncoder:
                 error = running_loss / (i + 1)
                 print(error)
 
-            if error < 0.01:
+            if error < 0.005:
                 break
 
-        modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential]
+        modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential and type(module) != DefaultNet]
         self.encoder = torch.nn.Sequential(*modules[0:2])
         self.decoder = torch.nn.Sequential(*modules[2:3])
 
@@ -80,27 +80,35 @@ class CategoricalAutoEncoder:
         oh_encoded_tensor = self.decoder(encoded_data)
         oh_encoded_tensor = oh_encoded_tensor.to('cpu')
         decoded_categories = self.oh_encoder.decode(oh_encoded_tensor)
-
         return decoded_categories
 
 
 if __name__ == "__main__":
+    # Generate some tests data
+    import random
+    import string
+    import pandas as pd
+    from sklearn.metrics import accuracy_score
 
-    data = ['category 1', 'category 3', 'category 4', None]
+    random.seed(2)
+    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) for x in range(1000)]
+
+    priming_data = []
+    test_data = []
+    for category in cateogries:
+        times = random.randint(1,600)
+        for i in range(times):
+            priming_data.appned(category)
+            if i % 3 == 0 or i == 1:
+                test_data.append(category)
+
+    priming_data = pd.Series(priming_data).sample(1, random_state=2)
+    test_data = pd.Series(test_data).sample(1, random_state=2)
 
     enc = CategoricalAutoEncoder()
 
-    enc.prepare_encoder(data)
-    encoded_data = enc.encode(['category 2', 'category 1', 'category 3', None])
-    decoded_data = enc.decode(encoded_data)
+    enc.prepare_encoder(priming_data)
+    encoded_data = enc.encode(test_data)
+    decoded_data = enc.decode(test_data)
 
-    print(f'Original: {data}')
-    print(f'Encoded: {encoded_data}')
-    print(f'Decoded: {decoded_data}')
-
-    assert(len(decoded_data) == 4)
-    for i in range(len(decoded_data)):
-        assert(decoded_data[i] == encoded_data[i])
-
-    print(f'Encoded values: \n{encoded_data}')
-    print(f'Decoded values: \n{decoded_data}')
+    print(accuracy_score(list(test_data), decoded_data))
