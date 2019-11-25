@@ -21,7 +21,7 @@ class CategoricalAutoEncoder:
         self.encoder = None
         self.decoder = None
         self.oh_encoder = CategoricalEncoder()
-        self.maximum_error = 0.05
+        self.desired_error = 0.01
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -36,12 +36,13 @@ class CategoricalAutoEncoder:
 
         encoded_priming_data = self.oh_encoder.encode(priming_data)
 
-        data_loader = torch.utils.data.DataLoader(encoded_priming_data, batch_size=100, shuffle=True)
+        data_loader = torch.utils.data.DataLoader(encoded_priming_data, batch_size=256, shuffle=True)
 
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = Ranger(self.net.parameters())
 
-        for epcohs in range(50000):
+        error_buffer = []
+        for epcohs in range(5000):
             running_loss = 0
             error = 0
             for i, data in enumerate(data_loader, 0):
@@ -64,15 +65,19 @@ class CategoricalAutoEncoder:
                 optimizer.step()
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
-
-            print(error)
-            if error < self.maximum_error:
-                break
+                error_buffer.append(error)
+                
+            if len(error_buffer) > 5:
+                print(error)
+                error_buffer.append(error)
+                error_buffer = error_buffer[-5:]
+                delta_mean = np.mean(error_buffer)
+                if delta_mean < 0 or error < self.desired_error:
+                    break
 
         modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential and type(module) != DefaultNet]
         self.encoder = torch.nn.Sequential(*modules[0:2])
         self.decoder = torch.nn.Sequential(*modules[2:3])
-
         self._prepared = True
 
     def encode(self, column_data):
@@ -97,12 +102,12 @@ if __name__ == "__main__":
     from sklearn.metrics import accuracy_score
 
     random.seed(2)
-    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) for x in range(10)]
+    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) for x in range(2000)]
 
     priming_data = []
     test_data = []
     for category in cateogries:
-        times = random.randint(1,10)
+        times = random.randint(1,50)
         for i in range(times):
             priming_data.append(category)
             if i % 3 == 0 or i == 1:
@@ -117,7 +122,6 @@ if __name__ == "__main__":
     encoded_data = enc.encode(test_data)
     decoded_data = enc.decode(encoded_data)
 
-    print(test_data)
-    print(decoded_data)
-
-    print(accuracy_score(list(test_data), decoded_data))
+    encoder_accuracy = accuracy_score(list(test_data), decoded_data)
+    print(f'Categorial encoder accuracy for: {encoder_accuracy} on testing dataset')
+    assert(encoder_accuracy > 0.98)
