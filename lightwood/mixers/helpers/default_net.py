@@ -8,7 +8,7 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds=None, dynamic_parameters, shape=None):
+    def __init__(self, ds, dynamic_parameters, shape=None):
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
