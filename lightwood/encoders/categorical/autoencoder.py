@@ -21,6 +21,7 @@ class CategoricalAutoEncoder:
         self.encoder = None
         self.decoder = None
         self.oh_encoder = CategoricalEncoder()
+        self.maximum_error = 0.05
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -40,7 +41,7 @@ class CategoricalAutoEncoder:
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = Ranger(self.net.parameters())
 
-        for epcohs in range(5000):
+        for epcohs in range(50000):
             running_loss = 0
             error = 0
             for i, data in enumerate(data_loader, 0):
@@ -65,7 +66,7 @@ class CategoricalAutoEncoder:
                 error = running_loss / (i + 1)
 
             print(error)
-            if error < 0.005:
+            if error < self.maximum_error:
                 break
 
         modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential and type(module) != DefaultNet]
