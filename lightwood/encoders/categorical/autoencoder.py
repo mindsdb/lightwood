@@ -98,7 +98,7 @@ if __name__ == "__main__":
     for category in cateogries:
         times = random.randint(1,600)
         for i in range(times):
-            priming_data.appned(category)
+            priming_data.append(category)
             if i % 3 == 0 or i == 1:
                 test_data.append(category)
 
