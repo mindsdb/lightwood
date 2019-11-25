@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     enc = CategoricalEncoder()
 
-    enc.fit(data)
+    enc.prepare_encoder(data)
     encoded_data = enc.encode(data)
     decoded_data = enc.decode(enc.encode(['category 2', 'category 1', 'category 3', None]))
 
