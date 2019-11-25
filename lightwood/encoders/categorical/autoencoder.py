@@ -8,8 +8,6 @@ from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.encoders.categorical.categorical import CategoricalEncoder
 
 
-UNCOMMON_WORD = '<UNCOMMON>'
-UNCOMMON_TOKEN = 0
 MAX_LENGTH = 100
 
 class CategoricalAutoEncoder:
@@ -22,6 +20,8 @@ class CategoricalAutoEncoder:
         self.decoder = None
         self.oh_encoder = CategoricalEncoder()
         self.desired_error = 0.01
+        self.use_autoencoder = None
+        self.max_encoded_length = 100
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -30,69 +30,76 @@ class CategoricalAutoEncoder:
         self.oh_encoder.prepare_encoder(priming_data)
 
         input_len = self.oh_encoder._lang.n_words
-        embeddings_layer_len = min(int(math.ceil(input_len/2)),MAX_LENGTH)
+        self.use_autoencoder = input_len > max_encoded_length
+        if use_autoencoder:
+            embeddings_layer_len = self.max_encoded_length
 
-        self.net = DefaultNet(ds=None, dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len])
+            self.net = DefaultNet(ds=None, dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len])
 
-        encoded_priming_data = self.oh_encoder.encode(priming_data)
+            encoded_priming_data = self.oh_encoder.encode(priming_data)
 
-        data_loader = torch.utils.data.DataLoader(encoded_priming_data, batch_size=256, shuffle=True)
+            data_loader = torch.utils.data.DataLoader(encoded_priming_data, batch_size=256, shuffle=True)
 
-        criterion = torch.nn.CrossEntropyLoss()
-        optimizer = Ranger(self.net.parameters())
+            criterion = torch.nn.CrossEntropyLoss()
+            optimizer = Ranger(self.net.parameters())
 
-        error_buffer = []
-        for epcohs in range(5000):
-            running_loss = 0
-            error = 0
-            for i, data in enumerate(data_loader, 0):
-                oh_encoded_categories = data
-                oh_encoded_categories = torch.Tensor(oh_encoded_categories)
-                oh_encoded_categories = oh_encoded_categories.to(self.net.device)
-                self.net(oh_encoded_categories)
+            error_buffer = []
+            for epcohs in range(5000):
+                running_loss = 0
+                error = 0
+                for i, data in enumerate(data_loader, 0):
+                    oh_encoded_categories = data
+                    oh_encoded_categories = torch.Tensor(oh_encoded_categories)
+                    oh_encoded_categories = oh_encoded_categories.to(self.net.device)
+                    self.net(oh_encoded_categories)
 
-                optimizer.zero_grad()
+                    optimizer.zero_grad()
 
-                outputs = self.net(oh_encoded_categories)
+                    outputs = self.net(oh_encoded_categories)
 
-                target = oh_encoded_categories.cpu().numpy()
-                target_indexes = np.where(target>0)[1]
-                targets_c = torch.LongTensor(target_indexes)
-                labels = targets_c.to(self.net.device)
+                    target = oh_encoded_categories.cpu().numpy()
+                    target_indexes = np.where(target>0)[1]
+                    targets_c = torch.LongTensor(target_indexes)
+                    labels = targets_c.to(self.net.device)
 
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
-                running_loss += loss.item()
-                error = running_loss / (i + 1)
-                error_buffer.append(error)
-                
-            if len(error_buffer) > 5:
-                print(error)
-                error_buffer.append(error)
-                error_buffer = error_buffer[-5:]
-                delta_mean = np.mean(error_buffer)
-                if delta_mean < 0 or error < self.desired_error:
-                    break
+                    loss = criterion(outputs, labels)
+                    loss.backward()
+                    optimizer.step()
+                    running_loss += loss.item()
+                    error = running_loss / (i + 1)
+                    error_buffer.append(error)
 
-        modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential and type(module) != DefaultNet]
-        self.encoder = torch.nn.Sequential(*modules[0:2])
-        self.decoder = torch.nn.Sequential(*modules[2:3])
+                if len(error_buffer) > 5:
+                    print(error)
+                    error_buffer.append(error)
+                    error_buffer = error_buffer[-5:]
+                    delta_mean = np.mean(error_buffer)
+                    if delta_mean < 0 or error < self.desired_error:
+                        break
+
+            modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential and type(module) != DefaultNet]
+            self.encoder = torch.nn.Sequential(*modules[0:2])
+            self.decoder = torch.nn.Sequential(*modules[2:3])
         self._prepared = True
 
     def encode(self, column_data):
         oh_encoded_tensor = self.oh_encoder.encode(column_data)
-        oh_encoded_tensor = oh_encoded_tensor.to(self.net.device)
-        embeddings = self.encoder(oh_encoded_tensor)
-
-        return embeddings
+        if not self.use_autoencoder:
+            return oh_encoded_tensor
+        else:
+            oh_encoded_tensor = oh_encoded_tensor.to(self.net.device)
+            embeddings = self.encoder(oh_encoded_tensor)
+            return embeddings
 
 
     def decode(self, encoded_data):
-        oh_encoded_tensor = self.decoder(encoded_data)
-        oh_encoded_tensor = oh_encoded_tensor.to('cpu')
-        decoded_categories = self.oh_encoder.decode(oh_encoded_tensor)
-        return decoded_categories
+        if not self.use_autoencoder:
+            return self.oh_encoder.decode(encoded_data)
+        else:
+            oh_encoded_tensor = self.decoder(encoded_data)
+            oh_encoded_tensor = oh_encoded_tensor.to('cpu')
+            decoded_categories = self.oh_encoder.decode(oh_encoded_tensor)
+            return decoded_categories
 
 
 if __name__ == "__main__":
