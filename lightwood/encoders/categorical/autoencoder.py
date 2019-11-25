@@ -87,7 +87,6 @@ if __name__ == "__main__":
     # Generate some tests data
     import random
     import string
-    import pandas as pd
     from sklearn.metrics import accuracy_score
 
     random.seed(2)
@@ -102,11 +101,9 @@ if __name__ == "__main__":
             if i % 3 == 0 or i == 1:
                 test_data.append(category)
 
-    priming_data = pd.Series(priming_data).sample(1, random_state=2)
-    test_data = pd.Series(test_data).sample(1, random_state=2)
-    priming_data = list(priming_data)
-    test_data = list(test_data)
-    
+    random.shuffle(priming_data)
+    random.shuffle(test_data)
+
     enc = CategoricalAutoEncoder()
 
     enc.prepare_encoder(priming_data)
