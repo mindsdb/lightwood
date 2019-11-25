@@ -104,7 +104,9 @@ if __name__ == "__main__":
 
     priming_data = pd.Series(priming_data).sample(1, random_state=2)
     test_data = pd.Series(test_data).sample(1, random_state=2)
-
+    priming_data = list(priming_data)
+    test_data = list(test_data)
+    
     enc = CategoricalAutoEncoder()
 
     enc.prepare_encoder(priming_data)
