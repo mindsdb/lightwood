@@ -1,7 +1,7 @@
 import torch
 from lightwood.encoders.text.helpers.rnn_helpers import Lang
 import numpy as np
-
+import logging
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0

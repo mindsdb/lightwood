@@ -30,8 +30,10 @@ class CategoricalAutoEncoder:
         self.oh_encoder.prepare_encoder(priming_data)
 
         input_len = self.oh_encoder._lang.n_words
-        self.use_autoencoder = input_len > max_encoded_length
-        if use_autoencoder:
+        self.use_autoencoder = input_len > self.max_encoded_length
+        if self.use_autoencoder:
+            logging.info('Preparing a categorical autoencoder, this might take a while')
+
             embeddings_layer_len = self.max_encoded_length
 
             self.net = DefaultNet(ds=None, dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len])
@@ -70,7 +72,6 @@ class CategoricalAutoEncoder:
                     error_buffer.append(error)
 
                 if len(error_buffer) > 5:
-                    print(error)
                     error_buffer.append(error)
                     error_buffer = error_buffer[-5:]
                     delta_mean = np.mean(error_buffer)
@@ -80,6 +81,8 @@ class CategoricalAutoEncoder:
             modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential and type(module) != DefaultNet]
             self.encoder = torch.nn.Sequential(*modules[0:2])
             self.decoder = torch.nn.Sequential(*modules[2:3])
+            logging.info('Categorical autoencoder ready')
+
         self._prepared = True
 
     def encode(self, column_data):
