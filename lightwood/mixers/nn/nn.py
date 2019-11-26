@@ -9,6 +9,8 @@ import numpy as np
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.config.config import CONFIG
+
 
 class NnMixer:
 
@@ -18,7 +20,6 @@ class NnMixer:
         self.optimizer = None
         self.input_column_names = None
         self.output_column_names = None
-        self.data_loader = None
         self.transformer = None
         self.encoders = None
         self.optimizer_class = None
@@ -30,6 +31,10 @@ class NnMixer:
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
+
+        self._nonpersistent = {
+            'sampler': None
+        }
 
     def fit(self, ds=None, callback=None):
 
@@ -94,7 +99,12 @@ class NnMixer:
         ds.encoders = self.encoders
         ds.transformer = self.transformer
 
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
+        if self._nonpersistent['sampler'] is None:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
+        else:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
         running_loss = 0.0
         error = 0
 
@@ -157,14 +167,27 @@ class NnMixer:
         :return:
         """
         self.fit_data_source(ds)
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        if self.is_categorical_output:
+            # The WeightedRandomSampler samples "randomly" but can assign higher weight to certain rows, we assign each rows it's weight based on the target variable value in that row and it's associated weight in the output_weights map (otherwise used to bias the loss function)
+            if ds.output_weights is not None and ds.output_weights is not False and CONFIG.OVERSAMPLE:
+                weights = []
+                for row in ds:
+                    _, out = row
+                    weights.append(ds.output_weights[torch.argmax(out).item()])
+
+                self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
+
+        if self._nonpersistent['sampler'] is None:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        else:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0, sampler=self._nonpersistent['sampler'])
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net = self.net.train()
 
         if self.criterion is None:
             if self.is_categorical_output:
-                if ds.output_weights is not None and ds.output_weights is not False:
+                if ds.output_weights is not None and ds.output_weights is not False and not CONFIG.OVERSAMPLE:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
