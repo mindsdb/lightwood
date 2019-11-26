@@ -21,7 +21,7 @@ class DataSource(Dataset):
         self.training = False # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
-        self.disable_cache = not CONFIG.USE_CACHE
+        self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
 
 
         for col in self.configuration['input_features']:
@@ -122,7 +122,7 @@ class DataSource(Dataset):
                         value_index = np.argmax(encoded_val[0])
 
                         if new_weights is None:
-                            new_weights = [0.2] * len(encoded_val[0])
+                            new_weights = [np.mean(list(weights.values()))] * len(encoded_val[0])
 
                         new_weights[value_index] = weights[val]
 
