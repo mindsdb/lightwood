@@ -55,7 +55,7 @@ class PLinear(nn.Module):
         """
 
         init.kaiming_uniform_(self.mean, a=math.sqrt(5))  # initial means (just as in original linear)
-        init.uniform_(self.sigma, a=0.05, b=0.2)
+        init.uniform_(self.sigma, a=0.05, b=0.5)
 
         if self.bias is not None:
             fan_in, _ = init._calculate_fan_in_and_fan_out(self.mean)
