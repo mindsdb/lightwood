@@ -314,7 +314,7 @@ class Predictor:
                 '''
 
                 ## Stop if the model is overfitting
-                if delta_mean < 0 and len(error_delta_buffer) > 5:
+                if delta_mean < 0 and len(error_delta_buffer) > 9:
                     stop_training = True
 
                 # Stop if we're past the time limit alloted for training
@@ -387,6 +387,10 @@ class Predictor:
         :return:
         """
         f = open(path_to, 'wb')
+
+        # Null out certain object we don't want to store
+        if hasattr(self._mixer, '_nonpersistent'):
+            self._mixer._nonpersistent = {}
 
         # Dump everything relevant to cpu before saving
         self.convert_to_device("cpu")
