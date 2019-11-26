@@ -61,6 +61,7 @@ class Predictor:
         self._stop_training_flag = False
 
         self.train_accuracy = None
+        self.overall_certainty = None
 
     @staticmethod
     def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=None, max_epochs=None):
@@ -286,6 +287,8 @@ class Predictor:
                 error_delta_buffer += [delta_error]
                 error_delta_buffer = error_delta_buffer[-10:]
                 delta_mean = np.mean(error_delta_buffer)
+                certainty = mixer.overall_certainty()
+                logging.info('certainty {certainty}'.format(certainty=certainty))
 
                 # update mixer and calculate accuracy
                 logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
@@ -322,6 +325,7 @@ class Predictor:
                     mixer.update_model(last_good_model)
                     self._mixer = mixer
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
+                    self.overall_certainty = certainty
                     break
 
         # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers

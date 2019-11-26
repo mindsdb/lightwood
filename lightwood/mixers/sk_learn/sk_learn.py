@@ -52,6 +52,9 @@ class SkLearnMixer(SkLearnMixerHelper):
         self.encoders = data_source.encoders
         return self.model
 
+    def overall_certainty(self):
+        return -1
+
     def predict(self, when_data_source, output_column_names=None):
         """
         :param when_data_source: is a DataSource object

@@ -31,6 +31,8 @@ class NnMixer:
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
+        self.awareness_criterion = None
+
 
         self._nonpersistent = {
             'sampler': None
@@ -88,6 +90,17 @@ class NnMixer:
         logging.info('Model predictions and decoding completed')
 
         return predictions
+
+    def overall_certainty(self):
+        """
+        return an estimate of how certain is the model about the overall predictions,
+        in this case its a measurement of how much did the variance of all the weights distributions reduced from its initial distribution
+        :return:
+        """
+        if hasattr(self.net, 'calculate_overall_certainty'):
+            return self.net.calculate_overall_certainty()
+        else:
+            return -1
 
     def error(self, ds):
         """
@@ -184,6 +197,7 @@ class NnMixer:
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net = self.net.train()
+        self.awareness_criterion = torch.nn.MSELoss()
 
         if self.criterion is None:
             if self.is_categorical_output:
@@ -225,18 +239,43 @@ class NnMixer:
                 self.optimizer.zero_grad()
 
                 # forward + backward + optimize
-                outputs = self.net(inputs)
+                # outputs = self.net(inputs)
+                outputs, awareness = self.net(inputs, True)  # ask it to return awareness
 
                 if self.is_categorical_output:
                     target = labels.cpu().numpy()
                     target_indexes = np.where(target>0)[1]
                     targets_c = torch.LongTensor(target_indexes)
-                    labels = targets_c.to(self.net.device)
+                    cat_labels = targets_c.to(self.net.device)
+                    loss = self.criterion(outputs, cat_labels)
+                else:
+                    loss = self.criterion(outputs, labels)
 
-                loss = self.criterion(outputs, labels)
-                loss.backward()
+                #loss.backward()
+                #self.optimizer.step()
 
+                #######################
+                ### time to optimize AWARENESS
+                #######################
+
+                # zero the parameter gradients
+                #self.optimizer.zero_grad()
+                # forward + backward + optimize
+
+
+                my_loss = torch.abs(labels - outputs) # error precentual to the target
+                my_loss = torch.Tensor(my_loss.tolist()) # disconnect from the graph (test if this is necessary)
+                my_loss = my_loss.to(self.net.device)
+
+                awareness_loss = self.awareness_criterion(awareness, my_loss)
+
+                total_loss = awareness_loss * loss
+                total_loss.backward()
+
+                # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
                 self.optimizer.step()
+
+
                 # Maybe make this a scheduler later
                 # Start flat and then go into cosine annealing
 
