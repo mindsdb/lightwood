@@ -246,7 +246,7 @@ class NnMixer:
 
                 awareness_loss = self.awareness_criterion(awareness, my_loss)
 
-                total_loss = awareness_loss + loss
+                total_loss = awareness_loss * loss
                 total_loss.backward()
 
                 # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
