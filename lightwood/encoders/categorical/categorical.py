@@ -8,7 +8,7 @@ UNCOMMON_TOKEN = 0
 
 class CategoricalEncoder:
 
-    def __init__(self, is_target = False):
+    def __init__(self, is_target=False):
         self._lang = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False

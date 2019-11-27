@@ -8,7 +8,11 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None):
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=None):
+        if selfaware is None:
+            selfaware = CONFIG.SELFAWARE
+        self.selfaware = selfaware
+
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
@@ -85,8 +89,21 @@ class DefaultNet(torch.nn.Module):
 
         self.net = torch.nn.Sequential(*layers)
 
+        if self.selfaware:
+            awareness_net_shape = funnel(self.input_size + self.output_size, self.output_size, 4)
+            awareness_layers = []
+
+            for ind in range(len(awareness_net_shape) - 1):
+                awareness_layers.append(torch.nn.Linear(awareness_net_shape[ind],awareness_net_shape[ind+1]))
+                if ind < len(awareness_layers) - 2:
+                    awareness_layers.append(rectifier())
+
+            self.awareness_net = torch.nn.Sequential(*awareness_layers)
+
         if CONFIG.DETERMINISTIC: # set initial weights based on a specific distribution if we have deterministic enabled
-            for layer in self.net:
+
+            # lambda function so that we can do this for either awareness layer or the internal layers of net
+            def reset_layer_params(layer):
                 if isinstance(layer, torch.nn.Linear):
                     torch.nn.init.normal_(layer.weight, mean=0., std=1 / math.sqrt(layer.out_features))
                     torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
@@ -95,15 +112,57 @@ class DefaultNet(torch.nn.Module):
                     torch.nn.init.normal_(layer.mean, mean=0., std=1 / math.sqrt(layer.out_features))
                     torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
 
-        self.net = self.net.to(self.device)
+            if self.selfaware:
+                for layer in self.awareness_net:
+                    reset_layer_params(layer)
 
+            for layer in self.net:
+                reset_layer_params(layer)
+
+        self.net = self.net.to(self.device)
+        self.awareness_net = self.awareness_net.to(self.device)
+
+    def calculate_overall_certainty(self):
+        """
+        Calculate overall certainty of the model
+        :return: -1 means its unknown as it is using non probabilistic layers
+        """
+        mean_variance = 0
+        count = 0
+
+        for layer in self.net:
+            if isinstance(layer, torch.nn.Linear):
+                continue
+            elif isinstance(layer, PLinear):
+
+                count +=1
+                mean_variance += torch.mean(layer.sigma).tolist()
+
+        if count == 0:
+            return -1 # Unknown
+
+        mean_variance = mean_variance / count
+        self.max_variance = mean_variance if self.max_variance is None else mean_variance if self.max_variance < mean_variance else self.max_variance
+
+        return (self.max_variance- mean_variance)/self.max_variance
 
     def forward(self, input):
         """
         In this particular model, we just need to forward the network defined in setup, with our input
+
         :param input: a pytorch tensor with the input data of a batch
-        :return:
+        :param return_awareness: This tells if we should return the awareness output
+
+        :return: either just output or (output, awareness)
         """
 
+
         output = self.net(input)
+
+        if self.selfaware:
+            interim = torch.cat((input, output), 1)
+            awareness = self.awareness_net(interim)
+
+            return output, awareness
+
         return output
