@@ -12,6 +12,7 @@ class CONFIG:
     # Enable deterministic cuda flag and use seeds everywhere (static or based on features of the dataset)
     DETERMINISTIC = True
     OVERSAMPLE = False
+    SELFAWARE = True
     
     """Probabilistic FC layers"""
     USE_PROBABILISTIC_LINEAR = False # change weights in mixer to be probabilistic

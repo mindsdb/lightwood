@@ -83,7 +83,16 @@ class DefaultNet(torch.nn.Module):
 
         self.net = torch.nn.Sequential(*layers)
 
-        self.awareness_net = linear_function(self.input_size + self.output_size, self.output_size)
+        if CONFIG.SELFAWARE:
+            awareness_net_shape = funnel(self.input_size + self.output_size, self.output_size, 4)
+            awareness_layers = []
+
+            for ind in range(len(awareness_net_shape) - 1):
+                awareness_layers.append(torch.nn.Linear(awareness_net_shape[ind],awareness_net_shape[ind+1]))
+                if ind < len(awareness_layers) - 2:
+                    awareness_layers.append(rectifier())
+
+            self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
         if CONFIG.DETERMINISTIC: # set initial weights based on a specific distribution if we have deterministic enabled
 
@@ -97,7 +106,9 @@ class DefaultNet(torch.nn.Module):
                     torch.nn.init.normal_(layer.mean, mean=0., std=1 / math.sqrt(layer.out_features))
                     torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
 
-            reset_layer_params(self.awareness_net)
+            if CONFIG.SELFAWARE:
+                for layer in self.awareness_net:
+                    reset_layer_params(layer)
 
             for layer in self.net:
                 reset_layer_params(layer)
@@ -129,7 +140,7 @@ class DefaultNet(torch.nn.Module):
 
         return (self.max_variance- mean_variance)/self.max_variance
 
-    def forward(self, input, return_awareness = False):
+    def forward(self, input):
         """
         In this particular model, we just need to forward the network defined in setup, with our input
 
@@ -142,11 +153,10 @@ class DefaultNet(torch.nn.Module):
 
         output = self.net(input)
 
-        interim = torch.cat((input, output), 1)
-        awareness = self.awareness_net(interim)
+        if CONFIG.SELFAWARE:
+            interim = torch.cat((input, output), 1)
+            awareness = self.awareness_net(interim)
 
-        if return_awareness:
             return output, awareness
 
-        # else return only the awareness
         return output
