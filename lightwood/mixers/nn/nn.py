@@ -220,6 +220,8 @@ class NnMixer:
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
+        if CONFIG.SELFAWARE:
+
         #self.optimizer = self.optimizer_class(self.net.net.parameters(), **self.optimizer_args)
         #self.awareness_optimizer = self.optimizer_class(self.net.awareness_net.parameters(), **self.optimizer_args)
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
@@ -242,7 +244,10 @@ class NnMixer:
 
                 # forward + backward + optimize
                 # outputs = self.net(inputs)
-                outputs, awareness = self.net(inputs, True)
+                if CONFIG.SELFAWARE:
+                    outputs, awareness = self.net(inputs)
+                else:
+                    outputs = self.net(inputs)
 
                 if self.is_categorical_output:
                     target = labels.cpu().numpy()
@@ -267,8 +272,6 @@ class NnMixer:
                 running_loss += total_loss.item()
                 error = running_loss / (i + 1)
 
-            print(error)
-            #exit(0)
             yield error
 
 
