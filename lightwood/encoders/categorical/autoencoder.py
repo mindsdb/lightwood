@@ -12,7 +12,7 @@ MAX_LENGTH = 100
 
 class CategoricalAutoEncoder:
 
-    def __init__(self, is_target = False):
+    def __init__(self, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self.net = None
