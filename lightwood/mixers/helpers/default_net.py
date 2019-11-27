@@ -83,7 +83,15 @@ class DefaultNet(torch.nn.Module):
 
         self.net = torch.nn.Sequential(*layers)
 
-        self.awareness_net = linear_function(self.input_size + self.output_size, self.output_size)
+        awareness_net_shape = funnel(self.input_size + self.output_size, self.output_size, 4)
+        awareness_layers = []
+
+        for ind in range(len(awareness_net_shape) - 1):
+            awareness_layers.append(torch.nn.Linear(shape[ind],shape[ind+1]))
+            if ind < len(awareness_layers) - 2:
+                awareness_layers.append(rectifier())
+
+        self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
         if CONFIG.DETERMINISTIC: # set initial weights based on a specific distribution if we have deterministic enabled
 
