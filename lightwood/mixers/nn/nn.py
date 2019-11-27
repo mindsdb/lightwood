@@ -220,7 +220,12 @@ class NnMixer:
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
+        # Set a much smaller learning rate for selfware networks, otherwise the gradients explode
         if CONFIG.SELFAWARE:
+            if 'lr' not in self.optimizer_args:
+                self.optimizer_args['lr'] = 0.00005
+            else:
+                self.optimizer_args['lr'] = self.optimizer_args['lr']/20
 
         #self.optimizer = self.optimizer_class(self.net.net.parameters(), **self.optimizer_args)
         #self.awareness_optimizer = self.optimizer_class(self.net.awareness_net.parameters(), **self.optimizer_args)
