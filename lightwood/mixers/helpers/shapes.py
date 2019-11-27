@@ -7,10 +7,15 @@ def funnel(in_size, out_size, depth):
         logging.warning('Depth must be at least 2 for the funnel function to work correctly, setting it to 2')
         depth = 2
 
-    step_denominator = depth - 1
-    layers = list( range(out_size, in_size, round((in_size - out_size)/step_denominator) ) )
-    layers.reverse()
-    layers = [in_size, *layers]
+    step = abs(in_size-out_size)/(depth-1)
+
+    layers = []
+    for k in range(0,depth-1):
+            layers.append(round(max(in_size,out_size) - k * step))
+    layers.append(min(in_size,out_size))
+
+    if in_size < out_size:
+        layers.reverse()
     return layers
 
 def rectangle(in_size,out_size,depth):
@@ -32,7 +37,6 @@ def rombus(in_size,out_size,depth,max_size=None):
     funnel_size = math.ceil(depth/2)
 
     first_funnel = funnel(in_size, max_size,funnel_size)
-
     if depth % 2 == 1:
         first_funnel = first_funnel[:-1]
 
