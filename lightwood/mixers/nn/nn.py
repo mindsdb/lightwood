@@ -64,7 +64,13 @@ class NnMixer:
             inputs = inputs.to(self.net.device)
 
             with torch.no_grad():
-                output = self.net(inputs).to('cpu')
+                if CONFIG.SELFAWARE:
+                    output, awareness = self.net(inputs)
+                    awareness = awareness.to('cpu')
+                else:
+                    output = self.net(inputs)
+                output = output.to('cpu')
+
             outputs.extend(output)
 
         output_trasnformed_vectors = {}
@@ -133,7 +139,11 @@ class NnMixer:
                 labels = targets_c.to(self.net.device)
 
             with torch.no_grad():
-                outputs = self.net(inputs)
+                if CONFIG.SELFAWARE:
+                    outputs, awareness = self.net(inputs)
+                else:
+                    outputs = self.net(inputs)
+
             loss = self.criterion(outputs, labels)
             running_loss += loss.item()
             error = running_loss / (i + 1)
@@ -223,12 +233,10 @@ class NnMixer:
         # Set a much smaller learning rate for selfware networks, otherwise the gradients explode
         if CONFIG.SELFAWARE:
             if 'lr' not in self.optimizer_args:
-                self.optimizer_args['lr'] = 0.00005
+                self.optimizer_args['lr'] = 0.00001
             else:
-                self.optimizer_args['lr'] = self.optimizer_args['lr']/20
+                self.optimizer_args['lr'] = self.optimizer_args['lr']/100
 
-        #self.optimizer = self.optimizer_class(self.net.net.parameters(), **self.optimizer_args)
-        #self.awareness_optimizer = self.optimizer_class(self.net.awareness_net.parameters(), **self.optimizer_args)
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
