@@ -64,7 +64,13 @@ class NnMixer:
             inputs = inputs.to(self.net.device)
 
             with torch.no_grad():
-                output = self.net(inputs).to('cpu')
+                if CONFIG.SELFAWARE:
+                    output, awareness = self.net(inputs)
+                    awareness = awareness.to('cpu')
+                else:
+                    output = self.net(inputs)
+                output = output.to('cpu')
+
             outputs.extend(output)
 
         output_trasnformed_vectors = {}
@@ -133,7 +139,11 @@ class NnMixer:
                 labels = targets_c.to(self.net.device)
 
             with torch.no_grad():
-                outputs = self.net(inputs)
+                if CONFIG.SELFAWARE:
+                    outputs, awareness = self.net(inputs)
+                else:
+                    outputs = self.net(inputs)
+
             loss = self.criterion(outputs, labels)
             running_loss += loss.item()
             error = running_loss / (i + 1)
@@ -220,6 +230,13 @@ class NnMixer:
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
+        # Set a much smaller learning rate for selfware networks, otherwise the gradients explode
+        if CONFIG.SELFAWARE:
+            if 'lr' not in self.optimizer_args:
+                self.optimizer_args['lr'] = 0.00001
+            else:
+                self.optimizer_args['lr'] = self.optimizer_args['lr']/100
+
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
@@ -240,7 +257,10 @@ class NnMixer:
 
                 # forward + backward + optimize
                 # outputs = self.net(inputs)
-                outputs, awareness = self.net(inputs, True)  # ask it to return awareness
+                if CONFIG.SELFAWARE:
+                    outputs, awareness = self.net(inputs)
+                else:
+                    outputs = self.net(inputs)
 
                 if self.is_categorical_output:
                     target = labels.cpu().numpy()
@@ -251,42 +271,18 @@ class NnMixer:
                 else:
                     loss = self.criterion(outputs, labels)
 
-                #loss.backward()
-                #self.optimizer.step()
+                # Unsure why `my_loss` has to be used here
+                real_loss = torch.abs(labels - outputs) # error precentual to the target
+                real_loss = torch.Tensor(real_loss.tolist()) # disconnect from the graph (test if this is necessary)
+                real_loss = real_loss.to(self.net.device)
 
-                #######################
-                ### time to optimize AWARENESS
-                #######################
+                awareness_loss = self.awareness_criterion(awareness, real_loss)
 
-                # zero the parameter gradients
-                #self.optimizer.zero_grad()
-                # forward + backward + optimize
-
-
-                my_loss = torch.abs(labels - outputs) # error precentual to the target
-                my_loss = torch.Tensor(my_loss.tolist()) # disconnect from the graph (test if this is necessary)
-                my_loss = my_loss.to(self.net.device)
-
-                awareness_loss = self.awareness_criterion(awareness, my_loss)
-
-                total_loss = awareness_loss * loss
+                total_loss = awareness_loss + loss
                 total_loss.backward()
-
-                # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
                 self.optimizer.step()
-
-
-                # Maybe make this a scheduler later
-                # Start flat and then go into cosine annealing
-
-                """
-                if total_iterations > 600 and epoch > 20:
-                    for group in self.optimizer.param_groups:
-                        if self.optimizer.initial_lr * 1/100 < group['lr']:
-                            group['lr'] = group['lr'] - self.optimizer.initial_lr * 1/400
-                """
-
-                running_loss += loss.item()
+                # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
+                running_loss += total_loss.item()
                 error = running_loss / (i + 1)
 
             yield error
