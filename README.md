@@ -5,12 +5,12 @@
 [![Build Status](https://travis-ci.org/mindsdb/lightwood.svg?branch=master)](https://travis-ci.org/mindsdb/lightwood)
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
 
-Lightwood has two objectives:
+Lightwood is like Legos for Machine Learning, with two objectives:
 
 - Make it so simple that you can build predictive models with a line of code.
 - Make it so flexible that you can change and customize everything.
 
-Lightwood was inspired on [Ludwig](https://github.com/uber/ludwig) but runs on Pytorch and gives you full control of what you can do.
+Lightwood runs on Pytorch and gives you full control of what you can do.
 
 # Documentation
 Learn more  [Lightwood's docs](https://mindsdb.github.io/lightwood/API/)  
