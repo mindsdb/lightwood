@@ -22,7 +22,11 @@ class DefaultNet(torch.nn.Module):
                 Seed that always has the same value on the same dataset plus setting the bellow CUDA options
                 In order to make sure pytroch randomly generate number will be the same every time when training on the same dataset
             '''
-            torch.manual_seed(len(ds))
+            if ds is not None:
+                torch.manual_seed(len(ds))
+            else:
+                torch.manual_seed(2)
+
             if device_str == 'cuda':
                     torch.backends.cudnn.deterministic = True
                     torch.backends.cudnn.benchmark = False
@@ -108,7 +112,8 @@ class DefaultNet(torch.nn.Module):
                 reset_layer_params(layer)
 
         self.net = self.net.to(self.device)
-        self.awareness_net = self.awareness_net.to(self.device)
+        if self.selfaware:
+            self.awareness_net = self.awareness_net.to(self.device)
 
     def calculate_overall_certainty(self):
         """

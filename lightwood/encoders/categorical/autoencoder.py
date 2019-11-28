@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import math
+import logging
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
@@ -36,7 +37,7 @@ class CategoricalAutoEncoder:
 
             embeddings_layer_len = self.max_encoded_length
 
-            self.net = DefaultNet(ds=None, dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len])
+            self.net = DefaultNet(ds=None, dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len], selfaware=False)
 
             encoded_priming_data = self.oh_encoder.encode(priming_data)
 
