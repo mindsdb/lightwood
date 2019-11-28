@@ -279,7 +279,6 @@ class NnMixer:
 
 
                 if np.isnan(running_loss) or np.isinf(running_loss):
-                    print(f'\n\n Learning rate of: {self.optimizer.lr} \n\n')
                     self.optimizer_args['lr'] = self.optimizer.lr/2
 
                     gc.collect()
