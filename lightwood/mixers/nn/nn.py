@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
 import gc
+import operator
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
@@ -33,7 +34,7 @@ class NnMixer:
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
         self.awareness_criterion = None
-
+        self.loss_combination_operator = operator.add
 
         self._nonpersistent = {
             'sampler': None
@@ -273,17 +274,19 @@ class NnMixer:
 
                 awareness_loss = self.awareness_criterion(awareness, real_loss)
 
-                total_loss = awareness_loss + loss
+                total_loss = self.loss_combination_operator(awareness_loss, loss)
                 running_loss += total_loss.item()
+
 
                 if np.isnan(running_loss) or np.isinf(running_loss):
                     print(f'\n\n Learning rate of: {self.optimizer.lr} \n\n')
-                    self.optimizer_args['lr'] = self.optimizer.lr/4
+                    self.optimizer_args['lr'] = self.optimizer.lr/2
 
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
 
+                    self.loss_combination_operator = operator.add
                     self.net = self.nn_class(ds, self.dynamic_parameters)
                     self.optimizer.zero_grad()
                     self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
@@ -296,7 +299,11 @@ class NnMixer:
 
                 error = running_loss / (i + 1)
 
-            print(error)
+
+                if error < 1:
+                    if self.loss_combination_operator == operator.add:
+                        self.loss_combination_operator = operator.mul
+
             yield error
 
 
