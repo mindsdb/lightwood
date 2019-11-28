@@ -61,6 +61,7 @@ class NnMixer:
         self.net = self.net.eval()
 
         outputs = []
+        awareness_arr = []
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
             inputs = inputs.to(self.net.device)
@@ -69,29 +70,42 @@ class NnMixer:
                 if CONFIG.SELFAWARE:
                     output, awareness = self.net(inputs)
                     awareness = awareness.to('cpu')
+                    awareness_arr.extend(awareness)
                 else:
                     output = self.net(inputs)
+                    awareness_arr = None
+
                 output = output.to('cpu')
 
             outputs.extend(output)
 
         output_trasnformed_vectors = {}
+        confidence_trasnformed_vectors = {}
 
-        for output_vector in outputs:
+        for i in range(len(outputs)):
+            if awareness_arr is not None:
+                confidence_vector = awareness_arr[i]
+                transformed_confidence_vectors = when_data_source.transformer.revert(confidence_vector,feature_set = 'output_features')
+                for feature in transformed_confidence_vectors:
+                    if feature not in confidence_trasnformed_vectors:
+                        confidence_trasnformed_vectors[feature] = []
+                    # @TODO: Very simple algorithm to get a confidence from the awareness, not necessarily what we want for the final version
+                    confidence_trasnformed_vectors[feature] += [1 - sum(np.abs(transformed_confidence_vectors[feature]))/len(transformed_confidence_vectors[feature])]
+
+            output_vector = outputs[i]
             transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
             for feature in transformed_output_vectors:
                 if feature not in output_trasnformed_vectors:
                     output_trasnformed_vectors[feature] = []
                 output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
 
-
-
         predictions = {}
-
         for output_column in output_trasnformed_vectors:
-
             decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
             predictions[output_column] = {'predictions': decoded_predictions}
+            if awareness_arr is not None:
+                predictions[output_column]['confidences'] = confidence_trasnformed_vectors[output_column]
+
             if include_encoded_predictions:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
@@ -351,12 +365,17 @@ if __name__ == "__main__":
     # print(data_frame)
 
     ds = DataSource(data_frame, config)
+    ds.prepare_encoders()
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
+    predict_input_ds.prepare_encoders()
     ####################
 
     mixer = NnMixer({})
 
-    data_encoded = mixer.fit(ds)
+    for i in  mixer.iter_fit(ds):
+        if i < 0.01:
+            break
+
     predictions = mixer.predict(predict_input_ds)
     print(predictions)
 
@@ -395,13 +414,16 @@ if __name__ == "__main__":
 
     data_frame = pandas.DataFrame(data)
     ds = DataSource(data_frame, config)
+    ds.prepare_encoders()
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
+    predict_input_ds.prepare_encoders()
     ####################
 
     mixer = NnMixer({})
 
     for i in  mixer.iter_fit(ds):
-        print(i)
+        if i < 0.01:
+            break
 
     predictions = mixer.predict(predict_input_ds)
     print(predictions)
