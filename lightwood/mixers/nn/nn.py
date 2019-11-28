@@ -196,6 +196,7 @@ class NnMixer:
                 weights = []
                 for row in ds:
                     _, out = row
+                    # @Note: This assumes one-hot encoding for the encoded_value
                     weights.append(ds.output_weights[torch.argmax(out).item()])
 
                 self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
