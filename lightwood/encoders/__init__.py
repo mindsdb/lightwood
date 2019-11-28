@@ -5,7 +5,8 @@ from lightwood.encoders.numeric.numeric import NumericEncoder
 from lightwood.encoders.text.infersent import InferSentEncoder
 from lightwood.encoders.text.rnn import RnnEncoder
 from lightwood.encoders.time_series.cesium_ts import CesiumTsEncoder
-from lightwood.encoders.categorical.categorical import CategoricalEncoder
+from lightwood.encoders.categorical.onehot import OneHotEncoder
+from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
 
 class DateTime:
     DatetimeEncoder = DatetimeEncoder
@@ -25,7 +26,8 @@ class TimeSeries:
     CesiumTsEncoder = CesiumTsEncoder
 
 class Categorical:
-    CategoricalEncoder = CategoricalEncoder
+    OneHotEncoder = OneHotEncoder
+    CategoricalAutoEncoder = CategoricalAutoEncoder
 
 class BuiltinEncoders:
     DateTime = DateTime

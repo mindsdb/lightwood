@@ -36,6 +36,7 @@ class CategoricalAutoEncoder:
 
         input_len = self.onehot_encoder._lang.n_words
         self.use_autoencoder = self.max_encoded_length is not None and input_len > self.max_encoded_length
+        print(f'\n\n\nValue of use autoencoder: {self.use_autoencoder}\n\n\n')
         if self.use_autoencoder:
             logging.info('Preparing a categorical autoencoder, this might take a while')
 
