@@ -5,6 +5,7 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
+import gc
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
@@ -231,13 +232,6 @@ class NnMixer:
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
-        # Set a much smaller learning rate for selfware networks, otherwise the gradients explode
-        if CONFIG.SELFAWARE:
-            if 'lr' not in self.optimizer_args:
-                self.optimizer_args['lr'] = 0.00001
-            else:
-                self.optimizer_args['lr'] = self.optimizer_args['lr']/100
-
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
@@ -280,12 +274,29 @@ class NnMixer:
                 awareness_loss = self.awareness_criterion(awareness, real_loss)
 
                 total_loss = awareness_loss + loss
+                running_loss += total_loss.item()
+
+                if np.isnan(running_loss) or np.isinf(running_loss):
+                    print(f'\n\n Learning rate of: {self.optimizer.lr} \n\n')
+                    self.optimizer_args['lr'] = self.optimizer.lr/4
+
+                    gc.collect()
+                    if 'cuda' in str(self.net.device):
+                        torch.cuda.empty_cache()
+
+                    self.net = self.nn_class(ds, self.dynamic_parameters)
+                    self.optimizer.zero_grad()
+                    self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+                    break
+
                 total_loss.backward()
                 self.optimizer.step()
                 # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
-                running_loss += total_loss.item()
+
                 error = running_loss / (i + 1)
 
+            print(error)
             yield error
 
 
