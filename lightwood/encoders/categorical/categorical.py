@@ -1,14 +1,14 @@
 import torch
 from lightwood.encoders.text.helpers.rnn_helpers import Lang
 import numpy as np
-
+import logging
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
 
 class CategoricalEncoder:
 
-    def __init__(self, is_target = False):
+    def __init__(self, is_target=False):
         self._lang = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     enc = CategoricalEncoder()
 
-    enc.fit(data)
+    enc.prepare_encoder(data)
     encoded_data = enc.encode(data)
     decoded_data = enc.decode(enc.encode(['category 2', 'category 1', 'category 3', None]))
 
