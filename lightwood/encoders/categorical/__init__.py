@@ -1,6 +1,6 @@
-from lightwood.encoders.categorical.categorical import CategoricalEncoder
+from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
 
-default = CategoricalEncoder
-onehot = CategoricalEncoder
+default = CategoricalAutoEncoder
+onehot = OneHotEncoder
 autoencoder = CategoricalAutoEncoder

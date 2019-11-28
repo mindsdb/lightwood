@@ -9,7 +9,7 @@ from lightwood.config.config import CONFIG
 
 class Img2VecEncoder:
 
-    def __init__(self):
+    def __init__(self, is_target=False):
         self._model = None
         # I think we should make this an enum, something like: speed, balance, accuracy
         self.aim = 'balance'
@@ -19,7 +19,7 @@ class Img2VecEncoder:
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
-            
+
         if self._model is None:
             if self.aim == 'speed':
                 self._model = Img2Vec(model='resnet-18')
