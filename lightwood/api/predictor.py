@@ -317,6 +317,7 @@ class Predictor:
                 if delta_mean < 0 and len(error_delta_buffer) > 9:
                     stop_training = True
 
+
                 # Stop if we're past the time limit alloted for training
                 if (int(time.time()) - started_training_at) > stop_training_after_seconds:
                    stop_training = True
