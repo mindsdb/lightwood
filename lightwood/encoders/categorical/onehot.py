@@ -6,7 +6,7 @@ import logging
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
 
-class CategoricalEncoder:
+class OneHotEncoder:
 
     def __init__(self, is_target=False):
         self._lang = None

@@ -6,7 +6,7 @@ import sys
 
 class NumericEncoder:
 
-    def __init__(self, data_type=None):
+    def __init__(self, data_type=None, is_target=False):
         self._type = data_type
         self._min_value = None
         self._max_value = None

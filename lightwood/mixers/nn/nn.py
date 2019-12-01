@@ -5,6 +5,8 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
+import gc
+import operator
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
@@ -32,7 +34,7 @@ class NnMixer:
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
         self.awareness_criterion = None
-
+        self.loss_combination_operator = operator.add
 
         self._nonpersistent = {
             'sampler': None
@@ -59,6 +61,7 @@ class NnMixer:
         self.net = self.net.eval()
 
         outputs = []
+        awareness_arr = []
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
             inputs = inputs.to(self.net.device)
@@ -67,29 +70,42 @@ class NnMixer:
                 if CONFIG.SELFAWARE:
                     output, awareness = self.net(inputs)
                     awareness = awareness.to('cpu')
+                    awareness_arr.extend(awareness)
                 else:
                     output = self.net(inputs)
+                    awareness_arr = None
+
                 output = output.to('cpu')
 
             outputs.extend(output)
 
         output_trasnformed_vectors = {}
+        confidence_trasnformed_vectors = {}
 
-        for output_vector in outputs:
+        for i in range(len(outputs)):
+            if awareness_arr is not None:
+                confidence_vector = awareness_arr[i]
+                transformed_confidence_vectors = when_data_source.transformer.revert(confidence_vector,feature_set = 'output_features')
+                for feature in transformed_confidence_vectors:
+                    if feature not in confidence_trasnformed_vectors:
+                        confidence_trasnformed_vectors[feature] = []
+                    # @TODO: Very simple algorithm to get a confidence from the awareness, not necessarily what we want for the final version
+                    confidence_trasnformed_vectors[feature] += [1 - sum(np.abs(transformed_confidence_vectors[feature]))/len(transformed_confidence_vectors[feature])]
+
+            output_vector = outputs[i]
             transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
             for feature in transformed_output_vectors:
                 if feature not in output_trasnformed_vectors:
                     output_trasnformed_vectors[feature] = []
                 output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
 
-
-
         predictions = {}
-
         for output_column in output_trasnformed_vectors:
-
             decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
             predictions[output_column] = {'predictions': decoded_predictions}
+            if awareness_arr is not None:
+                predictions[output_column]['confidences'] = confidence_trasnformed_vectors[output_column]
+
             if include_encoded_predictions:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
@@ -196,6 +212,7 @@ class NnMixer:
                 weights = []
                 for row in ds:
                     _, out = row
+                    # @Note: This assumes one-hot encoding for the encoded_value
                     weights.append(ds.output_weights[torch.argmax(out).item()])
 
                 self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
@@ -229,13 +246,6 @@ class NnMixer:
         for optimizer_arg_name in ['lr','k','N_sma_threshold']:
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
-
-        # Set a much smaller learning rate for selfware networks, otherwise the gradients explode
-        if CONFIG.SELFAWARE:
-            if 'lr' not in self.optimizer_args:
-                self.optimizer_args['lr'] = 0.00001
-            else:
-                self.optimizer_args['lr'] = self.optimizer_args['lr']/100
 
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
@@ -271,19 +281,46 @@ class NnMixer:
                 else:
                     loss = self.criterion(outputs, labels)
 
-                # Unsure why `my_loss` has to be used here
-                real_loss = torch.abs(labels - outputs) # error precentual to the target
-                real_loss = torch.Tensor(real_loss.tolist()) # disconnect from the graph (test if this is necessary)
-                real_loss = real_loss.to(self.net.device)
+                if CONFIG.SELFAWARE:
+                    real_loss = torch.abs(labels - outputs) # error precentual to the target
+                    real_loss = torch.Tensor(real_loss.tolist()) # disconnect from the graph (test if this is necessary)
+                    real_loss = real_loss.to(self.net.device)
 
-                awareness_loss = self.awareness_criterion(awareness, real_loss)
+                    awareness_loss = self.awareness_criterion(awareness, real_loss)
 
-                total_loss = awareness_loss + loss
+                    #print(awareness_loss.item())
+                    #print(loss.item())
+
+                    total_loss = self.loss_combination_operator(awareness_loss, loss)
+                    running_loss += total_loss.item()
+
+                    # Make sure the LR doesn't get too low
+                    if self.optimizer.lr > 5 * pow(10,-6):
+                        if np.isnan(running_loss) or np.isinf(running_loss) or running_loss > pow(10,4):
+                            self.optimizer_args['lr'] = self.optimizer.lr/2
+                            gc.collect()
+                            if 'cuda' in str(self.net.device):
+                                torch.cuda.empty_cache()
+
+                            self.loss_combination_operator = operator.add
+                            self.net = self.nn_class(ds, self.dynamic_parameters)
+                            self.optimizer.zero_grad()
+                            self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+                            break
+                else:
+                    total_loss = loss
+
                 total_loss.backward()
                 self.optimizer.step()
                 # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
-                running_loss += total_loss.item()
+
                 error = running_loss / (i + 1)
+
+
+                if error < 1:
+                    if self.loss_combination_operator == operator.add:
+                        self.loss_combination_operator = operator.mul
 
             yield error
 
@@ -333,12 +370,17 @@ if __name__ == "__main__":
     # print(data_frame)
 
     ds = DataSource(data_frame, config)
+    ds.prepare_encoders()
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
+    predict_input_ds.prepare_encoders()
     ####################
 
     mixer = NnMixer({})
 
-    data_encoded = mixer.fit(ds)
+    for i in  mixer.iter_fit(ds):
+        if i < 0.01:
+            break
+
     predictions = mixer.predict(predict_input_ds)
     print(predictions)
 
@@ -377,13 +419,16 @@ if __name__ == "__main__":
 
     data_frame = pandas.DataFrame(data)
     ds = DataSource(data_frame, config)
+    ds.prepare_encoders()
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)
+    predict_input_ds.prepare_encoders()
     ####################
 
     mixer = NnMixer({})
 
     for i in  mixer.iter_fit(ds):
-        print(i)
+        if i < 0.01:
+            break
 
     predictions = mixer.predict(predict_input_ds)
     print(predictions)
