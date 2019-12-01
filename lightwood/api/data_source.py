@@ -119,6 +119,7 @@ class DataSource(Dataset):
 
                     for val in weights:
                         encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:[val]})
+                        # @Note: This assumes one-hot encoding for the encoded_value
                         value_index = np.argmax(encoded_val[0])
 
                         if new_weights is None:
@@ -194,7 +195,8 @@ class DataSource(Dataset):
                     encoder_class = config['encoder_class']
 
                 # Instantiate the encoder and pass any arguments given via the configuration
-                encoder_instance = encoder_class()
+                is_target = True if feature_set == 'output_features' else False
+                encoder_instance = encoder_class(is_target=is_target)
 
                 encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
                 for attr in encoder_attrs:
@@ -254,8 +256,7 @@ class DataSource(Dataset):
         """
         if decoder_instance is None:
             if column_name not in self.encoders:
-                raise ValueError(
-                    'Data must have been encoded before at some point, you should not decode before having encoding at least once')
+                raise ValueError('Data must have been encoded before at some point, you should not decode before having encoding at least once')
             decoder_instance = self.encoders[column_name]
         decoded_data = decoder_instance.decode(encoded_data)
 

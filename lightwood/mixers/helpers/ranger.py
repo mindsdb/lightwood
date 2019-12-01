@@ -27,6 +27,9 @@ class Ranger(Optimizer):
         defaults = dict(lr=lr, alpha=alpha, k=k, betas=betas, N_sma_threshold=N_sma_threshold, eps=eps, weight_decay=weight_decay)
         super().__init__(params,defaults)
 
+        # Since we keep LR the same for all param groups, store it here for now for quick&easy access if we want to know it
+        self.lr = lr
+
         #adjustable threshold
         self.N_sma_threshold = N_sma_threshold
 

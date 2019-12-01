@@ -6,7 +6,7 @@ import logging
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
-from lightwood.encoders.categorical.categorical import CategoricalEncoder
+from lightwood.encoders.categorical.onehot import OneHotEncoder
 
 
 MAX_LENGTH = 100
@@ -19,19 +19,23 @@ class CategoricalAutoEncoder:
         self.net = None
         self.encoder = None
         self.decoder = None
-        self.oh_encoder = CategoricalEncoder()
+        self.onehot_encoder = OneHotEncoder()
         self.desired_error = 0.01
         self.use_autoencoder = None
-        self.max_encoded_length = 100
+        if is_target:
+            self.max_encoded_length = None
+        else:
+            self.max_encoded_length = 100
+
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
-        self.oh_encoder.prepare_encoder(priming_data)
+        self.onehot_encoder.prepare_encoder(priming_data)
 
-        input_len = self.oh_encoder._lang.n_words
-        self.use_autoencoder = input_len > self.max_encoded_length
+        input_len = self.onehot_encoder._lang.n_words
+        self.use_autoencoder = self.max_encoded_length is not None and input_len > self.max_encoded_length
         if self.use_autoencoder:
             logging.info('Preparing a categorical autoencoder, this might take a while')
 
@@ -39,7 +43,7 @@ class CategoricalAutoEncoder:
 
             self.net = DefaultNet(ds=None, dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len], selfaware=False)
 
-            encoded_priming_data = self.oh_encoder.encode(priming_data)
+            encoded_priming_data = self.onehot_encoder.encode(priming_data)
 
             data_loader = torch.utils.data.DataLoader(encoded_priming_data, batch_size=256, shuffle=True)
 
@@ -87,7 +91,7 @@ class CategoricalAutoEncoder:
         self._prepared = True
 
     def encode(self, column_data):
-        oh_encoded_tensor = self.oh_encoder.encode(column_data)
+        oh_encoded_tensor = self.onehot_encoder.encode(column_data)
         if not self.use_autoencoder:
             return oh_encoded_tensor
         else:
@@ -98,11 +102,11 @@ class CategoricalAutoEncoder:
 
     def decode(self, encoded_data):
         if not self.use_autoencoder:
-            return self.oh_encoder.decode(encoded_data)
+            return self.onehot_encoder.decode(encoded_data)
         else:
             oh_encoded_tensor = self.decoder(encoded_data)
             oh_encoded_tensor = oh_encoded_tensor.to('cpu')
-            decoded_categories = self.oh_encoder.decode(oh_encoded_tensor)
+            decoded_categories = self.onehot_encoder.decode(oh_encoded_tensor)
             return decoded_categories
 
 

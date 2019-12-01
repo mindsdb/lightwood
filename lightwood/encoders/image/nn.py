@@ -6,7 +6,7 @@ import torch
 
 class NnAutoEncoder:
 
-    def __init__(self):
+    def __init__(self, is_target=False):
         self._model = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
@@ -14,7 +14,7 @@ class NnAutoEncoder:
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
-            
+
         self._model = NnEncoderHelper(images)
         self._prepared = True
 
