@@ -12,6 +12,8 @@ class DefaultNet(torch.nn.Module):
         if selfaware is None:
             selfaware = CONFIG.SELFAWARE
         self.selfaware = selfaware
+        # How many devices we can train this network on
+        self.available_devices = 1
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
@@ -28,8 +30,10 @@ class DefaultNet(torch.nn.Module):
                 torch.manual_seed(2)
 
             if device_str == 'cuda':
-                    torch.backends.cudnn.deterministic = True
-                    torch.backends.cudnn.benchmark = False
+                torch.backends.cudnn.deterministic = True
+                torch.backends.cudnn.benchmark = False
+                self.available_devices = torch.cuda.device_count()
+
 
 
         self.device = torch.device(device_str)
@@ -111,8 +115,13 @@ class DefaultNet(torch.nn.Module):
             for layer in self.net:
                 reset_layer_params(layer)
 
+        if self.available_devices > 0:
+            self.net = torch.nn.DataParallel(self.net)
         self.net = self.net.to(self.device)
+
         if self.selfaware:
+            if self.available_devices > 0:
+                self.awareness_net = torch.nn.DataParallel(self.awareness_net)
             self.awareness_net = self.awareness_net.to(self.device)
 
     def calculate_overall_certainty(self):

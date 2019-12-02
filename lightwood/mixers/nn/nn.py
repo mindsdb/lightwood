@@ -28,7 +28,7 @@ class NnMixer:
         self.optimizer_args = None
         self.criterion = None
 
-        self.batch_size = 200
+        self.batch_size = None
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -217,13 +217,11 @@ class NnMixer:
 
                 self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
-        if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
-        else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0, sampler=self._nonpersistent['sampler'])
-
         self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net = self.net.train()
+
+        self.batch_size = 200 * self.net.available_devices
+
         self.awareness_criterion = torch.nn.MSELoss()
 
         if self.criterion is None:
@@ -249,6 +247,12 @@ class NnMixer:
 
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
+
+
+        if self._nonpersistent['sampler'] is None:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        else:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0, sampler=self._nonpersistent['sampler'])
 
         total_iterations = 0
         for epoch in range(total_epochs):  # loop over the dataset multiple times
