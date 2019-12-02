@@ -117,18 +117,16 @@ class DefaultNet(torch.nn.Module):
 
         self.net = self.net.to(self.device)
         if self.available_devices > 0:
-            self.parallel_net = torch.nn.DataParallel(self.net)
-            self.foward_net = self.parallel_net
+            self._foward_net = torch.nn.DataParallel(self.net)
         else:
-            self.foward_net = self.net
+            self._foward_net = self.net
 
         if self.selfaware:
             self.awareness_net = self.awareness_net.to(self.device)
             if self.available_devices > 0:
-                self.parallel_awareness_net = torch.nn.DataParallel(self.awareness_net)
-                self.foward_awareness_net = self.parallel_awareness_net
+                self._foward_awareness_net = torch.nn.DataParallel(self.awareness_net)
             else:
-                self.foward_awareness_net = self.net
+                self._foward_awareness_net = self.awareness_net
 
     def calculate_overall_certainty(self):
         """
@@ -165,11 +163,11 @@ class DefaultNet(torch.nn.Module):
         """
 
 
-        output = self.foward_net(input)
+        output = self._foward_net(input)
 
         if self.selfaware:
             interim = torch.cat((input, output), 1)
-            awareness = self.foward_awareness_net(interim)
+            awareness = self._foward_awareness_net(interim)
 
             return output, awareness
 
