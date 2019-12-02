@@ -116,14 +116,14 @@ class DefaultNet(torch.nn.Module):
                 reset_layer_params(layer)
 
         self.net = self.net.to(self.device)
-        if self.available_devices > 0:
+        if self.available_devices > 1:
             self._foward_net = torch.nn.DataParallel(self.net)
         else:
             self._foward_net = self.net
 
         if self.selfaware:
             self.awareness_net = self.awareness_net.to(self.device)
-            if self.available_devices > 0:
+            if self.available_devices > 1:
                 self._foward_awareness_net = torch.nn.DataParallel(self.awareness_net)
             else:
                 self._foward_awareness_net = self.awareness_net
