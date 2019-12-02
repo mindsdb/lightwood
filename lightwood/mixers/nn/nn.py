@@ -28,7 +28,7 @@ class NnMixer:
         self.optimizer_args = None
         self.criterion = None
 
-        self.batch_size = None
+        self.batch_size = 200
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -220,7 +220,8 @@ class NnMixer:
         self.net = self.nn_class(ds, self.dynamic_parameters)
         self.net = self.net.train()
 
-        self.batch_size = 200 * self.net.available_devices
+        if self.batch_size < self.net.available_devices:
+            self.batch_size = self.net.available_devices
 
         self.awareness_criterion = torch.nn.MSELoss()
 
