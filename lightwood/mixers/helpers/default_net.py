@@ -14,7 +14,8 @@ class DefaultNet(torch.nn.Module):
         self.selfaware = selfaware
         # How many devices we can train this network on
         self.available_devices = 1
-
+        self.max_variance = None
+        
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
