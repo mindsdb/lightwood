@@ -193,7 +193,7 @@ class DataSource(Dataset):
                         raise ValueError('No default encoder for {type}'.format(type=config['type']))
                 else:
                     encoder_class = config['encoder_class']
-
+                    
                 # Instantiate the encoder and pass any arguments given via the configuration
                 is_target = True if feature_set == 'output_features' else False
                 encoder_instance = encoder_class(is_target=is_target)
