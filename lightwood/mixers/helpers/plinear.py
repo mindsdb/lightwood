@@ -74,7 +74,7 @@ class PLinear(nn.Module):
 
         # multipliers
         sigma_multiplier = np.random.choice([1, 2, 3, 4], p=[0.41, 0.46, 0.09, 0.04])
-        sigma_multiplier = torch.Tensor(sigma_multiplier)
+        sigma_multiplier = torch.Tensor([sigma_multiplier])
         sigma_multiplier = sigma_multiplier.to(self.device)
 
         # generate the initial tensor, this will ultimately transforms in to the weights
@@ -92,18 +92,17 @@ class PLinear(nn.Module):
         w = torch.mul(
             self.mean.to(self.device),
             torch.add(
-                torch.Tensor([1]).to(self.device),
+                1,
                 torch.mul(
                     torch.mul(w, torch.abs(self.sigma).to(self.device)),
-                    torch.div(sigma_multiplier.to(self.device), torch.Tensor([2]).to(self.device))
+                    torch.div(sigma_multiplier, 2)
                 )
             )
         )
 
-        print(self.device)
-        print(w)
+
         # you can see how the average sigma changes over trainings
-        #print(torch.mean(self.sigma))
+        #print(torch.mean(self.sigm.to(self.device)a))
         return w
 
 
