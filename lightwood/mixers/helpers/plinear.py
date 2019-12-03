@@ -95,7 +95,7 @@ class PLinear(nn.Module):
                 torch.Tensor([1]).to(self.device),
                 torch.mul(
                     torch.mul(w, torch.abs(self.sigma).to(self.device)),
-                    torch.div(sigma_multiplier.to(self.device), torch.Tensor([2]))
+                    torch.div(sigma_multiplier.to(self.device), torch.Tensor([2]).to(self.device))
                 )
             )
         )
