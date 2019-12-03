@@ -90,12 +90,12 @@ class PLinear(nn.Module):
         # adjust based on sigma
 
         w = torch.mul(
-            self.mean.to(self.device), w)
+            self.mean.to(self.device),
             torch.add(
-                torch.var(1).to(self.device),
+                torch.Tensor([1]).to(self.device),
                 torch.mul(
                     torch.mul(w, torch.abs(self.sigma).to(self.device)),
-                    sigma_multiplier.to(self.device)
+                    torch.div(sigma_multiplier.to(self.device), torch.Tensor([2]))
                 )
             )
         )
