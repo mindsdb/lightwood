@@ -43,9 +43,7 @@ class CategoricalAutoEncoder:
 
             self.net = DefaultNet(ds=None, dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len], selfaware=False)
 
-            encoded_priming_data = self.onehot_encoder.encode(priming_data)
-
-            data_loader = torch.utils.data.DataLoader(encoded_priming_data, batch_size=256, shuffle=True)
+            data_loader = torch.utils.data.DataLoader(priming_data, batch_size=256, shuffle=True)
 
             criterion = torch.nn.CrossEntropyLoss()
             optimizer = Ranger(self.net.parameters())
@@ -55,7 +53,7 @@ class CategoricalAutoEncoder:
                 running_loss = 0
                 error = 0
                 for i, data in enumerate(data_loader, 0):
-                    oh_encoded_categories = data
+                    oh_encoded_categories = self.onehot_encoder.encode(data)
                     oh_encoded_categories = torch.Tensor(oh_encoded_categories)
                     oh_encoded_categories = oh_encoded_categories.to(self.net.device)
                     self.net(oh_encoded_categories)
@@ -76,6 +74,7 @@ class CategoricalAutoEncoder:
                     error = running_loss / (i + 1)
                     error_buffer.append(error)
 
+                print(error)
                 if len(error_buffer) > 5:
                     error_buffer.append(error)
                     error_buffer = error_buffer[-5:]

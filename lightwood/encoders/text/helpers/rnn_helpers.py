@@ -89,6 +89,7 @@ import unicodedata
 import string
 import re
 import random
+import operator
 
 import torch
 import torch.nn as nn
@@ -166,11 +167,36 @@ class Lang:
     def addWord(self, word):
         if word not in self.word2index:
             self.word2index[word] = self.n_words
-            self.word2count[word] = 1
+            self.word2count[word] = 0
             self.index2word[self.n_words] = word
             self.n_words += 1
+
+        self.word2count[word] += 1
+
+    # @NOTE: Very slow, especially for a large language, can be made faster by making index2word a list
+    def removeWord(self, word):
+        word_index = self.word2index[word]
+        del self.word2index[word]
+        del self.word2count[word]
+        del self.index2word[word_index]
+
+        self.n_words -= 1
+
+        for index in [x for x in self.index2word.keys() if x > word_index]:
+            word = self.index2word[index]
+            new_index = index - 1
+
+            self.word2index[word] = new_index
+
+            del self.index2word[index]
+            self.index2word[new_index] = word
+
+    def getLeastOccurring(self, n=1):
+        if n == 1:
+            return min(word2count, key=word2count.get)
         else:
-            self.word2count[word] += 1
+            sorted_word2count = sorted(word2count.items(), key=operator.itemgetter(1))
+            return [x[0] for x in sorted_word2count[:n]]
 
 
 ######################################################################
