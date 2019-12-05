@@ -193,9 +193,9 @@ class Lang:
 
     def getLeastOccurring(self, n=1):
         if n == 1:
-            return min(word2count, key=word2count.get)
+            return min(self.word2count, key=self.word2count.get)
         else:
-            sorted_word2count = sorted(word2count.items(), key=operator.itemgetter(1))
+            sorted_word2count = sorted(self.word2count.items(), key=operator.itemgetter(1))
             return [x[0] for x in sorted_word2count[:n]]
 
 
