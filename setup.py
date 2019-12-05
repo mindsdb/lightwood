@@ -31,7 +31,7 @@ if sys_platform in ['win32','cygwin','windows']:
     requirements = remove_requirements(requirements,'torchvision')
     try:
         print('Installing pytorch and torchvision!')
-        subprocess.call(['pip','install','torch===1.3.1', 'torchvision===0.4.2', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+        subprocess.call(['pip','install','torch>=1.2.0', 'torchvision>=0.4.2', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
         print('Successfully installed pytorch and torchvision!')
     except:
         print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
