@@ -74,7 +74,6 @@ class CategoricalAutoEncoder:
                     error = running_loss / (i + 1)
                     error_buffer.append(error)
 
-                print(error)
                 if len(error_buffer) > 5:
                     error_buffer.append(error)
                     error_buffer = error_buffer[-5:]
