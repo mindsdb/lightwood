@@ -14,6 +14,7 @@ import time
 
 import torch
 import torch.nn as nn
+from lightwood.config.config import CONFIG
 
 """
 BLSTM (max/mean) encoder
@@ -32,6 +33,13 @@ class InferSent(nn.Module):
 
         self.enc_lstm = nn.LSTM(self.word_emb_dim, self.enc_lstm_dim, 1,
                                 bidirectional=True, dropout=self.dpout_model)
+
+        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
+        if CONFIG.USE_DEVICE is not None:
+            device_str = CONFIG.USE_DEVICE
+        self.device = torch.device(device_str)
+
+        self.enc_lstm = self.enc_lstm.to(self.device)
 
         assert self.version in [1, 2]
         if self.version == 1:
@@ -65,7 +73,10 @@ class InferSent(nn.Module):
 
         # Handling padding in Recurrent Networks
         sent_packed = nn.utils.rnn.pack_padded_sequence(sent, sent_len_sorted)
+        sent_packed = sent_packed.to(self.device)
+
         sent_output = self.enc_lstm(sent_packed)[0]  # seqlen x batch x 2*nhid
+
         sent_output = nn.utils.rnn.pad_packed_sequence(sent_output)[0]
 
         # Un-sort by length
@@ -212,6 +223,9 @@ class InferSent(nn.Module):
         return sentences, lengths, idx_sort
 
     def encode(self, sentences, bsize=64, tokenize=True, verbose=False):
+        if self.is_cuda():
+            bsize = int(bsize/10)
+
         tic = time.time()
         sentences, lengths, idx_sort = self.prepare_samples(
                         sentences, bsize, tokenize, verbose)
@@ -234,6 +248,7 @@ class InferSent(nn.Module):
             print('Speed : %.1f sentences/s (%s mode, bsize=%s)' % (
                     len(embeddings)/(time.time()-tic),
                     'gpu' if self.is_cuda() else 'cpu', bsize))
+                    
         return embeddings
 
     def visualize(self, sent, tokenize=True):
