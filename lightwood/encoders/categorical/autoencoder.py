@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import math
 import logging
+import random
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
@@ -29,6 +30,8 @@ class CategoricalAutoEncoder:
 
 
     def prepare_encoder(self, priming_data):
+        random.seed(len(priming_data))
+
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
@@ -43,16 +46,18 @@ class CategoricalAutoEncoder:
 
             self.net = DefaultNet(ds=None, dynamic_parameters={},shape=[input_len, embeddings_layer_len, input_len], selfaware=False)
 
-            data_loader = torch.utils.data.DataLoader(priming_data, batch_size=256, shuffle=True)
-
             criterion = torch.nn.CrossEntropyLoss()
             optimizer = Ranger(self.net.parameters())
+
+            batch_size = min(200, int(len(priming_data)/50))
 
             error_buffer = []
             for epcohs in range(5000):
                 running_loss = 0
                 error = 0
-                for i, data in enumerate(data_loader, 0):
+                random.shuffle(priming_data)
+                itterable_priming_data = zip(*[iter(priming_data)]*batch_size)
+                for i, data in enumerate(itterable_priming_data):
                     oh_encoded_categories = self.onehot_encoder.encode(data)
                     oh_encoded_categories = torch.Tensor(oh_encoded_categories)
                     oh_encoded_categories = oh_encoded_categories.to(self.net.device)
