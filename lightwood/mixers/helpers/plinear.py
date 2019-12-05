@@ -47,6 +47,10 @@ class PLinear(nn.Module):
         self.sigma.requiresGrad = True # set requiresGrad to true!
         self.mean.requiresGrad = True  # set requiresGrad to true!
 
+        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
+        if CONFIG.USE_DEVICE is not None:
+            device_str = CONFIG.USE_DEVICE
+        self.device = torch.device(device_str)
 
     def reset_parameters(self):
         """
@@ -70,24 +74,35 @@ class PLinear(nn.Module):
 
         # multipliers
         sigma_multiplier = np.random.choice([1, 2, 3, 4], p=[0.41, 0.46, 0.09, 0.04])
-
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
+        sigma_multiplier = torch.Tensor([sigma_multiplier])
+        sigma_multiplier = sigma_multiplier.to(self.device)
 
         # generate the initial tensor, this will ultimately transforms in to the weights
         w = torch.Tensor(self.out_features, self.in_features)
 
-        device = torch.device(device_str)
-        w.to(device)
+        w = w.to(self.device)
 
         # make sure that they are evently distributed between -1, 1
         init.uniform_(w, a=-1, b=1)
 
+        # torch.div(sigma_multiplier,torch.var(2).to(self.device))
+
         # adjust based on sigma
-        w = self.mean*( 1+ w * torch.abs(self.sigma) * sigma_multiplier/2 )
+
+        w = torch.mul(
+            self.mean.to(self.device),
+            torch.add(
+                1,
+                torch.mul(
+                    torch.mul(w, torch.abs(self.sigma).to(self.device)),
+                    torch.div(sigma_multiplier, 2)
+                )
+            )
+        )
+
+
         # you can see how the average sigma changes over trainings
-        #print(torch.mean(self.sigma))
+        #print(torch.mean(self.sigm.to(self.device)a))
         return w
 
 
@@ -104,5 +119,3 @@ class PLinear(nn.Module):
 if __name__ == "__main__":
 
     pass
-
-
