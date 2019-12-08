@@ -1,4 +1,6 @@
 from lightwood.encoders.text.rnn import RnnEncoder
 from lightwood.encoders.text.infersent import InferSentEncoder
+from lightwood.encoders.text.distilbert import DistilBertEncoder
 
-default = InferSentEncoder
+default = DistilBertEncoder
+#default = InferSentEncoder
