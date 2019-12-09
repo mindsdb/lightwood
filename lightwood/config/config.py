@@ -20,3 +20,6 @@ class CONFIG:
 
     """Bayesian Network"""
     NUMBER_OF_PROBABILISTIC_MODELS = 2
+
+    """Encoder options"""
+    TRAIN_TO_PREDICT_TARGET = True

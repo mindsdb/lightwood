@@ -1,7 +1,10 @@
 import importlib
+import inspect
+import random
+
 import numpy as np
 from torch.utils.data import Dataset
-import random
+
 from lightwood.config.config import CONFIG
 
 
@@ -171,7 +174,9 @@ class DataSource(Dataset):
             the other datasets should get their encoders and transformers
             from the training dataset.
         '''
-        for feature_set in ['input_features', 'output_features']:
+        input_encoder_training_data = {'targets': []}
+
+        for feature_set in ['output_features', 'input_features']:
             for feature in self.configuration[feature_set]:
                 column_name = feature['name']
                 config = self.get_column_config(column_name)
@@ -203,8 +208,25 @@ class DataSource(Dataset):
                         setattr(encoder_instance, attr, encoder_attrs[attr])
 
                 # Prime the encoder using the data (for example, to get the one-hot mapping in a categorical encoder)
-                encoder_instance.prepare_encoder(args[0])
+                if feature_set == 'input_features':
+                    training_data = input_encoder_training_data
+                else:
+                    training_data = None
+
+                if 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder).args:
+                    encoder_instance.prepare_encoder(args[0], training_data=training_data)
+                else:
+                    encoder_instance.prepare_encoder(args[0])
+
                 self.encoders[column_name] = encoder_instance
+
+                if feature_set == 'output_features':
+                    input_encoder_training_data['targets'].append({
+                        'encoded_output': self.encoders[column_name].encode(args[0])
+                        ,'unencoded_output': args[0]
+                        ,'output_encoder': encoder_instance
+                        ,'output_type': config['type']
+                    })
 
         return True
 

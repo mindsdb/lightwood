@@ -3,3 +3,8 @@
 * SNN paper: https://arxiv.org/pdf/1706.02515.pdf
 * SNN paper code (see 8 for initialization): https://github.com/bioinf-jku/SNNs/blob/master/SelfNormalizingNetworks_MLP_MNIST.ipynb
 * Docs on obtaining deterministic models: https://pytorch.org/docs/stable/notes/randomness.html
+
+
+A good BERT classifier example:
+
+https://github.com/huggingface/transformers/blob/master/examples/run_glue.py
