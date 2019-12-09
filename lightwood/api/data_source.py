@@ -23,7 +23,6 @@ class DataSource(Dataset):
         self.dropout_dict = {}
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
 
-
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
                 dropout = 0.0
@@ -193,7 +192,7 @@ class DataSource(Dataset):
                         raise ValueError('No default encoder for {type}'.format(type=config['type']))
                 else:
                     encoder_class = config['encoder_class']
-                    
+
                 # Instantiate the encoder and pass any arguments given via the configuration
                 is_target = True if feature_set == 'output_features' else False
                 encoder_instance = encoder_class(is_target=is_target)
@@ -206,7 +205,6 @@ class DataSource(Dataset):
                 # Prime the encoder using the data (for example, to get the one-hot mapping in a categorical encoder)
                 encoder_instance.prepare_encoder(args[0])
                 self.encoders[column_name] = encoder_instance
-                encoded_val = encoder_instance.encode(*args)
 
         return True
 
