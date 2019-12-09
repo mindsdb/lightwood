@@ -12,3 +12,4 @@ xlrd >= 1.0.0
 requests >= 2.0.0
 ax-platform >= 0.1.3
 pyro-ppl >= 0.4.1
+pytorch-transformers == 1.2.0
