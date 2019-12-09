@@ -23,3 +23,4 @@ class CONFIG:
 
     """Encoder options"""
     TRAIN_TO_PREDICT_TARGET = True
+    MAX_ENCODER_TRAINING_TIME = 1800

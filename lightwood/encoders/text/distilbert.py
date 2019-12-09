@@ -20,7 +20,7 @@ class DistilBertEncoder:
         self._prepared = False
         self._model_type = None
         self.desired_error = 0.05
-        self.max_training_time = 1800
+        self.max_training_time = CONFIG.MAX_ENCODER_TRAINING_TIME
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
