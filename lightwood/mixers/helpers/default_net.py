@@ -15,9 +15,11 @@ class DefaultNet(torch.nn.Module):
         # How many devices we can train this network on
         self.available_devices = 1
         self.max_variance = None
+
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
+        self.device = torch.device(device_str)
 
         if CONFIG.DETERMINISTIC:
             '''
@@ -35,9 +37,6 @@ class DefaultNet(torch.nn.Module):
                 self.available_devices = torch.cuda.device_count()
 
 
-
-        self.device = torch.device(device_str)
-
         self.dynamic_parameters = dynamic_parameters
         """
         Here we define the basic building blocks of our model, in forward we define how we put it all together along wiht an input
@@ -51,8 +50,10 @@ class DefaultNet(torch.nn.Module):
             self.input_size = len(input_sample)
             self.output_size = len(output_sample)
 
-            large_input = True if self.input_size > 1000 else False
-            large_output = True if self.output_size > 1000 else False
+            small_input = True if self.input_size < 50 else False
+            small_output = True if self.input_size < 50 else False
+            large_input = True if self.input_size > 2000 else False
+            large_output = True if self.output_size > 2000 else False
 
             # 2. Determine in/out proportions
             # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case (outside of very specific things, such as text to image)
@@ -65,7 +66,10 @@ class DefaultNet(torch.nn.Module):
             else:
                 depth = 5
 
-            if (not large_input) and (not large_output):
+            if (small_input and small_output):
+                shape = rombus(self.input_size,self.output_size,depth+1,800)
+                print(shape)
+            elif (not large_input) and (not large_output):
                 shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
             elif large_input and large_output:
                 shape = rectangle(self.input_size,self.output_size,depth - 1)
