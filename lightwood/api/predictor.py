@@ -119,7 +119,6 @@ class Predictor:
 
         :return: None
         """
-        eval_every_x_epochs = 1
         self._stop_training_flag = False
 
         if stop_model_building_after_seconds is None:
