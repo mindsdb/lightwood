@@ -68,7 +68,6 @@ class DefaultNet(torch.nn.Module):
 
             if (small_input and small_output):
                 shape = rombus(self.input_size,self.output_size,depth+1,800)
-                print(shape)
             elif (not large_input) and (not large_output):
                 shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
             elif large_input and large_output:
