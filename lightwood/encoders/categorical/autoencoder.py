@@ -59,7 +59,6 @@ class CategoricalAutoEncoder:
                 itterable_priming_data = zip(*[iter(priming_data)]*batch_size)
 
                 for i, data in enumerate(itterable_priming_data):
-                    print(len(data))
                     oh_encoded_categories = self.onehot_encoder.encode(data)
                     oh_encoded_categories = oh_encoded_categories.to(self.net.device)
                     self.net(oh_encoded_categories)
