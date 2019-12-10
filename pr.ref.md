@@ -5,6 +5,5 @@
 * Docs on obtaining deterministic models: https://pytorch.org/docs/stable/notes/randomness.html
 
 
-A good BERT classifier example:
-
-https://github.com/huggingface/transformers/blob/master/examples/run_glue.py
+A good BERT classifier example: https://github.com/huggingface/transformers/blob/master/examples/run_glue.py
+Possible models: https://huggingface.co/transformers/_sources/pretrained_models.rst.txt
