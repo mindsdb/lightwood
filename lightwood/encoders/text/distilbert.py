@@ -55,6 +55,8 @@ class DistilBertEncoder:
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
+        priming_data = [x if x is not None else '' for x in priming_data]
+        
         self._max_len = min(max([len(x) for x in priming_data]),self._model_max_len)
         self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
         self._pad_id = self._tokenizer.convert_tokens_to_ids([self._tokenizer.pad_token])[0]
