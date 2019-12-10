@@ -12,7 +12,7 @@ class CONFIG:
     # Enable deterministic cuda flag and use seeds everywhere (static or based on features of the dataset)
     DETERMINISTIC = True
     OVERSAMPLE = True
-    SELFAWARE = False
+    SELFAWARE = True
 
     """Probabilistic FC layers"""
     USE_PROBABILISTIC_LINEAR = False # change weights in mixer to be probabilistic
@@ -23,4 +23,4 @@ class CONFIG:
 
     """Encoder options"""
     TRAIN_TO_PREDICT_TARGET = True
-    MAX_ENCODER_TRAINING_TIME = 4 * 1800
+    MAX_ENCODER_TRAINING_TIME = 3600 * 2

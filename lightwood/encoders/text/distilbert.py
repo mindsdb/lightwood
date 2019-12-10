@@ -124,8 +124,8 @@ class DistilBertEncoder:
 
                     error = running_loss/(i + 1)
 
-                    if i % 10 == 0:
-                        print(f'Intermediate error: {error}')
+                    #if i % 100 == 0:
+                    #    print(f'Intermediate text encoder error: {error}')
 
                 print(f'Text encoder training error: {error}')
                 if best_error is None or best_error > error:
