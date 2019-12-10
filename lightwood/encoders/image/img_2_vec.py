@@ -5,14 +5,14 @@ from io import BytesIO
 
 from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 from lightwood.config.config import CONFIG
-
+from lightwood.constants.lightwood import ENCODER_AIM
 
 class Img2VecEncoder:
 
-    def __init__(self, is_target=False):
+    def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
         self._model = None
         # I think we should make this an enum, something like: speed, balance, accuracy
-        self.aim = 'balance'
+        self.aim = aim
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
 
@@ -21,11 +21,11 @@ class Img2VecEncoder:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
         if self._model is None:
-            if self.aim == 'speed':
+            if self.aim == ENCODER_AIM.SPEED:
                 self._model = Img2Vec(model='resnet-18')
-            elif self.aim == 'balance':
+            elif self.aim == ENCODER_AIM.BALANCE:
                 self._model = Img2Vec(model='resnext-50-small')
-            elif self.aim == 'accuracy':
+            elif self.aim == ENCODER_AIM.ACCURACY:
                 self._model = Img2Vec(model='resnext-50')
             else:
                 self._model = Img2Vec()

@@ -1,6 +1,7 @@
 import importlib
 import inspect
 import random
+import copy
 
 import numpy as np
 from torch.utils.data import Dataset
@@ -222,10 +223,10 @@ class DataSource(Dataset):
 
                 if feature_set == 'output_features':
                     input_encoder_training_data['targets'].append({
-                        'encoded_output': self.encoders[column_name].encode(args[0])
-                        ,'unencoded_output': args[0]
-                        ,'output_encoder': encoder_instance
-                        ,'output_type': config['type']
+                        'encoded_output': copy.deepcopy(self.encoders[column_name].encode(args[0]))
+                        ,'unencoded_output': copy.deepcopy(args[0])
+                        ,'output_encoder': copy.deepcopy(encoder_instance)
+                        ,'output_type': copy.deepcopy(config['type'])
                     })
 
         return True
