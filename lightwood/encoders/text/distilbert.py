@@ -1,6 +1,7 @@
 import time
 import copy
 import random
+import logging
 
 import numpy as np
 import torch
@@ -67,7 +68,7 @@ class DistilBertEncoder:
             if self.aim == ENCODER_AIM.SPEED:
                 batch_size = 10
             else:
-                batch_size = 20
+                batch_size = 10
 
             no_decay = ['bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
@@ -124,14 +125,16 @@ class DistilBertEncoder:
 
                     error = running_loss/(i + 1)
 
-                    #if i % 100 == 0:
-                    #    print(f'Intermediate text encoder error: {error}')
+                    if i % 200 == 0:
+                        logging.info(f'Intermediate text encoder error: {error}')
 
-                print(f'Text encoder training error: {error}')
+                logging.info(f'Text encoder training error: {error}')
                 if best_error is None or best_error > error:
                     best_error = error
                     # Move to CPU to save GPU memory, move back to the origianl device if we end up using it
-                    best_model = copy.deepcopy(self._model).cpu()
+                    self._model = self._model.cpu()
+                    best_model = copy.deepcopy(self._model)
+                    self._model = self._model.to(self.device)
                     best_epoch = epoch
 
                 error_buffer.append(error)
