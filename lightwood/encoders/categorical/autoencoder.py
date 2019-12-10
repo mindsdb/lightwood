@@ -79,6 +79,7 @@ class CategoricalAutoEncoder:
                     error = running_loss / (i + 1)
                     error_buffer.append(error)
 
+                logging.info(f'Categorial autoencoder training error: {error}')
                 if len(error_buffer) > 5:
                     error_buffer.append(error)
                     error_buffer = error_buffer[-5:]
