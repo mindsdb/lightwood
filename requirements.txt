@@ -1,5 +1,6 @@
 NLTK >= 3
 python-dateutil <2.8.1,>=2.1
+dask<2.4.0,>=1.0.0
 cesium == 0.9.9
 dill >= 0.2.9
 numpy >= 1.16.2
