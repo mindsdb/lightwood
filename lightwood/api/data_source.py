@@ -1,7 +1,11 @@
 import importlib
+import inspect
+import random
+import copy
+
 import numpy as np
 from torch.utils.data import Dataset
-import random
+
 from lightwood.config.config import CONFIG
 
 
@@ -22,7 +26,6 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
-
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -172,7 +175,9 @@ class DataSource(Dataset):
             the other datasets should get their encoders and transformers
             from the training dataset.
         '''
-        for feature_set in ['input_features', 'output_features']:
+        input_encoder_training_data = {'targets': []}
+
+        for feature_set in ['output_features', 'input_features']:
             for feature in self.configuration[feature_set]:
                 column_name = feature['name']
                 config = self.get_column_config(column_name)
@@ -193,7 +198,7 @@ class DataSource(Dataset):
                         raise ValueError('No default encoder for {type}'.format(type=config['type']))
                 else:
                     encoder_class = config['encoder_class']
-                    
+
                 # Instantiate the encoder and pass any arguments given via the configuration
                 is_target = True if feature_set == 'output_features' else False
                 encoder_instance = encoder_class(is_target=is_target)
@@ -204,9 +209,25 @@ class DataSource(Dataset):
                         setattr(encoder_instance, attr, encoder_attrs[attr])
 
                 # Prime the encoder using the data (for example, to get the one-hot mapping in a categorical encoder)
-                encoder_instance.prepare_encoder(args[0])
+                if feature_set == 'input_features':
+                    training_data = input_encoder_training_data
+                else:
+                    training_data = None
+
+                if 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder).args:
+                    encoder_instance.prepare_encoder(args[0], training_data=training_data)
+                else:
+                    encoder_instance.prepare_encoder(args[0])
+
                 self.encoders[column_name] = encoder_instance
-                encoded_val = encoder_instance.encode(*args)
+
+                if feature_set == 'output_features':
+                    input_encoder_training_data['targets'].append({
+                        'encoded_output': copy.deepcopy(self.encoders[column_name].encode(args[0]))
+                        ,'unencoded_output': copy.deepcopy(args[0])
+                        ,'output_encoder': copy.deepcopy(encoder_instance)
+                        ,'output_type': copy.deepcopy(config['type'])
+                    })
 
         return True
 

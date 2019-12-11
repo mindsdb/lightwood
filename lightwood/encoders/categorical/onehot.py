@@ -13,7 +13,7 @@ class OneHotEncoder:
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
 
-    def prepare_encoder(self, priming_data):
+    def prepare_encoder(self, priming_data, max_dimensions=20000):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
@@ -25,6 +25,18 @@ class OneHotEncoder:
         for category in priming_data:
             if category != None:
                 self._lang.addWord(str(category))
+
+        while self._lang.n_words > max_dimensions:
+            necessary_words = UNCOMMON_WORD
+            least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words)+1)
+
+            word_to_remove = None
+            for word in least_occuring_words:
+                if word not in necessary_words:
+                    word_to_remove = word
+                    break
+
+            self._lang.removeWord(word_to_remove)
 
         self._prepared = True
 
@@ -61,11 +73,14 @@ if __name__ == "__main__":
 
     data = ['category 1', 'category 3', 'category 4', None]
 
-    enc = CategoricalEncoder()
+    enc = OneHotEncoder()
 
     enc.prepare_encoder(data)
     encoded_data = enc.encode(data)
     decoded_data = enc.decode(enc.encode(['category 2', 'category 1', 'category 3', None]))
+
+    print(f'Encoded values: \n{encoded_data}')
+    print(f'Decoded values: \n{decoded_data}')
 
     assert(len(encoded_data) == 4)
     assert(decoded_data[1] == 'category 1')
@@ -74,5 +89,26 @@ if __name__ == "__main__":
         assert(encoded_data[0][i] == UNCOMMON_TOKEN)
         assert(decoded_data[i] == UNCOMMON_WORD)
 
-    print(f'Encoded values: \n{encoded_data}')
-    print(f'Decoded values: \n{decoded_data}')
+    # Test max_dimensions
+    for max_dimensions in [2,3]:
+        data = ['category 1', 'category 1', 'category 3', 'category 4', 'category 4', 'category 4', None]
+
+        enc = OneHotEncoder()
+
+        enc.prepare_encoder(data, max_dimensions=max_dimensions)
+        encoded_data = enc.encode(data)
+        decoded_data = enc.decode(enc.encode(['category 1', 'category 2', 'category 3', 'category 4', None]))
+
+        print(f'Encoded values: \n{encoded_data}')
+        print(f'Decoded values: \n{decoded_data}')
+
+        if max_dimensions == 3:
+            assert(decoded_data[0] == 'category 1')
+        else:
+            assert(decoded_data[0] == UNCOMMON_WORD)
+
+        assert(decoded_data[1] == UNCOMMON_WORD)
+        assert(decoded_data[2] == UNCOMMON_WORD)
+        assert(decoded_data[4] == UNCOMMON_WORD)
+
+        assert(decoded_data[3] == 'category 4')
