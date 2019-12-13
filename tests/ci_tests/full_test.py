@@ -59,24 +59,10 @@ def run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
 
     preds = {}
     for j in range(100):
-        pred = predictor.predict(when={'sqft':1600})['number_of_rooms']['predictions'][0]
-        print(pred)
+        pred = predictor.predict(when={'sqft': round(j * 10)})['number_of_rooms']['predictions'][0]
         if pred not in preds:
             preds[pred] = 0
-        else:
-            preds[pred] += 1
-
-
-    print(preds)
-
-
-    # {'3': 31, '2': 18, '1': 23, '0': 22, '<UNCOMMON>': 1}
-
-    # {'0': 35, '<UNCOMMON>': 6, '1': 14, '3': 29, '2': 11}
-
-    # {'0': 30, '3': 32, '1': 20, '2': 13, '<UNCOMMON>': 0}
-
-    # {'2': 12, '1': 17, '3': 27, '0': 38, '<UNCOMMON>': 1}
+        preds[pred] += 1
 
 for USE_CUDA in [False]:
     for CACHE_ENCODED_DATA in [False, True]:
