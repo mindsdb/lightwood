@@ -57,7 +57,7 @@ config = {
                 'type': COLUMN_DATA_TYPES.NUMERIC
             },
             
-            # some encoders have attributes that can be specified on configuration
+            # some encoders have attributes that can be specified on the configuration
             # in this particular lets assume we have a photo of the product, we would like to encode this image and optimize for speed
             {
                 'name': 'product_photo',

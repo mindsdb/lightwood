@@ -11,14 +11,9 @@ Lightwood was inspired on [Keras](https://keras.io/)+[Ludwig](https://github.com
 ## Installing Lightwood
 
 
-### On Linux, OSX and all other operating systems
+### On Linux, OSX, Windows and all other operating systems
 ```bash
 pip3 install lightwood
-```
-
-### On Windows
-```
-pip install git+https://github.com/mindsdb/lightwood.git@master
 ```
 
 If this fails, please report the bug on github and try installing the current master branch:
