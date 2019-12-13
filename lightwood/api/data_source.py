@@ -97,7 +97,7 @@ class DataSource(Dataset):
                 col_config = self.get_column_config(col_name)
                 if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
                     if not ((dropout_features is not None and  col_name in dropout_features) or self.disable_cache):
-                        self.get_encoded_column_data(col_name, feature_set)
+                        self.get_encoded_column_data(col_name)
 
 
                 # if we are dropping this feature, get the encoded value of None
@@ -105,10 +105,15 @@ class DataSource(Dataset):
                     custom_data = {col_name:[None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:
-                        custom_data[custom_data['depends_on_column']]= [None]
-                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data=custom_data)[0]
+                        custom_data[custom_data['depends_on_column']] = [None]
+                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
                 elif self.disable_cache:
-                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, feature_set, custom_data={col_name: [self.data_frame[col_name].iloc[idx]]})[0]
+                    if col_name in self.data_frame:
+                        custom_data = {col_name: [self.data_frame[col_name].iloc[idx]]}
+                    else:
+                        custom_data = {col_name: [None]}
+
+                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
@@ -121,7 +126,7 @@ class DataSource(Dataset):
                     new_weights = None
 
                     for val in weights:
-                        encoded_val = self.get_encoded_column_data(col_config['name'],'output_features',custom_data={col_config['name']:[val]})
+                        encoded_val = self.get_encoded_column_data(col_config['name'],custom_data={col_config['name']:[val]})
                         # @Note: This assumes one-hot encoding for the encoded_value
                         value_index = np.argmax(encoded_val[0])
 
@@ -152,19 +157,19 @@ class DataSource(Dataset):
         :param column_name:
         :return:
         """
+        if column_name not in self.data_frame:
+            nr_rows = self.data_frame.shape[0]
+            return [None] * nr_rows
+
         if self.disable_cache:
             return self.data_frame[column_name].tolist()
 
-        if column_name in self.list_cache:
+        elif column_name in self.list_cache:
             return self.list_cache[column_name]
 
-        if column_name in self.data_frame:
+        else:
             self.list_cache[column_name] = self.data_frame[column_name].tolist()
             return self.list_cache[column_name]
-
-        else:  # if column not in dataframe
-            rows = self.data_frame.shape[0]
-            return [None] * rows
 
     def prepare_encoders(self):
         '''
@@ -232,7 +237,7 @@ class DataSource(Dataset):
         return True
 
 
-    def get_encoded_column_data(self, column_name, feature_set = 'input_features', custom_data = None):
+    def get_encoded_column_data(self, column_name, custom_data = None):
         """
 
         :param column_name:
