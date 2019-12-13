@@ -79,7 +79,7 @@ def run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
     # {'2': 12, '1': 17, '3': 27, '0': 38, '<UNCOMMON>': 1}
 
 for USE_CUDA in [False]:
-    for CACHE_ENCODED_DATA[False, True]:
-        for SELFAWARE[False, True]:
-            for PLINEAR[False, True]:
+    for CACHE_ENCODED_DATA in [False, True]:
+        for SELFAWARE in [False, True]:
+            for PLINEAR in [False, True]:
                 run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR)
