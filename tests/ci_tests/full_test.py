@@ -7,9 +7,9 @@ import lightwood
 
 def run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
     lightwood.config.config.CONFIG.USE_CUDA = USE_CUDA
-    lightwood.config.config.CONFIG.USE_CUDA = CACHE_ENCODED_DATA
-    lightwood.config.config.CONFIG.USE_CUDA = SELFAWARE
-    lightwood.config.config.CONFIG.USE_CUDA = PLINEAR
+    lightwood.config.config.CONFIG.CACHE_ENCODED_DATA = CACHE_ENCODED_DATA
+    lightwood.config.config.CONFIG.SELFAWARE = SELFAWARE
+    lightwood.config.config.CONFIG.PLINEAR = PLINEAR
 
     ####################
     config = {'input_features': [
