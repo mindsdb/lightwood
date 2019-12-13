@@ -4,6 +4,7 @@
 
 [![Build Status](https://travis-ci.org/mindsdb/lightwood.svg?branch=master)](https://travis-ci.org/mindsdb/lightwood)
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/lightwood)
 
 Lightwood is like Legos for Machine Learning, with two objectives:
 
@@ -13,7 +14,7 @@ Lightwood is like Legos for Machine Learning, with two objectives:
 Lightwood runs on Pytorch and gives you full control of what you can do.
 
 # Documentation
-Learn more  [Lightwood's docs](https://mindsdb.github.io/lightwood/API/)  
+Learn more  from the [Lightwood's docs](https://mindsdb.github.io/lightwood/API/).  
 
 # Quick start
 ```python
