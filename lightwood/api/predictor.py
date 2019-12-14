@@ -108,7 +108,7 @@ class Predictor:
             except:
                 pass
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=3600 * 8, stop_model_building_after_seconds=None):
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -120,9 +120,6 @@ class Predictor:
         :return: None
         """
         self._stop_training_flag = False
-
-        if stop_model_building_after_seconds is None:
-            stop_model_building_after_seconds = stop_training_after_seconds*3
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
         # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
@@ -161,7 +158,19 @@ class Predictor:
         else:
             is_categorical_output = False
 
+
+        if stop_training_after_seconds is None:
+            stop_training_after_seconds = round(from_data.shape[0] * from_data.shape[1] / 5)
+
+        if stop_model_building_after_seconds is None:
+            stop_model_building_after_seconds = stop_training_after_seconds*3
+
+        print(f'Will stop trainig after {stop_training_after_seconds}')
+        exit()
+
         from_data_ds = DataSource(from_data, self.config)
+
+
 
         if test_data is not None:
             test_data_ds = DataSource(test_data, self.config)
