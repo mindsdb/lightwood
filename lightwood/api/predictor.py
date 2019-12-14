@@ -165,12 +165,7 @@ class Predictor:
         if stop_model_building_after_seconds is None:
             stop_model_building_after_seconds = stop_training_after_seconds*3
 
-        print(f'Will stop trainig after {stop_training_after_seconds}')
-        exit()
-
         from_data_ds = DataSource(from_data, self.config)
-
-
 
         if test_data is not None:
             test_data_ds = DataSource(test_data, self.config)
