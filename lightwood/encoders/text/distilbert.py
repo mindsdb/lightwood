@@ -114,7 +114,7 @@ class DistilBertEncoder:
                         input = self._tokenizer.encode(text[:self._max_len], add_special_tokens=True)
                         inputs.append(input)
 
-                    labels =  randomized_target_data[i*batch_size:(i+1)*batch_size]]
+                    labels =  randomized_target_data[i*batch_size:(i+1)*batch_size]
 
                     max_input = max([len(x) for x in inputs])
                     inputs = [x + [self._pad_id] * (max_input - len(x)) for x in inputs]
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     test_data = []
     test_target = []
     for i in range(0,2000):
-        if random.randint(1,5) %  == 3:
+        if random.randint(1,5)  == 3:
             test_data.append(str(i))
             test_target.append(i)
         else:
