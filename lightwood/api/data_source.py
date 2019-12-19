@@ -9,6 +9,26 @@ from torch.utils.data import Dataset
 from lightwood.config.config import CONFIG
 
 
+class SubSet(Dataset):
+
+    def __init__(self, data_source, indexes):
+        self.data_source = data_source
+        self.index_mapping = {}
+        for i in range(len(indexes)):
+            self.index_mapping[i] = indexes[i]
+
+
+    def __len__(self):
+        """
+        return the length of the datasource (as in number of rows)
+        :return: number of rows
+        """
+        return int(len(index_mapping.keys()))
+
+    def __getitem__(self, idx):
+        return self.data_source[[index_mapping[idx]]]
+
+
 class DataSource(Dataset):
 
     def __init__(self, data_frame, configuration):
@@ -26,6 +46,7 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
+        self.subsets = {}
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -40,6 +61,20 @@ class DataSource(Dataset):
 
         self._clear_cache()
 
+
+    def create_subsets(self, nr_subsets):
+        subsets_indexes = {}
+        np.random.seed(len(self.data_frame))
+        for i in range(len(self.data_frame)):
+            random_nr = np.random.randint(0,nr_subsets)
+            for subset_nr in range(0,nr_subsets):
+                if ((i % nr_subsets) + subset_nr) == random_nr:
+                    if subset_nr not in subsets_indexes:
+                        subsets_indexes[subset_nr] = []
+                    subsets_indexes[subset_nr].append(i)
+
+        for subset_nr in subsets_indexes:
+            self.subsets[subset_nr] = SubSet(self, subsets_indexes[subset_nr])
 
     def _clear_cache(self):
         self.list_cache = {}
