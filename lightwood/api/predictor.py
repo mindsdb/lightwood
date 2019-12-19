@@ -172,6 +172,9 @@ class Predictor:
         else:
             test_data_ds = from_data_ds.extractRandomSubset(0.1)
 
+        from_data_ds.create_subsets(3)
+        test_data_ds.create_subsets(3)
+
         from_data_ds.training = True
 
         mixer_params = {}
@@ -184,6 +187,11 @@ class Predictor:
             mixer_class = NnMixer
 
         from_data_ds.prepare_encoders()
+
+        for subset in from_data_ds.subsets:
+            print(len(subset))
+            print(subset[0])
+        exit()
 
         # Initialize data sources
         try:
