@@ -188,11 +188,6 @@ class Predictor:
 
         from_data_ds.prepare_encoders()
 
-        for subset_index in from_data_ds.subsets:
-            print(len(from_data_ds.subsets[subset_index]))
-            print(from_data_ds.subsets[subset_index][0])
-        exit()
-
         # Initialize data sources
         try:
             mixer_class({}).fit_data_source(from_data_ds)
