@@ -23,7 +23,7 @@ class SubSet(Dataset):
         return the length of the datasource (as in number of rows)
         :return: number of rows
         """
-        return int(len(index_mapping.keys()))
+        return int(len(self.index_mapping.keys()))
 
     def __getitem__(self, idx):
         return self.data_source[[index_mapping[idx]]]

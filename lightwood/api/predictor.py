@@ -188,9 +188,9 @@ class Predictor:
 
         from_data_ds.prepare_encoders()
 
-        for subset in from_data_ds.subsets:
-            print(len(subset))
-            print(subset[0])
+        for subset_index in from_data_ds.subsets:
+            print(len(from_data_ds.subsets[subset_index]))
+            print(from_data_ds.subsets[subset_index][0])
         exit()
 
         # Initialize data sources
