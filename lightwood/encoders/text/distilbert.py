@@ -2,6 +2,7 @@ import time
 import copy
 import random
 import logging
+from functools import partial
 
 import numpy as np
 import torch
@@ -17,6 +18,7 @@ from lightwood.mixers.helpers.transformer import Transformer
 
 class DistilBertEncoder:
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
+        self.name = 'Text Transformer Encoder'
         self._tokenizer = None
         self._model = None
         self._pad_id = None
@@ -71,11 +73,7 @@ class DistilBertEncoder:
         if training_data is not None and 'targets' in training_data and len(training_data['targets']) ==1 and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL and CONFIG.TRAIN_TO_PREDICT_TARGET:
             self._model_type = 'classifier'
             self._model = self._classifier_model_class.from_pretrained(self._pretrained_model_name, num_labels=len(set(training_data['targets'][0]['unencoded_output'])) + 1).to(self.device)
-
-            if self.aim == ENCODER_AIM.SPEED:
-                batch_size = 10
-            else:
-                batch_size = 10
+            batch_size = 10
 
             no_decay = ['bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
@@ -84,8 +82,37 @@ class DistilBertEncoder:
             ]
 
             optimizer = AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
-            # num_training_steps is kind of an estimation
             scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
+
+
+            gym = Gym(model=self._model, optimizer=optimizer, scheduler=scheduler, loss_criterion=criterion, device=self.net.device, name=self.name)
+
+            input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
+            tokenized_max_len = max([len(x) for x in input])
+            input = [x + [self._pad_id] * (max_input - len(x)) for x in input]
+
+            def train_function(model, data, optimizer, scheduler, device, test=False):
+                input, output = data
+
+                input = input.to(device)
+                labels = torch.tensor([torch.argmax(x) for x in output]).to(device)
+
+                outputs = self._model(inputs, labels=labels)
+                loss, logits = outputs[:2]
+
+                if not test:
+                    loss.backward()
+                    optimizer.step()
+                    scheduler.step()
+                    optimizer.zero_grad()
+
+                return loss
+
+            gym.fit(self, train_data_loader, test_data_loader, desired_error, max_time, callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=None, custom_test_func=None)
+
+            # self._tokenizer.encode(text[:self._max_len], add_special_tokens=True)
+
+            ######################################
 
             self._model.train()
             error_buffer = []
