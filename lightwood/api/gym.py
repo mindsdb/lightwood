@@ -58,7 +58,7 @@ class Gym():
 
                     self.optimizer.zero_grad()
                 else:
-                    loss = custom_train_func(self.model, data, self.optimizer, self.scheduler, self.device)
+                    loss = custom_train_func(self.model, data, self)
 
                 running_loss += loss.item()
                 error = running_loss/(i + 1)
@@ -90,7 +90,7 @@ class Gym():
 
                             loss = self.loss_criterion(predicted, real)
                         else:
-                            loss = custom_test_func(self.model, data)
+                            loss = custom_test_func(self.model, data, self)
 
                         running_loss += loss.item()
                         test_error = running_loss/(i + 1)

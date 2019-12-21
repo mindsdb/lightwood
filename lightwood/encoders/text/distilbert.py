@@ -6,6 +6,7 @@ from functools import partial
 
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
 from transformers import DistilBertModel, DistilBertForSequenceClassification, DistilBertTokenizer, AlbertModel, AlbertForSequenceClassification, DistilBertTokenizer, AlbertTokenizer, AdamW, get_linear_schedule_with_warmup
 
 from lightwood.config.config import CONFIG
@@ -14,6 +15,7 @@ from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.transformer import Transformer
+from lightwood.api.gym import Gym
 
 
 class DistilBertEncoder:
@@ -27,7 +29,7 @@ class DistilBertEncoder:
         self._max_ele = None
         self._prepared = False
         self._model_type = None
-        self.desired_error = 0.05
+        self.desired_error = 0.01
         self.max_training_time = CONFIG.MAX_ENCODER_TRAINING_TIME
         self._head = None
         # Possible: speed, balance, accuracy
@@ -58,6 +60,46 @@ class DistilBertEncoder:
             device_str = CONFIG.USE_DEVICE
         self.device = torch.device(device_str)
 
+
+    def _train_callback(self, error, real_buff, predicted_buff):
+        print(f'{self.name} reached a loss of {error} while training !')
+
+    @staticmethod
+    def categorical_train_function(model, data, gym, test=False):
+        input, output = data
+
+        input = input.to(device)
+        labels = torch.tensor([torch.argmax(x) for x in output]).to(device)
+
+        outputs = self._model(inputs, labels=labels)
+        loss, logits = outputs[:2]
+
+        if not test:
+            loss.backward()
+            gym.optimizer.step()
+            gym.scheduler.step()
+            gym.optimizer.zero_grad()
+
+        return loss
+
+    @staticmethod
+    def numerical_train_function(model, data, gym, test=False):
+        input, output = data
+
+        input = input.to(device)
+        labels = torch.tensor([torch.argmax(x) for x in output]).to(device)
+
+        outputs = self._model(inputs, labels=labels)
+        loss, logits = outputs[:2]
+
+        if not test:
+            loss.backward()
+            gym.optimizer.step()
+            gym.scheduler.step()
+            gym.optimizer.zero_grad()
+
+        return loss
+
     def prepare_encoder(self, priming_data, training_data=None):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
@@ -84,32 +126,23 @@ class DistilBertEncoder:
             optimizer = AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
             scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
 
-
-            gym = Gym(model=self._model, optimizer=optimizer, scheduler=scheduler, loss_criterion=criterion, device=self.net.device, name=self.name)
+            gym = Gym(model=self._model, optimizer=optimizer, scheduler=scheduler, loss_criterion=None, device=self.device, name=self.name)
 
             input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
             tokenized_max_len = max([len(x) for x in input])
-            input = [x + [self._pad_id] * (max_input - len(x)) for x in input]
+            input = [x + [self._pad_id] * (tokenized_max_len - len(x)) for x in input]
 
-            def train_function(model, data, optimizer, scheduler, device, test=False):
-                input, output = data
+            real = training_data['targets'][0]['encoded_output']
 
-                input = input.to(device)
-                labels = torch.tensor([torch.argmax(x) for x in output]).to(device)
+            merged_data = list(zip(priming_data,priming_data))
 
-                outputs = self._model(inputs, labels=labels)
-                loss, logits = outputs[:2]
+            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*4/5)], batch_size=batch_size, shuffle=True)
+            test_data_loader = DataLoader(merged_data[int(len(merged_data)*4/5):], batch_size=batch_size, shuffle=True)
 
-                if not test:
-                    loss.backward()
-                    optimizer.step()
-                    scheduler.step()
-                    optimizer.zero_grad()
+            best_model, error, training_time = gym.fit(self, train_data_loader, test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=5, custom_train_func=partial(categorical_train_function,test=False), custom_test_func=partial(categorical_train_function,test=True))
 
-                return loss
-
-            gym.fit(self, train_data_loader, test_data_loader, desired_error, max_time, callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=None, custom_test_func=None)
-
+            self._model = best_model.to(self.device)
+            '''
             # self._tokenizer.encode(text[:self._max_len], add_special_tokens=True)
 
             ######################################
@@ -184,6 +217,7 @@ class DistilBertEncoder:
                 if started + self.max_training_time < time.time():
                     self._model = best_model.to(self.device)
                     break
+            '''
 
         elif all([x['output_type'] == COLUMN_DATA_TYPES.NUMERIC or x['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL for x in training_data['targets']]) and CONFIG.TRAIN_TO_PREDICT_TARGET:
             self.desired_error = 0.01
