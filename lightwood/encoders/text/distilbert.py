@@ -69,8 +69,8 @@ class DistilBertEncoder:
         print(data)
         input, real = data
 
-        input = input.to(device)
-        labels = torch.tensor([torch.argmax(x) for x in real]).to(device)
+        input = input.to(gym.device)
+        labels = torch.tensor([torch.argmax(x) for x in real]).to(gym.device)
 
         outputs = self._model(inputs, labels=labels)
         loss, logits = outputs[:2]
@@ -87,8 +87,8 @@ class DistilBertEncoder:
     def numerical_train_function(model, data, gym, test=False):
         input, output = data
 
-        input = input.to(device)
-        labels = torch.tensor([torch.argmax(x) for x in output]).to(device)
+        input = input.to(gym.device)
+        labels = torch.tensor([torch.argmax(x) for x in output]).to(gym.device)
 
         outputs = self._model(inputs, labels=labels)
         loss, logits = outputs[:2]
@@ -131,7 +131,7 @@ class DistilBertEncoder:
 
             input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
             tokenized_max_len = max([len(x) for x in input])
-            input = [x + [self._pad_id] * (tokenized_max_len - len(x)) for x in input]
+            input = torch.Tensor([x + [self._pad_id] * (tokenized_max_len - len(x)) for x in input])
 
             real = training_data['targets'][0]['encoded_output']
 
