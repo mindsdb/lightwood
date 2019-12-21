@@ -66,10 +66,11 @@ class DistilBertEncoder:
 
     @staticmethod
     def categorical_train_function(model, data, gym, test=False):
-        input, output = data
+        print(data)
+        input, real = data
 
         input = input.to(device)
-        labels = torch.tensor([torch.argmax(x) for x in output]).to(device)
+        labels = torch.tensor([torch.argmax(x) for x in real]).to(device)
 
         outputs = self._model(inputs, labels=labels)
         loss, logits = outputs[:2]
@@ -134,7 +135,7 @@ class DistilBertEncoder:
 
             real = training_data['targets'][0]['encoded_output']
 
-            merged_data = list(zip(priming_data,priming_data))
+            merged_data = list(zip(input,real))
 
             train_data_loader = DataLoader(merged_data[:int(len(merged_data)*4/5)], batch_size=batch_size, shuffle=True)
             test_data_loader = DataLoader(merged_data[int(len(merged_data)*4/5):], batch_size=batch_size, shuffle=True)
