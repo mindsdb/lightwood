@@ -1,13 +1,17 @@
-import torch
-import numpy as np
 import math
 import logging
 import random
+
+import numpy as np
+import torch
+from torch.utils.data import DataLoader
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.encoders.categorical.onehot import OneHotEncoder
+from lightwood.api.gym import Gym
+from lightwood.config.config import CONFIG
 
 
 MAX_LENGTH = 100
@@ -17,6 +21,7 @@ class CategoricalAutoEncoder:
     def __init__(self, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
+        self.name = 'Categorical Autoencoder'
         self.net = None
         self.encoder = None
         self.decoder = None
@@ -27,7 +32,18 @@ class CategoricalAutoEncoder:
             self.max_encoded_length = None
         else:
             self.max_encoded_length = 100
+        self.max_training_time = CONFIG.MAX_ENCODER_TRAINING_TIME
 
+    def _train_callback(self, error, real_buff, predicted_buff):
+        print(f'{self.name} reached a loss of {error} while training !')
+
+    def _encoder_targets(self, data):
+        oh_encoded_categories = self.onehot_encoder.encode(data)
+        target = oh_encoded_categories.cpu().numpy()
+        target_indexes = np.where(target>0)[1]
+        targets_c = torch.LongTensor(target_indexes)
+        labels = targets_c.to(self.net.device)
+        return labels
 
     def prepare_encoder(self, priming_data):
         random.seed(len(priming_data))
@@ -39,6 +55,7 @@ class CategoricalAutoEncoder:
 
         input_len = self.onehot_encoder._lang.n_words
         self.use_autoencoder = self.max_encoded_length is not None and input_len > self.max_encoded_length
+
         if self.use_autoencoder:
             logging.info('Preparing a categorical autoencoder, this might take a while')
 
@@ -49,6 +66,18 @@ class CategoricalAutoEncoder:
             criterion = torch.nn.CrossEntropyLoss()
             optimizer = Ranger(self.net.parameters())
 
+            gym = Gym(model=self.net, optimizer=optimizer, scheduler=None, loss_criterion=criterion, device=self.net.device, name=self.name, input_encoder=self.onehot_encoder.encode, output_encoder=self._encoder_targets)
+
+            batch_size = min(200, int(len(priming_data)/50))
+
+            train_data_loader = DataLoader(list(zip(priming_data,priming_data)), batch_size=batch_size, shuffle=True)
+            test_data_loader = None
+
+            best_model, error, training_time = gym.fit(train_data_loader, test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=5)
+
+            self.net = best_model.to(self.net.device)
+
+            '''
             batch_size = min(200, int(len(priming_data)/50))
 
             error_buffer = []
@@ -87,6 +116,7 @@ class CategoricalAutoEncoder:
                     if delta_mean < 0 or error < self.desired_error:
                         break
 
+            '''
             modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential and type(module) != DefaultNet]
             self.encoder = torch.nn.Sequential(*modules[0:2])
             self.decoder = torch.nn.Sequential(*modules[2:3])
