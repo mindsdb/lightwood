@@ -72,7 +72,7 @@ class DistilBertEncoder:
         input = input.to(gym.device)
         labels = torch.tensor([torch.argmax(x) for x in real]).to(gym.device)
 
-        outputs = self._model(inputs, labels=labels)
+        outputs = gym.model(inputs, labels=labels)
         loss, logits = outputs[:2]
 
         if not test:
@@ -90,7 +90,7 @@ class DistilBertEncoder:
         input = input.to(gym.device)
         labels = torch.tensor([torch.argmax(x) for x in output]).to(gym.device)
 
-        outputs = self._model(inputs, labels=labels)
+        outputs = gym.model(inputs, labels=labels)
         loss, logits = outputs[:2]
 
         if not test:
