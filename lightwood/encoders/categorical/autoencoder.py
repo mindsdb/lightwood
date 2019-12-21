@@ -77,46 +77,6 @@ class CategoricalAutoEncoder:
 
             self.net = best_model.to(self.net.device)
 
-            '''
-            batch_size = min(200, int(len(priming_data)/50))
-
-            error_buffer = []
-            for epcohs in range(5000):
-                running_loss = 0
-                error = 0
-                random.shuffle(priming_data)
-                itterable_priming_data = zip(*[iter(priming_data)]*batch_size)
-
-                for i, data in enumerate(itterable_priming_data):
-                    oh_encoded_categories = self.onehot_encoder.encode(data)
-                    oh_encoded_categories = oh_encoded_categories.to(self.net.device)
-                    self.net(oh_encoded_categories)
-
-                    optimizer.zero_grad()
-
-                    outputs = self.net(oh_encoded_categories)
-
-                    target = oh_encoded_categories.cpu().numpy()
-                    target_indexes = np.where(target>0)[1]
-                    targets_c = torch.LongTensor(target_indexes)
-                    labels = targets_c.to(self.net.device)
-
-                    loss = criterion(outputs, labels)
-                    loss.backward()
-                    optimizer.step()
-                    running_loss += loss.item()
-                    error = running_loss / (i + 1)
-                    error_buffer.append(error)
-
-                logging.info(f'Categorial autoencoder training error: {error}')
-                if len(error_buffer) > 5:
-                    error_buffer.append(error)
-                    error_buffer = error_buffer[-5:]
-                    delta_mean = np.mean(error_buffer)
-                    if delta_mean < 0 or error < self.desired_error:
-                        break
-
-            '''
             modules = [module for module in self.net.modules() if type(module) != torch.nn.Sequential and type(module) != DefaultNet]
             self.encoder = torch.nn.Sequential(*modules[0:2])
             self.decoder = torch.nn.Sequential(*modules[2:3])
