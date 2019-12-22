@@ -27,7 +27,8 @@ class Gym():
         started = time.time()
         epoch = 0
         lowest_test_error = None
-        test_error_buff = []
+        last_test_error = None
+        test_error_delta_buff = []
 
         keep_training = True
 
@@ -103,14 +104,12 @@ class Gym():
                     lowest_test_error = test_error
                     self.best_model = copy.deepcopy(self.model).to('cpu')
 
-                test_error_buff.append(test_error)
+                if last_test_error is None:
+                    test_error_delta_buff.append(0)
+                else:
+                    test_error_delta_buff.append(last_test_error - test_error)
 
-                print('\n\n===============')
-                print(desired_error)
-                print(test_error)
-                print(lowest_test_error)
-                print(lowest_test_error < desired_error)
-                print('-------------------------')
+                last_test_error = test_error
 
                 if (time.time() - started) > max_time:
                     keep_training = False
@@ -118,12 +117,11 @@ class Gym():
                 if lowest_test_error < desired_error:
                     keep_training = False
 
-                if len(test_error_buff) >= max_unimproving_models:
-                    delta_mean = np.mean(test_error_buff[-max_unimproving_models:])
+                if len(test_error_delta_buff) >= max_unimproving_models:
+                    delta_mean = np.mean(test_error_delta_buff[-max_unimproving_models:])
+                    print(delta_mean)
                     if delta_mean < 0:
                         keep_training = False
-
-                print(keep_training)
 
                 callback(test_error, real_buff, predicted_buff)
 
