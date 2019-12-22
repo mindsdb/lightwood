@@ -87,7 +87,7 @@ class DistilBertEncoder:
         input = input.to(gym.device)
         real = real.to(gym.device)
 
-        embeddings = backbone(inputs)[0][:,0,:]
+        embeddings = backbone(input)[0][:,0,:]
         outputs = gym.model(embeddings)
 
         loss = gym.criterion(outputs, real)
@@ -225,7 +225,7 @@ class DistilBertEncoder:
             self._model_type = 'generic_target_predictor'
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
             batch_size = 10
-            
+
             self._head = DefaultNet(ds=None, dynamic_parameters={},shape=funnel(768, sum( [ len(x['encoded_output'][0]) for x in training_data['targets'] ] ), depth=5), selfaware=False)
 
             no_decay = ['bias', 'LayerNorm.weight']
@@ -252,6 +252,7 @@ class DistilBertEncoder:
             for i in range(len(real)):
                 for target in training_data['targets']:
                     real[i] = real[i] + target['encoded_output'][i]
+            real = torch.tensor(real)
 
             merged_data = list(zip(input,real))
 
@@ -260,7 +261,7 @@ class DistilBertEncoder:
 
             self._model.eval()
 
-            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=5, custom_train_func=partial(self.categorical_train_function,test=False), custom_test_func=partial(self.numerical_train_function, backbone=self._model, test=True))
+            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=5, custom_train_func=partial(self.numerical_train_function, backbone=self._model, test=False), custom_test_func=partial(self.numerical_train_function, backbone=self._model, test=True))
 
             self._head = best_model.to(self.device)
 
