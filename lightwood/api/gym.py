@@ -66,7 +66,7 @@ class Gym():
 
             if epoch % eval_every_x_epochs == 0:
                 if test_data_loader is not None:
-                    running_loss = 0.0
+                    test_running_loss = 0.0
                     test_error = 0
                     self.model = self.model.eval()
                     real_buff = []
@@ -93,8 +93,8 @@ class Gym():
                         else:
                             loss = custom_test_func(self.model, data, self)
 
-                        running_loss += loss.item()
-                        test_error = running_loss/(i + 1)
+                        test_running_loss += loss.item()
+                        test_error = test_running_loss/(i + 1)
                 else:
                     test_error = error
                     real_buff = None
@@ -119,8 +119,7 @@ class Gym():
 
                 if len(test_error_delta_buff) >= max_unimproving_models:
                     delta_mean = np.mean(test_error_delta_buff[-max_unimproving_models:])
-                    print(delta_mean)
-                    if delta_mean < 0:
+                    if delta_mean <= 0:
                         keep_training = False
 
                 callback(test_error, real_buff, predicted_buff)
