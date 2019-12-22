@@ -136,8 +136,8 @@ class DistilBertEncoder:
 
             merged_data = list(zip(input,real))
 
-            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*4/5)], batch_size=batch_size, shuffle=True)
-            test_data_loader = DataLoader(merged_data[int(len(merged_data)*4/5):], batch_size=batch_size, shuffle=True)
+            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
+            test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
 
             best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=partial(self.categorical_train_function,test=False), custom_test_func=partial(self.categorical_train_function,test=True))
 
@@ -180,8 +180,8 @@ class DistilBertEncoder:
 
             merged_data = list(zip(input,real))
 
-            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*4/5)], batch_size=batch_size, shuffle=True)
-            test_data_loader = DataLoader(merged_data[int(len(merged_data)*4/5):], batch_size=batch_size, shuffle=True)
+            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
+            test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
 
             self._model.eval()
 
