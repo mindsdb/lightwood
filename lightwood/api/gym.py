@@ -105,15 +105,26 @@ class Gym():
 
                 test_error_buff.append(test_error)
 
+                print('\n\n===============')
+                print(desired_error)
+                print(test_error)
+                print(lowest_test_error)
+                print(lowest_test_error < desired_error)
+                print('-------------------------')
+
                 if (time.time() - started) > max_time:
                     keep_training = False
+
                 if lowest_test_error < desired_error:
                     keep_training = False
+
                 if len(test_error_buff) >= max_unimproving_models:
                     delta_mean = np.mean(test_error_buff[-max_unimproving_models:])
                     if delta_mean < 0:
                         keep_training = False
 
-                callback(error, real_buff, predicted_buff)
+                print(keep_training)
+
+                callback(test_error, real_buff, predicted_buff)
 
         return self.best_model, lowest_test_error, int(time.time() - started)

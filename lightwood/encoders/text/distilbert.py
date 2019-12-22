@@ -66,9 +66,7 @@ class DistilBertEncoder:
 
     @staticmethod
     def categorical_train_function(model, data, gym, test=False):
-        print(data)
         input, real = data
-
         input = input.to(gym.device)
         labels = torch.tensor([torch.argmax(x) for x in real]).to(gym.device)
 
@@ -80,18 +78,20 @@ class DistilBertEncoder:
             gym.optimizer.step()
             gym.scheduler.step()
             gym.optimizer.zero_grad()
-
         return loss
 
     @staticmethod
-    def numerical_train_function(model, data, gym, test=False):
-        input, output = data
+    def numerical_train_function(model, data, gym, backbone, test=False):
+        input, real = data
 
         input = input.to(gym.device)
-        labels = torch.tensor([torch.argmax(x) for x in output]).to(gym.device)
+        real = real.to(gym.device)
 
-        outputs = gym.model(input, labels=labels)
-        loss, logits = outputs[:2]
+        embeddings = backbone(inputs)[0][:,0,:]
+        outputs = gym.model(embeddings)
+
+        loss = gym.criterion(outputs, real)
+        loss.backward()
 
         if not test:
             loss.backward()
@@ -131,7 +131,7 @@ class DistilBertEncoder:
 
             input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
             tokenized_max_len = max([len(x) for x in input])
-            input = torch.Tensor([x + [self._pad_id] * (tokenized_max_len - len(x)) for x in input])
+            input = torch.tensor([x + [self._pad_id] * (tokenized_max_len - len(x)) for x in input])
 
             real = training_data['targets'][0]['encoded_output']
 
@@ -224,11 +224,8 @@ class DistilBertEncoder:
             self.desired_error = 0.01
             self._model_type = 'generic_target_predictor'
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
-            if self.aim == ENCODER_AIM.SPEED:
-                batch_size = 40
-            else:
-                batch_size = 40
-
+            batch_size = 10
+            
             self._head = DefaultNet(ds=None, dynamic_parameters={},shape=funnel(768, sum( [ len(x['encoded_output'][0]) for x in training_data['targets'] ] ), depth=5), selfaware=False)
 
             no_decay = ['bias', 'LayerNorm.weight']
@@ -245,6 +242,29 @@ class DistilBertEncoder:
 
             criterion = torch.nn.MSELoss()
 
+            gym = Gym(model=self._head, optimizer=optimizer, scheduler=scheduler, loss_criterion=criterion, device=self.device, name=self.name)
+
+            input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
+            tokenized_max_len = max([len(x) for x in input])
+            input = torch.tensor([x + [self._pad_id] * (tokenized_max_len - len(x)) for x in input])
+
+            real = [[]] * len(training_data['targets'][0]['encoded_output'])
+            for i in range(len(real)):
+                for target in training_data['targets']:
+                    real[i] = real[i] + target['encoded_output'][i]
+
+            merged_data = list(zip(input,real))
+
+            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*4/5)], batch_size=batch_size, shuffle=True)
+            test_data_loader = DataLoader(merged_data[int(len(merged_data)*4/5):], batch_size=batch_size, shuffle=True)
+
+            self._model.eval()
+
+            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=5, custom_train_func=partial(self.categorical_train_function,test=False), custom_test_func=partial(self.numerical_train_function, backbone=self._model, test=True))
+
+            self._head = best_model.to(self.device)
+
+            '''
             #self._model = torch.nn.Sequential(self._model, self._head)
             self._head.train()
             self._model.eval()
@@ -325,7 +345,7 @@ class DistilBertEncoder:
                 if started + self.max_training_time < time.time():
                     self._head = best_head.to(self.device)
                     break
-
+            '''
         else:
             self._model_type = 'embeddings_generator'
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
