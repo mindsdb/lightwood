@@ -90,8 +90,7 @@ class DistilBertEncoder:
         embeddings = backbone(input)[0][:,0,:]
         outputs = gym.model(embeddings)
 
-        loss = gym.criterion(outputs, real)
-        loss.backward()
+        loss = gym.loss_criterion(outputs, real)
 
         if not test:
             loss.backward()
