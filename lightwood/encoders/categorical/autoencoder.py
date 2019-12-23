@@ -35,7 +35,7 @@ class CategoricalAutoEncoder:
         self.max_training_time = CONFIG.MAX_ENCODER_TRAINING_TIME
 
     def _train_callback(self, error, real_buff, predicted_buff):
-        print(f'{self.name} reached a loss of {error} while training !')
+        logging.info(f'{self.name} reached a loss of {error} while training !')
 
     def _encoder_targets(self, data):
         oh_encoded_categories = self.onehot_encoder.encode(data)
