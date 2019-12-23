@@ -239,6 +239,8 @@ class Predictor:
             else:
                 logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
 
+
+        '''
         eval_next_on_epoch = eval_every_x_epochs
         error_delta_buffer = []  # this is a buffer of the delta of test and train error
         delta_mean = 0
@@ -309,16 +311,6 @@ class Predictor:
                 # Decide if we should stop training
                 stop_training = False
 
-                '''
-                # Two other potential conditions, not using them for now
-                # Stop if the error on the testing data is close to zero
-                if test_error < 0.000015:
-                    stop_training = True
-
-                # If we've seen no imporvement for a long while, stop
-                if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
-                    stop_training = True
-                '''
 
                 ## Stop if the model is overfitting
                 if delta_mean < 0 and len(error_delta_buffer) > 9:
@@ -335,6 +327,7 @@ class Predictor:
                     self.train_accuracy = self.calculate_accuracy(test_data_ds)
                     self.overall_certainty = certainty
                     break
+        '''
 
         # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers
         self._mixer.encoders = from_data_ds.encoders

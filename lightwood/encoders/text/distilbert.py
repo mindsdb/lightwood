@@ -62,7 +62,7 @@ class DistilBertEncoder:
 
 
     def _train_callback(self, error, real_buff, predicted_buff):
-        print(f'{self.name} reached a loss of {error} while training !')
+        logging.info(f'{self.name} reached a loss of {error} while training !')
 
     @staticmethod
     def categorical_train_function(model, data, gym, test=False):
