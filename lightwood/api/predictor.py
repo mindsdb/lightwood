@@ -282,8 +282,6 @@ class Predictor:
                         if delta_mean <= 0:
                             stop_training = True
 
-                    certainty =
-
                     if callback_on_iter is not None:
                         callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
