@@ -280,6 +280,8 @@ class Predictor:
                         delta_mean = np.mean(test_error_delta_buff[-10:])
                         if delta_mean <= 0:
                             stop_training = True
+                    else:
+                        delta_mean = 0
 
                     if callback_on_iter is not None:
                         callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
