@@ -236,7 +236,6 @@ class Predictor:
         started = time.time()
         epoch = 0
         eval_next_on_epoch = eval_every_x_epochs
-        is_subset
 
         for subset_id in [*from_data_ds.subsets.keys(),'full']:
             if subset_id == 'full':
@@ -246,7 +245,7 @@ class Predictor:
                 train_ds = from_data_ds
                 test_ds = test_data_ds
 
-            lowest_test_error = None
+            lowest_error = None
             last_test_error = None
             test_error_delta_buff = []
             best_model = None
@@ -271,10 +270,10 @@ class Predictor:
 
                     last_test_error = test_error
 
-                    if (time.time() - started) > max_time:
+                    if (time.time() - started) > stop_training_after_seconds:
                         stop_training = True
 
-                    if lowest_test_error < 0.0001:
+                    if lowest_error < 0.0001:
                         stop_training = True
 
                     if len(test_error_delta_buff) >= 10:
