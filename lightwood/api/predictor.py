@@ -306,7 +306,7 @@ class Predictor:
 
 
                     # Stop if we're past the time limit alloted for training
-                    if (int(time.time()) - started_training_at) > stop_training_after_seconds:
+                    if (int(time.time()) - started) > stop_training_after_seconds:
                        stop_training = True
 
                     if stop_training:
