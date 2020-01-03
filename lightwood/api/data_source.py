@@ -14,6 +14,7 @@ class SubSet(Dataset):
     def __init__(self, data_source, indexes):
         self.data_source = data_source
         self.index_mapping = {}
+        self.data_source_attributes = ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache']
         for i in range(len(indexes)):
             self.index_mapping[i] = indexes[i]
 
@@ -23,6 +24,26 @@ class SubSet(Dataset):
 
     def __getitem__(self, idx):
         return self.data_source[self.index_mapping[idx]]
+
+    def get_feature_names(self, where = 'input_features'):
+        return self.data_source.get_feature_names()
+
+    def __getattr__(self, item):
+        if item in self.data_source_attributes:
+            return self.data_source.__getitem__(item)
+        else:
+            try:
+                return self.__getitem__(item)
+            except KeyError:
+                raise AttributeError(item)
+
+    def __setattr__(self, item, value):
+        if item in self.data_source_attributes:
+            return dict.__setattr__(self.data_source, item, value)
+        elif self.__dict__.has_key(item):
+            dict.__setattr__(self, item, value)
+        else:
+            self.__setitem__(item, value)
 
 
 class DataSource(Dataset):
