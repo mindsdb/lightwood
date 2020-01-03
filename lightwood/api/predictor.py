@@ -238,12 +238,14 @@ class Predictor:
         eval_next_on_epoch = eval_every_x_epochs
 
         for subset_id in [*from_data_ds.subsets.keys(),'full']:
-            if subset_id == 'full':
+            if subset_id != 'full':
                 train_ds = from_data_ds.subsets[subset_id]
                 test_ds = test_data_ds.subsets[subset_id]
             else:
                 train_ds = from_data_ds
                 test_ds = test_data_ds
+
+            print(f'Training on subset {subset_id}')
 
             lowest_error = None
             last_test_error = None
