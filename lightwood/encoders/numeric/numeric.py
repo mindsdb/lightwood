@@ -59,7 +59,10 @@ class NumericEncoder:
                 vector[3] = 1
 
             try:
-                number = float(number)
+                try:
+                    number = float(number)
+                except:
+                    number = float(number.replace(',','.'))
             except:
                 logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
                 ret.append(vector)
