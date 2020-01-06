@@ -50,14 +50,12 @@ class Predictor:
 
         self.config = config
 
-        self._generate_config = True if output is not None else False # this is if we need to automatically generate a configuration variable
+        self._generate_config = True if output is not None or self.config is None else False # this is if we need to automatically generate a configuration variable
 
         self._output_columns = output
         self._input_columns = None
 
-        self._encoders = None
         self._mixer = None
-        self._mixers = {}
 
         self.train_accuracy = None
         self.overall_certainty = None
@@ -183,7 +181,7 @@ class Predictor:
             mixer_class = NnMixer
 
         # Initialize data sources
-        nr_subsets = 4
+        nr_subsets = 3
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
 
@@ -241,11 +239,11 @@ class Predictor:
             if subset_id != 'full':
                 train_ds = from_data_ds.subsets[subset_id]
                 test_ds = test_data_ds.subsets[subset_id]
+                logging.info(f'Training on subset {subset_id}')
             else:
                 train_ds = from_data_ds
                 test_ds = test_data_ds
-
-            print(f'Training on subset {subset_id}')
+                logging.info(f'Training on full dataset')
 
             lowest_error = None
             last_test_error = None
@@ -303,7 +301,7 @@ class Predictor:
                     '''
 
                     ## Stop if the model is overfitting
-                    if delta_mean < 0 and len(error_delta_buffer) > 9:
+                    if delta_mean < 0 and len(test_error_delta_buff) > 9:
                         stop_training = True
 
 
@@ -364,6 +362,7 @@ class Predictor:
                 }
             else:
                 # Note: We use this method instead of using `encoded_predictions` since the values in encoded_predictions are never prefectly 0 or 1, and this leads to rather large unwaranted different in the r2 score, re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
+
                 encoded_predictions = ds.encoders[output_column].encode(predictions[output_column]["predictions"])
                 accuracies[output_column] = {
                     'function': 'r2_score',
