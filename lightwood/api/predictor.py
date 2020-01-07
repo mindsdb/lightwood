@@ -270,43 +270,21 @@ class Predictor:
 
                     last_test_error = test_error
 
-                    if (time.time() - started) > stop_training_after_seconds:
-                        stop_training = True
-
-                    if lowest_error < 0.0001:
-                        stop_training = True
-
-                    if len(test_error_delta_buff) >= 10:
-                        delta_mean = np.mean(test_error_delta_buff[-10:])
-                        if delta_mean <= 0:
-                            stop_training = True
-                    else:
-                        delta_mean = 0
+                    stop_training = False
+                    delta_mean = np.mean(test_error_delta_buff[-10:])
 
                     if callback_on_iter is not None:
                         callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
-
-                    # Decide if we should stop training
-                    stop_training = False
-
-                    '''
-                    # Two other potential conditions, not using them for now
-                    # Stop if the error on the testing data is close to zero
-                    if test_error < 0.000015:
-                        stop_training = True
-
-                    # If we've seen no imporvement for a long while, stop
-                    if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
-                        stop_training = True
-                    '''
-
+        
                     ## Stop if the model is overfitting
                     if delta_mean < 0 and len(test_error_delta_buff) > 9:
                         stop_training = True
 
-
+                    print(started)
+                    print(time.time() - started)
+                    print(stop_training_after_seconds)
                     # Stop if we're past the time limit alloted for training
-                    if (int(time.time()) - started) > stop_training_after_seconds:
+                    if (time.time() - started) > stop_training_after_seconds:
                        stop_training = True
 
                     if stop_training:
