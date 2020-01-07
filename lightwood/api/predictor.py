@@ -275,14 +275,11 @@ class Predictor:
 
                     if callback_on_iter is not None:
                         callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
-        
+
                     ## Stop if the model is overfitting
                     if delta_mean < 0 and len(test_error_delta_buff) > 9:
                         stop_training = True
 
-                    print(started)
-                    print(time.time() - started)
-                    print(stop_training_after_seconds)
                     # Stop if we're past the time limit alloted for training
                     if (time.time() - started) > stop_training_after_seconds:
                        stop_training = True
