@@ -46,7 +46,7 @@ def run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
 
     predictor = Predictor(config)
     # stop_training_after_seconds given in order to not get timeouts in travis
-    predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=1, stop_training_after_seconds=20)
+    predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=1, stop_training_after_seconds=1)
 
     predictor.save('test.pkl')
 
