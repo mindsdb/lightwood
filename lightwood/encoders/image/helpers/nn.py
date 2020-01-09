@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import PIL
 import torch
@@ -10,8 +11,6 @@ from torchvision.utils import save_image
 import requests
 from io import BytesIO
 
-if not os.path.exists('./mlp_img'):
-    os.mkdir('./mlp_img')
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -116,7 +115,10 @@ class NnEncoderHelper:
                       .format(epoch + 1, num_epochs, loss.data))
                 if epoch % num_epochs == 0:
                     pic = to_img(output.cpu().data[0:-2])
+                    if not os.path.exists('./mlp_img'):
+                        os.mkdir('./mlp_img')
                     save_image(pic, './mlp_img/image_{}.png'.format(i))
+        shutil.rmtree('./mlp_img')
         torch.save(self.model.state_dict(), './sim_autoencoder.pth')
 
     def _transform_images(self, images):
