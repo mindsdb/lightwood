@@ -3,12 +3,6 @@ import math
 import logging
 import sys
 
-'''
-Numeric Input features should be
-[value as is, is_not_null]
-Output features
-[is_negative, is_zero, log(abs(value)) if !=0 else 0] (
-'''
 
 class NumericEncoder:
 
@@ -19,6 +13,7 @@ class NumericEncoder:
         self._mean = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
+        self._is_target = is_target
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -54,33 +49,31 @@ class NumericEncoder:
         ret = []
 
         for number in data:
-            vector_len = 4
-            vector = [0]*vector_len
-
-            if number is None:
-                vector[3] = 0
-                ret.append(vector)
-                continue
-            else:
-                vector[3] = 1
-
             try:
                 try:
                     number = float(number)
                 except:
+                    # Some data cleanup for an edge case that shows up a lot when lightwood isn't used with mindsdb
                     number = float(number.replace(',','.'))
             except:
                 logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
-                ret.append(vector)
+                number = None
                 continue
 
-            if number < 0:
-                vector[0] = 1
-
-            if number == 0:
-                vector[2] = 1
+            if self._is_target:
+                vector = [0]*3
+                if number < 0:
+                    vector[0] = 1
+                if number == 0:
+                    vector[2] = 1
+                else:
+                    vector[1] = math.log(abs(number))
             else:
-                vector[1] = math.log(abs(number))
+                vector = [0]*2
+                if number is None:
+                    vector[1] = 1
+                else:
+                    vector[0] = number
 
             ret.append(vector)
 
@@ -90,29 +83,47 @@ class NumericEncoder:
     def decode(self, encoded_values):
         ret = []
         for vector in encoded_values.tolist():
-            if not math.isnan(vector[0]):
-                is_negative = True if abs(round(vector[0])) == 1 else False
-            else:
-                logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                is_negative = False
+            if self._is_target:
+                if not math.isnan(vector[0]):
+                    is_negative = True if abs(round(vector[0])) == 1 else False
+                else:
+                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                    is_negative = False
 
-            if not math.isnan(vector[1]):
-                encoded_nr = vector[1]
-            else:
-                logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                encoded_nr = 0
+                if not math.isnan(vector[1]):
+                    encoded_nr = vector[1]
+                else:
+                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                    encoded_nr = 0
 
-            if not math.isnan(vector[2]):
-                is_zero = True if abs(round(vector[2])) == 1 else False
+                if not math.isnan(vector[2]):
+                    is_zero = True if abs(round(vector[2])) == 1 else False
+                else:
+                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                    is_zero = False
+                is_none = False
+
+                try:
+                    real_value = math.exp(encoded_nr)
+                    if is_negative:
+                        real_value = -real_value
+                except:
+                    if self._type == 'int':
+                        real_value = pow(2,63)
+                    else:
+                        real_value = float('inf')
+
+                if self._type == 'int':
+                    real_value = round(real_value)
             else:
-                logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                 is_zero = False
-
-            if not math.isnan(vector[3]):
-                is_none = True if abs(round(vector[3])) == 0 else False
-            else:
-                logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                is_none = True
+                is_negative = False
+                real_value = vector[0]
+                if not math.isnan(vector[3]):
+                    is_none = True if abs(round(vector[3])) == 0 else False
+                else:
+                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                    is_none = True
 
             if is_none:
                 ret.append(None)
@@ -121,19 +132,6 @@ class NumericEncoder:
             if is_zero:
                 ret.append(0)
                 continue
-
-            try:
-                real_value = math.exp(encoded_nr)
-                if is_negative:
-                    real_value = -real_value
-            except:
-                if self._type == 'int':
-                    real_value = pow(2,63)
-                else:
-                    real_value = float('inf')
-
-            if self._type == 'int':
-                real_value = round(real_value)
 
             ret.append(real_value)
 
