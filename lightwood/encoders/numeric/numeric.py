@@ -58,7 +58,6 @@ class NumericEncoder:
             except:
                 logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
                 number = None
-                continue
 
             if self._is_target:
                 vector = [0]*3
@@ -71,8 +70,9 @@ class NumericEncoder:
             else:
                 vector = [0]*2
                 if number is None:
-                    vector[1] = 1
+                    vector[1] = 0
                 else:
+                    vector[1] = 1
                     vector[0] = number
 
             ret.append(vector)
@@ -134,7 +134,7 @@ class NumericEncoder:
                 continue
 
             ret.append(real_value)
-
+            print(ret)
         return ret
 
 
