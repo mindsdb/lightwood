@@ -3,6 +3,12 @@ import math
 import logging
 import sys
 
+'''
+Numeric Input features should be
+[value as is, is_not_null]
+Output features
+[is_negative, is_zero, log(abs(value)) if !=0 else 0] (
+'''
 
 class NumericEncoder:
 
