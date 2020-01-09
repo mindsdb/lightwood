@@ -170,6 +170,7 @@ class Predictor:
 
         from_data_ds.training = True
 
+        mixer_class = NnMixer
         mixer_params = {}
 
         if 'mixer' in self.config:
@@ -177,8 +178,6 @@ class Predictor:
                 mixer_class = self.config['mixer']['class']
             if 'attrs' in  self.config['mixer']:
                 mixer_params = self.config['mixer']['attrs']
-        else:
-            mixer_class = NnMixer
 
         # Initialize data sources
         nr_subsets = 3
