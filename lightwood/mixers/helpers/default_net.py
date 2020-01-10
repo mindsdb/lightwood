@@ -85,7 +85,6 @@ class DefaultNet(torch.nn.Module):
             if ind < len(shape) - 2:
                 layers.append(rectifier())
 
-
         self.net = torch.nn.Sequential(*layers)
 
         if self.selfaware:

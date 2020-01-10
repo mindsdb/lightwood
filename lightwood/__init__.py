@@ -1,3 +1,4 @@
+import torchvision
 import sys
 
 

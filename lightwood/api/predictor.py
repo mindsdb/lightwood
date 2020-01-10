@@ -50,15 +50,12 @@ class Predictor:
 
         self.config = config
 
-        self._generate_config = True if output is not None else False # this is if we need to automatically generate a configuration variable
+        self._generate_config = True if output is not None or self.config is None else False # this is if we need to automatically generate a configuration variable
 
         self._output_columns = output
         self._input_columns = None
 
-        self._encoders = None
         self._mixer = None
-        self._mixers = {}
-        self._stop_training_flag = False
 
         self.train_accuracy = None
         self.overall_certainty = None
@@ -119,7 +116,6 @@ class Predictor:
 
         :return: None
         """
-        self._stop_training_flag = False
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
         # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
@@ -174,18 +170,20 @@ class Predictor:
 
         from_data_ds.training = True
 
+        mixer_class = NnMixer
         mixer_params = {}
 
         if 'mixer' in self.config:
-            mixer_class = self.config['mixer']['class']
+            if 'class' in  self.config['mixer']:
+                mixer_class = self.config['mixer']['class']
             if 'attrs' in  self.config['mixer']:
                 mixer_params = self.config['mixer']['attrs']
-        else:
-            mixer_class = NnMixer
-
-        from_data_ds.prepare_encoders()
 
         # Initialize data sources
+        nr_subsets = 3
+        from_data_ds.prepare_encoders()
+        from_data_ds.create_subsets(nr_subsets)
+
         try:
             mixer_class({}).fit_data_source(from_data_ds)
         except:
@@ -198,11 +196,7 @@ class Predictor:
         test_data_ds.transformer = from_data_ds.transformer
         test_data_ds.encoders = from_data_ds.encoders
         test_data_ds.output_weights = from_data_ds.output_weights
-        # Initialize data sources
-
-        if input_size != len(test_data_ds[0][0]):
-            logging.error("Test and Training dataframe members are of different size !")
-
+        test_data_ds.create_subsets(nr_subsets)
 
         if 'optimizer' in self.config:
             optimizer = self.config['optimizer']()
@@ -225,8 +219,8 @@ class Predictor:
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=training_time_per_iteration, max_epochs=None))
             logging.info('Using hyperparameter set: ', best_parameters)
         else:
-            # Run a bunch of models through AX and figure out some decent values to put in here
             best_parameters = {}
+
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
@@ -236,106 +230,89 @@ class Predictor:
             else:
                 logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
 
+        started = time.time()
+        epoch = 0
         eval_next_on_epoch = eval_every_x_epochs
-        error_delta_buffer = []  # this is a buffer of the delta of test and train error
-        delta_mean = 0
-        last_test_error = None
-        lowest_error = None
-        lowest_error_epoch = None
-        last_good_model = None
 
-        started_training_at = int(time.time())
-        #iterate over the iter_fit and see what the epoch and mixer error is
-        for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
-            if self._stop_training_flag == True:
-                logging.info('Learn has been stopped')
+        stop_training = False
+
+        for subset_iteration in [1,2]:
+            if stop_training:
                 break
-
-            logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
-
-            # see if it needs to be evaluated
-            if epoch >= eval_next_on_epoch and test_data_ds:
-                tmp_next = eval_next_on_epoch + eval_every_x_epochs
-                eval_next_on_epoch = tmp_next
-
-                test_error = mixer.error(test_data_ds)
-
-                # initialize lowest_error_variable if not initialized yet
-                if lowest_error is None:
-                    lowest_error = test_error
-                    lowest_error_epoch = epoch
-                    is_lowest_error = True
-
-                else:
-                    # define if this is the lowest test error we have had thus far
-                    if test_error < lowest_error:
-                        lowest_error = test_error
-                        lowest_error_epoch = epoch
-                        is_lowest_error = True
-                    else:
-                        is_lowest_error = False
-
-                if last_test_error is None:
-                    last_test_error = test_error
-
-                # it its the lowest error, make a FULL copy of the mixer so we can return only the best mixer at the end
-                if is_lowest_error:
-                    last_good_model = mixer.get_model_copy()
-
-                delta_error = last_test_error - test_error
-                last_test_error = test_error
-
-                # keep a stream of training errors delta, so that we can calculate if the mixer is starting to overfit.
-                # We assume if the delta of training error starts to increase
-                # delta is assumed as the difference between the test and train error
-                error_delta_buffer += [delta_error]
-                error_delta_buffer = error_delta_buffer[-10:]
-                delta_mean = np.mean(error_delta_buffer)
-                certainty = mixer.overall_certainty()
-                logging.info('certainty {certainty}'.format(certainty=certainty))
-
-                # update mixer and calculate accuracy
-                logging.debug('Delta of test error {delta}'.format(delta=delta_mean))
-
-                # if there is a callback function now its the time to call it
-                if callback_on_iter is not None:
-                    callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
-
-
-
-                # Decide if we should stop training
-                stop_training = False
-
-                '''
-                # Two other potential conditions, not using them for now
-                # Stop if the error on the testing data is close to zero
-                if test_error < 0.000015:
-                    stop_training = True
-
-                # If we've seen no imporvement for a long while, stop
-                if lowest_error_epoch + round(max(eval_every_x_epochs*6,epoch*0.5)) < epoch:
-                    stop_training = True
-                '''
-
-                ## Stop if the model is overfitting
-                if delta_mean < 0 and len(error_delta_buffer) > 9:
-                    stop_training = True
-
-
-                # Stop if we're past the time limit alloted for training
-                if (int(time.time()) - started_training_at) > stop_training_after_seconds:
-                   stop_training = True
-
+            for subset_id in [*from_data_ds.subsets.keys()]:
                 if stop_training:
-                    mixer.update_model(last_good_model)
-                    self._mixer = mixer
-                    self.train_accuracy = self.calculate_accuracy(test_data_ds)
-                    self.overall_certainty = certainty
                     break
 
-        # make sure that we update the encoders, we do this, so that the predictor or parent object can pickle the mixers
-        self._mixer.encoders = from_data_ds.encoders
+                subset_train_ds = from_data_ds.subsets[subset_id]
+                subset_test_ds = test_data_ds.subsets[subset_id]
 
+                lowest_error = None
+                last_test_error = None
+                last_subset_test_error = None
+                test_error_delta_buff = []
+                subset_test_error_delta_buff = []
+                best_model = None
+
+                #iterate over the iter_fit and see what the epoch and mixer error is
+                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds)):
+                    logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
+
+                    if epoch >= eval_next_on_epoch:
+                        # Prime the model on each subset for a bit
+                        if subset_iteration == 1:
+                            break
+
+                        eval_next_on_epoch += eval_every_x_epochs
+
+                        test_error = mixer.error(test_data_ds)
+                        subset_test_error = mixer.error(subset_test_ds)
+
+                        if lowest_error is None or test_error < lowest_error:
+                            lowest_error = test_error
+                            best_model = mixer.get_model_copy()
+
+                        if last_subset_test_error is None:
+                            subset_test_error_delta_buff.append(0)
+                        else:
+                            subset_test_error_delta_buff.append(last_subset_test_error - subset_test_error)
+
+                        if last_test_error is None:
+                            test_error_delta_buff.append(0)
+                        else:
+                            test_error_delta_buff.append(last_test_error - test_error)
+
+                        last_test_error = test_error
+
+                        delta_mean = np.mean(test_error_delta_buff[-10:])
+                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-10:])
+
+                        if callback_on_iter is not None:
+                            callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
+
+                        ## Stop if the model is overfitting
+                        if delta_mean < 0 and len(test_error_delta_buff) > 9:
+                            stop_training = True
+
+                        # Stop if we're past the time limit alloted for training
+                        if (time.time() - started) > stop_training_after_seconds:
+                           stop_training = True
+
+                        # If the trauining subset is overfitting on it's associated testing subset
+                        if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
+                            break
+                            
+                        if stop_training:
+                            mixer.update_model(best_model)
+                            self._mixer = mixer
+                            self.train_accuracy = self.calculate_accuracy(test_data_ds)
+                            self.overall_certainty = mixer.overall_certainty()
+                            if subset_id == 'full':
+                                logging.info('Finished training model !')
+                            else:
+                                logging.info('Finished fiting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
+                            break
+
+        self._mixer.encoders = from_data_ds.encoders
         return self
 
 
@@ -377,6 +354,7 @@ class Predictor:
                 }
             else:
                 # Note: We use this method instead of using `encoded_predictions` since the values in encoded_predictions are never prefectly 0 or 1, and this leads to rather large unwaranted different in the r2 score, re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
+
                 encoded_predictions = ds.encoders[output_column].encode(predictions[output_column]["predictions"])
                 accuracies[output_column] = {
                     'function': 'r2_score',
@@ -402,6 +380,3 @@ class Predictor:
         dill.dump(self.__dict__, f)
         self.convert_to_device()
         f.close()
-
-    def stop_training(self):
-        self._stop_training_flag = True
