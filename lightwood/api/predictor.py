@@ -289,10 +289,6 @@ class Predictor:
                         if callback_on_iter is not None:
                             callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
-                        # If the trauining subset is overfitting on it's associated testing subset
-                        if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
-                            break
-
                         ## Stop if the model is overfitting
                         if delta_mean < 0 and len(test_error_delta_buff) > 9:
                             stop_training = True
@@ -301,6 +297,10 @@ class Predictor:
                         if (time.time() - started) > stop_training_after_seconds:
                            stop_training = True
 
+                        # If the trauining subset is overfitting on it's associated testing subset
+                        if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
+                            break
+                            
                         if stop_training:
                             mixer.update_model(best_model)
                             self._mixer = mixer
