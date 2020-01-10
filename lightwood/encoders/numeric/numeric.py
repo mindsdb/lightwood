@@ -20,6 +20,7 @@ class NumericEncoder:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
         count = 0
+        abs_count = 0
         value_type = 'int'
         for number in priming_data:
             try:
@@ -35,12 +36,14 @@ class NumericEncoder:
             self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
             self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
             count += number
+            abs_count += abs(number)
 
             if int(number) != number:
                 value_type = 'float'
 
         self._type = value_type if self._type is None else self._type
         self._mean = count / len(priming_data)
+        self._abs_mean = abs_count / len(priming_data)
         self._prepared = True
 
     def encode(self, data):
@@ -73,10 +76,10 @@ class NumericEncoder:
                     vector[1] = 0
                 else:
                     vector[1] = 1
-                    vector[0] = number
+                    vector[0] = number/self._abs_mean
 
             ret.append(vector)
-
+        print(ret)
         return self._pytorch_wrapper(ret)
 
 
@@ -118,7 +121,7 @@ class NumericEncoder:
             else:
                 is_zero = False
                 is_negative = False
-                real_value = vector[0]
+                real_value = vector[0] * self._abs_mean
                 if not math.isnan(vector[3]):
                     is_none = True if abs(round(vector[3])) == 0 else False
                 else:
