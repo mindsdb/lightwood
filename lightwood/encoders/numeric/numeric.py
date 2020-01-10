@@ -79,7 +79,7 @@ class NumericEncoder:
                     vector[0] = number/self._abs_mean
 
             ret.append(vector)
-        print(ret)
+
         return self._pytorch_wrapper(ret)
 
 
@@ -137,7 +137,7 @@ class NumericEncoder:
                 continue
 
             ret.append(real_value)
-            print(ret)
+            
         return ret
 
 
