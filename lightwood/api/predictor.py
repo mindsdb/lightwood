@@ -234,65 +234,83 @@ class Predictor:
         epoch = 0
         eval_next_on_epoch = eval_every_x_epochs
 
-        for subset_id in [*from_data_ds.subsets.keys(),'full']:
-            if subset_id != 'full':
-                train_ds = from_data_ds.subsets[subset_id]
-                test_ds = test_data_ds.subsets[subset_id]
-                logging.info(f'Training on subset {subset_id}')
-            else:
-                train_ds = from_data_ds
-                test_ds = test_data_ds
-                logging.info(f'Training on full dataset')
+        stop_training = False
 
-            lowest_error = None
-            last_test_error = None
-            test_error_delta_buff = []
-            best_model = None
-            stop_training = False
+        for subset_iteration in [1,2]:
+            if stop_training:
+                break
+            for subset_id in [*from_data_ds.subsets.keys()]:
+                if stop_training:
+                    break
 
-            #iterate over the iter_fit and see what the epoch and mixer error is
-            for epoch, training_error in enumerate(mixer.iter_fit(train_ds)):
-                logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
+                subset_train_ds = from_data_ds.subsets[subset_id]
+                subset_test_ds = test_data_ds.subsets[subset_id]
 
-                if epoch >= eval_next_on_epoch:
-                    eval_next_on_epoch += eval_every_x_epochs
-                    test_error = mixer.error(test_data_ds)
+                lowest_error = None
+                last_test_error = None
+                last_subset_test_error = None
+                test_error_delta_buff = []
+                subset_test_error_delta_buff = []
+                best_model = None
 
-                    if lowest_error is None or test_error < lowest_error:
-                        lowest_error = test_error
-                        best_model = mixer.get_model_copy()
+                #iterate over the iter_fit and see what the epoch and mixer error is
+                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds)):
+                    logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
 
-                    if last_test_error is None:
-                        test_error_delta_buff.append(0)
-                    else:
-                        test_error_delta_buff.append(last_test_error - test_error)
+                    if epoch >= eval_next_on_epoch:
+                        # Prime the model on each subset for a bit
+                        if subset_iteration == 1:
+                            break
 
-                    last_test_error = test_error
+                        eval_next_on_epoch += eval_every_x_epochs
 
-                    stop_training = False
-                    delta_mean = np.mean(test_error_delta_buff[-10:])
+                        test_error = mixer.error(test_data_ds)
+                        subset_test_error = mixer.error(subset_test_ds)
 
-                    if callback_on_iter is not None:
-                        callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
+                        if lowest_error is None or test_error < lowest_error:
+                            lowest_error = test_error
+                            best_model = mixer.get_model_copy()
 
-                    ## Stop if the model is overfitting
-                    if delta_mean < 0 and len(test_error_delta_buff) > 9:
-                        stop_training = True
-
-                    # Stop if we're past the time limit alloted for training
-                    if (time.time() - started) > stop_training_after_seconds:
-                       stop_training = True
-
-                    if stop_training:
-                        mixer.update_model(best_model)
-                        self._mixer = mixer
-                        self.train_accuracy = self.calculate_accuracy(test_data_ds)
-                        self.overall_certainty = mixer.overall_certainty()
-                        if subset_id == 'full':
-                            logging.info('Finished training model !')
+                        if last_subset_test_error is None:
+                            subset_test_error_delta_buff.append(0)
                         else:
-                            logging.info('Finished fiting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
-                        break
+                            subset_test_error_delta_buff.append(last_subset_test_error - subset_test_error)
+
+                        if last_test_error is None:
+                            test_error_delta_buff.append(0)
+                        else:
+                            test_error_delta_buff.append(last_test_error - test_error)
+
+                        last_test_error = test_error
+
+                        delta_mean = np.mean(test_error_delta_buff[-10:])
+                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-10:])
+
+                        if callback_on_iter is not None:
+                            callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
+
+                        # If the trauining subset is overfitting on it's associated testing subset
+                        if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
+                            break
+
+                        ## Stop if the model is overfitting
+                        if delta_mean < 0 and len(test_error_delta_buff) > 9:
+                            stop_training = True
+
+                        # Stop if we're past the time limit alloted for training
+                        if (time.time() - started) > stop_training_after_seconds:
+                           stop_training = True
+
+                        if stop_training:
+                            mixer.update_model(best_model)
+                            self._mixer = mixer
+                            self.train_accuracy = self.calculate_accuracy(test_data_ds)
+                            self.overall_certainty = mixer.overall_certainty()
+                            if subset_id == 'full':
+                                logging.info('Finished training model !')
+                            else:
+                                logging.info('Finished fiting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
+                            break
 
         self._mixer.encoders = from_data_ds.encoders
         return self
