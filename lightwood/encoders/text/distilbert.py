@@ -2,9 +2,11 @@ import time
 import copy
 import random
 import logging
+from functools import partial
 
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
 from transformers import DistilBertModel, DistilBertForSequenceClassification, DistilBertTokenizer, AlbertModel, AlbertForSequenceClassification, DistilBertTokenizer, AlbertTokenizer, AdamW, get_linear_schedule_with_warmup
 
 from lightwood.config.config import CONFIG
@@ -13,10 +15,12 @@ from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.transformer import Transformer
+from lightwood.api.gym import Gym
 
 
 class DistilBertEncoder:
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
+        self.name = 'Text Transformer Encoder'
         self._tokenizer = None
         self._model = None
         self._pad_id = None
@@ -25,7 +29,7 @@ class DistilBertEncoder:
         self._max_ele = None
         self._prepared = False
         self._model_type = None
-        self.desired_error = 0.05
+        self.desired_error = 0.01
         self.max_training_time = CONFIG.MAX_ENCODER_TRAINING_TIME
         self._head = None
         # Possible: speed, balance, accuracy
@@ -56,6 +60,46 @@ class DistilBertEncoder:
             device_str = CONFIG.USE_DEVICE
         self.device = torch.device(device_str)
 
+
+    def _train_callback(self, error, real_buff, predicted_buff):
+        logging.info(f'{self.name} reached a loss of {error} while training !')
+
+    @staticmethod
+    def categorical_train_function(model, data, gym, test=False):
+        input, real = data
+        input = input.to(gym.device)
+        labels = torch.tensor([torch.argmax(x) for x in real]).to(gym.device)
+
+        outputs = gym.model(input, labels=labels)
+        loss, logits = outputs[:2]
+
+        if not test:
+            loss.backward()
+            gym.optimizer.step()
+            gym.scheduler.step()
+            gym.optimizer.zero_grad()
+        return loss
+
+    @staticmethod
+    def numerical_train_function(model, data, gym, backbone, test=False):
+        input, real = data
+
+        input = input.to(gym.device)
+        real = real.to(gym.device)
+
+        embeddings = backbone(input)[0][:,0,:]
+        outputs = gym.model(embeddings)
+
+        loss = gym.loss_criterion(outputs, real)
+
+        if not test:
+            loss.backward()
+            gym.optimizer.step()
+            gym.scheduler.step()
+            gym.optimizer.zero_grad()
+
+        return loss
+
     def prepare_encoder(self, priming_data, training_data=None):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
@@ -71,11 +115,7 @@ class DistilBertEncoder:
         if training_data is not None and 'targets' in training_data and len(training_data['targets']) ==1 and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL and CONFIG.TRAIN_TO_PREDICT_TARGET:
             self._model_type = 'classifier'
             self._model = self._classifier_model_class.from_pretrained(self._pretrained_model_name, num_labels=len(set(training_data['targets'][0]['unencoded_output'])) + 1).to(self.device)
-
-            if self.aim == ENCODER_AIM.SPEED:
-                batch_size = 10
-            else:
-                batch_size = 10
+            batch_size = 10
 
             no_decay = ['bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
@@ -84,88 +124,31 @@ class DistilBertEncoder:
             ]
 
             optimizer = AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
-            # num_training_steps is kind of an estimation
             scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
 
-            self._model.train()
-            error_buffer = []
-            started = time.time()
+            gym = Gym(model=self._model, optimizer=optimizer, scheduler=scheduler, loss_criterion=None, device=self.device, name=self.name)
 
-            best_error = None
-            best_model = None
-            best_epoch = None
+            input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
+            tokenized_max_len = max([len(x) for x in input])
+            input = torch.tensor([x + [self._pad_id] * (tokenized_max_len - len(x)) for x in input])
 
-            random.seed(len(priming_data))
+            real = training_data['targets'][0]['encoded_output']
 
-            for epoch in range(5000):
-                running_loss = 0
-                error = None
+            merged_data = list(zip(input,real))
 
-                merged_data = list(zip(priming_data, training_data['targets'][0]['encoded_output']))
-                random.shuffle(merged_data)
+            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
+            test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
 
-                randomized_priming_data, randomized_target_data = zip(*merged_data)
+            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=partial(self.categorical_train_function,test=False), custom_test_func=partial(self.categorical_train_function,test=True))
 
-                itterable_priming_data = zip(*[iter(randomized_priming_data)]*batch_size)
+            self._model = best_model.to(self.device)
 
-                for i, data in enumerate(itterable_priming_data):
-                    inputs = []
-                    for text in data:
-                        input = self._tokenizer.encode(text[:self._max_len], add_special_tokens=True)
-                        inputs.append(input)
-
-                    max_input = max([len(x) for x in inputs])
-                    inputs = [x + [self._pad_id] * (max_input - len(x)) for x in inputs]
-                    inputs = torch.tensor(inputs).to(self.device)
-
-                    labels = torch.tensor([torch.argmax(x) for x in randomized_target_data[i*batch_size:(i+1)*batch_size]]).to(self.device)
-
-                    outputs = self._model(inputs, labels=labels)
-                    loss, logits = outputs[:2]
-                    loss.backward()
-                    running_loss += loss.item()
-
-                    optimizer.step()
-                    scheduler.step()
-
-                    self._model.zero_grad()
-
-                    error = running_loss/(i + 1)
-
-                    if i % 200 == 0:
-                        logging.debug(f'Intermediate text encoder error: {error}')
-
-                logging.debug(f'Text encoder training error: {error}')
-                if best_error is None or best_error > error:
-                    best_error = error
-                    # Move to CPU to save GPU memory, move back to the origianl device if we end up using it
-                    self._model = self._model.cpu()
-                    best_model = copy.deepcopy(self._model)
-                    self._model = self._model.to(self.device)
-                    best_epoch = epoch
-
-                error_buffer.append(error)
-
-                if len(error_buffer) > 3:
-                    error_buffer.append(error)
-                    error_buffer = error_buffer[-3:]
-                    delta_mean = np.mean(error_buffer)
-                    if delta_mean < 0 or error < self.desired_error or best_epoch < epoch - 5:
-                        self._model = best_model.to(self.device)
-                        break
-
-                if started + self.max_training_time < time.time():
-                    self._model = best_model.to(self.device)
-                    break
 
         elif all([x['output_type'] == COLUMN_DATA_TYPES.NUMERIC or x['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL for x in training_data['targets']]) and CONFIG.TRAIN_TO_PREDICT_TARGET:
             self.desired_error = 0.01
             self._model_type = 'generic_target_predictor'
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
-            if self.aim == ENCODER_AIM.SPEED:
-                batch_size = 40
-            else:
-                batch_size = 40
+            batch_size = 10
 
             self._head = DefaultNet(ds=None, dynamic_parameters={},shape=funnel(768, sum( [ len(x['encoded_output'][0]) for x in training_data['targets'] ] ), depth=5), selfaware=False)
 
@@ -183,86 +166,28 @@ class DistilBertEncoder:
 
             criterion = torch.nn.MSELoss()
 
-            #self._model = torch.nn.Sequential(self._model, self._head)
-            self._head.train()
+            gym = Gym(model=self._head, optimizer=optimizer, scheduler=scheduler, loss_criterion=criterion, device=self.device, name=self.name)
+
+            input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
+            tokenized_max_len = max([len(x) for x in input])
+            input = torch.tensor([x + [self._pad_id] * (tokenized_max_len - len(x)) for x in input])
+
+            real = [[]] * len(training_data['targets'][0]['encoded_output'])
+            for i in range(len(real)):
+                for target in training_data['targets']:
+                    real[i] = real[i] + target['encoded_output'][i]
+            real = torch.tensor(real)
+
+            merged_data = list(zip(input,real))
+
+            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
+            test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
+
             self._model.eval()
-            error_buffer = []
-            started = time.time()
 
-            best_error = None
-            best_head = None
-            best_epoch = None
+            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=partial(self.numerical_train_function, backbone=self._model, test=False), custom_test_func=partial(self.numerical_train_function, backbone=self._model, test=True))
 
-            random.seed(len(priming_data))
-
-            for epoch in range(5000):
-                running_loss = 0
-                error = None
-
-                target_data = [[]] * len(training_data['targets'][0]['encoded_output'])
-                for i in range(len(target_data)):
-                    for target in training_data['targets']:
-                        target_data[i] = target_data[i] + target['encoded_output'][i]
-
-                merged_data = list(zip(priming_data, target_data))
-                random.shuffle(merged_data)
-
-                randomized_priming_data, randomized_target_data = zip(*merged_data)
-
-                itterable_priming_data = zip(*[iter(randomized_priming_data)]*batch_size)
-
-                for i, data in enumerate(itterable_priming_data):
-                    inputs = []
-                    for text in data:
-                        input = self._tokenizer.encode(text[:self._max_len], add_special_tokens=True)
-                        inputs.append(input)
-
-                    labels =  randomized_target_data[i*batch_size:(i+1)*batch_size]
-                    labels =  torch.tensor(labels).to(self.device)
-
-                    max_input = max([len(x) for x in inputs])
-                    inputs = [x + [self._pad_id] * (max_input - len(x)) for x in inputs]
-                    inputs = torch.tensor(inputs).to(self.device)
-
-                    embeddings = self._model(inputs)[0][:,0,:]
-                    outputs = self._head(embeddings)
-
-                    loss = criterion(outputs, labels)
-                    loss.backward()
-                    running_loss += loss.item()
-
-                    optimizer.step()
-                    scheduler.step()
-
-                    self._head.zero_grad()
-
-                    error = running_loss/(i + 1)
-
-                    if i % 200 == 0:
-                        logging.debug(f'Intermediate text encoder error: {error}')
-
-                logging.debug(f'Text encoder training error: {error}')
-                if best_error is None or best_error > error:
-                    best_error = error
-                    # Move to CPU to save GPU memory, move back to the origianl device if we end up using it
-                    self._head = self._head.cpu()
-                    best_head = copy.deepcopy(self._head)
-                    self._head = self._head.to(self.device)
-                    best_epoch = epoch
-
-                error_buffer.append(error)
-
-                if len(error_buffer) > 3:
-                    error_buffer.append(error)
-                    error_buffer = error_buffer[-3:]
-                    delta_mean = np.mean(error_buffer)
-                    if delta_mean < 0 or error < self.desired_error or best_epoch < epoch - 5:
-                        self._head = best_head.to(self.device)
-                        break
-
-                if started + self.max_training_time < time.time():
-                    self._head = best_head.to(self.device)
-                    break
+            self._head = best_model.to(self.device)
 
         else:
             self._model_type = 'embeddings_generator'
