@@ -132,7 +132,7 @@ class Predictor:
                 unique = from_data[col_name].nunique()
                 if  unique < 100 or unique < len(from_data[col_name])/10:
                     return COLUMN_DATA_TYPES.CATEGORICAL
-                # else asume its text
+                # else assume its text
                 return COLUMN_DATA_TYPES.TEXT
 
         # generate the configuration and set the order for the input and output columns
@@ -293,11 +293,11 @@ class Predictor:
                         if delta_mean < 0 and len(test_error_delta_buff) > 9:
                             stop_training = True
 
-                        # Stop if we're past the time limit alloted for training
+                        # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > stop_training_after_seconds:
                            stop_training = True
 
-                        # If the trauining subset is overfitting on it's associated testing subset
+                        # If the training subset is overfitting on it's associated testing subset
                         if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
                             break
                             
@@ -309,7 +309,7 @@ class Predictor:
                             if subset_id == 'full':
                                 logging.info('Finished training model !')
                             else:
-                                logging.info('Finished fiting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
+                                logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
                             break
 
         self._mixer.encoders = from_data_ds.encoders
@@ -325,7 +325,7 @@ class Predictor:
         """
 
         if when is not None:
-            when_dict = {key:[when[key]] for key in when }
+            when_dict = {key:[when[key]] for key in when}
             when_data = pandas.DataFrame(when_dict)
 
         when_data_ds = DataSource(when_data, self.config)
