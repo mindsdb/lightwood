@@ -16,7 +16,7 @@ from lightwood.config.config import CONFIG
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score, r2_score
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES 
 
 
 class Predictor:
@@ -300,7 +300,7 @@ class Predictor:
                         # If the trauining subset is overfitting on it's associated testing subset
                         if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
                             break
-                            
+
                         if stop_training:
                             mixer.update_model(best_model)
                             self._mixer = mixer
