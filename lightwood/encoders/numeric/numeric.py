@@ -64,12 +64,18 @@ class NumericEncoder:
 
             if self._is_target:
                 vector = [0]*3
-                if number < 0:
-                    vector[0] = 1
-                if number == 0:
-                    vector[2] = 1
-                else:
-                    vector[1] = math.log(abs(number))
+                try:
+                    if number < 0:
+                        vector[0] = 1
+                    if number == 0:
+                        vector[2] = 1
+                    else:
+                        vector[1] = math.log(abs(number))
+                except:
+                    logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
+                    # @TODO For now handle this by setting to zero as a hotifx, but we need to figure out why it's happening and fix it properly later
+                    vector = [0]*3
+
             else:
                 vector = [0]*2
                 if number is None:
@@ -137,7 +143,7 @@ class NumericEncoder:
                 continue
 
             ret.append(real_value)
-            
+
         return ret
 
 
