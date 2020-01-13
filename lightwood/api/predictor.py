@@ -15,8 +15,9 @@ from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 from lightwood.mixers.nn.nn import NnMixer
+from lightwood.mixers.boost.boost import BoostMixer
 from sklearn.metrics import accuracy_score, r2_score
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES 
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 
 class Predictor:
@@ -104,6 +105,16 @@ class Predictor:
                 self._mixer.encoders[e]._model.device = device_str
             except:
                 pass
+
+    def train_helper_mixers(train_ds, test_ds):
+        # Boosting mixer
+        boost_mixer = BoostMixer()
+        boost_mixer.fit(train_ds)
+
+        # Stop debugging
+        exit()
+        return
+
 
     def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
         """
@@ -220,6 +231,8 @@ class Predictor:
             logging.info('Using hyperparameter set: ', best_parameters)
         else:
             best_parameters = {}
+
+        helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
 
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
