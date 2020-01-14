@@ -9,7 +9,7 @@ class Gym():
 
     def __init__(self, model, optimizer, scheduler, loss_criterion, device, name=None, input_encoder=None, output_encoder=None):
         """
-        Create an environment for training a pytroch machine learning model
+        Create an environment for training a pytorch machine learning model
         """
         self.device = device
         self.model = model
