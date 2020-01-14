@@ -106,11 +106,13 @@ class Predictor:
             except:
                 pass
 
-    def train_helper_mixers(train_ds, test_ds):
+    def train_helper_mixers(self, train_ds, test_ds):
         # Boosting mixer
         boost_mixer = BoostMixer()
-        boost_mixer.fit(train_ds)
+        boost_mixer.train(train_ds)
 
+        predictions = boost_mixer.predict(test_ds)
+        print(predictions)
         # Stop debugging
         exit()
         return
