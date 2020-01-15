@@ -116,7 +116,7 @@ class Predictor:
         best_mixer_map = {}
         predictions = boost_mixer.predict(test_ds)
 
-        for output_column in self._mixer.output_column_names:
+        for output_column in self._output_columns:
             model = boost_mixer.targets[target_col_name]['model']
             if model is None:
                 continue
@@ -397,7 +397,7 @@ class Predictor:
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
         predictions = self._mixer.predict(ds, include_encoded_predictions=True)
         accuracies = {}
-        for output_column in self._mixer.output_column_names:
+        for output_column in self._output_columns:
 
             real = list(map(str,ds.get_column_original_data(output_column)))
             predicted =  list(map(str,predictions[output_column]["predictions"]))
