@@ -173,8 +173,8 @@ class Predictor:
             logging.info('Automatically generated a configuration')
             logging.info(self.config)
         else:
-            self._output_columns = [col['name'] for col in self.config['input_features']]
-            self._input_columns = [col['name'] for col in self.config['output_features']]
+            self._output_columns = [col['name'] for col in self.config['output_features']]
+            self._input_columns = [col['name'] for col in self.config['input_features']]
 
         # @TODO Make Cross Entropy Loss work with multiple outputs
         if len(self.config['output_features']) == 1 and self.config['output_features'][0]['type'] in (COLUMN_DATA_TYPES.CATEGORICAL):
@@ -391,12 +391,14 @@ class Predictor:
         :param from_data:a dataframe
         :return accuracies: dictionaries of accuracies
         """
+
         if self._mixer is None:
             logging.error("Please train the model before calculating accuracy")
             return
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
         predictions = self._mixer.predict(ds, include_encoded_predictions=True)
         accuracies = {}
+
         for output_column in self._output_columns:
 
             real = list(map(str,ds.get_column_original_data(output_column)))
