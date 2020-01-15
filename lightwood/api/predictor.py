@@ -117,7 +117,7 @@ class Predictor:
         predictions = boost_mixer.predict(test_ds)
 
         for output_column in self._output_columns:
-            model = boost_mixer.targets[target_col_name]['model']
+            model = boost_mixer.targets[output_column]['model']
             if model is None:
                 continue
 
