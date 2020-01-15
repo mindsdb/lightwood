@@ -4,6 +4,7 @@ import random
 
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
@@ -69,9 +70,8 @@ class CategoricalAutoEncoder:
 
             batch_size = min(200, int(len(priming_data)/50))
 
-            train_data_loader = list(zip(*[iter(priming_data)]*batch_size))
-            for i in range(len(train_data_loader)):
-                train_data_loader[i] = [train_data_loader[i], train_data_loader[i]]
+            priming_data_str = [str(x) for x in priming_data]
+            train_data_loader = DataLoader(list(zip(priming_data_str,priming_data_str)), batch_size=batch_size, shuffle=True)
             test_data_loader = None
 
             best_model, error, training_time = gym.fit(train_data_loader, test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=5)
@@ -111,10 +111,16 @@ if __name__ == "__main__":
     import string
     from sklearn.metrics import accuracy_score
     import logging
-    logging.basicConfig(level=logging.DEBUG)
+
+    logging.getLogger().setLevel(logging.DEBUG)
 
     random.seed(2)
-    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) for x in range(2000)]
+    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(6,8))) for x in range(2000)]
+    for i in range(len(cateogries)):
+        if i % 11 == 0:
+            cateogries[i] = None
+        if i % 10 == 0:
+            cateogries[i] = random.randint(1,20)
 
     priming_data = []
     test_data = []
