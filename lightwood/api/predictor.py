@@ -121,10 +121,10 @@ class Predictor:
             if model is None:
                 continue
 
-            real = list(map(str,ds.get_column_original_data(output_column)))
+            real = list(map(str,test_ds.get_column_original_data(output_column)))
             predicted =  predictions[output_column]
 
-            accuracy = apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted)
+            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted)
             best_mixer_map[output_column] = {
                 'model': boost_mixer
                 ,'accuracy': accuracy['value']
@@ -404,7 +404,7 @@ class Predictor:
             real = list(map(str,ds.get_column_original_data(output_column)))
             predicted =  list(map(str,predictions[output_column]["predictions"]))
 
-            accuracy = apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted)
+            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted)
             accuracies[output_column].append(accuracy)
 
         return accuracies
