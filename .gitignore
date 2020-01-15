@@ -1,4 +1,5 @@
 docs/site
+docs/scraps
 __pycache__
 *.pth
 *.vec
