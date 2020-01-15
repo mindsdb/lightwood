@@ -4,7 +4,6 @@ import random
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
@@ -113,7 +112,7 @@ if __name__ == "__main__":
     from sklearn.metrics import accuracy_score
     import logging
     logging.basicConfig(level=logging.DEBUG)
-    
+
     random.seed(2)
     cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) for x in range(2000)]
 
