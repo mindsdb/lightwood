@@ -25,7 +25,7 @@ class BoostMixer():
         X = np.array(X)
         for target_col_name in self.targets:
             Y = data_source.get_column_original_data(target_col_name)
-            
+
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 self.targets[target_col_name]['model'] = xgb.XGBClassifier()
                 self.targets[target_col_name]['model'].fit(X,Y)
@@ -46,7 +46,7 @@ class BoostMixer():
         predictions = {}
         for target_col_name in self.targets:
             if self.targets[target_col_name]['model'] is None:
-                return False
+                predictions[target_col_name] = None
 
             predictions[target_col_name] = self.targets[target_col_name]['model'].predict(X)
 
