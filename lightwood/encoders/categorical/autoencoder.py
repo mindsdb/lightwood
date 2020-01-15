@@ -70,7 +70,9 @@ class CategoricalAutoEncoder:
 
             batch_size = min(200, int(len(priming_data)/50))
 
-            train_data_loader = DataLoader(list(zip(priming_data,priming_data)), batch_size=batch_size, shuffle=True)
+            train_data_loader = list(zip(*[iter(priming_data)]*batch_size))
+            for i in range(len(train_data_loader)):
+                train_data_loader[i] = [train_data_loader[i], train_data_loader[i]]
             test_data_loader = None
 
             best_model, error, training_time = gym.fit(train_data_loader, test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=5)
