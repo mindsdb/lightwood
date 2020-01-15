@@ -375,12 +375,11 @@ class Predictor:
         predictions = self._mixer.predict(ds, include_encoded_predictions=True)
         accuracies = {}
         for output_column in self._mixer.output_column_names:
-            properties = ds.get_column_config(output_column)
 
             real = list(map(str,ds.get_column_original_data(output_column)))
             predicted =  list(map(str,predictions[output_column]["predictions"]))
 
-            accuracy = apply_accuracy_function(properties['type'], real, predicted)
+            accuracy = apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted)
             accuracies[output_column].append(accuracy)
 
         return accuracies
