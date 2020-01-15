@@ -373,7 +373,7 @@ class Predictor:
 
     @staticmethod
     def apply_accuracy_function(col_type, real, predicted):
-        if properties['type'] == 'categorical':
+        if col_type == 'categorical':
             accuracy = {
                 'function': 'accuracy_score',
                 'value': accuracy_score(real, predicted)
