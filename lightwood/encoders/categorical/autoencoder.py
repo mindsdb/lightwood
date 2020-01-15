@@ -111,7 +111,9 @@ if __name__ == "__main__":
     import random
     import string
     from sklearn.metrics import accuracy_score
-
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    
     random.seed(2)
     cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) for x in range(2000)]
 
