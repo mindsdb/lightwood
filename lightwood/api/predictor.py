@@ -405,7 +405,7 @@ class Predictor:
             predicted =  list(map(str,predictions[output_column]["predictions"]))
 
             accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted)
-            accuracies[output_column].append(accuracy)
+            accuracies[output_column] = accuracy
 
         return accuracies
 
