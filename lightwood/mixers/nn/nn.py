@@ -12,6 +12,7 @@ from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.config.config import CONFIG
+from lightwood.api.data_source import SubSet
 
 
 class NnMixer:
@@ -205,6 +206,7 @@ class NnMixer:
         :param ds:
         :return:
         """
+
         self.fit_data_source(ds)
         if self.is_categorical_output:
             # The WeightedRandomSampler samples "randomly" but can assign higher weight to certain rows, we assign each rows it's weight based on the target variable value in that row and it's associated weight in the output_weights map (otherwise used to bias the loss function)

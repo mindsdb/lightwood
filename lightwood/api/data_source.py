@@ -9,6 +9,36 @@ from torch.utils.data import Dataset
 from lightwood.config.config import CONFIG
 
 
+class SubSet(Dataset):
+
+    def __init__(self, data_source, indexes):
+        self.data_source = data_source
+        self.index_mapping = {}
+        for i in range(len(indexes)):
+            self.index_mapping[i] = indexes[i]
+
+
+    def __len__(self):
+        return int(len(self.index_mapping.keys()))
+
+    def __getitem__(self, idx):
+        return self.data_source[self.index_mapping[idx]]
+
+    def get_feature_names(self, where='input_features'):
+        return self.data_source.get_feature_names(where)
+
+    def __getattribute__(self, name):
+        if name in ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache']:
+            return self.data_source.__getattribute__(name)
+        else:
+            return object.__getattribute__(self, name)
+
+    def __setattr__(self, name, value):
+        if name in ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache']:
+            return dict.__setattr__(self.data_source, name, value)
+        else:
+            super().__setattr__(name, value)
+
 class DataSource(Dataset):
 
     def __init__(self, data_frame, configuration):
@@ -26,6 +56,7 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
+        self.subsets = {}
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -40,6 +71,23 @@ class DataSource(Dataset):
 
         self._clear_cache()
 
+
+    def create_subsets(self, nr_subsets):
+        subsets_indexes = {}
+        np.random.seed(len(self.data_frame))
+
+        subset_nr = 0
+        for i in range(len(self.data_frame)):
+            if subset_nr not in subsets_indexes:
+                subsets_indexes[subset_nr] = []
+            subsets_indexes[subset_nr].append(i)
+
+            subset_nr += 1
+            if subset_nr > nr_subsets:
+                subset_nr = 0
+
+        for subset_nr in subsets_indexes:
+            self.subsets[subset_nr] = SubSet(self, subsets_indexes[subset_nr])
 
     def _clear_cache(self):
         self.list_cache = {}
