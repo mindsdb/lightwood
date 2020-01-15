@@ -234,7 +234,7 @@ class Predictor:
         else:
             best_parameters = {}
 
-        helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
+        #helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
 
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
@@ -348,6 +348,20 @@ class Predictor:
 
         return self._mixer.predict(when_data_ds)
 
+    @staticmethod
+    def apply_accuracy_function(col_type, real, predicted):
+        if properties['type'] == 'categorical':
+            accuracy = {
+                'function': 'accuracy_score',
+                'value': accuracy_score(real, predicted)
+            }
+        else:
+            accuracy = {
+                'function': 'r2_score',
+                'value': r2_score(real, predicted)
+            }
+        return accuracy
+
     def calculate_accuracy(self, from_data):
         """
         calculates the accuracy of the model
@@ -362,19 +376,12 @@ class Predictor:
         accuracies = {}
         for output_column in self._mixer.output_column_names:
             properties = ds.get_column_config(output_column)
-            if properties['type'] == 'categorical':
-                accuracies[output_column] = {
-                    'function': 'accuracy_score',
-                    'value': accuracy_score(list(map(str,ds.get_column_original_data(output_column))), list(map(str,predictions[output_column]["predictions"])))
-                }
-            else:
-                # Note: We use this method instead of using `encoded_predictions` since the values in encoded_predictions are never prefectly 0 or 1, and this leads to rather large unwaranted different in the r2 score, re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
 
-                encoded_predictions = ds.encoders[output_column].encode(predictions[output_column]["predictions"])
-                accuracies[output_column] = {
-                    'function': 'r2_score',
-                    'value': r2_score(ds.get_encoded_column_data(output_column), encoded_predictions)
-                }
+            real = list(map(str,ds.get_column_original_data(output_column)))
+            predicted =  list(map(str,predictions[output_column]["predictions"]))
+
+            accuracy = apply_accuracy_function(properties['type'], real, predicted)
+            accuracies[output_column].append(accuracy)
 
         return accuracies
 
