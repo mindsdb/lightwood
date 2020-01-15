@@ -57,6 +57,7 @@ class Predictor:
         self._input_columns = None
 
         self._mixer = None
+        self._helper_mixers = None
 
         self.train_accuracy = None
         self.overall_certainty = None
@@ -111,11 +112,25 @@ class Predictor:
         boost_mixer = BoostMixer()
         boost_mixer.train(train_ds)
 
+        # @TODO: IF we add more mixers in the future, add the best on for each column to this map !
+        best_mixer_map = {}
         predictions = boost_mixer.predict(test_ds)
-        print(predictions)
-        # Stop debugging
-        exit()
-        return
+
+        for output_column in self._mixer.output_column_names:
+            model = boost_mixer.targets[target_col_name]['model']
+            if model is None:
+                continue
+
+            real = list(map(str,ds.get_column_original_data(output_column)))
+            predicted =  predictions[output_column]
+
+            accuracy = apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted)
+            best_mixer_map[output_column] = {
+                'model': boost_mixer
+                ,'accuracy': accuracy['value']
+            }
+
+        return best_mixer_map
 
 
     def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
@@ -234,7 +249,7 @@ class Predictor:
         else:
             best_parameters = {}
 
-        #helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
+        self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
 
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
@@ -346,7 +361,15 @@ class Predictor:
         when_data_ds = DataSource(when_data, self.config)
         when_data_ds.encoders = self._mixer.encoders
 
-        return self._mixer.predict(when_data_ds)
+        main_mixer_predictions = self._mixer.predict(when_data_ds)
+
+        for output_column in main_mixer_predictions:
+            if output_column in self._helper_mixers:
+                if self._helper_mixers[output_column]['accuracy'] > 1.1* self.train_accuracy[output_column]['value']:
+                    helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
+                    main_mixer_predictions[output_column] = {'predictions': helper_mixer_predictions}
+
+        return main_mixer_predictions
 
     @staticmethod
     def apply_accuracy_function(col_type, real, predicted):
