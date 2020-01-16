@@ -222,7 +222,6 @@ class NnMixer:
 
                     self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
-            print('\n\nHERE 1\n\n')
             self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
             self.net = self.net.train()
 
@@ -268,7 +267,6 @@ class NnMixer:
             for i, data in enumerate(data_loader, 0):
                 if self.start_selfaware_training and not self.is_selfaware:
                     self.is_selfaware = True
-                    print('\n\nHERE 2 !\n\n')
                     self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=copy.deepcopy(self.net.net))
 
                 total_iterations += 1
