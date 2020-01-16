@@ -141,5 +141,5 @@ if __name__ == "__main__":
     decoded_data = enc.decode(encoded_data)
 
     encoder_accuracy = accuracy_score(list(test_data), decoded_data)
-    print(f'Categorial encoder accuracy for: {encoder_accuracy} on testing dataset')
+    print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
     assert(encoder_accuracy > 0.98)
