@@ -106,7 +106,7 @@ class DefaultNet(torch.nn.Module):
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
-        if CONFIG.DETERMINISTIC and is None: # set initial weights based on a specific distribution if we have deterministic enabled
+        if CONFIG.DETERMINISTIC and pretrained_net is None: # set initial weights based on a specific distribution if we have deterministic enabled
 
             # lambda function so that we can do this for either awareness layer or the internal layers of net
             def reset_layer_params(layer):
