@@ -288,6 +288,10 @@ class Predictor:
                     first_run = False
                     logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
 
+                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
+                        mixer.start_selfaware_training = False
+                        mixer.stop_selfaware_training = True
+
                     if epoch >= eval_next_on_epoch:
                         # Prime the model on each subset for a bit
                         if subset_iteration == 1:

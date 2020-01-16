@@ -37,6 +37,7 @@ class NnMixer:
         self.awareness_criterion = None
         self.loss_combination_operator = operator.add
         self.start_selfaware_training = False
+        self.stop_selfaware_training = False
         self.is_selfaware = False
 
         self._nonpersistent = {
@@ -269,7 +270,18 @@ class NnMixer:
                     self.is_selfaware = True
                     self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=copy.deepcopy(self.net.net))
 
-                    #self.optimizer_args['lr'] = self.optimizer.lr/4 #  Lower the learning rate once we start training the selfaware network
+                    #self.optimizer_args['lr'] = self.optimizer.lr/10 #  Lower the learning rate once we start training the selfaware network
+                    gc.collect()
+                    if 'cuda' in str(self.net.device):
+                        torch.cuda.empty_cache()
+                    self.optimizer.zero_grad()
+                    self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+                if self.stop_selfaware_training:
+                    print(" RESETING THE NETWORK !! ")
+                    self.is_selfaware = False
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=copy.deepcopy(self.net.net))
+
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
