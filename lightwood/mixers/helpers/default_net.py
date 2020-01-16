@@ -5,7 +5,6 @@ from lightwood.mixers.helpers.plinear import PLinear
 import torch
 
 
-
 class DefaultNet(torch.nn.Module):
 
     def __init__(self, ds, dynamic_parameters, shape=None, selfaware=None, size_parameters={}):
@@ -35,7 +34,6 @@ class DefaultNet(torch.nn.Module):
                 torch.backends.cudnn.deterministic = True
                 torch.backends.cudnn.benchmark = False
                 self.available_devices = torch.cuda.device_count()
-
 
         self.dynamic_parameters = dynamic_parameters
         """
@@ -67,21 +65,21 @@ class DefaultNet(torch.nn.Module):
                 depth = 5
 
             if (small_input and small_output):
-                shape = rombus(self.input_size,self.output_size,depth+1,800)
+                shape = rombus(self.input_size, self.output_size, depth+1, 800)
             elif (not large_input) and (not large_output):
-                shape = rombus(self.input_size,self.output_size,depth,self.input_size*2)
+                shape = rombus(self.input_size, self.output_size, depth, self.input_size*2)
             elif large_input and large_output:
-                shape = rectangle(self.input_size,self.output_size,depth - 1)
+                shape = rectangle(self.input_size, self.output_size, depth - 1)
             else:
-                shape = funnel(self.input_size,self.output_size,depth)
+                shape = funnel(self.input_size, self.output_size, depth)
 
         logging.info(f'Building network of shape: {shape}')
-        rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
+        rectifier = torch.nn.SELU  # alternative: torch.nn.ReLU
 
         layers = []
         for ind in range(len(shape) - 1):
-            linear_function = PLinear  if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
-            layers.append(linear_function(shape[ind],shape[ind+1]))
+            linear_function = PLinear if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
+            layers.append(linear_function(shape[ind], shape[ind+1]))
             if ind < len(shape) - 2:
                 layers.append(rectifier())
 
@@ -92,13 +90,13 @@ class DefaultNet(torch.nn.Module):
             awareness_layers = []
 
             for ind in range(len(awareness_net_shape) - 1):
-                awareness_layers.append(torch.nn.Linear(awareness_net_shape[ind],awareness_net_shape[ind+1]))
+                awareness_layers.append(torch.nn.Linear(awareness_net_shape[ind], awareness_net_shape[ind+1]))
                 if ind < len(awareness_layers) - 2:
                     awareness_layers.append(rectifier())
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
-        if CONFIG.DETERMINISTIC: # set initial weights based on a specific distribution if we have deterministic enabled
+        if CONFIG.DETERMINISTIC:  # set initial weights based on a specific distribution if we have deterministic enabled
 
             # lambda function so that we can do this for either awareness layer or the internal layers of net
             def reset_layer_params(layer):
@@ -143,16 +141,16 @@ class DefaultNet(torch.nn.Module):
                 continue
             elif isinstance(layer, PLinear):
 
-                count +=1
+                count += 1
                 mean_variance += torch.mean(layer.sigma).tolist()
 
         if count == 0:
-            return -1 # Unknown
+            return -1  # Unknown
 
         mean_variance = mean_variance / count
         self.max_variance = mean_variance if self.max_variance is None else mean_variance if self.max_variance < mean_variance else self.max_variance
 
-        return (self.max_variance- mean_variance)/self.max_variance
+        return (self.max_variance - mean_variance)/self.max_variance
 
     def forward(self, input):
         """
@@ -163,7 +161,6 @@ class DefaultNet(torch.nn.Module):
 
         :return: either just output or (output, awareness)
         """
-
 
         output = self._foward_net(input)
 

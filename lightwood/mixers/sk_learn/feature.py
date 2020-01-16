@@ -18,8 +18,6 @@ class CategoricalFeature:
         return classifier_class(KNeighborsClassifier(3), n_jobs=-1)
 
 
-
-
 class NumericFeature:
 
     def __init__(self, properties):
@@ -34,8 +32,6 @@ class NumericFeature:
         :return: 
         """
         return regression_class(svm.SVR())
-
-
 
 
 class FeatureFactory:

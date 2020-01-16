@@ -26,7 +26,6 @@ mixer_schema = Schema({
 })
 
 
-
 predictor_config_schema = Schema({
     'input_features': [
         feature_schema

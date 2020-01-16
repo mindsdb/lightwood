@@ -8,26 +8,33 @@ from lightwood.encoders.time_series.cesium_ts import CesiumTsEncoder
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
 
+
 class DateTime:
     DatetimeEncoder = DatetimeEncoder
+
 
 class Image:
     Img2VecEncoder = Img2VecEncoder
     NnAutoEncoder = NnAutoEncoder
 
+
 class Numeric:
     NumericEncoder = NumericEncoder
+
 
 class Text:
     InferSentEncoder = InferSentEncoder
     RnnEncoder = RnnEncoder
 
+
 class TimeSeries:
     CesiumTsEncoder = CesiumTsEncoder
+
 
 class Categorical:
     OneHotEncoder = OneHotEncoder
     CategoricalAutoEncoder = CategoricalAutoEncoder
+
 
 class BuiltinEncoders:
     DateTime = DateTime
@@ -36,5 +43,6 @@ class BuiltinEncoders:
     Text = Text
     TimeSeries = TimeSeries
     Categorical = Categorical
+
 
 BUILTIN_ENCODERS = BuiltinEncoders

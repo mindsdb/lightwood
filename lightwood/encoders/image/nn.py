@@ -4,6 +4,7 @@ import os
 from lightwood.encoders.image.helpers.nn import NnEncoderHelper
 import torch
 
+
 class NnAutoEncoder:
 
     def __init__(self, is_target=False):

@@ -6,6 +6,7 @@ import logging
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
 
+
 class OneHotEncoder:
 
     def __init__(self, is_target=False):
@@ -57,7 +58,6 @@ class OneHotEncoder:
 
         return self._pytorch_wrapper(ret)
 
-
     def decode(self, encoded_data):
         encoded_data_list = encoded_data.tolist()
         ret = []
@@ -85,12 +85,12 @@ if __name__ == "__main__":
     assert(len(encoded_data) == 4)
     assert(decoded_data[1] == 'category 1')
     assert(decoded_data[2] == 'category 3')
-    for i in [0,3]:
+    for i in [0, 3]:
         assert(encoded_data[0][i] == UNCOMMON_TOKEN)
         assert(decoded_data[i] == UNCOMMON_WORD)
 
     # Test max_dimensions
-    for max_dimensions in [2,3]:
+    for max_dimensions in [2, 3]:
         data = ['category 1', 'category 1', 'category 3', 'category 4', 'category 4', 'category 4', None]
 
         enc = OneHotEncoder()

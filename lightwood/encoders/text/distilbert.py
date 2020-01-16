@@ -60,7 +60,6 @@ class DistilBertEncoder:
             device_str = CONFIG.USE_DEVICE
         self.device = torch.device(device_str)
 
-
     def _train_callback(self, error, real_buff, predicted_buff):
         logging.info(f'{self.name} reached a loss of {error} while training !')
 
@@ -87,7 +86,7 @@ class DistilBertEncoder:
         input = input.to(gym.device)
         real = real.to(gym.device)
 
-        embeddings = backbone(input)[0][:,0,:]
+        embeddings = backbone(input)[0][:, 0, :]
         outputs = gym.model(embeddings)
 
         loss = gym.loss_criterion(outputs, real)
@@ -106,27 +105,32 @@ class DistilBertEncoder:
 
         priming_data = [x if x is not None else '' for x in priming_data]
 
-        self._max_len = min(max([len(x) for x in priming_data]),self._model_max_len)
+        self._max_len = min(max([len(x) for x in priming_data]), self._model_max_len)
         self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
         self._pad_id = self._tokenizer.convert_tokens_to_ids([self._tokenizer.pad_token])[0]
         # @TODO: Support multiple targets if they are all categorical or train for the categorical target if it's a mix (maybe ?)
         # @TODO: Attach a language modeling head and/or use GPT2 and/or provide outputs better suited to a LM head (which will be the mixer) if the output if text
 
-        if training_data is not None and 'targets' in training_data and len(training_data['targets']) ==1 and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL and CONFIG.TRAIN_TO_PREDICT_TARGET:
+        if training_data is not None and 'targets' in training_data and len(training_data['targets']) == 1 and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL and CONFIG.TRAIN_TO_PREDICT_TARGET:
             self._model_type = 'classifier'
-            self._model = self._classifier_model_class.from_pretrained(self._pretrained_model_name, num_labels=len(set(training_data['targets'][0]['unencoded_output'])) + 1).to(self.device)
+            self._model = self._classifier_model_class.from_pretrained(self._pretrained_model_name, num_labels=len(
+                set(training_data['targets'][0]['unencoded_output'])) + 1).to(self.device)
             batch_size = 10
 
             no_decay = ['bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
-                {'params': [p for n, p in self._model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.000001},
-                {'params': [p for n, p in self._model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+                {'params': [p for n, p in self._model.named_parameters() if not any(
+                    nd in n for nd in no_decay)], 'weight_decay': 0.000001},
+                {'params': [p for n, p in self._model.named_parameters() if any(nd in n for nd in no_decay)],
+                 'weight_decay': 0.0}
             ]
 
             optimizer = AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
-            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
+            scheduler = get_linear_schedule_with_warmup(
+                optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
 
-            gym = Gym(model=self._model, optimizer=optimizer, scheduler=scheduler, loss_criterion=None, device=self.device, name=self.name)
+            gym = Gym(model=self._model, optimizer=optimizer, scheduler=scheduler,
+                      loss_criterion=None, device=self.device, name=self.name)
 
             input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
             tokenized_max_len = max([len(x) for x in input])
@@ -134,15 +138,16 @@ class DistilBertEncoder:
 
             real = training_data['targets'][0]['encoded_output']
 
-            merged_data = list(zip(input,real))
+            merged_data = list(zip(input, real))
 
-            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
+            train_data_loader = DataLoader(
+                merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
             test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
 
-            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=partial(self.categorical_train_function,test=False), custom_test_func=partial(self.categorical_train_function,test=True))
+            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback,
+                                                       eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=partial(self.categorical_train_function, test=False), custom_test_func=partial(self.categorical_train_function, test=True))
 
             self._model = best_model.to(self.device)
-
 
         elif all([x['output_type'] == COLUMN_DATA_TYPES.NUMERIC or x['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL for x in training_data['targets']]) and CONFIG.TRAIN_TO_PREDICT_TARGET:
             self.desired_error = 0.01
@@ -150,23 +155,28 @@ class DistilBertEncoder:
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
             batch_size = 10
 
-            self._head = DefaultNet(ds=None, dynamic_parameters={},shape=funnel(768, sum( [ len(x['encoded_output'][0]) for x in training_data['targets'] ] ), depth=5), selfaware=False)
+            self._head = DefaultNet(ds=None, dynamic_parameters={}, shape=funnel(
+                768, sum([len(x['encoded_output'][0]) for x in training_data['targets']]), depth=5), selfaware=False)
 
             no_decay = ['bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
-                {'params': [p for n, p in self._head.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.000001},
-                {'params': [p for n, p in self._head.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+                {'params': [p for n, p in self._head.named_parameters() if not any(
+                    nd in n for nd in no_decay)], 'weight_decay': 0.000001},
+                {'params': [p for n, p in self._head.named_parameters() if any(nd in n for nd in no_decay)],
+                 'weight_decay': 0.0}
             ]
 
             optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
             #optimizer = Ranger(self._head.parameters(),lr=5e-5)
 
             # num_training_steps is kind of an estimation
-            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
+            scheduler = get_linear_schedule_with_warmup(
+                optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
 
             criterion = torch.nn.MSELoss()
 
-            gym = Gym(model=self._head, optimizer=optimizer, scheduler=scheduler, loss_criterion=criterion, device=self.device, name=self.name)
+            gym = Gym(model=self._head, optimizer=optimizer, scheduler=scheduler,
+                      loss_criterion=criterion, device=self.device, name=self.name)
 
             input = [self._tokenizer.encode(x[:self._max_len], add_special_tokens=True) for x in priming_data]
             tokenized_max_len = max([len(x) for x in input])
@@ -178,14 +188,16 @@ class DistilBertEncoder:
                     real[i] = real[i] + target['encoded_output'][i]
             real = torch.tensor(real)
 
-            merged_data = list(zip(input,real))
+            merged_data = list(zip(input, real))
 
-            train_data_loader = DataLoader(merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
+            train_data_loader = DataLoader(
+                merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
             test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
 
             self._model.eval()
 
-            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=partial(self.numerical_train_function, backbone=self._model, test=False), custom_test_func=partial(self.numerical_train_function, backbone=self._model, test=True))
+            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1,
+                                                       max_unimproving_models=10, custom_train_func=partial(self.numerical_train_function, backbone=self._model, test=False), custom_test_func=partial(self.numerical_train_function, backbone=self._model, test=True))
 
             self._head = best_model.to(self.device)
 
@@ -195,7 +207,6 @@ class DistilBertEncoder:
 
         self._prepared = True
 
-
     def encode(self, column_data):
         encoded_representation = []
         self._model.eval()
@@ -203,11 +214,12 @@ class DistilBertEncoder:
             for text in column_data:
                 if text is None:
                     text = ''
-                input = torch.tensor(self._tokenizer.encode(text[:self._max_len], add_special_tokens=True)).to(self.device).unsqueeze(0)
+                input = torch.tensor(self._tokenizer.encode(
+                    text[:self._max_len], add_special_tokens=True)).to(self.device).unsqueeze(0)
 
                 if self._model_type == 'generic_target_predictor':
                     embeddings = self._model(input)
-                    output = self._head(embeddings[0][:,0,:])
+                    output = self._head(embeddings[0][:, 0, :])
                     encoded_representation.append(output.tolist()[0])
 
                 elif self._model_type == 'classifier':
@@ -218,12 +230,12 @@ class DistilBertEncoder:
 
                 else:
                     output = self._model(input)
-                    embeddings = output[0][:,0,:].cpu().numpy()[0]
+                    embeddings = output[0][:, 0, :].cpu().numpy()[0]
                     encoded_representation.append(embeddings)
 
         return self._pytorch_wrapper(encoded_representation)
 
-    def decode(self, encoded_values_tensor, max_length = 100):
+    def decode(self, encoded_values_tensor, max_length=100):
         # When test is an output... a bit trickier to handle this case, thinking on it
         pass
 
@@ -242,14 +254,14 @@ if __name__ == "__main__":
     primting_target = []
     test_data = []
     test_target = []
-    for i in range(0,300):
-        if random.randint(1,5)  == 3:
+    for i in range(0, 300):
+        if random.randint(1, 5) == 3:
             test_data.append(str(i) + ''.join(['n'] * i))
-            #test_data.append(str(i))
+            # test_data.append(str(i))
             test_target.append(i)
-        #else:
+        # else:
         priming_data.append(str(i) + ''.join(['n'] * i))
-        #priming_data.append(str(i))
+        # priming_data.append(str(i))
         primting_target.append(i)
 
     output_1_encoder = NumericEncoder()
@@ -260,13 +272,13 @@ if __name__ == "__main__":
 
     enc = DistilBertEncoder()
 
-    enc.prepare_encoder(priming_data, training_data={'targets': [{'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}, {'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}]})
+    enc.prepare_encoder(priming_data, training_data={'targets': [{'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}, {
+                        'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}]})
 
     encoded_predicted_target = enc.encode(test_data).tolist()
 
     predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:4] for x in encoded_predicted_target]))
     predicted_targets_2 = output_1_encoder.decode(torch.tensor([x[4:] for x in encoded_predicted_target]))
-
 
     for predicted_targets in [predicted_targets_1, predicted_targets_2]:
         real = list(test_target)

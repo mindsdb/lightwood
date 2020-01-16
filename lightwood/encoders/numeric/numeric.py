@@ -57,9 +57,10 @@ class NumericEncoder:
                     number = float(number)
                 except:
                     # Some data cleanup for an edge case that shows up a lot when lightwood isn't used with mindsdb
-                    number = float(number.replace(',','.'))
+                    number = float(number.replace(',', '.'))
             except:
-                logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
+                logging.warning(
+                    'It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
                 number = None
 
             if self._is_target:
@@ -87,7 +88,6 @@ class NumericEncoder:
             ret.append(vector)
 
         return self._pytorch_wrapper(ret)
-
 
     def decode(self, encoded_values):
         ret = []
@@ -118,7 +118,7 @@ class NumericEncoder:
                         real_value = -real_value
                 except:
                     if self._type == 'int':
-                        real_value = pow(2,63)
+                        real_value = pow(2, 63)
                     else:
                         real_value = float('inf')
 
@@ -147,9 +147,8 @@ class NumericEncoder:
         return ret
 
 
-
 if __name__ == "__main__":
-    data = [1,1.1,2,-8.6,None,0]
+    data = [1, 1.1, 2, -8.6, None, 0]
 
     encoder = NumericEncoder()
 
@@ -161,7 +160,7 @@ if __name__ == "__main__":
     assert(encoded_vals[1][1] > 0)
     assert(encoded_vals[2][1] > 0)
     assert(encoded_vals[3][1] > 0)
-    for i in range(0,4):
+    for i in range(0, 4):
         assert(encoded_vals[i][3] == 1)
     assert(encoded_vals[4][3] == 0)
 
@@ -171,4 +170,4 @@ if __name__ == "__main__":
         if decoded_vals[i] is None:
             assert(decoded_vals[i] == data[i])
         else:
-            assert(round(decoded_vals[i],5) == round(data[i],5))
+            assert(round(decoded_vals[i], 5) == round(data[i], 5))
