@@ -125,8 +125,6 @@ class DefaultNet(torch.nn.Module):
             for layer in self.net:
                 reset_layer_params(layer)
 
-        if pretrained_net:
-
         self.net = self.net.to(self.device)
         if self.available_devices > 1:
             self._foward_net = torch.nn.DataParallel(self.net)
