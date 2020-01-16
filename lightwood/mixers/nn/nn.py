@@ -269,6 +269,13 @@ class NnMixer:
                     self.is_selfaware = True
                     self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=copy.deepcopy(self.net.net))
 
+                    #self.optimizer_args['lr'] = self.optimizer.lr/4 #  Lower the learning rate once we start training the selfaware network
+                    gc.collect()
+                    if 'cuda' in str(self.net.device):
+                        torch.cuda.empty_cache()
+                    self.optimizer.zero_grad()
+                    self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
                 total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
