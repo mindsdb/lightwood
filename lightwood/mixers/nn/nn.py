@@ -70,7 +70,7 @@ class NnMixer:
             inputs = inputs.to(self.net.device)
 
             with torch.no_grad():
-                if CONFIG.SELFAWARE:
+                if self.is_selfaware:
                     output, awareness = self.net(inputs)
                     awareness = awareness.to('cpu')
                     awareness_arr.extend(awareness)
@@ -158,7 +158,7 @@ class NnMixer:
                 labels = targets_c.to(self.net.device)
 
             with torch.no_grad():
-                if CONFIG.SELFAWARE:
+                if self.is_selfaware:
                     outputs, awareness = self.net(inputs)
                 else:
                     outputs = self.net(inputs)
@@ -264,7 +264,7 @@ class NnMixer:
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
-                if self.start_selfaware_training:
+                if self.start_selfaware_training and not self.is_selfaware:
                     self.is_selfaware = True
                     self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=copy.deepcopy(self.net.net))
 
