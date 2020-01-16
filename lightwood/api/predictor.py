@@ -288,6 +288,7 @@ class Predictor:
                     first_run = False
                     logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
 
+                    # If the selfaware network isn't able to train, go back to the original network
                     if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
                         mixer.start_selfaware_training = False
                         mixer.stop_selfaware_training = True
@@ -298,7 +299,7 @@ class Predictor:
                             break
 
                         # Once we are past the priming/warmup period, start training the selfaware network
-                        if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE:
+                        if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
                             print('Started selfaware training !')
                             mixer.start_selfaware_training = True
 
