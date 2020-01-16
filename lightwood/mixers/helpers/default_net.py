@@ -92,8 +92,8 @@ class DefaultNet(torch.nn.Module):
             for layer in self.net:
                 if isinstance(layer, torch.nn.Linear):
                     if self.input_size is None:
-                        self.input_size = len(layer)
-                    self.output_size = len(layer)
+                        self.input_size = layer.in_features
+                    self.output_size = layer.out_features
 
         if self.selfaware:
             awareness_net_shape = funnel(self.input_size + self.output_size, self.output_size, 4)
