@@ -36,6 +36,8 @@ class NnMixer:
         self.dynamic_parameters = dynamic_parameters
         self.awareness_criterion = None
         self.loss_combination_operator = operator.add
+        self.start_selfaware_training = False
+        self.is_selfaware = False
 
         self._nonpersistent = {
             'sampler': None
@@ -219,7 +221,7 @@ class NnMixer:
 
                 self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
-        self.net = self.nn_class(ds, self.dynamic_parameters)
+        self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
         self.net = self.net.train()
 
         if self.batch_size < self.net.available_devices:
@@ -262,6 +264,10 @@ class NnMixer:
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
+                if self.start_selfaware_training:
+                    self.is_selfaware = True
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=copy.deepcopy(self.net.net))
+
                 total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
@@ -274,7 +280,7 @@ class NnMixer:
 
                 # forward + backward + optimize
                 # outputs = self.net(inputs)
-                if CONFIG.SELFAWARE:
+                if self.is_selfaware:
                     outputs, awareness = self.net(inputs)
                 else:
                     outputs = self.net(inputs)
@@ -288,7 +294,7 @@ class NnMixer:
                 else:
                     loss = self.criterion(outputs, labels)
 
-                if CONFIG.SELFAWARE:
+                if self.is_selfaware:
                     real_loss = torch.abs(labels - outputs) # error precentual to the target
                     real_loss = torch.Tensor(real_loss.tolist()) # disconnect from the graph (test if this is necessary)
                     real_loss = real_loss.to(self.net.device)
@@ -300,21 +306,6 @@ class NnMixer:
 
                     total_loss = self.loss_combination_operator(awareness_loss, loss)
                     running_loss += total_loss.item()
-
-                    # Make sure the LR doesn't get too low
-                    if self.optimizer.lr > 5 * pow(10,-6):
-                        if np.isnan(running_loss) or np.isinf(running_loss) or running_loss > pow(10,4):
-                            self.optimizer_args['lr'] = self.optimizer.lr/2
-                            gc.collect()
-                            if 'cuda' in str(self.net.device):
-                                torch.cuda.empty_cache()
-
-                            self.loss_combination_operator = operator.add
-                            self.net = self.nn_class(ds, self.dynamic_parameters)
-                            self.optimizer.zero_grad()
-                            self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
-                            break
                 else:
                     total_loss = loss
 
