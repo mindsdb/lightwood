@@ -8,9 +8,7 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=None, size_parameters={}):
-        if selfaware is None:
-            selfaware = CONFIG.SELFAWARE
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None):
         self.selfaware = selfaware
         # How many devices we can train this network on
         self.available_devices = 1
@@ -44,7 +42,7 @@ class DefaultNet(torch.nn.Module):
         """
         super(DefaultNet, self).__init__()
 
-        if shape is None:
+        if shape is None and pretrained_net is None:
             input_sample, output_sample = ds[0]
 
             self.input_size = len(input_sample)
@@ -75,17 +73,20 @@ class DefaultNet(torch.nn.Module):
             else:
                 shape = funnel(self.input_size,self.output_size,depth)
 
-        logging.info(f'Building network of shape: {shape}')
-        rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
+        if pretrained_net is None:
+            logging.info(f'Building network of shape: {shape}')
+            rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
 
-        layers = []
-        for ind in range(len(shape) - 1):
-            linear_function = PLinear  if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
-            layers.append(linear_function(shape[ind],shape[ind+1]))
-            if ind < len(shape) - 2:
-                layers.append(rectifier())
+            layers = []
+            for ind in range(len(shape) - 1):
+                linear_function = PLinear  if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
+                layers.append(linear_function(shape[ind],shape[ind+1]))
+                if ind < len(shape) - 2:
+                    layers.append(rectifier())
 
-        self.net = torch.nn.Sequential(*layers)
+            self.net = torch.nn.Sequential(*layers)
+        else:
+            self.net = pretrained_net
 
         if self.selfaware:
             awareness_net_shape = funnel(self.input_size + self.output_size, self.output_size, 4)
