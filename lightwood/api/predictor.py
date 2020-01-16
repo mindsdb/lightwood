@@ -319,14 +319,14 @@ class Predictor:
 
                         last_test_error = test_error
 
-                        delta_mean = np.mean(test_error_delta_buff[-10:])
-                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-10:])
+                        delta_mean = np.mean(test_error_delta_buff[-5:])
+                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
 
                         if callback_on_iter is not None:
                             callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
                         ## Stop if the model is overfitting
-                        if delta_mean < 0 and len(test_error_delta_buff) > 9:
+                        if delta_mean < 0 and len(test_error_delta_buff) > 4:
                             stop_training = True
 
                         # Stop if we're past the time limit alloted for training
@@ -334,7 +334,7 @@ class Predictor:
                            stop_training = True
 
                         # If the trauining subset is overfitting on it's associated testing subset
-                        if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
+                        if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 4:
                             break
 
                         if stop_training:
