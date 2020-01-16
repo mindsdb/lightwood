@@ -15,8 +15,7 @@ class CONFIG:
     SELFAWARE = True
 
     """Probabilistic FC layers"""
-    USE_PROBABILISTIC_LINEAR = False # change weights in mixer to be probabilistic
-
+    USE_PROBABILISTIC_LINEAR = False  # change weights in mixer to be probabilistic
 
     """Bayesian Network"""
     NUMBER_OF_PROBABILISTIC_MODELS = 2

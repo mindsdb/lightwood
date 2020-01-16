@@ -22,7 +22,6 @@ class Gym():
 
         self.best_model = None
 
-
     def fit(self, train_data_loader, test_data_loader, desired_error, max_time, callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=None, custom_test_func=None):
         started = time.time()
         epoch = 0

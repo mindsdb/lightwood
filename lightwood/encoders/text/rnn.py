@@ -1,9 +1,11 @@
 from lightwood.encoders.text.helpers.rnn_helpers import *
 import logging
 import math
+
+
 class RnnEncoder:
 
-    def __init__(self, encoded_vector_size = 256, train_iters=75000, stop_on_error = 0.0001, learning_rate=0.01, is_target = False):
+    def __init__(self, encoded_vector_size=256, train_iters=75000, stop_on_error=0.0001, learning_rate=0.01, is_target=False):
         self._stop_on_error = stop_on_error
         self._learning_rate = learning_rate
         self._encoded_vector_size = encoded_vector_size
@@ -18,11 +20,12 @@ class RnnEncoder:
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
-            
+
         no_null_sentences = [x if x is not None else '' for x in priming_data]
         estimated_time = 1/937*self._train_iters*len(no_null_sentences)
         log_every = math.ceil(self._train_iters/100)
-        logging.info('We will train an encoder for this text, on a CPU it will take about {min} minutes'.format(min=estimated_time))
+        logging.info('We will train an encoder for this text, on a CPU it will take about {min} minutes'.format(
+            min=estimated_time))
 
         self._input_lang = Lang('input')
         self._output_lang = self._input_lang
@@ -38,10 +41,9 @@ class RnnEncoder:
         self._decoder = DecoderRNN(hidden_size, self._output_lang.n_words).to(device)
 
         trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, no_null_sentences, no_null_sentences, self._train_iters, int(log_every), self._learning_rate, self._stop_on_error,
-        max_length)
+                   max_length)
 
         self._prepared = True
-
 
     def encode(self, column_data):
         if not self._prepared:
@@ -66,18 +68,16 @@ class RnnEncoder:
                     #encoder_outputs[ei] = encoder_output[0, 0]
 
                 # use the last hidden state as the encoded vector
-                ret+=[encoder_hidden.tolist()[0][0]]
+                ret += [encoder_hidden.tolist()[0][0]]
 
         return self._pytorch_wrapper(ret)
 
-
-    def decode(self, encoded_values_tensor, max_length = 100):
+    def decode(self, encoded_values_tensor, max_length=100):
 
         ret = []
         with torch.no_grad():
             for decoder_hiddens in encoded_values_tensor:
                 decoder_hidden = torch.FloatTensor([[decoder_hiddens.tolist()]])
-
 
                 decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 
@@ -101,7 +101,6 @@ class RnnEncoder:
         return ret
 
 
-
 # only run the test if this file is called from debugger
 if __name__ == "__main__":
     sentences = ["Everyone really likes the newest benefits",
@@ -112,10 +111,8 @@ if __name__ == "__main__":
 
                  ]
 
-    encoder = RnnEncoder(encoded_vector_size=10,train_iters=7500)
+    encoder = RnnEncoder(encoded_vector_size=10, train_iters=7500)
     encoder.encode(sentences)
-
-
 
     # test de decoder
 

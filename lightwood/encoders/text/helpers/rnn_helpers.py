@@ -84,6 +84,8 @@ And for more, read the papers that introduced these topics:
 **Requirements**
 """
 from __future__ import unicode_literals, print_function, division
+import math
+import time
 from io import open
 import unicodedata
 import string
@@ -151,6 +153,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 SOS_token = 0
 EOS_token = 1
 UNK_TOKEN = 2
+
 
 class Lang:
     def __init__(self, name):
@@ -264,8 +267,6 @@ def readLangs(lang1, lang2, reverse=False):
 MAX_LENGTH = 100
 
 
-
-
 ######################################################################
 # The full process for preparing the data is:
 #
@@ -287,9 +288,6 @@ def prepareData(lang1, lang2, reverse=False):
     print(input_lang.name, input_lang.n_words)
     print(output_lang.name, output_lang.n_words)
     return input_lang, output_lang, pairs
-
-
-
 
 
 ######################################################################
@@ -502,7 +500,7 @@ class AttnDecoderRNN(nn.Module):
 
 def indexesFromSentence(lang, sentence):
 
-    return [lang.word2index[word] if word in  lang.word2index else UNK_TOKEN for word in (str(sentence).split(' ') if sentence is not None else [None])]
+    return [lang.word2index[word] if word in lang.word2index else UNK_TOKEN for word in (str(sentence).split(' ') if sentence is not None else [None])]
 
 
 def tensorFromSentence(lang, sentence):
@@ -515,8 +513,6 @@ def tensorsFromPair(pair, input_lang, output_lang):
     input_tensor = tensorFromSentence(input_lang, pair[0])
     target_tensor = tensorFromSentence(output_lang, pair[1])
     return (input_tensor, target_tensor)
-
-
 
 
 ######################################################################
@@ -545,7 +541,6 @@ def tensorsFromPair(pair, input_lang, output_lang):
 # choose to use teacher forcing or not with a simple if statement. Turn
 # ``teacher_forcing_ratio`` up to use more of it.
 #
-
 teacher_forcing_ratio = 0.5
 
 
@@ -562,7 +557,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
 
     loss = 0
 
-    for ei in range(min(input_length,len(encoder_outputs))):
+    for ei in range(min(input_length, len(encoder_outputs))):
         encoder_output, encoder_hidden = encoder(
             input_tensor[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0, 0]
@@ -578,7 +573,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
         for di in range(target_length):
             if isinstance(decoder, AttnDecoderRNN):
                 decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+                    decoder_input, decoder_hidden, encoder_outputs)
             else:
                 decoder_output, decoder_hidden = decoder(
                     decoder_input, decoder_hidden)
@@ -590,7 +585,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
         for di in range(target_length):
             if isinstance(decoder, AttnDecoderRNN):
                 decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+                    decoder_input, decoder_hidden, encoder_outputs)
             else:
                 decoder_output, decoder_hidden = decoder(
                     decoder_input, decoder_hidden)
@@ -613,9 +608,6 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
 # This is a helper function to print time elapsed and estimated time
 # remaining given the current time and progress %.
 #
-
-import time
-import math
 
 
 def asMinutes(s):
@@ -653,7 +645,7 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
 
-    random_index = random.randint(0,len(input_rows))
+    random_index = random.randint(0, len(input_rows))
 
     training_pairs = [[tensorFromSentence(input_lang, input_rows[random_index]), tensorFromSentence(output_lang, output_rows[random_index])]
                       for i in range(n_iters)]
@@ -689,8 +681,7 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
             plot_losses.append(plot_loss_avg)
             plot_loss_total = 0
 
-    #showPlot(plot_losses)
-
+    # showPlot(plot_losses)
 
 
 ######################################################################
@@ -754,7 +745,6 @@ def evaluateRandomly(encoder, pairs, decoder, n=10, max_length=MAX_LENGTH):
         output_sentence = ' '.join(output_words)
         print('<', output_sentence)
         print('')
-
 
 
 ######################################################################

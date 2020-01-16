@@ -9,11 +9,12 @@ from lightwood.config.config import CONFIG
 class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
     def forward(self, input):
         n, c = input.size()
-        input = input.view(n,c,1).permute(0,2,1)
-        pooled =  torch.nn.functional.adaptive_avg_pool1d(input, self.output_size)
+        input = input.view(n, c, 1).permute(0, 2, 1)
+        pooled = torch.nn.functional.adaptive_avg_pool1d(input, self.output_size)
         _, _, c = pooled.size()
-        pooled = pooled.permute(0,2,1)
-        return pooled.view(n,c)
+        pooled = pooled.permute(0, 2, 1)
+        return pooled.view(n, c)
+
 
 class Img2Vec():
 

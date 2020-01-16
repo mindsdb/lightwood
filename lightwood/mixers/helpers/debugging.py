@@ -16,6 +16,7 @@ def get_gpu_memory_map():
     gpu_memory_map = dict(zip(range(len(gpu_memory)), gpu_memory))
     return gpu_memory_map
 
+
 def print_gpuutil_status():
     import GPUtil
     GPUtil.showUtilization()

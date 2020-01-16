@@ -17,7 +17,6 @@ class SubSet(Dataset):
         for i in range(len(indexes)):
             self.index_mapping[i] = indexes[i]
 
-
     def __len__(self):
         return int(len(self.index_mapping.keys()))
 
@@ -39,6 +38,7 @@ class SubSet(Dataset):
         else:
             super().__setattr__(name, value)
 
+
 class DataSource(Dataset):
 
     def __init__(self, data_frame, configuration):
@@ -52,7 +52,7 @@ class DataSource(Dataset):
         self.configuration = configuration
         self.encoders = {}
         self.transformer = None
-        self.training = False # Flip this flag if you are using the datasource while training
+        self.training = False  # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
@@ -70,7 +70,6 @@ class DataSource(Dataset):
             self.dropout_dict[col['name']] = dropout
 
         self._clear_cache()
-
 
     def create_subsets(self, nr_subsets):
         subsets_indexes = {}
@@ -94,7 +93,6 @@ class DataSource(Dataset):
         self.encoded_cache = {}
         self.transformed_cache = None
 
-
     def extractRandomSubset(self, percentage):
         np.random.seed(int(round(percentage*100000)))
         msk = np.random.rand(len(self.data_frame)) < (1-percentage)
@@ -107,8 +105,6 @@ class DataSource(Dataset):
         ds.encoders = self.encoders
         ds.transformer = self.transformer
         return ds
-
-
 
     def __len__(self):
         """
@@ -127,8 +123,9 @@ class DataSource(Dataset):
 
         dropout_features = None
 
-        if self.training == True and random.randint(0,2) == 1:
-            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
+        if self.training == True and random.randint(0, 2) == 1:
+            dropout_features = [feature['name'] for feature in self.configuration['input_features']
+                                if random.random() > (1 - self.dropout_dict[feature['name']])]
 
         if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
@@ -143,14 +140,13 @@ class DataSource(Dataset):
             for feature in self.configuration[feature_set]:
                 col_name = feature['name']
                 col_config = self.get_column_config(col_name)
-                if col_name not in self.encoded_cache: # if data is not encoded yet, encode values
-                    if not ((dropout_features is not None and  col_name in dropout_features) or self.disable_cache):
+                if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
+                    if not ((dropout_features is not None and col_name in dropout_features) or self.disable_cache):
                         self.get_encoded_column_data(col_name)
-
 
                 # if we are dropping this feature, get the encoded value of None
                 if dropout_features is not None and col_name in dropout_features:
-                    custom_data = {col_name:[None]}
+                    custom_data = {col_name: [None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']] = [None]
@@ -174,7 +170,8 @@ class DataSource(Dataset):
                     new_weights = None
 
                     for val in weights:
-                        encoded_val = self.get_encoded_column_data(col_config['name'],custom_data={col_config['name']:[val]})
+                        encoded_val = self.get_encoded_column_data(
+                            col_config['name'], custom_data={col_config['name']: [val]})
                         # @Note: This assumes one-hot encoding for the encoded_value
                         value_index = np.argmax(encoded_val[0])
 
@@ -276,16 +273,12 @@ class DataSource(Dataset):
 
                 if feature_set == 'output_features':
                     input_encoder_training_data['targets'].append({
-                        'encoded_output': copy.deepcopy(self.encoders[column_name].encode(args[0]))
-                        ,'unencoded_output': copy.deepcopy(args[0])
-                        ,'output_encoder': copy.deepcopy(encoder_instance)
-                        ,'output_type': copy.deepcopy(config['type'])
+                        'encoded_output': copy.deepcopy(self.encoders[column_name].encode(args[0])), 'unencoded_output': copy.deepcopy(args[0]), 'output_encoder': copy.deepcopy(encoder_instance), 'output_type': copy.deepcopy(config['type'])
                     })
 
         return True
 
-
-    def get_encoded_column_data(self, column_name, custom_data = None):
+    def get_encoded_column_data(self, column_name, custom_data=None):
         """
 
         :param column_name:
@@ -319,8 +312,8 @@ class DataSource(Dataset):
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
         else:
-            raise Exception('It looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
-
+            raise Exception(
+                'It looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
         """
@@ -330,13 +323,14 @@ class DataSource(Dataset):
         """
         if decoder_instance is None:
             if column_name not in self.encoders:
-                raise ValueError('Data must have been encoded before at some point, you should not decode before having encoding at least once')
+                raise ValueError(
+                    'Data must have been encoded before at some point, you should not decode before having encoding at least once')
             decoder_instance = self.encoders[column_name]
         decoded_data = decoder_instance.decode(encoded_data)
 
         return decoded_data
 
-    def get_feature_names(self, where = 'input_features'):
+    def get_feature_names(self, where='input_features'):
 
         return [feature['name'] for feature in self.configuration[where]]
 

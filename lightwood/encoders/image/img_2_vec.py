@@ -7,6 +7,7 @@ from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ENCODER_AIM
 
+
 class Img2VecEncoder:
 
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):

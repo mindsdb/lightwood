@@ -50,7 +50,8 @@ class Predictor:
 
         self.config = config
 
-        self._generate_config = True if output is not None or self.config is None else False # this is if we need to automatically generate a configuration variable
+        # this is if we need to automatically generate a configuration variable
+        self._generate_config = True if output is not None or self.config is None else False
 
         self._output_columns = output
         self._input_columns = None
@@ -79,7 +80,7 @@ class Predictor:
                 lowest_error = error
                 lowest_error_epoch = epoch
 
-            if max(lowest_error_epoch*1.4,10) < epoch:
+            if max(lowest_error_epoch*1.4, 10) < epoch:
                 return lowest_error
 
             if max_epochs is not None and epoch >= max_epochs:
@@ -88,7 +89,7 @@ class Predictor:
             if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
                 return lowest_error
 
-    def convert_to_device(self,device_str=None):
+    def convert_to_device(self, device_str=None):
         if device_str is None:
             device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
@@ -105,7 +106,7 @@ class Predictor:
             except:
                 pass
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
+    def learn(self, from_data, test_data=None, callback_on_iter=None, eval_every_x_epochs=20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -120,7 +121,7 @@ class Predictor:
         # This is a helper function that will help us auto-determine roughly what data types are in each column
         # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
         def type_map(col_name):
-            col_pd_type =  from_data[col_name].dtype
+            col_pd_type = from_data[col_name].dtype
             col_pd_type = str(col_pd_type)
 
             if col_pd_type in ['int64', 'float64', 'timedelta']:
@@ -130,7 +131,7 @@ class Predictor:
             else:
                 # if the number of uniques is elss than 100 or less than 10% of the total number of rows then keep it as categorical
                 unique = from_data[col_name].nunique()
-                if  unique < 100 or unique < len(from_data[col_name])/10:
+                if unique < 100 or unique < len(from_data[col_name])/10:
                     return COLUMN_DATA_TYPES.CATEGORICAL
                 # else assume its text
                 return COLUMN_DATA_TYPES.TEXT
@@ -154,7 +155,6 @@ class Predictor:
         else:
             is_categorical_output = False
 
-
         if stop_training_after_seconds is None:
             stop_training_after_seconds = round(from_data.shape[0] * from_data.shape[1] / 5)
 
@@ -174,9 +174,9 @@ class Predictor:
         mixer_params = {}
 
         if 'mixer' in self.config:
-            if 'class' in  self.config['mixer']:
+            if 'class' in self.config['mixer']:
                 mixer_class = self.config['mixer']['class']
-            if 'attrs' in  self.config['mixer']:
+            if 'attrs' in self.config['mixer']:
                 mixer_params = self.config['mixer']['attrs']
 
         # Initialize data sources
@@ -216,7 +216,8 @@ class Predictor:
 
             training_time_per_iteration = stop_model_building_after_seconds/optimizer.total_trials
 
-            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=training_time_per_iteration, max_epochs=None))
+            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(
+                mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=training_time_per_iteration, max_epochs=None))
             logging.info('Using hyperparameter set: ', best_parameters)
         else:
             best_parameters = {}
@@ -228,7 +229,8 @@ class Predictor:
             if hasattr(mixer, param):
                 setattr(mixer, param, mixer_params[param])
             else:
-                logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
+                logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(
+                    param=param, mixerclass=str(type(mixer))))
 
         started = time.time()
         epoch = 0
@@ -236,7 +238,7 @@ class Predictor:
 
         stop_training = False
 
-        for subset_iteration in [1,2]:
+        for subset_iteration in [1, 2]:
             if stop_training:
                 break
             for subset_id in [*from_data_ds.subsets.keys()]:
@@ -253,9 +255,10 @@ class Predictor:
                 subset_test_error_delta_buff = []
                 best_model = None
 
-                #iterate over the iter_fit and see what the epoch and mixer error is
+                # iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds)):
-                    logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
+                    logging.info('training iteration {iter_i}, error {error}'.format(
+                        iter_i=epoch, error=training_error))
 
                     if epoch >= eval_next_on_epoch:
                         # Prime the model on each subset for a bit
@@ -287,20 +290,21 @@ class Predictor:
                         subset_delta_mean = np.mean(subset_test_error_delta_buff[-10:])
 
                         if callback_on_iter is not None:
-                            callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
+                            callback_on_iter(epoch, training_error, test_error, delta_mean,
+                                             self.calculate_accuracy(test_data_ds))
 
-                        ## Stop if the model is overfitting
+                        # Stop if the model is overfitting
                         if delta_mean < 0 and len(test_error_delta_buff) > 9:
                             stop_training = True
 
                         # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > stop_training_after_seconds:
-                           stop_training = True
+                            stop_training = True
 
                         # If the training subset is overfitting on it's associated testing subset
                         if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
                             break
-                            
+
                         if stop_training:
                             mixer.update_model(best_model)
                             self._mixer = mixer
@@ -309,12 +313,12 @@ class Predictor:
                             if subset_id == 'full':
                                 logging.info('Finished training model !')
                             else:
-                                logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
+                                logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(
+                                    subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
                             break
 
         self._mixer.encoders = from_data_ds.encoders
         return self
-
 
     def predict(self, when_data=None, when=None):
         """
@@ -325,7 +329,7 @@ class Predictor:
         """
 
         if when is not None:
-            when_dict = {key:[when[key]] for key in when}
+            when_dict = {key: [when[key]] for key in when}
             when_data = pandas.DataFrame(when_dict)
 
         when_data_ds = DataSource(when_data, self.config)
@@ -350,7 +354,7 @@ class Predictor:
             if properties['type'] == 'categorical':
                 accuracies[output_column] = {
                     'function': 'accuracy_score',
-                    'value': accuracy_score(list(map(str,ds.get_column_original_data(output_column))), list(map(str,predictions[output_column]["predictions"])))
+                    'value': accuracy_score(list(map(str, ds.get_column_original_data(output_column))), list(map(str, predictions[output_column]["predictions"])))
                 }
             else:
                 # Note: We use this method instead of using `encoded_predictions` since the values in encoded_predictions are never prefectly 0 or 1, and this leads to rather large unwaranted different in the r2 score, re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0

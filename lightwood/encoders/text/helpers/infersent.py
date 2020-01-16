@@ -20,6 +20,7 @@ from lightwood.config.config import CONFIG
 BLSTM (max/mean) encoder
 """
 
+
 class InferSent(nn.Module):
 
     def __init__(self, config):
@@ -173,7 +174,7 @@ class InferSent(nn.Module):
             self.word_vec.update(new_word_vec)
         else:
             new_word_vec = []
-        print('New vocab size : %s (added %s words)'% (len(self.word_vec), len(new_word_vec)))
+        print('New vocab size : %s (added %s words)' % (len(self.word_vec), len(new_word_vec)))
 
     def get_batch(self, batch):
         # sent in batch in decreasing order of lengths
@@ -214,7 +215,7 @@ class InferSent(nn.Module):
         n_wk = np.sum(lengths)
         if verbose:
             print('Nb words kept : %s/%s (%.1f%s)' % (
-                        n_wk, n_w, 100.0 * n_wk / n_w, '%'))
+                n_wk, n_w, 100.0 * n_wk / n_w, '%'))
 
         # sort by decreasing length
         lengths, idx_sort = np.sort(lengths)[::-1], np.argsort(-lengths)
@@ -228,7 +229,7 @@ class InferSent(nn.Module):
 
         tic = time.time()
         sentences, lengths, idx_sort = self.prepare_samples(
-                        sentences, bsize, tokenize, verbose)
+            sentences, bsize, tokenize, verbose)
 
         embeddings = []
         for stidx in range(0, len(sentences), bsize):
@@ -246,9 +247,9 @@ class InferSent(nn.Module):
 
         if verbose:
             print('Speed : %.1f sentences/s (%s mode, bsize=%s)' % (
-                    len(embeddings)/(time.time()-tic),
-                    'gpu' if self.is_cuda() else 'cpu', bsize))
-                    
+                len(embeddings)/(time.time()-tic),
+                'gpu' if self.is_cuda() else 'cpu', bsize))
+
         return embeddings
 
     def visualize(self, sent, tokenize=True):
@@ -281,6 +282,7 @@ class InferSent(nn.Module):
         plt.show()
 
         return output, idxs
+
 
 """
 BiGRU encoder (first/last hidden states)
@@ -419,7 +421,7 @@ class GRUEncoder(nn.Module):
     def __init__(self, config):
         super(GRUEncoder, self).__init__()
         self.bsize = config['bsize']
-        self.word_emb_dim =  config['word_emb_dim']
+        self.word_emb_dim = config['word_emb_dim']
         self.enc_lstm_dim = config['enc_lstm_dim']
         self.pool_type = config['pool_type']
         self.dpout_model = config['dpout_model']
@@ -463,7 +465,6 @@ class InnerAttentionNAACLEncoder(nn.Module):
         self.enc_lstm_dim = config['enc_lstm_dim']
         self.pool_type = config['pool_type']
 
-
         self.enc_lstm = nn.LSTM(self.word_emb_dim, self.enc_lstm_dim, 1, bidirectional=True)
 
         self.proj_key = nn.Linear(2*self.enc_lstm_dim, 2*self.enc_lstm_dim, bias=False)
@@ -490,18 +491,18 @@ class InnerAttentionNAACLEncoder(nn.Module):
         idx_unsort = np.argsort(idx_sort)
         sent_output = sent_output.index_select(1, torch.cuda.LongTensor(idx_unsort))
 
-        sent_output = sent_output.transpose(0,1).contiguous()
+        sent_output = sent_output.transpose(0, 1).contiguous()
 
         sent_output_proj = self.proj_lstm(sent_output.view(-1,
-            2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
+                                                           2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
 
         sent_key_proj = self.proj_key(sent_output.view(-1,
-            2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
+                                                       2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
 
         sent_key_proj = torch.tanh(sent_key_proj)
         # NAACL paper: u_it=tanh(W_w.h_it + b_w)  (bsize, seqlen, 2nhid)
 
-        sent_w = self.query_embedding(torch.LongTensor(bsize*[0]).cuda()).unsqueeze(2) #(bsize, 2*nhid, 1)
+        sent_w = self.query_embedding(torch.LongTensor(bsize*[0]).cuda()).unsqueeze(2)  # (bsize, 2*nhid, 1)
 
         Temp = 2
         keys = sent_key_proj.bmm(sent_w).squeeze(2) / Temp
@@ -527,7 +528,7 @@ class InnerAttentionMILAEncoder(nn.Module):
     def __init__(self, config):
         super(InnerAttentionMILAEncoder, self).__init__()
         self.bsize = config['bsize']
-        self.word_emb_dim =  config['word_emb_dim']
+        self.word_emb_dim = config['word_emb_dim']
         self.enc_lstm_dim = config['enc_lstm_dim']
         self.pool_type = config['pool_type']
 
@@ -557,42 +558,40 @@ class InnerAttentionMILAEncoder(nn.Module):
         idx_unsort = np.argsort(idx_sort)
         sent_output = sent_output.index_select(1, torch.cuda.LongTensor(idx_unsort))
 
-        sent_output = sent_output.transpose(0,1).contiguous()
+        sent_output = sent_output.transpose(0, 1).contiguous()
         sent_output_proj = self.proj_lstm(sent_output.view(-1,
-            2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
+                                                           2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
         sent_key_proj = self.proj_key(sent_output.view(-1,
-            2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
+                                                       2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
         sent_key_proj = torch.tanh(sent_key_proj)
         # NAACL : u_it=tanh(W_w.h_it + b_w) like in NAACL paper
 
         # Temperature
         Temp = 3
 
-        sent_w1 = self.query_embedding(torch.LongTensor(bsize*[0]).cuda()).unsqueeze(2) #(bsize, nhid, 1)
+        sent_w1 = self.query_embedding(torch.LongTensor(bsize*[0]).cuda()).unsqueeze(2)  # (bsize, nhid, 1)
         keys1 = sent_key_proj.bmm(sent_w1).squeeze(2) / Temp
         keys1 = keys1 + ((keys1 == 0).float()*-1000)
         alphas1 = self.softmax(keys1).unsqueeze(2).expand_as(sent_key_proj)
         emb1 = torch.sum(alphas1 * sent_output_proj, 1).squeeze(1)
 
-
-        sent_w2 = self.query_embedding(torch.LongTensor(bsize*[1]).cuda()).unsqueeze(2) #(bsize, nhid, 1)
+        sent_w2 = self.query_embedding(torch.LongTensor(bsize*[1]).cuda()).unsqueeze(2)  # (bsize, nhid, 1)
         keys2 = sent_key_proj.bmm(sent_w2).squeeze(2) / Temp
         keys2 = keys2 + ((keys2 == 0).float()*-1000)
         alphas2 = self.softmax(keys2).unsqueeze(2).expand_as(sent_key_proj)
         emb2 = torch.sum(alphas2 * sent_output_proj, 1).squeeze(1)
 
-        sent_w3 = self.query_embedding(torch.LongTensor(bsize*[1]).cuda()).unsqueeze(2) #(bsize, nhid, 1)
+        sent_w3 = self.query_embedding(torch.LongTensor(bsize*[1]).cuda()).unsqueeze(2)  # (bsize, nhid, 1)
         keys3 = sent_key_proj.bmm(sent_w3).squeeze(2) / Temp
         keys3 = keys3 + ((keys3 == 0).float()*-1000)
         alphas3 = self.softmax(keys3).unsqueeze(2).expand_as(sent_key_proj)
         emb3 = torch.sum(alphas3 * sent_output_proj, 1).squeeze(1)
 
-        sent_w4 = self.query_embedding(torch.LongTensor(bsize*[1]).cuda()).unsqueeze(2) #(bsize, nhid, 1)
+        sent_w4 = self.query_embedding(torch.LongTensor(bsize*[1]).cuda()).unsqueeze(2)  # (bsize, nhid, 1)
         keys4 = sent_key_proj.bmm(sent_w4).squeeze(2) / Temp
         keys4 = keys4 + ((keys4 == 0).float()*-1000)
         alphas4 = self.softmax(keys4).unsqueeze(2).expand_as(sent_key_proj)
         emb4 = torch.sum(alphas4 * sent_output_proj, 1).squeeze(1)
-
 
         if int(time.time()) % 100 == 0:
             print('alphas', torch.cat((alphas1.data[0, :, 0],
@@ -649,13 +648,13 @@ class InnerAttentionYANGEncoder(nn.Module):
         idx_unsort = np.argsort(idx_sort)
         sent_output = sent_output.index_select(1, torch.cuda.LongTensor(idx_unsort))
 
-        sent_output = sent_output.transpose(0,1).contiguous()
+        sent_output = sent_output.transpose(0, 1).contiguous()
 
         sent_output_proj = self.proj_lstm(sent_output.view(-1,
-            2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
+                                                           2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
 
         sent_keys = self.proj_enc(sent_output.view(-1,
-            2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
+                                                   2*self.enc_lstm_dim)).view(bsize, -1, 2*self.enc_lstm_dim)
 
         sent_max = torch.max(sent_output, 1)[0].squeeze(1)  # (bsize, 2*nhid)
         sent_summary = self.proj_query(sent_max).unsqueeze(1).expand_as(sent_keys)
@@ -678,10 +677,11 @@ class InnerAttentionYANGEncoder(nn.Module):
         return emb
 
 
-
 """
 Hierarchical ConvNet
 """
+
+
 class ConvNetEncoder(nn.Module):
     def __init__(self, config):
         super(ConvNetEncoder, self).__init__()
@@ -695,24 +695,22 @@ class ConvNetEncoder(nn.Module):
             nn.Conv1d(self.word_emb_dim, 2*self.enc_lstm_dim, kernel_size=3,
                       stride=1, padding=1),
             nn.ReLU(inplace=True),
-            )
+        )
         self.convnet2 = nn.Sequential(
             nn.Conv1d(2*self.enc_lstm_dim, 2*self.enc_lstm_dim, kernel_size=3,
                       stride=1, padding=1),
             nn.ReLU(inplace=True),
-            )
+        )
         self.convnet3 = nn.Sequential(
             nn.Conv1d(2*self.enc_lstm_dim, 2*self.enc_lstm_dim, kernel_size=3,
                       stride=1, padding=1),
             nn.ReLU(inplace=True),
-            )
+        )
         self.convnet4 = nn.Sequential(
             nn.Conv1d(2*self.enc_lstm_dim, 2*self.enc_lstm_dim, kernel_size=3,
                       stride=1, padding=1),
             nn.ReLU(inplace=True),
-            )
-
-
+        )
 
     def forward(self, sent_tuple):
         # sent_len: [max_len, ..., min_len] (batch)
@@ -720,7 +718,7 @@ class ConvNetEncoder(nn.Module):
 
         sent, sent_len = sent_tuple
 
-        sent = sent.transpose(0,1).transpose(1,2).contiguous()
+        sent = sent.transpose(0, 1).transpose(1, 2).contiguous()
         # batch, nhid, seqlen)
 
         sent = self.convnet1(sent)
@@ -760,9 +758,9 @@ class NLINet(nn.Module):
         self.encoder = eval(self.encoder_type)(config)
         self.inputdim = 4*2*self.enc_lstm_dim
         self.inputdim = 4*self.inputdim if self.encoder_type in \
-                        ["ConvNetEncoder", "InnerAttentionMILAEncoder"] else self.inputdim
+            ["ConvNetEncoder", "InnerAttentionMILAEncoder"] else self.inputdim
         self.inputdim = self.inputdim/2 if self.encoder_type == "LSTMEncoder" \
-                                        else self.inputdim
+            else self.inputdim
         if self.nonlinear_fc:
             self.classifier = nn.Sequential(
                 nn.Dropout(p=self.dpout_fc),
@@ -773,13 +771,13 @@ class NLINet(nn.Module):
                 nn.Tanh(),
                 nn.Dropout(p=self.dpout_fc),
                 nn.Linear(self.fc_dim, self.n_classes),
-                )
+            )
         else:
             self.classifier = nn.Sequential(
                 nn.Linear(self.inputdim, self.fc_dim),
                 nn.Linear(self.fc_dim, self.fc_dim),
                 nn.Linear(self.fc_dim, self.n_classes)
-                )
+            )
 
     def forward(self, s1, s2):
         # s1 : (s1, s1_len)
@@ -815,7 +813,7 @@ class ClassificationNet(nn.Module):
         self.encoder = eval(self.encoder_type)(config)
         self.inputdim = 2*self.enc_lstm_dim
         self.inputdim = 4*self.inputdim if self.encoder_type == "ConvNetEncoder" else self.inputdim
-        self.inputdim = self.enc_lstm_dim if self.encoder_type =="LSTMEncoder" else self.inputdim
+        self.inputdim = self.enc_lstm_dim if self.encoder_type == "LSTMEncoder" else self.inputdim
         self.classifier = nn.Sequential(
             nn.Linear(self.inputdim, 512),
             nn.Linear(512, self.n_classes),
