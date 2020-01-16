@@ -9,6 +9,8 @@ import torch
 class DefaultNet(torch.nn.Module):
 
     def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None):
+        self.input_size = None
+        self.output_size = None
         self.selfaware = selfaware
         # How many devices we can train this network on
         self.available_devices = 1
@@ -87,6 +89,11 @@ class DefaultNet(torch.nn.Module):
             self.net = torch.nn.Sequential(*layers)
         else:
             self.net = pretrained_net
+            for layer in self.net:
+                if isinstance(layer, torch.nn.Linear):
+                    if self.input_size is None:
+                        self.input_size = len(layer)
+                    self.output_size = len(layer)
 
         if self.selfaware:
             awareness_net_shape = funnel(self.input_size + self.output_size, self.output_size, 4)
@@ -99,7 +106,7 @@ class DefaultNet(torch.nn.Module):
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
-        if CONFIG.DETERMINISTIC: # set initial weights based on a specific distribution if we have deterministic enabled
+        if CONFIG.DETERMINISTIC and is None: # set initial weights based on a specific distribution if we have deterministic enabled
 
             # lambda function so that we can do this for either awareness layer or the internal layers of net
             def reset_layer_params(layer):
@@ -117,6 +124,8 @@ class DefaultNet(torch.nn.Module):
 
             for layer in self.net:
                 reset_layer_params(layer)
+
+        if pretrained_net:
 
         self.net = self.net.to(self.device)
         if self.available_devices > 1:

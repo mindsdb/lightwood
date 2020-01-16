@@ -292,6 +292,11 @@ class Predictor:
                         if subset_iteration == 1:
                             break
 
+                        # Once we are past the priming/warmup period, start training the selfaware network
+                        if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE:
+                            print('Started selfaware training !')
+                            mixer.start_selfaware_training = True
+
                         eval_next_on_epoch += eval_every_x_epochs
 
                         test_error = mixer.error(test_data_ds)
