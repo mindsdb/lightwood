@@ -203,54 +203,56 @@ class NnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-    def iter_fit(self, ds):
+    def iter_fit(self, ds, initialize=True):
         """
         :param ds:
         :return:
         """
 
-        self.fit_data_source(ds)
-        if self.is_categorical_output:
-            # The WeightedRandomSampler samples "randomly" but can assign higher weight to certain rows, we assign each rows it's weight based on the target variable value in that row and it's associated weight in the output_weights map (otherwise used to bias the loss function)
-            if ds.output_weights is not None and ds.output_weights is not False and CONFIG.OVERSAMPLE:
-                weights = []
-                for row in ds:
-                    _, out = row
-                    # @Note: This assumes one-hot encoding for the encoded_value
-                    weights.append(ds.output_weights[torch.argmax(out).item()])
-
-                self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
-
-        self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
-        self.net = self.net.train()
-
-        if self.batch_size < self.net.available_devices:
-            self.batch_size = self.net.available_devices
-
-        self.awareness_criterion = torch.nn.MSELoss()
-
-        if self.criterion is None:
+        if initialize:
+            self.fit_data_source(ds)
             if self.is_categorical_output:
-                if ds.output_weights is not None and ds.output_weights is not False and not CONFIG.OVERSAMPLE:
-                    output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
+                # The WeightedRandomSampler samples "randomly" but can assign higher weight to certain rows, we assign each rows it's weight based on the target variable value in that row and it's associated weight in the output_weights map (otherwise used to bias the loss function)
+                if ds.output_weights is not None and ds.output_weights is not False and CONFIG.OVERSAMPLE:
+                    weights = []
+                    for row in ds:
+                        _, out = row
+                        # @Note: This assumes one-hot encoding for the encoded_value
+                        weights.append(ds.output_weights[torch.argmax(out).item()])
+
+                    self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
+
+            print('\n\nHERE 1\n\n')
+            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
+            self.net = self.net.train()
+
+            if self.batch_size < self.net.available_devices:
+                self.batch_size = self.net.available_devices
+
+            self.awareness_criterion = torch.nn.MSELoss()
+
+            if self.criterion is None:
+                if self.is_categorical_output:
+                    if ds.output_weights is not None and ds.output_weights is not False and not CONFIG.OVERSAMPLE:
+                        output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
+                    else:
+                        output_weights = None
+                    self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
                 else:
-                    output_weights = None
-                self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
-            else:
-                self.criterion = torch.nn.MSELoss()
+                    self.criterion = torch.nn.MSELoss()
 
-        self.optimizer_class = Ranger
-        if self.optimizer_args is None:
-            self.optimizer_args = {}
+            self.optimizer_class = Ranger
+            if self.optimizer_args is None:
+                self.optimizer_args = {}
 
-        if 'beta1' in self.dynamic_parameters:
-            self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
+            if 'beta1' in self.dynamic_parameters:
+                self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
 
-        for optimizer_arg_name in ['lr','k','N_sma_threshold']:
-            if optimizer_arg_name in self.dynamic_parameters:
-                self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
+            for optimizer_arg_name in ['lr','k','N_sma_threshold']:
+                if optimizer_arg_name in self.dynamic_parameters:
+                    self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
-        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+            self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
 
@@ -266,6 +268,7 @@ class NnMixer:
             for i, data in enumerate(data_loader, 0):
                 if self.start_selfaware_training and not self.is_selfaware:
                     self.is_selfaware = True
+                    print('\n\nHERE 2 !\n\n')
                     self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=copy.deepcopy(self.net.net))
 
                 total_iterations += 1

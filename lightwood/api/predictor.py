@@ -263,7 +263,7 @@ class Predictor:
         started = time.time()
         epoch = 0
         eval_next_on_epoch = eval_every_x_epochs
-
+        first_run = True
         stop_training = False
 
         for subset_iteration in [1,2]:
@@ -284,7 +284,8 @@ class Predictor:
                 best_model = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
-                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds)):
+                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
+                    first_run = False
                     logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
 
                     if epoch >= eval_next_on_epoch:
