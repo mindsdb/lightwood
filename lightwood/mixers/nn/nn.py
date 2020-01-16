@@ -39,6 +39,7 @@ class NnMixer:
         self.start_selfaware_training = False
         self.stop_selfaware_training = False
         self.is_selfaware = False
+        self.last_unaware_net = False
 
         self._nonpersistent = {
             'sampler': None
@@ -255,7 +256,6 @@ class NnMixer:
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
-
         if self._nonpersistent['sampler'] is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         else:
@@ -267,10 +267,13 @@ class NnMixer:
             error = 0
             for i, data in enumerate(data_loader, 0):
                 if self.start_selfaware_training and not self.is_selfaware:
+                    logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=copy.deepcopy(self.net.net))
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net)
+                    self.last_unaware_net = copy.deepcopy(self.net.net)
 
-                    self.optimizer_args['lr'] = self.optimizer.lr/10 #  Lower the learning rate once we start training the selfaware network
+                    # Lower the learning rate once we start training the selfaware network
+                    self.optimizer_args['lr'] = self.optimizer.lr/8
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
@@ -278,10 +281,12 @@ class NnMixer:
                     self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
                 if self.stop_selfaware_training and self.is_selfaware:
-                    print(" RESETING THE NETWORK !! ")
+                    logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=copy.deepcopy(self.net.net))
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net) #, pretrained_net=copy.deepcopy(self.net.net)
 
+                    # Increase the learning rate closer to the previous levels
+                    self.optimizer_args['lr'] = self.optimizer.lr * 4
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()

@@ -50,7 +50,7 @@ class DefaultNet(torch.nn.Module):
             self.input_size = len(input_sample)
             self.output_size = len(output_sample)
 
-            #'''
+            '''
             small_input = True if self.input_size < 50 else False
             small_output = True if self.input_size < 50 else False
             large_input = True if self.input_size > 2000 else False
@@ -75,8 +75,8 @@ class DefaultNet(torch.nn.Module):
                 shape = rectangle(self.input_size,self.output_size,depth - 1)
             else:
                 shape = funnel(self.input_size,self.output_size,depth)
-            #'''
-            #shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
+            '''
+            shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
 
         if pretrained_net is None:
             logging.info(f'Building network of shape: {shape}')
