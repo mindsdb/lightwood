@@ -300,7 +300,7 @@ class Predictor:
 
                         # Once we are past the priming/warmup period, start training the selfaware network
                         if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
-                            print('Started selfaware training !')
+                            logging.info('Started selfaware training !')
                             mixer.start_selfaware_training = True
 
                         eval_next_on_epoch += eval_every_x_epochs
@@ -333,7 +333,6 @@ class Predictor:
                             callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
                         ## Stop if the model is overfitting
-                        print(test_error_delta_buff)
                         if delta_mean < 0 and len(test_error_delta_buff) > 4:
                             stop_training = True
 
@@ -344,7 +343,10 @@ class Predictor:
                         # If the trauining subset is overfitting on it's associated testing subset
                         if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 4:
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
-                            break
+                            if subset_id == list(from_data_ds.subsets.keys())[-1]:
+                                stop_training = True
+                            elif not stop_training:
+                                break
 
                         if stop_training:
                             mixer.update_model(best_model)
