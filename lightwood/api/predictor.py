@@ -286,7 +286,7 @@ class Predictor:
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
                     first_run = False
-                    logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
+                    #logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
 
                     # If the selfaware network isn't able to train, go back to the original network
                     if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
@@ -313,12 +313,14 @@ class Predictor:
                             best_model = mixer.get_model_copy()
 
                         if last_subset_test_error is None:
-                            subset_test_error_delta_buff.append(0)
+                            subset_test_error_delta_buff.append(subset_test_error - 1)
                         else:
                             subset_test_error_delta_buff.append(last_subset_test_error - subset_test_error)
 
+                        last_subset_test_error = subset_test_error
+
                         if last_test_error is None:
-                            test_error_delta_buff.append(0)
+                            test_error_delta_buff.append(test_error -1)
                         else:
                             test_error_delta_buff.append(last_test_error - test_error)
 
@@ -331,15 +333,17 @@ class Predictor:
                             callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
                         ## Stop if the model is overfitting
+                        print(test_error_delta_buff)
                         if delta_mean < 0 and len(test_error_delta_buff) > 4:
                             stop_training = True
 
                         # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > stop_training_after_seconds:
-                           stop_training = True
+                            stop_training = True
 
                         # If the trauining subset is overfitting on it's associated testing subset
                         if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 4:
+                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
                             break
 
                         if stop_training:
@@ -347,10 +351,7 @@ class Predictor:
                             self._mixer = mixer
                             self.train_accuracy = self.calculate_accuracy(test_data_ds)
                             self.overall_certainty = mixer.overall_certainty()
-                            if subset_id == 'full':
-                                logging.info('Finished training model !')
-                            else:
-                                logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
+                            logging.info('Finished training model !')
                             break
 
         self._mixer.encoders = from_data_ds.encoders
