@@ -403,10 +403,10 @@ class Predictor:
                     predicted_fixed.append(float(val))
                 except:
                     predicted_fixed.append(0)
-                    
+
             accuracy = {
                 'function': 'r2_score',
-                'value': r2_score(real, predicted)
+                'value': r2_score(real_fixed, predicted_fixed)
             }
         return accuracy
 
