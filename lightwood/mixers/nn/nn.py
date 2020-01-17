@@ -326,9 +326,6 @@ class NnMixer:
 
                     awareness_loss = self.awareness_criterion(awareness, real_loss)
 
-                    #print(awareness_loss.item())
-                    #print(loss.item())
-
                     total_loss = self.loss_combination_operator(awareness_loss, loss)
                     running_loss += total_loss.item()
                 else:
