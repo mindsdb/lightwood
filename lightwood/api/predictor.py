@@ -390,6 +390,20 @@ class Predictor:
                 'value': accuracy_score(real, predicted)
             }
         else:
+            real_fixed = []
+            predicted_fixed = []
+            for val in real:
+                try:
+                    real_fixed.append(float(val))
+                except:
+                    real_fixed.append(0)
+
+            for val in predicted:
+                try:
+                    predicted_fixed.append(float(val))
+                except:
+                    predicted_fixed.append(0)
+                    
             accuracy = {
                 'function': 'r2_score',
                 'value': r2_score(real, predicted)
