@@ -342,7 +342,7 @@ class Predictor:
 
                         # If the trauining subset is overfitting on it's associated testing subset
                         if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 4:
-                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys()) - 1))
+                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
                             mixer.update_model(best_model)
                             if subset_id == list(from_data_ds.subsets.keys())[-1]:
                                 stop_training = True
@@ -382,9 +382,9 @@ class Predictor:
             if output_column in self._helper_mixers:
                 print('Helper mixer accuracy: ', self._helper_mixers[output_column]['accuracy'])
                 print('Normal mixer accuracy: ', self.train_accuracy[output_column]['value'])
-                #if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
-                #    helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
-                #    main_mixer_predictions[output_column] = {'predictions': list(helper_mixer_predictions[output_column])}
+                if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
+                    helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
+                    main_mixer_predictions[output_column] = {'predictions': list(helper_mixer_predictions[output_column])}
 
         return main_mixer_predictions
 
