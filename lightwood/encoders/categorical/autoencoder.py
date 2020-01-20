@@ -115,10 +115,8 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
 
     random.seed(2)
-    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(6,8))) for x in range(2000)]
+    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(7,8))) for x in range(2000)]
     for i in range(len(cateogries)):
-        if i % 11 == 0:
-            cateogries[i] = None
         if i % 10 == 0:
             cateogries[i] = random.randint(1,20)
 
