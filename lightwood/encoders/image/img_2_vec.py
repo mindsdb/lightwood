@@ -56,9 +56,11 @@ class Img2VecEncoder:
 
 
 if __name__ == "__main__":
+    #TODO: add images
     images = ['test_data/cat.jpg', 'test_data/cat2.jpg', 'test_data/catdog.jpg']
 
     encoder = Img2VecEncoder()
+    encoder.prepare_encoder([])
 
     ret = encoder.encode(images)
     print(ret)
