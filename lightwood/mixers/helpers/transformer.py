@@ -35,7 +35,7 @@ class Transformer:
         ret = {}
         list_vector = vector.tolist()
         for feature_name in getattr(self, feature_set):
-            top = start+self.feature_len_map[feature_name]
+            top = start + self.feature_len_map[feature_name]
             ret[feature_name] = list_vector[start:top]
             start = top
         return ret

@@ -3,7 +3,6 @@ import logging
 from collections import Counter
 
 import torch
-import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
 import pyro
@@ -11,7 +10,6 @@ import pyro
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
-from lightwood.mixers.helpers.ranger import Ranger
 
 
 class BayesianNnMixer:
@@ -121,10 +119,9 @@ class BayesianNnMixer:
         sampled_models = [self.pyro_guide(None, None) for _ in range(CONFIG.NUMBER_OF_PROBABILISTIC_MODELS)]
         # A tensor of tensors representing the whole batch of predictions for each "model" pyro built
         out_hats = [model(inputs).data for model in sampled_models]
-        outputs_mean = torch.mean(torch.stack(out_hats), 0)
 
         '''
-                histo_exp = []
+            histo_exp = []
 
             print(output_vectors)
             for i in range(len(outputs_mean[0])):
@@ -150,7 +147,10 @@ class BayesianNnMixer:
             for output_column in output_trasnformed_vectors:
 
                 decoded_predictions = when_data_source.get_decoded_column_data(
-                    output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
+                    output_column,
+                    when_data_source.encoders[output_column]._pytorch_wrapper(
+                        output_trasnformed_vectors[output_column]
+                    ))
 
                 if output_column not in predictions_arr_dict:
                     predictions_arr_dict[output_column] = []
@@ -176,16 +176,18 @@ class BayesianNnMixer:
                     occurance_dict = dict(Counter(predictions))
                     final_prediction = max(occurance_dict, key=occurance_dict.get)
                     final_predictions.append(final_prediction)
-                    final_predictions_confidence.append(occurance_dict[final_prediction]/len(predictions))
+                    final_predictions_confidence.append(occurance_dict[final_prediction] / len(predictions))
 
                     possible_predictions.append(list(occurance_dict.keys()))
-                    possible_predictions_confidence.append([x/len(predictions) for x in list(occurance_dict.values())])
+                    possible_predictions_confidence.append([
+                        x / len(predictions) for x in list(occurance_dict.values())
+                    ])
                 else:
                     predictions = [x if x is not None else 0 for x in predictions]
                     p_hist = np.histogram(np.array(predictions), 10)
-                    final_predictions_confidence.append(max(p_hist[0])/sum(p_hist[0]))
+                    final_predictions_confidence.append(max(p_hist[0]) / sum(p_hist[0]))
                     final_predictions.append(p_hist[1][np.where(p_hist[0] == max(p_hist[0]))][0])
-                    possible_predictions_confidence.append([x/sum(p_hist[0]) for x in p_hist[0]])
+                    possible_predictions_confidence.append([x / sum(p_hist[0]) for x in p_hist[0]])
                     possible_predictions.append(list(p_hist[1]))
 
             predictions_dict[output_column] = {}
@@ -249,10 +251,10 @@ class BayesianNnMixer:
         self.net = model
 
     def fit_data_source(self, ds):
-        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
-            'input_features')
-        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
-            'output_features')
+        self.input_column_names = self.input_column_names \
+            if self.input_column_names is not None else ds.get_feature_names('input_features')
+        self.output_column_names = self.output_column_names \
+            if self.output_column_names is not None else ds.get_feature_names('output_features')
 
         transformer_already_initialized = False
         try:
@@ -289,7 +291,7 @@ class BayesianNnMixer:
             else:
                 self.criterion = torch.nn.MSELoss()
 
-        #self.optimizer = pyro.optim.Adadelta({"lr": 0.1})
+        # self.optimizer = pyro.optim.Adadelta({"lr": 0.1})
         self.optimizer = pyro.optim.Adam({"lr": 0.005, "betas": (0.95, 0.999)})
         svi = pyro.infer.SVI(self.pyro_model, self.pyro_guide, self.optimizer, loss=pyro.infer.Trace_ELBO())
 
@@ -307,7 +309,7 @@ class BayesianNnMixer:
                 labels = labels.to(self.net.device)
                 inputs = inputs.to(self.net.device)
 
-                #mi = inputs.view(8,len(self.net.net[0].bias))
+                # mi = inputs.view(8,len(self.net.net[0].bias))
                 mi = inputs
                 running_loss += svi.step(mi[0], labels)
                 error = running_loss / (i + 1)

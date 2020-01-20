@@ -1,7 +1,6 @@
 import torch
 from lightwood.encoders.text.helpers.rnn_helpers import Lang
 import numpy as np
-import logging
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
@@ -24,7 +23,7 @@ class OneHotEncoder:
         self._lang.word2count[UNCOMMON_WORD] = 0
         self._lang.n_words = 1
         for category in priming_data:
-            if category != None:
+            if category is not None:
                 self._lang.addWord(str(category))
 
         while self._lang.n_words > max_dimensions:
@@ -49,7 +48,7 @@ class OneHotEncoder:
 
         for word in column_data:
             encoded_word = [0]*v_len
-            if word != None:
+            if word is not None:
                 word = str(word)
                 index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
                 encoded_word[index] = 1

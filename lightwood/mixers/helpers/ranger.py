@@ -5,7 +5,8 @@ from torch.optim.optimizer import Optimizer
 
 
 class Ranger(Optimizer):
-    def __init__(self, params, lr=0.001, alpha=0.5, k=6, N_sma_threshold=5, betas=(.95, 0.999), eps=1e-5, weight_decay=0):
+    def __init__(self, params, lr=0.001, alpha=0.5, k=6, N_sma_threshold=5,
+                 betas=(.95, 0.999), eps=1e-5, weight_decay=0):
         # parameter checks
         if not 0.0 <= alpha <= 1.0:
             raise ValueError(f'Invalid slow update rate: {alpha}')
@@ -27,7 +28,8 @@ class Ranger(Optimizer):
                         N_sma_threshold=N_sma_threshold, eps=eps, weight_decay=weight_decay)
         super().__init__(params, defaults)
 
-        # Since we keep LR the same for all param groups, store it here for now for quick&easy access if we want to know it
+        # Since we keep LR the same for all param groups,
+        # store it here for now for quick&easy access if we want to know it
         self.lr = lr
 
         # adjustable threshold
@@ -71,7 +73,8 @@ class Ranger(Optimizer):
                         # look ahead weight storage now in state dict
                         state['slow_buffer'] = torch.empty_like(p.data)
                         state['slow_buffer'].copy_(p.data)
-                    # @TODO Couldn't this branch happen after the if above is entered in thus replacing torch.zero_like) ??
+                    # @TODO Couldn't this branch happen after the if above is entered
+                    # in thus replacing torch.zero_like) ??
                     else:
                         state['exp_avg'] = state['exp_avg'].type_as(p_data_fp32)
                         state['exp_avg_sq'] = state['exp_avg_sq'].type_as(p_data_fp32)
@@ -119,7 +122,8 @@ class Ranger(Optimizer):
                 # we do it at the param level instead of group level
                 if state['step'] % group['k'] == 0:
                     slow_p = state['slow_buffer']
-                    # Find the interpolated weight between the slower buffer (the weight `k` steps ago) and the current weight, set that as the state for RAdam
+                    # Find the interpolated weight between the slower buffer (the weight `k` steps ago)
+                    # and the current weight, set that as the state for RAdam
                     slow_p.add_(self.alpha, p.data - slow_p)
                     p.data.copy_(slow_p)
 

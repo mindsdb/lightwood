@@ -1,6 +1,5 @@
 import importlib
 import inspect
-import random
 import copy
 
 import numpy as np
@@ -27,13 +26,15 @@ class SubSet(Dataset):
         return self.data_source.get_feature_names(where)
 
     def __getattribute__(self, name):
-        if name in ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache']:
+        if name in ['configuration', 'encoders', 'transformer', 'training',
+                    'output_weights', 'dropout_dict', 'disable_cache']:
             return self.data_source.__getattribute__(name)
         else:
             return object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
-        if name in ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache']:
+        if name in ['configuration', 'encoders', 'transformer', 'training',
+                    'output_weights', 'dropout_dict', 'disable_cache']:
             return dict.__setattr__(self.data_source, name, value)
         else:
             super().__setattr__(name, value)
@@ -123,7 +124,7 @@ class DataSource(Dataset):
 
         dropout_features = None
 
-        if self.training == True and random.randint(0, 2) == 1:
+        if self.training is True and random.randint(0, 2) == 1:
             dropout_features = [feature['name'] for feature in self.configuration['input_features']
                                 if random.random() > (1 - self.dropout_dict[feature['name']])]
 
@@ -217,14 +218,14 @@ class DataSource(Dataset):
             return self.list_cache[column_name]
 
     def prepare_encoders(self):
-        '''
+        """
             Get the encoder for all the output and input column and preapre them
             with all available data for that column.
 
             * Note: This method should only be called on the "main" training dataset, all
             the other datasets should get their encoders and transformers
             from the training dataset.
-        '''
+        """
         input_encoder_training_data = {'targets': []}
 
         for feature_set in ['output_features', 'input_features']:
@@ -273,7 +274,10 @@ class DataSource(Dataset):
 
                 if feature_set == 'output_features':
                     input_encoder_training_data['targets'].append({
-                        'encoded_output': copy.deepcopy(self.encoders[column_name].encode(args[0])), 'unencoded_output': copy.deepcopy(args[0]), 'output_encoder': copy.deepcopy(encoder_instance), 'output_type': copy.deepcopy(config['type'])
+                        'encoded_output': copy.deepcopy(self.encoders[column_name].encode(args[0])),
+                        'unencoded_output': copy.deepcopy(args[0]),
+                        'output_encoder': copy.deepcopy(encoder_instance),
+                        'output_type': copy.deepcopy(config['type'])
                     })
 
         return True
@@ -288,7 +292,8 @@ class DataSource(Dataset):
         if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
 
-        # The first argument of encoder is the data, if no custom data is specified, use all the datasource's data for this column
+        # The first argument of encoder is the data, if no custom data is specified,
+        # use all the datasource's data for this column
         if custom_data is not None:
             args = [custom_data[column_name]]
         else:
@@ -307,13 +312,14 @@ class DataSource(Dataset):
         if column_name in self.encoders:
             encoded_vals = self.encoders[column_name].encode(*args)
             # Cache the encoded data so we don't have to run the encoding,
-            # Don't cache custom_data (custom_data is usually used when running without cache or dropping out a feature for a certain pass)
+            # Don't cache custom_data
+            # (custom_data is usually used when running without cache or dropping out a feature for a certain pass)
             if column_name not in self.encoded_cache and custom_data is None:
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
         else:
             raise Exception(
-                'It looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
+                'Looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
         """
@@ -323,8 +329,10 @@ class DataSource(Dataset):
         """
         if decoder_instance is None:
             if column_name not in self.encoders:
-                raise ValueError(
-                    'Data must have been encoded before at some point, you should not decode before having encoding at least once')
+                raise ValueError("""
+                    Data must have been encoded before at some point.
+                    You should not decode before having encoding at least once
+                    """)
             decoder_instance = self.encoders[column_name]
         decoded_data = decoder_instance.decode(encoded_data)
 

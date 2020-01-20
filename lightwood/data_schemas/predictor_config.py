@@ -1,5 +1,5 @@
 from schema import Schema, And, Use, Optional
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES, HISTOGRAM_TYPES
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 feature_schema = Schema({
     'name': str,

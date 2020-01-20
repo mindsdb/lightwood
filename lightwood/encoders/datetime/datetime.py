@@ -46,10 +46,10 @@ class DatetimeEncoder:
                 ret += [None]
 
             else:
-
                 dt = datetime.datetime(year=round(vector[0]*3000), month=round(vector[1]*12), day=round(
                     vector[2]*31), hour=round(vector[4]*24), minute=round(vector[5]*60), second=round(vector[6]*60))
-                if return_as_datetime == True:
+
+                if return_as_datetime is True:
                     ret += [dt]
                 else:
                     ret += [round(dt.timestamp())]
@@ -65,4 +65,4 @@ if __name__ == "__main__":
 
     print(enc.decode(enc.encode(data)))
 
-   # print(enc.decode(enc.encode(['not there', 'time', 'tokens'])))
+    # print(enc.decode(enc.encode(['not there', 'time', 'tokens'])))
