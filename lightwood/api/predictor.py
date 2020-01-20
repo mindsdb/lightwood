@@ -380,11 +380,12 @@ class Predictor:
 
         main_mixer_predictions = self._mixer.predict(when_data_ds)
 
-        for output_column in main_mixer_predictions:
-            if self._helper_mixers is not None and output_column in self._helper_mixers:
-                if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
-                    helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
-                    main_mixer_predictions[output_column] = {'predictions': list(helper_mixer_predictions[output_column])}
+        if CONFIG.HELPER_MIXERS:
+            for output_column in main_mixer_predictions:
+                if self._helper_mixers is not None and output_column in self._helper_mixers:
+                    if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
+                        helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
+                        main_mixer_predictions[output_column] = {'predictions': list(helper_mixer_predictions[output_column])}
 
         return main_mixer_predictions
 
