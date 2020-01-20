@@ -1,17 +1,48 @@
+import runpy
 import os
 import sys
 import pandas as pd
 from lightwood import Predictor
 import lightwood
 
+pdir = '../../lightwood/'
+encoders_path = pdir + 'encoders/'
+mixers_path = pdir + 'mixers/'
+MODULES = [
+    f'{encoders_path}categorical/onehot.py',
+    f'{encoders_path}datetime/datetime.py',
+    f'{mixers_path}helpers/plinear.py',
+    f'{pdir}api/data_source.py',
+    f'{mixers_path}nn/nn.py',
+    f'{encoders_path}categorical/autoencoder.py',
+    #f'{encoders_path}text/rnn.py'.format(encoders_path),
+    #'./lightwood/encoders/image/nn.py',
+    #'./lightwood/encoders/image/img_2_vec.py',
+    #'./lightwood/encoders/numeric/numeric.py',
+    #'./lightwood/encoders/time_series/cesium_ts.py',
+    #'./lightwood/mixers/sk_learn/sk_learn.py',
+    #'./lightwood/encoders/text/infersent.py',
+    #'./lightwood/encoders/text/distilbert.py'
+]
 
-def run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
+
+def run_tests(modules):
+    '''
+    Run modules as scripts to execute main function
+    '''    
+    for module in modules:
+        runpy.run_path(module, run_name='__main__')
+
+
+def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
+    '''
+    Run full test example with home_rentals dataset
+    '''
     lightwood.config.config.CONFIG.USE_CUDA = USE_CUDA
     lightwood.config.config.CONFIG.CACHE_ENCODED_DATA = CACHE_ENCODED_DATA
     lightwood.config.config.CONFIG.SELFAWARE = SELFAWARE
     lightwood.config.config.CONFIG.PLINEAR = PLINEAR
 
-    ####################
     config = {'input_features': [
                         {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric'},
                         {'name': 'location', 'type': 'categorical'}, {'name': 'days_on_market', 'type': 'numeric'},
@@ -25,15 +56,12 @@ def run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
                       #       '4': 1,
                       # }
     }],
-     'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer}}
-
+    'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer}}
 
     # AX doesn't seem to work on the travis version of windows, so don't test it there as of now
     if sys.platform not in ['win32','cygwin','windows']:
         pass
         #config['optimizer'] = lightwood.model_building.BasicAxOptimizer
-
-
 
     df=pd.read_csv("https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv")
 
@@ -66,8 +94,11 @@ def run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
             preds[pred] = 0
         preds[pred] += 1
 
-for USE_CUDA in [False]:
-    for CACHE_ENCODED_DATA in [False, True]:
-        for SELFAWARE in [False, True]:
-            for PLINEAR in [False, True]:
-                run_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR)
+
+if __name__ == "__main__":
+    run_tests(MODULES)
+    for USE_CUDA in [False]:
+        for CACHE_ENCODED_DATA in [False, True]:
+            for SELFAWARE in [False, True]:
+                for PLINEAR in [False, True]:
+                    run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR)

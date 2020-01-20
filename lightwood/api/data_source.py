@@ -353,6 +353,7 @@ class DataSource(Dataset):
 
 
 if __name__ == "__main__":
+    #TODO; sometimes this fail depending on the data generated
     import random
     import pandas
 
@@ -390,5 +391,5 @@ if __name__ == "__main__":
     print(data_frame)
 
     ds = DataSource(data_frame, config)
-
+    ds.prepare_encoders()
     print(ds.get_encoded_column_data('z'))

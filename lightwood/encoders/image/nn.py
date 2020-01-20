@@ -57,9 +57,11 @@ class NnAutoEncoder:
 
 # only run the test if this file is called from debugger
 if __name__ == "__main__":
+    #TODO: add images
     images = ['test_data/cat.jpg', 'test_data/cat2.jpg', 'test_data/catdog.jpg']
     encoder = NnAutoEncoder(images)
 
+    encoder.prepare_encoder([])
     images = ['test_data/cat.jpg', 'test_data/cat2.jpg']
     encoded_data = encoder.encode(images)
     print(encoded_data)
