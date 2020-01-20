@@ -1,4 +1,3 @@
-import logging
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.plinear import PLinear
@@ -23,7 +22,8 @@ class DefaultNet(torch.nn.Module):
         if CONFIG.DETERMINISTIC:
             '''
                 Seed that always has the same value on the same dataset plus setting the bellow CUDA options
-                In order to make sure pytroch randomly generate number will be the same every time when training on the same dataset
+                In order to make sure pytorch randomly generate number will be the same every time
+                when training on the same dataset
             '''
             if ds is not None:
                 torch.manual_seed(len(ds))
@@ -36,9 +36,13 @@ class DefaultNet(torch.nn.Module):
                 self.available_devices = torch.cuda.device_count()
 
         self.dynamic_parameters = dynamic_parameters
+
         """
-        Here we define the basic building blocks of our model, in forward we define how we put it all together along wiht an input
-        :param sample_batch: this is used to understand the characteristics of the input and target, it is an object of type utils.libs.data_types.batch.Batch
+        Here we define the basic building blocks of our model,
+        in forward we define how we put it all together along with an input
+
+        :param sample_batch: this is used to understand the characteristics of the input and target,
+                            it is an object of type utils.libs.data_types.batch.Batch
         """
         super(DefaultNet, self).__init__()
 
@@ -54,10 +58,12 @@ class DefaultNet(torch.nn.Module):
             large_output = True if self.output_size > 2000 else False
 
             # 2. Determine in/out proportions
-            # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case (outside of very specific things, such as text to image)
-            larger_output = True if self.output_size > self.input_size*2 else False
-            larger_input = True if self.input_size > self.output_size*2 else False
-            even_input_output = larger_input and large_output
+            # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case
+            # (outside of very specific things, such as text to image)
+
+            # larger_output = True if self.output_size > self.input_size * 2 else False
+            # larger_input = True if self.input_size > self.output_size * 2 else False
+            # even_input_output = larger_input and large_output
 
             if 'network_depth' in self.dynamic_parameters:
                 depth = self.dynamic_parameters['network_depth']
@@ -65,9 +71,9 @@ class DefaultNet(torch.nn.Module):
                 depth = 5
 
             if (small_input and small_output):
-                shape = rombus(self.input_size, self.output_size, depth+1, 800)
+                shape = rombus(self.input_size, self.output_size, depth + 1, 800)
             elif (not large_input) and (not large_output):
-                shape = rombus(self.input_size, self.output_size, depth, self.input_size*2)
+                shape = rombus(self.input_size, self.output_size, depth, self.input_size * 2)
             elif large_input and large_output:
                 shape = rectangle(self.input_size, self.output_size, depth - 1)
             else:
@@ -79,7 +85,7 @@ class DefaultNet(torch.nn.Module):
         layers = []
         for ind in range(len(shape) - 1):
             linear_function = PLinear if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
-            layers.append(linear_function(shape[ind], shape[ind+1]))
+            layers.append(linear_function(shape[ind], shape[ind + 1]))
             if ind < len(shape) - 2:
                 layers.append(rectifier())
 
@@ -90,14 +96,14 @@ class DefaultNet(torch.nn.Module):
             awareness_layers = []
 
             for ind in range(len(awareness_net_shape) - 1):
-                awareness_layers.append(torch.nn.Linear(awareness_net_shape[ind], awareness_net_shape[ind+1]))
+                awareness_layers.append(torch.nn.Linear(awareness_net_shape[ind], awareness_net_shape[ind + 1]))
                 if ind < len(awareness_layers) - 2:
                     awareness_layers.append(rectifier())
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
-        if CONFIG.DETERMINISTIC:  # set initial weights based on a specific distribution if we have deterministic enabled
-
+        # set initial weights based on a specific distribution if we have deterministic enabled
+        if CONFIG.DETERMINISTIC:
             # lambda function so that we can do this for either awareness layer or the internal layers of net
             def reset_layer_params(layer):
                 if isinstance(layer, torch.nn.Linear):
@@ -148,9 +154,10 @@ class DefaultNet(torch.nn.Module):
             return -1  # Unknown
 
         mean_variance = mean_variance / count
-        self.max_variance = mean_variance if self.max_variance is None else mean_variance if self.max_variance < mean_variance else self.max_variance
+        self.max_variance = mean_variance if self.max_variance is None \
+            else mean_variance if self.max_variance < mean_variance else self.max_variance
 
-        return (self.max_variance - mean_variance)/self.max_variance
+        return (self.max_variance - mean_variance) / self.max_variance
 
     def forward(self, input):
         """

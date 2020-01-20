@@ -139,7 +139,7 @@ if __name__ == "__main__":
     ret = encoder.encode(sentences)
     print(ret)
 
-    ret = encoder.encode(["And theyw ill fail to raise"])
+    ret = encoder.encode(["And they will fail to raise"])
     print(ret)
 
     ret = encoder.encode(["Everyone really likes the newest benefits"])

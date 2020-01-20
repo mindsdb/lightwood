@@ -1,20 +1,14 @@
-import time
-import copy
-import random
-import logging
 from functools import partial
 
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from transformers import DistilBertModel, DistilBertForSequenceClassification, DistilBertTokenizer, AlbertModel, AlbertForSequenceClassification, DistilBertTokenizer, AlbertTokenizer, AdamW, get_linear_schedule_with_warmup
+from transformers import DistilBertModel, DistilBertForSequenceClassification, AlbertModel, \
+    AlbertForSequenceClassification, DistilBertTokenizer, AlbertTokenizer, AdamW, get_linear_schedule_with_warmup
 
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet
-from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.shapes import *
-from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.api.gym import Gym
 
 
@@ -36,7 +30,9 @@ class DistilBertEncoder:
         self.aim = aim
 
         if self.aim == ENCODER_AIM.SPEED:
-            # uses more memory, takes very long to train and outputs weird debugging statements to the command line, consider waiting until it gets better or try to investigate why this happens (changing the pretrained model doesn't seem to help)
+            # uses more memory, takes very long to train and outputs weird debugging statements to the command line,
+            # consider waiting until it gets better or try to investigate why this happens
+            # (changing the pretrained model doesn't seem to help)
             self._classifier_model_class = AlbertForSequenceClassification
             self._embeddings_model_class = AlbertModel
             self._tokenizer_class = AlbertTokenizer
@@ -108,8 +104,11 @@ class DistilBertEncoder:
         self._max_len = min(max([len(x) for x in priming_data]), self._model_max_len)
         self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
         self._pad_id = self._tokenizer.convert_tokens_to_ids([self._tokenizer.pad_token])[0]
-        # @TODO: Support multiple targets if they are all categorical or train for the categorical target if it's a mix (maybe ?)
-        # @TODO: Attach a language modeling head and/or use GPT2 and/or provide outputs better suited to a LM head (which will be the mixer) if the output if text
+        # @TODO: Support multiple targets if they are all categorical
+        # or train for the categorical target if it's a mix (maybe ?)
+
+        # @TODO: Attach a language modeling head and/or use GPT2
+        # and/or provide outputs better suited to a LM head (which will be the mixer) if the output if text
 
         if training_data is not None and 'targets' in training_data and len(training_data['targets']) == 1 and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL and CONFIG.TRAIN_TO_PREDICT_TARGET:
             self._model_type = 'classifier'
@@ -144,12 +143,26 @@ class DistilBertEncoder:
                 merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
             test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
 
-            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback,
-                                                       eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=partial(self.categorical_train_function, test=False), custom_test_func=partial(self.categorical_train_function, test=True))
+            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader,
+                                                       test_data_loader=test_data_loader,
+                                                       desired_error=self.desired_error,
+                                                       max_time=self.max_training_time,
+                                                       callback=self._train_callback,
+                                                       eval_every_x_epochs=1,
+                                                       max_unimproving_models=10,
+                                                       custom_train_func=partial(
+                                                           self.categorical_train_function,
+                                                           test=False),
+                                                       custom_test_func=partial(
+                                                           self.categorical_train_function, test=True)
+                                                       )
 
             self._model = best_model.to(self.device)
 
-        elif all([x['output_type'] == COLUMN_DATA_TYPES.NUMERIC or x['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL for x in training_data['targets']]) and CONFIG.TRAIN_TO_PREDICT_TARGET:
+        elif all([x['output_type'] == COLUMN_DATA_TYPES.NUMERIC
+                  or x['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL
+                  for x in training_data['targets']]) and CONFIG.TRAIN_TO_PREDICT_TARGET:
+
             self.desired_error = 0.01
             self._model_type = 'generic_target_predictor'
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
@@ -167,7 +180,7 @@ class DistilBertEncoder:
             ]
 
             optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
-            #optimizer = Ranger(self._head.parameters(),lr=5e-5)
+            # optimizer = Ranger(self._head.parameters(),lr=5e-5)
 
             # num_training_steps is kind of an estimation
             scheduler = get_linear_schedule_with_warmup(
@@ -196,8 +209,22 @@ class DistilBertEncoder:
 
             self._model.eval()
 
-            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader, test_data_loader=test_data_loader, desired_error=self.desired_error, max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1,
-                                                       max_unimproving_models=10, custom_train_func=partial(self.numerical_train_function, backbone=self._model, test=False), custom_test_func=partial(self.numerical_train_function, backbone=self._model, test=True))
+            best_model, error, training_time = gym.fit(train_data_loader=train_data_loader,
+                                                       test_data_loader=test_data_loader,
+                                                       desired_error=self.desired_error,
+                                                       max_time=self.max_training_time,
+                                                       callback=self._train_callback,
+                                                       eval_every_x_epochs=1,
+                                                       max_unimproving_models=10,
+                                                       custom_train_func=partial(
+                                                           self.numerical_train_function,
+                                                           backbone=self._model,
+                                                           test=False),
+                                                       custom_test_func=partial(
+                                                           self.numerical_train_function,
+                                                           backbone=self._model,
+                                                           test=True)
+                                                       )
 
             self._head = best_model.to(self.device)
 
@@ -272,8 +299,11 @@ if __name__ == "__main__":
 
     enc = DistilBertEncoder()
 
-    enc.prepare_encoder(priming_data, training_data={'targets': [{'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}, {
-                        'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}]})
+    enc.prepare_encoder(priming_data,
+                        training_data={'targets': [
+                            {'output_type': COLUMN_DATA_TYPES.NUMERIC,'encoded_output': encoded_data_1},
+                            {'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}
+                        ]})
 
     encoded_predicted_target = enc.encode(test_data).tolist()
 
@@ -295,4 +325,4 @@ if __name__ == "__main__":
         encoder_accuracy = r2_score(real, pred)
 
         print(f'Categorial encoder accuracy for: {encoder_accuracy} on testing dataset')
-        #assert(encoder_accuracy > 0.5)
+        # assert(encoder_accuracy > 0.5)

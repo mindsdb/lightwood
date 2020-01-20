@@ -25,7 +25,7 @@ class NumericEncoder:
         for number in priming_data:
             try:
                 number = float(number)
-            except:
+            except Exception:
                 continue
 
             if math.isnan(number):
@@ -74,7 +74,8 @@ class NumericEncoder:
                         vector[1] = math.log(abs(number))
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
-                    # @TODO For now handle this by setting to zero as a hotifx, but we need to figure out why it's happening and fix it properly later
+                    # @TODO For now handle this by setting to zero as a hotfix,
+                    # but we need to figure out why it's happening and fix it properly later
                     vector = [0]*3
 
             else:

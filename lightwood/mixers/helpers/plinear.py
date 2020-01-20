@@ -34,7 +34,8 @@ class PLinear(nn.Module):
         self.sigma = Parameter(torch.Tensor(out_features, in_features))
         self.mean = Parameter(torch.Tensor(out_features, in_features))
 
-        # there can be various ways to sample, given various distributions, we will stick with discrete normal as it is way faster
+        # there can be various ways to sample, given various distributions,
+        # we will stick with discrete normal as it is way faster
         self.w_sampler = self.w_discrete_normal
 
         if bias:
@@ -106,10 +107,11 @@ class PLinear(nn.Module):
         return w
 
     def forward(self, input):
-        '''
+        """
         Forward pass of the function.
-        The goal is to generate values such as if they weights of the linear operation are sampled from a normal distribution
-        '''
+        The goal is to generate values such as if they weights of the linear operation are sampled
+        from a normal distribution
+        """
 
         return F.linear(input, self.w_sampler(), self.bias)
 

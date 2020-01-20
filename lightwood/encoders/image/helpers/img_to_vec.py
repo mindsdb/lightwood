@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
 
@@ -61,7 +60,6 @@ class Img2Vec():
             my_embedding.copy_(o.data)
 
         h = self.extraction_layer.register_forward_hook(copy_data)
-        h_x = self.model(image)
         h.remove()
 
         if tensor:
@@ -82,11 +80,11 @@ class Img2Vec():
         if model_name == 'resnext-50-small':
             model = models.resnext50_32x4d(pretrained=True)
             if layer == 'default':
-                #b = torch.nn.AvgPool2d(kernel_size=(8,8),stride=(4,4))
-                #a = torch.nn.AvgPool2d(kernel_size=(2,2),stride=2)
-                #model.avgpool = b
-                #model.fc = nn.Identity()
-                #layer = model.avgpool
+                # b = torch.nn.AvgPool2d(kernel_size=(8,8),stride=(4,4))
+                # a = torch.nn.AvgPool2d(kernel_size=(2,2),stride=2)
+                # model.avgpool = b
+                # model.fc = nn.Identity()
+                # layer = model.avgpool
                 model.fc = ChannelPoolAdaptiveAvg1d(output_size=512)
                 layer = model.fc
                 self.layer_output_size = 512
@@ -126,7 +124,10 @@ class Img2Vec():
 
             return model, layer
 
-        # @TODO: Fix or remove, this is slow and not quite as accurate as resnet18, it's a failed experiment trying to end the encoder with the output from an FC rather than output from the pooling layer, might work on it later, if 1 month from now it stays the same, just remove it
+        # @TODO: Fix or remove, this is slow and not quite as accurate as resnet18,
+        # it's a failed experiment trying to end the encoder with the output from an FC
+        # rather than output from the pooling layer, might work on it later,
+        # if 1 month from now it stays the same, just remove it
         if model_name == 'mobilenet':
             model = models.mobilenet_v2(pretrained=True)
             if layer == 'default':

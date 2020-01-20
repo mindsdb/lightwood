@@ -2,7 +2,6 @@ import copy
 import logging
 
 import torch
-import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
 import gc
@@ -12,7 +11,6 @@ from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.config.config import CONFIG
-from lightwood.api.data_source import SubSet
 
 
 class NnMixer:
@@ -91,9 +89,12 @@ class NnMixer:
                 for feature in transformed_confidence_vectors:
                     if feature not in confidence_trasnformed_vectors:
                         confidence_trasnformed_vectors[feature] = []
-                    # @TODO: Very simple algorithm to get a confidence from the awareness, not necessarily what we want for the final version
+                    # @TODO: Very simple algorithm to get a confidence from the awareness,
+                    # not necessarily what we want for the final version
                     confidence_trasnformed_vectors[feature] += [
-                        1 - sum(np.abs(transformed_confidence_vectors[feature]))/len(transformed_confidence_vectors[feature])]
+                        1 - sum(np.abs(
+                            transformed_confidence_vectors[feature])) / len(transformed_confidence_vectors[feature])
+                    ]
 
             output_vector = outputs[i]
             transformed_output_vectors = when_data_source.transformer.revert(
@@ -106,7 +107,9 @@ class NnMixer:
         predictions = {}
         for output_column in output_trasnformed_vectors:
             decoded_predictions = when_data_source.get_decoded_column_data(
-                output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
+                output_column,
+                when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
+            )
             predictions[output_column] = {'predictions': decoded_predictions}
             if awareness_arr is not None:
                 predictions[output_column]['confidences'] = confidence_trasnformed_vectors[output_column]
@@ -121,7 +124,8 @@ class NnMixer:
     def overall_certainty(self):
         """
         return an estimate of how certain is the model about the overall predictions,
-        in this case its a measurement of how much did the variance of all the weights distributions reduced from its initial distribution
+        in this case its a measurement of how much did the variance of all the weights distributions
+        reduced from its initial distribution
         :return:
         """
         if hasattr(self.net, 'calculate_overall_certainty'):
@@ -189,10 +193,10 @@ class NnMixer:
         self.net = model
 
     def fit_data_source(self, ds):
-        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names(
-            'input_features')
-        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names(
-            'output_features')
+        self.input_column_names = self.input_column_names \
+            if self.input_column_names is not None else ds.get_feature_names('input_features')
+        self.output_column_names = self.output_column_names \
+            if self.output_column_names is not None else ds.get_feature_names('output_features')
 
         transformer_already_initialized = False
         try:
@@ -215,7 +219,9 @@ class NnMixer:
 
         self.fit_data_source(ds)
         if self.is_categorical_output:
-            # The WeightedRandomSampler samples "randomly" but can assign higher weight to certain rows, we assign each rows it's weight based on the target variable value in that row and it's associated weight in the output_weights map (otherwise used to bias the loss function)
+            # The WeightedRandomSampler samples "randomly" but can assign higher weight to certain rows,
+            # we assign each rows it's weight based on the target variable value in that row
+            # and it's associated weight in the output_weights map (otherwise used to bias the loss function)
             if ds.output_weights is not None and ds.output_weights is not False and CONFIG.OVERSAMPLE:
                 weights = []
                 for row in ds:
@@ -312,7 +318,7 @@ class NnMixer:
                     # Make sure the LR doesn't get too low
                     if self.optimizer.lr > 5 * pow(10, -6):
                         if np.isnan(running_loss) or np.isinf(running_loss) or running_loss > pow(10, 4):
-                            self.optimizer_args['lr'] = self.optimizer.lr/2
+                            self.optimizer_args['lr'] = self.optimizer.lr / 2
                             gc.collect()
                             if 'cuda' in str(self.net.device):
                                 torch.cuda.empty_cache()
@@ -328,7 +334,8 @@ class NnMixer:
 
                 total_loss.backward()
                 self.optimizer.step()
-                # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
+                # now that we have run backward in both losses, optimize()
+                # (review: we may need to optimize for each step)
 
                 error = running_loss / (i + 1)
 

@@ -3,7 +3,6 @@ import warnings
 import numpy as np
 import torch
 from cesium import featurize
-import math
 
 DEFAULT_FEATURES_TO_USE = [
     "all_times_nhist_numpeaks",
@@ -150,7 +149,8 @@ class CesiumTsEncoder:
         Encode a column data into time series
 
         :param values_data: a list of timeseries data eg: ['91.0 92.0 93.0 94.0', '92.0 93.0 94.0 95.0' ...]
-        :param times: (optional) a list of lists such that, len(times[i])=len(values_data[i]) for all i in range(len(times))
+        :param times: (optional) a list of lists such that, len(times[i])=len(values_data[i]) for
+                      all i in range(len(times))
         :return: a torch.floatTensor
         """
         features_to_use = self._features

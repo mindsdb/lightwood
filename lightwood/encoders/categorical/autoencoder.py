@@ -1,13 +1,10 @@
-import math
 import logging
-import random
 
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
 from lightwood.mixers.helpers.default_net import DefaultNet
-from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym
@@ -68,16 +65,22 @@ class CategoricalAutoEncoder:
             criterion = torch.nn.CrossEntropyLoss()
             optimizer = Ranger(self.net.parameters())
 
-            gym = Gym(model=self.net, optimizer=optimizer, scheduler=None, loss_criterion=criterion, device=self.net.device,
-                      name=self.name, input_encoder=self.onehot_encoder.encode, output_encoder=self._encoder_targets)
+            gym = Gym(model=self.net, optimizer=optimizer, scheduler=None, loss_criterion=criterion,
+                      device=self.net.device, name=self.name, input_encoder=self.onehot_encoder.encode,
+                      output_encoder=self._encoder_targets)
 
             batch_size = min(200, int(len(priming_data)/50))
 
             train_data_loader = DataLoader(list(zip(priming_data, priming_data)), batch_size=batch_size, shuffle=True)
             test_data_loader = None
 
-            best_model, error, training_time = gym.fit(train_data_loader, test_data_loader, desired_error=self.desired_error,
-                                                       max_time=self.max_training_time, callback=self._train_callback, eval_every_x_epochs=1, max_unimproving_models=5)
+            best_model, error, training_time = gym.fit(train_data_loader,
+                                                       test_data_loader,
+                                                       desired_error=self.desired_error,
+                                                       max_time=self.max_training_time,
+                                                       callback=self._train_callback,
+                                                       eval_every_x_epochs=1,
+                                                       max_unimproving_models=5)
 
             self.net = best_model.to(self.net.device)
 

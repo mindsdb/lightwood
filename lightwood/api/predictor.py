@@ -1,9 +1,6 @@
 import logging
 import traceback
 import time
-import math
-import copy
-import sys
 
 import dill
 import pandas
@@ -13,7 +10,6 @@ import torch
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
-from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
@@ -62,7 +58,8 @@ class Predictor:
         self.overall_certainty = None
 
     @staticmethod
-    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=None, max_epochs=None):
+    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
+                       is_categorical_output, max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
         lowest_error = 1
         mixer = mixer_class(dynamic_parameters, is_categorical_output)
@@ -80,7 +77,7 @@ class Predictor:
                 lowest_error = error
                 lowest_error_epoch = epoch
 
-            if max(lowest_error_epoch*1.4, 10) < epoch:
+            if max(lowest_error_epoch * 1.4, 10) < epoch:
                 return lowest_error
 
             if max_epochs is not None and epoch >= max_epochs:
@@ -106,7 +103,8 @@ class Predictor:
             except:
                 pass
 
-    def learn(self, from_data, test_data=None, callback_on_iter=None, eval_every_x_epochs=20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
+    def learn(self, from_data, test_data=None, callback_on_iter=None, eval_every_x_epochs=20,
+              stop_training_after_seconds=None, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -129,15 +127,16 @@ class Predictor:
             elif col_pd_type in ['bool', 'category']:
                 return COLUMN_DATA_TYPES.CATEGORICAL
             else:
-                # if the number of uniques is elss than 100 or less than 10% of the total number of rows then keep it as categorical
+                # if the number of uniques is elss than 100 or less,
+                # than 10% of the total number of rows then keep it as categorical
                 unique = from_data[col_name].nunique()
-                if unique < 100 or unique < len(from_data[col_name])/10:
+                if unique < 100 or unique < len(from_data[col_name]) / 10:
                     return COLUMN_DATA_TYPES.CATEGORICAL
                 # else assume its text
                 return COLUMN_DATA_TYPES.TEXT
 
         # generate the configuration and set the order for the input and output columns
-        if self._generate_config == True:
+        if self._generate_config is True:
             self._input_columns = [col for col in from_data if col not in self._output_columns]
             self.config = {
                 'input_features': [{'name': col, 'type': type_map(col)} for col in self._input_columns],
@@ -150,7 +149,8 @@ class Predictor:
             self._input_columns = [col['name'] for col in self.config['output_features']]
 
         # @TODO Make Cross Entropy Loss work with multiple outputs
-        if len(self.config['output_features']) == 1 and self.config['output_features'][0]['type'] in (COLUMN_DATA_TYPES.CATEGORICAL):
+        if len(self.config['output_features']) == 1 \
+                and self.config['output_features'][0]['type'] in (COLUMN_DATA_TYPES.CATEGORICAL):
             is_categorical_output = True
         else:
             is_categorical_output = False
@@ -159,7 +159,7 @@ class Predictor:
             stop_training_after_seconds = round(from_data.shape[0] * from_data.shape[1] / 5)
 
         if stop_model_building_after_seconds is None:
-            stop_model_building_after_seconds = stop_training_after_seconds*3
+            stop_model_building_after_seconds = stop_training_after_seconds * 3
 
         from_data_ds = DataSource(from_data, self.config)
 
@@ -202,11 +202,11 @@ class Predictor:
             optimizer = self.config['optimizer']()
 
             while True:
-                training_time_per_iteration = stop_model_building_after_seconds/optimizer.total_trials
+                training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
 
                 # Some heuristics...
                 if training_time_per_iteration > input_size:
-                    if training_time_per_iteration > min((training_data_length/(4*input_size)), 16*input_size):
+                    if training_time_per_iteration > min((training_data_length / (4 * input_size)), 16 * input_size):
                         break
 
                 optimizer.total_trials = optimizer.total_trials - 1
@@ -214,10 +214,12 @@ class Predictor:
                     optimizer.total_trials = 8
                     break
 
-            training_time_per_iteration = stop_model_building_after_seconds/optimizer.total_trials
+            training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(
-                mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=training_time_per_iteration, max_epochs=None))
+                mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output,
+                max_training_time=training_time_per_iteration, max_epochs=None))
+
             logging.info('Using hyperparameter set: ', best_parameters)
         else:
             best_parameters = {}
@@ -229,8 +231,10 @@ class Predictor:
             if hasattr(mixer, param):
                 setattr(mixer, param, mixer_params[param])
             else:
-                logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(
-                    param=param, mixerclass=str(type(mixer))))
+                logging.warning(
+                    'trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format
+                    (param=param, mixerclass=str(type(mixer)))
+                )
 
         started = time.time()
         epoch = 0
@@ -354,11 +358,16 @@ class Predictor:
             if properties['type'] == 'categorical':
                 accuracies[output_column] = {
                     'function': 'accuracy_score',
-                    'value': accuracy_score(list(map(str, ds.get_column_original_data(output_column))), list(map(str, predictions[output_column]["predictions"])))
+                    'value': accuracy_score(
+                        list(map(str, ds.get_column_original_data(output_column))),
+                        list(map(str, predictions[output_column]["predictions"]))
+                    )
                 }
             else:
-                # Note: We use this method instead of using `encoded_predictions` since the values in encoded_predictions are never prefectly 0 or 1, and this leads to rather large unwaranted different in the r2 score, re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
-
+                # Note: We use this method instead of using `encoded_predictions`
+                # since the values in encoded_predictions are never prefectly 0 or 1,
+                # and this leads to rather large unwaranted different in the r2 score,
+                # re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
                 encoded_predictions = ds.encoders[output_column].encode(predictions[output_column]["predictions"])
                 accuracies[output_column] = {
                     'function': 'r2_score',
