@@ -7,11 +7,10 @@ numpy >= 1.16.2
 pandas >= 0.25.1
 schema >= 0.6.8
 scikit-learn == 0.20.0
-torchvision >= 0.4
-torch >= 1.2.0
+torchvision >= 0.5.0
+torch >= 1.4.0
 xlrd >= 1.0.0
 requests >= 2.0.0
-ax-platform >= 0.1.3
-pyro-ppl >= 0.4.1
+ax-platform >= 0.1.9
 transformers >= 2.2.1
-pillow<7
+xgboost >= 0.80

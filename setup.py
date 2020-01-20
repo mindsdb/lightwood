@@ -18,7 +18,7 @@ sys_platform = sys.platform
 about = {}
 with open("lightwood/__about__.py") as fp:
     exec(fp.read(), about)
-    
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -29,13 +29,15 @@ with open('requirements.txt') as req_file:
 if sys_platform in ['win32','cygwin','windows']:
     requirements = remove_requirements(requirements,'torch')
     requirements = remove_requirements(requirements,'torchvision')
+    requirements = remove_requirements(requirements,'torchvision')
     try:
         print('Installing pytorch and torchvision!')
-        subprocess.call(['pip','install','torch>=1.2.0', 'torchvision>=0.4.2', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+        code = subprocess.call(['pip', 'install', 'torch===1.4.0', 'torchvision===0.5.0', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+        if code != 0:
+            raise Exception('Torch and trochvsion instalation failed !')
         print('Successfully installed pytorch and torchvision!')
     except:
         print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
-
 
 setuptools.setup(
     name=about['__title__'],
