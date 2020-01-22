@@ -70,7 +70,7 @@ class Predictor:
     @staticmethod
     def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
-        lowest_error = 1
+        lowest_error = 10000
         mixer = mixer_class(dynamic_parameters, is_categorical_output)
 
         if max_training_time is None and max_epochs is None:
@@ -288,7 +288,8 @@ class Predictor:
                 last_subset_test_error = None
                 test_error_delta_buff = []
                 subset_test_error_delta_buff = []
-                best_mixer = None
+                best_model = None
+                best_selfaware_model = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
@@ -299,16 +300,28 @@ class Predictor:
                     if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
                         mixer.start_selfaware_training = False
                         mixer.stop_selfaware_training = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    # Once we are past the priming/warmup period, start training the selfaware network
+                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
+                        logging.info('Started selfaware training !')
+                        mixer.start_selfaware_training = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
 
                     if epoch >= eval_next_on_epoch:
                         # Prime the model on each subset for a bit
                         if subset_iteration == 1:
                             break
-
-                        # Once we are past the priming/warmup period, start training the selfaware network
-                        if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
-                            logging.info('Started selfaware training !')
-                            mixer.start_selfaware_training = True
 
                         eval_next_on_epoch += eval_every_x_epochs
 
@@ -317,7 +330,10 @@ class Predictor:
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
-                            best_mixer = copy.deepcopy(mixer)
+                            if mixer.is_selfaware:
+                                best_selfaware_model = mixer.get_model_copy()
+                            else:
+                                best_model = mixer.get_model_copy()
 
                         if last_subset_test_error is None:
                             pass
@@ -350,15 +366,25 @@ class Predictor:
                         # If the trauining subset is overfitting on it's associated testing subset
                         if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(from_data_ds.subsets.keys()):
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
-                            mixer = best_mixer
-                            self._mixer = mixer
+
+                            if mixer.is_selfaware:
+                                if best_selfaware_model is not None:
+                                    mixer.update_model(best_selfaware_model)
+                            else:
+                                mixer.update_model(best_model)
+
+
                             if subset_id == list(from_data_ds.subsets.keys())[-1]:
                                 stop_training = True
                             elif not stop_training:
                                 break
 
                         if stop_training:
-                            self._mixer = best_mixer
+                            if mixer.is_selfaware:
+                                mixer.update_model(best_selfaware_model)
+                            else:
+                                mixer.update_model(best_model)
+                            self._mixer = mixer
                             self.train_accuracy = self.calculate_accuracy(test_data_ds)
                             self.overall_certainty = mixer.overall_certainty()
                             logging.info('Finished training model !')
