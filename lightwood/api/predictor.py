@@ -15,10 +15,8 @@ from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 from lightwood.mixers.nn.nn import NnMixer
-from lightwood.mixers.boost.boost import BoostMixer
 from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-
 
 class Predictor:
 
@@ -31,6 +29,13 @@ class Predictor:
         :param load_from_path: The path to load the predictor from
         :type config: dictionary
         """
+
+        try:
+            from lightwood.mixers.boost.boost import BoostMixer
+            self.has_boosting_mixer = True
+        except:
+            self.has_boosting_mixer = False
+            print('Boosting mixer can\'t be loaded !')
 
         if load_from_path is not None:
             pickle_in = open(load_from_path, "rb")
@@ -249,7 +254,7 @@ class Predictor:
         else:
             best_parameters = {}
 
-        if CONFIG.HELPER_MIXERS:
+        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
 
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
@@ -380,7 +385,7 @@ class Predictor:
 
         main_mixer_predictions = self._mixer.predict(when_data_ds)
 
-        if CONFIG.HELPER_MIXERS:
+        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             for output_column in main_mixer_predictions:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
                     if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
