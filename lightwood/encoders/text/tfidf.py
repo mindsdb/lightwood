@@ -24,7 +24,7 @@ class TfidfEncoder:
         self.tfidf_vectorizer.fit_transform(priming_data)
 
     def encode(self, column_data):
-        transformed_data = self.tfidf_vectorizer.transform(column_data)
+        transformed_data = self.tfidf_vectorizer.transform([str(x) for x in column_data])
         dense_transformed_data = [np.array(x.todense())[0] for x in transformed_data]
         return self._pytorch_wrapper(dense_transformed_data)
 
