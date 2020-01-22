@@ -1,8 +1,9 @@
 import logging
 import os
 
-from lightwood.encoders.image.helpers.nn import NnEncoderHelper
 import torch
+
+from lightwood.encoders.image.helpers.nn import NnEncoderHelper
 
 class NnAutoEncoder:
 
