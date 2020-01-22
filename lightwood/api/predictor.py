@@ -288,7 +288,7 @@ class Predictor:
                 last_subset_test_error = None
                 test_error_delta_buff = []
                 subset_test_error_delta_buff = []
-                best_model = None
+                best_mixer = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
@@ -317,7 +317,7 @@ class Predictor:
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
-                            best_model = mixer.get_model_copy()
+                            best_mixer = copy.deepcopy(mixer)
 
                         if last_subset_test_error is None:
                             pass
@@ -350,15 +350,15 @@ class Predictor:
                         # If the trauining subset is overfitting on it's associated testing subset
                         if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(from_data_ds.subsets.keys()):
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
-                            mixer.update_model(best_model)
+                            mixer = best_mixer
+                            self._mixer = mixer
                             if subset_id == list(from_data_ds.subsets.keys())[-1]:
                                 stop_training = True
                             elif not stop_training:
                                 break
 
                         if stop_training:
-                            mixer.update_model(best_model)
-                            self._mixer = mixer
+                            self._mixer = best_mixer
                             self.train_accuracy = self.calculate_accuracy(test_data_ds)
                             self.overall_certainty = mixer.overall_certainty()
                             logging.info('Finished training model !')
