@@ -36,3 +36,8 @@ class AmplitudeTsEncoder:
 
 if __name__ == "__main__":
     encoder = AmplitudeTsEncoder()
+
+    audio_url_arr = ['https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_1MG.mp3']
+
+    encoded_audio = encoder.encode(audio_url_arr)
+    print(encoded_audio)
