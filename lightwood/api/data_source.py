@@ -128,8 +128,13 @@ class DataSource(Dataset):
 
         dropout_features = None
 
-        if self.training == True and random.randint(0,2) == 1 and self.enable_dropout:
+        if self.training == True and random.randint(0,2) == 1 and self.enable_dropout and len(self.configuration['input_features']) > 1:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
+
+            # Make sure we never drop all the features, since this would make the row meaningless
+            if len(dropout_features) > len(self.configuration['input_features']):
+                dropout_features = dropout_features[:-1]
+
             print(f'\n----------------------\nDroping out features: {dropout_features}\n---------------------\n')
 
         if self.transformed_cache is None and not self.disable_cache:

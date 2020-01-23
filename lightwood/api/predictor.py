@@ -329,8 +329,6 @@ class Predictor:
                         subset_test_error_delta_buff = []
                         continue
 
-                    self.enable_dropout
-
                     if epoch >= eval_next_on_epoch:
                         # Prime the model on each subset for a bit
                         if subset_iteration == 1:
