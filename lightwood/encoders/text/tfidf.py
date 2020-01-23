@@ -28,7 +28,7 @@ class TfidfEncoder:
         dense_transformed_data = [np.array(x.todense())[0] for x in transformed_data]
         return self._pytorch_wrapper(dense_transformed_data)
 
-    def decode(self, encoded_values_tensor, max_length = 100):
+    def decode(self, encoded_values_tensor):
         raise Exception('This encoder is not bi-directional')
 
 

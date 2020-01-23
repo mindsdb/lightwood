@@ -185,6 +185,8 @@ class CesiumTsEncoder:
         ret_tensor = self._pytorch_wrapper(ret)
         return ret_tensor
 
+    def decode(self, encoded_values_tensor):
+        raise Exception('This encoder is not bi-directional')
 
 # only run the test if this file is called from debugger
 if __name__ == "__main__":
