@@ -34,6 +34,7 @@ if sys_platform in ['win32','cygwin','windows']:
     requirements = remove_requirements(requirements,'xgboost')
     requirements = remove_requirements(requirements,'dask')
     requirements = remove_requirements(requirements,'cesium')
+    requirements = remove_requirements(requirements,'pydub')
 
     print('Trying to install pytorch and torchvision!')
     code = 1

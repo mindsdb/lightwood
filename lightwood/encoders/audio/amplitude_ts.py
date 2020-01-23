@@ -46,12 +46,11 @@ class AmplitudeTsEncoder:
                 audio = audio.set_frame_rate(new_frame_rate)
                 logging.info(f'Lowering audio frame rate from {original_frame_rate} to {new_frame_rate} for ease of processing !')
 
-            audio_arr = np.array(audio.get_array_of_samples())
-            audio_arr = list(audio_arr)
+            audio_arr = list(np.array(audio.get_array_of_samples()))
 
             # Cesium is bad at encoding large pieces of audio
             encoded_audio = self._ts_encoder.encode([audio_arr])
-            
+
             encoded_audio_arr.append(encoded_audio[0])
 
         return self._pytorch_wrapper(encoded_audio_arr)
