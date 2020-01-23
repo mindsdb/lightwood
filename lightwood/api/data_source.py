@@ -61,7 +61,7 @@ class DataSource(Dataset):
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
-                dropout = 0.2
+                dropout = 0.1
             else:
                 dropout = 0.0
 
@@ -128,14 +128,13 @@ class DataSource(Dataset):
 
         dropout_features = None
 
-        if self.training == True and random.randint(0,2) == 1 and self.enable_dropout:
+        if self.training == True and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
             # Make sure we never drop all the features, since this would make the row meaningless
             if len(dropout_features) > len(self.configuration['input_features']):
                 dropout_features = dropout_features[:-1]
-
-            print(f'\n----------------------\nDroping out features: {dropout_features}\n---------------------\n')
+            #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
         if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
