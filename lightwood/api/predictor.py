@@ -318,6 +318,19 @@ class Predictor:
                         subset_test_error_delta_buff = []
                         continue
 
+                    # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
+                    if subset_iteration == 2 and  training_error < 0.5:
+                        logging.info('Started selfaware training !')
+                        from_data_ds.enable_dropout = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    self.enable_dropout
+
                     if epoch >= eval_next_on_epoch:
                         # Prime the model on each subset for a bit
                         if subset_iteration == 1:

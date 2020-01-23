@@ -55,6 +55,7 @@ class DataSource(Dataset):
         self.training = False # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
+        self.enable_dropout = False
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
         self.subsets = {}
 
@@ -62,7 +63,7 @@ class DataSource(Dataset):
             if len(self.configuration['input_features']) > 1:
                 dropout = 0.0
             else:
-                dropout = 0.0
+                dropout = 0.2
 
             if 'dropout' in col:
                 dropout = col['dropout']
@@ -127,8 +128,9 @@ class DataSource(Dataset):
 
         dropout_features = None
 
-        if self.training == True and random.randint(0,2) == 1:
+        if self.training == True and random.randint(0,2) == 1 and self.enable_dropout:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
+            print(f'\n----------------------\nDroping out features: {dropout_features}\n---------------------\n')
 
         if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
