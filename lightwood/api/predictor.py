@@ -29,14 +29,12 @@ class Predictor:
         :param load_from_path: The path to load the predictor from
         :type config: dictionary
         """
-
         try:
             from lightwood.mixers.boost.boost import BoostMixer
             self.has_boosting_mixer = True
         except:
             self.has_boosting_mixer = False
             print('Boosting mixer can\'t be loaded !')
-
         if load_from_path is not None:
             pickle_in = open(load_from_path, "rb")
             self_dict = dill.load(pickle_in)
@@ -114,6 +112,13 @@ class Predictor:
 
     def train_helper_mixers(self, train_ds, test_ds):
         # Boosting mixer
+        try:
+            from lightwood.mixers.boost.boost import BoostMixer
+            self.has_boosting_mixer = True
+        except:
+            self.has_boosting_mixer = False
+            print('Boosting mixer can\'t be loaded !')
+
         boost_mixer = BoostMixer()
         boost_mixer.train(train_ds)
 
