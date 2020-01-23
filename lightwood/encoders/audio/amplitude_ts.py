@@ -1,8 +1,12 @@
+from io import BytesIO
+import os
+
 from pydub import AudioSegment
 import requests
 import numpy as np
+import torch
 
-from lightwood.encoders.categorical.onehot import CesiumTsEncoder
+from lightwood.encoders.time_series.cesium_ts import CesiumTsEncoder
 
 
 
@@ -20,13 +24,22 @@ class AmplitudeTsEncoder:
         for path in  column_data:
             if path.startswith('http'):
                 response = requests.get(path)
-                audio = AudioSegment.from_raw(BytesIO(response.content))
+                with open(path.split('/')[-1], 'wb') as f:
+                    f.write(response.content)
+                try:
+                    audio = AudioSegment.from_file(path.split('/')[-1])
+                except Exception as e:
+                    print(e)
+                finally:
+                    os.remove(path.split('/')[-1])
             else:
                 audio = AudioSegment.from_file(path)
             # For now convert all (usually will be stereo) to mono by adding up and averging the amplitudes
             audio = audio.set_channels(1)
             audio_arr = np.array(audio.get_array_of_samples())
-            encoded_audio_arr = self._ts_encoder.encode(audio_arr)
+            audio_arr = list(audio_arr)
+            print(str(audio_arr))
+            encoded_audio_arr = self._ts_encoder.encode([audio_arr])
             encoded_audio_arr.append(encoded_audio_arr)
 
         return self._pytorch_wrapper(encoded_audio_arr)
@@ -37,7 +50,7 @@ class AmplitudeTsEncoder:
 if __name__ == "__main__":
     encoder = AmplitudeTsEncoder()
 
-    audio_url_arr = ['https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_1MG.mp3']
+    audio_url_arr = ['https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3', 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_1MG.mp3']
 
     encoded_audio = encoder.encode(audio_url_arr)
     print(encoded_audio)

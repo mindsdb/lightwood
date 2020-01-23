@@ -156,7 +156,10 @@ class CesiumTsEncoder:
         features_to_use = self._features
         ret = []
         for i, values in enumerate(values_data):
-            values = list(map(lambda x: float(x), values.split()))
+            if type(values) == type([]):
+                values = list(map(float,values))
+            else:
+                values = list(map(lambda x: float(x), values.split()))
             if times is None:
                 times_row = np.array([float(i) for i in range(1, len(values) + 1)])
             else:
