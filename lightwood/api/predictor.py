@@ -296,6 +296,17 @@ class Predictor:
                     first_run = False
                     #logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
 
+                    # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
+                    if subset_iteration == 2 and  training_error < 0.5:
+                        logging.info('Enabled dropout !')
+                        from_data_ds.enable_dropout = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+                    
                     # If the selfaware network isn't able to train, go back to the original network
                     if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
                         mixer.start_selfaware_training = False
@@ -311,17 +322,6 @@ class Predictor:
                     if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
                         logging.info('Started selfaware training !')
                         mixer.start_selfaware_training = True
-                        lowest_error = None
-                        last_test_error = None
-                        last_subset_test_error = None
-                        test_error_delta_buff = []
-                        subset_test_error_delta_buff = []
-                        continue
-
-                    # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
-                    if subset_iteration == 2 and  training_error < 0.5:
-                        logging.info('Started selfaware training !')
-                        from_data_ds.enable_dropout = True
                         lowest_error = None
                         last_test_error = None
                         last_subset_test_error = None
