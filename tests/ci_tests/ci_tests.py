@@ -15,6 +15,7 @@ MODULES = [
     f'{pdir}api/data_source.py',
     f'{mixers_path}nn/nn.py',
     f'{encoders_path}categorical/autoencoder.py',
+    './lightwood/encoders/text/distilbert.py',
     #f'{encoders_path}text/rnn.py'.format(encoders_path),
     #'./lightwood/encoders/image/nn.py',
     #'./lightwood/encoders/image/img_2_vec.py',
@@ -22,14 +23,13 @@ MODULES = [
     #'./lightwood/encoders/time_series/cesium_ts.py',
     #'./lightwood/mixers/sk_learn/sk_learn.py',
     #'./lightwood/encoders/text/infersent.py',
-    #'./lightwood/encoders/text/distilbert.py'
 ]
 
 
 def run_tests(modules):
     '''
     Run modules as scripts to execute main function
-    '''    
+    '''
     for module in modules:
         runpy.run_path(module, run_name='__main__')
 

@@ -175,7 +175,7 @@ class DistilBertEncoder:
             real = [[]] * len(training_data['targets'][0]['encoded_output'])
             for i in range(len(real)):
                 for target in training_data['targets']:
-                    real[i] = real[i] + target['encoded_output'][i]
+                    real[i] = real[i] + list(target['encoded_output'][i])
             real = torch.tensor(real)
 
             merged_data = list(zip(input,real))
@@ -252,7 +252,7 @@ if __name__ == "__main__":
         #priming_data.append(str(i))
         primting_target.append(i)
 
-    output_1_encoder = NumericEncoder()
+    output_1_encoder = NumericEncoder(is_target=True)
     output_1_encoder.prepare_encoder(primting_target)
 
     encoded_data_1 = output_1_encoder.encode(primting_target)
@@ -264,8 +264,8 @@ if __name__ == "__main__":
 
     encoded_predicted_target = enc.encode(test_data).tolist()
 
-    predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:4] for x in encoded_predicted_target]))
-    predicted_targets_2 = output_1_encoder.decode(torch.tensor([x[4:] for x in encoded_predicted_target]))
+    predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:2] for x in encoded_predicted_target]))
+    predicted_targets_2 = output_1_encoder.decode(torch.tensor([x[2:] for x in encoded_predicted_target]))
 
 
     for predicted_targets in [predicted_targets_1, predicted_targets_2]:
@@ -278,7 +278,7 @@ if __name__ == "__main__":
                 float(pred[i])
             except:
                 pred[i] = 0
-
+p
         print(real[0:25], '\n', pred[0:25])
         encoder_accuracy = r2_score(real, pred)
 
