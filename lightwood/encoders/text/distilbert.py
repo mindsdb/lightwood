@@ -264,8 +264,8 @@ if __name__ == "__main__":
 
     encoded_predicted_target = enc.encode(test_data).tolist()
 
-    predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:2] for x in encoded_predicted_target]))
-    predicted_targets_2 = output_1_encoder.decode(torch.tensor([x[2:] for x in encoded_predicted_target]))
+    predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:3] for x in encoded_predicted_target]))
+    predicted_targets_2 = output_1_encoder.decode(torch.tensor([x[3:] for x in encoded_predicted_target]))
 
 
     for predicted_targets in [predicted_targets_1, predicted_targets_2]:
@@ -278,7 +278,7 @@ if __name__ == "__main__":
                 float(pred[i])
             except:
                 pred[i] = 0
-                
+
         print(real[0:25], '\n', pred[0:25])
         encoder_accuracy = r2_score(real, pred)
 
