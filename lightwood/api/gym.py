@@ -62,7 +62,7 @@ class Gym:
                     loss = custom_train_func(self.model, data, self)
 
                 running_loss += loss.item()
-                error = running_loss/(i + 1)
+                error = running_loss / (i + 1)
 
             if epoch % eval_every_x_epochs == 0:
                 if test_data_loader is not None:
@@ -94,7 +94,7 @@ class Gym:
                             loss = custom_test_func(self.model, data, self)
 
                         test_running_loss += loss.item()
-                        test_error = test_running_loss/(i + 1)
+                        test_error = test_running_loss / (i + 1)
                 else:
                     test_error = error
                     real_buff = None

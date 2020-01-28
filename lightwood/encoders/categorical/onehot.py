@@ -28,7 +28,7 @@ class OneHotEncoder:
 
         while self._lang.n_words > max_dimensions:
             necessary_words = UNCOMMON_WORD
-            least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words)+1)
+            least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words) + 1)
 
             word_to_remove = None
             for word in least_occuring_words:
@@ -47,7 +47,7 @@ class OneHotEncoder:
         v_len = self._lang.n_words
 
         for word in column_data:
-            encoded_word = [0]*v_len
+            encoded_word = [0] * v_len
             if word is not None:
                 word = str(word)
                 index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN

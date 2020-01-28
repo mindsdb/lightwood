@@ -109,8 +109,11 @@ class DistilBertEncoder:
 
         # @TODO: Attach a language modeling head and/or use GPT2
         # and/or provide outputs better suited to a LM head (which will be the mixer) if the output if text
+        if training_data is not None and 'targets' in training_data \
+                and len(training_data['targets']) == 1 \
+                and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL \
+                and CONFIG.TRAIN_TO_PREDICT_TARGET:
 
-        if training_data is not None and 'targets' in training_data and len(training_data['targets']) == 1 and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL and CONFIG.TRAIN_TO_PREDICT_TARGET:
             self._model_type = 'classifier'
             self._model = self._classifier_model_class.from_pretrained(self._pretrained_model_name, num_labels=len(
                 set(training_data['targets'][0]['unencoded_output'])) + 1).to(self.device)
@@ -126,7 +129,7 @@ class DistilBertEncoder:
 
             optimizer = AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
             scheduler = get_linear_schedule_with_warmup(
-                optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
+                optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15 / 20)
 
             gym = Gym(model=self._model, optimizer=optimizer, scheduler=scheduler,
                       loss_criterion=None, device=self.device, name=self.name)
@@ -140,8 +143,9 @@ class DistilBertEncoder:
             merged_data = list(zip(input, real))
 
             train_data_loader = DataLoader(
-                merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
-            test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
+                merged_data[:int(len(merged_data) * 9 / 10)], batch_size=batch_size, shuffle=True)
+            test_data_loader = DataLoader(
+                merged_data[int(len(merged_data) * 9 / 10):], batch_size=batch_size, shuffle=True)
 
             best_model, error, training_time = gym.fit(train_data_loader=train_data_loader,
                                                        test_data_loader=test_data_loader,
@@ -159,8 +163,7 @@ class DistilBertEncoder:
 
             self._model = best_model.to(self.device)
 
-        elif all([x['output_type'] == COLUMN_DATA_TYPES.NUMERIC
-                  or x['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL
+        elif all([x['output_type'] == COLUMN_DATA_TYPES.NUMERIC or x['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL
                   for x in training_data['targets']]) and CONFIG.TRAIN_TO_PREDICT_TARGET:
 
             self.desired_error = 0.01
@@ -184,7 +187,7 @@ class DistilBertEncoder:
 
             # num_training_steps is kind of an estimation
             scheduler = get_linear_schedule_with_warmup(
-                optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15/20)
+                optimizer, num_warmup_steps=10, num_training_steps=len(priming_data) * 15 / 20)
 
             criterion = torch.nn.MSELoss()
 
@@ -204,8 +207,9 @@ class DistilBertEncoder:
             merged_data = list(zip(input, real))
 
             train_data_loader = DataLoader(
-                merged_data[:int(len(merged_data)*9/10)], batch_size=batch_size, shuffle=True)
-            test_data_loader = DataLoader(merged_data[int(len(merged_data)*9/10):], batch_size=batch_size, shuffle=True)
+                merged_data[:int(len(merged_data) * 9 / 10)], batch_size=batch_size, shuffle=True)
+            test_data_loader = DataLoader(
+                merged_data[int(len(merged_data) * 9 / 10):], batch_size=batch_size, shuffle=True)
 
             self._model.eval()
 
