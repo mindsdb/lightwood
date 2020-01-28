@@ -17,6 +17,7 @@ class ColumnDataTypes(Const):
     IMAGE = 'image'
     TEXT = 'text'
     TIME_SERIES = 'time_series'
+    AUDIO = 'audio'
 
 COLUMN_DATA_TYPES = ColumnDataTypes()
 

@@ -59,7 +59,7 @@ class NumericEncoder:
                     # Some data cleanup for an edge case that shows up a lot when lightwood isn't used with mindsdb
                     number = float(number.replace(',','.'))
             except:
-                logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
+                #logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
                 number = None
 
             if self._is_target:
@@ -100,7 +100,7 @@ class NumericEncoder:
                     is_negative = False
 
                 if not math.isnan(vector[1]):
-                    encoded_nr = vector[1]                    
+                    encoded_nr = vector[1]
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     encoded_nr = 0

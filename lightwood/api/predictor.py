@@ -15,10 +15,8 @@ from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 from lightwood.mixers.nn.nn import NnMixer
-from lightwood.mixers.boost.boost import BoostMixer
 from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-
 
 class Predictor:
 
@@ -31,7 +29,12 @@ class Predictor:
         :param load_from_path: The path to load the predictor from
         :type config: dictionary
         """
-
+        try:
+            from lightwood.mixers.boost.boost import BoostMixer
+            self.has_boosting_mixer = True
+        except:
+            self.has_boosting_mixer = False
+            print('Boosting mixer can\'t be loaded !')
         if load_from_path is not None:
             pickle_in = open(load_from_path, "rb")
             self_dict = dill.load(pickle_in)
@@ -65,7 +68,7 @@ class Predictor:
     @staticmethod
     def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output, max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
-        lowest_error = 1
+        lowest_error = 10000
         mixer = mixer_class(dynamic_parameters, is_categorical_output)
 
         if max_training_time is None and max_epochs is None:
@@ -109,6 +112,13 @@ class Predictor:
 
     def train_helper_mixers(self, train_ds, test_ds):
         # Boosting mixer
+        try:
+            from lightwood.mixers.boost.boost import BoostMixer
+            self.has_boosting_mixer = True
+        except:
+            self.has_boosting_mixer = False
+            print('Boosting mixer can\'t be loaded !')
+
         boost_mixer = BoostMixer()
         boost_mixer.train(train_ds)
 
@@ -249,7 +259,7 @@ class Predictor:
         else:
             best_parameters = {}
 
-        if CONFIG.HELPER_MIXERS:
+        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
 
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
@@ -284,26 +294,50 @@ class Predictor:
                 test_error_delta_buff = []
                 subset_test_error_delta_buff = []
                 best_model = None
+                best_selfaware_model = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
                     first_run = False
-                    #logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
+                    logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
+
+                    # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
+                    if subset_iteration == 2 and training_error < 0.5 and not from_data_ds.enable_dropout:
+                        logging.info('Enabled dropout !')
+                        from_data_ds.enable_dropout = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
 
                     # If the selfaware network isn't able to train, go back to the original network
                     if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
                         mixer.start_selfaware_training = False
                         mixer.stop_selfaware_training = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    # Once we are past the priming/warmup period, start training the selfaware network
+                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
+                        logging.info('Started selfaware training !')
+                        mixer.start_selfaware_training = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
 
                     if epoch >= eval_next_on_epoch:
                         # Prime the model on each subset for a bit
                         if subset_iteration == 1:
                             break
-
-                        # Once we are past the priming/warmup period, start training the selfaware network
-                        if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
-                            logging.info('Started selfaware training !')
-                            mixer.start_selfaware_training = True
 
                         eval_next_on_epoch += eval_every_x_epochs
 
@@ -312,7 +346,10 @@ class Predictor:
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
-                            best_model = mixer.get_model_copy()
+                            if mixer.is_selfaware:
+                                best_selfaware_model = mixer.get_model_copy()
+                            else:
+                                best_model = mixer.get_model_copy()
 
                         if last_subset_test_error is None:
                             pass
@@ -345,14 +382,24 @@ class Predictor:
                         # If the trauining subset is overfitting on it's associated testing subset
                         if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(from_data_ds.subsets.keys()):
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
-                            mixer.update_model(best_model)
+
+                            if mixer.is_selfaware:
+                                if best_selfaware_model is not None:
+                                    mixer.update_model(best_selfaware_model)
+                            else:
+                                mixer.update_model(best_model)
+
+
                             if subset_id == list(from_data_ds.subsets.keys())[-1]:
                                 stop_training = True
                             elif not stop_training:
                                 break
 
                         if stop_training:
-                            mixer.update_model(best_model)
+                            if mixer.is_selfaware:
+                                mixer.update_model(best_selfaware_model)
+                            else:
+                                mixer.update_model(best_model)
                             self._mixer = mixer
                             self.train_accuracy = self.calculate_accuracy(test_data_ds)
                             self.overall_certainty = mixer.overall_certainty()
@@ -380,7 +427,7 @@ class Predictor:
 
         main_mixer_predictions = self._mixer.predict(when_data_ds)
 
-        if CONFIG.HELPER_MIXERS:
+        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             for output_column in main_mixer_predictions:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
                     if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
