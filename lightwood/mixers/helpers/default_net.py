@@ -6,9 +6,9 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=None, size_parameters={}):
-        if selfaware is None:
-            selfaware = CONFIG.SELFAWARE
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None):
+        self.input_size = None
+        self.output_size = None
         self.selfaware = selfaware
         # How many devices we can train this network on
         self.available_devices = 1
@@ -46,12 +46,13 @@ class DefaultNet(torch.nn.Module):
         """
         super(DefaultNet, self).__init__()
 
-        if shape is None:
+        if shape is None and pretrained_net is None:
             input_sample, output_sample = ds[0]
 
             self.input_size = len(input_sample)
             self.output_size = len(output_sample)
 
+            '''
             small_input = True if self.input_size < 50 else False
             small_output = True if self.input_size < 50 else False
             large_input = True if self.input_size > 2000 else False
@@ -77,19 +78,29 @@ class DefaultNet(torch.nn.Module):
             elif large_input and large_output:
                 shape = rectangle(self.input_size, self.output_size, depth - 1)
             else:
-                shape = funnel(self.input_size, self.output_size, depth)
+                shape = funnel(self.input_size,self.output_size,depth)
+            '''
+            shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
 
-        logging.info(f'Building network of shape: {shape}')
-        rectifier = torch.nn.SELU  # alternative: torch.nn.ReLU
+        if pretrained_net is None:
+            logging.info(f'Building network of shape: {shape}')
+            rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
 
-        layers = []
-        for ind in range(len(shape) - 1):
-            linear_function = PLinear if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
-            layers.append(linear_function(shape[ind], shape[ind + 1]))
-            if ind < len(shape) - 2:
-                layers.append(rectifier())
+            layers = []
+            for ind in range(len(shape) - 1):
+                linear_function = PLinear  if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
+                layers.append(linear_function(shape[ind],shape[ind+1]))
+                if ind < len(shape) - 2:
+                    layers.append(rectifier())
 
-        self.net = torch.nn.Sequential(*layers)
+            self.net = torch.nn.Sequential(*layers)
+        else:
+            self.net = pretrained_net
+            for layer in self.net:
+                if isinstance(layer, torch.nn.Linear):
+                    if self.input_size is None:
+                        self.input_size = layer.in_features
+                    self.output_size = layer.out_features
 
         if self.selfaware:
             awareness_net_shape = funnel(self.input_size + self.output_size, self.output_size, 4)
@@ -102,8 +113,7 @@ class DefaultNet(torch.nn.Module):
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
-        # set initial weights based on a specific distribution if we have deterministic enabled
-        if CONFIG.DETERMINISTIC:
+        if CONFIG.DETERMINISTIC and pretrained_net is None: # set initial weights based on a specific distribution if we have deterministic enabled
             # lambda function so that we can do this for either awareness layer or the internal layers of net
             def reset_layer_params(layer):
                 if isinstance(layer, torch.nn.Linear):

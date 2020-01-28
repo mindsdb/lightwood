@@ -76,7 +76,7 @@ class DataSource(Dataset):
         subsets_indexes = {}
         np.random.seed(len(self.data_frame))
 
-        subset_nr = 0
+        subset_nr = 1
         for i in range(len(self.data_frame)):
             if subset_nr not in subsets_indexes:
                 subsets_indexes[subset_nr] = []
@@ -84,7 +84,7 @@ class DataSource(Dataset):
 
             subset_nr += 1
             if subset_nr > nr_subsets:
-                subset_nr = 0
+                subset_nr = 1
 
         for subset_nr in subsets_indexes:
             self.subsets[subset_nr] = SubSet(self, subsets_indexes[subset_nr])
@@ -355,6 +355,7 @@ class DataSource(Dataset):
 
 
 if __name__ == "__main__":
+    #TODO; sometimes this fail depending on the data generated
     import random
     import pandas
 
@@ -392,5 +393,5 @@ if __name__ == "__main__":
     print(data_frame)
 
     ds = DataSource(data_frame, config)
-
+    ds.prepare_encoders()
     print(ds.get_encoded_column_data('z'))

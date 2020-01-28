@@ -100,7 +100,7 @@ class NumericEncoder:
                     is_negative = False
 
                 if not math.isnan(vector[1]):
-                    encoded_nr = vector[1]
+                    encoded_nr = vector[1]                    
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     encoded_nr = 0

@@ -1,3 +1,5 @@
+# Requires adding: pyro-ppl >= 0.4.1
+
 import copy
 import logging
 from collections import Counter
