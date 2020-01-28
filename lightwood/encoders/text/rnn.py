@@ -1,3 +1,4 @@
+# flake8: noqa
 from lightwood.encoders.text.helpers.rnn_helpers import *
 import logging
 import math

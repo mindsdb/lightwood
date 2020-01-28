@@ -1,7 +1,6 @@
 import torch
 import math
 import logging
-import sys
 
 
 class NumericEncoder:
@@ -64,7 +63,7 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
-                vector = [0]*3
+                vector = [0] * 3
                 try:
                     if number < 0:
                         vector[0] = 1
@@ -76,15 +75,15 @@ class NumericEncoder:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
                     # but we need to figure out why it's happening and fix it properly later
-                    vector = [0]*3
+                    vector = [0] * 3
 
             else:
-                vector = [0]*2
+                vector = [0] * 2
                 if number is None:
                     vector[1] = 0
                 else:
                     vector[1] = 1
-                    vector[0] = number/self._abs_mean
+                    vector[0] = number / self._abs_mean
 
             ret.append(vector)
 

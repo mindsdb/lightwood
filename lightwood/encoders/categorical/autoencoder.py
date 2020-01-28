@@ -69,7 +69,7 @@ class CategoricalAutoEncoder:
                       device=self.net.device, name=self.name, input_encoder=self.onehot_encoder.encode,
                       output_encoder=self._encoder_targets)
 
-            batch_size = min(200, int(len(priming_data)/50))
+            batch_size = min(200, int(len(priming_data) / 50))
 
             train_data_loader = DataLoader(list(zip(priming_data, priming_data)), batch_size=batch_size, shuffle=True)
             test_data_loader = None

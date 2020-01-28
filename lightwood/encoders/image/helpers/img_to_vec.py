@@ -49,7 +49,7 @@ class Img2Vec():
         :param tensor: If True, get_vec will return a FloatTensor instead of Numpy array
         :returns: Numpy ndarray
         """
-        image = self.normalize(self.to_tensor(self.scaler(img))).unsqueeze(0).to(self.device)
+        # image = self.normalize(self.to_tensor(self.scaler(img))).unsqueeze(0).to(self.device)
 
         if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
             my_embedding = torch.zeros(1, self.layer_output_size)

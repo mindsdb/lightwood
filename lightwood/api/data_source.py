@@ -95,8 +95,8 @@ class DataSource(Dataset):
         self.transformed_cache = None
 
     def extractRandomSubset(self, percentage):
-        np.random.seed(int(round(percentage*100000)))
-        msk = np.random.rand(len(self.data_frame)) < (1-percentage)
+        np.random.seed(int(round(percentage * 100000)))
+        msk = np.random.rand(len(self.data_frame)) < (1 - percentage)
         test_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]
         # clear caches
