@@ -11,6 +11,7 @@ from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
 from lightwood.mixers.nn.nn import NnMixer
+from lightwood.mixers.boost.boost import BoostMixer
 from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
@@ -53,6 +54,7 @@ class Predictor:
         self._input_columns = None
 
         self._mixer = None
+        self._helper_mixers = None
 
         self.train_accuracy = None
         self.overall_certainty = None
@@ -103,8 +105,33 @@ class Predictor:
             except:
                 pass
 
-    def learn(self, from_data, test_data=None, callback_on_iter=None, eval_every_x_epochs=20,
-              stop_training_after_seconds=None, stop_model_building_after_seconds=None):
+    def train_helper_mixers(self, train_ds, test_ds):
+        # Boosting mixer
+        boost_mixer = BoostMixer()
+        boost_mixer.train(train_ds)
+
+        # @TODO: IF we add more mixers in the future, add the best on for each column to this map !
+        best_mixer_map = {}
+        predictions = boost_mixer.predict(test_ds)
+
+        for output_column in self._output_columns:
+            model = boost_mixer.targets[output_column]['model']
+            if model is None:
+                continue
+
+            real = list(map(str,test_ds.get_column_original_data(output_column)))
+            predicted =  predictions[output_column]
+
+            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted)
+            best_mixer_map[output_column] = {
+                'model': boost_mixer
+                ,'accuracy': accuracy['value']
+            }
+
+        return best_mixer_map
+
+
+    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -145,8 +172,8 @@ class Predictor:
             logging.info('Automatically generated a configuration')
             logging.info(self.config)
         else:
-            self._output_columns = [col['name'] for col in self.config['input_features']]
-            self._input_columns = [col['name'] for col in self.config['output_features']]
+            self._output_columns = [col['name'] for col in self.config['output_features']]
+            self._input_columns = [col['name'] for col in self.config['input_features']]
 
         # @TODO Make Cross Entropy Loss work with multiple outputs
         if len(self.config['output_features']) == 1 \
@@ -224,6 +251,9 @@ class Predictor:
         else:
             best_parameters = {}
 
+        if CONFIG.HELPER_MIXERS:
+            self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
+
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
@@ -239,13 +269,14 @@ class Predictor:
         started = time.time()
         epoch = 0
         eval_next_on_epoch = eval_every_x_epochs
-
+        first_run = True
         stop_training = False
 
         for subset_iteration in [1, 2]:
             if stop_training:
                 break
             for subset_id in [*from_data_ds.subsets.keys()]:
+                started_subset = time.time()
                 if stop_training:
                     break
 
@@ -259,66 +290,79 @@ class Predictor:
                 subset_test_error_delta_buff = []
                 best_model = None
 
-                # iterate over the iter_fit and see what the epoch and mixer error is
-                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds)):
-                    logging.info('training iteration {iter_i}, error {error}'.format(
-                        iter_i=epoch, error=training_error))
+                #iterate over the iter_fit and see what the epoch and mixer error is
+                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
+                    first_run = False
+                    #logging.info('training iteration {iter_i}, error {error}'.format(iter_i=epoch, error=training_error))
+
+                    # If the selfaware network isn't able to train, go back to the original network
+                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
+                        mixer.start_selfaware_training = False
+                        mixer.stop_selfaware_training = True
 
                     if epoch >= eval_next_on_epoch:
                         # Prime the model on each subset for a bit
                         if subset_iteration == 1:
                             break
 
+                        # Once we are past the priming/warmup period, start training the selfaware network
+                        if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
+                            logging.info('Started selfaware training !')
+                            mixer.start_selfaware_training = True
+
                         eval_next_on_epoch += eval_every_x_epochs
 
                         test_error = mixer.error(test_data_ds)
                         subset_test_error = mixer.error(subset_test_ds)
-
+                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
                             best_model = mixer.get_model_copy()
 
                         if last_subset_test_error is None:
-                            subset_test_error_delta_buff.append(0)
+                            pass
                         else:
                             subset_test_error_delta_buff.append(last_subset_test_error - subset_test_error)
 
+                        last_subset_test_error = subset_test_error
+
                         if last_test_error is None:
-                            test_error_delta_buff.append(0)
+                            pass
                         else:
                             test_error_delta_buff.append(last_test_error - test_error)
 
                         last_test_error = test_error
 
-                        delta_mean = np.mean(test_error_delta_buff[-10:])
-                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-10:])
+                        delta_mean = np.mean(test_error_delta_buff[-5:])
+                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
 
                         if callback_on_iter is not None:
                             callback_on_iter(epoch, training_error, test_error, delta_mean,
                                              self.calculate_accuracy(test_data_ds))
 
-                        # Stop if the model is overfitting
-                        if delta_mean < 0 and len(test_error_delta_buff) > 9:
-                            stop_training = True
+                        ## Stop if the model is overfitting
+                        #if delta_mean <= 0 and len(test_error_delta_buff) > 4:
+                        #    stop_training = True
 
                         # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > stop_training_after_seconds:
                             stop_training = True
 
-                        # If the training subset is overfitting on it's associated testing subset
-                        if subset_delta_mean < 0 and len(subset_test_error_delta_buff) > 9:
-                            break
+                        # If the trauining subset is overfitting on it's associated testing subset
+                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(from_data_ds.subsets.keys()):
+                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
+                            mixer.update_model(best_model)
+                            if subset_id == list(from_data_ds.subsets.keys())[-1]:
+                                stop_training = True
+                            elif not stop_training:
+                                break
 
                         if stop_training:
                             mixer.update_model(best_model)
                             self._mixer = mixer
                             self.train_accuracy = self.calculate_accuracy(test_data_ds)
                             self.overall_certainty = mixer.overall_certainty()
-                            if subset_id == 'full':
-                                logging.info('Finished training model !')
-                            else:
-                                logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(
-                                    subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
+                            logging.info('Finished training model !')
                             break
 
         self._mixer.encoders = from_data_ds.encoders
@@ -339,7 +383,44 @@ class Predictor:
         when_data_ds = DataSource(when_data, self.config)
         when_data_ds.encoders = self._mixer.encoders
 
-        return self._mixer.predict(when_data_ds)
+        main_mixer_predictions = self._mixer.predict(when_data_ds)
+
+        if CONFIG.HELPER_MIXERS:
+            for output_column in main_mixer_predictions:
+                if self._helper_mixers is not None and output_column in self._helper_mixers:
+                    if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
+                        helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
+                        main_mixer_predictions[output_column] = {'predictions': list(helper_mixer_predictions[output_column])}
+
+        return main_mixer_predictions
+
+    @staticmethod
+    def apply_accuracy_function(col_type, real, predicted):
+        if col_type == 'categorical':
+            accuracy = {
+                'function': 'accuracy_score',
+                'value': accuracy_score(real, predicted)
+            }
+        else:
+            real_fixed = []
+            predicted_fixed = []
+            for val in real:
+                try:
+                    real_fixed.append(float(val))
+                except:
+                    real_fixed.append(0)
+
+            for val in predicted:
+                try:
+                    predicted_fixed.append(float(val))
+                except:
+                    predicted_fixed.append(0)
+
+            accuracy = {
+                'function': 'r2_score',
+                'value': r2_score(real_fixed, predicted_fixed)
+            }
+        return accuracy
 
     def calculate_accuracy(self, from_data):
         """
@@ -347,32 +428,21 @@ class Predictor:
         :param from_data:a dataframe
         :return accuracies: dictionaries of accuracies
         """
+
         if self._mixer is None:
             logging.error("Please train the model before calculating accuracy")
             return
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
         predictions = self._mixer.predict(ds, include_encoded_predictions=True)
         accuracies = {}
-        for output_column in self._mixer.output_column_names:
-            properties = ds.get_column_config(output_column)
-            if properties['type'] == 'categorical':
-                accuracies[output_column] = {
-                    'function': 'accuracy_score',
-                    'value': accuracy_score(
-                        list(map(str, ds.get_column_original_data(output_column))),
-                        list(map(str, predictions[output_column]["predictions"]))
-                    )
-                }
-            else:
-                # Note: We use this method instead of using `encoded_predictions`
-                # since the values in encoded_predictions are never prefectly 0 or 1,
-                # and this leads to rather large unwaranted different in the r2 score,
-                # re-encoding the predictions means all "flag" values (sign, isnull, iszero) become either 1 or 0
-                encoded_predictions = ds.encoders[output_column].encode(predictions[output_column]["predictions"])
-                accuracies[output_column] = {
-                    'function': 'r2_score',
-                    'value': r2_score(ds.get_encoded_column_data(output_column), encoded_predictions)
-                }
+
+        for output_column in self._output_columns:
+
+            real = list(map(str,ds.get_column_original_data(output_column)))
+            predicted =  list(map(str,predictions[output_column]["predictions"]))
+
+            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted)
+            accuracies[output_column] = accuracy
 
         return accuracies
 
