@@ -156,7 +156,10 @@ class CesiumTsEncoder:
         features_to_use = self._features
         ret = []
         for i, values in enumerate(values_data):
-            values = list(map(lambda x: float(x), values.split()))
+            if type(values) == type([]):
+                values = list(map(float,values))
+            else:
+                values = list(map(lambda x: float(x), values.split()))
             if times is None:
                 times_row = np.array([float(i) for i in range(1, len(values) + 1)])
             else:
@@ -185,6 +188,8 @@ class CesiumTsEncoder:
         ret_tensor = self._pytorch_wrapper(ret)
         return ret_tensor
 
+    def decode(self, encoded_values_tensor):
+        raise Exception('This encoder is not bi-directional')
 
 # only run the test if this file is called from debugger
 if __name__ == "__main__":

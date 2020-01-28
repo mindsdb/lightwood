@@ -224,8 +224,8 @@ class DistilBertEncoder:
         return self._pytorch_wrapper(encoded_representation)
 
     def decode(self, encoded_values_tensor, max_length = 100):
-        # When test is an output... a bit trickier to handle this case, thinking on it
-        pass
+        raise Exception('This encoder is not bi-directional')
+
 
 
 if __name__ == "__main__":
