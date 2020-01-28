@@ -278,7 +278,7 @@ if __name__ == "__main__":
                 float(pred[i])
             except:
                 pred[i] = 0
-p
+                
         print(real[0:25], '\n', pred[0:25])
         encoder_accuracy = r2_score(real, pred)
 
