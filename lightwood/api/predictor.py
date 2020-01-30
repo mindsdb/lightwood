@@ -280,10 +280,14 @@ class Predictor:
         for subset_iteration in [1,2]:
             if stop_training:
                 break
-            for subset_id in [*from_data_ds.subsets.keys()]:
+            subset_id_arr =  [*from_data_ds.subsets.keys()] # [1]
+            for subset_id in subset_id_arr:
                 started_subset = time.time()
                 if stop_training:
                     break
+
+                #subset_train_ds = from_data_ds #.subsets[subset_id]
+                #subset_test_ds = test_data_ds #.subsets[subset_id]
 
                 subset_train_ds = from_data_ds.subsets[subset_id]
                 subset_test_ds = test_data_ds.subsets[subset_id]
@@ -390,7 +394,7 @@ class Predictor:
                                 mixer.update_model(best_model)
 
 
-                            if subset_id == list(from_data_ds.subsets.keys())[-1]:
+                            if subset_id == subset_id_arr[-1]:
                                 stop_training = True
                             elif not stop_training:
                                 break
