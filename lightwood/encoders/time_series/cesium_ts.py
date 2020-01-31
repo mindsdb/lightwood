@@ -184,8 +184,10 @@ class CesiumTsEncoder:
                     vector_row += [val, val1]  # val1 is 1 if its null
                 else:
                     vector_row += [val]
+
             ret += [vector_row]
         ret_tensor = self._pytorch_wrapper(ret)
+        
         return ret_tensor
 
     def decode(self, encoded_values_tensor):

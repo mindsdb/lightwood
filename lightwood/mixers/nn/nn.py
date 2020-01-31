@@ -224,7 +224,7 @@ class NnMixer:
 
                     self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
-            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
+            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False,  feature_len_map=ds.transformer.feature_len_map)
             self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -269,8 +269,8 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net)
-                    self.last_unaware_net = copy.deepcopy(self.net.net)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=(self.net.net, self.net.embedding_networks), feature_len_map=ds.transformer.feature_len_map)
+                    self.last_unaware_net = (copy.deepcopy(self.net.net), copy.deepcopy(self.net.embedding_networks))
 
                     # Lower the learning rate once we start training the selfaware network
                     self.optimizer_args['lr'] = self.optimizer.lr/8
@@ -283,7 +283,7 @@ class NnMixer:
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net) #, pretrained_net=copy.deepcopy(self.net.net)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net, feature_len_map=ds.transformer.feature_len_map) #, pretrained_net=copy.deepcopy(self.net.net)
 
                     # Increase the learning rate closer to the previous levels
                     self.optimizer_args['lr'] = self.optimizer.lr * 4

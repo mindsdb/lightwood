@@ -8,13 +8,21 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None):
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, feature_len_map=None):
         self.input_size = None
         self.output_size = None
         self.selfaware = selfaware
         # How many devices we can train this network on
         self.available_devices = 1
         self.max_variance = None
+        self.feature_len_map = feature_len_map
+        if feature_len_map is not None:
+            self.embedding_networks = []
+        else:
+            self.embedding_networks = None
+
+        self.embedding_networks = None
+        self.feature_len_map = None
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
@@ -45,10 +53,22 @@ class DefaultNet(torch.nn.Module):
         super(DefaultNet, self).__init__()
 
         if shape is None and pretrained_net is None:
+
+            in_feature_size = None
+            if self.feature_len_map is not None:
+                in_feature_size = 20
+                for feature_len in self.feature_len_map.values():
+                    self.embedding_networks.append(torch.nn.Linear(feature_len, in_feature_size).to(self.device))
+
+
             input_sample, output_sample = ds[0]
 
-            self.input_size = len(input_sample)
             self.output_size = len(output_sample)
+
+            if in_feature_size is None:
+                self.input_size = len(input_sample)
+            else:
+                self.input_size = int(len(self.embedding_networks)*20)
 
             '''
             small_input = True if self.input_size < 50 else False
@@ -91,7 +111,7 @@ class DefaultNet(torch.nn.Module):
 
             self.net = torch.nn.Sequential(*layers)
         else:
-            self.net = pretrained_net
+            self.net, self.embedding_networks = pretrained_net
             for layer in self.net:
                 if isinstance(layer, torch.nn.Linear):
                     if self.input_size is None:
@@ -175,6 +195,30 @@ class DefaultNet(torch.nn.Module):
         :return: either just output or (output, awareness)
         """
 
+        embedded_input = None
+        if self.embedding_networks is not None:
+            last_start = 0
+            for i, feature_len in enumerate(self.feature_len_map.values()):
+                sliced_input = input[:, last_start:last_start+feature_len]
+
+                #print(type(sliced_input))
+                #print(sliced_input.shape)
+                #print(input.shape)
+
+                #print(sliced_input.device)
+                #print(input.device)
+
+                embedding_network_out = self.embedding_networks[i](sliced_input)
+
+                if embedded_input is None:
+                    embedded_input = embedding_network_out
+                else:
+                    embedded_input = torch.cat((embedded_input, embedding_network_out),1)
+
+                last_start = feature_len
+
+        if embedded_input is not None:
+            input = embedded_input
 
         output = self._foward_net(input)
 
