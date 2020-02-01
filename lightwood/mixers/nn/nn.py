@@ -254,6 +254,7 @@ class NnMixer:
                     self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
         total_epochs = self.epochs
 
         if self._nonpersistent['sampler'] is None:

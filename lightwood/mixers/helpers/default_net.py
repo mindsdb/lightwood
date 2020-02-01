@@ -21,8 +21,8 @@ class DefaultNet(torch.nn.Module):
         else:
             self.embedding_networks = None
 
-        self.embedding_networks = None
-        self.feature_len_map = None
+        #self.embedding_networks = None
+        #self.feature_len_map = None
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
@@ -59,7 +59,7 @@ class DefaultNet(torch.nn.Module):
                 in_feature_size = 20
                 for feature_len in self.feature_len_map.values():
                     self.embedding_networks.append(torch.nn.Linear(feature_len, in_feature_size).to(self.device))
-
+                self.embedding_networks = torch.nn.ModuleList(self.embedding_networks)
 
             input_sample, output_sample = ds[0]
 
