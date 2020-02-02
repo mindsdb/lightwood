@@ -135,7 +135,6 @@ class Predictor:
                 'model': boost_mixer
                 ,'accuracy': accuracy['value']
             }
-
         return best_mixer_map
 
 
