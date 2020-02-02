@@ -22,14 +22,12 @@ class BoostMixer():
             else:
                 self.targets[output_feature['name']]['weights'] = None
 
-        X = [[None] * len(data_source.configuration['input_features'])] * len(data_source)
+        X = []
 
-        for feature_pos, input_feature in enumerate(data_source.configuration['input_features']):
-            for i, point in enumerate(data_source.get_column_original_data(input_feature['name'])):
-                X[i][feature_pos] = point
+        for row in data_source:
+            X.append(np.array(row[0]))
 
         X = np.array(X)
-
         for target_col_name in self.targets:
             Y = data_source.get_column_original_data(target_col_name)
 
@@ -54,14 +52,9 @@ class BoostMixer():
 
 
     def predict(self, when_data_source, targets=None):
-
-        X = [[None] * len(when_data_source.configuration['input_features'])] * len(when_data_source)
-
-        for feature_pos, input_feature in enumerate(when_data_source.configuration['input_features']):
-            for i, point in enumerate(when_data_source.get_column_original_data(input_feature['name'])):
-                X[i][feature_pos] = point
-
-        X = np.array(X)
+        X = []
+        for row in when_data_source:
+            X.append(np.array(row[0]))
 
         predictions = {}
         if targets is None:
