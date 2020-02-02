@@ -32,9 +32,11 @@ class Predictor:
         try:
             from lightwood.mixers.boost.boost import BoostMixer
             self.has_boosting_mixer = True
-        except:
+        except Exception as e:
             self.has_boosting_mixer = False
-            print('Boosting mixer can\'t be loaded !')
+            logging.info(f'Boosting mixer can\'t be loaded due to error: {e} !')
+            print((f'Boosting mixer can\'t be loaded due to error: {e} !'))
+
         if load_from_path is not None:
             pickle_in = open(load_from_path, "rb")
             self_dict = dill.load(pickle_in)
@@ -111,13 +113,7 @@ class Predictor:
                 pass
 
     def train_helper_mixers(self, train_ds, test_ds):
-        # Boosting mixer
-        try:
-            from lightwood.mixers.boost.boost import BoostMixer
-            self.has_boosting_mixer = True
-        except:
-            self.has_boosting_mixer = False
-            print('Boosting mixer can\'t be loaded !')
+        from lightwood.mixers.boost.boost import BoostMixer
 
         boost_mixer = BoostMixer()
         boost_mixer.train(train_ds)
@@ -259,7 +255,9 @@ class Predictor:
         else:
             best_parameters = {}
 
+        print("HERE 1")
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
+            print("HERE 2")
             self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
 
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
@@ -449,7 +447,6 @@ class Predictor:
                 sample_weight = []
                 for val in real:
                     sample_weight.append(weight_map[val])
-                print(sample_weight)
 
             accuracy = {
                 'function': 'accuracy_score',
