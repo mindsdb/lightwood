@@ -21,9 +21,6 @@ class DefaultNet(torch.nn.Module):
         else:
             self.embedding_networks = None
 
-        #self.embedding_networks = None
-        #self.feature_len_map = None
-
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE

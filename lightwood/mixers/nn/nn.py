@@ -254,7 +254,7 @@ class NnMixer:
                     self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
+            print(list(self.net.parameters()))
         total_epochs = self.epochs
 
         if self._nonpersistent['sampler'] is None:
@@ -280,7 +280,7 @@ class NnMixer:
                         torch.cuda.empty_cache()
                     self.optimizer.zero_grad()
                     self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
+                    print(list(self.net.parameters()))
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
@@ -293,7 +293,7 @@ class NnMixer:
                         torch.cuda.empty_cache()
                     self.optimizer.zero_grad()
                     self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
+                    print(list(self.net.parameters()))
                 total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
