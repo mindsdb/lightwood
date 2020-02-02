@@ -32,9 +32,11 @@ class Predictor:
         try:
             from lightwood.mixers.boost.boost import BoostMixer
             self.has_boosting_mixer = True
-        except:
+        except Exception as e:
             self.has_boosting_mixer = False
-            print('Boosting mixer can\'t be loaded !')
+            logging.info(f'Boosting mixer can\'t be loaded due to error: {e} !')
+            print((f'Boosting mixer can\'t be loaded due to error: {e} !'))
+
         if load_from_path is not None:
             pickle_in = open(load_from_path, "rb")
             self_dict = dill.load(pickle_in)
@@ -111,13 +113,7 @@ class Predictor:
                 pass
 
     def train_helper_mixers(self, train_ds, test_ds):
-        # Boosting mixer
-        try:
-            from lightwood.mixers.boost.boost import BoostMixer
-            self.has_boosting_mixer = True
-        except:
-            self.has_boosting_mixer = False
-            print('Boosting mixer can\'t be loaded !')
+        from lightwood.mixers.boost.boost import BoostMixer
 
         boost_mixer = BoostMixer()
         boost_mixer.train(train_ds)
@@ -134,12 +130,11 @@ class Predictor:
             real = list(map(str,test_ds.get_column_original_data(output_column)))
             predicted =  predictions[output_column]
 
-            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted)
+            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, train_ds.get_column_config(output_column)['weights'])
             best_mixer_map[output_column] = {
                 'model': boost_mixer
                 ,'accuracy': accuracy['value']
             }
-
         return best_mixer_map
 
 
@@ -260,8 +255,11 @@ class Predictor:
             best_parameters = {}
 
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
-            self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
-
+            try:
+                self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
+            except:
+                logging.warning(f'Failed to train helper mixers with error: {e}')
+                
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
@@ -441,11 +439,18 @@ class Predictor:
         return main_mixer_predictions
 
     @staticmethod
-    def apply_accuracy_function(col_type, real, predicted):
+    def apply_accuracy_function(col_type, real, predicted, weight_map=None):
         if col_type == 'categorical':
+            if weight_map is None:
+                sample_weight = [1 for x in real]
+            else:
+                sample_weight = []
+                for val in real:
+                    sample_weight.append(weight_map[val])
+
             accuracy = {
                 'function': 'accuracy_score',
-                'value': accuracy_score(real, predicted)
+                'value': accuracy_score(real, predicted, sample_weight=sample_weight)
             }
         else:
             real_fixed = []
@@ -487,7 +492,7 @@ class Predictor:
             real = list(map(str,ds.get_column_original_data(output_column)))
             predicted =  list(map(str,predictions[output_column]["predictions"]))
 
-            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted)
+            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,ds.get_column_config(output_column)['weights'])
             accuracies[output_column] = accuracy
 
         return accuracies
