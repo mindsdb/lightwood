@@ -134,7 +134,7 @@ class Predictor:
             real = list(map(str,test_ds.get_column_original_data(output_column)))
             predicted =  predictions[output_column]
 
-            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted)
+            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, ds.get_column_config(output_column)['weights'])
             best_mixer_map[output_column] = {
                 'model': boost_mixer
                 ,'accuracy': accuracy['value']
@@ -303,7 +303,7 @@ class Predictor:
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
                     first_run = False
-                    logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
+                    #logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
                     if subset_iteration == 2 and training_error < 0.5 and not from_data_ds.enable_dropout:
@@ -441,11 +441,19 @@ class Predictor:
         return main_mixer_predictions
 
     @staticmethod
-    def apply_accuracy_function(col_type, real, predicted):
+    def apply_accuracy_function(col_type, real, predicted, weight_map=None):
         if col_type == 'categorical':
+            if weight_map is None:
+                sample_weight = [1 for x in real]
+            else:
+                sample_weight = []
+                for val in real:
+                    sample_weight.append(weight_map[val])
+                print(sample_weight)
+
             accuracy = {
                 'function': 'accuracy_score',
-                'value': accuracy_score(real, predicted)
+                'value': accuracy_score(real, predicted, sample_weight=sample_weight)
             }
         else:
             real_fixed = []
@@ -487,7 +495,7 @@ class Predictor:
             real = list(map(str,ds.get_column_original_data(output_column)))
             predicted =  list(map(str,predictions[output_column]["predictions"]))
 
-            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted)
+            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,ds.get_column_config(output_column)['weights'])
             accuracies[output_column] = accuracy
 
         return accuracies
