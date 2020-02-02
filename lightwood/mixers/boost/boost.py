@@ -17,28 +17,31 @@ class BoostMixer():
             self.targets[output_feature['name']] = {
                 'type': output_feature['type']
             }
+            if 'weights' in output_feature:
+                self.targets[output_feature['name']]['weights'] = output_feature['weights']
+            else:
+                self.targets[output_feature['name']]['weights'] = None
 
-        X = []
-        for row in data_source:
-            X.append(np.array(row[0]))
+        X = [[None] * len(data_source.configuration['input_features'])] * len(data_source)
+
+        for feature_pos, input_feature in enumerate(data_source.configuration['input_features']):
+            for i, point in enumerate(data_source.get_column_original_data(input_feature['name'])):
+                X[i][feature_pos] = point
 
         X = np.array(X)
+
         for target_col_name in self.targets:
             Y = data_source.get_column_original_data(target_col_name)
 
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
-                weight_map = None
-                if 'weights' in output_features[target_col_name]:
-                    weight_map = output_features[target_col_name]['weights']
+                weight_map = self.targets[target_col_name]['weights']
                 if weight_map is None:
                     sample_weight = [1 for x in real]
                 else:
                     sample_weight = []
-                    for val in real:
+                    for val in Y:
                         sample_weight.append(weight_map[val])
 
-                print(sample_weight)
-                exit()
                 self.targets[target_col_name]['model'] = xgb.XGBClassifier()
                 self.targets[target_col_name]['model'].fit(X,Y,sample_weight=sample_weight)
 
@@ -51,9 +54,14 @@ class BoostMixer():
 
 
     def predict(self, when_data_source, targets=None):
-        X = []
-        for row in when_data_source:
-            X.append(np.array(row[0]))
+
+        X = [[None] * len(when_data_source.configuration['input_features'])] * len(when_data_source)
+
+        for feature_pos, input_feature in enumerate(when_data_source.configuration['input_features']):
+            for i, point in enumerate(when_data_source.get_column_original_data(input_feature['name'])):
+                X[i][feature_pos] = point
+
+        X = np.array(X)
 
         predictions = {}
         if targets is None:

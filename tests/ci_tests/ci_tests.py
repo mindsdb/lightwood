@@ -16,8 +16,11 @@ MODULES = [
     f'{mixers_path}nn/nn.py',
     f'{encoders_path}categorical/autoencoder.py',
 
-    # f'{encoders_path}text/distilbert.py', <--- takes too long
+    # Take too long
+    # f'{encoders_path}text/distilbert.py',
+    # f'./lightwood/mixers/boost/boost.py',
 
+    # Not working for some reason
     #f'{encoders_path}text/rnn.py'.format(encoders_path),
     #'./lightwood/encoders/image/nn.py',
     #'./lightwood/encoders/image/img_2_vec.py',
