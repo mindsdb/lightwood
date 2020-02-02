@@ -130,7 +130,7 @@ class Predictor:
             real = list(map(str,test_ds.get_column_original_data(output_column)))
             predicted =  predictions[output_column]
 
-            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, ds.get_column_config(output_column)['weights'])
+            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, train_ds.get_column_config(output_column)['weights'])
             best_mixer_map[output_column] = {
                 'model': boost_mixer
                 ,'accuracy': accuracy['value']
@@ -255,9 +255,7 @@ class Predictor:
         else:
             best_parameters = {}
 
-        print("HERE 1")
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
-            print("HERE 2")
             self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
 
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
