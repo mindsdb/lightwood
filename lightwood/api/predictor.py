@@ -255,8 +255,11 @@ class Predictor:
             best_parameters = {}
 
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
-            self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
-
+            try:
+                self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
+            except:
+                logging.warning(f'Failed to train helper mixers with error: {e}')
+                
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
