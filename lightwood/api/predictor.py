@@ -257,9 +257,9 @@ class Predictor:
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             try:
                 self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
-            except:
+            except Exception as e:
                 logging.warning(f'Failed to train helper mixers with error: {e}')
-                
+
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
@@ -301,7 +301,10 @@ class Predictor:
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
                     first_run = False
-                    #logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
+
+                    # Log this every now and then so that the user knows it's running
+                    if (int(time.time()) - started) % 30 == 0:
+                        logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
                     if subset_iteration == 2 and training_error < 0.5 and not from_data_ds.enable_dropout:
