@@ -270,6 +270,7 @@ class Predictor:
                 logging.warning('trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format(param=param, mixerclass=str(type(mixer))))
 
         started = time.time()
+        log_reasure = time.time()
         epoch = 0
         eval_next_on_epoch = eval_every_x_epochs
         first_run = True
@@ -303,7 +304,8 @@ class Predictor:
                     first_run = False
 
                     # Log this every now and then so that the user knows it's running
-                    if (int(time.time()) - started) % 30 == 0:
+                    if (int(time.time()) - log_reasure) > 30:
+                        log_reasure = time.time()
                         logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
@@ -431,7 +433,7 @@ class Predictor:
         when_data_ds.encoders = self._mixer.encoders
 
         main_mixer_predictions = self._mixer.predict(when_data_ds)
-        
+
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             for output_column in main_mixer_predictions:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
