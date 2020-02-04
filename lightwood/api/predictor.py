@@ -272,6 +272,7 @@ class Predictor:
         started = time.time()
         log_reasure = time.time()
         epoch = 0
+        eval_every_x_epochs = 1
         eval_next_on_epoch = eval_every_x_epochs
         first_run = True
         stop_training = False
@@ -498,6 +499,7 @@ class Predictor:
             predicted =  list(map(str,predictions[output_column]["predictions"]))
 
             accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,ds.get_column_config(output_column)['weights'])
+
             accuracies[output_column] = accuracy
 
         return accuracies

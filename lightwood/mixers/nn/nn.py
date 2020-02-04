@@ -335,6 +335,7 @@ class NnMixer:
                 # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
 
                 error = running_loss / (i + 1)
+                print(i, error)
 
                 if error < 1:
                     if self.loss_combination_operator == operator.add:
