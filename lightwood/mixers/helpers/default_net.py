@@ -8,7 +8,7 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, feature_len_map=None):
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, feature_len_map=None, trainable_encoders=None, trainable_decoders=None):
         self.input_size = None
         self.output_size = None
         self.selfaware = selfaware
@@ -20,6 +20,10 @@ class DefaultNet(torch.nn.Module):
             self.embedding_networks = []
         else:
             self.embedding_networks = None
+
+
+        self.trainable_encoders = trainable_encoders
+        self.trainable_decoders = trainable_decoders
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
@@ -54,7 +58,11 @@ class DefaultNet(torch.nn.Module):
             in_feature_size = None
             if self.feature_len_map is not None:
                 in_feature_size = 20
-                for feature_len in self.feature_len_map.values():
+                for position, feature_len in enumerate(self.feature_len_map.values()):
+
+                    if position in self.trainable_encoders:
+                        feature_len = self.trainable_encoders[position].out_size
+
                     self.embedding_networks.append(torch.nn.Linear(feature_len, in_feature_size).to(self.device))
                 self.embedding_networks = torch.nn.ModuleList(self.embedding_networks)
 
@@ -65,7 +73,7 @@ class DefaultNet(torch.nn.Module):
             if in_feature_size is None:
                 self.input_size = len(input_sample)
             else:
-                self.input_size = int(len(self.embedding_networks)*20)
+                self.input_size = int(len(self.embedding_networks)*in_feature_size)
 
             '''
             small_input = True if self.input_size < 50 else False
@@ -204,6 +212,9 @@ class DefaultNet(torch.nn.Module):
 
                 #print(sliced_input.device)
                 #print(input.device)
+
+                if i in self.trainable_encoders:
+                    sliced_input = self.trainable_encoders[i](sliced_input)
 
                 embedding_network_out = self.embedding_networks[i](sliced_input)
 

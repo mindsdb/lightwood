@@ -41,6 +41,7 @@ class BoostMixer():
                         sample_weight.append(weight_map[val])
 
                 self.targets[target_col_name]['model'] = xgb.XGBClassifier()
+                self.sample_weight = sample_weight
                 self.targets[target_col_name]['model'].fit(X,Y,sample_weight=sample_weight)
 
             elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.NUMERIC:

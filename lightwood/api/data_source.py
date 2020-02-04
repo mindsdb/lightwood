@@ -28,13 +28,13 @@ class SubSet(Dataset):
         return self.data_source.get_feature_names(where)
 
     def __getattribute__(self, name):
-        if name in ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache']:
+        if name in ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache', 'trainable_encoders', 'trainable_decoders']:
             return self.data_source.__getattribute__(name)
         else:
             return object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
-        if name in ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache']:
+        if name in ['configuration', 'encoders', 'transformer', 'training', 'output_weights', 'dropout_dict', 'disable_cache', 'trainable_encoders', 'trainable_decoders']:
             return dict.__setattr__(self.data_source, name, value)
         else:
             super().__setattr__(name, value)
@@ -51,6 +51,10 @@ class DataSource(Dataset):
         self.data_frame = data_frame
         self.configuration = configuration
         self.encoders = {}
+
+        self.trainable_encoders = {}
+        self.trainable_decoders = {}
+
         self.transformer = None
         self.training = False # Flip this flag if you are using the datasource while training
         self.output_weights = None
@@ -237,7 +241,7 @@ class DataSource(Dataset):
         input_encoder_training_data = {'targets': []}
 
         for feature_set in ['output_features', 'input_features']:
-            for feature in self.configuration[feature_set]:
+            for position, feature in enumerate(self.configuration[feature_set]):
                 column_name = feature['name']
                 config = self.get_column_config(column_name)
 
@@ -279,6 +283,12 @@ class DataSource(Dataset):
                     encoder_instance.prepare_encoder(args[0])
 
                 self.encoders[column_name] = encoder_instance
+
+                if hasattr(encoder_instance, 'trainable'):
+                    if feature_set == 'input_features':
+                        self.trainable_encoders[position] = encoder_instance.trainable
+                    else:
+                        self.trainable_decoders[position] = encoder_instance.trainable
 
                 if feature_set == 'output_features':
                     input_encoder_training_data['targets'].append({

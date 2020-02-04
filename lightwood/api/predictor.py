@@ -257,9 +257,9 @@ class Predictor:
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             try:
                 self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
-            except:
+            except Exception as e:
                 logging.warning(f'Failed to train helper mixers with error: {e}')
-                
+
         mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
         self._mixer = mixer
 
@@ -432,7 +432,7 @@ class Predictor:
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             for output_column in main_mixer_predictions:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
-                    if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
+                    if self._helper_mixers[output_column]['accuracy'] > .05 * self.train_accuracy[output_column]['value']:
                         helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
                         main_mixer_predictions[output_column] = {'predictions': list(helper_mixer_predictions[output_column])}
 

@@ -29,7 +29,7 @@ class NnMixer:
         self.optimizer_args = None
         self.criterion = None
 
-        self.batch_size = 200
+        self.batch_size = 20
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -194,7 +194,7 @@ class NnMixer:
 
         transformer_already_initialized = False
         try:
-            if len(list(ds.transformer.feature_len_map.keys())) > 0:
+            if len(list(ds.transformer.input_feature_len_map.keys())) > 0:
                 transformer_already_initialized = True
         except:
             pass
@@ -224,7 +224,7 @@ class NnMixer:
 
                     self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
-            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False,  feature_len_map=ds.transformer.feature_len_map)
+            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False,  feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=ds.trainable_encoders, trainable_decoders=ds.trainable_decoders)
             self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -254,7 +254,6 @@ class NnMixer:
                     self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-            print(list(self.net.parameters()))
         total_epochs = self.epochs
 
         if self._nonpersistent['sampler'] is None:
@@ -270,7 +269,7 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=(self.net.net, self.net.embedding_networks), feature_len_map=ds.transformer.feature_len_map)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=(self.net.net, self.net.embedding_networks), feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=ds.trainable_encoders, trainable_decoders=ds.trainable_decoders)
                     self.last_unaware_net = (copy.deepcopy(self.net.net), copy.deepcopy(self.net.embedding_networks))
 
                     # Lower the learning rate once we start training the selfaware network
@@ -280,11 +279,10 @@ class NnMixer:
                         torch.cuda.empty_cache()
                     self.optimizer.zero_grad()
                     self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-                    print(list(self.net.parameters()))
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net, feature_len_map=ds.transformer.feature_len_map) #, pretrained_net=copy.deepcopy(self.net.net)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net, feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=ds.trainable_encoders, trainable_decoders=ds.trainable_decoders) #, pretrained_net=copy.deepcopy(self.net.net)
 
                     # Increase the learning rate closer to the previous levels
                     self.optimizer_args['lr'] = self.optimizer.lr * 4
@@ -293,7 +291,6 @@ class NnMixer:
                         torch.cuda.empty_cache()
                     self.optimizer.zero_grad()
                     self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-                    print(list(self.net.parameters()))
                 total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
@@ -337,7 +334,7 @@ class NnMixer:
                 # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
 
                 error = running_loss / (i + 1)
-
+                print(i, error)
 
                 if error < 1:
                     if self.loss_combination_operator == operator.add:

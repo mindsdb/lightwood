@@ -15,6 +15,7 @@ class Img2VecEncoder:
         self.aim = aim
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
+        self.trainable = None
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -29,6 +30,9 @@ class Img2VecEncoder:
                 self._model = Img2Vec(model='resnext-50')
             else:
                 self._model = Img2Vec()
+
+        self.trainable = self._model
+
         self._prepared = True
 
     def encode(self, images):
@@ -49,10 +53,11 @@ class Img2VecEncoder:
             else:
                 img = Image.open(image)
 
-            vec = self._model.get_vec(img)
+            #vec = self._model.get_vec(img)
+            vec = self._model.normalize(self._model.to_tensor(self._model.scaler(img))) #.unsqueeze(0)#.to(self.device)
             pics.append(vec)
 
-        return torch.FloatTensor(pics)
+        return pics #torch.FloatTensor(pics)
 
     def decode(self, encoded_values_tensor):
         raise Exception('This encoder is not bi-directional')
