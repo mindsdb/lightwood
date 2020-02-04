@@ -431,7 +431,7 @@ class Predictor:
         when_data_ds.encoders = self._mixer.encoders
 
         main_mixer_predictions = self._mixer.predict(when_data_ds)
-
+        
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             for output_column in main_mixer_predictions:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
