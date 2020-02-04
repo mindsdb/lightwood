@@ -131,7 +131,7 @@ class Predictor:
             predicted =  predictions[output_column]
 
             weight_map = None
-            if 'weights' in:
+            if 'weights' in train_ds.get_column_config(output_column):
                 weight_map = train_ds.get_column_config(output_column)['weights']
 
             accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, weight_map)
@@ -503,7 +503,7 @@ class Predictor:
             predicted =  list(map(str,predictions[output_column]["predictions"]))
 
             weight_map = None
-            if 'weights' in:
+            if 'weights' in ds.get_column_config(output_column):
                 weight_map = ds.get_column_config(output_column)['weights']
 
             accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
