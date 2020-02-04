@@ -25,6 +25,3 @@ class CONFIG:
 
     # Flags bellow are deprecated but still here in case we want to use the feature again
     OVERSAMPLE = False
-
-    """Bayesian Network"""
-    NUMBER_OF_PROBABILISTIC_MODELS = 2
