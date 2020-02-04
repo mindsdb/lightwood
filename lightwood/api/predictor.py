@@ -130,7 +130,11 @@ class Predictor:
             real = list(map(str,test_ds.get_column_original_data(output_column)))
             predicted =  predictions[output_column]
 
-            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, train_ds.get_column_config(output_column)['weights'])
+            weight_map = None
+            if 'weights' in:
+                weight_map = train_ds.get_column_config(output_column)['weights']
+
+            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, weight_map)
             best_mixer_map[output_column] = {
                 'model': boost_mixer
                 ,'accuracy': accuracy['value']
@@ -498,7 +502,11 @@ class Predictor:
             real = list(map(str,ds.get_column_original_data(output_column)))
             predicted =  list(map(str,predictions[output_column]["predictions"]))
 
-            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,ds.get_column_config(output_column)['weights'])
+            weight_map = None
+            if 'weights' in:
+                weight_map = ds.get_column_config(output_column)['weights']
+
+            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
 
             accuracies[output_column] = accuracy
 
