@@ -276,7 +276,6 @@ class Predictor:
         started = time.time()
         log_reasure = time.time()
         epoch = 0
-        eval_every_x_epochs = 1
         eval_next_on_epoch = eval_every_x_epochs
         first_run = True
         stop_training = False

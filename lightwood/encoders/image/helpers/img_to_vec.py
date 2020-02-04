@@ -36,6 +36,12 @@ class Img2Vec(torch.nn.Module):
 
         self.model, self.extraction_layer = self._get_model_and_layer(model, layer)
 
+        for pos, param in enumerate(self.model.parameters()):
+            if pos < 180:
+                param.requires_grad = False
+            else:
+                param.requires_grad = True
+
         self.model = self.model.to(self.device)
 
         self.model.train()
@@ -44,7 +50,7 @@ class Img2Vec(torch.nn.Module):
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                               std=[0.229, 0.224, 0.225])
         self.to_tensor = transforms.ToTensor()
-        self.out_size = 512
+        self.out_size = 1000
 
 
     def forward(self, img, tensor=False):
@@ -53,16 +59,17 @@ class Img2Vec(torch.nn.Module):
         :param tensor: If True, get_vec will return a FloatTensor instead of Numpy array
         :returns: Numpy ndarray
         """
-        if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
-            my_embedding = torch.zeros(1, self.layer_output_size)
-        elif self.model_name in ('resnet-18', 'resnext-50'):
-            my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
+        #if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
+        #    my_embedding = torch.zeros(1, self.layer_output_size)
+        #elif self.model_name in ('resnet-18', 'resnext-50'):
+        #    my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
 
         #def copy_data(m, i, o):
         #    print(m, i ,o)
         #    my_embedding.copy_(o.data)
 
         #h = self.extraction_layer.register_forward_hook(copy_data)
+
         h_x = self.model(img)
         return h_x
         #h.remove()
@@ -87,11 +94,6 @@ class Img2Vec(torch.nn.Module):
         if model_name == 'resnext-50-small':
             model = models.resnext50_32x4d(pretrained=True)
             if layer == 'default':
-                #b = torch.nn.AvgPool2d(kernel_size=(8,8),stride=(4,4))
-                #a = torch.nn.AvgPool2d(kernel_size=(2,2),stride=2)
-                #model.avgpool = b
-                #model.fc = nn.Identity()
-                #layer = model.avgpool
                 model.fc = ChannelPoolAdaptiveAvg1d(output_size=512)
                 layer = model.fc
                 self.layer_output_size = 512

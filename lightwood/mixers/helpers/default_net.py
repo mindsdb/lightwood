@@ -21,6 +21,8 @@ class DefaultNet(torch.nn.Module):
         else:
             self.embedding_networks = None
 
+        self.embedding_networks = None
+        self.feature_len_map = None
 
         self.trainable_encoders = trainable_encoders
         self.trainable_decoders = trainable_decoders
@@ -57,7 +59,7 @@ class DefaultNet(torch.nn.Module):
 
             in_feature_size = None
             if self.feature_len_map is not None:
-                in_feature_size = 20
+                in_feature_size = 200
                 for position, feature_len in enumerate(self.feature_len_map.values()):
 
                     if position in self.trainable_encoders:
@@ -101,7 +103,9 @@ class DefaultNet(torch.nn.Module):
             else:
                 shape = funnel(self.input_size,self.output_size,depth)
             '''
-            shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
+            #shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
+            #shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
+            shape = [512, 1024, self.output_size]
 
         if pretrained_net is None:
             logging.info(f'Building network of shape: {shape}')
@@ -200,7 +204,9 @@ class DefaultNet(torch.nn.Module):
         :return: either just output or (output, awareness)
         """
 
+        '''
         embedded_input = None
+
         if self.embedding_networks is not None:
             last_start = 0
             for i, feature_len in enumerate(self.feature_len_map.values()):
@@ -227,7 +233,8 @@ class DefaultNet(torch.nn.Module):
 
         if embedded_input is not None:
             input = embedded_input
-
+        '''
+        input = self.trainable_encoders[0](input)
         output = self._foward_net(input)
 
         if self.selfaware:

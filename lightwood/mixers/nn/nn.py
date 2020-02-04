@@ -29,7 +29,7 @@ class NnMixer:
         self.optimizer_args = None
         self.criterion = None
 
-        self.batch_size = 20
+        self.batch_size = 5
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -204,6 +204,8 @@ class NnMixer:
 
         self.encoders = ds.encoders
         self.transformer = ds.transformer
+        self.trainable_encoders = ds.trainable_encoders
+        self.trainable_decoders = ds.trainable_decoders
 
     def iter_fit(self, ds, initialize=True):
         """
@@ -224,7 +226,7 @@ class NnMixer:
 
                     self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
-            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False,  feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=ds.trainable_encoders, trainable_decoders=ds.trainable_decoders)
+            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False,  feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=self.trainable_encoders, trainable_decoders=self.trainable_decoders)
             self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -253,6 +255,10 @@ class NnMixer:
                 if optimizer_arg_name in self.dynamic_parameters:
                     self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
+            #for p in self.net.parameters():
+            #    print('\n\n\n')
+            #    print(p)
+            #exit()
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
@@ -269,7 +275,7 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=(self.net.net, self.net.embedding_networks), feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=ds.trainable_encoders, trainable_decoders=ds.trainable_decoders)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=(self.net.net, self.net.embedding_networks), feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=self.trainable_encoders, trainable_decoders=self.trainable_decoders)
                     self.last_unaware_net = (copy.deepcopy(self.net.net), copy.deepcopy(self.net.embedding_networks))
 
                     # Lower the learning rate once we start training the selfaware network
@@ -282,7 +288,7 @@ class NnMixer:
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net, feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=ds.trainable_encoders, trainable_decoders=ds.trainable_decoders) #, pretrained_net=copy.deepcopy(self.net.net)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net, feature_len_map=ds.transformer.input_feature_len_map, trainable_encoders=self.trainable_encoders, trainable_decoders=self.trainable_decoders) #, pretrained_net=copy.deepcopy(self.net.net)
 
                     # Increase the learning rate closer to the previous levels
                     self.optimizer_args['lr'] = self.optimizer.lr * 4
@@ -335,7 +341,6 @@ class NnMixer:
                 # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
 
                 error = running_loss / (i + 1)
-                print(i, error)
 
                 if error < 1:
                     if self.loss_combination_operator == operator.add:
