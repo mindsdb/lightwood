@@ -327,16 +327,16 @@ class NnMixer:
                     awareness_loss = self.awareness_criterion(awareness, real_loss)
 
                     total_loss = self.loss_combination_operator(awareness_loss, loss)
-                    running_loss += total_loss.item()
                 else:
                     total_loss = loss
+
+                running_loss += total_loss.item()
 
                 total_loss.backward()
                 self.optimizer.step()
                 # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
 
                 error = running_loss / (i + 1)
-
 
                 if error < 1:
                     if self.loss_combination_operator == operator.add:
