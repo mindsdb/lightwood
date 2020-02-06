@@ -313,7 +313,8 @@ class Predictor:
                         logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
-                    if subset_iteration == 2 and training_error < 0.5 and not from_data_ds.enable_dropout:
+                    if subset_iteration == 2 and training_error < 0.4 and not from_data_ds.enable_dropout:
+                        eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
                         logging.info('Enabled dropout !')
                         from_data_ds.enable_dropout = True
                         lowest_error = None
@@ -335,7 +336,7 @@ class Predictor:
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.2:
+                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.15:
                         logging.info('Started selfaware training !')
                         mixer.start_selfaware_training = True
                         lowest_error = None

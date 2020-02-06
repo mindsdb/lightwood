@@ -91,7 +91,6 @@ class DataSource(Dataset):
             self.subsets[subset_nr] = SubSet(self, subsets_indexes[subset_nr])
 
     def _clear_cache(self):
-        self.list_cache = {}
         self.encoded_cache = {}
         self.transformed_cache = None
 
@@ -215,15 +214,8 @@ class DataSource(Dataset):
             nr_rows = self.data_frame.shape[0]
             return [None] * nr_rows
 
-        if self.disable_cache:
-            return self.data_frame[column_name].tolist()
+        return self.data_frame[column_name].tolist()
 
-        elif column_name in self.list_cache:
-            return self.list_cache[column_name]
-
-        else:
-            self.list_cache[column_name] = self.data_frame[column_name].tolist()
-            return self.list_cache[column_name]
 
     def prepare_encoders(self):
         '''
