@@ -1,5 +1,5 @@
 import numpy as np
-import xgboost as xgb
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
@@ -40,11 +40,11 @@ class BoostMixer():
                     for val in Y:
                         sample_weight.append(weight_map[val])
 
-                self.targets[target_col_name]['model'] = xgb.XGBClassifier()
+                self.targets[target_col_name]['model'] = GradientBoostingClassifier(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X,Y,sample_weight=sample_weight)
 
             elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.NUMERIC:
-                self.targets[target_col_name]['model'] = xgb.XGBRegressor()
+                self.targets[target_col_name]['model'] = GradientBoostingRegressor()
                 self.targets[target_col_name]['model'].fit(X,Y)
 
             else:
