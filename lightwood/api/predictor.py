@@ -312,6 +312,11 @@ class Predictor:
                         log_reasure = time.time()
                         logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
 
+
+                    # Prime the model on each subset for a bit
+                    if subset_iteration == 1:
+                        break
+
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
                     if subset_iteration == 2 and training_error < 0.4 and not from_data_ds.enable_dropout:
                         eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
@@ -347,10 +352,6 @@ class Predictor:
                         continue
 
                     if epoch >= eval_next_on_epoch:
-                        # Prime the model on each subset for a bit
-                        if subset_iteration == 1:
-                            break
-
                         eval_next_on_epoch += eval_every_x_epochs
 
                         test_error = mixer.error(test_data_ds)
@@ -441,8 +442,9 @@ class Predictor:
 
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             for output_column in main_mixer_predictions:
+                print(self._helper_mixers[output_column]['accuracy'], self.train_accuracy[output_column]['value'])
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
-                    if self._helper_mixers[output_column]['accuracy'] > 1.05 * self.train_accuracy[output_column]['value']:
+                    if self._helper_mixers[output_column]['accuracy'] > 1.00 * self.train_accuracy[output_column]['value']:
                         helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
                         main_mixer_predictions[output_column] = {'predictions': list(helper_mixer_predictions[output_column])}
 
