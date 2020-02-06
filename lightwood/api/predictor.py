@@ -258,7 +258,7 @@ class Predictor:
         else:
             best_parameters = {}
 
-        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer and (FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10,3)):
+        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer and (CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10,3)):
             try:
                 self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
             except Exception as e:
