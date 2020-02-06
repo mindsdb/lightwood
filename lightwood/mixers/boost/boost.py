@@ -44,7 +44,7 @@ class BoostMixer():
                 self.targets[target_col_name]['model'].fit(X,Y,sample_weight=sample_weight)
 
             elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.NUMERIC:
-                self.targets[target_col_name]['model'] = GradientBoostingRegressor()
+                self.targets[target_col_name]['model'] = GradientBoostingRegressor(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X,Y)
 
             else:
@@ -60,9 +60,18 @@ class BoostMixer():
         if targets is None:
             targets = self.targets
         for target_col_name in self.targets:
+
             if self.targets[target_col_name]['model'] is None:
                 predictions[target_col_name] = None
+            else:
+                predictions[target_col_name] = {'values':None, 'confidences':None}
 
-            predictions[target_col_name] = self.targets[target_col_name]['model'].predict(X)
+                predictions[target_col_name]['values'] = self.targets[target_col_name]['model'].predict(X)
+                try:
+                    predictions[target_col_name]['confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
+
+                except Exception as e:
+                    pass
+
 
         return predictions
