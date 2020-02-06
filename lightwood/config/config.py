@@ -14,6 +14,7 @@ class CONFIG:
     DETERMINISTIC = True
     SELFAWARE = True
     HELPER_MIXERS = True
+    FORCE_HELPER_MIXERS = False
     ENABLE_DROPOUT = True
 
     """Probabilistic FC layers"""
