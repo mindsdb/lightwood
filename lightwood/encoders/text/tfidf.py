@@ -21,7 +21,7 @@ class TfidfEncoder:
 
     def prepare_encoder(self, priming_data, training_data=None):
         self.tfidf_vectorizer = TfidfVectorizer(ngram_range=self.ngram_range, max_features=self.max_features)
-        self.tfidf_vectorizer.fit_transform(priming_data)
+        self.tfidf_vectorizer.fit_transform([str(x) for x in priming_data])
 
     def encode(self, column_data):
         transformed_data = self.tfidf_vectorizer.transform([str(x) for x in column_data])
