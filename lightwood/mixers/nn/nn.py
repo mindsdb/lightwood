@@ -273,7 +273,7 @@ class NnMixer:
                     self.last_unaware_net = copy.deepcopy(self.net.net)
 
                     # Lower the learning rate once we start training the selfaware network
-                    self.optimizer_args['lr'] = self.optimizer.lr/8
+                    self.optimizer_args['lr'] = self.optimizer.lr/4
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
