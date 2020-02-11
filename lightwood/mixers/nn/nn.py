@@ -16,7 +16,6 @@ from lightwood.api.data_source import SubSet
 
 
 class NnMixer:
-
     def __init__(self, dynamic_parameters, is_categorical_output=False):
         self.is_categorical_output = is_categorical_output
         self.net = None
