@@ -201,7 +201,7 @@ class DistilBertEncoder:
             real = [[]] * len(training_data['targets'][0]['encoded_output'])
             for i in range(len(real)):
                 for target in training_data['targets']:
-                    real[i] = real[i] + target['encoded_output'][i]
+                    real[i] = real[i] + list(target['encoded_output'][i])
             real = torch.tensor(real)
 
             merged_data = list(zip(input, real))
@@ -267,8 +267,7 @@ class DistilBertEncoder:
         return self._pytorch_wrapper(encoded_representation)
 
     def decode(self, encoded_values_tensor, max_length=100):
-        # When test is an output... a bit trickier to handle this case, thinking on it
-        pass
+        raise Exception('This encoder is not bi-directional')
 
 
 if __name__ == "__main__":
@@ -295,7 +294,7 @@ if __name__ == "__main__":
         # priming_data.append(str(i))
         primting_target.append(i)
 
-    output_1_encoder = NumericEncoder()
+    output_1_encoder = NumericEncoder(is_target=True)
     output_1_encoder.prepare_encoder(primting_target)
 
     encoded_data_1 = output_1_encoder.encode(primting_target)
@@ -311,8 +310,8 @@ if __name__ == "__main__":
 
     encoded_predicted_target = enc.encode(test_data).tolist()
 
-    predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:4] for x in encoded_predicted_target]))
-    predicted_targets_2 = output_1_encoder.decode(torch.tensor([x[4:] for x in encoded_predicted_target]))
+    predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:3] for x in encoded_predicted_target]))
+    predicted_targets_2 = output_1_encoder.decode(torch.tensor([x[3:] for x in encoded_predicted_target]))
 
     for predicted_targets in [predicted_targets_1, predicted_targets_2]:
         real = list(test_target)

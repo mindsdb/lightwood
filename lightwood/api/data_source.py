@@ -57,12 +57,13 @@ class DataSource(Dataset):
         self.training = False  # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
+        self.enable_dropout = False
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
         self.subsets = {}
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
-                dropout = 0.0
+                dropout = 0.1
             else:
                 dropout = 0.0
 
@@ -91,7 +92,6 @@ class DataSource(Dataset):
             self.subsets[subset_nr] = SubSet(self, subsets_indexes[subset_nr])
 
     def _clear_cache(self):
-        self.list_cache = {}
         self.encoded_cache = {}
         self.transformed_cache = None
 
@@ -125,9 +125,13 @@ class DataSource(Dataset):
 
         dropout_features = None
 
-        if self.training is True and random.randint(0, 2) == 1:
-            dropout_features = [feature['name'] for feature in self.configuration['input_features']
-                                if random.random() > (1 - self.dropout_dict[feature['name']])]
+        if self.training == True and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
+            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
+
+            # Make sure we never drop all the features, since this would make the row meaningless
+            if len(dropout_features) > len(self.configuration['input_features']):
+                dropout_features = dropout_features[:-1]
+            #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
         if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
@@ -208,15 +212,8 @@ class DataSource(Dataset):
             nr_rows = self.data_frame.shape[0]
             return [None] * nr_rows
 
-        if self.disable_cache:
-            return self.data_frame[column_name].tolist()
+        return self.data_frame[column_name].tolist()
 
-        elif column_name in self.list_cache:
-            return self.list_cache[column_name]
-
-        else:
-            self.list_cache[column_name] = self.data_frame[column_name].tolist()
-            return self.list_cache[column_name]
 
     def prepare_encoders(self):
         """

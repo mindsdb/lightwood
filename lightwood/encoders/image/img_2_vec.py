@@ -54,6 +54,8 @@ class Img2VecEncoder:
 
         return torch.FloatTensor(pics)
 
+    def decode(self, encoded_values_tensor):
+        raise Exception('This encoder is not bi-directional')
 
 if __name__ == "__main__":
     #TODO: add images
