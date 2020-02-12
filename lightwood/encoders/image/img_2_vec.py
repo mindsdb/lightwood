@@ -15,6 +15,7 @@ class Img2VecEncoder:
         self.aim = aim
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
+        self._encoded_length = None
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -43,13 +44,20 @@ class Img2VecEncoder:
 
         pics = []
         for image in images:
-            if image.startswith('http'):
-                response = requests.get(image)
-                img = Image.open(BytesIO(response.content))
-            else:
-                img = Image.open(image)
+            if image is not None:
+                if image.startswith('http'):
+                    response = requests.get(image)
+                    img = Image.open(BytesIO(response.content))
+                else:
+                    img = Image.open(image)
 
-            vec = self._model.get_vec(img)
+                vec = self._model.get_vec(img)
+            else:
+                vec = [0] * self._encoded_length
+
+            if self._encoded_length is None:
+                self._encoded_length = len(vec)
+
             pics.append(vec)
 
         return torch.FloatTensor(pics)
