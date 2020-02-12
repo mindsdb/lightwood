@@ -14,7 +14,6 @@ from lightwood.config.config import CONFIG
 
 
 class NnMixer:
-
     def __init__(self, dynamic_parameters, is_categorical_output=False):
         self.is_categorical_output = is_categorical_output
         self.net = None
@@ -283,7 +282,7 @@ class NnMixer:
                     self.last_unaware_net = copy.deepcopy(self.net.net)
 
                     # Lower the learning rate once we start training the selfaware network
-                    self.optimizer_args['lr'] = self.optimizer.lr/8
+                    self.optimizer_args['lr'] = self.optimizer.lr/4
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
@@ -337,10 +336,10 @@ class NnMixer:
                     awareness_loss = self.awareness_criterion(awareness, real_loss)
 
                     total_loss = self.loss_combination_operator(awareness_loss, loss)
-                    running_loss += total_loss.item()
-
                 else:
                     total_loss = loss
+
+                running_loss += total_loss.item()
 
                 total_loss.backward()
                 self.optimizer.step()

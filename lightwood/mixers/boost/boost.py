@@ -1,5 +1,5 @@
 import numpy as np
-import xgboost as xgb
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
@@ -17,8 +17,13 @@ class BoostMixer():
             self.targets[output_feature['name']] = {
                 'type': output_feature['type']
             }
+            if 'weights' in output_feature:
+                self.targets[output_feature['name']]['weights'] = output_feature['weights']
+            else:
+                self.targets[output_feature['name']]['weights'] = None
 
         X = []
+
         for row in data_source:
             X.append(np.array(row[0]))
 
@@ -27,11 +32,19 @@ class BoostMixer():
             Y = data_source.get_column_original_data(target_col_name)
 
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
-                self.targets[target_col_name]['model'] = xgb.XGBClassifier()
-                self.targets[target_col_name]['model'].fit(X,Y)
+                weight_map = self.targets[target_col_name]['weights']
+                if weight_map is None:
+                    sample_weight = [1 for x in real]
+                else:
+                    sample_weight = []
+                    for val in Y:
+                        sample_weight.append(weight_map[val])
+
+                self.targets[target_col_name]['model'] = GradientBoostingClassifier(n_estimators=600)
+                self.targets[target_col_name]['model'].fit(X,Y,sample_weight=sample_weight)
 
             elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.NUMERIC:
-                self.targets[target_col_name]['model'] = xgb.XGBRegressor()
+                self.targets[target_col_name]['model'] = GradientBoostingRegressor(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X,Y)
 
             else:
@@ -47,9 +60,18 @@ class BoostMixer():
         if targets is None:
             targets = self.targets
         for target_col_name in self.targets:
+
             if self.targets[target_col_name]['model'] is None:
                 predictions[target_col_name] = None
+            else:
+                predictions[target_col_name] = {'values':None, 'confidences':None}
 
-            predictions[target_col_name] = self.targets[target_col_name]['model'].predict(X)
+                predictions[target_col_name]['values'] = self.targets[target_col_name]['model'].predict(X)
+                try:
+                    predictions[target_col_name]['confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
+
+                except Exception as e:
+                    pass
+
 
         return predictions

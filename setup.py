@@ -30,14 +30,37 @@ if sys_platform in ['win32','cygwin','windows']:
     requirements = remove_requirements(requirements,'torch')
     requirements = remove_requirements(requirements,'torchvision')
     requirements = remove_requirements(requirements,'torchvision')
+
+    requirements = remove_requirements(requirements,'dask')
+    requirements = remove_requirements(requirements,'cesium')
+    requirements = remove_requirements(requirements,'pydub')
+
+    print('Trying to install pytorch and torchvision!')
+    code = 1
     try:
-        print('Installing pytorch and torchvision!')
         code = subprocess.call(['pip', 'install', 'torch===1.4.0', 'torchvision===0.5.0', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
         if code != 0:
             raise Exception('Torch and trochvsion instalation failed !')
-        print('Successfully installed pytorch and torchvision!')
     except:
-        print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
+        try:
+            code = subprocess.call(['pip3', 'install', 'torch===1.4.0', 'torchvision===0.5.0', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+            if code != 0:
+                raise Exception('Torch and trochvsion instalation failed !')
+        except:
+            try:
+                code = subprocess.call(['pip', 'install', 'torch===1.4.0+cpu', 'torchvision===0.5.0+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+                if code != 0:
+                    raise Exception('Torch and trochvsion instalation failed !')
+            except:
+                try:
+                    code = subprocess.call(['pip3', 'install', 'torch===1.4.0+cpu', 'torchvision===0.5.0+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+                    if code != 0:
+                        raise Exception('Torch and trochvsion instalation failed !')
+                except:
+                    print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
+    if code == 0:
+        print('Successfully installed pytorch and torchvision!')
+
 
 setuptools.setup(
     name=about['__title__'],
