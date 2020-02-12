@@ -5,6 +5,7 @@ import torch
 
 from lightwood.encoders.image.helpers.nn import NnEncoderHelper
 
+
 class NnAutoEncoder:
 
     def __init__(self, is_target=False):

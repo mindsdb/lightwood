@@ -3,7 +3,6 @@ import warnings
 import numpy as np
 import torch
 from cesium import featurize
-import math
 
 DEFAULT_FEATURES_TO_USE = [
     "all_times_nhist_numpeaks",
@@ -138,7 +137,7 @@ FEATURES_WITH_DEFAULT_NONE = [
 
 class CesiumTsEncoder:
 
-    def __init__(self, features=DEFAULT_FEATURES_TO_USE, is_target = False):
+    def __init__(self, features=DEFAULT_FEATURES_TO_USE, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor
         self._features = features
 
@@ -150,7 +149,8 @@ class CesiumTsEncoder:
         Encode a column data into time series
 
         :param values_data: a list of timeseries data eg: ['91.0 92.0 93.0 94.0', '92.0 93.0 94.0 95.0' ...]
-        :param times: (optional) a list of lists such that, len(times[i])=len(values_data[i]) for all i in range(len(times))
+        :param times: (optional) a list of lists such that, len(times[i])=len(values_data[i]) for
+                      all i in range(len(times))
         :return: a torch.floatTensor
         """
         features_to_use = self._features
@@ -163,7 +163,7 @@ class CesiumTsEncoder:
             if times is None:
                 times_row = np.array([float(i) for i in range(1, len(values) + 1)])
             else:
-                times_row = np.array(list(map(lambda x: float(x), times[i].split()))) # np.array(times[i])
+                times_row = np.array(list(map(lambda x: float(x), times[i].split())))  # np.array(times[i])
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 row = featurize.featurize_time_series(times=times_row,

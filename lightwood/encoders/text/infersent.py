@@ -27,7 +27,7 @@ W2V_PATH = "datasets/fastText/crawl-300d-2M-subword.vec"
 
 class InferSentEncoder:
 
-    def __init__(self, is_target = False):
+    def __init__(self, is_target=False):
         self._model = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False

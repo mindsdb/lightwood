@@ -1,5 +1,5 @@
 from schema import Schema, And, Use, Optional
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES, HISTOGRAM_TYPES
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 feature_schema = Schema({
     'name': str,
@@ -24,7 +24,6 @@ mixer_schema = Schema({
     Optional('attrs'): dict,
     Optional('mixer_graph'): [mixer_graph_schema]
 })
-
 
 
 predictor_config_schema = Schema({

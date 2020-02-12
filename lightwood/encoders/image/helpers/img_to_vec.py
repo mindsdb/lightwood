@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
 
@@ -9,11 +8,12 @@ from lightwood.config.config import CONFIG
 class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
     def forward(self, input):
         n, c = input.size()
-        input = input.view(n,c,1).permute(0,2,1)
-        pooled =  torch.nn.functional.adaptive_avg_pool1d(input, self.output_size)
+        input = input.view(n, c, 1).permute(0, 2, 1)
+        pooled = torch.nn.functional.adaptive_avg_pool1d(input, self.output_size)
         _, _, c = pooled.size()
-        pooled = pooled.permute(0,2,1)
-        return pooled.view(n,c)
+        pooled = pooled.permute(0, 2, 1)
+        return pooled.view(n, c)
+
 
 class Img2Vec():
 
@@ -49,7 +49,7 @@ class Img2Vec():
         :param tensor: If True, get_vec will return a FloatTensor instead of Numpy array
         :returns: Numpy ndarray
         """
-        image = self.normalize(self.to_tensor(self.scaler(img))).unsqueeze(0).to(self.device)
+        # image = self.normalize(self.to_tensor(self.scaler(img))).unsqueeze(0).to(self.device)
 
         if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
             my_embedding = torch.zeros(1, self.layer_output_size)
@@ -60,7 +60,6 @@ class Img2Vec():
             my_embedding.copy_(o.data)
 
         h = self.extraction_layer.register_forward_hook(copy_data)
-        h_x = self.model(image)
         h.remove()
 
         if tensor:
@@ -81,11 +80,11 @@ class Img2Vec():
         if model_name == 'resnext-50-small':
             model = models.resnext50_32x4d(pretrained=True)
             if layer == 'default':
-                #b = torch.nn.AvgPool2d(kernel_size=(8,8),stride=(4,4))
-                #a = torch.nn.AvgPool2d(kernel_size=(2,2),stride=2)
-                #model.avgpool = b
-                #model.fc = nn.Identity()
-                #layer = model.avgpool
+                # b = torch.nn.AvgPool2d(kernel_size=(8,8),stride=(4,4))
+                # a = torch.nn.AvgPool2d(kernel_size=(2,2),stride=2)
+                # model.avgpool = b
+                # model.fc = nn.Identity()
+                # layer = model.avgpool
                 model.fc = ChannelPoolAdaptiveAvg1d(output_size=512)
                 layer = model.fc
                 self.layer_output_size = 512
@@ -125,7 +124,10 @@ class Img2Vec():
 
             return model, layer
 
-        # @TODO: Fix or remove, this is slow and not quite as accurate as resnet18, it's a failed experiment trying to end the encoder with the output from an FC rather than output from the pooling layer, might work on it later, if 1 month from now it stays the same, just remove it
+        # @TODO: Fix or remove, this is slow and not quite as accurate as resnet18,
+        # it's a failed experiment trying to end the encoder with the output from an FC
+        # rather than output from the pooling layer, might work on it later,
+        # if 1 month from now it stays the same, just remove it
         if model_name == 'mobilenet':
             model = models.mobilenet_v2(pretrained=True)
             if layer == 'default':

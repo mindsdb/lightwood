@@ -1,10 +1,10 @@
 import torch
 from lightwood.encoders.text.helpers.rnn_helpers import Lang
 import numpy as np
-import logging
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
+
 
 class OneHotEncoder:
 
@@ -23,12 +23,12 @@ class OneHotEncoder:
         self._lang.word2count[UNCOMMON_WORD] = 0
         self._lang.n_words = 1
         for category in priming_data:
-            if category != None:
+            if category is not None:
                 self._lang.addWord(str(category))
 
         while self._lang.n_words > max_dimensions:
             necessary_words = UNCOMMON_WORD
-            least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words)+1)
+            least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words) + 1)
 
             word_to_remove = None
             for word in least_occuring_words:
@@ -47,8 +47,8 @@ class OneHotEncoder:
         v_len = self._lang.n_words
 
         for word in column_data:
-            encoded_word = [0]*v_len
-            if word != None:
+            encoded_word = [0] * v_len
+            if word is not None:
                 word = str(word)
                 index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
                 encoded_word[index] = 1
@@ -56,7 +56,6 @@ class OneHotEncoder:
             ret.append(encoded_word)
 
         return self._pytorch_wrapper(ret)
-
 
     def decode(self, encoded_data):
         encoded_data_list = encoded_data.tolist()
@@ -85,12 +84,12 @@ if __name__ == "__main__":
     assert(len(encoded_data) == 4)
     assert(decoded_data[1] == 'category 1')
     assert(decoded_data[2] == 'category 3')
-    for i in [0,3]:
+    for i in [0, 3]:
         assert(encoded_data[0][i] == UNCOMMON_TOKEN)
         assert(decoded_data[i] == UNCOMMON_WORD)
 
     # Test max_dimensions
-    for max_dimensions in [2,3]:
+    for max_dimensions in [2, 3]:
         data = ['category 1', 'category 1', 'category 3', 'category 4', 'category 4', 'category 4', None]
 
         enc = OneHotEncoder()

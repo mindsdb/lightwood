@@ -5,7 +5,7 @@
 class Const:
 
     def get_attributes(self):
-        a = {val:self.__getattribute__(val) for val in dir(self) if val[0]!='_' and val[0].isupper()}
+        a = {val: self.__getattribute__(val) for val in dir(self) if val[0] != '_' and val[0].isupper()}
         return a
 
 
@@ -19,6 +19,7 @@ class ColumnDataTypes(Const):
     TIME_SERIES = 'time_series'
     AUDIO = 'audio'
 
+
 COLUMN_DATA_TYPES = ColumnDataTypes()
 
 
@@ -26,6 +27,7 @@ class HistogramTypes(Const):
 
     NORMAL = 'normal'
     EXPONENTIAL = 'exponential'
+
 
 HISTOGRAM_TYPES = HistogramTypes()
 
@@ -35,5 +37,6 @@ class EncoderAim(Const):
     SPEED = 'speed'
     BALANCE = 'balance'
     ACCURACY = 'accuracy'
+
 
 ENCODER_AIM = EncoderAim()

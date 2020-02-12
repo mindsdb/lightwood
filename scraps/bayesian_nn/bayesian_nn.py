@@ -5,7 +5,6 @@ import logging
 from collections import Counter
 
 import torch
-import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
 import pyro
@@ -13,7 +12,6 @@ import pyro
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
-from lightwood.mixers.helpers.ranger import Ranger
 
 
 class BayesianNnMixer:
@@ -35,7 +33,7 @@ class BayesianNnMixer:
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
 
-        #Pyro stuff
+        # Pyro stuff
         self.softplus = torch.nn.Softplus()
 
     def fit(self, ds=None, callback=None):
@@ -48,13 +46,18 @@ class BayesianNnMixer:
 
     def pyro_model(self, input_data, output_data):
 
-        inw_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[0].weight, device=self.net.device), scale=torch.ones_like(self.net.net[0].weight))
-        inb_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[0].bias, device=self.net.device), scale=torch.ones_like(self.net.net[0].bias))
+        inw_prior = pyro.distributions.Normal(loc=torch.zeros_like(
+            self.net.net[0].weight, device=self.net.device), scale=torch.ones_like(self.net.net[0].weight))
+        inb_prior = pyro.distributions.Normal(loc=torch.zeros_like(
+            self.net.net[0].bias, device=self.net.device), scale=torch.ones_like(self.net.net[0].bias))
 
-        outw_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[-1].weight, device=self.net.device), scale=torch.ones_like(self.net.net[-1].weight))
-        outb_prior = pyro.distributions.Normal(loc=torch.zeros_like(self.net.net[-1].bias, device=self.net.device), scale=torch.ones_like(self.net.net[-1].bias))
+        outw_prior = pyro.distributions.Normal(loc=torch.zeros_like(
+            self.net.net[-1].weight, device=self.net.device), scale=torch.ones_like(self.net.net[-1].weight))
+        outb_prior = pyro.distributions.Normal(loc=torch.zeros_like(
+            self.net.net[-1].bias, device=self.net.device), scale=torch.ones_like(self.net.net[-1].bias))
 
-        priors = {'net[0].weight': inw_prior, 'net[0].bias': inb_prior,  'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
+        priors = {'net[0].weight': inw_prior, 'net[0].bias': inb_prior,
+                  'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
         # lift module parameters to random variables sampled from the priors
         lifted_module = pyro.random_module("module", self.net, priors)
         # sample a regressor (which also samples w and b)
@@ -93,13 +96,14 @@ class BayesianNnMixer:
         outb_sigma_param = self.softplus(pyro.param("outb_sigma", outb_sigma))
 
         outb_prior = pyro.distributions.Normal(loc=outb_mu_param, scale=outb_sigma_param)
-        priors = {'net[0].weight': inw_prior, 'net[0].bias': inb_prior, 'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
+        priors = {'net[0].weight': inw_prior, 'net[0].bias': inb_prior,
+                  'net[-1].weight': outw_prior, 'net[-1].bias': outb_prior}
 
         lifted_module = pyro.random_module("module", self.net, priors)
 
         return lifted_module()
 
-    def predict(self, when_data_source, include_encoded_predictions = False):
+    def predict(self, when_data_source, include_encoded_predictions=False):
         """
         :param when_data_source:
         :return:
@@ -117,11 +121,9 @@ class BayesianNnMixer:
         sampled_models = [self.pyro_guide(None, None) for _ in range(CONFIG.NUMBER_OF_PROBABILISTIC_MODELS)]
         # A tensor of tensors representing the whole batch of predictions for each "model" pyro built
         out_hats = [model(inputs).data for model in sampled_models]
-        outputs_mean = torch.mean(torch.stack(out_hats), 0)
-
 
         '''
-                histo_exp = []
+            histo_exp = []
 
             print(output_vectors)
             for i in range(len(outputs_mean[0])):
@@ -137,7 +139,8 @@ class BayesianNnMixer:
             output_trasnformed_vectors = {}
 
             for output_vector in outputs:
-                transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
+                transformed_output_vectors = when_data_source.transformer.revert(
+                    output_vector, feature_set='output_features')
                 for feature in transformed_output_vectors:
                     if feature not in output_trasnformed_vectors:
                         output_trasnformed_vectors[feature] = []
@@ -145,7 +148,11 @@ class BayesianNnMixer:
 
             for output_column in output_trasnformed_vectors:
 
-                decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
+                decoded_predictions = when_data_source.get_decoded_column_data(
+                    output_column,
+                    when_data_source.encoders[output_column]._pytorch_wrapper(
+                        output_trasnformed_vectors[output_column]
+                    ))
 
                 if output_column not in predictions_arr_dict:
                     predictions_arr_dict[output_column] = []
@@ -159,7 +166,6 @@ class BayesianNnMixer:
             possible_predictions = []
             possible_predictions_confidence = []
 
-
             predictions_arr = predictions_arr_dict[output_column]
 
             predictions_arr_r = [[]] * len(predictions_arr[0])
@@ -172,18 +178,19 @@ class BayesianNnMixer:
                     occurance_dict = dict(Counter(predictions))
                     final_prediction = max(occurance_dict, key=occurance_dict.get)
                     final_predictions.append(final_prediction)
-                    final_predictions_confidence.append(occurance_dict[final_prediction]/len(predictions))
+                    final_predictions_confidence.append(occurance_dict[final_prediction] / len(predictions))
 
                     possible_predictions.append(list(occurance_dict.keys()))
-                    possible_predictions_confidence.append([x/len(predictions) for x in list(occurance_dict.values())])
+                    possible_predictions_confidence.append([
+                        x / len(predictions) for x in list(occurance_dict.values())
+                    ])
                 else:
                     predictions = [x if x is not None else 0 for x in predictions]
-                    p_hist = np.histogram(np.array(predictions),10)
-                    final_predictions_confidence.append(max(p_hist[0])/sum(p_hist[0]))
+                    p_hist = np.histogram(np.array(predictions), 10)
+                    final_predictions_confidence.append(max(p_hist[0]) / sum(p_hist[0]))
                     final_predictions.append(p_hist[1][np.where(p_hist[0] == max(p_hist[0]))][0])
-                    possible_predictions_confidence.append([x/sum(p_hist[0]) for x in p_hist[0]])
+                    possible_predictions_confidence.append([x / sum(p_hist[0]) for x in p_hist[0]])
                     possible_predictions.append(list(p_hist[1]))
-
 
             predictions_dict[output_column] = {}
             predictions_dict[output_column]['predictions'] = final_predictions
@@ -215,7 +222,7 @@ class BayesianNnMixer:
 
             if self.is_categorical_output:
                 target = labels.cpu().numpy()
-                target_indexes = np.where(target>0)[1]
+                target_indexes = np.where(target > 0)[1]
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
 
@@ -246,8 +253,10 @@ class BayesianNnMixer:
         self.net = model
 
     def fit_data_source(self, ds):
-        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names('input_features')
-        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names('output_features')
+        self.input_column_names = self.input_column_names \
+            if self.input_column_names is not None else ds.get_feature_names('input_features')
+        self.output_column_names = self.output_column_names \
+            if self.output_column_names is not None else ds.get_feature_names('output_features')
 
         transformer_already_initialized = False
         try:
@@ -272,8 +281,7 @@ class BayesianNnMixer:
 
         self.net = self.nn_class(ds, self.dynamic_parameters)
 
-        #self.net.train()
-
+        # self.net.train()
 
         if self.criterion is None:
             if self.is_categorical_output:
@@ -285,7 +293,7 @@ class BayesianNnMixer:
             else:
                 self.criterion = torch.nn.MSELoss()
 
-        #self.optimizer = pyro.optim.Adadelta({"lr": 0.1})
+        # self.optimizer = pyro.optim.Adadelta({"lr": 0.1})
         self.optimizer = pyro.optim.Adam({"lr": 0.005, "betas": (0.95, 0.999)})
         svi = pyro.infer.SVI(self.pyro_model, self.pyro_guide, self.optimizer, loss=pyro.infer.Trace_ELBO())
 
@@ -303,7 +311,7 @@ class BayesianNnMixer:
                 labels = labels.to(self.net.device)
                 inputs = inputs.to(self.net.device)
 
-                #mi = inputs.view(8,len(self.net.net[0].bias))
+                # mi = inputs.view(8,len(self.net.net[0].bias))
                 mi = inputs
                 running_loss += svi.step(mi[0], labels)
                 error = running_loss / (i + 1)
