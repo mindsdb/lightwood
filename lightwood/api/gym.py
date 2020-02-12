@@ -2,12 +2,12 @@ import copy
 import time
 
 import numpy as np
-import torch
 
 
-class Gym():
+class Gym:
 
-    def __init__(self, model, optimizer, scheduler, loss_criterion, device, name=None, input_encoder=None, output_encoder=None):
+    def __init__(self, model, optimizer, scheduler, loss_criterion, device,
+                 name=None, input_encoder=None, output_encoder=None):
         """
         Create an environment for training a pytorch machine learning model
         """
@@ -22,8 +22,8 @@ class Gym():
 
         self.best_model = None
 
-
-    def fit(self, train_data_loader, test_data_loader, desired_error, max_time, callback, eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=None, custom_test_func=None):
+    def fit(self, train_data_loader, test_data_loader, desired_error, max_time, callback,
+            eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=None, custom_test_func=None):
         started = time.time()
         epoch = 0
         lowest_test_error = None
@@ -62,7 +62,7 @@ class Gym():
                     loss = custom_train_func(self.model, data, self)
 
                 running_loss += loss.item()
-                error = running_loss/(i + 1)
+                error = running_loss / (i + 1)
 
             if epoch % eval_every_x_epochs == 0:
                 if test_data_loader is not None:
@@ -94,7 +94,7 @@ class Gym():
                             loss = custom_test_func(self.model, data, self)
 
                         test_running_loss += loss.item()
-                        test_error = test_running_loss/(i + 1)
+                        test_error = test_running_loss / (i + 1)
                 else:
                     test_error = error
                     real_buff = None

@@ -18,21 +18,23 @@ except:
 class DateTime:
     DatetimeEncoder = DatetimeEncoder
 
+
 class Image:
     Img2VecEncoder = Img2VecEncoder
     NnAutoEncoder = NnAutoEncoder
 
+
 class Numeric:
     NumericEncoder = NumericEncoder
+
 
 class Text:
     InferSentEncoder = InferSentEncoder
     RnnEncoder = RnnEncoder
-
 class Categorical:
     OneHotEncoder = OneHotEncoder
     CategoricalAutoEncoder = CategoricalAutoEncoder
-
+    
 class TimeSeries:
     if export_ts_encoder:
         CesiumTsEncoder = CesiumTsEncoder
@@ -40,7 +42,6 @@ class TimeSeries:
 class Audio:
     if export_ts_encoder:
         AmplitudeTsEncoder = AmplitudeTsEncoder
-
 
 class BuiltinEncoders:
     DateTime = DateTime
@@ -51,5 +52,6 @@ class BuiltinEncoders:
     if export_ts_encoder:
         TimeSeries = TimeSeries
         Audio = Audio
+
 
 BUILTIN_ENCODERS = BuiltinEncoders

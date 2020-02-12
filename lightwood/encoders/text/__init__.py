@@ -5,4 +5,4 @@ from lightwood.encoders.text.tfidf import TfidfEncoder
 
 #default = TfidfEncoder
 default = DistilBertEncoder
-#default = InferSentEncoder
+# default = InferSentEncoder

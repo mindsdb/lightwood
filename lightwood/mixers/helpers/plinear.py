@@ -1,10 +1,10 @@
 
 # Import PyTorch
-import torch #
-import torch.nn as nn # import modules
+import torch
+import torch.nn as nn  # import modules
 
-from torch.nn.parameter import Parameter # import Parameter to create custom activations with learnable parameters
-import torch.nn.functional as F # import torch functions
+from torch.nn.parameter import Parameter  # import Parameter to create custom activations with learnable parameters
+import torch.nn.functional as F  # import torch functions
 from torch.nn import init
 import math
 import numpy as np
@@ -16,6 +16,7 @@ class PLinear(nn.Module):
     '''
     Implementation of probabilistic weights via Linear function
     '''
+
     def __init__(self, in_features, out_features, bias=True):
         """
 
@@ -24,7 +25,7 @@ class PLinear(nn.Module):
         :param bias: if you want a specific bias
         """
 
-        super(PLinear ,self).__init__()
+        super(PLinear, self).__init__()
 
         self.in_features = in_features
         self.out_features = out_features
@@ -33,7 +34,8 @@ class PLinear(nn.Module):
         self.sigma = Parameter(torch.Tensor(out_features, in_features))
         self.mean = Parameter(torch.Tensor(out_features, in_features))
 
-        # there can be various ways to sample, given various distributions, we will stick with discrete normal as it is way faster
+        # there can be various ways to sample, given various distributions,
+        # we will stick with discrete normal as it is way faster
         self.w_sampler = self.w_discrete_normal
 
         if bias:
@@ -43,8 +45,8 @@ class PLinear(nn.Module):
 
         self.reset_parameters()
 
-        #make sure that we tell the graph that these two need to be optimized
-        self.sigma.requiresGrad = True # set requiresGrad to true!
+        # make sure that we tell the graph that these two need to be optimized
+        self.sigma.requiresGrad = True  # set requiresGrad to true!
         self.mean.requiresGrad = True  # set requiresGrad to true!
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
@@ -100,18 +102,16 @@ class PLinear(nn.Module):
             )
         )
 
-
         # you can see how the average sigma changes over trainings
-        #print(torch.mean(self.sigm.to(self.device)a))
+        # print(torch.mean(self.sigm.to(self.device)a))
         return w
 
-
-
     def forward(self, input):
-        '''
+        """
         Forward pass of the function.
-        The goal is to generate values such as if they weights of the linear operation are sampled from a normal distribution
-        '''
+        The goal is to generate values such as if they weights of the linear operation are sampled
+        from a normal distribution
+        """
 
         return F.linear(input, self.w_sampler(), self.bias)
 

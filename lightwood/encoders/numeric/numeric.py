@@ -1,7 +1,6 @@
 import torch
 import math
 import logging
-import sys
 
 
 class NumericEncoder:
@@ -25,7 +24,7 @@ class NumericEncoder:
         for number in priming_data:
             try:
                 number = float(number)
-            except:
+            except Exception:
                 continue
 
             if math.isnan(number):
@@ -58,13 +57,14 @@ class NumericEncoder:
                     number = float(number)
                 except:
                     # Some data cleanup for an edge case that shows up a lot when lightwood isn't used with mindsdb
-                    number = float(number.replace(',','.'))
+                    number = float(number.replace(',', '.'))
             except:
                 #logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
+
                 number = None
 
             if self._is_target:
-                vector = [0]*3
+                vector = [0] * 3
                 try:
                     if number < 0:
                         vector[0] = 1
@@ -74,21 +74,21 @@ class NumericEncoder:
                         vector[1] = math.log(abs(number))
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
-                    # @TODO For now handle this by setting to zero as a hotifx, but we need to figure out why it's happening and fix it properly later
-                    vector = [0]*3
+                    # @TODO For now handle this by setting to zero as a hotfix,
+                    # but we need to figure out why it's happening and fix it properly later
+                    vector = [0] * 3
 
             else:
-                vector = [0]*2
+                vector = [0] * 2
                 if number is None:
                     vector[1] = 0
                 else:
                     vector[1] = 1
-                    vector[0] = number/self._abs_mean
+                    vector[0] = number / self._abs_mean
 
             ret.append(vector)
 
         return self._pytorch_wrapper(ret)
-
 
     def decode(self, encoded_values):
         ret = []
@@ -119,7 +119,7 @@ class NumericEncoder:
                         real_value = -real_value
                 except:
                     if self._type == 'int':
-                        real_value = pow(2,63)
+                        real_value = pow(2, 63)
                     else:
                         real_value = float('inf')
 
@@ -148,9 +148,8 @@ class NumericEncoder:
         return ret
 
 
-
 if __name__ == "__main__":
-    data = [1,1.1,2,-8.6,None,0]
+    data = [1, 1.1, 2, -8.6, None, 0]
 
     encoder = NumericEncoder()
 
@@ -162,7 +161,7 @@ if __name__ == "__main__":
     assert(encoded_vals[1][1] > 0)
     assert(encoded_vals[2][1] > 0)
     assert(encoded_vals[3][1] > 0)
-    for i in range(0,4):
+    for i in range(0, 4):
         assert(encoded_vals[i][3] == 1)
     assert(encoded_vals[4][3] == 0)
 
@@ -172,4 +171,4 @@ if __name__ == "__main__":
         if decoded_vals[i] is None:
             assert(decoded_vals[i] == data[i])
         else:
-            assert(round(decoded_vals[i],5) == round(data[i],5))
+            assert(round(decoded_vals[i], 5) == round(data[i], 5))

@@ -2,7 +2,6 @@ import copy
 import logging
 
 import torch
-import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
 import gc
@@ -12,7 +11,6 @@ from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.config.config import CONFIG
-from lightwood.api.data_source import SubSet
 
 
 class NnMixer:
@@ -52,7 +50,7 @@ class NnMixer:
         self.encoders = ds.encoders
         return ret
 
-    def predict(self, when_data_source, include_encoded_predictions = False):
+    def predict(self, when_data_source, include_encoded_predictions=False):
         """
         :param when_data_source:
         :return:
@@ -89,15 +87,21 @@ class NnMixer:
         for i in range(len(outputs)):
             if awareness_arr is not None:
                 confidence_vector = awareness_arr[i]
-                transformed_confidence_vectors = when_data_source.transformer.revert(confidence_vector,feature_set = 'output_features')
+                transformed_confidence_vectors = when_data_source.transformer.revert(
+                    confidence_vector, feature_set='output_features')
                 for feature in transformed_confidence_vectors:
                     if feature not in confidence_trasnformed_vectors:
                         confidence_trasnformed_vectors[feature] = []
-                    # @TODO: Very simple algorithm to get a confidence from the awareness, not necessarily what we want for the final version
-                    confidence_trasnformed_vectors[feature] += [1 - sum(np.abs(transformed_confidence_vectors[feature]))/len(transformed_confidence_vectors[feature])]
+                    # @TODO: Very simple algorithm to get a confidence from the awareness,
+                    # not necessarily what we want for the final version
+                    confidence_trasnformed_vectors[feature] += [
+                        1 - sum(np.abs(
+                            transformed_confidence_vectors[feature])) / len(transformed_confidence_vectors[feature])
+                    ]
 
             output_vector = outputs[i]
-            transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
+            transformed_output_vectors = when_data_source.transformer.revert(
+                output_vector, feature_set='output_features')
             for feature in transformed_output_vectors:
                 if feature not in output_trasnformed_vectors:
                     output_trasnformed_vectors[feature] = []
@@ -105,7 +109,10 @@ class NnMixer:
 
         predictions = {}
         for output_column in output_trasnformed_vectors:
-            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
+            decoded_predictions = when_data_source.get_decoded_column_data(
+                output_column,
+                when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
+            )
             predictions[output_column] = {'predictions': decoded_predictions}
             if awareness_arr is not None:
                 predictions[output_column]['confidences'] = confidence_trasnformed_vectors[output_column]
@@ -120,7 +127,8 @@ class NnMixer:
     def overall_certainty(self):
         """
         return an estimate of how certain is the model about the overall predictions,
-        in this case its a measurement of how much did the variance of all the weights distributions reduced from its initial distribution
+        in this case its a measurement of how much did the variance of all the weights distributions
+        reduced from its initial distribution
         :return:
         """
         if hasattr(self.net, 'calculate_overall_certainty'):
@@ -138,9 +146,9 @@ class NnMixer:
         ds.encoders = self.encoders
         ds.transformer = self.transformer
 
-
         if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
+            data_loader = DataLoader(ds, batch_size=self.batch_size,
+                                     sampler=self._nonpersistent['sampler'], num_workers=0)
         else:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
@@ -154,7 +162,7 @@ class NnMixer:
 
             if self.is_categorical_output:
                 target = labels.cpu().numpy()
-                target_indexes = np.where(target>0)[1]
+                target_indexes = np.where(target > 0)[1]
                 targets_c = torch.LongTensor(target_indexes)
                 labels = targets_c.to(self.net.device)
 
@@ -188,8 +196,10 @@ class NnMixer:
         self.net = model
 
     def fit_data_source(self, ds):
-        self.input_column_names = self.input_column_names if self.input_column_names is not None else ds.get_feature_names('input_features')
-        self.output_column_names = self.output_column_names if self.output_column_names is not None else ds.get_feature_names('output_features')
+        self.input_column_names = self.input_column_names \
+            if self.input_column_names is not None else ds.get_feature_names('input_features')
+        self.output_column_names = self.output_column_names \
+            if self.output_column_names is not None else ds.get_feature_names('output_features')
 
         transformer_already_initialized = False
         try:
@@ -209,7 +219,6 @@ class NnMixer:
         :param ds:
         :return:
         """
-
         if initialize:
             self.fit_data_source(ds)
             if self.is_categorical_output:
@@ -258,7 +267,8 @@ class NnMixer:
         if self._nonpersistent['sampler'] is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0, sampler=self._nonpersistent['sampler'])
+            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
+                                     sampler=self._nonpersistent['sampler'])
 
         total_iterations = 0
         for epoch in range(total_epochs):  # loop over the dataset multiple times
@@ -311,7 +321,7 @@ class NnMixer:
 
                 if self.is_categorical_output:
                     target = labels.cpu().numpy()
-                    target_indexes = np.where(target>0)[1]
+                    target_indexes = np.where(target > 0)[1]
                     targets_c = torch.LongTensor(target_indexes)
                     cat_labels = targets_c.to(self.net.device)
                     loss = self.criterion(outputs, cat_labels)
@@ -333,7 +343,8 @@ class NnMixer:
 
                 total_loss.backward()
                 self.optimizer.step()
-                # now that we have run backward in both losses, optimize() (review: we may need to optimize for each step)
+                # now that we have run backward in both losses, optimize()
+                # (review: we may need to optimize for each step)
 
                 error = running_loss / (i + 1)
 
@@ -342,7 +353,6 @@ class NnMixer:
                         self.loss_combination_operator = operator.mul
 
             yield error
-
 
 
 if __name__ == "__main__":
@@ -378,7 +388,7 @@ if __name__ == "__main__":
         ]
     }
 
-    ##For Classification
+    # For Classification
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
 
@@ -396,14 +406,14 @@ if __name__ == "__main__":
 
     mixer = NnMixer({})
 
-    for i in  mixer.iter_fit(ds):
+    for i in mixer.iter_fit(ds):
         if i < 0.01:
             break
 
     predictions = mixer.predict(predict_input_ds)
     print(predictions)
 
-    ##For Regression
+    # For Regression
 
     # GENERATE DATA
     ###############
@@ -413,7 +423,7 @@ if __name__ == "__main__":
             {
                 'name': 'x',
                 'type': 'numeric',
-                #'encoder_path': 'lightwood.encoders.numeric.numeric'
+                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
             },
             {
                 'name': 'y',
@@ -445,7 +455,7 @@ if __name__ == "__main__":
 
     mixer = NnMixer({})
 
-    for i in  mixer.iter_fit(ds):
+    for i in mixer.iter_fit(ds):
         if i < 0.01:
             break
 
