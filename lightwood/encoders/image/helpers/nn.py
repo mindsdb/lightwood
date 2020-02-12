@@ -130,11 +130,19 @@ class NnEncoderHelper:
         """
         data_source = []
         for image in images:
-            if image.startswith('http'):
-                response = requests.get(image)
-                img = Image.open(BytesIO(response.content))
+            if image is not None:
+                if image.startswith('http'):
+                    response = requests.get(image)
+                    img = Image.open(BytesIO(response.content))
+                else:
+                    img = Image.open(image)
+                resized_image = img.resize((128, 128), PIL.Image.ANTIALIAS)
+                transformed_img = transforms.ToTensor()(resized_image)
             else:
-                img = Image.open(image)
-            resized_image = img.resize((128, 128), PIL.Image.ANTIALIAS)
-            data_source.append(transforms.ToTensor()(resized_image))
+                transformed_img = [0] * self._encoded_length
+
+            if self._encoded_length is None:
+                self._encoded_length = len(transformed_img)
+
+            data_source.append(transformed_img)
         return data_source
