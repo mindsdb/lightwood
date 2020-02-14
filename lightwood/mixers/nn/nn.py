@@ -10,6 +10,7 @@ import operator
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.mixers.helpers.debugging import TrainingMonitor
 from lightwood.config.config import CONFIG
 
 
@@ -37,6 +38,8 @@ class NnMixer:
         self.stop_selfaware_training = False
         self.is_selfaware = False
         self.last_unaware_net = False
+
+        self.monitor = TrainingMonitor()
 
         self._nonpersistent = {
             'sampler': None
@@ -340,6 +343,9 @@ class NnMixer:
                     total_loss = loss
 
                 running_loss += total_loss.item()
+
+                self.monitor.send_training_loss(send_training_loss, 1)
+                exit()
 
                 total_loss.backward()
                 self.optimizer.step()
