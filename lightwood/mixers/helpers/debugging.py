@@ -1,5 +1,17 @@
+import visdom
 import subprocess
 
+
+class TrainingMonitor():
+    def __init__(sefl):
+        self.vis = visdom.Visdom()
+
+        self.train_loss_step = 0
+        self.train_loss_layout = dict(title="Training Loss", xaxis={'title': 'loss'}, yaxis={'title': 'step'})
+
+    def send_training_loss(loss, step):
+        trace = dict(x=[loss], y=[step], mode="markers+lines", type='custom', marker={'color': 'red', 'symbol': 104, 'size': "10"})
+        self.vis._send({'data': [trace], 'layout': self.train_loss_layout, 'win': 'mywin'})
 
 def get_gpu_memory_map():
     '''

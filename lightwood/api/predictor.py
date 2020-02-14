@@ -225,7 +225,7 @@ class Predictor:
         except:
             # Not all mixers might require this
             pass
-
+        
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
 
