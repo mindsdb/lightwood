@@ -222,9 +222,9 @@ class Predictor:
 
         try:
             mixer_class({}).fit_data_source(from_data_ds)
-        except:
+        except Exception as e:
             # Not all mixers might require this
-            pass
+            print(e)
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
@@ -309,7 +309,7 @@ class Predictor:
                 best_selfaware_model = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
-                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run)):
+                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
                     first_run = False
 
                     # Log this every now and then so that the user knows it's running
@@ -360,7 +360,7 @@ class Predictor:
                         eval_next_on_epoch += eval_every_x_epochs
 
                         test_error = mixer.error(test_data_ds)
-                        subset_test_error = mixer.error(subset_test_ds)
+                        subset_test_error = mixer.error(subset_test_ds, subset_id=subset_id)
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
