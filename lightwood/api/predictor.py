@@ -223,9 +223,8 @@ class Predictor:
         try:
             mixer_class({}).fit_data_source(from_data_ds)
         except Exception as e:
-            print(e)
             # Not all mixers might require this
-            pass
+            print(e)
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
