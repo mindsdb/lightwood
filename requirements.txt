@@ -13,5 +13,5 @@ xlrd >= 1.0.0
 requests >= 2.0.0
 ax-platform >= 0.1.9
 transformers >= 2.2.1
-tsfresh == 0.14.1
+tsfresh >= 0.14.1
 pydub >= 0.20.0
