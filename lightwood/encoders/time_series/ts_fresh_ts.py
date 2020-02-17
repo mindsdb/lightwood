@@ -1,4 +1,6 @@
-from tsfresh import extract_relevant_features
+import pandas as pd
+from tsfresh import extract_relevant_features, extract_features
+from tsfresh.examples import load_robot_execution_failures
 import torch
 
 
@@ -28,20 +30,14 @@ class TsFreshTsEncoder:
             else:
                 values = list(map(lambda x: float(x), values.split()))
 
-            features = extract_relevant_features(values)
+            df = pd.DataFrame({'main_feature': values, 'id': [1] * len(values)})
+
+            features = extract_features(df, column_id='id',disable_progressbar=True)
             features.fillna(value=0, inplace=True)
-            print(features)
+
+            features = list(features.iloc[0])
+
             ret.append(features)
-
-        #y = values_data.groupby(group_by).first()[target_name]
-        #values_data.drop(columns=[target_name], inplace=True)
-
-        #features = extract_relevant_features(values_data, y=y,  column_id=group_by, column_sort=order_by)
-
-
-
-        for row in features.iterrows():
-            ret.append(list(row[1]))
 
         return self._pytorch_wrapper(ret)
 
