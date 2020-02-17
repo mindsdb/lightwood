@@ -1,5 +1,6 @@
 import copy
 import logging
+import random
 
 import torch
 from torch.utils.data import DataLoader
@@ -37,6 +38,15 @@ class NnMixer:
         self.stop_selfaware_training = False
         self.is_selfaware = False
         self.last_unaware_net = False
+
+        self.monitor = None
+        for k in CONFIG.MONITORING:
+            if CONFIG.MONITORING[k]:
+                from lightwood.mixers.helpers.debugging import TrainingMonitor
+                self.monitor = TrainingMonitor()
+                break
+
+        self.total_iterations = 0
 
         self._nonpersistent = {
             'sampler': None
@@ -136,7 +146,7 @@ class NnMixer:
         else:
             return -1
 
-    def error(self, ds):
+    def error(self, ds, subset_id=None):
         """
         :param ds:
         :return:
@@ -175,6 +185,11 @@ class NnMixer:
             loss = self.criterion(outputs, labels)
             running_loss += loss.item()
             error = running_loss / (i + 1)
+
+        if CONFIG.MONITORING['epoch_loss']:
+            self.monitor.plot_loss(error, self.total_iterations, 'Test Epoch Error')
+            self.monitor.plot_loss(error, self.total_iterations, f'Test Epoch Error - Subset {subset_id}')
+
         self.net = self.net.train()
 
         return error
@@ -214,7 +229,7 @@ class NnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-    def iter_fit(self, ds, initialize=True):
+    def iter_fit(self, ds, initialize=True, subset_id=None):
         """
         :param ds:
         :return:
@@ -270,7 +285,6 @@ class NnMixer:
             data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
                                      sampler=self._nonpersistent['sampler'])
 
-        total_iterations = 0
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
@@ -302,7 +316,7 @@ class NnMixer:
                     self.optimizer.zero_grad()
                     self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-                total_iterations += 1
+                self.total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
 
@@ -334,24 +348,62 @@ class NnMixer:
                     real_loss = real_loss.to(self.net.device)
 
                     awareness_loss = self.awareness_criterion(awareness, real_loss)
-
                     total_loss = self.loss_combination_operator(awareness_loss, loss)
+
+                    if CONFIG.MONITORING['batch_loss']:
+                        self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
                 else:
                     total_loss = loss
+
+                if CONFIG.MONITORING['batch_loss']:
+                    self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
                 running_loss += total_loss.item()
 
                 total_loss.backward()
+
+                # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
+                if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 900:
+                    weights = []
+                    gradients = []
+                    layer_name = []
+                    for index, layer in enumerate(self.net.net):
+                        if 'Linear' in str(type(layer)):
+                            weights.append( list(layer.weight.cpu().detach().numpy().ravel()) )
+                            gradients.append( list(layer.weight.grad.cpu().detach().numpy().ravel()) )
+                            layer_name.append(f'Layer {index}-{index+1}')
+                    self.monitor.weight_map(layer_name, weights, 'Predcitive network weights')
+                    self.monitor.weight_map(layer_name, weights, 'Predictive network gradients')
+
+                    if self.is_selfaware:
+                        weights = []
+                        gradients = []
+                        layer_name = []
+                        for index, layer in enumerate(self.net.awareness_net):
+                            if 'Linear' in str(type(layer)):
+                                weights.append( list(layer.weight.cpu().detach().numpy().ravel()) )
+                                gradients.append( list(layer.weight.grad.cpu().detach().numpy().ravel()) )
+                                layer_name.append(f'Layer {index}-{index+1}')
+                        self.monitor.weight_map(layer_name, weights, 'Awareness network weights')
+                        self.monitor.weight_map(layer_name, weights, 'Awareness network gradients')
+
                 self.optimizer.step()
                 # now that we have run backward in both losses, optimize()
                 # (review: we may need to optimize for each step)
 
                 error = running_loss / (i + 1)
 
+                if CONFIG.MONITORING['batch_loss']:
+                    self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
+                    self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
+
                 if error < 1:
                     if self.loss_combination_operator == operator.add:
                         self.loss_combination_operator = operator.mul
 
+            if CONFIG.MONITORING['epoch_loss']:
+                self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')
+                self.monitor.plot_loss(error, self.total_iterations, f'Train Epoch Error - Subset {subset_id}')
             yield error
 
 

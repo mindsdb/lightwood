@@ -26,3 +26,9 @@ class CONFIG:
 
     # Flags bellow are deprecated but still here in case we want to use the feature again
     OVERSAMPLE = False
+
+    MONITORING = {
+        'epoch_loss': False
+        ,'batch_loss': False
+        ,'network_heatmap': False
+    }
