@@ -364,7 +364,7 @@ class NnMixer:
 
                 total_loss.backward()
 
-                # @NOTE: Decrease 980 if you want to print gradients more often, I find it's too expensive to do so
+                # @NOTE: Decrease 900 if you want to print gradients more often, I find it's too expensive to do so
                 if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 900:
                     weights = []
                     gradients = []
