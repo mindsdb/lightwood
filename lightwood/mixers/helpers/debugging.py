@@ -13,18 +13,28 @@ class TrainingMonitor():
         self.loss_colors = [[211,47,47],[81,45,168],[2,136,209],[56,142,60],[251,192,45],[230,74,25],[69,90,100]]
         self.loss_colors_index = 0
 
-        print(np.arange(1, 6), np.arange(1, 11))
+
+    def weight_map(self, layer_names, values, name):
+        max_len = 0
+        min_val = 0
+
+        for array in values:
+            max_len = max(len(array), max_len)
+            min_val = min(min(array), min_val)
+
+        for array in values:
+            nr_to_append = max_len - len(array)
+            array.extend([min_val] * nr_to_append)
+
         self.vis.heatmap(
-            X=np.outer(np.arange(1, 6), np.arange(1, 11)),
+            X=values,
             opts=dict(
-                columnnames=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
-                rownames=['y1', 'y2', 'y3', 'y4', 'y5'],
+                rownames=layer_names,
                 colormap='Electric',
+                title=name,
             )
-            ,win='mywin'
+            ,win=name
         )
-
-
 
     def plot_loss(self, loss, step, name):
         if name not in self.loss_wds:

@@ -30,5 +30,5 @@ class CONFIG:
     MONITORING = {
         'epoch_loss': True
         ,'batch_loss': False
-        ,'network_heatmap': False
+        ,'network_heatmap': True
     }
