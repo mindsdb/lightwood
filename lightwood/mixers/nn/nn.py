@@ -11,7 +11,6 @@ import operator
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
-from lightwood.mixers.helpers.debugging import TrainingMonitor
 from lightwood.config.config import CONFIG
 
 
@@ -43,6 +42,7 @@ class NnMixer:
         self.monitor = None
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
+                from lightwood.mixers.helpers.debugging import TrainingMonitor
                 self.monitor = TrainingMonitor()
                 break
 
