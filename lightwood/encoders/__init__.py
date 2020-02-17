@@ -8,7 +8,7 @@ from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
 
 try:
-    from lightwood.encoders.time_series.cesium_ts import CesiumTsEncoder
+    from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
     from lightwood.encoders.audio.audio import AmplitudeTsEncoder
     export_ts_encoder = True
 except:
@@ -31,13 +31,14 @@ class Numeric:
 class Text:
     InferSentEncoder = InferSentEncoder
     RnnEncoder = RnnEncoder
+    
 class Categorical:
     OneHotEncoder = OneHotEncoder
     CategoricalAutoEncoder = CategoricalAutoEncoder
-    
+
 class TimeSeries:
     if export_ts_encoder:
-        CesiumTsEncoder = CesiumTsEncoder
+        TsFreshTsEncoder = TsFreshTsEncoder
 
 class Audio:
     if export_ts_encoder:
