@@ -16,10 +16,7 @@ class TsFreshTsEncoder:
         """
         Encode a column data into time series
 
-        :param values_data: data frame with all columns including target
-        :param target_name: target column name
-        :param group_by: group_by column name
-        :param order_by: order_by column name
+        :param column_data: a list of timeseries data eg: ['91.0 92.0 93.0 94.0', '92.0 93.0 94.0 95.0' ...]
         :return: a torch.floatTensor
         """
 
