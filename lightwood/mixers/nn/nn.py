@@ -1,5 +1,6 @@
 import copy
 import logging
+import random
 
 import torch
 from torch.utils.data import DataLoader
@@ -362,6 +363,32 @@ class NnMixer:
                 running_loss += total_loss.item()
 
                 total_loss.backward()
+
+                # @NOTE: Decrease 990 if you want to print gradients more often, I find it's too expensive to do so
+                if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 990:
+                    weights = []
+                    gradients = []
+                    layer_name = []
+                    for index, layer in enumerate(self.net.net):
+                        if 'Linear' in str(type(layer)):
+                            weights.append( list(layer.weight.cpu().detach().numpy().ravel()) )
+                            gradients.append( list(layer.weight.grad.cpu().detach().numpy().ravel()) )
+                            layer_name.append(f'Layer {index}-{index+1}')
+                    self.monitor.weight_map(layer_name, weights, 'Predcitive network weights')
+                    self.monitor.weight_map(layer_name, weights, 'Predictive network gradients')
+
+                    if self.is_selfaware:
+                        weights = []
+                        gradients = []
+                        layer_name = []
+                        for index, layer in enumerate(self.net.awareness_net):
+                            if 'Linear' in str(type(layer)):
+                                weights.append( list(layer.weight.cpu().detach().numpy().ravel()) )
+                                gradients.append( list(layer.weight.grad.cpu().detach().numpy().ravel()) )
+                                layer_name.append(f'Layer {index}-{index+1}')
+                        self.monitor.weight_map(layer_name, weights, 'Awareness network weights')
+                        self.monitor.weight_map(layer_name, weights, 'Awareness network gradients')
+
                 self.optimizer.step()
                 # now that we have run backward in both losses, optimize()
                 # (review: we may need to optimize for each step)
