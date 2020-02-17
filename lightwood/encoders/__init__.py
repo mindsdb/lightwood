@@ -6,13 +6,14 @@ from lightwood.encoders.text.infersent import InferSentEncoder
 from lightwood.encoders.text.rnn import RnnEncoder
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
+from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
 
 try:
-    from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
+    from lightwood.encoders.time_series.cesium_ts import CesiumTsEncoder
     from lightwood.encoders.audio.audio import AmplitudeTsEncoder
-    export_ts_encoder = True
+    export_optional_encoder = True
 except:
-    export_ts_encoder = False
+    export_optional_encoder = False
     print('Time series encoders can\'t be loaded')
 
 class DateTime:
@@ -31,17 +32,18 @@ class Numeric:
 class Text:
     InferSentEncoder = InferSentEncoder
     RnnEncoder = RnnEncoder
-    
+
 class Categorical:
     OneHotEncoder = OneHotEncoder
     CategoricalAutoEncoder = CategoricalAutoEncoder
 
 class TimeSeries:
-    if export_ts_encoder:
-        TsFreshTsEncoder = TsFreshTsEncoder
+    TsFreshTsEncoder = TsFreshTsEncoder
+    if export_optional_encoder:
+        CesiumTsEncoder = CesiumTsEncoder
 
 class Audio:
-    if export_ts_encoder:
+    if export_optional_encoder:
         AmplitudeTsEncoder = AmplitudeTsEncoder
 
 class BuiltinEncoders:
@@ -50,9 +52,8 @@ class BuiltinEncoders:
     Numeric = Numeric
     Text = Text
     Categorical = Categorical
-    if export_ts_encoder:
-        TimeSeries = TimeSeries
-        Audio = Audio
+    TimeSeries = TimeSeries
+    Audio = Audio
 
 
 BUILTIN_ENCODERS = BuiltinEncoders
