@@ -14,7 +14,7 @@ class AmplitudeTsEncoder:
 
     def __init__(self, is_target = False):
         self._pytorch_wrapper = torch.FloatTensor
-        self._ts_encoder = CesiumTsEncoder()
+        self._ts_encoder = TsFreshTsEncoder()
         self._ts_encoder._pytorch_wrapper = list
         self._max_samples = 2000
 
