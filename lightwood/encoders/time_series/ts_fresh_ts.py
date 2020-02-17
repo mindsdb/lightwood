@@ -4,10 +4,13 @@ import torch
 
 class TsFreshTsEncoder:
 
-    def __init__(self):
+    def __init__(self, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor
 
-    def encode(self, values_data, target_name, order_by, group_by):
+    def prepare_encoder(self, priming_data):
+        pass
+
+    def encode(self, column_data):
         """
         Encode a column data into time series
 
@@ -17,15 +20,26 @@ class TsFreshTsEncoder:
         :param order_by: order_by column name
         :return: a torch.floatTensor
         """
-        y = values_data.groupby(group_by).first()[target_name]
-        values_data.drop(columns=[target_name], inplace=True)
-
-        features = extract_relevant_features(values_data, y=y,
-                                             column_id=group_by, column_sort=order_by)
-
-        features.fillna(value=0, inplace=True)
 
         ret = []
+        for i, values in enumerate(column_data):
+            if type(values) == type([]):
+                values = list(map(float,values))
+            else:
+                values = list(map(lambda x: float(x), values.split()))
+
+            features = extract_relevant_features(values)
+            features.fillna(value=0, inplace=True)
+            print(features)
+            ret.append(features)
+
+        #y = values_data.groupby(group_by).first()[target_name]
+        #values_data.drop(columns=[target_name], inplace=True)
+
+        #features = extract_relevant_features(values_data, y=y,  column_id=group_by, column_sort=order_by)
+
+
+
         for row in features.iterrows():
             ret.append(list(row[1]))
 
@@ -37,10 +51,10 @@ class TsFreshTsEncoder:
 
 # only run the test if this file is called from debugger, it takes <1 min
 if __name__ == "__main__":
-    import pandas as pd
+    import math
 
-    df = pd.read_csv("test_data/train.csv")
+    data = [" ".join(str(math.sin(i / 100)) for i in range(1, 10)) for j in range(20)]
 
-    ret = TsFreshTsEncoder().encode(df, "target", "time", "id")
+    ret = TsFreshTsEncoder().encode(data)
 
     print(ret)
