@@ -1,17 +1,53 @@
-import visdom
 import subprocess
+
+import visdom
+import numpy as np
 
 
 class TrainingMonitor():
-    def __init__(sefl):
+    def __init__(self, name='Default'):
         self.vis = visdom.Visdom()
+        self.name = name
 
-        self.train_loss_step = 0
-        self.train_loss_layout = dict(title="Training Loss", xaxis={'title': 'loss'}, yaxis={'title': 'step'})
+        self.loss_wds = {}
+        self.loss_colors = [[211,47,47],[81,45,168],[2,136,209],[56,142,60],[251,192,45],[230,74,25],[69,90,100]]
+        self.loss_colors_index = 0
 
-    def send_training_loss(loss, step):
-        trace = dict(x=[loss], y=[step], mode="markers+lines", type='custom', marker={'color': 'red', 'symbol': 104, 'size': "10"})
-        self.vis._send({'data': [trace], 'layout': self.train_loss_layout, 'win': 'mywin'})
+        print(np.arange(1, 6), np.arange(1, 11))
+        self.vis.heatmap(
+            X=np.outer(np.arange(1, 6), np.arange(1, 11)),
+            opts=dict(
+                columnnames=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
+                rownames=['y1', 'y2', 'y3', 'y4', 'y5'],
+                colormap='Electric',
+            )
+            ,win='mywin'
+        )
+
+
+
+    def plot_loss(self, loss, step, name):
+        if name not in self.loss_wds:
+            self.loss_wds[name] = {
+                'name': f'{self.name} - {name}'
+                ,'color': self.loss_colors[self.loss_colors_index]
+            }
+            self.loss_colors_index += 1
+            if self.loss_colors_index >= len(self.loss_colors):
+                self.loss_colors_index = 0
+
+            self.vis.line(X=[step],Y=[loss],win=self.loss_wds[name]['name'],
+                opts=dict(
+                    width=600,
+                    height=600,
+                    xlabel='Step',
+                    ylabel='Loss',
+                    title=self.loss_wds[name]['name'],
+                    linecolor=np.array([self.loss_wds[name]['color']])
+                )
+            )
+        else:
+            self.vis.line(X=[step],Y=[loss],win=self.loss_wds[name]['name'],update='append')
 
 def get_gpu_memory_map():
     '''

@@ -39,7 +39,15 @@ class NnMixer:
         self.is_selfaware = False
         self.last_unaware_net = False
 
-        self.monitor = TrainingMonitor()
+        self.monitor = None
+        for k in CONFIG.MONITORING:
+            print(k)
+            if CONFIG.MONITORING[k]:
+                print(CONFIG.MONITORING[k])
+                self.monitor = TrainingMonitor()
+                break
+
+        self.total_iterations = 0
 
         self._nonpersistent = {
             'sampler': None
@@ -139,7 +147,7 @@ class NnMixer:
         else:
             return -1
 
-    def error(self, ds):
+    def error(self, ds, subset_id=None):
         """
         :param ds:
         :return:
@@ -178,6 +186,11 @@ class NnMixer:
             loss = self.criterion(outputs, labels)
             running_loss += loss.item()
             error = running_loss / (i + 1)
+
+        if CONFIG.MONITORING['epoch_loss']:
+            self.monitor.plot_loss(error, self.total_iterations, 'Test Epoch Error')
+            self.monitor.plot_loss(error, self.total_iterations, f'Test Epoch Error - Subset {subset_id}')
+
         self.net = self.net.train()
 
         return error
@@ -217,7 +230,7 @@ class NnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-    def iter_fit(self, ds, initialize=True):
+    def iter_fit(self, ds, initialize=True, subset_id=None):
         """
         :param ds:
         :return:
@@ -273,7 +286,6 @@ class NnMixer:
             data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
                                      sampler=self._nonpersistent['sampler'])
 
-        total_iterations = 0
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
@@ -305,7 +317,7 @@ class NnMixer:
                     self.optimizer.zero_grad()
                     self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-                total_iterations += 1
+                self.total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
 
@@ -337,15 +349,17 @@ class NnMixer:
                     real_loss = real_loss.to(self.net.device)
 
                     awareness_loss = self.awareness_criterion(awareness, real_loss)
-
                     total_loss = self.loss_combination_operator(awareness_loss, loss)
+
+                    if CONFIG.MONITORING['batch_loss']:
+                        self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
                 else:
                     total_loss = loss
 
-                running_loss += total_loss.item()
+                if CONFIG.MONITORING['batch_loss']:
+                    self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
-                self.monitor.send_training_loss(send_training_loss, 1)
-                exit()
+                running_loss += total_loss.item()
 
                 total_loss.backward()
                 self.optimizer.step()
@@ -354,10 +368,17 @@ class NnMixer:
 
                 error = running_loss / (i + 1)
 
+                if CONFIG.MONITORING['batch_loss']:
+                    self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
+                    self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
+
                 if error < 1:
                     if self.loss_combination_operator == operator.add:
                         self.loss_combination_operator = operator.mul
 
+            if CONFIG.MONITORING['epoch_loss']:
+                self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')
+                self.monitor.plot_loss(error, self.total_iterations, f'Train Epoch Error - Subset {subset_id}')
             yield error
 
 
