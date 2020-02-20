@@ -82,9 +82,11 @@ if __name__ == "__main__":
 
     data = [" ".join(str(math.sin(i / 100)) for i in range(1, 10)) for j in range(20)]
 
-    ret = TsFreshTsEncoder().encode(data)
+    enc = TsFreshTsEncoder()
+    enc.prepare_encoder(data)
+    ret = enc.encode(data)
 
     print(ret)
     print(f'Got above vecotr of lenght: {len(ret)} and feature lenght: {len(ret[0])} for that of length {len(data)} and member length {len(data[0])}')
     assert(len(ret) == len(data))
-    assert(len(ret) < 800)
+    assert(len(ret) < 60)
