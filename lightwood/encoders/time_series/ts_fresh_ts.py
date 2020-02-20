@@ -14,7 +14,7 @@ class TsFreshTsEncoder:
     def prepare_encoder(self, priming_data):
         all_numbers = []
 
-        for i, values in enumerate(column_data):
+        for i, values in enumerate(priming_data):
             if values is None:
                 values = []
             elif type(values) == type([]):
