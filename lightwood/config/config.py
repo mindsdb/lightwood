@@ -28,7 +28,7 @@ class CONFIG:
     OVERSAMPLE = False
 
     MONITORING = {
-        'epoch_loss': False
-        ,'batch_loss': False
+        'epoch_loss': True
+        ,'batch_loss': True
         ,'network_heatmap': False
     }
