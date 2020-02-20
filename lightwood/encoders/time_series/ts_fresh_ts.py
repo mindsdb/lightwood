@@ -56,7 +56,6 @@ class TsFreshTsEncoder:
             features.fillna(value=0, inplace=True)
 
             features = list(features.iloc[0])
-            print(len(features))
             ret.append(features)
 
         for i, values in  enumerate(all_values):
@@ -70,7 +69,6 @@ class TsFreshTsEncoder:
                 encoded_numbers_list.extend(pair)
 
             ret[i].extend(encoded_numbers_list)
-            print(len(ret[i]))
 
         return self._pytorch_wrapper(ret)
 
