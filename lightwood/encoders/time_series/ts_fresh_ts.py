@@ -10,18 +10,20 @@ class TsFreshTsEncoder:
     def __init__(self, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor
         self.numerical_encoder = NumericEncoder()
+        self.max_series_len = 0
 
     def prepare_encoder(self, priming_data):
         all_numbers = []
 
         for i, values in enumerate(priming_data):
             if values is None:
-                values = []
+                values = [0]
             elif type(values) == type([]):
                 values = list(map(float,values))
             else:
                 values = list(map(lambda x: float(x), values.split()))
 
+            self.max_series_len = max(self.max_series_len,len(values))
             all_numbers.extend(values)
 
         self.numerical_encoder.prepare_encoder(all_numbers)
@@ -41,7 +43,7 @@ class TsFreshTsEncoder:
 
         for i, values in enumerate(column_data):
             if values is None:
-                values = []
+                values = [0] * self.max_series_len
             elif type(values) == type([]):
                 values = list(map(float,values))
             else:
@@ -57,10 +59,8 @@ class TsFreshTsEncoder:
             print(len(features))
             ret.append(features)
 
-        max_series_len = max([len(x) for x in all_values])
-
         for i, values in  enumerate(all_values):
-            while len(values) < max_series_len:
+            while len(values) < self.max_series_len:
                 values.append(0)
 
             encoded_values = self.numerical_encoder.encode(values)
