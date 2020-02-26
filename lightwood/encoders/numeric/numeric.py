@@ -5,7 +5,7 @@ import logging
 
 class NumericEncoder:
 
-    def __init__(self, data_type=None, is_target=False):
+    def __init__(self, data_type=None, is_target=False, quantile=0.95):
         self._type = data_type
         self._min_value = None
         self._max_value = None
@@ -13,6 +13,10 @@ class NumericEncoder:
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self._is_target = is_target
+        if self._is_target and quantile is not None:
+            self.quantile = quantile
+        else:
+            self.quantile = quantile = None
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -34,7 +38,7 @@ class NumericEncoder:
 
             self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
             self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
-            
+
             count += number
             abs_count += abs(number)
 
@@ -64,7 +68,10 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
-                vector = [0] * 3
+                if quantile is not None:
+                    vector = [0] * 5
+                else:
+                    vector = [0] * 3
                 try:
                     if number < 0:
                         vector[0] = 1
@@ -72,11 +79,19 @@ class NumericEncoder:
                         vector[2] = 1
                     else:
                         vector[1] = math.log(abs(number))
+
+                    if quantile is not None:
+                        vector[3] = math.log(abs(number * quantile))
+                        vector[4] = math.log(abs(number * (2-quantile)))
+
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
                     # but we need to figure out why it's happening and fix it properly later
-                    vector = [0] * 3
+                if quantile is not None:
+                        vector = [0] * 5
+                    else:
+                        vector = [0] * 3
 
             else:
                 vector = [0] * 2
