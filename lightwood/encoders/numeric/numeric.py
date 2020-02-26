@@ -5,7 +5,7 @@ import logging
 
 class NumericEncoder:
 
-    def __init__(self, data_type=None, is_target=False, quantile=0.95):
+    def __init__(self, data_type=None, is_target=False, quantile=None):
         self._type = data_type
         self._min_value = None
         self._max_value = None
@@ -13,10 +13,8 @@ class NumericEncoder:
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self._is_target = is_target
-        if self._is_target and quantile is not None:
+        if self._is_target:
             self.quantile = quantile
-        else:
-            self.quantile = quantile = None
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -68,7 +66,7 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
-                if quantile is not None:
+                if self.quantile is not None:
                     vector = [0] * 5
                 else:
                     vector = [0] * 3
@@ -80,15 +78,15 @@ class NumericEncoder:
                     else:
                         vector[1] = math.log(abs(number))
 
-                    if quantile is not None:
-                        vector[3] = math.log(abs(number * quantile))
-                        vector[4] = math.log(abs(number * (2-quantile)))
+                    if self.quantile is not None:
+                        vector[3] = math.log(abs(number * self.quantile))
+                        vector[4] = math.log(abs(number * (2-self.quantile)))
 
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
                     # but we need to figure out why it's happening and fix it properly later
-                if quantile is not None:
+                    if self.quantile is not None:
                         vector = [0] * 5
                     else:
                         vector = [0] * 3
