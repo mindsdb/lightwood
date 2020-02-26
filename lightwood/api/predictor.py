@@ -66,10 +66,10 @@ class Predictor:
 
     @staticmethod
     def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
-                       is_categorical_output, max_training_time=None, max_epochs=None):
+                       max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
         lowest_error = 10000
-        mixer = mixer_class(dynamic_parameters, is_categorical_output)
+        mixer = mixer_class(dynamic_parameters)
 
         if max_training_time is None and max_epochs is None:
             err = "Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`"
@@ -184,13 +184,6 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['output_features']]
             self._input_columns = [col['name'] for col in self.config['input_features']]
 
-        # @TODO Make Cross Entropy Loss work with multiple outputs
-        if len(self.config['output_features']) == 1 \
-                and self.config['output_features'][0]['type'] in (COLUMN_DATA_TYPES.CATEGORICAL):
-            is_categorical_output = True
-        else:
-            is_categorical_output = False
-
         if stop_training_after_seconds is None:
             stop_training_after_seconds = round(from_data.shape[0] * from_data.shape[1] / 5)
 
@@ -253,7 +246,7 @@ class Predictor:
             training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(
-                mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output,
+                mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
                 max_training_time=training_time_per_iteration, max_epochs=None))
 
             logging.info('Using hyperparameter set: ', best_parameters)
@@ -266,7 +259,7 @@ class Predictor:
             except Exception as e:
                 logging.warning(f'Failed to train helper mixers with error: {e}')
 
-        mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
+        mixer = mixer_class(best_parameters)
         self._mixer = mixer
 
         for param in mixer_params:

@@ -11,12 +11,14 @@ import operator
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 
 class NnMixer:
-    def __init__(self, dynamic_parameters, is_categorical_output=False):
-        self.is_categorical_output = is_categorical_output
+    def __init__(self, dynamic_parameters):
+        self.output_types = None
         self.net = None
         self.optimizer = None
         self.input_column_names = None
@@ -25,7 +27,7 @@ class NnMixer:
         self.encoders = None
         self.optimizer_class = None
         self.optimizer_args = None
-        self.criterion = None
+        self.criterion_arr = None
 
         self.batch_size = 200
         self.epochs = 120000
@@ -170,19 +172,20 @@ class NnMixer:
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
-            if self.is_categorical_output:
-                target = labels.cpu().numpy()
-                target_indexes = np.where(target > 0)[1]
-                targets_c = torch.LongTensor(target_indexes)
-                labels = targets_c.to(self.net.device)
-
             with torch.no_grad():
                 if self.is_selfaware:
                     outputs, awareness = self.net(inputs)
                 else:
                     outputs = self.net(inputs)
 
-            loss = self.criterion(outputs, labels)
+            loss = None
+            for k, criterion in enumerate(self.criterion_arr):
+                target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                if loss is None:
+                    loss = target_loss
+                else:
+                    loss += target_loss
+
             running_loss += loss.item()
             error = running_loss / (i + 1)
 
@@ -236,16 +239,6 @@ class NnMixer:
         """
         if initialize:
             self.fit_data_source(ds)
-            if self.is_categorical_output:
-                # The WeightedRandomSampler samples "randomly" but can assign higher weight to certain rows, we assign each rows it's weight based on the target variable value in that row and it's associated weight in the output_weights map (otherwise used to bias the loss function)
-                if ds.output_weights is not None and ds.output_weights is not False and CONFIG.OVERSAMPLE:
-                    weights = []
-                    for row in ds:
-                        _, out = row
-                        # @Note: This assumes one-hot encoding for the encoded_value
-                        weights.append(ds.output_weights[torch.argmax(out).item()])
-
-                    self._nonpersistent['sampler'] = torch.utils.data.WeightedRandomSampler(weights=weights,num_samples=len(weights),replacement=True)
 
             self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
             self.net = self.net.train()
@@ -255,15 +248,19 @@ class NnMixer:
 
             self.awareness_criterion = torch.nn.MSELoss()
 
-            if self.criterion is None:
-                if self.is_categorical_output:
-                    if ds.output_weights is not None and ds.output_weights is not False and not CONFIG.OVERSAMPLE:
-                        output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
-                    else:
-                        output_weights = None
-                    self.criterion = torch.nn.CrossEntropyLoss(weight=output_weights)
+            if self.criterion_arr is None:
+                self.criterion_arr = []
+                if ds.output_weights is not None and ds.output_weights is not False:
+                    output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
-                    self.criterion = torch.nn.MSELoss()
+                    output_weights = None
+                for output_type in ds.out_types:
+                    if output_type in (COLUMN_DATA_TYPES.CATEGORICAL):
+                        self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
+                    elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
+                        self.criterion_arr.append(torch.nn.MSELoss())
+                    else:
+                        self.criterion_arr.append(torch.nn.MSELoss())
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
@@ -333,14 +330,13 @@ class NnMixer:
                 else:
                     outputs = self.net(inputs)
 
-                if self.is_categorical_output:
-                    target = labels.cpu().numpy()
-                    target_indexes = np.where(target > 0)[1]
-                    targets_c = torch.LongTensor(target_indexes)
-                    cat_labels = targets_c.to(self.net.device)
-                    loss = self.criterion(outputs, cat_labels)
-                else:
-                    loss = self.criterion(outputs, labels)
+                loss = None
+                for k, criterion in enumerate(self.criterion_arr):
+                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                    if loss is None:
+                        loss = target_loss
+                    else:
+                        loss += target_loss
 
                 if self.is_selfaware:
                     real_loss = torch.abs(labels - outputs) # error precentual to the target
