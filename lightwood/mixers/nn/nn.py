@@ -69,6 +69,8 @@ class NnMixer:
         """
         when_data_source.transformer = self.transformer
         when_data_source.encoders = self.encoders
+        _, _ = when_data_source[0]
+
         data_loader = DataLoader(when_data_source, batch_size=self.batch_size, shuffle=False, num_workers=0)
 
         # set model into evaluation mode in order to skip things such as Dropout
@@ -76,6 +78,7 @@ class NnMixer:
 
         outputs = []
         awareness_arr = []
+        loss_confidence_arr = [[]] * len(when_data_source.out_indexes)
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
             inputs = inputs.to(self.net.device)
@@ -89,12 +92,23 @@ class NnMixer:
                     output = self.net(inputs)
                     awareness_arr = None
 
+                for k, criterion in enumerate(self.criterion_arr):
+                    try:
+                        confidences = criterion.estimate_confidence(output[:,when_data_source.out_indexes[k][0]:when_data_source.out_indexes[k][1]])
+                        loss_confidence_arr[k].extend(confidences)
+                    except Exception as e:
+                        loss_confidence_arr[k] = None
+
+
                 output = output.to('cpu')
 
             outputs.extend(output)
 
         output_trasnformed_vectors = {}
         confidence_trasnformed_vectors = {}
+
+        for conf in loss_confidence_arr[0]:
+            print(conf)
 
         for i in range(len(outputs)):
             if awareness_arr is not None:
