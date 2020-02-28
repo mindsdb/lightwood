@@ -41,6 +41,8 @@ class NnMixer:
         self.is_selfaware = False
         self.last_unaware_net = False
 
+        self.max_confidence_per_output = []
+
         self.monitor = None
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
@@ -94,7 +96,7 @@ class NnMixer:
 
                 for k, criterion in enumerate(self.criterion_arr):
                     try:
-                        confidences = criterion.estimate_confidence(output[:,when_data_source.out_indexes[k][0]:when_data_source.out_indexes[k][1]])
+                        confidences = criterion.estimate_confidence(output[:,when_data_source.out_indexes[k][0]:when_data_source.out_indexes[k][1]], self.max_confidence_per_output[k])
                         loss_confidence_arr[k].extend(confidences)
                     except Exception as e:
                         loss_confidence_arr[k] = None
@@ -107,8 +109,9 @@ class NnMixer:
         output_trasnformed_vectors = {}
         confidence_trasnformed_vectors = {}
 
-        for conf in loss_confidence_arr[0]:
-            print(conf)
+        #for conf in loss_confidence_arr[0]:
+        #    pass
+        #    #print(conf)
 
         for i in range(len(outputs)):
             if awareness_arr is not None:
@@ -195,6 +198,18 @@ class NnMixer:
             loss = None
             for k, criterion in enumerate(self.criterion_arr):
                 target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+
+                try:
+                    if len(self.max_confidence_per_output) <= k:
+                        self.max_confidence_per_output.append(0.00000001)
+
+                    confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], self.max_confidence_per_output[k])
+                    self.max_confidence_per_output[k] = max(self.max_confidence_per_output[k], max(confidences))
+                    print(self.max_confidence_per_output)
+                except Exception as e:
+                    print(e)
+                    pass
+
                 if loss is None:
                     loss = target_loss
                 else:
