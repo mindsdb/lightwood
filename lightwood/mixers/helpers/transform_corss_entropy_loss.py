@@ -4,11 +4,11 @@ import torch
 class TransformCrossEntropyLoss(torch.nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
-        self.maximum_confidence = 0.000000001
+        self.maximum_confidence = 0.00001
         self.cross_entropy_loss = torch.nn.CrossEntropyLoss(**kwargs)
 
     def forward(self, preds, target):
-        confidences = self.estimate_confidence(self, preds)
+        confidences = self.estimate_confidence(preds)
         self.maximum_confidence = max(self.maximum_confidence, max(confidences))
 
         cat_labels = target.max(1).indices
@@ -17,7 +17,7 @@ class TransformCrossEntropyLoss(torch.nn.Module):
     def estimate_confidence(self, preds):
         confidences = []
         for pred in preds:
-            conf = float(pred.max(0).values)/float(sum([x if x > 0 else 0 for x in preds.sum(0)]))
+            conf = float(pred.max(0).values)/float(sum([x if x > 0 else 0.00001 for x in preds.sum(0)]))
             conf = conf/self.maximum_confidence
             confidences.append(conf)
         return confidences
