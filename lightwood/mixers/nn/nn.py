@@ -203,7 +203,7 @@ class NnMixer:
                     if len(self.max_confidence_per_output) <= k:
                         self.max_confidence_per_output.append(0.00000001)
 
-                    confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], self.max_confidence_per_output[k])
+                    confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
                     self.max_confidence_per_output[k] = max(self.max_confidence_per_output[k], max(confidences))
                     print(self.max_confidence_per_output)
                 except Exception as e:

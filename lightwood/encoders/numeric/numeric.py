@@ -5,7 +5,7 @@ import logging
 
 class NumericEncoder:
 
-    def __init__(self, data_type=None, is_target=False, quantile=None):
+    def __init__(self, data_type=None, is_target=False, quantile=0.95):
         self._type = data_type
         self._min_value = None
         self._max_value = None
@@ -136,6 +136,11 @@ class NumericEncoder:
                     else:
                         real_value = float('inf')
 
+                if is_none:
+                    real_value = None
+                if is_zero:
+                    real_value = 0
+
                 if self._type == 'int':
                     real_value = round(real_value)
             else:
@@ -148,13 +153,10 @@ class NumericEncoder:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     is_none = True
 
-            if is_none:
-                ret.append(None)
-                continue
-
-            if is_zero:
-                ret.append(0)
-                continue
+                if is_none:
+                    real_value = None
+                if is_zero:
+                    real_value = 0
 
             ret.append(real_value)
 
