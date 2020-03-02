@@ -14,7 +14,8 @@ class TransformCrossEntropyLoss(torch.nn.Module):
         confidences = []
         for pred in preds:
             conf = float(pred.max(0).values)/float(sum([x if x > 0 else 0.000001 for x in preds.sum(0)]))
+            
             if maximum_confidence is not None:
                 conf = conf/maximum_confidence
-            confidences.append(conf)
+            confidences.append(min(conf,1))
         return confidences
