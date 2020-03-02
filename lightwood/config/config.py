@@ -25,7 +25,7 @@ class CONFIG:
     MAX_ENCODER_TRAINING_TIME = 3600 * 2
 
     MONITORING = {
-        'epoch_loss': False
-        ,'batch_loss': False
+        'epoch_loss': True
+        ,'batch_loss': True
         ,'network_heatmap': False
     }
