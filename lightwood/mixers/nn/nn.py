@@ -28,6 +28,7 @@ class NnMixer:
         self.optimizer_class = None
         self.optimizer_args = None
         self.criterion_arr = None
+        self.unreduced_criterion_arr = None
 
         self.batch_size = 200
         self.epochs = 120000
@@ -56,6 +57,52 @@ class NnMixer:
             'sampler': None
         }
 
+    def build_confidence_normalization_data(self, ds, subset_id=None):
+        """
+        :param ds:
+        :return:
+        """
+        self.net = self.net.eval()
+
+        ds.encoders = self.encoders
+        ds.transformer = self.transformer
+
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
+        loss_confidence_arr = []
+
+        for i, data in enumerate(data_loader, 0):
+            inputs, labels = data
+            inputs = inputs.to(self.net.device)
+            labels = labels.to(self.net.device)
+
+            with torch.no_grad():
+                if self.is_selfaware:
+                    outputs, awareness = self.net(inputs)
+                else:
+                    outputs = self.net(inputs)
+
+            loss = None
+            for k, criterion in enumerate(self.criterion_arr):
+                if len(loss_confidence_arr) <= k:
+                    loss_confidence_arr.append([])
+                    self.max_confidence_per_output.append(None)
+
+                try:
+                    confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                    loss_confidence_arr[k].extend(confidences)
+                except:
+                    pass
+
+        for k, _ in enumerate(self.criterion_arr):
+            if len(loss_confidence_arr[k]) > 0:
+                loss_confidence_arr[k] = np.array(loss_confidence_arr[k])
+                nf_pct = np.percentile(loss_confidence_arr[k], 95)
+                self.max_confidence_per_output[k] = max(loss_confidence_arr[k][loss_confidence_arr[k] < nf_pct])
+
+        return True
+
+
     def fit(self, ds=None, callback=None):
 
         ret = 0
@@ -81,6 +128,7 @@ class NnMixer:
         outputs = []
         awareness_arr = []
         loss_confidence_arr = [[]] * len(when_data_source.out_indexes)
+
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
             inputs = inputs.to(self.net.device)
@@ -96,11 +144,14 @@ class NnMixer:
 
                 for k, criterion in enumerate(self.criterion_arr):
                     try:
-                        confidences = criterion.estimate_confidence(output[:,when_data_source.out_indexes[k][0]:when_data_source.out_indexes[k][1]], self.max_confidence_per_output[k])
+                        max_conf = 1
+                        if len(self.max_confidence_per_output) >= (k - 1) and self.max_confidence_per_output[k] is not None:
+                            max_conf = self.max_confidence_per_output[k]
+
+                        confidences = criterion.estimate_confidence(output[:,when_data_source.out_indexes[k][0]:when_data_source.out_indexes[k][1]], max_conf)
                         loss_confidence_arr[k].extend(confidences)
                     except Exception as e:
                         loss_confidence_arr[k] = None
-
 
                 output = output.to('cpu')
 
@@ -108,10 +159,6 @@ class NnMixer:
 
         output_trasnformed_vectors = {}
         confidence_trasnformed_vectors = {}
-
-        #for conf in loss_confidence_arr[0]:
-        #    pass
-        #    #print(conf)
 
         for i in range(len(outputs)):
             if awareness_arr is not None:
@@ -137,14 +184,17 @@ class NnMixer:
                 output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
 
         predictions = {}
-        for output_column in output_trasnformed_vectors:
+        for k, output_column in enumerate(list(output_trasnformed_vectors.keys())):
             decoded_predictions = when_data_source.get_decoded_column_data(
                 output_column,
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
             predictions[output_column] = {'predictions': decoded_predictions}
             if awareness_arr is not None:
-                predictions[output_column]['confidences'] = confidence_trasnformed_vectors[output_column]
+                predictions[output_column]['selfaware_confidences'] = confidence_trasnformed_vectors[output_column]
+
+            if loss_confidence_arr[k] is not None:
+                predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
 
             if include_encoded_predictions:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
@@ -198,17 +248,6 @@ class NnMixer:
             loss = None
             for k, criterion in enumerate(self.criterion_arr):
                 target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
-
-                try:
-                    if len(self.max_confidence_per_output) <= k:
-                        self.max_confidence_per_output.append(0.00000001)
-
-                    confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
-                    self.max_confidence_per_output[k] = max(self.max_confidence_per_output[k], max(confidences))
-                    print(self.max_confidence_per_output)
-                except Exception as e:
-                    print(e)
-                    pass
 
                 if loss is None:
                     loss = target_loss
@@ -279,6 +318,7 @@ class NnMixer:
 
             if self.criterion_arr is None:
                 self.criterion_arr = []
+                self.unreduced_criterion_arr = []
                 if ds.output_weights is not None and ds.output_weights is not False:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
@@ -286,10 +326,13 @@ class NnMixer:
                 for output_type in ds.out_types:
                     if output_type in (COLUMN_DATA_TYPES.CATEGORICAL):
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
+                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
                         self.criterion_arr.append(torch.nn.MSELoss())
+                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
                     else:
                         self.criterion_arr.append(torch.nn.MSELoss())
+                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
@@ -367,25 +410,40 @@ class NnMixer:
                     else:
                         loss += target_loss
 
+                awareness_loss = None
                 if self.is_selfaware:
-                    real_loss = torch.abs(labels - outputs) # error precentual to the target
-                    real_loss = torch.Tensor(real_loss.tolist()) # disconnect from the graph (test if this is necessary)
-                    real_loss = real_loss.to(self.net.device)
+                    unreduced_losses = []
+                    for k, criterion in enumerate(self.unreduced_criterion_arr):
+                        # redyce = True
+                        target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
-                    awareness_loss = self.awareness_criterion(awareness, real_loss)
-                    total_loss = self.loss_combination_operator(awareness_loss, loss)
+                        target_loss = target_loss.tolist()
+                        if type(target_loss[0]) == type([]):
+                            target_loss = [np.mean(x) for x in target_loss]
+                        for i, value in enumerate(target_loss):
+                            if len(unreduced_losses) <= i:
+                                unreduced_losses.append([])
+                            unreduced_losses[i].append(value)
+
+                    unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
+
+                    awareness_loss = self.awareness_criterion(awareness,unreduced_losses)
 
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
-                else:
-                    total_loss = loss
+                #else:
+                #    total_loss = loss
 
                 if CONFIG.MONITORING['batch_loss']:
                     self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
-                running_loss += total_loss.item()
+                #running_loss += total_loss.item()
 
-                total_loss.backward()
+                #total_loss.backward()
+
+                loss.backward()
+                if awareness_loss is not None:
+                    awareness_loss.backward()
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
                 if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 900:
@@ -419,7 +477,7 @@ class NnMixer:
                 error = running_loss / (i + 1)
 
                 if CONFIG.MONITORING['batch_loss']:
-                    self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
+                    #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
                     self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
 
                 if error < 1:

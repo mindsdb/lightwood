@@ -129,7 +129,7 @@ class Predictor:
             predicted =  predictions[output_column]['values']
 
             weight_map = None
-            if 'weights' in train_ds.get_column_config(output_column):
+            if 'weights' in test_ds.get_column_config(output_column):
                 weight_map = train_ds.get_column_config(output_column)['weights']
 
             accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, weight_map)
@@ -339,7 +339,7 @@ class Predictor:
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.15:
+                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 2.15:
                         logging.info('Started selfaware training !')
                         mixer.start_selfaware_training = True
                         lowest_error = None
@@ -418,6 +418,7 @@ class Predictor:
                             logging.info('Finished training model !')
                             break
 
+        self._mixer.build_confidence_normalization_data(test_data_ds)
         self._mixer.encoders = from_data_ds.encoders
         return self
 
@@ -447,6 +448,7 @@ class Predictor:
                         if 'confidences' in helper_mixer_predictions[output_column] and helper_mixer_predictions[output_column]['confidences'] is not None:
                             main_mixer_predictions[output_column]['confidences'] = list(helper_mixer_predictions[output_column]['confidences'])
 
+        print(main_mixer_predictions)
         return main_mixer_predictions
 
     @staticmethod

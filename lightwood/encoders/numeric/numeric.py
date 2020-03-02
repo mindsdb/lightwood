@@ -5,7 +5,7 @@ import logging
 
 class NumericEncoder:
 
-    def __init__(self, data_type=None, is_target=False, quantile=0.95):
+    def __init__(self, data_type=None, is_target=False, quantile=None):
         self._type = data_type
         self._min_value = None
         self._max_value = None
@@ -76,7 +76,7 @@ class NumericEncoder:
                     if number == 0:
                         vector[2] = 1
                     else:
-                        vector[1] = math.log(abs(number))
+                        vector[1] = abs(number)/self._max_value#math.log(abs(number))
 
                     if self.quantile is not None:
                         vector[3] = math.log(abs(number * self.quantile))
@@ -127,7 +127,7 @@ class NumericEncoder:
                 is_none = False
 
                 try:
-                    real_value = math.exp(encoded_nr)
+                    real_value = encoded_nr * self._max_value #math.exp(encoded_nr)
                     if is_negative:
                         real_value = -real_value
                 except:
