@@ -137,7 +137,7 @@ class NnMixer:
                 if self.is_selfaware:
                     output, awareness = self.net(inputs)
                     awareness = awareness.to('cpu')
-                    awareness_arr.extend(awareness)
+                    awareness_arr.extend(awareness.tolist())
                 else:
                     output = self.net(inputs)
                     awareness_arr = None
@@ -161,20 +161,6 @@ class NnMixer:
         confidence_trasnformed_vectors = {}
 
         for i in range(len(outputs)):
-            if awareness_arr is not None and False:
-                confidence_vector = awareness_arr[i]
-                transformed_confidence_vectors = when_data_source.transformer.revert(
-                    confidence_vector, feature_set='output_features')
-                for feature in transformed_confidence_vectors:
-                    if feature not in confidence_trasnformed_vectors:
-                        confidence_trasnformed_vectors[feature] = []
-                    # @TODO: Very simple algorithm to get a confidence from the awareness,
-                    # not necessarily what we want for the final version
-                    confidence_trasnformed_vectors[feature] += [
-                        1 - sum(np.abs(
-                            transformed_confidence_vectors[feature])) / len(transformed_confidence_vectors[feature])
-                    ]
-
             output_vector = outputs[i]
             transformed_output_vectors = when_data_source.transformer.revert(
                 output_vector, feature_set='output_features')
@@ -190,8 +176,8 @@ class NnMixer:
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
             predictions[output_column] = {'predictions': decoded_predictions}
-            if awareness_arr is not None and False:
-                predictions[output_column]['selfaware_confidences'] = confidence_trasnformed_vectors[output_column]
+            if awareness_arr is not None:
+                predictions[output_column]['selfaware_confidences'] = [1/x[k] for x in awareness_arr]
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
@@ -431,6 +417,7 @@ class NnMixer:
 
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
+
                 #else:
                 #    total_loss = loss
 
