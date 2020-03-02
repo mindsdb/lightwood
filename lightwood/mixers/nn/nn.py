@@ -418,15 +418,10 @@ class NnMixer:
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
 
-                #else:
-                #    total_loss = loss
 
                 if CONFIG.MONITORING['batch_loss']:
                     self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
-                #running_loss += total_loss.item()
-
-                #total_loss.backward()
 
 
                 if awareness_loss is not None:
