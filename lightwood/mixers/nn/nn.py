@@ -161,7 +161,7 @@ class NnMixer:
         confidence_trasnformed_vectors = {}
 
         for i in range(len(outputs)):
-            if awareness_arr is not None:
+            if awareness_arr is not None and False:
                 confidence_vector = awareness_arr[i]
                 transformed_confidence_vectors = when_data_source.transformer.revert(
                     confidence_vector, feature_set='output_features')
@@ -190,7 +190,7 @@ class NnMixer:
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
             predictions[output_column] = {'predictions': decoded_predictions}
-            if awareness_arr is not None:
+            if awareness_arr is not None and False:
                 predictions[output_column]['selfaware_confidences'] = confidence_trasnformed_vectors[output_column]
 
             if loss_confidence_arr[k] is not None:
@@ -441,9 +441,11 @@ class NnMixer:
 
                 #total_loss.backward()
 
-                loss.backward()
+
                 if awareness_loss is not None:
-                    awareness_loss.backward()
+                    awareness_loss.backward(retain_graph=True)
+
+                loss.backward()
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
                 if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 900:
