@@ -13,7 +13,7 @@ class CONFIG:
     # Enable deterministic cuda flag and use seeds everywhere (static or based on features of the dataset)
     DETERMINISTIC = True
     SELFAWARE = True
-    HELPER_MIXERS = False
+    HELPER_MIXERS = True
     FORCE_HELPER_MIXERS = False
     ENABLE_DROPOUT = True
 
@@ -25,7 +25,7 @@ class CONFIG:
     MAX_ENCODER_TRAINING_TIME = 3600 * 2
 
     MONITORING = {
-        'epoch_loss': True
-        ,'batch_loss': True
+        'epoch_loss': False
+        ,'batch_loss': False
         ,'network_heatmap': False
     }
