@@ -76,11 +76,11 @@ class NumericEncoder:
                     if number == 0:
                         vector[2] = 1
                     else:
-                        vector[1] = math.log(abs(number)) #abs(number)/self._max_value
+                        vector[1] = abs(number)/self._max_value #math.log(abs(number))
 
                     if self.quantile is not None:
-                        vector[3] = math.log(abs(number * self.quantile))
-                        vector[4] = math.log(abs(number * (2-self.quantile)))
+                        vector[3] = number * self.quantile / self._max_value #math.log(abs(number * self.quantile))
+                        vector[4] =  number * (2 - self.quantile) / self._max_value #math.log(abs(number * (2-self.quantile)))
 
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
@@ -127,7 +127,7 @@ class NumericEncoder:
                 is_none = False
 
                 try:
-                    real_value = math.exp(encoded_nr) #encoded_nr * self._max_value
+                    real_value = encoded_nr * self._max_value # math.exp(encoded_nr)
                     if is_negative:
                         real_value = -real_value
                 except:
