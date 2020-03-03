@@ -8,7 +8,7 @@
 
 Lightwood is like Legos for Machine Learning. 
 
-A Pytorch based framework that breaks down machine learning problems into smaller blocks that can be glued together seamlessly with on objective:
+A Pytorch based framework that breaks down machine learning problems into smaller blocks that can be glued together seamlessly with one objective:
 
 - Make it so simple that you can build predictive models with as little as one line of code.
 
