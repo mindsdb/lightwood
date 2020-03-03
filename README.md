@@ -40,3 +40,7 @@ You can now given new readings from *sensor1* and *sensor2* predict what *sensor
 prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
 
 ```
+
+## License
+
+[License](https://github.com/mindsdb/lightwood/blob/master/LICENSE)
