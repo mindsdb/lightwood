@@ -12,7 +12,7 @@ class QuantileLoss(torch.nn.Module):
         lowe_range_loss = []
         for i in range(len(preds)):
             if preds[i,3] > preds[i,2]:
-                lowe_range_loss.append([1000])
+                lowe_range_loss.append([ (preds[i,4] - target[i,2]) * 2 ** 2])
             elif preds[i,3] > target[i,2]*0.95:
                 lowe_range_loss.append([0])
             else:
@@ -23,7 +23,7 @@ class QuantileLoss(torch.nn.Module):
         upper_range_loss = []
         for i in range(len(preds)):
             if preds[i,4] < preds[i,2]:
-                upper_range_loss.append([1000])
+                upper_range_loss.append([ (preds[i,4] - target[i,2]) * 2 ** 2])
             elif preds[i,4] < target[i,2]*1.05:
                 upper_range_loss.append([0])
             else:
@@ -32,7 +32,7 @@ class QuantileLoss(torch.nn.Module):
         upper_range_loss = torch.Tensor(upper_range_loss).to(preds.device)
 
         loss = torch.cat([main_mse_loss, lowe_range_loss, upper_range_loss], 1)
-
+        
         if self.reduce is False:
             return loss
         if self.reduce == 'mean':
