@@ -301,7 +301,7 @@ class NnMixer:
             if self.batch_size < self.net.available_devices:
                 self.batch_size = self.net.available_devices
 
-            self.awareness_criterion = QuantileLoss()
+            self.awareness_criterion = torch.nn.MSELoss()
 
             if self.criterion_arr is None:
                 self.criterion_arr = []

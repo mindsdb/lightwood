@@ -31,9 +31,7 @@ class QuantileLoss(torch.nn.Module):
 
         upper_range_loss = torch.Tensor(upper_range_loss).to(preds.device)
 
-        print(main_mse_loss.shape, lowe_range_loss.shape, upper_range_loss.shape)
         loss = torch.cat([main_mse_loss, lowe_range_loss, upper_range_loss], 1)
-        print(loss.shape)
 
         if self.reduce is False:
             return loss
