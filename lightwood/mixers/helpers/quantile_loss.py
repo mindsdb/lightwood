@@ -12,30 +12,32 @@ class QuantileLoss(torch.nn.Module):
         lowe_range_loss = []
         for i in range(len(preds)):
             if preds[i,3] > preds[i,2]:
-                lowe_range_loss.append(torch.Tensor([1000]))
+                lowe_range_loss.append([1000])
             elif preds[i,3] > target[i,2]*0.95:
-                lowe_range_loss.append(torch.Tensor([0]))
+                lowe_range_loss.append([0])
             else:
-                lowe_range_loss.append(torch.Tensor([preds[i,3] - target[i,2]*0.95]) ** 2)
+                lowe_range_loss.append([ (preds[i,3] - target[i,2]*0.95)  ** 2])
 
-        lowe_range_loss = torch.Tensor(lowe_range_loss)
+        lowe_range_loss = torch.Tensor(lowe_range_loss).to(preds.device)
 
         upper_range_loss = []
         for i in range(len(preds)):
             if preds[i,4] < preds[i,2]:
-                upper_range_loss.append(torch.Tensor([1000]))
+                upper_range_loss.append([1000])
             elif preds[i,4] < target[i,2]*1.05:
-                upper_range_loss.append(torch.Tensor([0]))
+                upper_range_loss.append([0])
             else:
-                upper_range_loss.append(torch.Tensor([preds[i,4] - target[i,2]*1.05]) ** 2)
+                upper_range_loss.append([ (preds[i,4] - target[i,2]*1.05) ** 2])
 
-        upper_range_loss = torch.Tensor(lowe_range_loss)
+        upper_range_loss = torch.Tensor(upper_range_loss).to(preds.device)
 
-        loss = torch.cat([main_mse_loss, lowe_range_loss, upper_range_loss])
+        print(main_mse_loss.shape, lowe_range_loss.shape, upper_range_loss.shape)
+        loss = torch.cat([main_mse_loss, lowe_range_loss, upper_range_loss], 1)
+        print(loss.shape)
 
-        if reduce is False:
+        if self.reduce is False:
             return loss
-        if reduce == 'mean':
+        if self.reduce == 'mean':
             return torch.mean(loss)
 
         return torch.mean(loss)
