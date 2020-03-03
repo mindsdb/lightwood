@@ -6,12 +6,11 @@
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/lightwood)
 
-Lightwood is like Legos for Machine Learning, with two objectives:
+Lightwood is like Legos for Machine Learning, with one objective:
 
-- Make it so simple that you can build predictive models with a line of code.
-- Make it so flexible that you can change and customize everything.
+- Make it so simple that you can build predictive models with as little as one line of code.
 
-Lightwood runs on Pytorch and gives you full control of what you can do.
+Lightwood runs on Pytorch and gives you full control of what building blocks you can use for your ML models.
 
 # Documentation
 Learn more  from the [Lightwood's docs](https://mindsdb.github.io/lightwood/API/).  
