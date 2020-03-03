@@ -11,23 +11,23 @@ class QuantileLoss(torch.nn.Module):
 
         lowe_range_loss = []
         for i in range(len(preds)):
-            if vec[i,4] > vec[i,3]:
+            if preds[i,3] > preds[i,2]:
                 lowe_range_loss.append(torch.Tensor([1000]))
-            elif vec[i,4] > target[i,3]*0.95:
+            elif preds[i,3] > target[i,2]*0.95:
                 lowe_range_loss.append(torch.Tensor([0]))
             else:
-                lowe_range_loss.append(torch.Tensor([vec[i,4] - target[i,3]]) ** 2)
+                lowe_range_loss.append(torch.Tensor([preds[i,3] - target[i,2]*0.95]) ** 2)
 
         lowe_range_loss = torch.Tensor(lowe_range_loss)
 
         upper_range_loss = []
-        for i in len(preds):
-            if vec[i,5] < vec[i,3]:
+        for i in range(len(preds)):
+            if preds[i,4] < preds[i,2]:
                 upper_range_loss.append(torch.Tensor([1000]))
-            elif vec[i,5] < target[i,3]*1.05:
+            elif preds[i,4] < target[i,2]*1.05:
                 upper_range_loss.append(torch.Tensor([0]))
             else:
-                upper_range_loss.append(torch.Tensor([vec[i,5] - target[i,3]]) ** 2)
+                upper_range_loss.append(torch.Tensor([preds[i,4] - target[i,2]*1.05]) ** 2)
 
         upper_range_loss = torch.Tensor(lowe_range_loss)
 
