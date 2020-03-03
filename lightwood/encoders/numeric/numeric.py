@@ -5,7 +5,7 @@ import logging
 
 class NumericEncoder:
 
-    def __init__(self, data_type=None, is_target=False, quantile=None):
+    def __init__(self, data_type=None, is_target=False, quantile=0.95):
         self._type = data_type
         self._min_value = None
         self._max_value = None
