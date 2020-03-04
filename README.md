@@ -3,9 +3,11 @@
 	<br>
 	<br>
 </h1>
+--------------------------------------------------------------------------------
 
 
 [![Build Status](https://travis-ci.org/mindsdb/lightwood.svg?branch=master)](https://travis-ci.org/mindsdb/lightwood)
+![](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/lightwood)
 
@@ -42,7 +44,7 @@ Import [Predictor](https://mindsdb.github.io/lightwood/API/) from Lightwood
 from lightwood import Predictor
 ```
 
-Train the model:
+Train the model.
 ```python
 import pandas
 sensor3_predictor = Predictor(output=['sensor3']).learn(from_data=pandas.read_csv('sensor_data.csv'))
@@ -52,6 +54,8 @@ You can now predict what *sensor3* value will be.
 ```python
 prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
 ```
+
+* You can also try Lightwood in Google Colab: [![Google Colab](https://colab.research.google.com/assets/colab-badge.svg "Lightwood")](https://colab.research.google.com/drive/10W43sur_uj28ROiGuAIF9X46_Xrx1e7K)
 
 ## License ![PyPI - License](https://img.shields.io/pypi/l/lightwood)
 
