@@ -14,33 +14,42 @@ A Pytorch based framework that breaks down machine learning problems into smalle
 
 
 # Documentation
-Learn more  from the [Lightwood's docs](https://mindsdb.github.io/lightwood/API/).  
+Learn more from the [Lightwood's docs](https://mindsdb.github.io/lightwood/API/).  
 
-# Quick start
+## Try it out
+
+### Installation
+You can install Lightwood from pip:
+
 ```python
 pip3 install lightwood
 ```
+>Note: depending on your environment, you might have to use pip instead of pip3 in the above command.
 
-### Learn
+### Usage
+Given the simple sensor_data.csv let's predict sensor3 values.
+| sensor1  | sensor2 | sensor3 |
+|----|----|----|
+|  1 | -1 | -1 |
+| 0  | 1  | 0  |
+| -1  |- 1  |1  |
 
-You can train a Predictor as follows:
-
+Import [Predictor](https://mindsdb.github.io/lightwood/API/) from Lightwood
 ```python
 from lightwood import Predictor
-sensor3_predictor = Predictor(output=['sensor3']).learn(from_data=pandas.read_csv('sensor_data.csv'))
-
 ```
 
-### Predict
-
-You can now given new readings from *sensor1* and *sensor2* predict what *sensor3* will be.
+Train the model:
+```python
+import pandas
+sensor3_predictor = Predictor(output=['sensor3']).learn(from_data=pandas.read_csv('sensor_data.csv'))
+```
+You can now predict what *sensor3* value will be.
 
 ```python
-
 prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
-
 ```
 
-## License
+## License ![PyPI - License](https://img.shields.io/pypi/l/lightwood)
 
-[License](https://github.com/mindsdb/lightwood/blob/master/LICENSE)
+* [Lightwood License](https://github.com/mindsdb/lightwood/blob/master/LICENSE)
