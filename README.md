@@ -3,13 +3,12 @@
 	<br>
 	<br>
 </h1>
---------------------------------------------------------------------------------
-
 
 [![Build Status](https://travis-ci.org/mindsdb/lightwood.svg?branch=master)](https://travis-ci.org/mindsdb/lightwood)
 ![](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/lightwood)
+[![Discourse posts](https://img.shields.io/discourse/posts?server=https%3A%2F%2Fcommunity.mindsdb.com%2F)](https://community.mindsdb.com/)
 
 Lightwood is like Legos for Machine Learning. 
 
@@ -56,6 +55,9 @@ prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
 ```
 
 * You can also try Lightwood in Google Colab: [![Google Colab](https://colab.research.google.com/assets/colab-badge.svg "Lightwood")](https://colab.research.google.com/drive/10W43sur_uj28ROiGuAIF9X46_Xrx1e7K)
+
+## Contributing
+Thanks for your interest.There are many ways to contribute to this project. Get started [here](https://github.com/mindsdb/lightwood/blob/master/CONTRIBUTING.md).
 
 ## License ![PyPI - License](https://img.shields.io/pypi/l/lightwood)
 
