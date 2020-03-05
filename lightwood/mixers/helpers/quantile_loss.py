@@ -5,7 +5,7 @@ class RangeLoss(torch.nn.Module):
     def __init__(self, reduce='mean', **kwargs):
         super().__init__()
         self.reduce = reduce
-        self.range = 0.02
+        self.range = 0.5
         self.use_log = False
 
     def forward(self, preds, target):
