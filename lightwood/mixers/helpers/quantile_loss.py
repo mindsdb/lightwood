@@ -27,6 +27,11 @@ class RangeLoss(torch.nn.Module):
                 if preds[k][1] * (1 + self.range) > target[k][1] and preds[k][1] * (1 - self.range) < target[k][1]:
                     target[k][1] = preds[k][1]
 
+        if self.use_log:
+            preds = preds.clone()
+            preds[:,1] = preds[:,1].log()
+            target[:,1] = target[:,1].log()
+
         loss = (preds - target) ** 2
 
         if self.reduce is False:
