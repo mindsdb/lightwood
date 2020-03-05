@@ -11,7 +11,8 @@ import operator
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
-from lightwood.mixers.helpers.quantile_loss import QuantileLoss
+#from lightwood.mixers.helpers.quantile_loss import QuantileLoss
+from lightwood.mixers.helpers.quantile_loss import RangeLoss as QuantileLoss
 #from torch.nn import MSELoss as QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG

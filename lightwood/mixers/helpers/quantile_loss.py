@@ -1,12 +1,42 @@
 import torch
 
 
+class RangeLoss(torch.nn.Module):
+    def __init__(self, reduce='mean', **kwargs):
+        super().__init__()
+        self.reduce = reduce
+        self.range = 0.05
+
+    def forward(self, preds, target):
+        target = target.clone()
+
+        for k in range(len(preds)):
+            for i in [0,2]:
+                if preds[k][i] < 0.1 and target[k][i] == 0:
+                    target[k][i] = preds[k][i]
+                if preds[k][i] > 0.9 and target[k][i] == 1:
+                    target[k][i] = preds[k][i]
+
+            if preds[k][1] * (1 + self.range) > target[k][1] and preds[k][1] * (1 - self.range) < target[k][1]:
+                target[k][1] = preds[k][1]
+
+        loss = (preds - target) ** 2
+
+        if self.reduce is False:
+            return loss
+        if self.reduce == 'mean':
+            return torch.mean(loss)
+
+        return torch.mean(loss)
+
+
 class QuantileLoss(torch.nn.Module):
     def __init__(self, reduce='mean', **kwargs):
         super().__init__()
         self.reduce = reduce
 
     def forward(self, preds, target):
+        print(preds)
         main_mse_loss = (preds[:,:3] - target[:,:3]) ** 2
 
         lowe_range_loss = []
@@ -32,7 +62,7 @@ class QuantileLoss(torch.nn.Module):
         upper_range_loss = torch.Tensor(upper_range_loss).to(preds.device)
 
         loss = torch.cat([main_mse_loss, lowe_range_loss, upper_range_loss], 1)
-        
+
         if self.reduce is False:
             return loss
         if self.reduce == 'mean':
