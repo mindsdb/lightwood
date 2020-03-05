@@ -30,7 +30,6 @@ We use GitHub issues to track bugs and features. Report them by opening a [new i
 # Code review process
 The Pull Request reviews are done on a regular basis. 
 Please, make sure you respond to our feedback/questions.
-[![Discourse posts](https://img.shields.io/discourse/posts?server=https%3A%2F%2Fcommunity.mindsdb.com%2F)](https://community.mindsdb.com/)
 
 # Community
 If you have additional questions or you want to chat with MindsDB core team, you can join our community [![Discourse posts](https://img.shields.io/discourse/posts?server=https%3A%2F%2Fcommunity.mindsdb.com%2F)](https://community.mindsdb.com/). To get updates on MindsDB’s latest announcements, releases, and events, [sign up for our newsletter](https://mindsdb.us20.list-manage.com/subscribe/post?u=5174706490c4f461e54869879&amp;id=242786942a).
