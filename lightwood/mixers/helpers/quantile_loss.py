@@ -5,20 +5,27 @@ class RangeLoss(torch.nn.Module):
     def __init__(self, reduce='mean', **kwargs):
         super().__init__()
         self.reduce = reduce
-        self.range = 0.05
+        self.range = 0.02
+        self.use_log = False
 
     def forward(self, preds, target):
         target = target.clone()
 
         for k in range(len(preds)):
             for i in [0,2]:
+                # For is-zer and is-negative we don't care about the exact value, so just check that it's in the correct ballpark and, if so, apply no penalty (by making the target equll to the prediction)
                 if preds[k][i] < 0.1 and target[k][i] == 0:
                     target[k][i] = preds[k][i]
                 if preds[k][i] > 0.9 and target[k][i] == 1:
                     target[k][i] = preds[k][i]
 
-            if preds[k][1] * (1 + self.range) > target[k][1] and preds[k][1] * (1 - self.range) < target[k][1]:
+            # If 0, we don't care about the number predicted
+            if preds[k][2] > 0.9:
                 target[k][1] = preds[k][1]
+            else:
+                # If the number is within the range desired, apply no penalty (by making the target equall to the prediction)
+                if preds[k][1] * (1 + self.range) > target[k][1] and preds[k][1] * (1 - self.range) < target[k][1]:
+                    target[k][1] = preds[k][1]
 
         loss = (preds - target) ** 2
 
