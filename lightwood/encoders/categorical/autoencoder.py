@@ -1,4 +1,5 @@
 import random
+import logging
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -117,7 +118,6 @@ if __name__ == "__main__":
     import random
     import string
     from sklearn.metrics import accuracy_score
-    import logging
 
     logging.getLogger().setLevel(logging.DEBUG)
 
