@@ -5,8 +5,9 @@ class RangeLoss(torch.nn.Module):
     def __init__(self, reduce='mean', **kwargs):
         super().__init__()
         self.reduce = reduce
-        self.range = 0.5
-        self.use_log = False
+        self.range = 0.05
+        self.use_log = True
+        self.compare_log = True
 
     def forward(self, preds, target):
         target = target.clone()
@@ -14,23 +15,28 @@ class RangeLoss(torch.nn.Module):
         for k in range(len(preds)):
             for i in [0,2]:
                 # For is-zer and is-negative we don't care about the exact value, so just check that it's in the correct ballpark and, if so, apply no penalty (by making the target equll to the prediction)
-                if preds[k][i] < 0.1 and target[k][i] == 0:
-                    target[k][i] = preds[k][i]
-                if preds[k][i] > 0.9 and target[k][i] == 1:
-                    target[k][i] = preds[k][i]
+                pass
+                #if preds[k][i] < 0.1 and target[k][i] == 0:
+                #    target[k][i] = preds[k][i]
+                #if preds[k][i] > 0.9 and target[k][i] == 1:
+                #    target[k][i] = preds[k][i]
 
             # If 0, we don't care about the number predicted
             if preds[k][2] > 0.9:
                 target[k][1] = preds[k][1]
             else:
                 # If the number is within the range desired, apply no penalty (by making the target equall to the prediction)
-                if preds[k][1] * (1 + self.range) > target[k][1] and preds[k][1] * (1 - self.range) < target[k][1]:
-                    target[k][1] = preds[k][1]
+                if self.compare_log:
 
+                else:
+                    if preds[k][1] * (1 + self.range) > target[k][1] and preds[k][1] * (1 - self.range) < target[k][1]:
+                        target[k][1] = preds[k][1]
+        '''
         if self.use_log:
             preds = preds.clone()
             preds[:,1] = preds[:,1].log()
             target[:,1] = target[:,1].log()
+        '''
 
         loss = (preds - target) ** 2
 
