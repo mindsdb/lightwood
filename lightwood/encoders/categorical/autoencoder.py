@@ -118,7 +118,6 @@ if __name__ == "__main__":
     import random
     import string
     from sklearn.metrics import accuracy_score
-    import logging
 
     logging.getLogger().setLevel(logging.DEBUG)
 
