@@ -48,7 +48,6 @@ class AmplitudeTsEncoder:
 
             audio_arr = list(np.array(audio.get_array_of_samples()))
 
-            # Cesium is bad at encoding large pieces of audio
             encoded_audio = self._ts_encoder.encode([audio_arr])
 
             encoded_audio_arr.append(encoded_audio[0])
