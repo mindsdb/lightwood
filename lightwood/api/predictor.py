@@ -217,7 +217,8 @@ class Predictor:
             mixer_class({}).fit_data_source(from_data_ds)
         except Exception as e:
             # Not all mixers might require this
-            print(e)
+            # print(e)
+            pass
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
@@ -448,7 +449,6 @@ class Predictor:
                         if 'confidences' in helper_mixer_predictions[output_column] and helper_mixer_predictions[output_column]['confidences'] is not None:
                             main_mixer_predictions[output_column]['confidences'] = list(helper_mixer_predictions[output_column]['confidences'])
 
-        print(main_mixer_predictions)
         return main_mixer_predictions
 
     @staticmethod
