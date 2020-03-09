@@ -66,10 +66,10 @@ class Predictor:
 
     @staticmethod
     def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
-                       is_categorical_output, max_training_time=None, max_epochs=None):
+                       max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
         lowest_error = 10000
-        mixer = mixer_class(dynamic_parameters, is_categorical_output)
+        mixer = mixer_class(dynamic_parameters)
 
         if max_training_time is None and max_epochs is None:
             err = "Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`"
@@ -129,7 +129,7 @@ class Predictor:
             predicted =  predictions[output_column]['values']
 
             weight_map = None
-            if 'weights' in train_ds.get_column_config(output_column):
+            if 'weights' in test_ds.get_column_config(output_column):
                 weight_map = train_ds.get_column_config(output_column)['weights']
 
             accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, weight_map)
@@ -184,13 +184,6 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['output_features']]
             self._input_columns = [col['name'] for col in self.config['input_features']]
 
-        # @TODO Make Cross Entropy Loss work with multiple outputs
-        if len(self.config['output_features']) == 1 \
-                and self.config['output_features'][0]['type'] in (COLUMN_DATA_TYPES.CATEGORICAL):
-            is_categorical_output = True
-        else:
-            is_categorical_output = False
-
         if stop_training_after_seconds is None:
             stop_training_after_seconds = round(from_data.shape[0] * from_data.shape[1] / 5)
 
@@ -224,7 +217,8 @@ class Predictor:
             mixer_class({}).fit_data_source(from_data_ds)
         except Exception as e:
             # Not all mixers might require this
-            print(e)
+            # print(e)
+            pass
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
@@ -253,7 +247,7 @@ class Predictor:
             training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(
-                mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, is_categorical_output,
+                mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
                 max_training_time=training_time_per_iteration, max_epochs=None))
 
             logging.info('Using hyperparameter set: ', best_parameters)
@@ -266,7 +260,7 @@ class Predictor:
             except Exception as e:
                 logging.warning(f'Failed to train helper mixers with error: {e}')
 
-        mixer = mixer_class(best_parameters, is_categorical_output=is_categorical_output)
+        mixer = mixer_class(best_parameters)
         self._mixer = mixer
 
         for param in mixer_params:
@@ -346,7 +340,7 @@ class Predictor:
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.15:
+                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.35:
                         logging.info('Started selfaware training !')
                         mixer.start_selfaware_training = True
                         lowest_error = None
@@ -425,6 +419,7 @@ class Predictor:
                             logging.info('Finished training model !')
                             break
 
+        self._mixer.build_confidence_normalization_data(test_data_ds)
         self._mixer.encoders = from_data_ds.encoders
         return self
 

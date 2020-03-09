@@ -10,11 +10,17 @@ from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
 
 try:
     from lightwood.encoders.time_series.cesium_ts import CesiumTsEncoder
-    from lightwood.encoders.audio.audio import AmplitudeTsEncoder
-    export_optional_encoder = True
+    export_cesium = True
 except:
-    export_optional_encoder = False
-    print('Time series encoders can\'t be loaded')
+    export_cesium = False
+    print('Failed to export cesium timeseires encoder')
+
+try:
+    from lightwood.encoders.audio.audio import AmplitudeTsEncoder
+    export_ampl = True
+except:
+    export_ampl = False
+    print('Failed to export amplitude audio encoder')
 
 class DateTime:
     DatetimeEncoder = DatetimeEncoder
@@ -39,11 +45,11 @@ class Categorical:
 
 class TimeSeries:
     TsFreshTsEncoder = TsFreshTsEncoder
-    if export_optional_encoder:
+    if export_cesium:
         CesiumTsEncoder = CesiumTsEncoder
 
 class Audio:
-    if export_optional_encoder:
+    if export_ampl:
         AmplitudeTsEncoder = AmplitudeTsEncoder
 
 class BuiltinEncoders:

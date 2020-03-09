@@ -28,7 +28,7 @@ class SubSet(Dataset):
 
     def __getattribute__(self, name):
         if name in ['configuration', 'encoders', 'transformer', 'training',
-                    'output_weights', 'dropout_dict', 'disable_cache']:
+                    'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes']:
             return self.data_source.__getattribute__(name)
         else:
             return object.__getattribute__(self, name)
@@ -60,6 +60,8 @@ class DataSource(Dataset):
         self.enable_dropout = False
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
         self.subsets = {}
+        self.out_indexes = None
+        self.out_types = None
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -195,6 +197,8 @@ class DataSource(Dataset):
 
         if self.transformer:
             sample = self.transformer.transform(sample)
+            if self.out_indexes is None:
+                self.out_indexes = self.transformer.out_indexes
 
         if not self.disable_cache:
             self.transformed_cache[idx] = sample
@@ -225,6 +229,7 @@ class DataSource(Dataset):
             from the training dataset.
         """
         input_encoder_training_data = {'targets': []}
+        self.out_types = []
 
         for feature_set in ['output_features', 'input_features']:
             for feature in self.configuration[feature_set]:
@@ -251,6 +256,9 @@ class DataSource(Dataset):
                 # Instantiate the encoder and pass any arguments given via the configuration
                 is_target = True if feature_set == 'output_features' else False
                 encoder_instance = encoder_class(is_target=is_target)
+
+                if is_target:
+                    self.out_types.append(config['type'])
 
                 encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
                 for attr in encoder_attrs:

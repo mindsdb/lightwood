@@ -24,9 +24,6 @@ class CONFIG:
     TRAIN_TO_PREDICT_TARGET = True
     MAX_ENCODER_TRAINING_TIME = 3600 * 2
 
-    # Flags bellow are deprecated but still here in case we want to use the feature again
-    OVERSAMPLE = False
-
     MONITORING = {
         'epoch_loss': False
         ,'batch_loss': False
