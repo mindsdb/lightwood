@@ -31,7 +31,7 @@ def train_model():
 
     # The actual training process
     predictor = lightwood.Predictor(config)
-    predictor.learn(from_data=df, callback_on_iter=train_callback, eval_every_x_epochs=1, stop_training_after_seconds=1)
+    predictor.learn(from_data=df, callback_on_iter=train_callback, eval_every_x_epochs=1, stop_training_after_seconds=100)
 
     # Save the lightwood model
     predictor.save('lightwood_model.dill')
