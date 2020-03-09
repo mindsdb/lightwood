@@ -8,7 +8,7 @@ def train_model():
     df = pd.read_csv('https://raw.githubusercontent.com/mindsdb/mindsdb-examples/master/benchmarks/default_of_credit/dataset/train.csv')
 
     # A configuration describing the contents of the dataframe, what are the targets we want to predict and what are the features we want to use
-    # Note the `weights` for the output column `default.payment.next.month`, since the number of samples is uneven between the two categories, but we care about balanced accuracy rather than overall accuracy
+    # Note: the `weights` for the output column `default.payment.next.month`, since the number of samples is uneven between the two categories, but we care about balanced accuracy rather than overall accuracy
     config = {'input_features': [
         {'name': 'ID', 'type': 'numeric'}, {'name': 'LIMIT_BAL', 'type': 'numeric'},
         {'name': 'SEX', 'type': 'categorical'}, {'name': 'EDUCATION', 'type': 'categorical'},
@@ -31,7 +31,8 @@ def train_model():
 
     # The actual training process
     predictor = lightwood.Predictor(config)
-    predictor.learn(from_data=df, callback_on_iter=train_callback, eval_every_x_epochs=1, stop_training_after_seconds=100)
+    # Note: If `stop_training_after_seconds` is not set, training will stop automatically once we determine the model is overfitting (we separate a testing and a training dataset internally from the dataframe given and only train on the training one, using the testing one to determine overfitting, pick the best model and evaluate model accuracy)
+    predictor.learn(from_data=df, callback_on_iter=train_callback, eval_every_x_epochs=5, stop_training_after_seconds=100)
 
     # Save the lightwood model
     predictor.save('lightwood_model.dill')
