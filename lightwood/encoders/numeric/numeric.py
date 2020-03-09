@@ -34,7 +34,7 @@ class NumericEncoder:
 
             self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
             self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
-            
+
             count += number
             abs_count += abs(number)
 
@@ -71,7 +71,8 @@ class NumericEncoder:
                     if number == 0:
                         vector[2] = 1
                     else:
-                        vector[1] = math.log(abs(number))
+                        vector[1] = math.log(abs(number)) #abs(number)/self._max_value
+
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
@@ -114,7 +115,7 @@ class NumericEncoder:
                 is_none = False
 
                 try:
-                    real_value = math.exp(encoded_nr)
+                    real_value = math.exp(encoded_nr) #encoded_nr * self._max_value
                     if is_negative:
                         real_value = -real_value
                 except:
@@ -122,6 +123,11 @@ class NumericEncoder:
                         real_value = pow(2, 63)
                     else:
                         real_value = float('inf')
+
+                if is_none:
+                    real_value = None
+                if is_zero:
+                    real_value = 0
 
                 if self._type == 'int':
                     real_value = round(real_value)
@@ -135,13 +141,10 @@ class NumericEncoder:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     is_none = True
 
-            if is_none:
-                ret.append(None)
-                continue
-
-            if is_zero:
-                ret.append(0)
-                continue
+                if is_none:
+                    real_value = None
+                if is_zero:
+                    real_value = 0
 
             ret.append(real_value)
 

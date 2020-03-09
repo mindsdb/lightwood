@@ -11,6 +11,7 @@ class TsFreshTsEncoder:
         self._pytorch_wrapper = torch.FloatTensor
         self.numerical_encoder = NumericEncoder()
         self.max_series_len = 0
+        self.n_jobs = 6
 
     def prepare_encoder(self, priming_data):
         all_numbers = []
@@ -52,7 +53,12 @@ class TsFreshTsEncoder:
             all_values.append(values)
             df = pd.DataFrame({'main_feature': values, 'id': [1] * len(values)})
 
-            features = extract_features(df, column_id='id',disable_progressbar=True, default_fc_parameters=default_fc_parameters,n_jobs=6)
+            try:
+                features = extract_features(df, column_id='id',disable_progressbar=True, default_fc_parameters=default_fc_parameters,n_jobs=self.n_jobs)
+            except:
+                self.n_jobs = 1
+                features = extract_features(df, column_id='id',disable_progressbar=True, default_fc_parameters=default_fc_parameters,n_jobs=self.n_jobs)
+
             features.fillna(value=0, inplace=True)
 
             features = list(features.iloc[0])
