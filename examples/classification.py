@@ -52,7 +52,7 @@ def test_model():
 
     # Get the balanced accuracy score to see how well we did (in this case > 0.5 means better than random)
     balanced_accuracy = balanced_accuracy_score(real, predicted)
-    print(f'Balacned accuracy score of {balanced_accuracy}')
+    print(f'Balacned accuracy score of {round(balanced_accuracy,1)}%')
 
 
 # Run as main
