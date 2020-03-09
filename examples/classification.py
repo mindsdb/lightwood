@@ -50,9 +50,9 @@ def test_model():
     predictions = predictor.predict(when_data=test)
     predicted = [str(x) for x in predictions['default.payment.next.month']['predictions']]
 
-    # Get the balanced accuracy score to see how well we did (in this case > 0.5 means better than random)
-    balanced_accuracy = balanced_accuracy_score(real, predicted)
-    print(f'Balacned accuracy score of {round(balanced_accuracy,1)}%')
+    # Get the balanced accuracy score to see how well we did (in this case > 50% means better than random)
+    balanced_accuracy_pct = balanced_accuracy_score(real, predicted) * 100
+    print(f'Balacned accuracy score of {round(balanced_accuracy_pct,1)}%')
 
 
 # Run as main
