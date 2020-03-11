@@ -71,3 +71,4 @@ docs/index.rst
 docs/make.bat
 docs/Makefile
 docs/source
+examples/lightwood_model.dill
