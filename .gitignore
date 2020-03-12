@@ -4,6 +4,7 @@ __pycache__
 *.pth
 *.vec
 *.pkl
+*.dill
 integration_testing/*.csv
 integration_testing/*.tsv
 integration_testing/*.sql
