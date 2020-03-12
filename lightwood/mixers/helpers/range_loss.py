@@ -2,7 +2,7 @@ import torch
 
 
 class RangeLoss(torch.nn.Module):
-    def __init__(self, range, reduce='mean', **kwargs):
+    def __init__(self, confidence_range, reduce='mean', **kwargs):
         super().__init__()
         self.reduce = reduce
         self.confidence_range = confidence_range
