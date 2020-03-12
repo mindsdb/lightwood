@@ -181,7 +181,6 @@ class NnMixer:
 
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [max(1 - abs(x[k]), 0) for x in awareness_arr]
-                print(predictions[output_column]['selfaware_confidences'])
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
