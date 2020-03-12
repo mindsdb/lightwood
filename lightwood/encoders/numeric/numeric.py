@@ -13,6 +13,7 @@ class NumericEncoder:
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self._is_target = is_target
+        self._add_log = False
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -69,10 +70,12 @@ class NumericEncoder:
                     if number < 0:
                         vector[0] = 1
                     if number == 0:
-                        vector[2] = 1
+                        vector[1] = 1
                     else:
-                        vector[1] = abs(number)/self._abs_mean
-                        #vector[1] = math.log(abs(number))
+                        vector[2] = abs(number)/self._abs_mean
+                        # Just used for the loss
+                        if self._add_log:
+                            vector.append(math.log(abs(number)))
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
@@ -98,25 +101,24 @@ class NumericEncoder:
                 if not math.isnan(vector[0]):
                     is_negative = True if abs(round(vector[0])) == 1 else False
                 else:
-                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                    logging.warning(f'(1) Occurance of `nan` value in encoded numerical value: {vector}')
                     is_negative = False
 
-                if not math.isnan(vector[1]):
-                    encoded_nr = vector[1]
+                if not math.isnan(vector[2]):
+                    encoded_nr = vector[2]
                 else:
-                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                    logging.warning(f'(2) Occurance of `nan` value in encoded numerical value: {vector}')
                     encoded_nr = 0
 
-                if not math.isnan(vector[2]):
-                    is_zero = True if abs(round(vector[2])) == 1 else False
+                if not math.isnan(vector[1]):
+                    is_zero = True if abs(round(vector[1])) == 1 else False
                 else:
-                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
+                    logging.warning(f'(3) Occurance of `nan` value in encoded numerical value: {vector}')
                     is_zero = False
                 is_none = False
 
                 try:
                     real_value = encoded_nr * self._abs_mean
-                    #real_value = math.exp(encoded_nr)
                     if is_negative:
                         real_value = -real_value
                 except:
