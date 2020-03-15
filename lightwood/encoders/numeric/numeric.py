@@ -64,17 +64,16 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
-                [actual_number,log(abs(number)) if abs(number)>0 else -100]
-
-                vector = [0] * 3
+                vector = [0] * 2
                 try:
-                    vector[0] = number # Alternative: abs(number)/self._abs_mean
+                    vector[0] = number/self._abs_mean
+                    #vector[0] = number
                     vector[1] = math.log(abs(number)) if number > 0 else -100
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
                     # but we need to figure out why it's happening and fix it properly later
-                    vector = [0] * 3
+                    vector = [0] * 2
 
             else:
                 vector = [0] * 2
@@ -94,12 +93,13 @@ class NumericEncoder:
             if self._is_target:
                 if not math.isnan(vector[0]):
                     linear_value = vector[0]
-                    real_value = linear_value # lienar_value * self._abs_mean under alternative encoding
+                    real_value = linear_value * self._abs_mean
+                    #real_value = linear_value
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     real_value = None
 
-                if self._type == 'int':
+                if self._type == 'int' and real_value is not None:
                     real_value = int(round(real_value))
             else:
                 is_zero = False
