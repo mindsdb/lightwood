@@ -64,15 +64,12 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
+                [actual_number,log(abs(number)) if abs(number)>0 else -100]
+
                 vector = [0] * 3
                 try:
-                    if number < 0:
-                        vector[0] = 1
-                    if number == 0:
-                        vector[2] = 1
-                    else:
-                        vector[1] = math.log(abs(number)) #abs(number)/self._max_value
-
+                    vector[0] = number # Alternative: abs(number)/self._abs_mean
+                    vector[1] = math.log(abs(number)) if number > 0 else -100
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
@@ -96,41 +93,14 @@ class NumericEncoder:
         for vector in encoded_values.tolist():
             if self._is_target:
                 if not math.isnan(vector[0]):
-                    is_negative = True if abs(round(vector[0])) == 1 else False
+                    linear_value = vector[0]
+                    real_value = linear_value # lienar_value * self._abs_mean under alternative encoding
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                    is_negative = False
-
-                if not math.isnan(vector[1]):
-                    encoded_nr = vector[1]
-                else:
-                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                    encoded_nr = 0
-
-                if not math.isnan(vector[2]):
-                    is_zero = True if abs(round(vector[2])) == 1 else False
-                else:
-                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                    is_zero = False
-                is_none = False
-
-                try:
-                    real_value = math.exp(encoded_nr) #encoded_nr * self._max_value
-                    if is_negative:
-                        real_value = -real_value
-                except:
-                    if self._type == 'int':
-                        real_value = pow(2, 63)
-                    else:
-                        real_value = float('inf')
-
-                if is_none:
                     real_value = None
-                if is_zero:
-                    real_value = 0
 
                 if self._type == 'int':
-                    real_value = round(real_value)
+                    real_value = int(round(real_value))
             else:
                 is_zero = False
                 is_negative = False
