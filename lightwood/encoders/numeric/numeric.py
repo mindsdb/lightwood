@@ -64,16 +64,16 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
-                vector = [0] * 1
+                vector = [0] * 2
                 try:
                     vector[0] = number/self._abs_mean
                     #vector[0] = number
-                    #vector[1] = math.log(abs(number)) if number > 0 else -100
+                    vector[1] = math.log(abs(number)) if number > 0 else -100
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
                     # but we need to figure out why it's happening and fix it properly later
-                    vector = [0] * 1
+                    vector = [0] * 2
 
             else:
                 vector = [0] * 2

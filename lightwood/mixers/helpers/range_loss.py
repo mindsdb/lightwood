@@ -1,8 +1,5 @@
 import torch
 
-
-
-
 class RangeLoss(torch.nn.Module):
     def __init__(self, confidence_range, reduce='mean', **kwargs):
         super().__init__()
@@ -18,17 +15,7 @@ class RangeLoss(torch.nn.Module):
             if preds[k][0] * (1 + self.confidence_range) > target[k][0] and preds[k][0] * (1 - self.confidence_range) < target[k][0]:
                 target[k][0] = preds[k][0]
 
-        loss_arr = []
-
-        if self.lienar_loss:
-            loss_arr.append((preds - target) ** 2)
-        if self.log_loss:
-            loss_arr.append((preds.log() - target.log()) ** 2)
-
-        loss = loss_arr[0]
-        for loss_ele in loss_arr[1:]:
-            loss += loss_ele
-        loss = loss.div(len(loss_ele))
+        loss = (preds - target) ** 2
 
         if self.reduce is False:
             return loss
