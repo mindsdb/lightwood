@@ -13,7 +13,7 @@ class CONFIG:
     # Enable deterministic cuda flag and use seeds everywhere (static or based on features of the dataset)
     DETERMINISTIC = True
     SELFAWARE = True
-    HELPER_MIXERS = True
+    HELPER_MIXERS = False#True
     FORCE_HELPER_MIXERS = False
     ENABLE_DROPOUT = True
 
