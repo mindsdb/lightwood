@@ -318,11 +318,11 @@ class NnMixer:
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
-                        self.criterion_arr.append(torch.nn.MSELoss())
-                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+                        self.criterion_arr.append(RangeLoss(confidence_range=self.numeric_confidence_range))
+                        self.unreduced_criterion_arr.append(RangeLoss(reduce=False, confidence_range=self.numeric_confidence_range))
                     else:
-                        self.criterion_arr.append(torch.nn.MSELoss())
-                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+                        self.criterion_arr.append(RangeLoss(confidence_range=self.numeric_confidence_range))
+                        self.unreduced_criterion_arr.append(RangeLoss(reduce=False, confidence_range=self.numeric_confidence_range))
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
