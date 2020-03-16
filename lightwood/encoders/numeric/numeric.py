@@ -68,7 +68,7 @@ class NumericEncoder:
                 try:
                     vector[0] = number/self._abs_mean
                     #vector[0] = number
-                    vector[1] = math.log(abs(number)) if number > 0 else -100
+                    vector[1] = math.log(abs(number))
                 except:
                     logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
                     # @TODO For now handle this by setting to zero as a hotfix,
