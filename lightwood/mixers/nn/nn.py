@@ -11,6 +11,7 @@ import operator
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.mixers.helpers.range_loss import RangeLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
@@ -32,6 +33,7 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
+        self.numeric_confidence_range = 0.05
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
@@ -175,9 +177,11 @@ class NnMixer:
                 output_column,
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
+            predictions[output_column] = {'predictions': decoded_predictions, 'confidence_range': self.numeric_confidence_range}
+
             predictions[output_column] = {'predictions': decoded_predictions}
             if awareness_arr is not None:
-                predictions[output_column]['selfaware_confidences'] = [1/x[k] for x in awareness_arr]
+                predictions[output_column]['selfaware_confidences'] = [max(1 - abs(x[k]), 0) for x in awareness_arr]
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
