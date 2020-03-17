@@ -178,8 +178,6 @@ class NnMixer:
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
             predictions[output_column] = {'predictions': decoded_predictions, 'confidence_range': self.numeric_confidence_range}
-
-            predictions[output_column] = {'predictions': decoded_predictions}
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [max(1 - abs(x[k]), 0) for x in awareness_arr]
 
