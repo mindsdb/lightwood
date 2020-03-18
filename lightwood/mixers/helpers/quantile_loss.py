@@ -8,7 +8,7 @@ class QuantileLoss(nn.Module):
         assert preds.size(0) == target.size(0)
         losses = []
         for i, q in enumerate(self.quantiles):
-            errors = target - preds[:, i*2:i*2+1]
+            errors = target[:, i*2:i*2+1] - preds[:, i*2:i*2+1]
             losses.append(
                 torch.max(
                    (q-1) * errors,
