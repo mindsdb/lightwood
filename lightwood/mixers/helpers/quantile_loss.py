@@ -1,7 +1,11 @@
-class QuantileLoss(nn.Module):
+import torch
+
+
+class QuantileLoss(torch.nn.Module):
     def __init__(self, quantiles, reduce='mean', **kwargs):
         super().__init__()
         self.quantiles = quantiles
+        self.reduce = reduce
 
     def forward(self, preds, target):
         assert not target.requires_grad

@@ -64,16 +64,16 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
-                vector = [0] * 2
-                try:
-                    vector[0] = number/self._abs_mean
-                    #vector[0] = number
-                    vector[1] = math.log(abs(number)) if number != 0 else -100
-                except:
-                    logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
-                    # @TODO For now handle this by setting to zero as a hotfix,
-                    # but we need to figure out why it's happening and fix it properly later
-                    vector = [0] * 2
+                vector = [0] * 6
+
+                vector[0] = number/self._abs_mean
+                vector[1] = math.log(abs(number)) if number != 0 else -100
+
+                # Quantiles (Just repeats essentially, but this is the easiest way to get this working)
+                vector[2] = number/self._abs_mean
+                vector[3] = math.log(abs(number)) if number != 0 else -100
+                vector[4] = number/self._abs_mean
+                vector[5] = math.log(abs(number)) if number != 0 else -100
 
             else:
                 vector = [0] * 2
@@ -92,15 +92,20 @@ class NumericEncoder:
         for vector in encoded_values.tolist():
             if self._is_target:
                 if not math.isnan(vector[0]):
-                    linear_value = vector[0]
-                    real_value = linear_value * self._abs_mean
+                    first_quantile = vector[0] * self._abs_mean
+                    second_quantile = vector[2] * self._abs_mean
+                    third_quantile = vector[4] * self._abs_mean
                     #real_value = linear_value
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                    real_value = None
+                    first_quantile = None
+                    second_quantile = None
+                    third_quantile = None
 
                 if self._type == 'int' and real_value is not None:
-                    real_value = int(round(real_value))
+                    real_value = [int(round(first_quantile)),int(round(second_quantile)),int(round(third_quantile))]
+                else:
+                    real_value = [first_quantile,second_quantile,third_quantile]
             else:
                 is_zero = False
                 is_negative = False

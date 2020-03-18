@@ -317,7 +317,7 @@ class NnMixer:
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
                         self.criterion_arr.append(QuantileLoss(quantiles=[0.95,0.5,0.05]))
-                        self.unreduced_criterion_arr.append(RangeQuantileLossLoss(reduce=False, quantiles=[0.95,0.5,0.05]))
+                        self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=[0.95,0.5,0.05]))
                     else:
                         self.criterion_arr.append(QuantileLoss(quantiles=[0.95,0.5,0.05]))
                         self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=[0.95,0.5,0.05]))
