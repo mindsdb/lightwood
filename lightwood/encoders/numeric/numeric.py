@@ -102,7 +102,7 @@ class NumericEncoder:
                     second_quantile = None
                     third_quantile = None
 
-                if self._type == 'int' and real_value is not None:
+                if self._type == 'int' and first_quantile is not None and second_quantile is not None and third_quantile is not None:
                     real_value = [int(round(first_quantile)),int(round(second_quantile)),int(round(third_quantile))]
                 else:
                     real_value = [first_quantile,second_quantile,third_quantile]

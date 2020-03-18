@@ -43,6 +43,7 @@ class NnMixer:
         self.stop_selfaware_training = False
         self.is_selfaware = False
         self.last_unaware_net = False
+        self.out_types = None
 
         self.max_confidence_per_output = []
 
@@ -177,7 +178,12 @@ class NnMixer:
                 output_column,
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
-            predictions[output_column] = {'predictions': decoded_predictions, 'confidence_range': self.numeric_confidence_range}
+
+            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+                predictions[output_column] = {'predictions': [x[1] for x in decoded_predictions], 'confidence_range': [[x[0],x[2]] for x in decoded_predictions]}
+            else:
+                predictions[output_column] = {'predictions': decoded_predictions}
+
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [max(1 - abs(x[k]), 0) for x in awareness_arr]
 
@@ -294,6 +300,7 @@ class NnMixer:
         :return:
         """
         if initialize:
+            self.out_types = ds.out_types
             self.fit_data_source(ds)
 
             self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
@@ -319,8 +326,8 @@ class NnMixer:
                         self.criterion_arr.append(QuantileLoss(quantiles=[0.95,0.5,0.05]))
                         self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=[0.95,0.5,0.05]))
                     else:
-                        self.criterion_arr.append(QuantileLoss(quantiles=[0.95,0.5,0.05]))
-                        self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=[0.95,0.5,0.05]))
+                        self.criterion_arr.append(MSELoss())
+                        self.unreduced_criterion_arr.append(MSELoss(reduce=False))
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
