@@ -34,6 +34,7 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
+        self.quantiles = [0.95,0.5,0.05]
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
@@ -180,7 +181,7 @@ class NnMixer:
             )
 
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column] = {'predictions': [x[1] for x in decoded_predictions], 'confidence_range': [[x[0],x[2]] for x in decoded_predictions]}
+                predictions[output_column] = {'predictions': [x[1] for x in decoded_predictions], 'confidence_range': [[x[0],x[2]] for x in decoded_predictions], 'quantile_confidences': self.quantiles[0] - self.quantiles[2]}
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
@@ -323,8 +324,8 @@ class NnMixer:
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
-                        self.criterion_arr.append(QuantileLoss(quantiles=[0.95,0.5,0.05]))
-                        self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=[0.95,0.5,0.05]))
+                        self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
+                        self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=self.quantiles))
                     else:
                         self.criterion_arr.append(MSELoss())
                         self.unreduced_criterion_arr.append(MSELoss(reduce=False))
