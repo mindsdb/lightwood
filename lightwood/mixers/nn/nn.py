@@ -181,7 +181,7 @@ class NnMixer:
             )
 
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column] = {'predictions': [x[1] for x in decoded_predictions], 'confidence_range': [[x[0],x[2]] for x in decoded_predictions], 'quantile_confidences': self.quantiles[0] - self.quantiles[2]}
+                predictions[output_column] = {'predictions': [x[1] for x in decoded_predictions], 'confidence_range': [[x[0],x[2]] for x in decoded_predictions], 'quantile_confidences': [self.quantiles[0] - self.quantiles[2] for x in decoded_predictions]}
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
