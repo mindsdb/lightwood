@@ -34,7 +34,7 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
-        self.quantiles = [0.95,0.5,0.05]
+        self.quantiles = [0.05,0.5,0.95]
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
@@ -265,7 +265,8 @@ class NnMixer:
         get the actual mixer model
         :return: self.net
         """
-        return copy.deepcopy(self.net)
+        net = copy.deepcopy(self.net)
+        return net
 
     def update_model(self, model):
         """
