@@ -249,6 +249,10 @@ class NnMixer:
 
         self.net = self.net.train()
 
+        # To avoid weird behavior with nan values just return a very large number instead
+        if np.isnan(error):
+            return pow(10,12)
+
         return error
 
     def get_model_copy(self):
@@ -427,6 +431,7 @@ class NnMixer:
                 if awareness_loss is not None:
                     awareness_loss.backward(retain_graph=True)
 
+                running_loss += loss.item()
                 loss.backward()
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
