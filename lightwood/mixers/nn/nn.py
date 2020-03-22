@@ -249,10 +249,6 @@ class NnMixer:
 
         self.net = self.net.train()
 
-        # To avoid weird behavior with nan values just return a very large number instead
-        if np.isnan(error):
-            return pow(10,12)
-
         return error
 
     def get_model_copy(self):
@@ -260,6 +256,7 @@ class NnMixer:
         get the actual mixer model
         :return: self.net
         """
+        self.optimizer.zero_grad()
         return copy.deepcopy(self.net)
 
     def update_model(self, model):

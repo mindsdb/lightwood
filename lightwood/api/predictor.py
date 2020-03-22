@@ -307,7 +307,7 @@ class Predictor:
                     first_run = False
 
                     # Log this every now and then so that the user knows it's running
-                    if (int(time.time()) - log_reasure) > 0:
+                    if (int(time.time()) - log_reasure) > 30:
                         log_reasure = time.time()
                         logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
 

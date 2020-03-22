@@ -13,7 +13,8 @@ class DefaultNet(torch.nn.Module):
         # How many devices we can train this network on
         self.available_devices = 1
         self.max_variance = None
-        self.ds = ds
+        if ds is not None:
+            self.out_indexes = ds.out_indexes
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
@@ -104,8 +105,9 @@ class DefaultNet(torch.nn.Module):
                     self.output_size = layer.out_features
 
         if self.selfaware:
-            awareness_net_shape = [(self.input_size + self.output_size), max([int((self.input_size + self.output_size) * 1.5), 300]), len(self.ds.out_indexes)]
+            awareness_net_shape = [(self.input_size + self.output_size), max([int((self.input_size + self.output_size) * 1.5), 300]), len(self.out_indexes)]
             awareness_layers = []
+
 
             for ind in range(len(awareness_net_shape) - 1):
                 awareness_layers.append(torch.nn.Linear(awareness_net_shape[ind], awareness_net_shape[ind + 1]))
