@@ -101,7 +101,7 @@ class NumericEncoder:
                     lower_range = None
                     upper_range = None
 
-                if self._type == 'int' and first_quantile is not None and second_quantile is not None and third_quantile is not None:
+                if self._type == 'int' and real_value is not None and lower_range is not None and upper_range is not None:
                     real_value = [int(round(real_value)),int(round(lower_range)),int(round(upper_range))]
                 else:
                     real_value = [real_value,lower_range,upper_range]
