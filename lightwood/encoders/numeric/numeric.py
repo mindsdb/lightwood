@@ -68,13 +68,7 @@ class NumericEncoder:
 
                 try:
                     vector[0] = number/self._abs_mean
-                    #vector[1] = math.log(abs(number)) if number != 0 else -100
-
-                    # Quantiles (Just repeats essentially, but this is the easiest way to get this working)
-                    vector[1] = number/self._abs_mean
-                    #vector[3] = math.log(abs(number)) if number != 0 else -100
-                    #vector[4] = number/self._abs_mean
-                    vector[2] = math.log(abs(number)) if number != 0 else -100
+                    vector[1] = math.log(abs(number)) if number != 0 else -100
                 except:
                     vector = [0] * 6
                     logging.warning(f'Cannot encode target value: {number}')
@@ -95,11 +89,8 @@ class NumericEncoder:
         ret = []
         for vector in encoded_values.tolist():
             if self._is_target:
-                if not math.isnan(vector[0]) and not math.isnan(vector[1]) and not math.isnan(vector[1]):
+                if not math.isnan(vector[0]):
                     first_quantile = vector[0] * self._abs_mean
-                    second_quantile = vector[1] * self._abs_mean
-                    third_quantile = vector[2] * self._abs_mean
-                    #real_value = linear_value
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     first_quantile = None
