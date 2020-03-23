@@ -10,6 +10,19 @@ matrix:
       env:
         DEPLOYMENT_ENV="true"
 
+    - name: "Python 3.6 on Ubuntu 16.0.4"
+      os: linux
+      python: 3.6
+      node: 11.15.0
+      dist: xenial
+
+    - name: "Python 3.8 on Ubuntu 16.0.4"
+      os: linux
+      python: 3.8
+      node: 11.15.0
+      dist: xenial
+
+
     - name: "Python 3.7.2 on OSX"
       os: osx
       language: shell
