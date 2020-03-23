@@ -64,13 +64,13 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
-                vector = [0] * 6
+                vector = [0] * 2
 
                 try:
                     vector[0] = number/self._abs_mean
                     vector[1] = math.log(abs(number)) if number != 0 else -100
                 except:
-                    vector = [0] * 6
+                    vector = [0] * 2
                     logging.warning(f'Cannot encode target value: {number}')
 
             else:
