@@ -309,7 +309,7 @@ class Predictor:
                     # Log this every now and then so that the user knows it's running
                     if (int(time.time()) - log_reasure) > 30:
                         log_reasure = time.time()
-                        logging.info('Lightwood training, iteration {iter_i}, training error {error}'.format(iter_i=epoch, error=training_error))
+                        logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
 
 
                     # Prime the model on each subset for a bit
@@ -356,6 +356,7 @@ class Predictor:
                         test_error = mixer.error(test_data_ds)
                         subset_test_error = mixer.error(subset_test_ds, subset_id=subset_id)
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
+
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
                             if mixer.is_selfaware:
