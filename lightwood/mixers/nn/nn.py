@@ -98,7 +98,12 @@ class NnMixer:
             if len(loss_confidence_arr[k]) > 0:
                 loss_confidence_arr[k] = np.array(loss_confidence_arr[k])
                 nf_pct = np.percentile(loss_confidence_arr[k], 95)
-                self.max_confidence_per_output[k] = max(loss_confidence_arr[k][loss_confidence_arr[k] < nf_pct])
+
+                losses_bellow_95th_percentile = loss_confidence_arr[k][loss_confidence_arr[k] < nf_pct]
+                if len(losses_bellow_95th_percentile) < 1:
+                    losses_bellow_95th_percentile = loss_confidence_arr[k]
+                    
+                self.max_confidence_per_output[k] = max(losses_bellow_95th_percentile)
 
         return True
 
