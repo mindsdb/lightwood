@@ -83,9 +83,9 @@ class DefaultNet(torch.nn.Module):
             else:
                 shape = funnel(self.input_size,self.output_size,depth)
             '''
-            print(self.out_indexes)
-            print(self.out_types)
-            exit()
+            #print(self.out_indexes)
+            #print(self.out_types)
+            #exit()
             shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
 
         if pretrained_net is None:

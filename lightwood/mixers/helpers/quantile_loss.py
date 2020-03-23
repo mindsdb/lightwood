@@ -11,9 +11,9 @@ class QuantileLoss(torch.nn.Module):
         assert not target.requires_grad
         assert preds.size(0) == target.size(0)
         losses = []
+        losses.append(torch.nn.MSELoss(target[:,0:2], preds[:,0:2], reduce=False))
         for i, q in enumerate(self.quantiles):
-            #errors = target[:, i*2:i*2+2] - preds[:, i*2:i*2+2]
-            errors = target[:, i] - preds[:, i]
+            errors = target[:, 0] - preds[:, i+2]
             losses.append(
                 torch.max(
                    (q-1) * errors,

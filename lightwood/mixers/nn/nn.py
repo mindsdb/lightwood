@@ -34,7 +34,7 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
-        self.quantiles = [0.05,0.5,0.95]
+        self.quantiles = [0.05,0.95]
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
@@ -328,8 +328,8 @@ class NnMixer:
                         self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
                         self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=self.quantiles))
                     else:
-                        self.criterion_arr.append(MSELoss())
-                        self.unreduced_criterion_arr.append(MSELoss(reduce=False))
+                        self.criterion_arr.append(torch.nn.MSELoss())
+                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
