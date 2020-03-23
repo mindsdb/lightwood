@@ -92,17 +92,19 @@ class NumericEncoder:
         for vector in encoded_values.tolist():
             if self._is_target:
                 if not math.isnan(vector[0]):
-                    first_quantile = vector[0] * self._abs_mean
+                    real_value = vector[0] * self._abs_mean
+                    lower_range = vector[2] * self._abs_mean
+                    upper_range = vector[3] * self._abs_mean
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                    first_quantile = None
-                    second_quantile = None
-                    third_quantile = None
+                    real_value = None
+                    lower_range = None
+                    upper_range = None
 
                 if self._type == 'int' and first_quantile is not None and second_quantile is not None and third_quantile is not None:
-                    real_value = [int(round(first_quantile)),int(round(second_quantile)),int(round(third_quantile))]
+                    real_value = [int(round(real_value)),int(round(lower_range)),int(round(upper_range))]
                 else:
-                    real_value = [first_quantile,second_quantile,third_quantile]
+                    real_value = [real_value,lower_range,upper_range]
             else:
                 is_zero = False
                 is_negative = False
