@@ -15,7 +15,6 @@ class DefaultNet(torch.nn.Module):
         self.max_variance = None
         if ds is not None:
             self.out_indexes = ds.out_indexes
-            self.out_types = ds.out_types
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
@@ -83,10 +82,7 @@ class DefaultNet(torch.nn.Module):
             else:
                 shape = funnel(self.input_size,self.output_size,depth)
             '''
-            #print(self.out_indexes)
-            #print(self.out_types)
-            #exit()
-            shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
+            shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), max([self.input_size*2,self.output_size*2,400]), self.output_size]
 
         if pretrained_net is None:
             logging.info(f'Building network of shape: {shape}')
