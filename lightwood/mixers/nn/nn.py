@@ -251,9 +251,9 @@ class NnMixer:
 
             with torch.no_grad():
                 if self.is_selfaware:
-                    outputs, awareness = self.net(inputs)
+                    outputs, quantiles, awareness = self.net(inputs)
                 else:
-                    outputs = self.net(inputs)
+                    outputs, out_quantiles = self.net(inputs)
 
             loss = None
             for k, criterion in enumerate(self.criterion_arr):
