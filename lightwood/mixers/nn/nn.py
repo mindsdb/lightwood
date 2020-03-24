@@ -191,7 +191,7 @@ class NnMixer:
                     'predictions': [(x[0] + x[1])/2 for x in decoded_predictions]
                     ,'confidence_range': [[x[0],x[1]] for x in decoded_predictions]
                     ,'quantile_confidences': [self.quantiles[1] - self.quantiles[0] for x in decoded_predictions]}
-                print(predictions[output_column])
+                    
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
