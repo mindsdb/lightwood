@@ -36,12 +36,18 @@ class Transformer:
 
         return torch.FloatTensor(input_vector), torch.FloatTensor(output_vector)
 
-    def revert(self, vector, feature_set='output_features'):
+    def revert(self, vector, feature_set='output_features', custom_output_indexes=None):
         start = 0
         ret = {}
         list_vector = vector.tolist()
-        for feature_name in getattr(self, feature_set):
-            top = start + self.feature_len_map[feature_name]
-            ret[feature_name] = list_vector[start:top]
-            start = top
+
+        if custom_output_indexes is None:
+            for feature_name in getattr(self, feature_set):
+                top = start + self.feature_len_map[feature_name]
+                ret[feature_name] = list_vector[start:top]
+                start = top
+        else:
+            for i, feature_name in enumerate(getattr(self, feature_set)):
+                ret[feature_name] = list_vector[custom_output_indexes[i][0]:custom_output_indexes[i][1]]
+
         return ret

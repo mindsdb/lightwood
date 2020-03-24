@@ -173,7 +173,7 @@ class NnMixer:
         for i in range(len(outputs)):
             output_vector = outputs[i]
             transformed_output_vectors = when_data_source.transformer.revert(
-                output_vector, feature_set='output_features')
+                output_vector, feature_set='output_features', custom_output_indexes=self.out_indexes)
             for feature in transformed_output_vectors:
                 if feature not in output_trasnformed_vectors:
                     output_trasnformed_vectors[feature] = []
