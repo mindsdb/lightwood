@@ -21,7 +21,7 @@ class DefaultNet(torch.nn.Module):
             device_str = CONFIG.USE_DEVICE
         self.device = torch.device(device_str)
         self.quantiles = quantiles
-        
+
         if CONFIG.DETERMINISTIC:
             '''
                 Seed that always has the same value on the same dataset plus setting the bellow CUDA options
@@ -216,4 +216,4 @@ class DefaultNet(torch.nn.Module):
             awareness = self._foward_awareness_net(interim)
             return output, quantile_output, awareness
 
-        return output, awareness
+        return output, quantile_output

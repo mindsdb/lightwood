@@ -7,13 +7,14 @@ class QuantileLoss(torch.nn.Module):
         self.quantiles = quantiles
         self.reduce = reduce
         self.index_offset = index_offset
+        self.target_index = target_index
 
     def forward(self, preds, target):
         assert not target.requires_grad
         assert preds.size(0) == target.size(0)
         losses = []
         for i, q in enumerate(self.quantiles):
-            errors = target[:, target_index] - preds[:, self.index_offset+i]
+            errors = target[:, self.target_index] - preds[:, self.index_offset+i]
             losses.append(
                 torch.max(
                    (q-1) * errors,
