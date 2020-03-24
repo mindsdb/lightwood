@@ -69,8 +69,6 @@ class NumericEncoder:
                 try:
                     vector[0] = number/self._abs_mean
                     vector[1] = math.log(abs(number)) if number != 0 else -100
-                    vector[2] = 0
-                    vector[3] = 0
                 except:
                     vector = [0] * 4
                     logging.warning(f'Cannot encode target value: {number}')
@@ -93,8 +91,6 @@ class NumericEncoder:
             if self._is_target:
                 if not math.isnan(vector[0]):
                     real_value = vector[0] * self._abs_mean
-                    lower_range = vector[2] * self._abs_mean
-                    upper_range = vector[3] * self._abs_mean
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     real_value = None

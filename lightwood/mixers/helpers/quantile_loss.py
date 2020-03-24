@@ -2,18 +2,18 @@ import torch
 
 
 class QuantileLoss(torch.nn.Module):
-    def __init__(self, quantiles, reduce='mean', **kwargs):
+    def __init__(self, quantiles, target_index, index_offset, reduce='mean', **kwargs):
         super().__init__()
         self.quantiles = quantiles
         self.reduce = reduce
-        self.exact_prediction_loss = torch.nn.L1Loss(reduce=False)
+        self.index_offset = index_offset
 
     def forward(self, preds, target):
         assert not target.requires_grad
         assert preds.size(0) == target.size(0)
-        losses = [self.exact_prediction_loss(target[:,0:2], preds[:,0:2])]
+        losses = []
         for i, q in enumerate(self.quantiles):
-            errors = target[:, 0] - preds[:, i+2]
+            errors = target[:, target_index] - preds[:, self.index_offset+i]
             losses.append(
                 torch.max(
                    (q-1) * errors,

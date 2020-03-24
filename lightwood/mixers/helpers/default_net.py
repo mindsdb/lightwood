@@ -6,7 +6,7 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None):
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, quantiles=None):
         self.input_size = None
         self.output_size = None
         self.selfaware = selfaware
@@ -116,6 +116,17 @@ class DefaultNet(torch.nn.Module):
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
+        if self.quantiles is not None:
+            quantile_net_sahpe = [self.input_size, max([self.input_size*2,self.output_size*2,400]), max([self.input_size*2,self.output_size*2,400]), len(self.quantiles)]
+            quantile_layers = []
+
+            for ind in range(len(quantile_net_sahpe) - 1):
+                quantile_layers.append(torch.nn.Linear(quantile_net_sahpe[ind], quantile_net_sahpe[ind + 1]))
+                if ind < len(quantile_net_sahpe) - 2:
+                    quantile_layers.append(rectifier())
+
+            self._quantile_net = torch.nn.Sequential(*quantile_layers)
+
         if CONFIG.DETERMINISTIC and pretrained_net is None: # set initial weights based on a specific distribution if we have deterministic enabled
             # lambda function so that we can do this for either awareness layer or the internal layers of net
             def reset_layer_params(layer):
@@ -129,6 +140,10 @@ class DefaultNet(torch.nn.Module):
 
             if self.selfaware:
                 for layer in self.awareness_net:
+                    reset_layer_params(layer)
+
+            if self.quantiles is not None:
+                for layer in self._quantile_net:
                     reset_layer_params(layer)
 
             for layer in self.net:
@@ -146,6 +161,13 @@ class DefaultNet(torch.nn.Module):
                 self._foward_awareness_net = torch.nn.DataParallel(self.awareness_net)
             else:
                 self._foward_awareness_net = self.awareness_net
+
+        if self.quantiles is not None:
+            self._quantile_net = self._quantile_net.to(self.device)
+            if self.available_devices > 1:
+                self._foward_quantile_net = torch.nn.DataParallel(self._quantile_net)
+            else:
+                self._foward_quantile_net = self._quantile_net
 
     def calculate_overall_certainty(self):
         """
@@ -183,11 +205,14 @@ class DefaultNet(torch.nn.Module):
         """
 
         output = self._foward_net(input)
+        quantile_output = None
+
+        if self.quantiles is not None:
+            quantile_output = self._foward_quantile_net(input)
 
         if self.selfaware:
             interim = torch.cat((input, output), 1)
             awareness = self._foward_awareness_net(interim)
+            return output, quantile_output, awareness
 
-            return output, awareness
-
-        return output
+        return output, awareness

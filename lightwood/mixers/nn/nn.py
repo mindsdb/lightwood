@@ -57,6 +57,10 @@ class NnMixer:
 
         self.total_iterations = 0
 
+        self.quantile_criterion_arr = None
+        self.quantils_to_predict = None
+        self.quantile_target_indexes = None
+
         self._nonpersistent = {
             'sampler': None
         }
@@ -82,9 +86,9 @@ class NnMixer:
 
             with torch.no_grad():
                 if self.is_selfaware:
-                    outputs, awareness = self.net(inputs)
+                    outputs, quantile_output, awareness = self.net(inputs)
                 else:
-                    outputs = self.net(inputs)
+                    outputs, quantile_output = self.net(inputs)
 
             loss = None
             for k, criterion in enumerate(self.criterion_arr):
@@ -106,7 +110,7 @@ class NnMixer:
                 losses_bellow_95th_percentile = loss_confidence_arr[k][loss_confidence_arr[k] < nf_pct]
                 if len(losses_bellow_95th_percentile) < 1:
                     losses_bellow_95th_percentile = loss_confidence_arr[k]
-                    
+
                 self.max_confidence_per_output[k] = max(losses_bellow_95th_percentile)
 
         return True
@@ -144,11 +148,11 @@ class NnMixer:
 
             with torch.no_grad():
                 if self.is_selfaware:
-                    output, awareness = self.net(inputs)
+                    output, quantile_output, awareness = self.net(inputs)
                     awareness = awareness.to('cpu')
                     awareness_arr.extend(awareness.tolist())
                 else:
-                    output = self.net(inputs)
+                    output, quantile_output = self.net(inputs)
                     awareness_arr = None
 
                 for k, criterion in enumerate(self.criterion_arr):
@@ -185,8 +189,11 @@ class NnMixer:
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
 
+            numeric_index = 0
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column] = {'predictions': [x[0] for x in decoded_predictions], 'confidence_range': [[x[1],x[2]] for x in decoded_predictions], 'quantile_confidences': [self.quantiles[0] - self.quantiles[1] for x in decoded_predictions]}
+                predictions[output_column] = {'predictions': [x for x in decoded_predictions], 'confidence_range': [[quantile_output[numeric_index*2],x[numeric_index*2+1]] for x in decoded_predictions], 'quantile_confidences': [self.quantiles[0] - self.quantiles[1] for x in decoded_predictions]}
+                numeric_index += 1
+                
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
@@ -310,9 +317,6 @@ class NnMixer:
             self.out_types = ds.out_types
             self.fit_data_source(ds)
 
-            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
-            self.net = self.net.train()
-
             if self.batch_size < self.net.available_devices:
                 self.batch_size = self.net.available_devices
 
@@ -321,20 +325,38 @@ class NnMixer:
             if self.criterion_arr is None:
                 self.criterion_arr = []
                 self.unreduced_criterion_arr = []
+
+                self.quantile_criterion_arr = []
+                self.quantile_target_indexes = []
+                self.quantils_to_predict = []
+                quantile_index_offset = 0
+
                 if ds.output_weights is not None and ds.output_weights is not False:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
-                for output_type in ds.out_types:
+
+                for ouput_positon, output_type in enumerate(ds.out_types):
                     if output_type in (COLUMN_DATA_TYPES.CATEGORICAL):
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
-                        self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
-                        self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=self.quantiles))
+                        self.criterion_arr.append(torch.nn.L1Loss())
+                        self.unreduced_criterion_arr.append(torch.nn.L1Loss(reduce=False))
+
+                        quantile_index_offset +=
+                        self.quantile_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, target_index=ds.out_indexes[ouput_positon][0], index_offset=quantile_index_offset))
+                        quantile_index_offset += 2
+
+                        self.quantile_target_indexes.appendds.out_indexes[ouput_positon][0]()
+                        self.quantils_to_predict.extend(self.quantiles)
+
                     else:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+
+            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, quantiles=self.quantils_to_predict)
+            self.net = self.net.train()
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
@@ -400,9 +422,9 @@ class NnMixer:
                 # forward + backward + optimize
                 # outputs = self.net(inputs)
                 if self.is_selfaware:
-                    outputs, awareness = self.net(inputs)
+                    outputs, quantile_output, awareness = self.net(inputs)
                 else:
-                    outputs = self.net(inputs)
+                    outputs, quantile_output = self.net(inputs)
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
@@ -411,6 +433,15 @@ class NnMixer:
                         loss = target_loss
                     else:
                         loss += target_loss
+
+                quantiles_loss = None
+                if quantile_output is not None:
+                    for k, criterion in enumerate(self.quantile_criterion_arr):
+                        target_loss = criterion(quantile_output, labels)
+                        if quantiles_loss is None:
+                            quantiles_loss = target_loss
+                        else:
+                            quantiles_loss += target_loss
 
                 awareness_loss = None
                 if self.is_selfaware:
@@ -442,6 +473,9 @@ class NnMixer:
 
                 if awareness_loss is not None:
                     awareness_loss.backward(retain_graph=True)
+
+                if quantiles_loss is not None:
+                    quantiles_loss.backward(retain_graph=True)
 
                 running_loss += loss.item()
                 loss.backward()
