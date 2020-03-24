@@ -6,7 +6,7 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None):
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, extra_output=0):
         self.input_size = None
         self.output_size = None
         self.selfaware = selfaware
@@ -52,7 +52,7 @@ class DefaultNet(torch.nn.Module):
             input_sample, output_sample = ds[0]
 
             self.input_size = len(input_sample)
-            self.output_size = len(output_sample)
+            self.output_size = len(output_sample) + extra_output
 
             '''
             small_input = True if self.input_size < 50 else False

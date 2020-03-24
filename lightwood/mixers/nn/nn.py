@@ -34,7 +34,8 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
-        self.quantiles = [0.05,0.95]
+        self.quantiles = [0.05,0.95, 0.5]
+        self.out_indexes = None
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
@@ -93,7 +94,7 @@ class NnMixer:
                     self.max_confidence_per_output.append(None)
 
                 try:
-                    confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                    confidences = criterion.estimate_confidence(outputs[:,self.out_indexes[k][0]:self.out_indexes[k][1]])
                     loss_confidence_arr[k].extend(confidences)
                 except:
                     pass
@@ -106,7 +107,7 @@ class NnMixer:
                 losses_bellow_95th_percentile = loss_confidence_arr[k][loss_confidence_arr[k] < nf_pct]
                 if len(losses_bellow_95th_percentile) < 1:
                     losses_bellow_95th_percentile = loss_confidence_arr[k]
-                    
+
                 self.max_confidence_per_output[k] = max(losses_bellow_95th_percentile)
 
         return True
@@ -157,7 +158,7 @@ class NnMixer:
                         if len(self.max_confidence_per_output) >= (k - 1) and self.max_confidence_per_output[k] is not None:
                             max_conf = self.max_confidence_per_output[k]
 
-                        confidences = criterion.estimate_confidence(output[:,when_data_source.out_indexes[k][0]:when_data_source.out_indexes[k][1]], max_conf)
+                        confidences = criterion.estimate_confidence(output[:,self.out_indexes[k][0]:self.out_indexes[k][1]], max_conf)
                         loss_confidence_arr[k].extend(confidences)
                     except Exception as e:
                         loss_confidence_arr[k] = None
@@ -247,7 +248,7 @@ class NnMixer:
 
             loss = None
             for k, criterion in enumerate(self.criterion_arr):
-                target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                target_loss = criterion(outputs[:,self.out_indexes[k][0]:self.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
                 if loss is None:
                     loss = target_loss
@@ -310,7 +311,12 @@ class NnMixer:
             self.out_types = ds.out_types
             self.fit_data_source(ds)
 
-            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
+            output_difference_from_target = 0
+            for _ in [x for x in ds.out_types if x in (COLUMN_DATA_TYPES.NUMERIC)]:
+                output_difference_from_target += (len(self.quantiles) - 1)
+
+            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, extra_output=output_difference_from_target)
+
             self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -321,20 +327,29 @@ class NnMixer:
             if self.criterion_arr is None:
                 self.criterion_arr = []
                 self.unreduced_criterion_arr = []
+                self.out_indexes = []
+
+
+                offset_after = 0
+                offset_before = 0
                 if ds.output_weights is not None and ds.output_weights is not False:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
-                for output_type in ds.out_types:
+                for i, output_type in enumerate(ds.out_types):
                     if output_type in (COLUMN_DATA_TYPES.CATEGORICAL):
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
                         self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
                         self.unreduced_criterion_arr.append(QuantileLoss(reduce=False, quantiles=self.quantiles))
+                        offset_after += (len(self.quantiles) - 1)
                     else:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+
+                    self.out_indexes.append([ds.out_indexes[i] + offset_before, ds.out_indexes[i][1] + offset_after])
+                    offset_before = offset_after
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
@@ -406,7 +421,7 @@ class NnMixer:
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
-                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                    target_loss = criterion(outputs[:,self.out_indexes[k][0]:self.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
                     if loss is None:
                         loss = target_loss
                     else:
@@ -417,7 +432,7 @@ class NnMixer:
                     unreduced_losses = []
                     for k, criterion in enumerate(self.unreduced_criterion_arr):
                         # redyce = True
-                        target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                        target_loss = criterion(outputs[:,self.out_indexes[k][0]:self.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
                         target_loss = target_loss.tolist()
                         if type(target_loss[0]) == type([]):

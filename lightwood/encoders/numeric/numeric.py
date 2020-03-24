@@ -64,15 +64,12 @@ class NumericEncoder:
                 number = None
 
             if self._is_target:
-                vector = [0] * 4
+                vector = [0] * 1
 
                 try:
                     vector[0] = number/self._abs_mean
-                    vector[1] = math.log(abs(number)) if number != 0 else -100
-                    vector[2] = 0
-                    vector[3] = 0
                 except:
-                    vector = [0] * 4
+                    vector = [0] * 1
                     logging.warning(f'Cannot encode target value: {number}')
 
             else:
@@ -87,24 +84,23 @@ class NumericEncoder:
 
         return self._pytorch_wrapper(ret)
 
-    def decode(self, encoded_values):
+    def decode(self, encoded_values, nr_quantiles=1):
         ret = []
         for vector in encoded_values.tolist():
             if self._is_target:
-                if not math.isnan(vector[0]):
-                    real_value = vector[0] * self._abs_mean
-                    lower_range = vector[2] * self._abs_mean
-                    upper_range = vector[3] * self._abs_mean
-                else:
-                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                    real_value = None
-                    lower_range = None
-                    upper_range = None
+                assert(len(vector) == nr_quantiles)
+                quantiles = []
+                for value in vector:
+                    if not math.isnan(value):
+                        qunatiles.append(value * self._abs_mean)
+                    else:
+                        quantiles.append(None)
+                        logging.warning(f'Occurance of `nan` value in encoded numerical value: {value}')
 
-                if self._type == 'int' and real_value is not None and lower_range is not None and upper_range is not None:
-                    real_value = [int(round(real_value)),int(round(lower_range)),int(round(upper_range))]
+                if self._type == 'int':
+                    real_value = [int(round(x)) if x is not None else x for x in quantiles]
                 else:
-                    real_value = [real_value,lower_range,upper_range]
+                    real_value = quantiles
             else:
                 is_zero = False
                 is_negative = False

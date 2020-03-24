@@ -6,14 +6,12 @@ class QuantileLoss(torch.nn.Module):
         super().__init__()
         self.quantiles = quantiles
         self.reduce = reduce
-        self.exact_prediction_loss = torch.nn.L1Loss(reduce=False)
 
     def forward(self, preds, target):
         assert not target.requires_grad
         assert preds.size(0) == target.size(0)
-        losses = [self.exact_prediction_loss(target[:,0:2], preds[:,0:2])]
         for i, q in enumerate(self.quantiles):
-            errors = target[:, 0] - preds[:, i+2]
+            errors = target - preds[:, i]
             losses.append(
                 torch.max(
                    (q-1) * errors,
