@@ -20,7 +20,8 @@ class DefaultNet(torch.nn.Module):
         if CONFIG.USE_DEVICE is not None:
             device_str = CONFIG.USE_DEVICE
         self.device = torch.device(device_str)
-
+        self.quantiles = quantiles
+        
         if CONFIG.DETERMINISTIC:
             '''
                 Seed that always has the same value on the same dataset plus setting the bellow CUDA options
