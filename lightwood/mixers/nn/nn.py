@@ -349,7 +349,7 @@ class NnMixer:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
 
-                    self.out_indexes.append([ds.out_indexes[i] + offset_before, ds.out_indexes[i][1] + offset_after])
+                    self.out_indexes.append([ds.out_indexes[i][0] + offset_before, ds.out_indexes[i][1] + offset_after])
                     offset_before = offset_after
 
             self.optimizer_class = Ranger

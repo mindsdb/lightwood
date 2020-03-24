@@ -92,7 +92,7 @@ class NumericEncoder:
                 quantiles = []
                 for value in vector:
                     if not math.isnan(value):
-                        qunatiles.append(value * self._abs_mean)
+                        quantiles.append(value * self._abs_mean)
                     else:
                         quantiles.append(None)
                         logging.warning(f'Occurance of `nan` value in encoded numerical value: {value}')
