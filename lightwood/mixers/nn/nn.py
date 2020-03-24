@@ -60,6 +60,7 @@ class NnMixer:
         self.quantile_criterion_arr = None
         self.quantils_to_predict = None
         self.quantile_target_indexes = None
+        self.quantile_multiplication_factor = None
 
         self._nonpersistent = {
             'sampler': None
@@ -193,7 +194,7 @@ class NnMixer:
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column] = {'predictions': [x for x in decoded_predictions], 'confidence_range': [[quantile_output[numeric_index*2],x[numeric_index*2+1]] for x in decoded_predictions], 'quantile_confidences': [self.quantiles[0] - self.quantiles[1] for x in decoded_predictions]}
                 numeric_index += 1
-                
+
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
@@ -317,6 +318,26 @@ class NnMixer:
             self.out_types = ds.out_types
             self.fit_data_source(ds)
 
+            if self.quantile_criterion_arr is None:
+                for ouput_positon, output_type in enumerate(ds.out_types):
+                    self.quantile_criterion_arr = []
+                    self.quantile_target_indexes = []
+                    self.quantils_to_predict = []
+                    self.quantile_multiplication_factor = []
+                    quantile_index_offset = 0
+
+                    if output_type in (COLUMN_DATA_TYPES.NUMERIC):
+
+                        self.quantile_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, target_index=ds.out_indexes[ouput_positon][0], index_offset=quantile_index_offset))
+                        quantile_index_offset += 2
+
+                        self.quantile_target_indexes.appendds.out_indexes[ouput_positon][0]()
+                        self.quantils_to_predict.extend(self.quantiles)
+                        self.quantile_multiplication_factor.append(ds.encoders[self.output_column_names[output_position]])
+
+            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, quantiles=self.quantils_to_predict)
+            self.net = self.net.train()
+
             if self.batch_size < self.net.available_devices:
                 self.batch_size = self.net.available_devices
 
@@ -325,11 +346,6 @@ class NnMixer:
             if self.criterion_arr is None:
                 self.criterion_arr = []
                 self.unreduced_criterion_arr = []
-
-                self.quantile_criterion_arr = []
-                self.quantile_target_indexes = []
-                self.quantils_to_predict = []
-                quantile_index_offset = 0
 
                 if ds.output_weights is not None and ds.output_weights is not False:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
@@ -343,20 +359,9 @@ class NnMixer:
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
                         self.criterion_arr.append(torch.nn.L1Loss())
                         self.unreduced_criterion_arr.append(torch.nn.L1Loss(reduce=False))
-
-                        quantile_index_offset +=
-                        self.quantile_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, target_index=ds.out_indexes[ouput_positon][0], index_offset=quantile_index_offset))
-                        quantile_index_offset += 2
-
-                        self.quantile_target_indexes.appendds.out_indexes[ouput_positon][0]()
-                        self.quantils_to_predict.extend(self.quantiles)
-
                     else:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
-
-            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, quantiles=self.quantils_to_predict)
-            self.net = self.net.train()
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
