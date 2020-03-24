@@ -141,6 +141,7 @@ class NnMixer:
 
         outputs = []
         awareness_arr = []
+        quantile_arr = []
         loss_confidence_arr = [[]] * len(when_data_source.out_indexes)
 
         for i, data in enumerate(data_loader, 0):
@@ -155,6 +156,8 @@ class NnMixer:
                 else:
                     output, quantile_output = self.net(inputs)
                     awareness_arr = None
+
+                quantile_arr.extend(quantile_output.tolist())
 
                 for k, criterion in enumerate(self.criterion_arr):
                     try:
@@ -194,7 +197,14 @@ class NnMixer:
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 #logging.warning(f'Can\'t compute lower quantile due to exception: {e}')
 
-                predictions[output_column] = {'predictions': [x for x in decoded_predictions], 'confidence_range': [[quantile_output[numeric_index*2] * self.quantile_multiplication_factor[numeric_index],x[numeric_index*2+1] * self.quantile_multiplication_factor[numeric_index]] for x in decoded_predictions], 'quantile_confidences': [self.quantiles[0] - self.quantiles[1] for x in decoded_predictions]}
+                confidence_range = []
+                for x in quantile_arr:
+                    print(x)
+                    ab_mean = self.quantile_multiplication_factor[numeric_index]
+                    confidence_range.append([x[numeric_index*2] * ab_mean, x[numeric_index*2+1] * ab_mean])
+
+                predictions[output_column] = {'predictions': [x for x in decoded_predictions], 'confidence_range':confidence_range, 'quantile_confidences': [self.quantiles[0] - self.quantiles[1] for x in decoded_predictions]}
+
                 numeric_index += 1
 
             else:
@@ -335,7 +345,7 @@ class NnMixer:
 
                         self.quantile_target_indexes.append(ds.out_indexes[out_position][0])
                         self.quantils_to_predict.extend(self.quantiles)
-                        self.quantile_multiplication_factor.append(ds.encoders[self.output_column_names[out_position]])
+                        self.quantile_multiplication_factor.append(ds.encoders[self.output_column_names[out_position]]._abs_mean)
 
             self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, quantiles=self.quantils_to_predict)
             self.net = self.net.train()
