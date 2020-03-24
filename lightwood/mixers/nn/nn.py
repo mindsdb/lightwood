@@ -402,7 +402,7 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net, pretrained_quantile_net=self.net.quantile_net, quantiles=self.quantils_to_predict)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net, pretrained_quantile_net=self.net._quantile_net, quantiles=self.quantils_to_predict)
                     self.last_unaware_net = copy.deepcopy(self.net.net)
 
                     # Lower the learning rate once we start training the selfaware network
@@ -416,7 +416,7 @@ class NnMixer:
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net, pretrained_quantile_net=self.net.quantile_net, quantiles=self.quantils_to_predict) #, pretrained_net=copy.deepcopy(self.net.net)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net, pretrained_quantile_net=self.net._quantile_net, quantiles=self.quantils_to_predict) #, pretrained_net=copy.deepcopy(self.net.net)
 
                     # Increase the learning rate closer to the previous levels
                     self.optimizer_args['lr'] = self.optimizer.lr * 4
