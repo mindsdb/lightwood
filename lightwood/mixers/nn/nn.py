@@ -34,7 +34,7 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
-        self.quantiles = [0.05,0.95]
+        self.quantiles = [0.1,0.9]
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
@@ -199,7 +199,6 @@ class NnMixer:
 
                 confidence_range = []
                 for x in quantile_arr:
-                    print(x)
                     ab_mean = self.quantile_multiplication_factor[numeric_index]
                     confidence_range.append([x[numeric_index*2] * ab_mean, x[numeric_index*2+1] * ab_mean])
 
