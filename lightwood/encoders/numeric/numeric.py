@@ -94,13 +94,11 @@ class NumericEncoder:
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     real_value = None
-                    lower_range = None
-                    upper_range = None
 
-                if self._type == 'int' and real_value is not None and lower_range is not None and upper_range is not None:
-                    real_value = [int(round(real_value)),int(round(lower_range)),int(round(upper_range))]
+                if self._type == 'int' and real_value is not None:
+                    real_value = int(round(real_value))
                 else:
-                    real_value = [real_value,lower_range,upper_range]
+                    real_value = real_value
             else:
                 is_zero = False
                 is_negative = False
