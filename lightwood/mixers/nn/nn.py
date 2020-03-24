@@ -192,7 +192,9 @@ class NnMixer:
 
             numeric_index = 0
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column] = {'predictions': [x for x in decoded_predictions], 'confidence_range': [[quantile_output[numeric_index*2],x[numeric_index*2+1]] for x in decoded_predictions], 'quantile_confidences': [self.quantiles[0] - self.quantiles[1] for x in decoded_predictions]}
+                #logging.warning(f'Can\'t compute lower quantile due to exception: {e}')
+
+                predictions[output_column] = {'predictions': [x for x in decoded_predictions], 'confidence_range': [[quantile_output[numeric_index*2] * self.quantile_multiplication_factor[numeric_index],x[numeric_index*2+1] * self.quantile_multiplication_factor[numeric_index]] for x in decoded_predictions], 'quantile_confidences': [self.quantiles[0] - self.quantiles[1] for x in decoded_predictions]}
                 numeric_index += 1
 
             else:
@@ -319,7 +321,7 @@ class NnMixer:
             self.fit_data_source(ds)
 
             if self.quantile_criterion_arr is None:
-                for ouput_positon, output_type in enumerate(ds.out_types):
+                for out_position, output_type in enumerate(ds.out_types):
                     self.quantile_criterion_arr = []
                     self.quantile_target_indexes = []
                     self.quantils_to_predict = []
@@ -328,12 +330,12 @@ class NnMixer:
 
                     if output_type in (COLUMN_DATA_TYPES.NUMERIC):
 
-                        self.quantile_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, target_index=ds.out_indexes[ouput_positon][0], index_offset=quantile_index_offset))
+                        self.quantile_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, target_index=ds.out_indexes[out_position][0], index_offset=quantile_index_offset))
                         quantile_index_offset += 2
 
-                        self.quantile_target_indexes.appendds.out_indexes[ouput_positon][0]()
+                        self.quantile_target_indexes.append(ds.out_indexes[out_position][0])
                         self.quantils_to_predict.extend(self.quantiles)
-                        self.quantile_multiplication_factor.append(ds.encoders[self.output_column_names[output_position]])
+                        self.quantile_multiplication_factor.append(ds.encoders[self.output_column_names[out_position]])
 
             self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, quantiles=self.quantils_to_predict)
             self.net = self.net.train()
@@ -352,7 +354,7 @@ class NnMixer:
                 else:
                     output_weights = None
 
-                for ouput_positon, output_type in enumerate(ds.out_types):
+                for output_type in ds.out_types:
                     if output_type in (COLUMN_DATA_TYPES.CATEGORICAL):
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
