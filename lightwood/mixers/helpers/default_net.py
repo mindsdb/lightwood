@@ -6,7 +6,7 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, quantiles=None):
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, pretrained_quantile_net=None,  quantiles=None):
         self.input_size = None
         self.output_size = None
         self.selfaware = selfaware
@@ -117,7 +117,7 @@ class DefaultNet(torch.nn.Module):
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
-        if self.quantiles is not None:
+        if self.quantiles is not None and pretrained_quantile_net is None:
             quantile_net_sahpe = [self.input_size, max([self.input_size*2,self.output_size*2,400]), max([self.input_size*2,self.output_size*2,400]), len(self.quantiles)]
             quantile_layers = []
 
@@ -127,6 +127,9 @@ class DefaultNet(torch.nn.Module):
                     quantile_layers.append(rectifier())
 
             self._quantile_net = torch.nn.Sequential(*quantile_layers)
+
+        else:
+            self._quantile_net = pretrained_quantile_net
 
         if CONFIG.DETERMINISTIC and pretrained_net is None: # set initial weights based on a specific distribution if we have deterministic enabled
             # lambda function so that we can do this for either awareness layer or the internal layers of net
