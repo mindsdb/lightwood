@@ -327,7 +327,7 @@ class Predictor:
                         continue
 
                     # If the selfaware network isn't able to train, go back to the original network
-                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
+                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training:
                         mixer.start_selfaware_training = False
                         mixer.stop_selfaware_training = True
                         lowest_error = None
