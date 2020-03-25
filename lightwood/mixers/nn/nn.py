@@ -34,7 +34,7 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
-        self.quantiles = [0.05,0.95 ,0.5]
+        self.quantiles = [0.05,0.95]
         self.out_indexes = None
 
         self.nn_class = DefaultNet
@@ -187,7 +187,7 @@ class NnMixer:
 
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column] = {
-                    'predictions': [x[2] for x in decoded_predictions]
+                    'predictions': [(x[1]+x[0])/2 for x in decoded_predictions]
                     ,'confidence_range': [[x[0],x[1]] for x in decoded_predictions]
                     ,'quantile_confidences': [self.quantiles[1] - self.quantiles[0] for x in decoded_predictions]}
 

@@ -275,7 +275,6 @@ class Predictor:
         started = time.time()
         log_reasure = time.time()
         epoch = 0
-        eval_next_on_epoch = eval_every_x_epochs
         first_run = True
         stop_training = False
 
@@ -307,7 +306,7 @@ class Predictor:
                     first_run = False
 
                     # Log this every now and then so that the user knows it's running
-                    if (int(time.time()) - log_reasure) > 0:
+                    if (int(time.time()) - log_reasure) > 30:
                         log_reasure = time.time()
                         logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
 
@@ -318,7 +317,6 @@ class Predictor:
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
                     if subset_iteration == 2 and training_error < 0.4 and not from_data_ds.enable_dropout:
-                        eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
                         logging.info('Enabled dropout !')
                         from_data_ds.enable_dropout = True
                         lowest_error = None
@@ -351,8 +349,7 @@ class Predictor:
                         subset_test_error_delta_buff = []
                         continue
 
-                    if epoch >= eval_next_on_epoch:
-                        eval_next_on_epoch += eval_every_x_epochs
+                    if epoch % eval_every_x_epochs == 0:
 
                         test_error = mixer.error(test_data_ds)
                         subset_test_error = mixer.error(subset_test_ds, subset_id=subset_id)
