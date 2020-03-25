@@ -48,9 +48,9 @@ class BoostMixer():
                 self.targets[target_col_name]['model'] = GradientBoostingRegressor(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X,Y)
                 if self.quantiles is not None:
-                    self.targets[target_col_name]['quantile_models'] = []
+                    self.targets[target_col_name]['quantile_models'] = {}
                     for i, quantile in enumerate(self.quantiles):
-                        self.targets[target_col_name]['quantile_models'][i] = GradientBoostingRegressor(n_estimators=600, loss='quantile',alpha=[quantile])
+                        self.targets[target_col_name]['quantile_models'][i] = GradientBoostingRegressor(n_estimators=600, loss='quantile',alpha=quantile)
                         self.targets[target_col_name]['quantile_models'][i].fit(X,Y)
 
             else:
@@ -70,8 +70,7 @@ class BoostMixer():
             if self.targets[target_col_name]['model'] is None:
                 predictions[target_col_name] = None
             else:
-                predictions[target_col_name] = {'values':None, 'confidences':None}
-
+                predictions[target_col_name] = {}
                 predictions[target_col_name]['predictions'] = self.targets[target_col_name]['model'].predict(X)
                 try:
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
