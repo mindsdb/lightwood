@@ -274,8 +274,6 @@ class Predictor:
 
         started = time.time()
         log_reasure = time.time()
-        epoch = 0
-        eval_next_on_epoch = eval_every_x_epochs
         first_run = True
         stop_training = False
 
@@ -329,7 +327,7 @@ class Predictor:
                         continue
 
                     # If the selfaware network isn't able to train, go back to the original network
-                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
+                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training:
                         mixer.start_selfaware_training = False
                         mixer.stop_selfaware_training = True
                         lowest_error = None
@@ -350,12 +348,10 @@ class Predictor:
                         subset_test_error_delta_buff = []
                         continue
 
-                    if epoch >= eval_next_on_epoch:
-                        eval_next_on_epoch += eval_every_x_epochs
-
+                    if epoch % eval_every_x_epochs == 0:
                         test_error = mixer.error(test_data_ds)
                         subset_test_error = mixer.error(subset_test_ds, subset_id=subset_id)
-                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
+                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
 
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
