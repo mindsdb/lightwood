@@ -270,7 +270,7 @@ class NnMixer:
         :param model: a model object
         :return: None
         """
-       if 'cuda' in str(self.net.device):
+        if 'cuda' in str(self.net.device):
             torch.cuda.empty_cache()
         self.optimizer.zero_grad()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
@@ -331,7 +331,7 @@ class NnMixer:
 
             self.optimizer_class = Ranger
             if self.optimizer_args is None:
-                self.optimizer_args = {}
+                self.optimizer_args = {'lr': 0.0005}
 
             if 'beta1' in self.dynamic_parameters:
                 self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
