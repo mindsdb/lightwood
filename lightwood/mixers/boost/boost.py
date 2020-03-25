@@ -71,19 +71,21 @@ class BoostMixer():
                 predictions[target_col_name] = None
             else:
                 predictions[target_col_name] = {}
-                predictions[target_col_name]['predictions'] = self.targets[target_col_name]['model'].predict(X)
+                predictions[target_col_name]['predictions'] = [x for x in self.targets[target_col_name]['model'].predict(X)]
+
                 try:
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
-
-                    if 'quantile_models' in self.targets[target_col_name]:
-                        lower_quantiles = self.targets[target_col_name]['quantile_models'][0].predict(X)
-                        upper_quantiles = self.targets[target_col_name]['quantile_models'][1].predict(X)
-
-                        predictions[target_col_name]['confidence_range'] = [[lower_quantiles[i],upper_quantiles[i]] for i in range(len(decoded_predictions))]
-                        predictions[target_col_name]['quantile_confidences'] = [self.quantiles[1] - self.quantiles[0] for i in range(len(decoded_predictions))]
-
                 except Exception as e:
                     pass
+
+                if 'quantile_models' in self.targets[target_col_name]:
+                    lower_quantiles = self.targets[target_col_name]['quantile_models'][0].predict(X)
+                    upper_quantiles = self.targets[target_col_name]['quantile_models'][1].predict(X)
+
+                    predictions[target_col_name]['confidence_range'] = [[lower_quantiles[i],upper_quantiles[i]] for i in range(len(lower_quantiles))]
+                    predictions[target_col_name]['quantile_confidences'] = [self.quantiles[1] - self.quantiles[0] for i in range(len(lower_quantiles))]
+
+
 
 
         return predictions
