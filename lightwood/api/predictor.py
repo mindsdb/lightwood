@@ -428,7 +428,6 @@ class Predictor:
         :param when: a dictionary
         :return: a complete dataframe
         """
-        print('HERE !')
         if when is not None:
             when_dict = {key: [when[key]] for key in when}
             when_data = pandas.DataFrame(when_dict)
@@ -446,7 +445,6 @@ class Predictor:
 
                         main_mixer_predictions[output_column] = helper_mixer_predictions[output_column]
 
-        print(main_mixer_predictions)
         return main_mixer_predictions
 
     @staticmethod
