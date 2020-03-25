@@ -351,7 +351,7 @@ class Predictor:
                     if epoch % eval_every_x_epochs == 0:
                         test_error = mixer.error(test_data_ds)
                         subset_test_error = mixer.error(subset_test_ds, subset_id=subset_id)
-                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
+                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
 
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
