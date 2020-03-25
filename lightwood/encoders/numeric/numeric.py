@@ -84,7 +84,7 @@ class NumericEncoder:
 
         return self._pytorch_wrapper(ret)
 
-    def decode(self, encoded_values, nr_quantiles=2):
+    def decode(self, encoded_values, nr_quantiles=3):
         ret = []
         for vector in encoded_values.tolist():
             if self._is_target:

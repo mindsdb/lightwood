@@ -34,13 +34,12 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
-        self.quantiles = [0.05,0.95]
+        self.quantiles = [0.05,0.95 ,0.5]
         self.out_indexes = None
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
         self.awareness_criterion = None
-        self.loss_combination_operator = operator.add
         self.start_selfaware_training = False
         self.stop_selfaware_training = False
         self.is_selfaware = False
@@ -188,10 +187,10 @@ class NnMixer:
 
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column] = {
-                    'predictions': [(x[0] + x[1])/2 for x in decoded_predictions]
+                    'predictions': [x[2] for x in decoded_predictions]
                     ,'confidence_range': [[x[0],x[1]] for x in decoded_predictions]
                     ,'quantile_confidences': [self.quantiles[1] - self.quantiles[0] for x in decoded_predictions]}
-                    
+
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
@@ -284,8 +283,12 @@ class NnMixer:
         :param model: a model object
         :return: None
         """
-
         self.net = model
+
+        if 'cuda' in str(self.net.device):
+            torch.cuda.empty_cache()
+        self.optimizer.zero_grad()
+        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
     def fit_data_source(self, ds):
         self.input_column_names = self.input_column_names \
@@ -320,8 +323,6 @@ class NnMixer:
                 output_difference_from_target += (len(self.quantiles) - 1)
 
             self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, extra_output=output_difference_from_target)
-
-            self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
                 self.batch_size = self.net.available_devices
@@ -367,7 +368,9 @@ class NnMixer:
                     self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
         total_epochs = self.epochs
+        self.net = self.net.train()
 
         if self._nonpersistent['sampler'] is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
@@ -499,10 +502,6 @@ class NnMixer:
                 if CONFIG.MONITORING['batch_loss']:
                     #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
                     self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
-
-                if error < 1:
-                    if self.loss_combination_operator == operator.add:
-                        self.loss_combination_operator = operator.mul
 
             if CONFIG.MONITORING['epoch_loss']:
                 self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')

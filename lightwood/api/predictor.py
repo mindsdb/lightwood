@@ -307,7 +307,7 @@ class Predictor:
                     first_run = False
 
                     # Log this every now and then so that the user knows it's running
-                    if (int(time.time()) - log_reasure) > 30:
+                    if (int(time.time()) - log_reasure) > 0:
                         log_reasure = time.time()
                         logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
 
@@ -329,7 +329,8 @@ class Predictor:
                         continue
 
                     # If the selfaware network isn't able to train, go back to the original network
-                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)):
+                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training:
+                        logging.info('Stopped selfaware training !')
                         mixer.start_selfaware_training = False
                         mixer.stop_selfaware_training = True
                         lowest_error = None
@@ -355,7 +356,7 @@ class Predictor:
 
                         test_error = mixer.error(test_data_ds)
                         subset_test_error = mixer.error(subset_test_ds, subset_id=subset_id)
-                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
+                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
 
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
