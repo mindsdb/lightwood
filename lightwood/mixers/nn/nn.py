@@ -270,11 +270,13 @@ class NnMixer:
         :param model: a model object
         :return: None
         """
+
+        self.net = model
+
         if 'cuda' in str(self.net.device):
             torch.cuda.empty_cache()
         self.optimizer.zero_grad()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-        self.net = model
 
     def fit_data_source(self, ds):
         self.input_column_names = self.input_column_names \
