@@ -126,7 +126,7 @@ class Predictor:
                 continue
 
             real = list(map(str,test_ds.get_column_original_data(output_column)))
-            predicted =  predictions[output_column]['values']
+            predicted =  predictions[output_column]['predictions']
 
             weight_map = None
             if 'weights' in test_ds.get_column_config(output_column):
@@ -259,6 +259,7 @@ class Predictor:
                 self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
             except Exception as e:
                 logging.warning(f'Failed to train helper mixers with error: {e}')
+
 
         mixer = mixer_class(best_parameters)
         self._mixer = mixer
@@ -427,7 +428,7 @@ class Predictor:
         :param when: a dictionary
         :return: a complete dataframe
         """
-
+        print('HERE !')
         if when is not None:
             when_dict = {key: [when[key]] for key in when}
             when_data = pandas.DataFrame(when_dict)
@@ -441,10 +442,11 @@ class Predictor:
             for output_column in main_mixer_predictions:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
                     if self._helper_mixers[output_column]['accuracy'] > 1.00 * self.train_accuracy[output_column]['value']:
-                        helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, output_column)
+                        helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, [output_column])
 
-                        main_mixer_predictions[output_column] = helper_mixer_predictions
+                        main_mixer_predictions[output_column] = helper_mixer_predictions[output_column]
 
+        print(main_mixer_predictions)
         return main_mixer_predictions
 
     @staticmethod
