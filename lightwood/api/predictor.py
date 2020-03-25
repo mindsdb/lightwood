@@ -151,6 +151,7 @@ class Predictor:
 
         :return: None
         """
+        eval_every_x_epochs = 5000
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
         # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
@@ -306,7 +307,7 @@ class Predictor:
                     first_run = False
 
                     # Log this every now and then so that the user knows it's running
-                    if (int(time.time()) - log_reasure) > 30:
+                    if (int(time.time()) - log_reasure) > 10:
                         log_reasure = time.time()
                         logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
 

@@ -34,7 +34,7 @@ class NnMixer:
 
         self.batch_size = 200
         self.epochs = 120000
-        self.quantiles = [0.05,0.95]
+        self.quantiles = [0.5,0.5,0.5]
         self.out_indexes = None
 
         self.nn_class = DefaultNet
@@ -187,7 +187,7 @@ class NnMixer:
 
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column] = {
-                    'predictions': [(x[1]+x[0])/2 for x in decoded_predictions]
+                    'predictions': [x[2] for x in decoded_predictions]
                     ,'confidence_range': [[x[0],x[1]] for x in decoded_predictions]
                     ,'quantile_confidences': [self.quantiles[1] - self.quantiles[0] for x in decoded_predictions]}
 
@@ -356,9 +356,9 @@ class NnMixer:
                     self.out_indexes.append([ds.out_indexes[i][0] + offset_before, ds.out_indexes[i][1] + offset_after])
                     offset_before = offset_after
 
-            self.optimizer_class = Ranger
+            self.optimizer_class = Ranger #torch.optim.AdamW
             if self.optimizer_args is None:
-                self.optimizer_args = {}
+                self.optimizer_args = {'lr': 0.0005}
 
             if 'beta1' in self.dynamic_parameters:
                 self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)

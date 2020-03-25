@@ -75,16 +75,16 @@ class NumericEncoder:
             else:
                 vector = [0] * 2
                 if number is None:
-                    vector[1] = 0
-                else:
                     vector[1] = 1
+                else:
+                    vector[1] = 0
                     vector[0] = number / self._abs_mean
 
             ret.append(vector)
 
         return self._pytorch_wrapper(ret)
 
-    def decode(self, encoded_values, nr_quantiles=2):
+    def decode(self, encoded_values, nr_quantiles=3):
         ret = []
         for vector in encoded_values.tolist():
             if self._is_target:
@@ -105,8 +105,8 @@ class NumericEncoder:
                 is_zero = False
                 is_negative = False
                 real_value = vector[0] * self._abs_mean
-                if not math.isnan(vector[3]):
-                    is_none = True if abs(round(vector[3])) == 0 else False
+                if not math.isnan(vector[2]):
+                    is_none = True if abs(round(vector[2])) == 1 else False
                 else:
                     logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
                     is_none = True
