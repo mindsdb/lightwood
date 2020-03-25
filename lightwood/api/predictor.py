@@ -274,8 +274,6 @@ class Predictor:
 
         started = time.time()
         log_reasure = time.time()
-        epoch = 0
-        eval_next_on_epoch = eval_every_x_epochs
         first_run = True
         stop_training = False
 
@@ -350,9 +348,7 @@ class Predictor:
                         subset_test_error_delta_buff = []
                         continue
 
-                    if epoch >= eval_next_on_epoch:
-                        eval_next_on_epoch += eval_every_x_epochs
-
+                    if epoch % eval_every_x_epochs == 0:
                         test_error = mixer.error(test_data_ds)
                         subset_test_error = mixer.error(subset_test_ds, subset_id=subset_id)
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}')
