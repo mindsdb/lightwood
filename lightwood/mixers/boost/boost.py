@@ -6,8 +6,9 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 class BoostMixer():
 
-    def __init__(self):
+    def __init__(self, quantiles=None):
         self.targets = None
+        self.quantiles = quantiles
 
     def train(self, data_source):
         output_features = data_source.configuration['output_features']
@@ -46,6 +47,11 @@ class BoostMixer():
             elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.NUMERIC:
                 self.targets[target_col_name]['model'] = GradientBoostingRegressor(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X,Y)
+                if self.quantiles is not None:
+                    self.targets[target_col_name]['quantile_models'] = []
+                    for i, quantile in enumerate(self.quantiles):
+                        self.targets[target_col_name]['quantile_models'][i] = GradientBoostingRegressor(n_estimators=600, loss='quantile',alpha=[quantile])
+                        self.targets[target_col_name]['quantile_models'][i].fit(X,Y)
 
             else:
                 self.targets[target_col_name]['model'] = None
@@ -66,9 +72,16 @@ class BoostMixer():
             else:
                 predictions[target_col_name] = {'values':None, 'confidences':None}
 
-                predictions[target_col_name]['values'] = self.targets[target_col_name]['model'].predict(X)
+                predictions[target_col_name]['predictions'] = self.targets[target_col_name]['model'].predict(X)
                 try:
-                    predictions[target_col_name]['confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
+                    predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
+
+                    if 'quantile_models' in self.targets[target_col_name]:
+                        lower_quantiles = self.targets[target_col_name]['quantile_models'][0].predict(X)
+                        upper_quantiles = self.targets[target_col_name]['quantile_models'][1].predict(X)
+
+                        predictions[target_col_name]['confidence_range'] = [[lower_quantiles[i],upper_quantiles[i]] for i in range(len(decoded_predictions))]
+                        predictions[target_col_name]['quantile_confidences'] = [self.quantiles[1] - self.quantiles[0] for i in range(len(decoded_predictions))]
 
                 except Exception as e:
                     pass
