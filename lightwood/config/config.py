@@ -29,3 +29,5 @@ class CONFIG:
         ,'batch_loss': False
         ,'network_heatmap': False
     }
+
+    QUANTILES = [0.05,0.95]
