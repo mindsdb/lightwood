@@ -442,8 +442,7 @@ class Predictor:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
                     if (self._helper_mixers[output_column]['accuracy'] > 1.00 * self.train_accuracy[output_column]['value']) or CONFIG.FORCE_HELPER_MIXERS:
                         helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, [output_column])
-                        print(helper_mixer_predictions)
-                        exit()
+                        
                         main_mixer_predictions[output_column] = helper_mixer_predictions[output_column]
 
         return main_mixer_predictions
