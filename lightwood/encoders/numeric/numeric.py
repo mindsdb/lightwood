@@ -14,7 +14,7 @@ class NumericEncoder:
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self.is_target = is_target
-        self.decode_log = True
+        self.decode_log = False
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -80,9 +80,12 @@ class NumericEncoder:
 
         if decode_log is None:
             decode_log = self.decode_log
-
+            
         ret = []
-        for vector in encoded_values.tolist():
+        if type(encoded_values) != type([]):
+            encoded_values = encoded_values.tolist()
+
+        for vector in encoded_values:
             if self.is_target:
                 if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
                     logging.error(f'Got weird target value to decode: {vector}')
