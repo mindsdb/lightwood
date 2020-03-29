@@ -508,14 +508,15 @@ class Predictor:
             accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
 
             if ds.get_column_config(output_column)['type'] in (COLUMN_DATA_TYPES.NUMERIC):
-                ds.encoders[output_column].decode_log = False
-                predicted = list(map(str,predictions[output_column]['predictions']))
+                ds.encoders[output_column].decode_log = True
+                predicted =ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
+
                 alternative_accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
 
                 if alternative_accuracy['value'] > accuracy['value']:
                     accuracy = alternative_accuracy
                 else:
-                    ds.encoders[output_column].decode_log = True
+                    ds.encoders[output_column].decode_log = False
 
             accuracies[output_column] = accuracy
 
