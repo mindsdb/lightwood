@@ -1,8 +1,10 @@
-import torch
 import math
 import logging
 import sys
+
+import torch
 import numpy as np
+
 
 class NumericEncoder:
 
