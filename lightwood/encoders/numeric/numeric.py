@@ -57,10 +57,10 @@ class NumericEncoder:
                 vector = [0] * 4
                 try:
                     if real is None:
-                        vector[1] = 0
+                        vector[0] = 0
                     else:
-                        vector[1] = 1
-                        vector[0] = math.log(abs(real)) if abs(real) > 0 else -20
+                        vector[0] = 1
+                        vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                         vector[2] = 1 if real < 0 else 0
                         vector[3] = real/self._mean
                 except Exception as e:
@@ -91,7 +91,7 @@ class NumericEncoder:
                     else:
                         real_value = vector[2] * self._mean
             else:
-                if vector[2] < 0.5:
+                if vector[0] < 0.5:
                     ret.append(None)
                     continue
 
