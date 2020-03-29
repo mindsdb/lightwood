@@ -89,11 +89,16 @@ class DefaultNet(torch.nn.Module):
             rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
 
             layers = []
+            fr = False
             for ind in range(len(shape) - 1):
                 linear_function = PLinear  if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
                 layers.append(linear_function(shape[ind],shape[ind+1]))
                 if ind < len(shape) - 2:
-                    layers.append(rectifier())
+                    if fr:
+                        fr = False
+                        layers.append(torch.nn.Tanh())
+                    else:
+                        layers.append(rectifier())
 
             self.net = torch.nn.Sequential(*layers)
         else:
