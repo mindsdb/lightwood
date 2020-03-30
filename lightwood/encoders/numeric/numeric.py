@@ -36,7 +36,7 @@ class NumericEncoder:
                 value_type = 'float'
 
         self._type = value_type if self._type is None else self._type
-        non_null_priming_data = [x for x in priming_data if x is not None]
+        non_null_priming_data = [float(str(x).replace(',','.')) for x in priming_data if x is not None]
         self._mean = np.sum(non_null_priming_data) / len(non_null_priming_data)
         self._prepared = True
 
@@ -46,6 +46,13 @@ class NumericEncoder:
 
         ret = []
         for real in data:
+            try:
+                real = float(real)
+            except:
+                try:
+                    real = float(real.replace(',','.'))
+                except:
+                    real = None
             if self.is_target:
                 vector = [0] * 3
                 try:
@@ -80,7 +87,7 @@ class NumericEncoder:
 
         if decode_log is None:
             decode_log = self.decode_log
-            
+
         ret = []
         if type(encoded_values) != type([]):
             encoded_values = encoded_values.tolist()
