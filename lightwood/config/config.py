@@ -15,7 +15,7 @@ class CONFIG:
     SELFAWARE = True
     HELPER_MIXERS = True
     FORCE_HELPER_MIXERS = False
-    ENABLE_DROPOUT = True
+    ENABLE_DROPOUT = False
 
     """Probabilistic FC layers"""
     USE_PROBABILISTIC_LINEAR = False # change weights in mixer to be probabilistic
