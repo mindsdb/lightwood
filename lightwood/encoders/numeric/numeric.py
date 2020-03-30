@@ -1,141 +1,136 @@
-import torch
 import math
 import logging
+import sys
+
+import torch
+import numpy as np
 
 
 class NumericEncoder:
 
     def __init__(self, data_type=None, is_target=False):
         self._type = data_type
-        self._min_value = None
-        self._max_value = None
         self._mean = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
-        self._is_target = is_target
+        self.is_target = is_target
+        self.decode_log = False
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
-        count = 0
-        abs_count = 0
         value_type = 'int'
         for number in priming_data:
             try:
                 number = float(number)
-            except Exception:
+            except:
                 continue
 
-            if math.isnan(number):
+            if np.isnan(number):
                 err = 'Lightwood does not support working with NaN values !'
                 logging.error(err)
                 raise Exception(err)
-
-            self._min_value = number if self._min_value is None or self._min_value > number else self._min_value
-            self._max_value = number if self._max_value is None or self._max_value < number else self._max_value
-
-            count += number
-            abs_count += abs(number)
 
             if int(number) != number:
                 value_type = 'float'
 
         self._type = value_type if self._type is None else self._type
-        self._mean = count / len(priming_data)
-        self._abs_mean = abs_count / len(priming_data)
+        non_null_priming_data = [float(str(x).replace(',','.')) for x in priming_data if x is not None]
+        self._mean = np.sum(non_null_priming_data) / len(non_null_priming_data)
         self._prepared = True
 
     def encode(self, data):
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+
         ret = []
-
-        for number in data:
+        for real in data:
             try:
-                try:
-                    number = float(number)
-                except:
-                    # Some data cleanup for an edge case that shows up a lot when lightwood isn't used with mindsdb
-                    number = float(number.replace(',', '.'))
+                real = float(real)
             except:
-                #logging.warning('It is assuming that  "{what}" is a number but cannot cast to float'.format(what=number))
-
-                number = None
-
-            if self._is_target:
-                vector = [0] * 2
                 try:
-                    vector[0] = number/self._abs_mean
-                    #vector[0] = number
-                    vector[1] = math.log(abs(number)) if number > 0 else -100
+                    real = float(real.replace(',','.'))
                 except:
-                    logging.warning(f'Got unexpected value for numerical target value: "{number}" !')
-                    # @TODO For now handle this by setting to zero as a hotfix,
-                    # but we need to figure out why it's happening and fix it properly later
-                    vector = [0] * 2
+                    real = None
+            if self.is_target:
+                vector = [0] * 3
+                try:
+                    vector[0] = math.log(abs(real)) if abs(real) > 0 else - 20
+                    vector[1] = 1 if real < 0 else 0
+                    vector[2] = real/self._mean
+                except Exception as e:
+                    vector = [0] * 3
+                    logging.error(f'Can\'t encode target value: {real}, exception: {e}')
 
             else:
-                vector = [0] * 2
-                if number is None:
-                    vector[1] = 0
-                else:
-                    vector[1] = 1
-                    vector[0] = number / self._abs_mean
+                vector = [0] * 4
+                try:
+                    if real is None:
+                        vector[0] = 0
+                    else:
+                        vector[0] = 1
+                        vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
+                        vector[2] = 1 if real < 0 else 0
+                        vector[3] = real/self._mean
+                except Exception as e:
+                    vector = [0] * 4
+                    logging.error(f'Can\'t encode input value: {real}, exception: {e}')
 
             ret.append(vector)
 
         return self._pytorch_wrapper(ret)
 
-    def decode(self, encoded_values):
+    def decode(self, encoded_values, decode_log=None):
+        if not self._prepared:
+            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+
+        if decode_log is None:
+            decode_log = self.decode_log
+
         ret = []
-        for vector in encoded_values.tolist():
-            if self._is_target:
-                if not math.isnan(vector[0]):
-                    linear_value = vector[0]
-                    real_value = linear_value * self._abs_mean
-                    #real_value = linear_value
-                else:
-                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                    real_value = None
+        if type(encoded_values) != type([]):
+            encoded_values = encoded_values.tolist()
 
-                if self._type == 'int' and real_value is not None:
-                    real_value = int(round(real_value))
+        for vector in encoded_values:
+            if self.is_target:
+                if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
+                    logging.error(f'Got weird target value to decode: {vector}')
+                    real_value = pow(10,63)
+                else:
+                    if decode_log:
+                        sign = -1 if vector[1] > 0.5 else 1
+                        real_value = math.exp(vector[0]) * sign
+                    else:
+                        real_value = vector[2] * self._mean
             else:
-                is_zero = False
-                is_negative = False
-                real_value = vector[0] * self._abs_mean
-                if not math.isnan(vector[3]):
-                    is_none = True if abs(round(vector[3])) == 0 else False
-                else:
-                    logging.warning(f'Occurance of `nan` value in encoded numerical value: {vector}')
-                    is_none = True
+                if vector[0] < 0.5:
+                    ret.append(None)
+                    continue
 
-                if is_none:
-                    real_value = None
-                if is_zero:
-                    real_value = 0
+                real_value = vector[3] * self._mean
+
+            if self._type == 'int':
+                real_value = round(real_value)
 
             ret.append(real_value)
-
         return ret
 
 
 if __name__ == "__main__":
-    data = [1, 1.1, 2, -8.6, None, 0]
+    data = [1,1.1,2,-8.6,None,0]
 
     encoder = NumericEncoder()
 
     encoder.prepare_encoder(data)
     encoded_vals = encoder.encode(data)
 
-    assert(sum(encoded_vals[4]) == 0)
-    assert(sum(encoded_vals[0]) == 1)
     assert(encoded_vals[1][1] > 0)
     assert(encoded_vals[2][1] > 0)
     assert(encoded_vals[3][1] > 0)
-    for i in range(0, 4):
-        assert(encoded_vals[i][3] == 1)
+    for i in range(0,3):
+        assert(encoded_vals[i][2] == 0)
+    assert(encoded_vals[3][2] == 1)
     assert(encoded_vals[4][3] == 0)
 
     decoded_vals = encoder.decode(encoded_vals)
@@ -144,4 +139,4 @@ if __name__ == "__main__":
         if decoded_vals[i] is None:
             assert(decoded_vals[i] == data[i])
         else:
-            assert(round(decoded_vals[i], 5) == round(data[i], 5))
+            assert(round(decoded_vals[i],5) == round(data[i],5))
