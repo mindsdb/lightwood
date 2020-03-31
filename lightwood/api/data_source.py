@@ -118,7 +118,7 @@ class DataSource(Dataset):
 
     def __len__(self):
         """
-        return the length of the datasource (as in number of rows)
+        return the length of thecontinue datasource (as in number of rows)
         :return: number of rows
         """
         return int(self.data_frame.shape[0])

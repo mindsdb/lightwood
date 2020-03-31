@@ -487,8 +487,10 @@ class NnMixer:
                     print('Normal train loss: ', loss.item())
 
                 if total_iter > 0 and total_iter % 3 == 0:
-                    dropout_column = random.choices(list(ds.dropout_dict.keys()),list(ds.dropout_dict.values()))
-                    ds.set_drouput(dropout_column)
+                    dropout_weights = list(ds.dropout_dict.values())
+                    if np.sum(dropout_weights) != 0:
+                        dropout_column = random.choices(list(ds.dropout_dict.keys()),dropout_weights)
+                        ds.set_drouput(dropout_column)
                 else:
                     ds.disable_dropout()
 
