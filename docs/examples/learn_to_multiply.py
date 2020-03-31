@@ -6,7 +6,7 @@ import os
 
 
 lightwood.config.config.CONFIG.HELPER_MIXERS = False
-
+lightwood.config.config.CONFIG.ENABLE_DROPOUT = True
 ### Generate a dataset
 n = 1000
 op = '*'

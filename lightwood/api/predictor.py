@@ -315,18 +315,6 @@ class Predictor:
                     if subset_iteration == 1:
                         break
 
-                    # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
-                    if subset_iteration == 2 and training_error < 0.4 and not from_data_ds.enable_dropout:
-                        eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
-                        logging.info('Enabled dropout !')
-                        from_data_ds.enable_dropout = True
-                        lowest_error = None
-                        last_test_error = None
-                        last_subset_test_error = None
-                        test_error_delta_buff = []
-                        subset_test_error_delta_buff = []
-                        continue
-
                     # If the selfaware network isn't able to train, go back to the original network
                     if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training:
                         mixer.start_selfaware_training = False

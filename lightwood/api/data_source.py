@@ -26,16 +26,22 @@ class SubSet(Dataset):
     def get_feature_names(self, where='input_features'):
         return self.data_source.get_feature_names(where)
 
+    def set_drouput(self, columns):
+        return self.data_source.set_drouput(columns)
+
+    def disable_dropout(self):
+        return self.data_source.disable_dropout()
+
     def __getattribute__(self, name):
         if name in ['configuration', 'encoders', 'transformer', 'training',
-                    'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes']:
+                    'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes', 'dropout_features']:
             return self.data_source.__getattribute__(name)
         else:
             return object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
         if name in ['configuration', 'encoders', 'transformer', 'training',
-                    'output_weights', 'dropout_dict', 'disable_cache']:
+                    'output_weights', 'dropout_dict', 'disable_cache', 'dropout_features']:
             return dict.__setattr__(self.data_source, name, value)
         else:
             super().__setattr__(name, value)
@@ -57,9 +63,9 @@ class DataSource(Dataset):
         self.training = False  # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
-        self.enable_dropout = False
         self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
         self.subsets = {}
+        self.dropout_features = None
         self.out_indexes = None
         self.out_types = None
 
@@ -117,28 +123,26 @@ class DataSource(Dataset):
         """
         return int(self.data_frame.shape[0])
 
+    def set_drouput(self, columns):
+        if type(columns) == str:
+            columns = [columns]
+        self.dropout_features = columns
+
+    def disable_dropout(self):
+        self.dropout_features = None
+
     def __getitem__(self, idx):
         """
-
         :param idx:
         :return:
         """
+
         sample = {}
-
-        dropout_features = None
-
-        if self.training == True and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
-            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
-
-            # Make sure we never drop all the features, since this would make the row meaningless
-            if len(dropout_features) > len(self.configuration['input_features']):
-                dropout_features = dropout_features[:-1]
-            #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
         if self.transformed_cache is None and not self.disable_cache:
             self.transformed_cache = [None] * self.__len__()
 
-        if not self.disable_cache and not (dropout_features is not None and len(dropout_features) > 0):
+        if not self.disable_cache and not (self.dropout_features is not None and len(self.dropout_features) > 0):
             cached_sample = self.transformed_cache[idx]
             if cached_sample is not None:
                 return cached_sample
@@ -149,11 +153,11 @@ class DataSource(Dataset):
                 col_name = feature['name']
                 col_config = self.get_column_config(col_name)
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
-                    if not ((dropout_features is not None and col_name in dropout_features) or self.disable_cache):
+                    if not ((self.dropout_features is not None and col_name in self.dropout_features) or self.disable_cache):
                         self.get_encoded_column_data(col_name)
 
                 # if we are dropping this feature, get the encoded value of None
-                if dropout_features is not None and col_name in dropout_features:
+                if self.dropout_features is not None and col_name in self.dropout_features:
                     custom_data = {col_name: [None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:

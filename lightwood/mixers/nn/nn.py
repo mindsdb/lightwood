@@ -351,6 +351,7 @@ class NnMixer:
             data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
                                      sampler=self._nonpersistent['sampler'])
 
+        total_iter = 0
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
@@ -479,6 +480,19 @@ class NnMixer:
                 if error < 1:
                     if self.loss_combination_operator == operator.add:
                         self.loss_combination_operator = operator.mul
+
+                if (total_iter-1) % 3 == 0:
+                    print('Droput train loss: ', loss.item())
+                else:
+                    print('Normal train loss: ', loss.item())
+
+                if total_iter > 0 and total_iter % 3 == 0:
+                    dropout_column = random.choices(list(ds.dropout_dict.keys()),list(ds.dropout_dict.values()))
+                    ds.set_drouput(dropout_column)
+                else:
+                    ds.disable_dropout()
+
+                total_iter += 1
 
             if CONFIG.MONITORING['epoch_loss']:
                 self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')
