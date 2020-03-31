@@ -94,20 +94,20 @@ class RnnEncoder:
 
 # only run the test if this file is called from debugger
 if __name__ == "__main__":
-    series = [[10,20,30,40,50],
-                 [1,2,3,4,5,6,7],
-                 [5,7,9,11,13,15,17,19],
-                 [3,6,9,12,15,18,21,24,27,30]
+    series = [[10,11,9,13,8],
+              [11, 12, 10, 14, 9],
+              [9, 10, 8, 12, 7],
+              [12, 13, 11, 15, 10]
 
                  ]
 
-    encoder = RnnEncoder(encoded_vector_size=3,train_iters=75000)
+    encoder = RnnEncoder(encoded_vector_size=3,train_iters=700)
     encoder.prepare_encoder(series)
     encoder.encode(series)
 
     # test de decoder
 
-    ret = encoder.encode([[3,4,5,6,7]])
+    ret = encoder.encode([[9]])
     print('encoded vector:')
     print(ret)
     print('decoded vector')

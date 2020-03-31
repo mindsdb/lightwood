@@ -680,7 +680,7 @@ def timeSince(since, percent):
 # of examples, time so far, estimated time) and average loss.
 #
 
-def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, loss_breakpoint=0.0001, max_length=MAX_LENGTH):
+def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, loss_breakpoint=0.00001, max_length=MAX_LENGTH):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -689,14 +689,16 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
 
-    random_index = random.randint(0, len(input_rows))
+
 
     training_pairs = [[tensorFromSentence(input_lang, input_rows[i]), tensorFromSentence(output_lang, output_rows[i])]
                       for i in range(len(input_rows))]
     criterion = nn.NLLLoss()
 
-    for iter in range(1, n_iters + 1):
-        training_pair = training_pairs[iter - 1]
+    for iter in range(1, n_iters * len(training_pairs)):
+        print(iter)
+        random_index = random.randint(0, len(input_rows)-1)
+        training_pair = training_pairs[random_index]
         input_tensor = training_pair[0]
         target_tensor = training_pair[1]
 
@@ -712,7 +714,7 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
 
-            break
+            #break
 
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
@@ -756,7 +758,7 @@ def trainItersNoLang(encoder, decoder, input_rows, output_rows, n_iters, print_e
                       for i in range(len(input_rows))]
     criterion = nn.MSELoss()
 
-    for iter in range(1, n_iters + 1):
+    for iter in range(1, n_iters * len(training_pairs) + 1):
         random_index = random.randint(0, len(input_rows)-1)
         training_pair = training_pairs[random_index]
         input_tensor = training_pair[0]
@@ -774,7 +776,7 @@ def trainItersNoLang(encoder, decoder, input_rows, output_rows, n_iters, print_e
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
 
-            break
+
 
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every

@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
                  ]
 
-    encoder = RnnEncoder(encoded_vector_size=100,train_iters=750000)
+    encoder = RnnEncoder(encoded_vector_size=10,train_iters=750)
     encoder.prepare_encoder(sentences)
     encoder.encode(sentences)
 
