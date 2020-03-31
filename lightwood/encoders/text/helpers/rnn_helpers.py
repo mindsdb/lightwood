@@ -358,6 +358,23 @@ class EncoderRNN(nn.Module):
     def initHidden(self):
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
+
+class EncoderRNNNumerical(nn.Module):
+    def __init__(self, input_size, hidden_size):
+        super(EncoderRNNNumerical, self).__init__()
+        self.hidden_size = hidden_size
+
+        self.gru = nn.GRU(input_size, hidden_size)
+
+    def forward(self, input, hidden):
+        #input = torch.Tensor([[input.tolist()]], device=device)
+        output, hidden = self.gru(input, hidden)
+        return output, hidden
+
+    def initHidden(self):
+        return torch.zeros(1, 1, self.hidden_size, device=device)
+
+
 ######################################################################
 # The Decoder
 # -----------
@@ -401,6 +418,25 @@ class DecoderRNN(nn.Module):
         output = F.relu(output)
         output, hidden = self.gru(output, hidden)
         output = self.softmax(self.out(output[0]))
+        return output, hidden
+
+    def initHidden(self):
+        return torch.zeros(1, 1, self.hidden_size, device=device)
+
+
+class DecoderRNNNumerical(nn.Module):
+    def __init__(self, hidden_size, output_size):
+        super(DecoderRNNNumerical, self).__init__()
+        self.hidden_size = hidden_size
+        self.gru = nn.GRU(output_size, hidden_size)
+        self.out = nn.Linear(hidden_size, output_size)
+
+
+    def forward(self, input, hidden):
+        output = F.relu(input.float())
+        output, hidden = self.gru(output, hidden)
+        output = self.out(output)
+        #output = self.softmax(self.out(output[0]))
         return output, hidden
 
     def initHidden(self):
@@ -509,6 +545,10 @@ def tensorFromSentence(lang, sentence):
     indexes.append(EOS_token)
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
+def tensorFromSeries(series):
+
+    return torch.tensor(series, dtype=torch.long, device=device).view(-1, 1, 1, 1).float()
+
 
 def tensorsFromPair(pair, input_lang, output_lang):
     input_tensor = tensorFromSentence(input_lang, pair[0])
@@ -563,11 +603,14 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
             input_tensor[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0, 0]
 
-    decoder_input = torch.tensor([[SOS_token]], device=device)
+    if isinstance(encoder, EncoderRNNNumerical):
+        decoder_input = torch.tensor([[[SOS_token]]], device=device)
+    else:
+        decoder_input = torch.tensor([[SOS_token]], device=device)
 
     decoder_hidden = encoder_hidden
 
-    use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
+    use_teacher_forcing = True# True if random.random() < teacher_forcing_ratio else False
 
     if use_teacher_forcing:
         # Teacher forcing: Feed the target as the next input
@@ -648,8 +691,8 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
 
     random_index = random.randint(0, len(input_rows))
 
-    training_pairs = [[tensorFromSentence(input_lang, input_rows[random_index]), tensorFromSentence(output_lang, output_rows[random_index])]
-                      for i in range(n_iters)]
+    training_pairs = [[tensorFromSentence(input_lang, input_rows[i]), tensorFromSentence(output_lang, output_rows[i])]
+                      for i in range(len(input_rows))]
     criterion = nn.NLLLoss()
 
     for iter in range(1, n_iters + 1):
@@ -684,6 +727,67 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
 
     # showPlot(plot_losses)
 
+
+
+######################################################################
+# The whole training process looks like this:
+#
+# -  Start a timer
+# -  Initialize optimizers and criterion
+# -  Create set of training pairs
+# -  Start empty losses array for plotting
+#
+# Then we call ``train`` many times and occasionally print the progress (%
+# of examples, time so far, estimated time) and average loss.
+#
+
+def trainItersNoLang(encoder, decoder, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, loss_breakpoint=0.0001, max_length=MAX_LENGTH):
+    start = time.time()
+    plot_losses = []
+    print_loss_total = 0  # Reset every print_every
+    plot_loss_total = 0  # Reset every plot_every
+
+    encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
+    decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
+
+
+
+    training_pairs = [[tensorFromSeries(input_rows[i]), tensorFromSeries(output_rows[i])]
+                      for i in range(len(input_rows))]
+    criterion = nn.MSELoss()
+
+    for iter in range(1, n_iters + 1):
+        random_index = random.randint(0, len(input_rows)-1)
+        training_pair = training_pairs[random_index]
+        input_tensor = training_pair[0]
+        target_tensor = training_pair[1]
+
+        loss = train(input_tensor, target_tensor, encoder,
+                     decoder, encoder_optimizer, decoder_optimizer, criterion, max_length)
+        print_loss_total += loss
+        plot_loss_total += loss
+
+        print_loss_avg = print_loss_total / print_every
+
+        if print_loss_avg < loss_breakpoint:
+
+            print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
+                                         iter, iter / n_iters * 100, print_loss_avg))
+
+            break
+
+        if iter % print_every == 0:
+            print_loss_avg = print_loss_total / print_every
+            print_loss_total = 0
+            print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
+                                         iter, iter / n_iters * 100, print_loss_avg))
+
+        if iter % plot_every == 0:
+            plot_loss_avg = plot_loss_total / plot_every
+            plot_losses.append(plot_loss_avg)
+            plot_loss_total = 0
+
+    # showPlot(plot_losses)
 
 ######################################################################
 # Evaluation
