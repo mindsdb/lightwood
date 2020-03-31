@@ -396,6 +396,8 @@ class NnMixer:
 
                     if one_dropout_inptus is not None:
                         inputs = one_dropout_inptus
+                    elif all_but_one_dropout_inptus is not None:
+                        inputs = all_but_one_dropout_inptus
                     else:
                         inputs = original_inputs
 
@@ -496,6 +498,7 @@ class NnMixer:
                         print('Droput train loss: ', loss.item())
                     elif dropout_index == 2:
                         print('Droput all but one train loss: ', loss.item())
+                        print('\n--------------------------------\n')
                     else:
                         print('Normal train loss: ', loss.item())
 
@@ -517,16 +520,14 @@ class NnMixer:
 
                         for k in ds.transformer.input_indexes_dict:
                             if k == dropout_column:
-                                t = original_inputs[:,indexes_to_replace[0]:indexes_to_repla ce[1]]
+                                t = original_inputs[:,indexes_to_replace[0]:indexes_to_replace[1]]
                             else:
-                                t = ds.get_encoded_column_data(k, custom_data={dropout_column: [None]*original_inputs.shape[0]}).to(self.net.device)
+                                t = ds.get_encoded_column_data(k, custom_data={k: [None]*original_inputs.shape[0]}).to(self.net.device)
 
                             if all_but_one_dropout_inptus is None:
                                 all_but_one_dropout_inptus = t
-                                print('1: ', all_but_one_dropout_inptus.shape)
                             else:
                                 all_but_one_dropout_inptus = torch.cat([all_but_one_dropout_inptus,t], dim=1)
-                                print('2: ', all_but_one_dropout_inptus.shape, t.shape)
 
                     '''
                     if total_iter > 0 and total_iter % 3 == 0:
