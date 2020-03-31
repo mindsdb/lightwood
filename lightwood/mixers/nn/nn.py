@@ -361,7 +361,11 @@ class NnMixer:
                 dropout_column = None
                 indexes_to_replace = None
 
-                for dropout_index in range(3):
+                dropout_range = 1
+                if total_iter % 2 == 0:
+                    dropout_range = 3
+                    
+                for dropout_index in range(dropout_range):
                     if self.start_selfaware_training and not self.is_selfaware:
                         logging.info('Making network selfaware !')
                         self.is_selfaware = True
@@ -528,16 +532,6 @@ class NnMixer:
                                 all_but_one_dropout_inptus = t
                             else:
                                 all_but_one_dropout_inptus = torch.cat([all_but_one_dropout_inptus,t], dim=1)
-
-                    '''
-                    if total_iter > 0 and total_iter % 3 == 0:
-                        dropout_weights = list(ds.dropout_dict.values())
-                        if np.sum(dropout_weights) != 0:
-
-                            ds.set_drouput(dropout_column)
-                    else:
-                        ds.disable_dropout()
-                    '''
 
                     total_iter += 1
 
