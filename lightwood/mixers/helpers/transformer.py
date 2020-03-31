@@ -10,30 +10,44 @@ class Transformer:
 
         self.feature_len_map = {}
         self.out_indexes = []
+        self.input_indexes = []
+        self.input_indexes_dict = {}
+
+        self.initial_run = True
 
     def transform(self, sample):
-
         input_vector = []
         output_vector = []
 
         for input_feature in self.input_features:
             sub_vector = sample['input_features'][input_feature].tolist()
             input_vector += sub_vector
-            if input_feature not in self.feature_len_map:
-                self.feature_len_map[input_feature] = len(sub_vector)
+
+            if self.initial_run:
+                if input_feature not in self.feature_len_map:
+                    self.feature_len_map[input_feature] = len(sub_vector)
+
+                if len(self.input_indexes) == 0:
+                    self.input_indexes.append([0,len(sub_vector)])
+                else:
+                    self.input_indexes.append([self.input_indexes[-1][1], self.input_indexes[-1][1] + len(sub_vector)])
+                self.input_indexes_dict[input_feature] = self.input_indexes[-1]
 
         for output_feature in self.output_features:
             sub_vector = sample['output_features'][output_feature].tolist()
             output_vector += sub_vector
-            if output_feature not in self.feature_len_map:
-                self.feature_len_map[output_feature] = len(sub_vector)
 
-            if len(self.out_indexes) < len(sample['output_features']):
-                if len(self.out_indexes) == 0:
-                    self.out_indexes.append([0,len(sub_vector)])
-                else:
-                    self.out_indexes.append([self.out_indexes[-1][1], self.out_indexes[-1][1] + len(sub_vector)])
+            if self.initial_run:
+                if output_feature not in self.feature_len_map:
+                    self.feature_len_map[output_feature] = len(sub_vector)
 
+                if len(self.out_indexes) < len(sample['output_features']):
+                    if len(self.out_indexes) == 0:
+                        self.out_indexes.append([0,len(sub_vector)])
+                    else:
+                        self.out_indexes.append([self.out_indexes[-1][1], self.out_indexes[-1][1] + len(sub_vector)])
+
+        self.initial_run = False
         return torch.FloatTensor(input_vector), torch.FloatTensor(output_vector)
 
     def revert(self, vector, feature_set='output_features'):

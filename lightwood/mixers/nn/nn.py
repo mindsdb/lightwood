@@ -356,145 +356,189 @@ class NnMixer:
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
-                if self.start_selfaware_training and not self.is_selfaware:
-                    logging.info('Making network selfaware !')
-                    self.is_selfaware = True
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net)
-                    self.last_unaware_net = copy.deepcopy(self.net.net)
+                one_dropout_inptus = None
+                all_but_one_dropout_inptus = None
+                dropout_column = None
+                indexes_to_replace = None
 
-                    # Lower the learning rate once we start training the selfaware network
-                    self.optimizer_args['lr'] = self.optimizer.lr/4
-                    gc.collect()
-                    if 'cuda' in str(self.net.device):
-                        torch.cuda.empty_cache()
-                    self.optimizer.zero_grad()
-                    self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+                for dropout_index in range(3):
+                    if self.start_selfaware_training and not self.is_selfaware:
+                        logging.info('Making network selfaware !')
+                        self.is_selfaware = True
+                        self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net)
+                        self.last_unaware_net = copy.deepcopy(self.net.net)
 
-                if self.stop_selfaware_training and self.is_selfaware:
-                    logging.info('Cannot train selfaware network, training a normal network instead !')
-                    self.is_selfaware = False
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net) #, pretrained_net=copy.deepcopy(self.net.net)
+                        # Lower the learning rate once we start training the selfaware network
+                        self.optimizer_args['lr'] = self.optimizer.lr/4
+                        gc.collect()
+                        if 'cuda' in str(self.net.device):
+                            torch.cuda.empty_cache()
+                        self.optimizer.zero_grad()
+                        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-                    # Increase the learning rate closer to the previous levels
-                    self.optimizer_args['lr'] = self.optimizer.lr * 4
-                    gc.collect()
-                    if 'cuda' in str(self.net.device):
-                        torch.cuda.empty_cache()
-                    self.optimizer.zero_grad()
-                    self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+                    if self.stop_selfaware_training and self.is_selfaware:
+                        logging.info('Cannot train selfaware network, training a normal network instead !')
+                        self.is_selfaware = False
+                        self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net) #, pretrained_net=copy.deepcopy(self.net.net)
 
-                self.total_iterations += 1
-                # get the inputs; data is a list of [inputs, labels]
-                inputs, labels = data
+                        # Increase the learning rate closer to the previous levels
+                        self.optimizer_args['lr'] = self.optimizer.lr * 4
+                        gc.collect()
+                        if 'cuda' in str(self.net.device):
+                            torch.cuda.empty_cache()
+                        self.optimizer.zero_grad()
+                        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-                labels = labels.to(self.net.device)
-                inputs = inputs.to(self.net.device)
+                    self.total_iterations += 1
+                    # get the inputs; data is a list of [inputs, labels]
+                    original_inputs, labels = data
+                    original_inputs = original_inputs.to(self.net.device)
 
-                # zero the parameter gradients
-                self.optimizer.zero_grad()
-
-                # forward + backward + optimize
-                # outputs = self.net(inputs)
-                if self.is_selfaware:
-                    outputs, awareness = self.net(inputs)
-                else:
-                    outputs = self.net(inputs)
-
-                loss = None
-                for k, criterion in enumerate(self.criterion_arr):
-                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
-                    if loss is None:
-                        loss = target_loss
+                    if one_dropout_inptus is not None:
+                        inputs = one_dropout_inptus
                     else:
-                        loss += target_loss
+                        inputs = original_inputs
 
-                awareness_loss = None
-                if self.is_selfaware:
-                    unreduced_losses = []
-                    for k, criterion in enumerate(self.unreduced_criterion_arr):
-                        # redyce = True
+                    labels = labels.to(self.net.device)
+
+                    # zero the parameter gradients
+                    self.optimizer.zero_grad()
+
+                    # forward + backward + optimize
+                    # outputs = self.net(inputs)
+                    if self.is_selfaware:
+                        outputs, awareness = self.net(inputs)
+                    else:
+                        outputs = self.net(inputs)
+
+                    loss = None
+                    for k, criterion in enumerate(self.criterion_arr):
                         target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                        if loss is None:
+                            loss = target_loss
+                        else:
+                            loss += target_loss
 
-                        target_loss = target_loss.tolist()
-                        if type(target_loss[0]) == type([]):
-                            target_loss = [np.mean(x) for x in target_loss]
-                        for i, value in enumerate(target_loss):
-                            if len(unreduced_losses) <= i:
-                                unreduced_losses.append([])
-                            unreduced_losses[i].append(value)
+                    awareness_loss = None
+                    if self.is_selfaware:
+                        unreduced_losses = []
+                        for k, criterion in enumerate(self.unreduced_criterion_arr):
+                            # redyce = True
+                            target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
-                    unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
+                            target_loss = target_loss.tolist()
+                            if type(target_loss[0]) == type([]):
+                                target_loss = [np.mean(x) for x in target_loss]
+                            for i, value in enumerate(target_loss):
+                                if len(unreduced_losses) <= i:
+                                    unreduced_losses.append([])
+                                unreduced_losses[i].append(value)
 
-                    awareness_loss = self.awareness_criterion(awareness,unreduced_losses)
+                        unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
+
+                        awareness_loss = self.awareness_criterion(awareness,unreduced_losses)
+
+                        if CONFIG.MONITORING['batch_loss']:
+                            self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
+
 
                     if CONFIG.MONITORING['batch_loss']:
-                        self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
-
-
-                if CONFIG.MONITORING['batch_loss']:
-                    self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
+                        self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
 
 
-                if awareness_loss is not None:
-                    awareness_loss.backward(retain_graph=True)
+                    if awareness_loss is not None:
+                        awareness_loss.backward(retain_graph=True)
 
-                running_loss += loss.item()
-                loss.backward()
+                    running_loss += loss.item()
+                    loss.backward()
 
-                # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
-                if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 900:
-                    weights = []
-                    gradients = []
-                    layer_name = []
-                    for index, layer in enumerate(self.net.net):
-                        if 'Linear' in str(type(layer)):
-                            weights.append( list(layer.weight.cpu().detach().numpy().ravel()) )
-                            gradients.append( list(layer.weight.grad.cpu().detach().numpy().ravel()) )
-                            layer_name.append(f'Layer {index}-{index+1}')
-                    self.monitor.weight_map(layer_name, weights, 'Predcitive network weights')
-                    self.monitor.weight_map(layer_name, weights, 'Predictive network gradients')
-
-                    if self.is_selfaware:
+                    # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
+                    if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 900:
                         weights = []
                         gradients = []
                         layer_name = []
-                        for index, layer in enumerate(self.net.awareness_net):
+                        for index, layer in enumerate(self.net.net):
                             if 'Linear' in str(type(layer)):
                                 weights.append( list(layer.weight.cpu().detach().numpy().ravel()) )
                                 gradients.append( list(layer.weight.grad.cpu().detach().numpy().ravel()) )
                                 layer_name.append(f'Layer {index}-{index+1}')
-                        self.monitor.weight_map(layer_name, weights, 'Awareness network weights')
-                        self.monitor.weight_map(layer_name, weights, 'Awareness network gradients')
+                        self.monitor.weight_map(layer_name, weights, 'Predcitive network weights')
+                        self.monitor.weight_map(layer_name, weights, 'Predictive network gradients')
 
-                self.optimizer.step()
-                # now that we have run backward in both losses, optimize()
-                # (review: we may need to optimize for each step)
+                        if self.is_selfaware:
+                            weights = []
+                            gradients = []
+                            layer_name = []
+                            for index, layer in enumerate(self.net.awareness_net):
+                                if 'Linear' in str(type(layer)):
+                                    weights.append( list(layer.weight.cpu().detach().numpy().ravel()) )
+                                    gradients.append( list(layer.weight.grad.cpu().detach().numpy().ravel()) )
+                                    layer_name.append(f'Layer {index}-{index+1}')
+                            self.monitor.weight_map(layer_name, weights, 'Awareness network weights')
+                            self.monitor.weight_map(layer_name, weights, 'Awareness network gradients')
 
-                error = running_loss / (i + 1)
+                    self.optimizer.step()
+                    # now that we have run backward in both losses, optimize()
+                    # (review: we may need to optimize for each step)
 
-                if CONFIG.MONITORING['batch_loss']:
-                    #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
-                    self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
+                    error = running_loss / (i + 1)
 
-                if error < 1:
-                    if self.loss_combination_operator == operator.add:
-                        self.loss_combination_operator = operator.mul
+                    if CONFIG.MONITORING['batch_loss']:
+                        #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
+                        self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
 
-                if (total_iter-1) % 3 == 0:
-                    print('Droput train loss: ', loss.item())
-                else:
-                    print('Normal train loss: ', loss.item())
+                    if error < 1:
+                        if self.loss_combination_operator == operator.add:
+                            self.loss_combination_operator = operator.mul
 
-                if total_iter > 0 and total_iter % 3 == 0:
-                    dropout_weights = list(ds.dropout_dict.values())
-                    if np.sum(dropout_weights) != 0:
-                        dropout_column = random.choices(list(ds.dropout_dict.keys()),dropout_weights)
-                        ds.set_drouput(dropout_column)
-                else:
-                    ds.disable_dropout()
+                    if dropout_index == 1:
+                        print('Droput train loss: ', loss.item())
+                    elif dropout_index == 2:
+                        print('Droput all but one train loss: ', loss.item())
+                    else:
+                        print('Normal train loss: ', loss.item())
 
-                total_iter += 1
+                    if dropout_index == 0:
+                        dropout_weights = list(ds.dropout_dict.values())
+                        dropout_column = random.choices(list(ds.dropout_dict.keys()),dropout_weights)[0]
+                        droped_out_dat = ds.get_encoded_column_data(dropout_column, custom_data={dropout_column: [None]*original_inputs.shape[0]}).to(self.net.device)
+                        indexes_to_replace = ds.transformer.input_indexes_dict[dropout_column]
+
+                        for t in [original_inputs[:,0:indexes_to_replace[0]],droped_out_dat,original_inputs[:,indexes_to_replace[1]:]]:
+                            if t.shape[1] > 0:
+                                if one_dropout_inptus is None:
+                                    one_dropout_inptus = t
+                                else:
+                                    one_dropout_inptus = torch.cat([one_dropout_inptus,t], dim=1)
+
+                    if dropout_index == 1:
+                        one_dropout_inptus = None
+
+                        for k in ds.transformer.input_indexes_dict:
+                            if k == dropout_column:
+                                t = original_inputs[:,indexes_to_replace[0]:indexes_to_repla ce[1]]
+                            else:
+                                t = ds.get_encoded_column_data(k, custom_data={dropout_column: [None]*original_inputs.shape[0]}).to(self.net.device)
+
+                            if all_but_one_dropout_inptus is None:
+                                all_but_one_dropout_inptus = t
+                                print('1: ', all_but_one_dropout_inptus.shape)
+                            else:
+                                all_but_one_dropout_inptus = torch.cat([all_but_one_dropout_inptus,t], dim=1)
+                                print('2: ', all_but_one_dropout_inptus.shape, t.shape)
+
+                    '''
+                    if total_iter > 0 and total_iter % 3 == 0:
+                        dropout_weights = list(ds.dropout_dict.values())
+                        if np.sum(dropout_weights) != 0:
+
+                            ds.set_drouput(dropout_column)
+                    else:
+                        ds.disable_dropout()
+                    '''
+
+                    total_iter += 1
 
             if CONFIG.MONITORING['epoch_loss']:
                 self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')

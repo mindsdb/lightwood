@@ -32,6 +32,9 @@ class SubSet(Dataset):
     def disable_dropout(self):
         return self.data_source.disable_dropout()
 
+    def get_encoded_column_data(self, column_name, custom_data=None):
+        return self.data_source.get_encoded_column_data(column_name, custom_data=custom_data)
+
     def __getattribute__(self, name):
         if name in ['configuration', 'encoders', 'transformer', 'training',
                     'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes', 'dropout_features']:
