@@ -363,8 +363,8 @@ class Predictor:
 
                         last_test_error = test_error
 
-                        delta_mean = np.mean(test_error_delta_buff[-5:])
-                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
+                        delta_mean = np.mean(test_error_delta_buff[-10:])
+                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-10:])
 
                         if callback_on_iter is not None:
                             callback_on_iter(epoch, training_error, test_error, delta_mean,
@@ -379,7 +379,7 @@ class Predictor:
                             stop_training = True
 
                         # If the trauining subset is overfitting on it's associated testing subset
-                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(from_data_ds.subsets.keys()):
+                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 9) or (time.time() - started_subset) > stop_training_after_seconds/len(from_data_ds.subsets.keys()):
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
 
                             if mixer.is_selfaware:

@@ -82,7 +82,7 @@ class DefaultNet(torch.nn.Module):
             else:
                 shape = funnel(self.input_size,self.output_size,depth)
             '''
-            shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
+            shape = [self.input_size, max([self.input_size*2,self.output_size*2,800]),self.output_size]
 
         if pretrained_net is None:
             logging.info(f'Building network of shape: {shape}')

@@ -36,7 +36,6 @@ class NnMixer:
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
         self.awareness_criterion = None
-        self.loss_combination_operator = operator.add
         self.start_selfaware_training = False
         self.stop_selfaware_training = False
         self.is_selfaware = False
@@ -351,7 +350,6 @@ class NnMixer:
             data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
                                      sampler=self._nonpersistent['sampler'])
 
-        total_iter = 0
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
@@ -362,9 +360,10 @@ class NnMixer:
                 indexes_to_replace = None
 
                 dropout_range = 1
-                if total_iter % 2 == 0:
+                if self.total_iterations % 1 == 1:
                     dropout_range = 3
-                    
+                dropout_range = 1
+
                 for dropout_index in range(dropout_range):
                     if self.start_selfaware_training and not self.is_selfaware:
                         logging.info('Making network selfaware !')
@@ -435,10 +434,10 @@ class NnMixer:
                             target_loss = target_loss.tolist()
                             if type(target_loss[0]) == type([]):
                                 target_loss = [np.mean(x) for x in target_loss]
-                            for i, value in enumerate(target_loss):
-                                if len(unreduced_losses) <= i:
+                            for ii, value in enumerate(target_loss):
+                                if len(unreduced_losses) <= ii:
                                     unreduced_losses.append([])
-                                unreduced_losses[i].append(value)
+                                unreduced_losses[ii].append(value)
 
                         unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
 
@@ -456,7 +455,6 @@ class NnMixer:
                     if awareness_loss is not None:
                         awareness_loss.backward(retain_graph=True)
 
-                    running_loss += loss.item()
                     loss.backward()
 
                     # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
@@ -484,29 +482,18 @@ class NnMixer:
                             self.monitor.weight_map(layer_name, weights, 'Awareness network weights')
                             self.monitor.weight_map(layer_name, weights, 'Awareness network gradients')
 
+                    #if dropout_index < 3:
                     self.optimizer.step()
-                    # now that we have run backward in both losses, optimize()
-                    # (review: we may need to optimize for each step)
 
-                    error = running_loss / (i + 1)
+                    running_loss += loss.item()
+                    error = running_loss / (i*1 + 1)
 
                     if CONFIG.MONITORING['batch_loss']:
                         #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
                         self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
 
-                    if error < 1:
-                        if self.loss_combination_operator == operator.add:
-                            self.loss_combination_operator = operator.mul
+                    if dropout_index == 10:
 
-                    if dropout_index == 1:
-                        print('Droput train loss: ', loss.item())
-                    elif dropout_index == 2:
-                        print('Droput all but one train loss: ', loss.item())
-                        print('\n--------------------------------\n')
-                    else:
-                        print('Normal train loss: ', loss.item())
-
-                    if dropout_index == 0:
                         dropout_weights = list(ds.dropout_dict.values())
                         dropout_column = random.choices(list(ds.dropout_dict.keys()),dropout_weights)[0]
                         droped_out_dat = ds.get_encoded_column_data(dropout_column, custom_data={dropout_column: [None]*original_inputs.shape[0]}).to(self.net.device)
@@ -532,8 +519,6 @@ class NnMixer:
                                 all_but_one_dropout_inptus = t
                             else:
                                 all_but_one_dropout_inptus = torch.cat([all_but_one_dropout_inptus,t], dim=1)
-
-                    total_iter += 1
 
             if CONFIG.MONITORING['epoch_loss']:
                 self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')

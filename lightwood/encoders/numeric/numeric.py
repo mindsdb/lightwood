@@ -100,7 +100,11 @@ class NumericEncoder:
                 else:
                     if decode_log:
                         sign = -1 if vector[1] > 0.5 else 1
-                        real_value = math.exp(vector[0]) * sign
+                        try:
+                            real_value = math.exp(vector[0]) * sign
+                        except OverflowError as e:
+                            logging.error('Value predicted is too high, setting it to 10^9 instead as a placeholder !')
+                            real_value = pow(10,9)
                     else:
                         real_value = vector[2] * self._mean
             else:
