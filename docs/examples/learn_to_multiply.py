@@ -19,8 +19,8 @@ op = '*'
 data_train = {'x': [random.randint(-15, 5) for i in range(n)],
         'y': [random.randint(-15, 5) for i in range(n)]}
 
-data_test = {'x': [random.randint(-15, 15) for i in range(m)],
-        'y': [random.randint(-15, 15) for i in range(m)]}
+data_test = {'x': [random.randint(-15, 5) for i in range(m)],
+        'y': [random.randint(-15, 5) for i in range(m)]}
 
 if op == '/':
     for i in range(n):
@@ -48,25 +48,19 @@ predictor.learn(from_data=df_train, callback_on_iter=iter_function, eval_every_x
 predictor.save('ok.pkl')
 
 predictor = Predictor(load_from_path='ok.pkl')
-
-'''
-when = {'x': [0, 0, 1, -1, 1], 'y': [0, 1, -1, -1, 1]}
-pred = predictor.predict(when_data=pandas.DataFrame(when))['z']['predictions']
-print('Real values: ' + eval(f"""str([when['x'][i] {op} when['y'][i] for i in range(len(when['x']))])"""))
-print('Pred values: ' + str(pred))
-
-when = {'x': [0, 3, 1, -5, 1], 'y': [0, 1, -5, -4, 7]}
-pred = predictor.predict(when_data=pandas.DataFrame(when))['z']['predictions']
-print('Real values: ' + eval(f"""str([when['x'][i] {op} when['y'][i] for i in range(len(when['x']))])"""))
-print('Pred values: ' + str(pred))
-'''
-
 print('Train accuracy: ', predictor.train_accuracy)
 print('Test accuracy: ', predictor.calculate_accuracy(from_data=df_test))
 
 
 predictions = predictor.predict(when_data=df_test)
-acc = r2_score(np.log(df_test['z']), np.log(predictions['z']['predictions']))
-print(predictions['z'].keys())
+print('Confidence mean for both x and y present: ', np.mean(predictions['z']['selfaware_confidences']))
+
+predictions = predictor.predict(when_data=df_test.drop(columns=['x']))
+print('Confidence mean for x missing: ', np.mean(predictions['z']['selfaware_confidences']))
+
+predictions = predictor.predict(when_data=df_test.drop(columns=['y']))
+print('Confidence mean for y missing: ', np.mean(predictions['z']['selfaware_confidences']))
+
 print(list(df_test['z'])[30:60])
 print(predictions['z']['predictions'][30:60])
+print()

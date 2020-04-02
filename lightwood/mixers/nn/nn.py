@@ -361,8 +361,8 @@ class NnMixer:
 
                 dropout_range = 1
                 if self.total_iterations % 1 == 0:
-                    dropout_range = 3
-                #dropout_range = 1
+                    dropout_range = 2
+                #dropout_range = 3
 
                 for dropout_index in range(dropout_range):
                     if self.start_selfaware_training and not self.is_selfaware:
@@ -490,7 +490,8 @@ class NnMixer:
                         #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
                         self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
 
-                    if dropout_index == 10:
+                    '''
+                    if dropout_index == 0:
 
                         dropout_weights = list(ds.dropout_dict.values())
                         dropout_column = random.choices(list(ds.dropout_dict.keys()),dropout_weights)[0]
@@ -503,9 +504,13 @@ class NnMixer:
                                     one_dropout_inptus = t
                                 else:
                                     one_dropout_inptus = torch.cat([one_dropout_inptus,t], dim=1)
-
+                    '''
                     if dropout_index == 1:
                         one_dropout_inptus = None
+
+                        dropout_weights = list(ds.dropout_dict.values())
+                        dropout_column = random.choices(list(ds.dropout_dict.keys()),dropout_weights)[0]
+                        indexes_to_replace = ds.transformer.input_indexes_dict[dropout_column]
 
                         for k in ds.transformer.input_indexes_dict:
                             if k == dropout_column:
@@ -517,6 +522,7 @@ class NnMixer:
                                 all_but_one_dropout_inptus = t
                             else:
                                 all_but_one_dropout_inptus = torch.cat([all_but_one_dropout_inptus,t], dim=1)
+                    #'''
 
             if CONFIG.MONITORING['epoch_loss']:
                 self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')

@@ -282,7 +282,7 @@ class Predictor:
             if stop_training:
                 break
             subset_id_arr =  [*from_data_ds.subsets.keys()] # [1]
-            for subset_id in subset_id_arr:
+            for subset_iteration_subindex, subset_id in enumerate(subset_id_arr):
                 started_subset = time.time()
                 if stop_training:
                     break
@@ -316,7 +316,7 @@ class Predictor:
                         break
 
                     # If the selfaware network isn't able to train, go back to the original network
-                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training and False:
+                    if subset_iteration > 1 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training and False:
                         mixer.start_selfaware_training = False
                         mixer.stop_selfaware_training = True
                         lowest_error = None
@@ -327,7 +327,7 @@ class Predictor:
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.35:
+                    if subset_iteration > 1 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and (training_error < 0.35 or subset_iteration_subindex > 0):
                         logging.info('Started selfaware training !')
                         mixer.start_selfaware_training = True
                         lowest_error = None
