@@ -362,7 +362,7 @@ class NnMixer:
                 dropout_range = 1
                 if self.total_iterations % 1 == 0:
                     dropout_range = 3
-                dropout_range = 1
+                #dropout_range = 1
 
                 for dropout_index in range(dropout_range):
                     if self.start_selfaware_training and not self.is_selfaware:
