@@ -360,7 +360,7 @@ class NnMixer:
                 indexes_to_replace = None
 
                 dropout_range = 1
-                if self.total_iterations % 1 == 1:
+                if self.total_iterations % 1 == 0:
                     dropout_range = 3
                 dropout_range = 1
 
@@ -450,8 +450,6 @@ class NnMixer:
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
-
-
                     if awareness_loss is not None:
                         awareness_loss.backward(retain_graph=True)
 
@@ -486,7 +484,7 @@ class NnMixer:
                     self.optimizer.step()
 
                     running_loss += loss.item()
-                    error = running_loss / (i*1 + 1)
+                    error = running_loss / (i + 1)
 
                     if CONFIG.MONITORING['batch_loss']:
                         #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
