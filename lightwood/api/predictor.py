@@ -339,7 +339,7 @@ class Predictor:
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-                    if subset_iteration > 1 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and (training_error < 0.35 or (training_error < 50 and subset_iteration > 2)):
+                    if subset_iteration > 1 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.35:
                         logging.info('Started selfaware training !')
                         mixer.start_selfaware_training = True
                         lowest_error = None
