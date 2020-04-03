@@ -113,6 +113,7 @@ class DefaultNet(torch.nn.Module):
             for ind in range(len(awareness_net_shape) - 1):
                 awareness_layers.append(torch.nn.Linear(awareness_net_shape[ind], awareness_net_shape[ind + 1]))
                 if ind < len(awareness_net_shape) - 2:
+                    #awareness_layers.append(torch.nn.SELU())
                     awareness_layers.append(torch.nn.Tanh())
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
