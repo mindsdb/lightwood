@@ -278,7 +278,7 @@ class Predictor:
         first_run = True
         stop_training = False
 
-        for subset_iteration in [1, 2, 3]:
+        for subset_iteration in [1, 2]:
             if stop_training:
                 break
             subset_id_arr =  [*from_data_ds.subsets.keys()] # [1]
