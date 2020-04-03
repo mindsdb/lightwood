@@ -8,7 +8,7 @@ import numpy as np
 
 
 lightwood.config.config.CONFIG.HELPER_MIXERS = False
-lightwood.config.config.CONFIG.ENABLE_DROPOUT = True
+lightwood.config.config.CONFIG.ENABLE_DROPOUT = False
 random.seed(66)
 ### Generate a dataset
 n = 100
@@ -44,7 +44,7 @@ predictor = Predictor(output=['z'])
 def iter_function(epoch, training_error, test_error, test_error_gradient, test_accuracy):
     print(f'Epoch: {epoch}, Train Error: {training_error}, Test Error: {test_error}, Test Error Gradient: {test_error_gradient}, Test Accuracy: {test_accuracy}')
 
-predictor.learn(from_data=df_train, callback_on_iter=iter_function, eval_every_x_epochs=20)
+predictor.learn(from_data=df_train, callback_on_iter=iter_function, eval_every_x_epochs=200)
 predictor.save('ok.pkl')
 
 predictor = Predictor(load_from_path='ok.pkl')

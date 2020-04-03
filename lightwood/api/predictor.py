@@ -278,11 +278,11 @@ class Predictor:
         first_run = True
         stop_training = False
 
-        for subset_iteration in [1, 2]:
+        for subset_iteration in [1, 2, 3]:
             if stop_training:
                 break
             subset_id_arr =  [*from_data_ds.subsets.keys()] # [1]
-            for subset_subindex, subset_id in enumerate(subset_id_arr):
+            for subset_id in subset_id_arr:
                 started_subset = time.time()
                 if stop_training:
                     break
@@ -316,7 +316,7 @@ class Predictor:
                         break
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
-                    if subset_iteration == 2 and training_error < 0.4 and not from_data_ds.enable_dropout:
+                    if subset_iteration > 1 and training_error < 0.4 and not from_data_ds.enable_dropout:
                         eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
                         logging.info('Enabled dropout !')
                         from_data_ds.enable_dropout = True
@@ -328,7 +328,7 @@ class Predictor:
                         continue
 
                     # If the selfaware network isn't able to train, go back to the original network
-                    if subset_iteration == 2 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training:
+                    if subset_iteration > 1 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training:
                         mixer.start_selfaware_training = False
                         mixer.stop_selfaware_training = True
                         lowest_error = None
@@ -339,7 +339,7 @@ class Predictor:
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-                    if subset_iteration == 2 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and (training_error < 0.35):
+                    if subset_iteration > 1 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and (training_error < 0.35 or (training_error < 50 and subset_iteration > 2)):
                         logging.info('Started selfaware training !')
                         mixer.start_selfaware_training = True
                         lowest_error = None

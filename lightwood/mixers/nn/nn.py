@@ -36,7 +36,6 @@ class NnMixer:
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
         self.awareness_criterion = None
-        self.loss_combination_operator = operator.add
         self.start_selfaware_training = False
         self.stop_selfaware_training = False
         self.is_selfaware = False
@@ -475,10 +474,6 @@ class NnMixer:
                 if CONFIG.MONITORING['batch_loss']:
                     #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
                     self.monitor.plot_loss(error, self.total_iterations, 'Mean Total Running Loss')
-
-                if error < 1:
-                    if self.loss_combination_operator == operator.add:
-                        self.loss_combination_operator = operator.mul
 
             if CONFIG.MONITORING['epoch_loss']:
                 self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')
