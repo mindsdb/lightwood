@@ -546,7 +546,8 @@ def tensorFromSentence(lang, sentence):
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 def tensorFromSeries(series):
-
+    if type(series) != type([]):
+        series =  list(map(float, series.split()))
     return torch.tensor(series, dtype=torch.long, device=device).view(-1, 1, 1, 1).float()
 
 
