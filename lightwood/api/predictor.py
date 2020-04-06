@@ -102,6 +102,15 @@ class Predictor:
         device = torch.device(device_str)
 
         self._mixer.net.to(device)
+
+        if type(self._mixer.net._foward_net) == torch.nn.DataParallel:
+            available_devices = 1
+            if device_str == 'cuda':
+                available_devices = torch.cuda.device_count()
+            if available_devices < 2:
+                self._mixer.net._foward_net = self._mixer.net.net
+                self._mixer.net._foward_awareness_net = self._mixer.net.awareness_net
+
         self._mixer.net.device = device
         for e in self._mixer.encoders:
             try:
