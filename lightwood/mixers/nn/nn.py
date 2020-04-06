@@ -135,7 +135,6 @@ class NnMixer:
         loss_confidence_arr = [[]] * len(when_data_source.out_indexes)
 
         for i, data in enumerate(data_loader, 0):
-            print(i)
             inputs, _ = data
             inputs = inputs.to(self.net.device)
 
