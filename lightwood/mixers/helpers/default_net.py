@@ -36,6 +36,8 @@ class DefaultNet(torch.nn.Module):
                 torch.backends.cudnn.deterministic = True
                 torch.backends.cudnn.benchmark = False
                 self.available_devices = torch.cuda.device_count()
+            else:
+                self.available_devices = 1
 
         self.dynamic_parameters = dynamic_parameters
 
