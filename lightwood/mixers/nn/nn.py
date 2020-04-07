@@ -42,8 +42,8 @@ class NnMixer:
         self.last_unaware_net = False
 
         self.max_confidence_per_output = []
-
         self.monitor = None
+
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
                 from lightwood.mixers.helpers.debugging import TrainingMonitor
