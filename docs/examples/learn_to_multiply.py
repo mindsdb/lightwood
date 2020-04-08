@@ -8,7 +8,6 @@ import numpy as np
 
 
 lightwood.config.config.CONFIG.HELPER_MIXERS = False
-lightwood.config.config.CONFIG.ENABLE_DROPOUT = False
 random.seed(66)
 
 ### Generate a dataset
