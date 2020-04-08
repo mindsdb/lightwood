@@ -9,6 +9,7 @@ random.seed(66)
 n = 100
 m = 500
 train = True
+nr_inputs = 10
 
 #options = ['a','b','c','d','e','f','g','h','n','m']
 options = ['a','b','c']
@@ -17,10 +18,10 @@ data_train = {}
 data_test = {}
 
 for data, nr_ele in [(data_train,n), (data_test,m)]:
-    for i in range(1,6):
+    for i in range(nr_inputs):
         data[f'x_{i}'] = [random.choice(options) for _ in range(nr_ele)]
 
-    data['y'] = [Counter([data[f'x_{i}'][n] for i in range(1,6)]).most_common(1)[0][0] for n in range(nr_ele)]
+    data['y'] = [Counter([data[f'x_{i}'][n] for i in range(nr_inputs)]).most_common(1)[0][0] for n in range(nr_ele)]
 
 data_train = pd.DataFrame(data_train)
 data_test = pd.DataFrame(data_test)
@@ -40,7 +41,7 @@ print('Test accuracy: ', predictor.calculate_accuracy(from_data=data_test)['y'][
 predictions = predictor.predict(when_data=data_test)
 print(f'Confidence mean for all columns present ', np.mean(predictions['y']['selfaware_confidences']))
 
-for i_drop in range(1,6):
+for i_drop in range(nr_inputs):
     predictions = predictor.predict(when_data=data_test.drop(columns=[f'x_{i_drop}']))
     print(f'Accuracy for x_{i_drop} missing: ', predictor.calculate_accuracy(from_data=data_test.drop(columns=[f'x_{i_drop}']))['y']['value'])
     print(f'Confidence mean for x_{i_drop} missing: ', np.mean(predictions['y']['selfaware_confidences']))
