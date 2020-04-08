@@ -3,11 +3,12 @@ import random
 import pandas as pd
 import numpy as np
 
-
+lightwood.config.config.CONFIG.HELPER_MIXERS = False
 random.seed(66)
+
 n = 100
-m = 500
-train = True
+m = 11
+train = False
 
 data_train = {}
 data_test = {}
