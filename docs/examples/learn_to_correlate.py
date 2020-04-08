@@ -6,16 +6,16 @@ import numpy as np
 lightwood.config.config.CONFIG.HELPER_MIXERS = False
 random.seed(66)
 
-n = 100
-m = 11
-train = False
+n = 500
+m = 800
+train = True
 
 data_train = {}
 data_test = {}
 
 for data, nr_ele in [(data_train,n), (data_test,m)]:
     for i in range(1,5):
-        data[f'x_{i}'] = [random.randint(25,50) for _ in range(nr_ele)]
+        data[f'x_{i}'] = [random.random()*50 + 25  for _ in range(nr_ele)]
 
     data['y'] = [data['x_1'][i] * 0.9 + data['x_2'][i] * 0.09 + data['x_3'][i] * 0.009 + data['x_4'][i] * 0.0009 for i in range(nr_ele)]
 
@@ -33,10 +33,10 @@ if train:
     predictor.save('/tmp/ltcrl.pkl')
 
 predictor = lightwood.Predictor(load_from_path='/tmp/ltcrl.pkl')
-print('Train accuracy: ', predictor.train_accuracy)
-print('Test accuracy: ', predictor.calculate_accuracy(from_data=data_test))
+print('Train accuracy: ', predictor.train_accuracy['y']['value'])
+print('Test accuracy: ', predictor.calculate_accuracy(from_data=data_test)['y']['value'])
 
 for i_drop in range(1,5):
     predictions = predictor.predict(when_data=data_test.drop(columns=[f'x_{i_drop}']))
-    print(f'Accuracy for x_{i_drop} missing: ', predictor.calculate_accuracy(from_data=data_test.drop(columns=[f'x_{i_drop}'])))
+    print(f'Accuracy for x_{i_drop} missing: ', predictor.calculate_accuracy(from_data=data_test.drop(columns=[f'x_{i_drop}']))['y']['value'])
     print(f'Confidence mean for x_{i_drop} missing: ', np.mean(predictions['y']['selfaware_confidences']))
