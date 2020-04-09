@@ -8,8 +8,8 @@ import numpy as np
 
 
 lightwood.config.config.CONFIG.HELPER_MIXERS = False
-lightwood.config.config.CONFIG.ENABLE_DROPOUT = False
 random.seed(66)
+
 ### Generate a dataset
 n = 100
 m = n * 100
@@ -34,7 +34,6 @@ if op == '/':
 # target variable to be the multiplication of the two
 data_train['z'] = eval(f"""[data_train['x'][i] {op} data_train['y'][i] for i in range(n)]""")
 data_test['z'] = eval(f"""[data_test['x'][i] {op} data_test['y'][i] for i in range(m)]""")
-
 
 df_train = pandas.DataFrame(data_train)
 df_test = pandas.DataFrame(data_test)
