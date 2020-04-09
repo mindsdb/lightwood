@@ -19,8 +19,8 @@ op = '*'
 data_train = {'x': [random.randint(-15, 5) for i in range(n)],
         'y': [random.randint(-15, 5) for i in range(n)]}
 
-data_test = {'x': [random.randint(-15, 5) for i in range(m)],
-        'y': [random.randint(-15, 5) for i in range(m)]}
+data_test = {'x': [random.randint(-15, 15) for i in range(m)],
+        'y': [random.randint(-15, 15) for i in range(m)]}
 
 if op == '/':
     for i in range(n):
