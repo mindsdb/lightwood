@@ -15,6 +15,7 @@ class NumericEncoder:
         self._prepared = False
         self.is_target = is_target
         self.decode_log = False
+        self.nr_quantiles = 3
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -54,7 +55,7 @@ class NumericEncoder:
                 except:
                     real = None
             if self.is_target:
-                vector = [0] * 7
+                vector = [0] * (1 + nr_quantiles * 2)
                 try:
                     vector[0] = 1 if real < 0 else 0
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
@@ -64,7 +65,7 @@ class NumericEncoder:
                     vector[5] = math.log(abs(real)) if abs(real) > 0 else - 20
                     vector[6] = real/self._mean
                 except Exception as e:
-                    vector = [0] * 7
+                    vector = [0] * (1 + nr_quantiles * 2)
                     logging.error(f'Can\'t encode target value: {real}, exception: {e}')
 
             else:
@@ -104,9 +105,9 @@ class NumericEncoder:
                 else:
                     if decode_log:
                         sign = -1 if vector[0] > 0.5 else 1
-                        real_value = math.exp(vector[1]) * sign
+                        real_value = [math.exp(vector[i*2 + 1]) * sign for i in range(nr_quantiles)]
                     else:
-                        real_value = vector[2] * self._mean
+                        real_value = [vector[2*i + 2] * self._mean for i in range(nr_quantiles)]
             else:
                 if vector[0] < 0.5:
                     ret.append(None)

@@ -11,7 +11,7 @@ lightwood.config.config.CONFIG.HELPER_MIXERS = False
 random.seed(66)
 
 ### Generate a dataset
-n = 100
+n = 1000
 m = n * 100
 op = '*'
 
@@ -19,8 +19,8 @@ op = '*'
 data_train = {'x': [random.randint(-15, 5) for i in range(n)],
         'y': [random.randint(-15, 5) for i in range(n)]}
 
-data_test = {'x': [random.randint(-15, 15) for i in range(m)],
-        'y': [random.randint(-15, 15) for i in range(m)]}
+data_test = {'x': [random.randint(-5, 15) for i in range(m)],
+        'y': [random.randint(-5, 15) for i in range(m)]}
 
 if op == '/':
     for i in range(n):
