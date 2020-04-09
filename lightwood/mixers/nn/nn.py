@@ -43,6 +43,7 @@ class NnMixer:
 
         self.max_confidence_per_output = []
         self.monitor = None
+        self.quantiles = [0.5,0.05,0.95]
 
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
@@ -178,7 +179,15 @@ class NnMixer:
                 output_column,
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
-            predictions[output_column] = {'predictions': decoded_predictions}
+
+            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+                predictions[output_column] = {
+                    'predictions': [x[0] for x in decoded_predictions]
+                    ,'confidence_range': [[x[1],x[2]] for x in decoded_predictions]
+                    ,'quantile_confidences': [self.quantiles[2] - self.quantiles[1] for x in decoded_predictions]}
+            else:
+                predictions[output_column] = {'predictions': decoded_predictions}
+
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/x[k] for x in awareness_arr]
 
@@ -303,6 +312,8 @@ class NnMixer:
         if initialize:
             self.fit_data_source(ds)
 
+            self.out_types = ds.out_types
+
             self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
             self.net = self.net.train()
 
@@ -323,8 +334,8 @@ class NnMixer:
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
-                        self.criterion_arr.append(QuantileLoss())
-                        self.unreduced_criterion_arr.append(QuantileLoss(reduce=False))
+                        self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
+                        self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
                     else:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
