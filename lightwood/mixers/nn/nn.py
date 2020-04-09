@@ -11,10 +11,10 @@ import operator
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.mixers.helpers.quantile_loss import QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-
 
 class NnMixer:
     def __init__(self, dynamic_parameters):
@@ -108,7 +108,6 @@ class NnMixer:
 
 
     def fit(self, ds=None, callback=None):
-
         ret = 0
         for i in self.iter_fit(ds):
             ret = i
@@ -324,8 +323,8 @@ class NnMixer:
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
-                        self.criterion_arr.append(torch.nn.MSELoss())
-                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+                        self.criterion_arr.append(QuantileLoss())
+                        self.unreduced_criterion_arr.append(QuantileLoss(reduce=False))
                     else:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))

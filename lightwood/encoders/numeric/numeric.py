@@ -54,13 +54,17 @@ class NumericEncoder:
                 except:
                     real = None
             if self.is_target:
-                vector = [0] * 3
+                vector = [0] * 7
                 try:
-                    vector[0] = math.log(abs(real)) if abs(real) > 0 else - 20
-                    vector[1] = 1 if real < 0 else 0
+                    vector[0] = 1 if real < 0 else 0
+                    vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
                     vector[2] = real/self._mean
+                    vector[3] = math.log(abs(real)) if abs(real) > 0 else - 20
+                    vector[4] = real/self._mean
+                    vector[5] = math.log(abs(real)) if abs(real) > 0 else - 20
+                    vector[6] = real/self._mean
                 except Exception as e:
-                    vector = [0] * 3
+                    vector = [0] * 7
                     logging.error(f'Can\'t encode target value: {real}, exception: {e}')
 
             else:
@@ -99,8 +103,8 @@ class NumericEncoder:
                     real_value = pow(10,63)
                 else:
                     if decode_log:
-                        sign = -1 if vector[1] > 0.5 else 1
-                        real_value = math.exp(vector[0]) * sign
+                        sign = -1 if vector[0] > 0.5 else 1
+                        real_value = math.exp(vector[1]) * sign
                     else:
                         real_value = vector[2] * self._mean
             else:
