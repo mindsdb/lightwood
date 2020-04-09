@@ -532,7 +532,7 @@ class Predictor:
 
             if ds.get_column_config(output_column)['type'] in (COLUMN_DATA_TYPES.NUMERIC):
                 ds.encoders[output_column].decode_log = True
-                predicted =ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
+                predicted = ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
 
                 alternative_accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
 
