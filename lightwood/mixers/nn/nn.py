@@ -508,25 +508,21 @@ if __name__ == "__main__":
     ###############
 
     config = {
-        'name': 'test',
         'input_features': [
             {
                 'name': 'x',
-                'type': 'numeric',
-                'encoder_path': 'lightwood.encoders.numeric.numeric'
+                'type': 'numeric'
             },
             {
                 'name': 'y',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+                'type': 'numeric'
             }
         ],
 
         'output_features': [
             {
                 'name': 'z',
-                'type': 'categorical',
-                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
+                'type': 'categorical'
             }
         ]
     }
@@ -566,24 +562,22 @@ if __name__ == "__main__":
         'input_features': [
             {
                 'name': 'x',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+                'type': 'numeric'
             },
             {
                 'name': 'y',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+                'type': 'numeric'
             }
         ],
 
         'output_features': [
             {
                 'name': 'z',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
+                'type': 'numeric'
             }
         ]
     }
+    config = predictor_config_schema.validate(config)
 
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
