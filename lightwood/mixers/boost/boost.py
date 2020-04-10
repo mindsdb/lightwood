@@ -10,7 +10,7 @@ class BoostMixer():
         self.targets = None
         self.quantiles = quantiles
 
-    def train(self, data_source):
+    def fit(self, ds=None, callback=None):
         output_features = data_source.configuration['output_features']
 
         self.targets = {}
@@ -25,12 +25,12 @@ class BoostMixer():
 
         X = []
 
-        for row in data_source:
+        for row in ds:
             X.append(np.array(row[0]))
 
         X = np.array(X)
         for target_col_name in self.targets:
-            Y = data_source.get_column_original_data(target_col_name)
+            Y = ds.get_column_original_data(target_col_name)
 
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
