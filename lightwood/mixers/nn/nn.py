@@ -291,6 +291,11 @@ class NnMixer:
         self.output_column_names = self.output_column_names \
             if self.output_column_names is not None else ds.get_feature_names('output_features')
 
+        self.out_types = ds.out_types
+        for n, out_type in enumerate(self.out_types):
+            if out_type == COLUMN_DATA_TYPES.NUMERIC:
+                ds.encoders[self.output_column_names[n]].extra_outputs = len(self.quantiles) - 1
+
         transformer_already_initialized = False
         try:
             if len(list(ds.transformer.feature_len_map.keys())) > 0:
@@ -312,8 +317,6 @@ class NnMixer:
         if initialize:
             self.fit_data_source(ds)
 
-            self.out_types = ds.out_types
-
             self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
             self.net = self.net.train()
 
@@ -329,7 +332,7 @@ class NnMixer:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
-                for output_type in ds.out_types:
+                for output_type in self.out_types:
                     if output_type in (COLUMN_DATA_TYPES.CATEGORICAL):
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))

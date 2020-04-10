@@ -15,7 +15,7 @@ class NumericEncoder:
         self._prepared = False
         self.is_target = is_target
         self.decode_log = False
-        self.extra_outputs = 2
+        self.extra_outputs = 0
 
     def prepare_encoder(self, priming_data):
         if self._prepared:

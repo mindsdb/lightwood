@@ -234,7 +234,6 @@ class Predictor:
         nr_subsets = 3
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
-
         try:
             mixer_class({}).fit_data_source(from_data_ds)
         except Exception as e:
