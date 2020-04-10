@@ -45,12 +45,10 @@ class Predictor:
             raise ValueError('You must give one argument to the Predictor constructor')
         try:
             if config is not None and output is None:
-                config = predictor_config_schema.validate(config)
+                self.config = predictor_config_schema.validate(config)
         except:
             error = traceback.format_exc(1)
             raise ValueError('[BAD DEFINITION] argument has errors: {err}'.format(err=error))
-
-        self.config = config
 
         # this is if we need to automatically generate a configuration variable
         self._generate_config = True if output is not None or self.config is None else False
@@ -200,6 +198,7 @@ class Predictor:
                 'input_features': [{'name': col, 'type': type_map(col)} for col in self._input_columns],
                 'output_features': [{'name': col, 'type': type_map(col)} for col in self._output_columns]
             }
+            pself.config = predictor_config_schema.validate(self.config)
             logging.info('Automatically generated a configuration')
             logging.info(self.config)
         else:
