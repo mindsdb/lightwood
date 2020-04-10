@@ -19,9 +19,6 @@ class CONFIG:
     """Probabilistic FC layers"""
     USE_PROBABILISTIC_LINEAR = False # change weights in mixer to be probabilistic
 
-    """Encoder options"""
-    MAX_ENCODER_TRAINING_TIME = 3600 * 2
-
     MONITORING = {
         'epoch_loss': False
         ,'batch_loss': False

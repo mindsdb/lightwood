@@ -24,7 +24,7 @@ class DistilBertEncoder:
         self._prepared = False
         self._model_type = None
         self.desired_error = 0.01
-        self.max_training_time = CONFIG.MAX_ENCODER_TRAINING_TIME
+        self.max_training_time = 7200
         self._head = None
         # Possible: speed, balance, accuracy
         self.aim = aim
