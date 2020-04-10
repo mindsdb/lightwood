@@ -14,14 +14,14 @@ class QuantileLoss(torch.nn.Module):
         losses = []
         losses.append( torch.abs((target[:, 0] - preds[:, 0]).unsqueeze(1)) )
         for i, q in enumerate(self.quantiles):
-            errors = target[:, i*2+1] - preds[:, i*2+1]
+            errors = target[:, 1] - preds[:, i*2+1]
             losses.append(
                 torch.max(
                    (q-1) * errors,
                    q * errors
             ).unsqueeze(1))
 
-            errors = target[:, i*2+2] - preds[:, i*2+2]
+            errors = target[:, 2] - preds[:, i*2+2]
             losses.append(
                 torch.max(
                    (q-1) * errors,
