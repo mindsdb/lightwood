@@ -13,10 +13,7 @@ MODULES = [
     f'{encoders_path}datetime/datetime.py',
     f'{encoders_path}categorical/autoencoder.py',
     f'{encoders_path}time_series/ts_fresh_ts.py',
-
     f'{pdir}api/data_source.py',
-
-    f'{mixers_path}helpers/plinear.py',
     f'{mixers_path}nn/nn.py',
     # Take too long
     # f'{encoders_path}text/distilbert.py',
