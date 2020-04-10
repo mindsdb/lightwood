@@ -27,10 +27,7 @@ class DefaultNet(torch.nn.Module):
                 In order to make sure pytorch randomly generate number will be the same every time
                 when training on the same dataset
             '''
-            if ds is not None:
-                torch.manual_seed(len(ds))
-            else:
-                torch.manual_seed(2)
+            torch.manual_seed(input_size + output_size)
 
             if device_str == 'cuda':
                 torch.backends.cudnn.deterministic = True
