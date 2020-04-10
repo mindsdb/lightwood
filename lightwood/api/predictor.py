@@ -45,7 +45,7 @@ class Predictor:
             raise ValueError('You must give one argument to the Predictor constructor')
         try:
             if config is not None and output is None:
-                predictor_config_schema.validate(config)
+                config = predictor_config_schema.validate(config)
         except:
             error = traceback.format_exc(1)
             raise ValueError('[BAD DEFINITION] argument has errors: {err}'.format(err=error))

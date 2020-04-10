@@ -40,7 +40,7 @@ predictor_config_schema = Schema({
     'output_features': [
         feature_schema
     ],
-    Optional('data_source', default=default_data_source_config): data_source_scheam,
+    Optional('data_source', default=default_data_source_config): data_source_schema,
     Optional('mixer'): mixer_schema,
     Optional('optimizer'): object
 })
