@@ -106,6 +106,9 @@ class NumericEncoder:
                     else:
                         real_value = [vector[2*i + 2] * self._mean for i in range(1 + self.extra_outputs)]
 
+                    if self._type == 'int':
+                        real_value = [int(x) for x in real_value]
+                        
                     if len(real_value) < 2:
                         real_value = real_value[0]
             else:
@@ -115,8 +118,8 @@ class NumericEncoder:
 
                 real_value = vector[3] * self._mean
 
-            if self._type == 'int':
-                real_value = round(real_value)
+                if self._type == 'int':
+                    real_value = round(real_value)
 
             ret.append(real_value)
         return ret
