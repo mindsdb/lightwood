@@ -6,15 +6,15 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, deterministic=False):
-        self.input_size = None
-        self.output_size = None
+    def __init__(self, dynamic_parameters, input_size=None, output_size=None, nr_outputs=None, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, deterministic=False):
+        self.input_size = input_size
+        self.output_size = output_size
+        self.nr_outputs = nr_outputs
+
         self.selfaware = selfaware
         # How many devices we can train this network on
         self.available_devices = 1
         self.max_variance = None
-        if ds is not None:
-            self.out_indexes = ds.out_indexes
 
         device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
         if CONFIG.USE_DEVICE is not None:
@@ -44,46 +44,10 @@ class DefaultNet(torch.nn.Module):
         """
         Here we define the basic building blocks of our model,
         in forward we define how we put it all together along with an input
-
-        :param sample_batch: this is used to understand the characteristics of the input and target,
-                            it is an object of type utils.libs.data_types.batch.Batch
         """
         super(DefaultNet, self).__init__()
 
         if shape is None and pretrained_net is None:
-            input_sample, output_sample = ds[0]
-
-            self.input_size = len(input_sample)
-            self.output_size = len(output_sample)
-
-            '''
-            small_input = True if self.input_size < 50 else False
-            small_output = True if self.input_size < 50 else False
-            large_input = True if self.input_size > 2000 else False
-            large_output = True if self.output_size > 2000 else False
-
-            # 2. Determine in/out proportions
-            # @TODO: Maybe provide a warning if the output is larger, this really shouldn't usually be the case
-            # (outside of very specific things, such as text to image)
-
-            # larger_output = True if self.output_size > self.input_size * 2 else False
-            # larger_input = True if self.input_size > self.output_size * 2 else False
-            # even_input_output = larger_input and large_output
-
-            if 'network_depth' in self.dynamic_parameters:
-                depth = self.dynamic_parameters['network_depth']
-            else:
-                depth = 5
-
-            if (small_input and small_output):
-                shape = rombus(self.input_size, self.output_size, depth + 1, 800)
-            elif (not large_input) and (not large_output):
-                shape = rombus(self.input_size, self.output_size, depth, self.input_size * 2)
-            elif large_input and large_output:
-                shape = rectangle(self.input_size, self.output_size, depth - 1)
-            else:
-                shape = funnel(self.input_size,self.output_size,depth)
-            '''
             shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
 
         if pretrained_net is None:
@@ -107,7 +71,7 @@ class DefaultNet(torch.nn.Module):
                     self.output_size = layer.out_features
 
         if self.selfaware:
-            awareness_net_shape = [(self.input_size + self.output_size), max([int((self.input_size + self.output_size) * 1.5), 300]), len(self.out_indexes)]
+            awareness_net_shape = [(self.input_size + self.output_size), max([int((self.input_size + self.output_size) * 1.5), 300]), self.nr_outputs]
             awareness_layers = []
 
 

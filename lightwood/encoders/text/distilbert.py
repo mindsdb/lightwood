@@ -168,7 +168,7 @@ class DistilBertEncoder:
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
             batch_size = 10
 
-            self._head = DefaultNet(ds=None, dynamic_parameters={}, shape=funnel(
+            self._head = DefaultNet(dynamic_parameters={}, shape=funnel(
                 768, sum([len(x['encoded_output'][0]) for x in training_data['targets']]), depth=5), selfaware=False)
 
             no_decay = ['bias', 'LayerNorm.weight']

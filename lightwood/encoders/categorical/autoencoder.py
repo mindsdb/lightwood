@@ -59,7 +59,7 @@ class CategoricalAutoEncoder:
 
             embeddings_layer_len = self.max_encoded_length
 
-            self.net = DefaultNet(ds=None, dynamic_parameters={}, shape=[
+            self.net = DefaultNet(dynamic_parameters={}, shape=[
                                   input_len, embeddings_layer_len, input_len], selfaware=False)
 
             criterion = torch.nn.CrossEntropyLoss()
