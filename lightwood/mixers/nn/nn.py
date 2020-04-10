@@ -501,6 +501,7 @@ if __name__ == "__main__":
     import random
     import pandas
     from lightwood.api.data_source import DataSource
+    from lightwood.data_schemas.predictor_config import predictor_config_schema
 
     ###############
     # GENERATE DATA
@@ -529,6 +530,8 @@ if __name__ == "__main__":
             }
         ]
     }
+
+    config = predictor_config_schema.validate(config)
 
     # For Classification
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
