@@ -198,7 +198,7 @@ class Predictor:
                 'input_features': [{'name': col, 'type': type_map(col)} for col in self._input_columns],
                 'output_features': [{'name': col, 'type': type_map(col)} for col in self._output_columns]
             }
-            pself.config = predictor_config_schema.validate(self.config)
+            self.config = predictor_config_schema.validate(self.config)
             logging.info('Automatically generated a configuration')
             logging.info(self.config)
         else:
