@@ -58,7 +58,7 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
         self.enable_dropout = False
-        self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
+        self.disable_cache = not configuration['data_source']['cache_transformed_data']
         self.subsets = {}
         self.out_indexes = None
         self.out_types = None

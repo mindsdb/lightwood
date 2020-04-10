@@ -25,6 +25,13 @@ mixer_schema = Schema({
     Optional('mixer_graph'): [mixer_graph_schema]
 })
 
+data_source_schema = Schema({
+    Optional('cache_transformed_data', default=True): bool,
+})
+
+default_data_source_config = {
+    'cache_transformed_data': True
+}
 
 predictor_config_schema = Schema({
     'input_features': [
@@ -33,6 +40,7 @@ predictor_config_schema = Schema({
     'output_features': [
         feature_schema
     ],
+    Optional('data_source', default=default_data_source_config): data_source_scheam,
     Optional('mixer'): mixer_schema,
     Optional('optimizer'): object
 })
