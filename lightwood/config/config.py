@@ -8,7 +8,6 @@ class CONFIG:
         USE_CUDA = True
 
     USE_DEVICE = None
-    CACHE_ENCODED_DATA = True
 
     # Enable deterministic cuda flag and use seeds everywhere (static or based on features of the dataset)
     DETERMINISTIC = True
