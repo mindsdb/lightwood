@@ -544,7 +544,7 @@ if __name__ == "__main__":
     predict_input_ds.prepare_encoders()
     ####################
 
-    mixer = NnMixer({})
+    mixer = NnMixer({}, config)
 
     for i in mixer.iter_fit(ds):
         if i < 0.01:
@@ -591,7 +591,7 @@ if __name__ == "__main__":
     predict_input_ds.prepare_encoders()
     ####################
 
-    mixer = NnMixer({})
+    mixer = NnMixer({}, config)
 
     for i in mixer.iter_fit(ds):
         if i < 0.01:
