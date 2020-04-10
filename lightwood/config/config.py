@@ -8,15 +8,11 @@ class CONFIG:
         USE_CUDA = True
     USE_DEVICE = None
 
-    # Enable deterministic cuda flag and use seeds everywhere (static or based on features of the dataset)
-    HELPER_MIXERS = True
-
-
-
-    # Here for development purposes
+    # Development flags (maybe move to somewhere else later)
     USE_PROBABILISTIC_LINEAR = False
     ENABLE_DROPOUT = False
     FORCE_HELPER_MIXERS = False
+    HELPER_MIXERS = True
 
     MONITORING = {
         'epoch_loss': False
