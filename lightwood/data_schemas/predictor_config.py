@@ -20,18 +20,15 @@ mixer_graph_schema = Schema({
 })
 
 mixer_schema = Schema({
-    'class': object,
+    Optional('class'): object,
     Optional('attrs'): dict,
-    Optional('mixer_graph'): [mixer_graph_schema]
+    Optional('deterministic', default=True): bool,
+    Optional('selfaware', default=True): bool
 })
 
 data_source_schema = Schema({
     Optional('cache_transformed_data', default=True): bool,
 })
-
-default_data_source_config = {
-    'cache_transformed_data': True
-}
 
 predictor_config_schema = Schema({
     'input_features': [
@@ -40,7 +37,7 @@ predictor_config_schema = Schema({
     'output_features': [
         feature_schema
     ],
-    Optional('data_source', default=default_data_source_config): data_source_schema,
-    Optional('mixer'): mixer_schema,
+    Optional('data_source', default=data_source_schema.validate({})): data_source_schema,
+    Optional('mixer', default=mixer_schema.validate({})): mixer_schema,
     Optional('optimizer'): object
 })
