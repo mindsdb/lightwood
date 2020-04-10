@@ -6,7 +6,7 @@ import torch
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None):
+    def __init__(self, ds, dynamic_parameters, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, deterministic=False):
         self.input_size = None
         self.output_size = None
         self.selfaware = selfaware
@@ -21,7 +21,7 @@ class DefaultNet(torch.nn.Module):
             device_str = CONFIG.USE_DEVICE
         self.device = torch.device(device_str)
 
-        if CONFIG.DETERMINISTIC:
+        if deterministic:
             '''
                 Seed that always has the same value on the same dataset plus setting the bellow CUDA options
                 In order to make sure pytorch randomly generate number will be the same every time
@@ -92,7 +92,7 @@ class DefaultNet(torch.nn.Module):
 
             layers = []
             for ind in range(len(shape) - 1):
-                linear_function = PLinear  if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
+                linear_function = PLinear if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
                 layers.append(linear_function(shape[ind],shape[ind+1]))
                 if ind < len(shape) - 2:
                     layers.append(rectifier())
@@ -119,7 +119,7 @@ class DefaultNet(torch.nn.Module):
 
             self.awareness_net = torch.nn.Sequential(*awareness_layers)
 
-        if CONFIG.DETERMINISTIC and pretrained_net is None: # set initial weights based on a specific distribution if we have deterministic enabled
+        if deterministic and pretrained_net is None: # set initial weights based on a specific distribution if we have deterministic enabled
             # lambda function so that we can do this for either awareness layer or the internal layers of net
             def reset_layer_params(layer):
                 if isinstance(layer, torch.nn.Linear):

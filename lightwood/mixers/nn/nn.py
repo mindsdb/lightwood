@@ -17,7 +17,8 @@ from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 class NnMixer:
-    def __init__(self, dynamic_parameters):
+    def __init__(self, dynamic_parameters, config=None):
+        self.config = config
         self.output_types = None
         self.net = None
         self.optimizer = None
@@ -317,7 +318,7 @@ class NnMixer:
         if initialize:
             self.fit_data_source(ds)
 
-            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
+            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, deterministic=self.config['mixer']['deterministic'])
             self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -370,7 +371,7 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net, deterministic=self.config['mixer']['deterministic'])
                     self.last_unaware_net = copy.deepcopy(self.net.net)
 
                     # Lower the learning rate once we start training the selfaware network
@@ -384,7 +385,7 @@ class NnMixer:
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net) #, pretrained_net=copy.deepcopy(self.net.net)
+                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net, deterministic=self.config['mixer']['deterministic'])
 
                     # Increase the learning rate closer to the previous levels
                     self.optimizer_args['lr'] = self.optimizer.lr * 4

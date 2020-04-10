@@ -61,9 +61,6 @@ class NumericEncoder:
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
                     vector[2] = real/self._mean
                     # Note: This part here is just to have targets equall in size to the prediction size, these appended zeros won't be used anywhere
-                    for _ in range(self.extra_outputs):
-                        vector.append(0)
-
                 except Exception as e:
                     vector = [0] * (3 + 2*self.extra_outputs)
                     logging.error(f'Can\'t encode target value: {real}, exception: {e}')
