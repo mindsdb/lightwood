@@ -58,6 +58,7 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
         self.enable_dropout = False
+        print(self.configuration)
         self.disable_cache = not self.configuration['data_source']['cache_transformed_data']
         self.subsets = {}
         self.out_indexes = None
