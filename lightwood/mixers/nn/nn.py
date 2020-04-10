@@ -532,7 +532,6 @@ if __name__ == "__main__":
     }
 
     config = predictor_config_schema.validate(config)
-
     # For Classification
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
