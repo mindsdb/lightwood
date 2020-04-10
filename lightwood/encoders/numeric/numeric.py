@@ -15,7 +15,7 @@ class NumericEncoder:
         self._prepared = False
         self.is_target = is_target
         self.decode_log = False
-        self.nr_quantiles = 3
+        self.extra_outputs = 2
 
     def prepare_encoder(self, priming_data):
         if self._prepared:
@@ -55,17 +55,17 @@ class NumericEncoder:
                 except:
                     real = None
             if self.is_target:
-                vector = [0] * (1 + self.nr_quantiles * 2)
+                vector = [0] * (3 + 2*self.extra_outputs)
                 try:
                     vector[0] = 1 if real < 0 else 0
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
                     vector[2] = real/self._mean
-                    vector[3] = math.log(abs(real)) if abs(real) > 0 else - 20
-                    vector[4] = real/self._mean
-                    vector[5] = math.log(abs(real)) if abs(real) > 0 else - 20
-                    vector[6] = real/self._mean
+                    # Note: This part here is just to have targets equall in size to the prediction size, these appended zeros won't be used anywhere
+                    for _ in range(self.extra_outputs):
+                        vector.append(0)
+
                 except Exception as e:
-                    vector = [0] * (1 + self.nr_quantiles * 2)
+                    vector = [0] * (3 + 2*self.extra_outputs)
                     logging.error(f'Can\'t encode target value: {real}, exception: {e}')
 
             else:
@@ -105,9 +105,12 @@ class NumericEncoder:
                 else:
                     if decode_log:
                         sign = -1 if vector[0] > 0.5 else 1
-                        real_value = [math.exp(vector[i*2 + 1]) * sign for i in range(self.nr_quantiles)]
+                        real_value = [math.exp(vector[i*2 + 1]) * sign for i in range(1 + self.extra_outputs)]
                     else:
-                        real_value = [vector[2*i + 2] * self._mean for i in range(self.nr_quantiles)]
+                        real_value = [vector[2*i + 2] * self._mean for i in range(1 + self.extra_outputs)]
+
+                    if len(real_value) < 2:
+                        real_value = real_value[0]
             else:
                 if vector[0] < 0.5:
                     ret.append(None)
