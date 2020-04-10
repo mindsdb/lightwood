@@ -367,7 +367,6 @@ if __name__ == "__main__":
     from lightwood.data_schemas.predictor_config import predictor_config_schema
 
     config = {
-        'name': 'test',
         'input_features': [
             {
                 'name': 'x',
