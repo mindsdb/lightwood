@@ -30,7 +30,7 @@ class CategoricalAutoEncoder:
             self.max_encoded_length = None
         else:
             self.max_encoded_length = 100
-        self.max_training_time = CONFIG.MAX_ENCODER_TRAINING_TIME
+        self.max_training_time = 7200
 
     def _train_callback(self, error, real_buff, predicted_buff):
         logging.info(f'{self.name} reached a loss of {error} while training !')
@@ -59,7 +59,7 @@ class CategoricalAutoEncoder:
 
             embeddings_layer_len = self.max_encoded_length
 
-            self.net = DefaultNet(ds=None, dynamic_parameters={}, shape=[
+            self.net = DefaultNet(dynamic_parameters={}, shape=[
                                   input_len, embeddings_layer_len, input_len], selfaware=False)
 
             criterion = torch.nn.CrossEntropyLoss()

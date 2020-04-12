@@ -13,10 +13,7 @@ MODULES = [
     f'{encoders_path}datetime/datetime.py',
     f'{encoders_path}categorical/autoencoder.py',
     f'{encoders_path}time_series/ts_fresh_ts.py',
-
     f'{pdir}api/data_source.py',
-
-    f'{mixers_path}helpers/plinear.py',
     f'{mixers_path}nn/nn.py',
     # Take too long
     # f'{encoders_path}text/distilbert.py',
@@ -46,8 +43,6 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
     Run full test example with home_rentals dataset
     '''
     lightwood.config.config.CONFIG.USE_CUDA = USE_CUDA
-    lightwood.config.config.CONFIG.CACHE_ENCODED_DATA = CACHE_ENCODED_DATA
-    lightwood.config.config.CONFIG.SELFAWARE = SELFAWARE
     lightwood.config.config.CONFIG.PLINEAR = PLINEAR
 
     config = {'input_features': [
@@ -63,7 +58,8 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
                       #       '4': 1,
                       # }
     }],
-    'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer}}
+    'data_source': {'cache_transformed_data':CACHE_ENCODED_DATA},
+    'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer, 'selfaware': SELFAWARE}}
 
     # AX doesn't seem to work on the travis version of windows, so don't test it there as of now
     if sys.platform not in ['win32','cygwin','windows']:

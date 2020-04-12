@@ -11,14 +11,15 @@ import operator
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.mixers.helpers.quantile_loss import QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
-
 class NnMixer:
-    def __init__(self, dynamic_parameters):
-        self.output_types = None
+    def __init__(self, dynamic_parameters, config=None):
+        self.config = config
+        self.out_types = None
         self.net = None
         self.optimizer = None
         self.input_column_names = None
@@ -43,6 +44,7 @@ class NnMixer:
 
         self.max_confidence_per_output = []
         self.monitor = None
+        self.quantiles = [0.5,0.05,0.95]
 
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
@@ -108,7 +110,6 @@ class NnMixer:
 
 
     def fit(self, ds=None, callback=None):
-
         ret = 0
         for i in self.iter_fit(ds):
             ret = i
@@ -179,7 +180,15 @@ class NnMixer:
                 output_column,
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
-            predictions[output_column] = {'predictions': decoded_predictions}
+
+            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+                predictions[output_column] = {
+                    'predictions': [x[0] for x in decoded_predictions]
+                    ,'confidence_range': [[x[1],x[2]] for x in decoded_predictions]
+                    ,'quantile_confidences': [self.quantiles[2] - self.quantiles[1] for x in decoded_predictions]}
+            else:
+                predictions[output_column] = {'predictions': decoded_predictions}
+
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/x[k] for x in awareness_arr]
 
@@ -283,6 +292,11 @@ class NnMixer:
         self.output_column_names = self.output_column_names \
             if self.output_column_names is not None else ds.get_feature_names('output_features')
 
+        self.out_types = ds.out_types
+        for n, out_type in enumerate(self.out_types):
+            if out_type == COLUMN_DATA_TYPES.NUMERIC:
+                ds.encoders[self.output_column_names[n]].extra_outputs = len(self.quantiles) - 1
+
         transformer_already_initialized = False
         try:
             if len(list(ds.transformer.feature_len_map.keys())) > 0:
@@ -304,7 +318,9 @@ class NnMixer:
         if initialize:
             self.fit_data_source(ds)
 
-            self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False)
+            input_sample, output_sample = ds[0]
+
+            self.net = self.nn_class(self.dynamic_parameters, input_size=len(input_sample), output_size=len(output_sample), nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'])
             self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -319,13 +335,13 @@ class NnMixer:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
-                for output_type in ds.out_types:
+                for output_type in self.out_types:
                     if output_type in (COLUMN_DATA_TYPES.CATEGORICAL):
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
-                        self.criterion_arr.append(torch.nn.MSELoss())
-                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+                        self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
+                        self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
                     else:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
@@ -357,7 +373,7 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=True, pretrained_net=self.net.net)
+                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=True, pretrained_net=self.net.net, deterministic=self.config['mixer']['deterministic'])
                     self.last_unaware_net = copy.deepcopy(self.net.net)
 
                     # Lower the learning rate once we start training the selfaware network
@@ -371,7 +387,7 @@ class NnMixer:
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(ds, self.dynamic_parameters, selfaware=False, pretrained_net=self.last_unaware_net) #, pretrained_net=copy.deepcopy(self.net.net)
+                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=False, pretrained_net=self.last_unaware_net, deterministic=self.config['mixer']['deterministic'])
 
                     # Increase the learning rate closer to the previous levels
                     self.optimizer_args['lr'] = self.optimizer.lr * 4
@@ -485,35 +501,33 @@ if __name__ == "__main__":
     import random
     import pandas
     from lightwood.api.data_source import DataSource
+    from lightwood.data_schemas.predictor_config import predictor_config_schema
 
     ###############
     # GENERATE DATA
     ###############
 
     config = {
-        'name': 'test',
         'input_features': [
             {
                 'name': 'x',
-                'type': 'numeric',
-                'encoder_path': 'lightwood.encoders.numeric.numeric'
+                'type': 'numeric'
             },
             {
                 'name': 'y',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+                'type': 'numeric'
             }
         ],
 
         'output_features': [
             {
                 'name': 'z',
-                'type': 'categorical',
-                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
+                'type': 'categorical'
             }
         ]
     }
 
+    config = predictor_config_schema.validate(config)
     # For Classification
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
@@ -530,7 +544,7 @@ if __name__ == "__main__":
     predict_input_ds.prepare_encoders()
     ####################
 
-    mixer = NnMixer({})
+    mixer = NnMixer({}, config)
 
     for i in mixer.iter_fit(ds):
         if i < 0.01:
@@ -548,24 +562,22 @@ if __name__ == "__main__":
         'input_features': [
             {
                 'name': 'x',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+                'type': 'numeric'
             },
             {
                 'name': 'y',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.numeric.numeric'
+                'type': 'numeric'
             }
         ],
 
         'output_features': [
             {
                 'name': 'z',
-                'type': 'numeric',
-                # 'encoder_path': 'lightwood.encoders.categorical.categorical'
+                'type': 'numeric'
             }
         ]
     }
+    config = predictor_config_schema.validate(config)
 
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
@@ -579,7 +591,7 @@ if __name__ == "__main__":
     predict_input_ds.prepare_encoders()
     ####################
 
-    mixer = NnMixer({})
+    mixer = NnMixer({}, config)
 
     for i in mixer.iter_fit(ds):
         if i < 0.01:
