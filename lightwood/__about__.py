@@ -1,10 +1,6 @@
 __title__ = 'lightwood'
 __package_name__ = 'mindsdb'
-<<<<<<< HEAD
 __version__ = '0.22.0'
-=======
-__version__ = '0.21.3'
->>>>>>> master
 __description__ = "Lightwood's goal is to make it very simple for developers to use the power of artificial neural networks in their projects."
 __email__ = "jorge@mindsdb.com"
 __author__ = 'MindsDB Inc'
