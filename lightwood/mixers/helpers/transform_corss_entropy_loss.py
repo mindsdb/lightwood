@@ -13,8 +13,8 @@ class TransformCrossEntropyLoss(torch.nn.Module):
     def estimate_confidence(self, preds, maximum_confidence=None):
         confidences = []
         for pred in preds:
-            conf = float(pred.max(0).values)/float(sum([x if x > 0 else 0.000001 for x in preds.sum(0)]))
-            
+            conf = float(pred.max(0).values)/float(sum([x if x > 0 else 0.000001 for x in pred.sum(0)]))
+
             if maximum_confidence is not None:
                 conf = conf/maximum_confidence
             confidences.append(min(conf,1))
