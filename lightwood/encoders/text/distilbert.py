@@ -24,7 +24,7 @@ class DistilBertEncoder:
         self._prepared = False
         self._model_type = None
         self.desired_error = 0.01
-        self.max_training_time = CONFIG.MAX_ENCODER_TRAINING_TIME
+        self.max_training_time = 7200
         self._head = None
         # Possible: speed, balance, accuracy
         self.aim = aim
@@ -109,10 +109,7 @@ class DistilBertEncoder:
 
         # @TODO: Attach a language modeling head and/or use GPT2
         # and/or provide outputs better suited to a LM head (which will be the mixer) if the output if text
-        if training_data is not None and 'targets' in training_data \
-                and len(training_data['targets']) == 1 \
-                and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL \
-                and CONFIG.TRAIN_TO_PREDICT_TARGET:
+        if training_data is not None and 'targets' in training_data and len(training_data['targets']) == 1 and training_data['targets'][0]['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL:
 
             self._model_type = 'classifier'
             self._model = self._classifier_model_class.from_pretrained(self._pretrained_model_name, num_labels=len(
@@ -164,14 +161,14 @@ class DistilBertEncoder:
             self._model = best_model.to(self.device)
 
         elif all([x['output_type'] == COLUMN_DATA_TYPES.NUMERIC or x['output_type'] == COLUMN_DATA_TYPES.CATEGORICAL
-                  for x in training_data['targets']]) and CONFIG.TRAIN_TO_PREDICT_TARGET:
+                  for x in training_data['targets']]):
 
             self.desired_error = 0.01
             self._model_type = 'generic_target_predictor'
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
             batch_size = 10
 
-            self._head = DefaultNet(ds=None, dynamic_parameters={}, shape=funnel(
+            self._head = DefaultNet(dynamic_parameters={}, shape=funnel(
                 768, sum([len(x['encoded_output'][0]) for x in training_data['targets']]), depth=5), selfaware=False)
 
             no_decay = ['bias', 'LayerNorm.weight']

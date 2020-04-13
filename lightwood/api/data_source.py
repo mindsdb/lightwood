@@ -58,7 +58,7 @@ class DataSource(Dataset):
         self.output_weights = None
         self.dropout_dict = {}
         self.enable_dropout = False
-        self.disable_cache = not CONFIG.CACHE_ENCODED_DATA
+        self.disable_cache = not self.configuration['data_source']['cache_transformed_data']
         self.subsets = {}
         self.out_indexes = None
         self.out_types = None
@@ -364,9 +364,9 @@ if __name__ == "__main__":
     #TODO; sometimes this fail depending on the data generated
     import random
     import pandas
+    from lightwood.data_schemas.predictor_config import predictor_config_schema
 
     config = {
-        'name': 'test',
         'input_features': [
             {
                 'name': 'x',
@@ -389,6 +389,7 @@ if __name__ == "__main__":
         ]
     }
 
+    config = predictor_config_schema.validate(config)
     data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
 

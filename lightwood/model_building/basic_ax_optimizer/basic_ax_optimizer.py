@@ -8,10 +8,8 @@ class BasicAxOptimizer:
         self.total_trials = 32
 
     def evaluate(self, error_yielding_function):
-        if CONFIG.DETERMINISTIC:
-            random_seed = self.total_trials
-        else:
-            random_seed = randint(1, pow(2, 32))
+        random_seed = self.total_trials
+        
         best_parameters, values, experiment, model = ax.optimize(
             parameters=[
                 {'name': 'beta1', 'type': 'choice', 'values': [0.90, 0.95]},

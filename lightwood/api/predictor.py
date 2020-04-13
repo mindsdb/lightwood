@@ -45,12 +45,10 @@ class Predictor:
             raise ValueError('You must give one argument to the Predictor constructor')
         try:
             if config is not None and output is None:
-                predictor_config_schema.validate(config)
+                self.config = predictor_config_schema.validate(config)
         except:
             error = traceback.format_exc(1)
             raise ValueError('[BAD DEFINITION] argument has errors: {err}'.format(err=error))
-
-        self.config = config
 
         # this is if we need to automatically generate a configuration variable
         self._generate_config = True if output is not None or self.config is None else False
@@ -65,11 +63,11 @@ class Predictor:
         self.overall_certainty = None
 
     @staticmethod
-    def evaluate_mixer(mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
+    def evaluate_mixer(config, mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
                        max_training_time=None, max_epochs=None):
         started_evaluation_at = int(time.time())
         lowest_error = 10000
-        mixer = mixer_class(dynamic_parameters)
+        mixer = mixer_class(dynamic_parameters, config)
 
         if max_training_time is None and max_epochs is None:
             err = "Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`"
@@ -200,6 +198,7 @@ class Predictor:
                 'input_features': [{'name': col, 'type': type_map(col)} for col in self._input_columns],
                 'output_features': [{'name': col, 'type': type_map(col)} for col in self._output_columns]
             }
+            self.config = predictor_config_schema.validate(self.config)
             logging.info('Automatically generated a configuration')
             logging.info(self.config)
         else:
@@ -234,7 +233,6 @@ class Predictor:
         nr_subsets = 3
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
-
         try:
             mixer_class({}).fit_data_source(from_data_ds)
         except Exception as e:
@@ -268,9 +266,7 @@ class Predictor:
 
             training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
 
-            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(
-                mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
-                max_training_time=training_time_per_iteration, max_epochs=None))
+            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(self.config, mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
 
             logging.info('Using hyperparameter set: ', best_parameters)
         else:
@@ -283,7 +279,7 @@ class Predictor:
                 logging.warning(f'Failed to train helper mixers with error: {e}')
 
 
-        mixer = mixer_class(best_parameters)
+        mixer = mixer_class(best_parameters, self.config)
         self._mixer = mixer
 
         for param in mixer_params:
@@ -362,7 +358,7 @@ class Predictor:
 
                     # Once we are past the priming/warmup period, start training the selfaware network
 
-                    if subset_iteration > 1 and not mixer.is_selfaware and CONFIG.SELFAWARE and not mixer.stop_selfaware_training and training_error < 0.35:
+                    if subset_iteration > 1 and not mixer.is_selfaware and self.config['mixer']['selfaware'] and not mixer.stop_selfaware_training and training_error < 0.35:
                         logging.info('Started selfaware training !')
                         mixer.start_selfaware_training = True
                         lowest_error = None
@@ -532,7 +528,7 @@ class Predictor:
 
             if ds.get_column_config(output_column)['type'] in (COLUMN_DATA_TYPES.NUMERIC):
                 ds.encoders[output_column].decode_log = True
-                predicted =ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
+                predicted = ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
 
                 alternative_accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
 
