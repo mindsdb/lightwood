@@ -14,7 +14,7 @@ class RnnEncoder:
         self._learning_rate = learning_rate
         self._encoded_vector_size = encoded_vector_size
         self._train_iters = train_iters
-
+        self._pytorch_wrapper = torch.FloatTensor
         self._encoder = None
         self._decoder = None
         self._prepared = False
@@ -143,10 +143,12 @@ class RnnEncoder:
                 next += [next_i]
 
             ret += [encoded]
-
+            
+        ret = self._pytorch_wrapper(ret)
         if get_next_count is None:
             return ret
         else:
+
             return ret, next
 
 
