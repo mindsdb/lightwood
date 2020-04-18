@@ -22,12 +22,8 @@ config = {'input_features': [{'name': 'ts', 'type': COLUMN_DATA_TYPES.TIME_SERIE
 
 
 
-def iter_function(epoch, error, test_error, test_error_gradient):
-    print(
-        'epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, accuracy: {accuracy}'.format(
-            iter=epoch, error=error, test_error=test_error, test_error_gradient=test_error_gradient,
-            accuracy=predictor.train_accuracy))
-
+def iter_function(epoch, training_error, test_error, test_error_gradient, test_accuracy):
+    print(f'Epoch: {epoch}, Train Error: {training_error}, Test Error: {test_error}, Test Error Gradient: {test_error_gradient}, Test Accuracy: {test_accuracy}')
 
 data = pandas.DataFrame(ts_data, columns=['time', 'ts', 'next'])
 
