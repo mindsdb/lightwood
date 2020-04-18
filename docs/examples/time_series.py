@@ -32,7 +32,8 @@ predictor = Predictor(config)
 
 predictor.learn(from_data=data, callback_on_iter=iter_function, eval_every_x_epochs=10)
 
-
+print('\n\n')
 ret = predictor.predict(when={'ts':" ".join([str(math.sin(i/max)) for i in range(10+1, 10+ts_len)])})
 print(" ".join([str(math.sin(i/max)) for i in range(10+1, 10+ts_len+1)]))
+print('Got predictions: ')
 print(ret)
