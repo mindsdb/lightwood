@@ -51,7 +51,7 @@ script:
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 ci_tests.py; fi
   - cd ../..
 
-before_deploy:
+after_deploy:
   - cd docs
   - mkdocs build --verbose --clean --strict
   - cp -r site ../
