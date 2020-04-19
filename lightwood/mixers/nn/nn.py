@@ -190,7 +190,7 @@ class NnMixer:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
             if awareness_arr is not None:
-                predictions[output_column]['selfaware_confidences'] = [1/x[k] for x in awareness_arr]
+                predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.0001 for x in awareness_arr]
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
