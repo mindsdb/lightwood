@@ -109,8 +109,7 @@ class NnMixer:
 
         return True
 
-
-    def fit(self, train_ds, test_ds=None, callback=None, stop_training_after_seconds=None):
+    def fit(self, train_ds, test_ds=None, callback=None, stop_training_after_seconds=None, eval_every_x_epochs=None):
         started = time.time()
         log_reasure = time.time()
         first_run = True
@@ -135,6 +134,7 @@ class NnMixer:
                 subset_test_error_delta_buff = []
                 best_model = None
                 best_selfaware_model = None
+                quantile_adjustment_attempts = 0
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(self.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
@@ -148,6 +148,8 @@ class NnMixer:
 
                     # Prime the model on each subset for a bit
                     if subset_iteration == 1:
+                        if subset_id == subset_id_arr[-1]:
+                            self.adjust_quantiles(test_ds)
                         break
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
@@ -174,7 +176,6 @@ class NnMixer:
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-
                     if subset_iteration > 1 and not self.is_selfaware and self.config['mixer']['selfaware'] and not self.stop_selfaware_training and training_error < 0.35:
                         logging.info('Started selfaware training !')
                         self.start_selfaware_training = True
@@ -184,6 +185,11 @@ class NnMixer:
                         test_error_delta_buff = []
                         subset_test_error_delta_buff = []
                         continue
+
+                    # Adjust the values for the quantiles
+                    if subset_iteration > 1 and epoch % (eval_every_x_epochs/2) == 0 and quantile_adjustment_attempts < 10:
+                        self.adjust_quantiles(test_ds)
+                        quantile_adjustment_attempts += 1
 
                     if epoch % eval_every_x_epochs == 0:
                         test_error = self.error(test_ds)
@@ -215,8 +221,7 @@ class NnMixer:
                         subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
 
                         if callback is not None:
-                            callback(epoch, training_error, test_error, delta_mean,
-                                                self.calculate_accuracy(test_ds))
+                            callback(epoch, training_error, test_error, delta_mean)
 
                         # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > stop_training_after_seconds:
@@ -245,12 +250,6 @@ class NnMixer:
                                 self.update_model(best_model)
                             logging.info('Finished training model !')
                             break
-
-        ret = 0
-        for i in self.iter_fit(ds):
-            ret = i
-        self.encoders = ds.encoders
-        return ret
 
     def predict(self, when_data_source, include_encoded_predictions=False):
         """
@@ -361,8 +360,7 @@ class NnMixer:
         ds.transformer = self.transformer
 
         if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size,
-                                     sampler=self._nonpersistent['sampler'], num_workers=0)
+            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
         else:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
@@ -399,6 +397,64 @@ class NnMixer:
         self.net = self.net.train()
 
         return error
+
+    def adjust_quantiles(self, ds):
+        self.net = self.net.eval()
+
+        if self._nonpersistent['sampler'] is None:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
+        else:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
+
+        quantile_errors = {}
+        quantile_mean_diff = {}
+
+        for i, data in enumerate(data_loader, 0):
+            inputs, labels = data
+            inputs = inputs.to(self.net.device)
+            labels = labels.to(self.net.device)
+
+            with torch.no_grad():
+                if self.is_selfaware:
+                    outputs, awareness = self.net(inputs)
+                else:
+                    outputs = self.net(inputs)
+
+            for k, criterion in enumerate(self.criterion_arr):
+                if type(criterion) == QuantileLoss:
+                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+
+                    if k not in quantile_errors:
+                        quantile_errors[k] = []
+                        quantile_mean_diff[k] = []
+
+                    quantile_errors[k].append(float(target_loss.item()))
+
+                    quantile_prediction = outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
+
+                    if ds.encoders[self.output_column_names[k]].decode_log == True:
+                        diff = (quantile_prediction[5] - quantile_prediction[3])/quantile_prediction[5]
+                    else:
+                        diff = (quantile_prediction[6] - quantile_prediction[4])/quantile_prediction[6]
+
+                    diff = float(diff.mean())
+                    quantile_mean_diff[k].append((diff if diff > 0 else 1))
+
+        for k in quantile_errors:
+            loss_avg = sum(quantile_errors[k])/len(quantile_errors[k])
+            diff_avg = sum(quantile_mean_diff[k])/len(quantile_mean_diff[k])
+
+            if loss_avg > 1 and diff_avg > 0.4 and self.quantiles[1] < 0.4:
+                self.quantiles[1] += 0.035
+                self.quantiles[2] -= 0.035
+            elif loss_avg < 0.2 and diff_avg < 0.1 and self.quantiles[1] < 0.99:
+                self.quantiles[1] -= 0.015
+                self.quantiles[2] += 0.015
+
+            self.criterion_arr[k] = QuantileLoss(quantiles=self.quantiles)
+            print(loss_avg, diff_avg)
+            print(self.quantiles)
 
     def get_model_copy(self):
         """
