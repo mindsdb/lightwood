@@ -6,11 +6,11 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 class BoostMixer():
 
-    def __init__(self, quantiles=None):
+    def __init__(self, quantiles):
         self.targets = None
         self.quantiles = quantiles
 
-    def fit(self, ds=None, callback=None):
+    def fit(self, train_ds, test_ds=None, callback=None):
         output_features = data_source.configuration['output_features']
 
         self.targets = {}
@@ -25,12 +25,12 @@ class BoostMixer():
 
         X = []
 
-        for row in ds:
+        for row in train_ds:
             X.append(np.array(row[0]))
 
         X = np.array(X)
         for target_col_name in self.targets:
-            Y = ds.get_column_original_data(target_col_name)
+            Y = train_ds.get_column_original_data(target_col_name)
 
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
