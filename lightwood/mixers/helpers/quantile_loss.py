@@ -2,7 +2,7 @@ import torch
 
 
 class QuantileLoss(torch.nn.Module):
-    def __init__(self, quantiles=[0.5,0.95,0.05], reduce='mean'):
+    def __init__(self, quantiles, reduce='mean'):
         super().__init__()
         self.quantiles = quantiles
         self.reduce = reduce
