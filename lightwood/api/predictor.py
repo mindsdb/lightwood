@@ -55,7 +55,7 @@ class Predictor:
 
         self._output_columns = output
         self._input_columns = None
-        self.test_accuracy = None
+        self.train_accuracy = None
 
         self._mixer = None
         self._helper_mixers = None
@@ -158,7 +158,7 @@ class Predictor:
         return best_mixer_map
 
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
+    def learn(self, from_data, test_data=None, callback_on_iter=None, eval_every_x_epochs=20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -273,16 +273,19 @@ class Predictor:
         self._mixer = mixer_class(best_parameters, self.config)
 
         for param in mixer_params:
-            if hasattr(mixer, param):
-                setattr(mixer, param, mixer_params[param])
+            if hasattr(self._mixer, param):
+                setattr(self._mixer, param, mixer_params[param])
             else:
                 logging.warning(
                     'trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format
-                    (param=param, mixerclass=str(type(mixer)))
+                    (param=param, mixerclass=str(type(self._mixer)))
                 )
 
-        self._mixer.fit(train_ds=from_data_ds ,test_ds=test_data_ds, callback=callback_on_iter, stop_training_after_seconds=stop_training_after_seconds)
-        self.test_accuracy = self.calculate_accuracy(test_ds)
+        def callback_on_iter_w_acc(epoch, training_error, test_error, delta_mean):
+            callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
+
+        self._mixer.fit(train_ds=from_data_ds ,test_ds=test_data_ds, callback=callback_on_iter_w_acc, stop_training_after_seconds=stop_training_after_seconds, eval_every_x_epochs=eval_every_x_epochs)
+        self.train_accuracy = self.calculate_accuracy(test_data_ds)
 
         self._mixer.build_confidence_normalization_data(test_data_ds)
         self._mixer.encoders = from_data_ds.encoders
@@ -315,7 +318,7 @@ class Predictor:
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             for output_column in main_mixer_predictions:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
-                    if (self._helper_mixers[output_column]['accuracy'] > 1.00 * self.test_accuracy[output_column]['value']) or CONFIG.FORCE_HELPER_MIXERS:
+                    if (self._helper_mixers[output_column]['accuracy'] > 1.00 * self.train_accuracy[output_column]['value']) or CONFIG.FORCE_HELPER_MIXERS:
                         helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, [output_column])
 
                         main_mixer_predictions[output_column] = helper_mixer_predictions[output_column]
