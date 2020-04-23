@@ -1,6 +1,7 @@
 import copy
 import logging
 import random
+import time
 
 import torch
 from torch.utils.data import DataLoader
@@ -109,7 +110,142 @@ class NnMixer:
         return True
 
 
-    def fit(self, ds=None, callback=None):
+    def fit(self, train_ds, test_ds=None, callback=None, stop_training_after_seconds=None):
+        started = time.time()
+        log_reasure = time.time()
+        first_run = True
+        stop_training = False
+
+        for subset_iteration in [1, 2]:
+            if stop_training:
+                break
+            subset_id_arr =  [*train_ds.subsets.keys()]
+            for subset_id in subset_id_arr:
+                started_subset = time.time()
+                if stop_training:
+                    break
+
+                subset_train_ds = train_ds.subsets[subset_id]
+                subset_test_ds = test_ds.subsets[subset_id]
+
+                lowest_error = None
+                last_test_error = None
+                last_subset_test_error = None
+                test_error_delta_buff = []
+                subset_test_error_delta_buff = []
+                best_model = None
+                best_selfaware_model = None
+
+                #iterate over the iter_fit and see what the epoch and mixer error is
+                for epoch, training_error in enumerate(self.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
+                    first_run = False
+
+                    # Log this every now and then so that the user knows it's running
+                    if (int(time.time()) - log_reasure) > 30:
+                        log_reasure = time.time()
+                        logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
+
+
+                    # Prime the model on each subset for a bit
+                    if subset_iteration == 1:
+                        break
+
+                    # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
+                    if subset_iteration > 1 and training_error < 0.4 and not train_ds.enable_dropout:
+                        eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
+                        logging.info('Enabled dropout !')
+                        train_ds.enable_dropout = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    # If the selfaware network isn't able to train, go back to the original network
+                    if subset_iteration > 1 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not self.stop_selfaware_training:
+                        self.start_selfaware_training = False
+                        self.stop_selfaware_training = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    # Once we are past the priming/warmup period, start training the selfaware network
+
+                    if subset_iteration > 1 and not self.is_selfaware and self.config['mixer']['selfaware'] and not self.stop_selfaware_training and training_error < 0.35:
+                        logging.info('Started selfaware training !')
+                        self.start_selfaware_training = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    if epoch % eval_every_x_epochs == 0:
+                        test_error = self.error(test_ds)
+                        subset_test_error = self.error(subset_test_ds, subset_id=subset_id)
+                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
+
+                        if lowest_error is None or test_error < lowest_error:
+                            lowest_error = test_error
+                            if self.is_selfaware:
+                                best_selfaware_model = self.get_model_copy()
+                            else:
+                                best_model = self.get_model_copy()
+
+                        if last_subset_test_error is None:
+                            pass
+                        else:
+                            subset_test_error_delta_buff.append(last_subset_test_error - subset_test_error)
+
+                        last_subset_test_error = subset_test_error
+
+                        if last_test_error is None:
+                            pass
+                        else:
+                            test_error_delta_buff.append(last_test_error - test_error)
+
+                        last_test_error = test_error
+
+                        delta_mean = np.mean(test_error_delta_buff[-5:])
+                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
+
+                        if callback is not None:
+                            callback(epoch, training_error, test_error, delta_mean,
+                                                self.calculate_accuracy(test_ds))
+
+                        # Stop if we're past the time limit allocated for training
+                        if (time.time() - started) > stop_training_after_seconds:
+                            stop_training = True
+
+                        # If the trauining subset is overfitting on it's associated testing subset
+                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()):
+                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
+
+                            if self.is_selfaware:
+                                if best_selfaware_model is not None:
+                                    self.update_model(best_selfaware_model)
+                            else:
+                                self.update_model(best_model)
+
+
+                            if subset_id == subset_id_arr[-1]:
+                                stop_training = True
+                            elif not stop_training:
+                                break
+
+                        if stop_training:
+                            if self.is_selfaware:
+                                self.update_model(best_selfaware_model)
+                            else:
+                                self.update_model(best_model)
+                            logging.info('Finished training model !')
+                            break
+
         ret = 0
         for i in self.iter_fit(ds):
             ret = i
