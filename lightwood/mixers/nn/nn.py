@@ -456,8 +456,6 @@ class NnMixer:
                 self.quantiles_pair[1] -= 2
 
             self.criterion_arr[k] = QuantileLoss(quantiles=self.quantiles)
-            print(loss_avg, diff_avg)
-            print(f'Adjusted to use quantile pair: {self.quantiles_pair}')
 
     def get_model_copy(self):
         """
