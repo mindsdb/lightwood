@@ -1,11 +1,13 @@
 from __future__ import unicode_literals, print_function, division
+
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
+from lightwood.config.config import CONFIG
 
 import torch
 import torch.nn as nn
 from torch import optim
-
 import numpy as np
+
 
 class RnnEncoder:
 
@@ -29,6 +31,7 @@ class RnnEncoder:
         self._encoder = self._encoder.to(self.device)
 
     def prepare_encoder(self, priming_data, feedback_hoop_function = None):
+        print('\n\n\nPREPARUING THIS ENCODER !\n\n')
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of lists [[time_series], ...]
