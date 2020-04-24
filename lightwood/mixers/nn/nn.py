@@ -437,9 +437,9 @@ class NnMixer:
                     li_start = self.quantiles_pair[0] * 2 + 3
                     li_end = self.quantiles_pair[1] * 2 + 3
                     if ds.encoders[self.output_column_names[k]].decode_log == True:
-                        diff = (lg_end - lg_start)/lg_end
+                        diff = (quantile_prediction[lg_end] - quantile_prediction[lg_start])/quantile_prediction[lg_end]
                     else:
-                        diff = (li_end - li_start)/li_end
+                        diff = (quantile_prediction[li_end] - quantile_prediction[li_start])/quantile_prediction[li_end]
 
                     diff = float(diff.mean())
                     quantile_mean_diff[k].append((diff if diff > 0 else 1))
