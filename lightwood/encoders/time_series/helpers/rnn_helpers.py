@@ -1,3 +1,5 @@
+import logging
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,10 +8,18 @@ import numpy as np
 
 
 def tensor_from_series(series, device):
-    a = torch.tensor(series, dtype=torch.float, device=device)
-    a = a.view(-1, 1, 1, 1)
-    a = a.float()
-    return
+    if type(series) != type([]):
+        series = str(series).split(' ')
+
+    float_series = []
+    for ele in series:
+        try:
+            float_series.append(float(ele))
+        except:
+            logging.warning(f'Weird element encountered in timeseries: {ele} !')
+            float_series.append(0)
+
+    return torch.tensor(float_series, dtype=torch.float, device=device).view(-1, 1, 1, 1).float()
 
 
 class DecoderRNNNumerical(nn.Module):
