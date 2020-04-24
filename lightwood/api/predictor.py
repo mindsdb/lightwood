@@ -290,10 +290,10 @@ class Predictor:
         self._mixer.build_confidence_normalization_data(test_data_ds)
         self._mixer.encoders = from_data_ds.encoders
 
-        # Train some alternative mixers 
+        # Train some alternative mixers
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer and (CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10,3)):
             try:
-                self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds, self._mixer.quantiles)
+                self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds, self._mixer.quantiles[self._mixer.quantiles_pair[0]+1:self._mixer.quantiles_pair[1]+1])
             except Exception as e:
                 logging.warning(f'Failed to train helper mixers with error: {e}')
 

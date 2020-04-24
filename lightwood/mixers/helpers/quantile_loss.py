@@ -28,8 +28,8 @@ class QuantileLoss(torch.nn.Module):
                    q * errors
             ).unsqueeze(1))
 
+        print(torch.cat(losses, dim=1).shape)
         loss = torch.sum(torch.cat(losses, dim=1), dim=1)
-
         if self.reduce is False:
             return loss
         if self.reduce == 'mean':
