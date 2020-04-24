@@ -45,7 +45,8 @@ class NnMixer:
 
         self.max_confidence_per_output = []
         self.monitor = None
-        self.quantiles = [0.5,0.05,0.95]
+        self.quantiles = [0.5,  0.02,0.98,  0.005,0.995,  0.05,0.95,  0.1,0.9,  0.2,0.8]
+        self.quantiles_pair = [5,6]
 
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
@@ -319,8 +320,8 @@ class NnMixer:
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column] = {
                     'predictions': [x[0] for x in decoded_predictions]
-                    ,'confidence_range': [[x[1],x[2]] for x in decoded_predictions]
-                    ,'quantile_confidences': [self.quantiles[2] - self.quantiles[1] for x in decoded_predictions]}
+                    ,'confidence_range': [[x[self.quantiles_pair[0]],x[self.quantiles_pair[1]]] for x in decoded_predictions]
+                    ,'quantile_confidences': [self.quantiles[self.quantiles_pair[1]] - self.quantiles[self.quantiles_pair[0]] for x in decoded_predictions]}
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
