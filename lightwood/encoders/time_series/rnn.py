@@ -63,7 +63,7 @@ class RnnEncoder:
                 break
             if feedback_hoop_function is not None:
                 feedback_hoop_function("epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(average_loss=average_loss, epoch_n=i+1, total=self._train_iters))
-            
+
         self._prepared = True
 
     def encode_one(self, data, initial_hidden = None, as_list = False, return_next_value = False):
@@ -143,7 +143,7 @@ class RnnEncoder:
                 next += [next_i]
 
             ret += [encoded]
-            
+
         ret = self._pytorch_wrapper(ret)
         if get_next_count is None:
             return ret
