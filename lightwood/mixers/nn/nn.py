@@ -149,8 +149,6 @@ class NnMixer:
 
                     # Prime the model on each subset for a bit
                     if subset_iteration == 1:
-                        if subset_id == subset_id_arr[-1]:
-                            self.adjust_quantiles(test_ds)
                         break
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
@@ -189,7 +187,7 @@ class NnMixer:
 
                     # Adjust the values for the quantiles
                     if subset_iteration > 1 and epoch % (eval_every_x_epochs/2) == 0 and quantile_adjustment_attempts < 10:
-                        self.adjust_quantiles(test_ds)
+                        self.evaluate_quantiles(test_ds)
                         quantile_adjustment_attempts += 1
 
                     if epoch % eval_every_x_epochs == 0:
@@ -399,7 +397,7 @@ class NnMixer:
 
         return error
 
-    def adjust_quantiles(self, ds):
+    def evaluate_quantiles(self, ds):
         self.net = self.net.eval()
 
         if self._nonpersistent['sampler'] is None:
@@ -434,10 +432,14 @@ class NnMixer:
 
                     quantile_prediction = outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
 
+                    lg_start = self.quantiles_pair[0] * 2 + 2
+                    lg_end =  self.quantiles_pair[1] * 2 + 2
+                    li_start = self.quantiles_pair[0] * 2 + 3
+                    li_end = self.quantiles_pair[1] * 2 + 3
                     if ds.encoders[self.output_column_names[k]].decode_log == True:
-                        diff = (quantile_prediction[5] - quantile_prediction[3])/quantile_prediction[5]
+                        diff = (lg_end - lg_start)/lg_end
                     else:
-                        diff = (quantile_prediction[6] - quantile_prediction[4])/quantile_prediction[6]
+                        diff = (li_end - li_start)/li_end
 
                     diff = float(diff.mean())
                     quantile_mean_diff[k].append((diff if diff > 0 else 1))
@@ -446,16 +448,16 @@ class NnMixer:
             loss_avg = sum(quantile_errors[k])/len(quantile_errors[k])
             diff_avg = sum(quantile_mean_diff[k])/len(quantile_mean_diff[k])
 
-            if loss_avg > 1 and diff_avg > 0.4 and self.quantiles[1] < 0.4:
-                self.quantiles[1] += 0.035
-                self.quantiles[2] -= 0.035
-            elif loss_avg < 0.2 and diff_avg < 0.1 and self.quantiles[1] < 0.99:
-                self.quantiles[1] -= 0.015
-                self.quantiles[2] += 0.015
+            if loss_avg > 1 and diff_avg > 0.4 and self.quantiles[1] < 0.4 and self.quantiles_pair[1] < 10:
+                self.quantiles_pair[0] += 2
+                self.quantiles_pair[1] += 2
+            elif loss_avg < 0.2 and diff_avg < 0.1 and self.quantiles[1] < 0.99 and self.quantiles_pair[1] > 2:
+                self.quantiles_pair[0] -= 2
+                self.quantiles_pair[1] -= 2
 
             self.criterion_arr[k] = QuantileLoss(quantiles=self.quantiles)
             print(loss_avg, diff_avg)
-            print(self.quantiles)
+            print(f'Adjusted to use quantile pair: {self.quantiles_pair}')
 
     def get_model_copy(self):
         """
