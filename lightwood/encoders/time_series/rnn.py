@@ -131,7 +131,7 @@ class RnnEncoder:
 
         for val in column_data:
             if get_next_count is None:
-                encoded = self.encode_one(val)
+                encoded = self.encode_one(val, as_list=True)
             else:
                 if get_next_count <= 0:
                     raise Exception('get_next_count must be greater than 0')

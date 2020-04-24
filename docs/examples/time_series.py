@@ -1,10 +1,12 @@
 import math
 import pandas
 import random
+import lightwood
 from lightwood import Predictor
 from lightwood import COLUMN_DATA_TYPES
 
 
+lightwood.config.config.CONFIG.USE_CUDA = True
 
 ts_len = 10
 max = 2000
