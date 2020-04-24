@@ -22,7 +22,7 @@ class TsFreshTsEncoder:
             elif type(values) == type([]):
                 values = list(map(float,values))
             else:
-                values = list(map(lambda x: float(x), values.split()))
+                values = list(map(lambda x: float(x), values.split(' ')))
 
             self.max_series_len = max(self.max_series_len,len(values))
             all_numbers.extend(values)
@@ -48,7 +48,7 @@ class TsFreshTsEncoder:
             elif type(values) == type([]):
                 values = list(map(float,values))
             else:
-                values = list(map(lambda x: float(x), values.split()))
+                values = list(map(lambda x: float(x), values.split(' ')))
 
             all_values.append(values)
             df = pd.DataFrame({'main_feature': values, 'id': [1] * len(values)})

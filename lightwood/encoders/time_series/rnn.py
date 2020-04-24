@@ -31,7 +31,6 @@ class RnnEncoder:
         self._encoder = self._encoder.to(self.device)
 
     def prepare_encoder(self, priming_data, feedback_hoop_function = None):
-        print('\n\n\nPREPARUING THIS ENCODER !\n\n')
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of lists [[time_series], ...]
@@ -55,7 +54,7 @@ class RnnEncoder:
                 optimizer.zero_grad()
                 encoder_hidden = self._encoder.initHidden(self.device)
                 next_tensor = data_tensor[0]
-                for tensor_i in range(len(priming_data[j])-1):
+                for tensor_i in range(len(data_tensor)-1):
                     rand = np.random.randint(2)
                     # teach from forward as well as from known tensor alteratively
                     if rand == 1:
@@ -80,7 +79,7 @@ class RnnEncoder:
     def encode_one(self, data, initial_hidden = None, as_list = False, return_next_value = False):
         """
         This method encodes one single row of serial data
-        :param data:  a list of values [1,2,3,4,...]
+        :param data: a string representing a list of values separate by space, for example: `1 2 3 4` or a list [1, 2, 3, 4]
         :param initial_hidden: if you want to encode from an initial hidden state other than 0s
         :param as_list: if you want to return the information as lists
         :param return_next_value:  if you want to return the next value in the time series too
@@ -100,8 +99,7 @@ class RnnEncoder:
             if type(encoder_hidden) is list:
                 encoder_hidden = torch.Tensor([[encoder_hidden]], device=device)
             next_tensor = None
-            for tensor_i in range(len(data)):
-
+            for tensor_i in range(len(data_tensor)):
                 next_tensor, encoder_hidden = self._encoder.forward(data_tensor[tensor_i], encoder_hidden)
 
         if as_list:
@@ -175,7 +173,7 @@ if __name__ == "__main__":
         start = np.random.randint(30)
         vec = [start+j*skip for j in range(length)]
 
-        series+=[vec]
+        series+=[[str(x) for x in vec].join(' ')]
 
     print(series)
 
@@ -184,6 +182,6 @@ if __name__ == "__main__":
 
 
     # test de decoder
-    init_vector = [[31,33,35,37], [1,2,3,4,5,6]]
+    init_vector = ['31 33 35 37', '1 2 3 4 5 6']
 
     print(encoder.encode(column_data=init_vector, get_next_count=2))
