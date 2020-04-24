@@ -19,15 +19,15 @@ class DecoderRNNNumerical(nn.Module):
     def __init__(self, hidden_size, output_size):
         super(DecoderRNNNumerical, self).__init__()
         self.hidden_size = hidden_size
+        self.in_activation = nn.ReLU()
         self.gru = nn.GRU(output_size, hidden_size)
         self.out = nn.Linear(hidden_size, output_size)
 
 
     def forward(self, input, hidden):
-        output = F.relu(input.float())
+        output = self.in_activation(input.float())
         output, hidden = self.gru(output, hidden)
         output = self.out(output)
-        #output = self.softmax(self.out(output[0]))
         return output, hidden
 
     def initHidden(self):
