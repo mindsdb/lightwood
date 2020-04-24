@@ -6,7 +6,10 @@ import numpy as np
 
 
 def tensor_from_series(series, device):
-    return torch.tensor(series, dtype=torch.float, device=device).view(-1, 1, 1, 1).float()
+    a = torch.tensor(series, dtype=torch.float, device=device)
+    a = a.view(-1, 1, 1, 1)
+    a = a.float()
+    return
 
 
 class DecoderRNNNumerical(nn.Module):
