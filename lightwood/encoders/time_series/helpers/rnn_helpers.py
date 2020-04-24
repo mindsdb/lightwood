@@ -1,17 +1,11 @@
-
-
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-
 import numpy as np
 
-def tensor_from_series(series):
+
+def tensor_from_series(series, device):
     return torch.tensor(series, dtype=torch.float, device=device).view(-1, 1, 1, 1).float()
 
 
@@ -30,7 +24,7 @@ class DecoderRNNNumerical(nn.Module):
         output = self.out(output)
         return output, hidden
 
-    def initHidden(self):
+    def initHidden(self, device):
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
 
@@ -50,5 +44,5 @@ class EncoderRNNNumerical(nn.Module):
         output = self.out(output)
         return output, hidden
 
-    def initHidden(self):
+    def initHidden(self, device):
         return torch.zeros(1, 1, self.hidden_size, device=device)

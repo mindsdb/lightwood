@@ -19,6 +19,15 @@ class RnnEncoder:
         self._decoder = None
         self._prepared = False
 
+        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
+        if CONFIG.USE_DEVICE is not None:
+            device_str = CONFIG.USE_DEVICE
+        self.device = torch.device(device_str)
+
+    def to(self, device):
+        self.device = device
+        self._encoder = self._encoder.to(self.device)
+
     def prepare_encoder(self, priming_data, feedback_hoop_function = None):
         """
         The usual, run this on the initial training data for the encoder
@@ -29,8 +38,7 @@ class RnnEncoder:
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
-
-        self._encoder = EncoderRNNNumerical(hidden_size=self._encoded_vector_size)
+        self._encoder = EncoderRNNNumerical(hidden_size=self._encoded_vector_size).to(self.device)
         optimizer = optim.Adam(self._encoder.parameters(), lr=self._learning_rate)
         criterium = nn.MSELoss()
         self._encoder.train()
@@ -38,11 +46,11 @@ class RnnEncoder:
             average_loss = 0
             total = len(priming_data)
             for j in range(len(priming_data)):
-                data_tensor = tensor_from_series(priming_data[j])
+                data_tensor = tensor_from_series(priming_data[j], self.device)
                 loss = 0
 
                 optimizer.zero_grad()
-                encoder_hidden = self._encoder.initHidden()
+                encoder_hidden = self._encoder.initHidden(self.device)
                 next_tensor = data_tensor[0]
                 for tensor_i in range(len(priming_data[j])-1):
                     rand = np.random.randint(2)
@@ -82,9 +90,9 @@ class RnnEncoder:
         self._encoder.eval()
         with torch.no_grad():
 
-            data_tensor = tensor_from_series(data)
+            data_tensor = tensor_from_series(data, self.device)
 
-            encoder_hidden = self._encoder.initHidden()
+            encoder_hidden = self._encoder.initHidden(self.device)
             encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
             if type(encoder_hidden) is list:
                 encoder_hidden = torch.Tensor([[encoder_hidden]], device=device)
