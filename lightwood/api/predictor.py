@@ -132,7 +132,7 @@ class Predictor:
         from lightwood.mixers.boost.boost import BoostMixer
 
         boost_mixer = BoostMixer(quantiles=quantiles)
-        boost_mixer.fir(train_ds=train_ds)
+        boost_mixer.fit(train_ds=train_ds)
 
         # @TODO: IF we add more mixers in the future, add the best on for each column to this map !
         best_mixer_map = {}
