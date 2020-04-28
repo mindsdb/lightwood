@@ -188,7 +188,7 @@ class DataSource(Dataset):
 
                         new_weights[value_index] = weights[val]
 
-                    if self.output_weights is None:
+                    if self.output_weights is None or self.output_weights == False:
                         self.output_weights = new_weights
                     else:
                         self.output_weights.extend(new_weights)

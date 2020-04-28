@@ -84,14 +84,16 @@ class Gym:
                             input = input.to(self.device)
                             real = real.to(self.device)
 
-                            predicted = self.model(input)
+                            with torch.no_grad():
+                                predicted = self.model(input)
 
                             real_buff.append(real.tolist())
                             predicted_buff.append(predicted.tolist())
 
                             loss = self.loss_criterion(predicted, real)
                         else:
-                            loss = custom_test_func(self.model, data, self)
+                            with torch.no_grad():
+                                loss = custom_test_func(self.model, data, self)
 
                         test_running_loss += loss.item()
                         test_error = test_running_loss / (i + 1)
