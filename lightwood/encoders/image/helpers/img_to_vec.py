@@ -33,8 +33,6 @@ class Img2Vec():
 
         self.model = self.model.to(self.device)
 
-        self.model.eval()
-
         self.scaler = transforms.Scale((224, 224))
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                               std=[0.229, 0.224, 0.225])
