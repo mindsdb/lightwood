@@ -4,8 +4,7 @@ from lightwood.config.config import CONFIG
 
 
 def get_devices():
-    if device_str is None:
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
+    device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
     if CONFIG.USE_DEVICE is not None:
         device_str = CONFIG.USE_DEVICE
     device = torch.device(device_str)

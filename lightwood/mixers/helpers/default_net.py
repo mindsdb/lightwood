@@ -28,7 +28,7 @@ class DefaultNet(torch.nn.Module):
             '''
             torch.manual_seed(66)
 
-            if device_str == 'cuda':
+            if 'cuda' in str(self.device):
                 torch.backends.cudnn.deterministic = True
                 torch.backends.cudnn.benchmark = False
                 self.available_devices = torch.cuda.device_count()
@@ -132,7 +132,8 @@ class DefaultNet(torch.nn.Module):
                 self._foward_awareness_net = self.awareness_net
 
         self.device = device
-
+        self.available_devices = available_devices
+        
         return 'Success, please note, this function mutates the object in place, unlike torche\'s .to'
 
 
