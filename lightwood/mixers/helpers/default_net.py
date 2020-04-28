@@ -134,7 +134,7 @@ class DefaultNet(torch.nn.Module):
         self.device = device
         self.available_devices = available_devices
 
-        return 'Success, please note, this function mutates the object in place, unlike torche\'s .to'
+        return self
 
 
     def calculate_overall_certainty(self):
