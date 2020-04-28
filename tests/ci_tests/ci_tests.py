@@ -12,7 +12,6 @@ MODULES = [
     f'{encoders_path}categorical/onehot.py',
     f'{encoders_path}datetime/datetime.py',
     f'{encoders_path}categorical/autoencoder.py',
-    f'{encoders_path}time_series/rnn.py',
     f'{pdir}api/data_source.py',
     f'{mixers_path}nn/nn.py',
     # Take too long
