@@ -13,6 +13,7 @@ from lightwood.config.config import CONFIG
 from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.shared.helpers import get_devices
 
 class Predictor:
 
@@ -92,13 +93,18 @@ class Predictor:
                 return lowest_error
 
     def convert_to_device(self, device_str=None):
-        self._mixer.to()
+        if device_str is not None:
+            device = torch.device(device_str)
+            available_devices = 1
+            if device_str == 'cuda':
+                available_devices = torch.cuda.device_count()
+        else:
+            device, available_devices = get_devices()
+
+        self._mixer.to(device, available_devices)
         for e in self._mixer.encoders:
-            try:
-                self._mixer.encoders[e]._model.model.to(device)
-                self._mixer.encoders[e]._model.device = device_str
-            except:
-                pass
+            if hasattr(self._mixer.encoders[e], 'to'):
+                self._mixer.encoders[e].to(device, available_devices)
 
     def train_helper_mixers(self, train_ds, test_ds):
         from lightwood.mixers.boost.boost import BoostMixer

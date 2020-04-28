@@ -24,10 +24,7 @@ class RnnEncoder:
 
         self.device, _ = get_devices()
 
-    def to(self, device=None, available_devices=None):
-        if device is None or available_devices is None:
-            device, available_devices = get_devices()
-
+    def to(self, device, available_devices):
         self.device = device
         self._encoder = self._encoder.to(self.device)
 
