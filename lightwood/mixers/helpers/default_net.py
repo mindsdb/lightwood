@@ -111,6 +111,11 @@ class DefaultNet(torch.nn.Module):
             else:
                 self._foward_awareness_net = self.awareness_net
 
+    def to(self, device=None, available_devices=None):
+        if device is None or available_devices is None:
+            
+        pass
+
     def calculate_overall_certainty(self):
         """
         Calculate overall certainty of the model
