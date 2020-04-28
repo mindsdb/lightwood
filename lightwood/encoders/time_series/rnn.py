@@ -26,7 +26,8 @@ class RnnEncoder:
     def to(self, device, available_devices):
         self.device = device
         self._encoder = self._encoder.to(self.device)
-
+        return self
+    
     def prepare_encoder(self, priming_data, feedback_hoop_function = None):
         """
         The usual, run this on the initial training data for the encoder
