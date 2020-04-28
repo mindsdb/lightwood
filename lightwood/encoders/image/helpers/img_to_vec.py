@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
+from lightwood.shared.helpers import get_devices
 
 from lightwood.config.config import CONFIG
 
@@ -24,11 +25,7 @@ class Img2Vec():
         :param layer: String or Int depending on model.  See more docs: https://github.com/christiansafka/img2vec.git
         :param layer_output_size: Int depicting the output size of the requested layer
         """
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-
-        self.device = torch.device(device_str)
+        self.device, _ = get_devices()
         self.layer_output_size = layer_output_size
         self.model_name = model
 
