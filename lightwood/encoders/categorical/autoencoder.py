@@ -52,6 +52,7 @@ class CategoricalAutoEncoder:
 
             self.encoder = torch.nn.Sequential(*modules[0:2])
             self.decoder = torch.nn.Sequential(*modules[2:3])
+        return self
 
     def prepare_encoder(self, priming_data):
         random.seed(len(priming_data))

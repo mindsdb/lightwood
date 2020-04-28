@@ -498,7 +498,8 @@ class NnMixer:
 
     def to(self, device, available_devices):
         self.net.to(device, available_devices)
-
+        return self
+    
 if __name__ == "__main__":
     import random
     import pandas

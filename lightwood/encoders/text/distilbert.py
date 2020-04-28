@@ -98,6 +98,8 @@ class DistilBertEncoder:
         if self._head is not None:
             self._head = self._head.to(self.device)
 
+        return self
+
     def prepare_encoder(self, priming_data, training_data=None):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
