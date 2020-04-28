@@ -119,7 +119,7 @@ class DefaultNet(torch.nn.Module):
             self.awareness_net = self.awareness_net.to(device)
 
         available_devices = 1
-        if device_str == 'cuda':
+        if 'cuda' in str(device):
             available_devices = torch.cuda.device_count()
 
         if available_devices > 1:
@@ -133,7 +133,7 @@ class DefaultNet(torch.nn.Module):
 
         self.device = device
         self.available_devices = available_devices
-        
+
         return 'Success, please note, this function mutates the object in place, unlike torche\'s .to'
 
 
