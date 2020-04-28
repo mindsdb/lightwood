@@ -177,3 +177,4 @@ if __name__ == "__main__":
     init_vector = ['31 33 35 37', '1 2 3 4 5 6']
 
     print(encoder.encode(column_data=init_vector, get_next_count=2))
+    print(encoder.encode(column_data=init_vector))
