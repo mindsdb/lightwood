@@ -55,12 +55,10 @@ class Predictor:
 
         self._output_columns = output
         self._input_columns = None
+        self.train_accuracy = None
 
         self._mixer = None
         self._helper_mixers = None
-
-        self.train_accuracy = None
-        self.overall_certainty = None
 
     @staticmethod
     def evaluate_mixer(config, mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
@@ -130,11 +128,11 @@ class Predictor:
             except:
                 pass
 
-    def train_helper_mixers(self, train_ds, test_ds):
+    def train_helper_mixers(self, train_ds, test_ds, quantiles):
         from lightwood.mixers.boost.boost import BoostMixer
 
-        boost_mixer = BoostMixer(quantiles=[0.05,0.95])
-        boost_mixer.train(train_ds)
+        boost_mixer = BoostMixer(quantiles=quantiles)
+        boost_mixer.fit(train_ds=train_ds)
 
         # @TODO: IF we add more mixers in the future, add the best on for each column to this map !
         best_mixer_map = {}
@@ -160,7 +158,7 @@ class Predictor:
         return best_mixer_map
 
 
-    def learn(self, from_data, test_data=None, callback_on_iter = None, eval_every_x_epochs = 20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
+    def learn(self, from_data, test_data=None, callback_on_iter=None, eval_every_x_epochs=20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
@@ -272,172 +270,33 @@ class Predictor:
         else:
             best_parameters = {}
 
-        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer and (CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10,3)):
-            try:
-                self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds)
-            except Exception as e:
-                logging.warning(f'Failed to train helper mixers with error: {e}')
-
-
-        mixer = mixer_class(best_parameters, self.config)
-        self._mixer = mixer
+        self._mixer = mixer_class(best_parameters, self.config)
 
         for param in mixer_params:
-            if hasattr(mixer, param):
-                setattr(mixer, param, mixer_params[param])
+            if hasattr(self._mixer, param):
+                setattr(self._mixer, param, mixer_params[param])
             else:
                 logging.warning(
                     'trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format
-                    (param=param, mixerclass=str(type(mixer)))
+                    (param=param, mixerclass=str(type(self._mixer)))
                 )
 
-        started = time.time()
-        log_reasure = time.time()
-        first_run = True
-        stop_training = False
+        def callback_on_iter_w_acc(epoch, training_error, test_error, delta_mean):
+            callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
-        for subset_iteration in [1, 2]:
-            if stop_training:
-                break
-            subset_id_arr =  [*from_data_ds.subsets.keys()] # [1]
-            for subset_id in subset_id_arr:
-                started_subset = time.time()
-                if stop_training:
-                    break
-
-                #subset_train_ds = from_data_ds #.subsets[subset_id]
-                #subset_test_ds = test_data_ds #.subsets[subset_id]
-
-                subset_train_ds = from_data_ds.subsets[subset_id]
-                subset_test_ds = test_data_ds.subsets[subset_id]
-
-                lowest_error = None
-                last_test_error = None
-                last_subset_test_error = None
-                test_error_delta_buff = []
-                subset_test_error_delta_buff = []
-                best_model = None
-                best_selfaware_model = None
-
-                #iterate over the iter_fit and see what the epoch and mixer error is
-                for epoch, training_error in enumerate(mixer.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
-                    first_run = False
-
-                    # Log this every now and then so that the user knows it's running
-                    if (int(time.time()) - log_reasure) > 30:
-                        log_reasure = time.time()
-                        logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
-
-
-                    # Prime the model on each subset for a bit
-                    if subset_iteration == 1:
-                        break
-
-                    # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
-                    if subset_iteration > 1 and training_error < 0.4 and not from_data_ds.enable_dropout:
-                        eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
-                        logging.info('Enabled dropout !')
-                        from_data_ds.enable_dropout = True
-                        lowest_error = None
-                        last_test_error = None
-                        last_subset_test_error = None
-                        test_error_delta_buff = []
-                        subset_test_error_delta_buff = []
-                        continue
-
-                    # If the selfaware network isn't able to train, go back to the original network
-                    if subset_iteration > 1 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not mixer.stop_selfaware_training:
-                        mixer.start_selfaware_training = False
-                        mixer.stop_selfaware_training = True
-                        lowest_error = None
-                        last_test_error = None
-                        last_subset_test_error = None
-                        test_error_delta_buff = []
-                        subset_test_error_delta_buff = []
-                        continue
-
-                    # Once we are past the priming/warmup period, start training the selfaware network
-
-                    if subset_iteration > 1 and not mixer.is_selfaware and self.config['mixer']['selfaware'] and not mixer.stop_selfaware_training and training_error < 0.35:
-                        logging.info('Started selfaware training !')
-                        mixer.start_selfaware_training = True
-                        lowest_error = None
-                        last_test_error = None
-                        last_subset_test_error = None
-                        test_error_delta_buff = []
-                        subset_test_error_delta_buff = []
-                        continue
-
-                    if epoch % eval_every_x_epochs == 0:
-                        test_error = mixer.error(test_data_ds)
-                        subset_test_error = mixer.error(subset_test_ds, subset_id=subset_id)
-                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
-
-                        if lowest_error is None or test_error < lowest_error:
-                            lowest_error = test_error
-                            if mixer.is_selfaware:
-                                best_selfaware_model = mixer.get_model_copy()
-                            else:
-                                best_model = mixer.get_model_copy()
-
-                        if last_subset_test_error is None:
-                            pass
-                        else:
-                            subset_test_error_delta_buff.append(last_subset_test_error - subset_test_error)
-
-                        last_subset_test_error = subset_test_error
-
-                        if last_test_error is None:
-                            pass
-                        else:
-                            test_error_delta_buff.append(last_test_error - test_error)
-
-                        last_test_error = test_error
-
-                        delta_mean = np.mean(test_error_delta_buff[-5:])
-                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
-
-                        if callback_on_iter is not None:
-                            callback_on_iter(epoch, training_error, test_error, delta_mean,
-                                             self.calculate_accuracy(test_data_ds))
-
-                        ## Stop if the model is overfitting
-                        #if delta_mean <= 0 and len(test_error_delta_buff) > 4:
-                        #    stop_training = True
-
-                        # Stop if we're past the time limit allocated for training
-                        if (time.time() - started) > stop_training_after_seconds:
-                            stop_training = True
-
-                        # If the trauining subset is overfitting on it's associated testing subset
-                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(from_data_ds.subsets.keys()):
-                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(from_data_ds.subsets.keys())))
-
-                            if mixer.is_selfaware:
-                                if best_selfaware_model is not None:
-                                    mixer.update_model(best_selfaware_model)
-                            else:
-                                mixer.update_model(best_model)
-
-
-                            if subset_id == subset_id_arr[-1]:
-                                stop_training = True
-                            elif not stop_training:
-                                break
-
-                        if stop_training:
-                            if mixer.is_selfaware:
-                                mixer.update_model(best_selfaware_model)
-                            else:
-                                mixer.update_model(best_model)
-                            self._mixer = mixer
-                            self.train_accuracy = self.calculate_accuracy(test_data_ds)
-                            self.overall_certainty = mixer.overall_certainty()
-                            logging.info('Finished training model !')
-                            break
+        self._mixer.fit(train_ds=from_data_ds ,test_ds=test_data_ds, callback=callback_on_iter_w_acc, stop_training_after_seconds=stop_training_after_seconds, eval_every_x_epochs=eval_every_x_epochs)
+        self.train_accuracy = self.calculate_accuracy(test_data_ds)
 
         self._mixer.build_confidence_normalization_data(test_data_ds)
         self._mixer.encoders = from_data_ds.encoders
+
+        # Train some alternative mixers
+        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer and (CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10,3)):
+            try:
+                self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds, self._mixer.quantiles[self._mixer.quantiles_pair[0]+1:self._mixer.quantiles_pair[1]+1])
+            except Exception as e:
+                logging.warning(f'Failed to train helper mixers with error: {e}')
+
         return self
 
     def predict(self, when_data=None, when=None):

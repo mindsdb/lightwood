@@ -79,12 +79,14 @@ class DistilBertEncoder:
     def numerical_train_function(model, data, gym, backbone, test=False):
         input, real = data
 
-        input = input.to(gym.device)
-        real = real.to(gym.device)
+        backbone = backbone.eval()
+        with torch.no_grad():
+            input = input.to(gym.device)
+            real = real.to(gym.device)
 
-        embeddings = backbone(input)[0][:, 0, :]
+            embeddings = backbone(input)[0][:, 0, :]
+
         outputs = gym.model(embeddings)
-
         loss = gym.loss_criterion(outputs, real)
 
         if not test:
@@ -208,8 +210,6 @@ class DistilBertEncoder:
             test_data_loader = DataLoader(
                 merged_data[int(len(merged_data) * 9 / 10):], batch_size=batch_size, shuffle=True)
 
-            self._model.eval()
-
             best_model, error, training_time = gym.fit(train_data_loader=train_data_loader,
                                                        test_data_loader=test_data_loader,
                                                        desired_error=self.desired_error,
@@ -237,7 +237,7 @@ class DistilBertEncoder:
 
     def encode(self, column_data):
         encoded_representation = []
-        self._model.eval()
+        self._model = self._model.eval()
         with torch.no_grad():
             for text in column_data:
                 if text is None:
