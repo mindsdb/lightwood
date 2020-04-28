@@ -12,7 +12,6 @@ MODULES = [
     f'{encoders_path}categorical/onehot.py',
     f'{encoders_path}datetime/datetime.py',
     f'{encoders_path}categorical/autoencoder.py',
-    f'{encoders_path}time_series/ts_fresh_ts.py',
     f'{pdir}api/data_source.py',
     f'{mixers_path}nn/nn.py',
     # Take too long
@@ -61,13 +60,8 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
     'data_source': {'cache_transformed_data':CACHE_ENCODED_DATA},
     'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer, 'selfaware': SELFAWARE}}
 
-    # AX doesn't seem to work on the travis version of windows, so don't test it there as of now
-    if sys.platform not in ['win32','cygwin','windows']:
-        pass
-        #config['optimizer'] = lightwood.model_building.BasicAxOptimizer
 
     df=pd.read_csv("https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv")
-
 
     def iter_function(epoch, error, test_error, test_error_gradient, test_accuracy):
         print(
@@ -77,15 +71,10 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
 
     predictor = Predictor(config)
     # stop_training_after_seconds given in order to not get timeouts in travis
-    predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=1, stop_training_after_seconds=1)
-
-    predictor.save('test.pkl')
-
-    predictor = Predictor(load_from_path='test.pkl')
+    predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=4, stop_training_after_seconds=40)
 
     df = df.drop([x['name'] for x in config['output_features']], axis=1)
     predictor.predict(when_data=df)
-
 
     predictor.save('test.pkl')
     predictor = Predictor(load_from_path='test.pkl')
@@ -99,9 +88,7 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
 
 
 if __name__ == "__main__":
-    run_tests(MODULES)
+    #run_tests(MODULES)
     for USE_CUDA in [False]:
         for CACHE_ENCODED_DATA in [False, True]:
-            for SELFAWARE in [False, True]:
-                for PLINEAR in [False, True]:
-                    run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR)
+            run_full_test(USE_CUDA, CACHE_ENCODED_DATA, True, False)

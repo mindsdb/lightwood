@@ -1,6 +1,7 @@
 import copy
 import logging
 import random
+import time
 
 import torch
 from torch.utils.data import DataLoader
@@ -44,7 +45,8 @@ class NnMixer:
 
         self.max_confidence_per_output = []
         self.monitor = None
-        self.quantiles = [0.5,0.05,0.95]
+        self.quantiles = [0.5,  0.02,0.98,  0.005,0.995,  0.05,0.95,  0.1,0.9,  0.2,0.8]
+        self.quantiles_pair = [5,6]
 
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
@@ -108,12 +110,145 @@ class NnMixer:
 
         return True
 
-    def fit(self, ds=None, callback=None):
-        ret = 0
-        for i in self.iter_fit(ds):
-            ret = i
-        self.encoders = ds.encoders
-        return ret
+    def fit(self, train_ds, test_ds=None, callback=None, stop_training_after_seconds=None, eval_every_x_epochs=None):
+        started = time.time()
+        log_reasure = time.time()
+        first_run = True
+        stop_training = False
+
+        for subset_iteration in [1, 2]:
+            if stop_training:
+                break
+            subset_id_arr =  [*train_ds.subsets.keys()]
+            for subset_id in subset_id_arr:
+                started_subset = time.time()
+                if stop_training:
+                    break
+
+                subset_train_ds = train_ds.subsets[subset_id]
+                subset_test_ds = test_ds.subsets[subset_id]
+
+                lowest_error = None
+                last_test_error = None
+                last_subset_test_error = None
+                test_error_delta_buff = []
+                subset_test_error_delta_buff = []
+                best_model = None
+                best_selfaware_model = None
+                quantile_adjustment_attempts = 0
+
+                #iterate over the iter_fit and see what the epoch and mixer error is
+                for epoch, training_error in enumerate(self.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
+                    first_run = False
+
+                    # Log this every now and then so that the user knows it's running
+                    if (int(time.time()) - log_reasure) > 30:
+                        log_reasure = time.time()
+                        logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
+
+
+                    # Prime the model on each subset for a bit
+                    if subset_iteration == 1:
+                        break
+
+                    # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
+                    if subset_iteration > 1 and training_error < 0.4 and not train_ds.enable_dropout:
+                        eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
+                        logging.info('Enabled dropout !')
+                        train_ds.enable_dropout = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    # If the selfaware network isn't able to train, go back to the original network
+                    if subset_iteration > 1 and (np.isnan(training_error) or np.isinf(training_error) or training_error > pow(10,5)) and not self.stop_selfaware_training:
+                        self.start_selfaware_training = False
+                        self.stop_selfaware_training = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    # Once we are past the priming/warmup period, start training the selfaware network
+                    if subset_iteration > 1 and not self.is_selfaware and self.config['mixer']['selfaware'] and not self.stop_selfaware_training and training_error < 0.35:
+                        logging.info('Started selfaware training !')
+                        self.start_selfaware_training = True
+                        lowest_error = None
+                        last_test_error = None
+                        last_subset_test_error = None
+                        test_error_delta_buff = []
+                        subset_test_error_delta_buff = []
+                        continue
+
+                    # Adjust the values for the quantiles
+                    if subset_iteration > 1 and epoch % (eval_every_x_epochs/2) == 0 and quantile_adjustment_attempts < 10:
+                        self.evaluate_quantiles(test_ds)
+                        quantile_adjustment_attempts += 1
+
+                    if epoch % eval_every_x_epochs == 0:
+                        test_error = self.error(test_ds)
+                        subset_test_error = self.error(subset_test_ds, subset_id=subset_id)
+                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
+
+                        if lowest_error is None or test_error < lowest_error:
+                            lowest_error = test_error
+                            if self.is_selfaware:
+                                best_selfaware_model = self.get_model_copy()
+                            else:
+                                best_model = self.get_model_copy()
+
+                        if last_subset_test_error is None:
+                            pass
+                        else:
+                            subset_test_error_delta_buff.append(last_subset_test_error - subset_test_error)
+
+                        last_subset_test_error = subset_test_error
+
+                        if last_test_error is None:
+                            pass
+                        else:
+                            test_error_delta_buff.append(last_test_error - test_error)
+
+                        last_test_error = test_error
+
+                        delta_mean = np.mean(test_error_delta_buff[-5:])
+                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
+
+                        if callback is not None:
+                            callback(epoch, training_error, test_error, delta_mean)
+
+                        # Stop if we're past the time limit allocated for training
+                        if (time.time() - started) > stop_training_after_seconds:
+                            stop_training = True
+
+                        # If the trauining subset is overfitting on it's associated testing subset
+                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()):
+                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
+
+                            if self.is_selfaware:
+                                if best_selfaware_model is not None:
+                                    self.update_model(best_selfaware_model)
+                            else:
+                                self.update_model(best_model)
+
+
+                            if subset_id == subset_id_arr[-1]:
+                                stop_training = True
+                            elif not stop_training:
+                                break
+
+                        if stop_training:
+                            if self.is_selfaware:
+                                self.update_model(best_selfaware_model)
+                            else:
+                                self.update_model(best_model)
+                            logging.info('Finished training model !')
+                            break
 
     def predict(self, when_data_source, include_encoded_predictions=False):
         """
@@ -183,8 +318,8 @@ class NnMixer:
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column] = {
                     'predictions': [x[0] for x in decoded_predictions]
-                    ,'confidence_range': [[x[1],x[2]] for x in decoded_predictions]
-                    ,'quantile_confidences': [self.quantiles[2] - self.quantiles[1] for x in decoded_predictions]}
+                    ,'confidence_range': [[x[self.quantiles_pair[0]],x[self.quantiles_pair[1]]] for x in decoded_predictions]
+                    ,'quantile_confidences': [self.quantiles[self.quantiles_pair[1]] - self.quantiles[self.quantiles_pair[0]] for x in decoded_predictions]}
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
@@ -224,8 +359,7 @@ class NnMixer:
         ds.transformer = self.transformer
 
         if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size,
-                                     sampler=self._nonpersistent['sampler'], num_workers=0)
+            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
         else:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
@@ -262,6 +396,66 @@ class NnMixer:
         self.net = self.net.train()
 
         return error
+
+    def evaluate_quantiles(self, ds):
+        self.net = self.net.eval()
+
+        if self._nonpersistent['sampler'] is None:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
+        else:
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
+
+        quantile_errors = {}
+        quantile_mean_diff = {}
+
+        for i, data in enumerate(data_loader, 0):
+            inputs, labels = data
+            inputs = inputs.to(self.net.device)
+            labels = labels.to(self.net.device)
+
+            with torch.no_grad():
+                if self.is_selfaware:
+                    outputs, awareness = self.net(inputs)
+                else:
+                    outputs = self.net(inputs)
+
+            for k, criterion in enumerate(self.criterion_arr):
+                if type(criterion) == QuantileLoss:
+                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+
+                    if k not in quantile_errors:
+                        quantile_errors[k] = []
+                        quantile_mean_diff[k] = []
+
+                    quantile_errors[k].append(float(target_loss.item()))
+
+                    quantile_prediction = outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
+
+                    lg_start = self.quantiles_pair[0] * 2 + 2
+                    lg_end =  self.quantiles_pair[1] * 2 + 2
+                    li_start = self.quantiles_pair[0] * 2 + 3
+                    li_end = self.quantiles_pair[1] * 2 + 3
+                    if ds.encoders[self.output_column_names[k]].decode_log == True:
+                        diff = (quantile_prediction[lg_end] - quantile_prediction[lg_start])/quantile_prediction[lg_end]
+                    else:
+                        diff = (quantile_prediction[li_end] - quantile_prediction[li_start])/quantile_prediction[li_end]
+
+                    diff = float(diff.mean())
+                    quantile_mean_diff[k].append((diff if diff > 0 else 1))
+
+        for k in quantile_errors:
+            loss_avg = sum(quantile_errors[k])/len(quantile_errors[k])
+            diff_avg = sum(quantile_mean_diff[k])/len(quantile_mean_diff[k])
+
+            if loss_avg > 1 and diff_avg > 0.4 and self.quantiles[1] < 0.4 and self.quantiles_pair[1] < 10:
+                self.quantiles_pair[0] += 2
+                self.quantiles_pair[1] += 2
+            elif loss_avg < 0.2 and diff_avg < 0.1 and self.quantiles[1] < 0.99 and self.quantiles_pair[1] > 2:
+                self.quantiles_pair[0] -= 2
+                self.quantiles_pair[1] -= 2
+
+            self.criterion_arr[k] = QuantileLoss(quantiles=self.quantiles)
 
     def get_model_copy(self):
         """
@@ -499,7 +693,7 @@ class NnMixer:
     def to(self, device, available_devices):
         self.net.to(device, available_devices)
         return self
-    
+
 if __name__ == "__main__":
     import random
     import pandas

@@ -99,8 +99,8 @@ class CategoricalAutoEncoder:
 
             modules = [module for module in self.net.modules() if type(
                 module) != torch.nn.Sequential and type(module) != DefaultNet]
-            self.encoder = torch.nn.Sequential(*modules[0:2])
-            self.decoder = torch.nn.Sequential(*modules[2:3])
+            self.encoder = torch.nn.Sequential(*modules[0:2]).eval()
+            self.decoder = torch.nn.Sequential(*modules[2:3]).eval()
             logging.info('Categorical autoencoder ready')
 
         self._prepared = True
@@ -110,18 +110,20 @@ class CategoricalAutoEncoder:
         if not self.use_autoencoder:
             return oh_encoded_tensor
         else:
-            oh_encoded_tensor = oh_encoded_tensor.to(self.net.device)
-            embeddings = self.encoder(oh_encoded_tensor)
-            return embeddings
+            with torch.no_grad():
+                oh_encoded_tensor = oh_encoded_tensor.to(self.net.device)
+                embeddings = self.encoder(oh_encoded_tensor)
+                return embeddings
 
     def decode(self, encoded_data):
         if not self.use_autoencoder:
             return self.onehot_encoder.decode(encoded_data)
         else:
-            oh_encoded_tensor = self.decoder(encoded_data)
-            oh_encoded_tensor = oh_encoded_tensor.to('cpu')
-            decoded_categories = self.onehot_encoder.decode(oh_encoded_tensor)
-            return decoded_categories
+            with torch.no_grad():
+                oh_encoded_tensor = self.decoder(encoded_data)
+                oh_encoded_tensor = oh_encoded_tensor.to('cpu')
+                decoded_categories = self.onehot_encoder.decode(oh_encoded_tensor)
+                return decoded_categories
 
 
 if __name__ == "__main__":
