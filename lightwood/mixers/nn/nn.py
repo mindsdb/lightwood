@@ -496,7 +496,7 @@ class NnMixer:
             yield error
 
 
-    def to(self, device=None, available_devices=None):
+    def to(self, device, available_devices):
         self.net.to(device, available_devices)
 
 if __name__ == "__main__":

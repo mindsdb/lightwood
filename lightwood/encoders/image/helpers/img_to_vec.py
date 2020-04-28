@@ -40,6 +40,10 @@ class Img2Vec():
                                               std=[0.229, 0.224, 0.225])
         self.to_tensor = transforms.ToTensor()
 
+    def to(self, device, available_devices):
+        self.device = device
+        self.model = self.model.to(self.device)
+
     def get_vec(self, img, tensor=False):
         """ Get vector embedding from PIL image
         :param img: PIL Image

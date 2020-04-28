@@ -10,7 +10,6 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.shapes import *
 from lightwood.api.gym import Gym
-from lightwood.shared.helpers import get_devices
 
 
 class DistilBertEncoder:
@@ -93,8 +92,7 @@ class DistilBertEncoder:
 
         return loss
 
-    def to(self, device=None, available_devices=None):
-        self.device, _ = get_devices()
+    def to(self, device, available_devices):
         self._model = self._model.to(self.device)
 
         if self._head is not None:
