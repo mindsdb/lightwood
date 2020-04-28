@@ -1,10 +1,12 @@
 import math
 import pandas
 import random
+import lightwood
 from lightwood import Predictor
 from lightwood import COLUMN_DATA_TYPES
 
 
+lightwood.config.config.CONFIG.USE_CUDA = True
 
 ts_len = 10
 max = 2000
@@ -22,12 +24,8 @@ config = {'input_features': [{'name': 'ts', 'type': COLUMN_DATA_TYPES.TIME_SERIE
 
 
 
-def iter_function(epoch, error, test_error, test_error_gradient):
-    print(
-        'epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, accuracy: {accuracy}'.format(
-            iter=epoch, error=error, test_error=test_error, test_error_gradient=test_error_gradient,
-            accuracy=predictor.train_accuracy))
-
+def iter_function(epoch, training_error, test_error, test_error_gradient, test_accuracy):
+    print(f'Epoch: {epoch}, Train Error: {training_error}, Test Error: {test_error}, Test Error Gradient: {test_error_gradient}, Test Accuracy: {test_accuracy}')
 
 data = pandas.DataFrame(ts_data, columns=['time', 'ts', 'next'])
 
@@ -36,7 +34,8 @@ predictor = Predictor(config)
 
 predictor.learn(from_data=data, callback_on_iter=iter_function, eval_every_x_epochs=10)
 
-
+print('\n\n')
 ret = predictor.predict(when={'ts':" ".join([str(math.sin(i/max)) for i in range(10+1, 10+ts_len)])})
 print(" ".join([str(math.sin(i/max)) for i in range(10+1, 10+ts_len+1)]))
+print('Got predictions: ')
 print(ret)
