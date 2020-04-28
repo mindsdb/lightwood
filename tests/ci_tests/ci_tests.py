@@ -12,7 +12,7 @@ MODULES = [
     f'{encoders_path}categorical/onehot.py',
     f'{encoders_path}datetime/datetime.py',
     f'{encoders_path}categorical/autoencoder.py',
-    f'{encoders_path}time_series/ts_fresh_ts.py',
+    f'{encoders_path}time_series/rnn.py',
     f'{pdir}api/data_source.py',
     f'{mixers_path}nn/nn.py',
     # Take too long
@@ -64,7 +64,6 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
 
     df=pd.read_csv("https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv")
 
-
     def iter_function(epoch, error, test_error, test_error_gradient, test_accuracy):
         print(
             'epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, test_accuracy: {test_accuracy}'.format(
@@ -73,15 +72,10 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
 
     predictor = Predictor(config)
     # stop_training_after_seconds given in order to not get timeouts in travis
-    predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=20, stop_training_after_seconds=30)
-
-    predictor.save('test.pkl')
-
-    predictor = Predictor(load_from_path='test.pkl')
+    predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=4, stop_training_after_seconds=40)
 
     df = df.drop([x['name'] for x in config['output_features']], axis=1)
     predictor.predict(when_data=df)
-
 
     predictor.save('test.pkl')
     predictor = Predictor(load_from_path='test.pkl')
