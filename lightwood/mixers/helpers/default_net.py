@@ -1,7 +1,9 @@
+import torch
+
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.plinear import PLinear
-import torch
+from lightwood.shared.helpers import get_devices
 
 
 class DefaultNet(torch.nn.Module):
@@ -16,10 +18,7 @@ class DefaultNet(torch.nn.Module):
         self.available_devices = 1
         self.max_variance = None
 
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-        self.device = torch.device(device_str)
+        self.device, _ = get_devices()
 
         if deterministic:
             '''
@@ -113,8 +112,29 @@ class DefaultNet(torch.nn.Module):
 
     def to(self, device=None, available_devices=None):
         if device is None or available_devices is None:
-            
-        pass
+            device, available_devices = get_devices()
+
+        self.net = self.net.to(device)
+        if self.selfaware:
+            self.awareness_net = self.awareness_net.to(device)
+
+        available_devices = 1
+        if device_str == 'cuda':
+            available_devices = torch.cuda.device_count()
+
+        if available_devices > 1:
+            self._foward_net = torch.nn.DataParallel(self.net)
+            if self.selfaware:
+                self._foward_awareness_net = torch.nn.DataParallel(self.awareness_net)
+        else:
+            self._foward_net = self.net
+            if self.selfaware:
+                self._foward_awareness_net = self.awareness_net
+
+        self.device = device
+
+        return 'Success, please note, this function mutates the object in place, unlike torche\'s .to'
+
 
     def calculate_overall_certainty(self):
         """

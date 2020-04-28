@@ -10,6 +10,7 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.shapes import *
 from lightwood.api.gym import Gym
+from lightwood.shared.helpers import get_devices
 
 
 class DistilBertEncoder:
@@ -51,10 +52,7 @@ class DistilBertEncoder:
             self._pretrained_model_name = 'distilbert-base-uncased'
             self._model_max_len = 768
 
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-        self.device = torch.device(device_str)
+        self.device, _ = get_devices()
 
     def _train_callback(self, error, real_buff, predicted_buff):
         logging.info(f'{self.name} reached a loss of {error} while training !')
@@ -94,6 +92,13 @@ class DistilBertEncoder:
             gym.optimizer.zero_grad()
 
         return loss
+
+    def to(self, device=None, available_devices=None):
+        self.device, _ = get_devices()
+        self._model = self._model.to(self.device)
+
+        if self._head is not None:
+            self._head = self._head.to(self.device)
 
     def prepare_encoder(self, priming_data, training_data=None):
         if self._prepared:

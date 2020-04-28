@@ -2,6 +2,7 @@ from __future__ import unicode_literals, print_function, division
 
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
 from lightwood.config.config import CONFIG
+from lightwood.shared.helpers import get_devices
 
 import torch
 import torch.nn as nn
@@ -21,12 +22,12 @@ class RnnEncoder:
         self._decoder = None
         self._prepared = False
 
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-        self.device = torch.device(device_str)
+        self.device, _ = get_devices()
 
-    def to(self, device):
+    def to(self, device=None, available_devices=None):
+        if device is None or available_devices is None:
+            device, available_devices = get_devices()
+
         self.device = device
         self._encoder = self._encoder.to(self.device)
 

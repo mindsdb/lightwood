@@ -9,6 +9,7 @@ from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym
 from lightwood.config.config import CONFIG
+from lightwood.shared.helpers import get_devices
 
 
 MAX_LENGTH = 100
@@ -42,6 +43,15 @@ class CategoricalAutoEncoder:
         targets_c = torch.LongTensor(target_indexes)
         labels = targets_c.to(self.net.device)
         return labels
+
+    def to(self, device=None, available_devices=None):
+        self.net.to(device, available_devices)
+
+        modules = [module for module in self.net.modules() if type(
+            module) != torch.nn.Sequential and type(module) != DefaultNet]
+
+        self.encoder = torch.nn.Sequential(*modules[0:2])
+        self.decoder = torch.nn.Sequential(*modules[2:3])
 
     def prepare_encoder(self, priming_data):
         random.seed(len(priming_data))

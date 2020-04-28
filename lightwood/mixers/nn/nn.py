@@ -108,7 +108,6 @@ class NnMixer:
 
         return True
 
-
     def fit(self, ds=None, callback=None):
         ret = 0
         for i in self.iter_fit(ds):
@@ -496,6 +495,9 @@ class NnMixer:
                 self.monitor.plot_loss(error, self.total_iterations, f'Train Epoch Error - Subset {subset_id}')
             yield error
 
+
+    def to(self, device=None, available_devices=None):
+        self.net.to(device, available_devices)
 
 if __name__ == "__main__":
     import random
