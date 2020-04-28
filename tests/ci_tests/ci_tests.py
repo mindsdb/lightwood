@@ -88,7 +88,7 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
 
 
 if __name__ == "__main__":
-    run_tests(MODULES)
+    #run_tests(MODULES)
     for USE_CUDA in [False]:
         for CACHE_ENCODED_DATA in [False, True]:
             run_full_test(USE_CUDA, CACHE_ENCODED_DATA, True, False)
