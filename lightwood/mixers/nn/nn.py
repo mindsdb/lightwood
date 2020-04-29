@@ -432,14 +432,15 @@ class NnMixer:
 
                     quantile_prediction = outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
 
-                    lg_start = self.quantiles_pair[0] * 2 + 2
-                    lg_end =  self.quantiles_pair[1] * 2 + 2
-                    li_start = self.quantiles_pair[0] * 2 + 3
-                    li_end = self.quantiles_pair[1] * 2 + 3
+                    lg_start = self.quantiles_pair[0] * 2 + 1
+                    lg_end =  self.quantiles_pair[1] * 2 + 1
+                    li_start = self.quantiles_pair[0] * 2 + 2
+                    li_end = self.quantiles_pair[1] * 2 + 2
+
                     if ds.encoders[self.output_column_names[k]].decode_log == True:
-                        diff = (quantile_prediction[lg_end] - quantile_prediction[lg_start])/quantile_prediction[lg_end]
+                        diff = (quantile_prediction[:, lg_end] - quantile_prediction[:, lg_start])/quantile_prediction[:, lg_end]
                     else:
-                        diff = (quantile_prediction[li_end] - quantile_prediction[li_start])/quantile_prediction[li_end]
+                        diff = (quantile_prediction[:, li_end] - quantile_prediction[:, li_start])/quantile_prediction[:, li_end]
 
                     diff = float(diff.mean())
                     quantile_mean_diff[k].append((diff if diff > 0 else 1))
