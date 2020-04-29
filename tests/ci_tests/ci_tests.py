@@ -71,7 +71,7 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
 
     predictor = Predictor(config)
     # stop_training_after_seconds given in order to not get timeouts in travis
-    predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=4, stop_training_after_seconds=40)
+    predictor.learn(from_data=df, callback_on_iter=iter_function, eval_every_x_epochs=4, stop_training_after_seconds=80)
 
     df = df.drop([x['name'] for x in config['output_features']], axis=1)
     predictor.predict(when_data=df)
