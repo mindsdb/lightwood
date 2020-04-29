@@ -228,7 +228,12 @@ class Predictor:
                 mixer_params = self.config['mixer']['attrs']
 
         # Initialize data sources
-        nr_subsets = 3
+        if len(from_data_ds) > 100:
+            nr_subsets = 3
+        else:
+            # Don't use k-fold cross validation for very small input sizes
+            nr_subsets = 1
+
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
         try:
