@@ -153,7 +153,7 @@ if __name__ == "__main__":
     random.shuffle(test_data)
 
     enc = CategoricalAutoEncoder()
-    enc.desired_error = 0.2
+    enc.desired_error = 5
 
     enc.prepare_encoder(priming_data)
     encoded_data = enc.encode(test_data)
