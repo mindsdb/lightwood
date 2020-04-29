@@ -718,7 +718,7 @@ if __name__ == "__main__":
                 'type': 'numeric'
             },
             {
-                'name': 'z`'
+                'name': 'z`',
                 'type': 'categorical'
             }
         ]
