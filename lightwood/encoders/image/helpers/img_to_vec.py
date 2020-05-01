@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
-from lightwood.shared.helpers import get_devices
+from lightwood.helpers.device import get_devices
 
 from lightwood.config.config import CONFIG
 

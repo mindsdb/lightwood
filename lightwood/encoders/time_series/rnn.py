@@ -2,7 +2,7 @@ from __future__ import unicode_literals, print_function, division
 
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
 from lightwood.config.config import CONFIG
-from lightwood.shared.helpers import get_devices
+from lightwood.helpers.device import get_devices
 
 import torch
 import torch.nn as nn

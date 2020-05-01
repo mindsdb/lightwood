@@ -15,7 +15,7 @@ import torch
 import torch.nn as nn
 
 from lightwood.config.config import CONFIG
-from lightwood.shared.helpers import get_devices
+from lightwood.helpers.device import get_devices
 
 """
 BLSTM (max/mean) encoder

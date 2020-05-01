@@ -7,7 +7,7 @@ import math
 import numpy as np
 
 from lightwood.config.config import CONFIG
-from lightwood.shared.helpers import get_devices
+from lightwood.helpers.device import get_devices
 
 
 class PLinear(nn.Module):
