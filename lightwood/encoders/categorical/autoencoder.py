@@ -45,13 +45,7 @@ class CategoricalAutoEncoder:
 
     def to(self, device, available_devices):
         if self.use_autoencoder:
-            self.net.to(device, available_devices)
-
-            modules = [module for module in self.net.modules() if type(
-                module) != torch.nn.Sequential and type(module) != DefaultNet]
-
-            self.encoder = torch.nn.Sequential(*modules[0:2])
-            self.decoder = torch.nn.Sequential(*modules[2:3])
+            self.net = self.net.to(device, available_devices)
         return self
 
     def prepare_encoder(self, priming_data):
@@ -135,7 +129,7 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
 
     random.seed(2)
-    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(7,8))) for x in range(2000)]
+    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(7,8))) for x in range(500)]
     for i in range(len(cateogries)):
         if i % 10 == 0:
             cateogries[i] = random.randint(1,20)
@@ -153,7 +147,7 @@ if __name__ == "__main__":
     random.shuffle(test_data)
 
     enc = CategoricalAutoEncoder()
-    enc.desired_error = 5
+    enc.desired_error = 3
 
     enc.prepare_encoder(priming_data)
     encoded_data = enc.encode(test_data)
@@ -161,4 +155,4 @@ if __name__ == "__main__":
 
     encoder_accuracy = accuracy_score(list(map(str,test_data)), list(map(str,decoded_data)))
     print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
-    assert(encoder_accuracy > 0.75)
+    assert(encoder_accuracy > 0.83)
