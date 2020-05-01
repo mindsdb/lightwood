@@ -13,7 +13,7 @@ from lightwood.config.config import CONFIG
 from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-from lightwood.shared.helpers import get_devices
+from lightwood.helpers.device import get_devices
 
 class Predictor:
 

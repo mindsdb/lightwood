@@ -3,7 +3,7 @@ import torch
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.plinear import PLinear
-from lightwood.shared.helpers import get_devices
+from lightwood.helpers.device import get_devices
 
 
 class DefaultNet(torch.nn.Module):
