@@ -1,7 +1,9 @@
+import torch
+
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.plinear import PLinear
-import torch
+from lightwood.helpers.device import get_devices
 
 
 class DefaultNet(torch.nn.Module):
@@ -16,10 +18,7 @@ class DefaultNet(torch.nn.Module):
         self.available_devices = 1
         self.max_variance = None
 
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-        self.device = torch.device(device_str)
+        self.device, _ = get_devices()
 
         if deterministic:
             '''
@@ -29,7 +28,7 @@ class DefaultNet(torch.nn.Module):
             '''
             torch.manual_seed(66)
 
-            if device_str == 'cuda':
+            if 'cuda' in str(self.device):
                 torch.backends.cudnn.deterministic = True
                 torch.backends.cudnn.benchmark = False
                 self.available_devices = torch.cuda.device_count()
@@ -110,6 +109,33 @@ class DefaultNet(torch.nn.Module):
                 self._foward_awareness_net = torch.nn.DataParallel(self.awareness_net)
             else:
                 self._foward_awareness_net = self.awareness_net
+
+    def to(self, device=None, available_devices=None):
+        if device is None or available_devices is None:
+            device, available_devices = get_devices()
+
+        self.net = self.net.to(device)
+        if self.selfaware:
+            self.awareness_net = self.awareness_net.to(device)
+
+        available_devices = 1
+        if 'cuda' in str(device):
+            available_devices = torch.cuda.device_count()
+
+        if available_devices > 1:
+            self._foward_net = torch.nn.DataParallel(self.net)
+            if self.selfaware:
+                self._foward_awareness_net = torch.nn.DataParallel(self.awareness_net)
+        else:
+            self._foward_net = self.net
+            if self.selfaware:
+                self._foward_awareness_net = self.awareness_net
+
+        self.device = device
+        self.available_devices = available_devices
+
+        return self
+
 
     def calculate_overall_certainty(self):
         """

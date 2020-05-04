@@ -13,6 +13,7 @@ from lightwood.config.config import CONFIG
 from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score, r2_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.helpers.device import get_devices
 
 class Predictor:
 
@@ -90,43 +91,18 @@ class Predictor:
                 return lowest_error
 
     def convert_to_device(self, device_str=None):
-        if device_str is None:
-            device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-
-        device = torch.device(device_str)
-
-        self._mixer.net.net = self._mixer.net.net.to(device)
-        try:
-            self._mixer.net.awareness_net = self._mixer.net.awareness_net.to(device)
-        except:
-            pass
-
-        available_devices = 1
-        if device_str == 'cuda':
-            available_devices = torch.cuda.device_count()
-
-        if available_devices > 1:
-            self._mixer.net._foward_net = torch.nn.DataParallel(self._mixer.net.net)
-            try:
-                self._mixer.net._foward_awareness_net = torch.nn.DataParallel(self._mixer.net.awareness_net)
-            except:
-                pass
+        if device_str is not None:
+            device = torch.device(device_str)
+            available_devices = 1
+            if device_str == 'cuda':
+                available_devices = torch.cuda.device_count()
         else:
-            self._mixer.net._foward_net = self._mixer.net.net
-            try:
-                self._mixer.net._foward_awareness_net = self._mixer.net.awareness_net
-            except:
-                pass
+            device, available_devices = get_devices()
 
-        self._mixer.net.device = device
+        self._mixer.to(device, available_devices)
         for e in self._mixer.encoders:
-            try:
-                self._mixer.encoders[e]._model.model.to(device)
-                self._mixer.encoders[e]._model.device = device_str
-            except:
-                pass
+            if hasattr(self._mixer.encoders[e], 'to'):
+                self._mixer.encoders[e].to(device, available_devices)
 
     def train_helper_mixers(self, train_ds, test_ds, quantiles):
         from lightwood.mixers.boost.boost import BoostMixer
