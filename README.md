@@ -18,7 +18,7 @@ A Pytorch based framework that breaks down machine learning problems into smalle
 
 
 # Documentation
-Learn more from the [Lightwood's docs](https://mindsdb.github.io/lightwood/API/).  
+Learn more from the [Lightwood's docs](https://docs.mindsdb.com/lightwood/info/).  
 
 ## Try it out
 
