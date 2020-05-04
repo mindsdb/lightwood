@@ -8,13 +8,14 @@
 """
 This file contains the definition of encoders used in https://arxiv.org/pdf/1705.02364.pdf
 """
-
-import numpy as np
 import time
 
+import numpy as np
 import torch
 import torch.nn as nn
+
 from lightwood.config.config import CONFIG
+from lightwood.helpers.device import get_devices
 
 """
 BLSTM (max/mean) encoder
@@ -35,10 +36,7 @@ class InferSent(nn.Module):
         self.enc_lstm = nn.LSTM(self.word_emb_dim, self.enc_lstm_dim, 1,
                                 bidirectional=True, dropout=self.dpout_model)
 
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-        self.device = torch.device(device_str)
+        self.device, _ = get_devices()
 
         self.enc_lstm = self.enc_lstm.to(self.device)
 

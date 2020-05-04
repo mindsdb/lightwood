@@ -1,15 +1,13 @@
-
-# Import PyTorch
 import torch
-import torch.nn as nn  # import modules
-
-from torch.nn.parameter import Parameter  # import Parameter to create custom activations with learnable parameters
-import torch.nn.functional as F  # import torch functions
+import torch.nn as nn
+from torch.nn.parameter import Parameter
+import torch.nn.functional as F
 from torch.nn import init
 import math
 import numpy as np
 
 from lightwood.config.config import CONFIG
+from lightwood.helpers.device import get_devices
 
 
 class PLinear(nn.Module):
@@ -49,10 +47,7 @@ class PLinear(nn.Module):
         self.sigma.requiresGrad = True  # set requiresGrad to true!
         self.mean.requiresGrad = True  # set requiresGrad to true!
 
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-        self.device = torch.device(device_str)
+        self.device, _ = get_devices()
 
     def reset_parameters(self):
         """

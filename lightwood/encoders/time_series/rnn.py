@@ -2,6 +2,7 @@ from __future__ import unicode_literals, print_function, division
 
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
 from lightwood.config.config import CONFIG
+from lightwood.helpers.device import get_devices
 
 import torch
 import torch.nn as nn
@@ -18,18 +19,15 @@ class RnnEncoder:
         self._train_iters = train_iters
         self._pytorch_wrapper = torch.FloatTensor
         self._encoder = None
-        self._decoder = None
         self._prepared = False
 
-        device_str = "cuda" if CONFIG.USE_CUDA else "cpu"
-        if CONFIG.USE_DEVICE is not None:
-            device_str = CONFIG.USE_DEVICE
-        self.device = torch.device(device_str)
+        self.device, _ = get_devices()
 
-    def to(self, device):
+    def to(self, device, available_devices):
         self.device = device
         self._encoder = self._encoder.to(self.device)
-
+        return self
+    
     def prepare_encoder(self, priming_data, feedback_hoop_function = None):
         """
         The usual, run this on the initial training data for the encoder
@@ -42,13 +40,13 @@ class RnnEncoder:
 
         self._encoder = EncoderRNNNumerical(hidden_size=self._encoded_vector_size).to(self.device)
         optimizer = optim.Adam(self._encoder.parameters(), lr=self._learning_rate)
-        criterium = nn.MSELoss()
+        criterion = nn.MSELoss()
+
         self._encoder.train()
         for i in range(self._train_iters):
             average_loss = 0
-            total = len(priming_data)
-            for j in range(len(priming_data)):
-                data_tensor = tensor_from_series(priming_data[j], self.device)
+            for data_point in priming_data:
+                data_tensor = tensor_from_series(data_point, self.device)
                 loss = 0
 
                 optimizer.zero_grad()
@@ -61,14 +59,16 @@ class RnnEncoder:
                         next_tensor, encoder_hidden = self._encoder.forward(data_tensor[tensor_i] , encoder_hidden)
                     else:
                         next_tensor, encoder_hidden = self._encoder.forward(next_tensor.detach(), encoder_hidden)
-                    loss += criterium(next_tensor, data_tensor[tensor_i+1])
+                    loss += criterion(next_tensor, data_tensor[tensor_i+1])
 
 
                 loss = loss
                 average_loss += int(loss)
                 loss.backward()
                 optimizer.step()
-            average_loss = average_loss/total
+
+            average_loss = average_loss/len(priming_data)
+
             if average_loss < self._stop_on_error:
                 break
             if feedback_hoop_function is not None:
@@ -76,19 +76,15 @@ class RnnEncoder:
 
         self._prepared = True
 
-    def encode_one(self, data, initial_hidden = None, as_list = False, return_next_value = False):
+    def _encode_one(self, data, initial_hidden = None, return_next_value = False):
         """
         This method encodes one single row of serial data
         :param data: a string representing a list of values separate by space, for example: `1 2 3 4` or a list [1, 2, 3, 4]
         :param initial_hidden: if you want to encode from an initial hidden state other than 0s
-        :param as_list: if you want to return the information as lists
-        :param return_next_value:  if you want to return the next value in the time series too
+        :param return_next_value:  if you to return the next value in the time series too
 
         :return:  either encoded_value or encoded_value, next_value
         """
-        if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
-
         self._encoder.eval()
         with torch.no_grad():
 
@@ -101,12 +97,6 @@ class RnnEncoder:
             next_tensor = None
             for tensor_i in range(len(data_tensor)):
                 next_tensor, encoder_hidden = self._encoder.forward(data_tensor[tensor_i], encoder_hidden)
-
-        if as_list:
-            if return_next_value:
-                return encoder_hidden.squeeze().tolist(), next_tensor.squeeze().tolist()
-            else:
-                return encoder_hidden.squeeze().tolist()
 
         if return_next_value:
             return encoder_hidden, next_tensor
@@ -131,7 +121,7 @@ class RnnEncoder:
 
         for val in column_data:
             if get_next_count is None:
-                encoded = self.encode_one(val, as_list=True)
+                encoded = self._encode_one(val)
             else:
                 if get_next_count <= 0:
                     raise Exception('get_next_count must be greater than 0')
@@ -143,23 +133,20 @@ class RnnEncoder:
 
                 for j in range(get_next_count):
 
-                    hidden, next_reading = self.encode_one(vector, initial_hidden=hidden, as_list=True, return_next_value=True)
+                    hidden, next_reading = self._encode_one(vector, initial_hidden=hidden, return_next_value=True)
                     vector = [next_reading]
                     if j == 0:
                         encoded = hidden
                     next_i += [next_reading]
 
-                next += [next_i]
+                next += [next_i[0][0].cpu()]
 
-            ret += [encoded]
+            ret += [encoded[0][0].cpu()]
 
-        ret = self._pytorch_wrapper(ret)
         if get_next_count is None:
-            return ret
+            return self._pytorch_wrapper(torch.stack(ret))
         else:
-
-            return ret, next
-
+            return self._pytorch_wrapper(torch.stack(ret)), self._pytorch_wrapper(torch.stack(next))
 
 
 
@@ -173,11 +160,9 @@ if __name__ == "__main__":
         start = np.random.randint(30)
         vec = [start+j*skip for j in range(length)]
 
-        series+=[[str(x) for x in vec].join(' ')]
+        series+=[' '.join([str(x) for x in vec])]
 
-    print(series)
-
-    encoder = RnnEncoder(encoded_vector_size=3,train_iters=500)
+    encoder = RnnEncoder(encoded_vector_size=3,train_iters=10)
     encoder.prepare_encoder(series, feedback_hoop_function=lambda x:print(x))
 
 
@@ -185,3 +170,4 @@ if __name__ == "__main__":
     init_vector = ['31 33 35 37', '1 2 3 4 5 6']
 
     print(encoder.encode(column_data=init_vector, get_next_count=2))
+    print(encoder.encode(column_data=init_vector))

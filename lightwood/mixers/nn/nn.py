@@ -110,7 +110,7 @@ class NnMixer:
 
         return True
 
-    def fit(self, train_ds, test_ds=None, callback=None, stop_training_after_seconds=None, eval_every_x_epochs=None):
+    def fit(self, train_ds, test_ds, callback=None, stop_training_after_seconds=None, eval_every_x_epochs=None):
         started = time.time()
         log_reasure = time.time()
         first_run = True
@@ -691,16 +691,16 @@ class NnMixer:
             yield error
 
 
+    def to(self, device, available_devices):
+        self.net.to(device, available_devices)
+        return self
+
 if __name__ == "__main__":
     import random
     import pandas
     from lightwood.api.data_source import DataSource
     from lightwood.data_schemas.predictor_config import predictor_config_schema
 
-    ###############
-    # GENERATE DATA
-    ###############
-
     config = {
         'input_features': [
             {
@@ -716,58 +716,11 @@ if __name__ == "__main__":
         'output_features': [
             {
                 'name': 'z',
+                'type': 'numeric'
+            },
+            {
+                'name': 'z`',
                 'type': 'categorical'
-            }
-        ]
-    }
-
-    config = predictor_config_schema.validate(config)
-    # For Classification
-    data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
-    nums = [data['x'][i] * data['y'][i] for i in range(10)]
-
-    data['z'] = ['low' if i < 50 else 'high' for i in nums]
-
-    data_frame = pandas.DataFrame(data)
-
-    # print(data_frame)
-
-    ds = DataSource(data_frame, config)
-    ds.prepare_encoders()
-    predict_input_ds = DataSource(data_frame[['x', 'y']], config)
-    predict_input_ds.prepare_encoders()
-    ####################
-
-    mixer = NnMixer({}, config)
-
-    for i in mixer.iter_fit(ds):
-        if i < 0.01:
-            break
-
-    predictions = mixer.predict(predict_input_ds)
-    print(predictions)
-
-    # For Regression
-
-    # GENERATE DATA
-    ###############
-
-    config = {
-        'input_features': [
-            {
-                'name': 'x',
-                'type': 'numeric'
-            },
-            {
-                'name': 'y',
-                'type': 'numeric'
-            }
-        ],
-
-        'output_features': [
-            {
-                'name': 'z',
-                'type': 'numeric'
             }
         ]
     }
@@ -777,19 +730,19 @@ if __name__ == "__main__":
     nums = [data['x'][i] * data['y'][i] for i in range(10)]
 
     data['z'] = [i + 0.5 for i in range(10)]
+    data['z`'] = ['low' if i < 50 else 'high' for i in nums]
 
     data_frame = pandas.DataFrame(data)
     ds = DataSource(data_frame, config)
     ds.prepare_encoders()
-    predict_input_ds = DataSource(data_frame[['x', 'y']], config)
-    predict_input_ds.prepare_encoders()
-    ####################
 
     mixer = NnMixer({}, config)
 
     for i in mixer.iter_fit(ds):
-        if i < 0.01:
-            break
+        break
+    mixer.fit(ds,ds, stop_training_after_seconds=50)
 
+    predict_input_ds = DataSource(data_frame[['x', 'y']], config)
+    predict_input_ds.prepare_encoders()
     predictions = mixer.predict(predict_input_ds)
     print(predictions)

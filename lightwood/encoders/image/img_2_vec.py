@@ -17,6 +17,10 @@ class Img2VecEncoder:
         self._prepared = False
         self._encoded_length = None
 
+    def to(self, device, available_devices):
+        self._model.to(device, available_devices)
+        return self
+    
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
