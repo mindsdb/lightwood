@@ -10,6 +10,7 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.shapes import *
 from lightwood.api.gym import Gym
+from lightwood.helpers.device import get_devices
 
 
 class DistilBertEncoder:
