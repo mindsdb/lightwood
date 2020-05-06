@@ -3,7 +3,6 @@ import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
 from lightwood.helpers.device import get_devices
-
 from lightwood.config.config import CONFIG
 
 
@@ -30,7 +29,6 @@ class Img2Vec():
         self.model_name = model
 
         self.model, self.extraction_layer = self._get_model_and_layer(model, layer)
-
         self.model = self.model.to(self.device)
 
         self.scaler = transforms.Scale((224, 224))
@@ -49,27 +47,30 @@ class Img2Vec():
         :param tensor: If True, get_vec will return a FloatTensor instead of Numpy array
         :returns: Numpy ndarray
         """
-        image = self.normalize(self.to_tensor(self.scaler(img))).unsqueeze(0).to(self.device)
 
-        if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
-            my_embedding = torch.zeros(1, self.layer_output_size)
-        elif self.model_name in ('resnet-18', 'resnext-50'):
-            my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
+        self.model =  self.model.eval()
+        with torch.no_grad():
+            image = self.normalize(self.to_tensor(self.scaler(img))).unsqueeze(0).to(self.device)
 
-        def copy_data(m, i, o):
-            my_embedding.copy_(o.data)
-
-        h = self.extraction_layer.register_forward_hook(copy_data)
-        h_x = self.model(image)
-        h.remove()
-
-        if tensor:
-            return my_embedding
-        else:
             if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
-                return my_embedding.numpy()[0, :]
+                my_embedding = torch.zeros(1, self.layer_output_size)
             elif self.model_name in ('resnet-18', 'resnext-50'):
-                return my_embedding.numpy()[0, :, 0, 0]
+                my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
+
+            def copy_data(m, i, o):
+                my_embedding.copy_(o.data)
+
+            h = self.extraction_layer.register_forward_hook(copy_data)
+            h_x = self.model(image)
+            h.remove()
+
+            if tensor:
+                return my_embedding
+            else:
+                if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
+                    return my_embedding.numpy()[0, :]
+                elif self.model_name in ('resnet-18', 'resnext-50'):
+                    return my_embedding.numpy()[0, :, 0, 0]
 
     def _get_model_and_layer(self, model_name, layer):
         """ Internal method for getting layer from model
