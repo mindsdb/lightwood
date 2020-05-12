@@ -90,8 +90,8 @@ for i, data in enumerate(test_cases):
     text = f'\n---------\nTest case {name}\n---------\nNormal accuracy of: ' + str(accmap['normal'])
     for cols in dropout_arr:
         mk = 'missing_' + '_'.join(cols)
-        text += f'Specially-trained trained accuracy when {cols} missing: ' + str(accmap[mk + '_fit'])
-        text += f'Normally-trained trained accuracy when {cols} missing: ' + str(accmap[mk + '_unfit'])
+        text += f'\nSpecially-trained trained accuracy when {cols} missing: ' + str(accmap[mk + '_fit'])
+        text += f'\nNormally-trained trained accuracy when {cols} missing: ' + str(accmap[mk + '_unfit'])
 
     log_map[name] = text
 
