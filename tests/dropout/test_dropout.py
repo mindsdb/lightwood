@@ -9,43 +9,41 @@ random.seed(66)
 
 def gen_multiply():
     n = 1000
-    m = n * 100
     op = '*'
 
     # generate random numbers between -10 and 10
     data_train = {'x': [random.randint(-15, 5) for i in range(n)],
             'y': [random.randint(-15, 5) for i in range(n)]}
 
-    data_test = {'x': [random.randint(-5, 15) for i in range(m)],
-            'y': [random.randint(-5, 15) for i in range(m)]}
+    data_test = {'x': [random.randint(-5, 15) for i in range(n)],
+            'y': [random.randint(-5, 15) for i in range(n)]}
 
     if op == '/':
         for i in range(n):
             if data_train['y'][i] == 0:
                 data_train['y'][i] = 1
     if op == '/':
-        for i in range(m):
+        for i in range(n):
             if data_test['y'][i] == 0:
                 data_test['y'][i] = 1
 
     # target variable to be the multiplication of the two
     data_train['z'] = eval(f"""[data_train['x'][i] {op} data_train['y'][i] for i in range(n)]""")
-    data_test['z'] = eval(f"""[data_test['x'][i] {op} data_test['y'][i] for i in range(m)]""")
+    data_test['z'] = eval(f"""[data_test['x'][i] {op} data_test['y'][i] for i in range(n)]""")
 
     df_train = pandas.DataFrame(data_train)
     df_test = pandas.DataFrame(data_test)
 
-    return (data_train, data_test, [['x'],['y'], 'z','multiplied')
+    return (data_train, data_test, [['x'],['y']], 'z','multiplied')
 
 def gen_correlate():
     n = 500
-    m = 800
     train = True
 
     data_train = {}
     data_test = {}
 
-    for data, nr_ele in [(data_train,n), (data_test,m)]:
+    for data, nr_ele in [(data_train,n), (data_test,n)]:
         for i in range(1,5):
             data[f'x_{i}'] = [random.random()*50 + 25  for _ in range(nr_ele)]
 
@@ -79,7 +77,7 @@ def iter_function(epoch, training_error, test_error, test_error_gradient, test_a
     print(f'Epoch: {epoch}, Train Error: {training_error}, Test Error: {test_error}, Test Error Gradient: {test_error_gradient}, Test Accuracy: {test_accuracy}')
 
 
-test_cases = [gen_correlate(),gen_multiply(),gen_categorical()]
+test_cases = [gen_multiply(),gen_correlate(),gen_categorical()]
 
 log_map = {}
 for i, data in enumerate(test_cases):
