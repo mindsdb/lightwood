@@ -9,7 +9,6 @@ random.seed(66)
 
 def gen_multiply():
     n = 1000
-    op = '*'
 
     # generate random numbers between -10 and 10
     data_train = {'x': [random.randint(-15, 5) for i in range(n)],
@@ -18,19 +17,10 @@ def gen_multiply():
     data_test = {'x': [random.randint(-5, 15) for i in range(n)],
             'y': [random.randint(-5, 15) for i in range(n)]}
 
-    if op == '/':
-        for i in range(n):
-            if data_train['y'][i] == 0:
-                data_train['y'][i] = 1
-    if op == '/':
-        for i in range(n):
-            if data_test['y'][i] == 0:
-                data_test['y'][i] = 1
-
     # target variable to be the multiplication of the two
-    data_train['z'] = eval(f"""[data_train['x'][i] {op} data_train['y'][i] for i in range(n)]""")
-    data_test['z'] = eval(f"""[data_test['x'][i] {op} data_test['y'][i] for i in range(n)]""")
-
+    data_train['z'] = [data_train['x'][i] * data_train['y'][i] for i in range(n)]
+    data_test['z'] = [data_test['x'][i] * data_test['y'][i] for i in range(n)]
+    
     df_train = pandas.DataFrame(data_train)
     df_test = pandas.DataFrame(data_test)
 
