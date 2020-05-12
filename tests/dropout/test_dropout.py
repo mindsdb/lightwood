@@ -78,14 +78,14 @@ for i, data in enumerate(test_cases):
 
     pmap['normal'] = lightwood.Predictor(output=[out_col])
     pmap['normal'].learn(from_data=df_train, callback_on_iter=iter_function, eval_every_x_epochs=100)
-    accmap['normal'] = pmap['normal'].calculate_accuracy(from_data=df_test)['y']['value']
+    accmap['normal'] = pmap['normal'].calculate_accuracy(from_data=df_test)[out_col]['value']
 
     for cols in dropout_arr:
         mk = 'missing_' + '_'.join(cols)
         pmap[mk] = lightwood.Predictor(output=[out_col])
         pmap[mk].learn(from_data=df_train.drop(columns=cols), callback_on_iter=iter_function, eval_every_x_epochs=100)
-        accmap[mk + '_unfit'] = pmap['normal'].calculate_accuracy(from_data=df_test.drop(columns=cols))['y']['value']
-        accmap[mk + '_fit'] = pmap[mk].calculate_accuracy(from_data=df_test.drop(columns=cols))['y']['value']
+        accmap[mk + '_unfit'] = pmap['normal'].calculate_accuracy(from_data=df_test.drop(columns=cols))[out_col]['value']
+        accmap[mk + '_fit'] = pmap[mk].calculate_accuracy(from_data=df_test.drop(columns=cols))[out_col]['value']
 
     text = f'\n---------\nTest case {name}\n---------\nNormal accuracy of: ' + str(accmap['normal'])
     for cols in dropout_arr:
