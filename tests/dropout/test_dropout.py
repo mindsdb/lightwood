@@ -21,8 +21,8 @@ def gen_multiply():
     data_train['z'] = [data_train['x'][i] * data_train['y'][i] for i in range(n)]
     data_test['z'] = [data_test['x'][i] * data_test['y'][i] for i in range(n)]
     
-    df_train = pandas.DataFrame(data_train)
-    df_test = pandas.DataFrame(data_test)
+    df_train = pd.DataFrame(data_train)
+    df_test = pd.DataFrame(data_test)
 
     return (data_train, data_test, [['x'],['y']], 'z','multiplied')
 
