@@ -24,7 +24,7 @@ def gen_multiply():
     df_train = pd.DataFrame(data_train)
     df_test = pd.DataFrame(data_test)
 
-    return (data_train, data_test, [['x'],['y']], 'z','multiplied')
+    return (df_train, df_test, [['x'],['y']], 'z','multiplied')
 
 def gen_correlate():
     n = 500
