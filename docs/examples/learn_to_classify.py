@@ -34,14 +34,18 @@ if train:
     predictor.learn(from_data=data_train, callback_on_iter=iter_function, eval_every_x_epochs=200)
     predictor.save('/tmp/ltcrl.pkl')
 
+
 predictor = lightwood.Predictor(load_from_path='/tmp/ltcrl.pkl')
 print('Train accuracy: ', predictor.train_accuracy['y']['value'])
 print('Test accuracy: ', predictor.calculate_accuracy(from_data=data_test)['y']['value'])
 
-predictions = predictor.predict(when_data=data_test)
+print(f'Accuracy for all columns present: ', predictor.calculate_accuracy(from_data=data_test)['y']['value'])
+
+predictions = predictor.calculate_accuracy(from_data=data_test)
 print(f'Confidence mean for all columns present ', np.mean(predictions['y']['selfaware_confidences']))
 
 for i_drop in range(nr_inputs):
-    predictions = predictor.predict(when_data=data_test.drop(columns=[f'x_{i_drop}']))
     print(f'Accuracy for x_{i_drop} missing: ', predictor.calculate_accuracy(from_data=data_test.drop(columns=[f'x_{i_drop}']))['y']['value'])
+
+    predictions = predictor.calculate_accuracy(from_data=data_test.drop(columns=[f'x_{i_drop}']))
     print(f'Confidence mean for x_{i_drop} missing: ', np.mean(predictions['y']['selfaware_confidences']))
