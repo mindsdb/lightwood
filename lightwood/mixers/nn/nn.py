@@ -356,9 +356,9 @@ class NnMixer:
                     ,'confidence_range': [[x[self.quantiles_pair[0]],x[self.quantiles_pair[1]]] for x in decoded_predictions]
                     ,'quantile_confidences': [self.quantiles[self.quantiles_pair[1]] - self.quantiles[self.quantiles_pair[0]] for x in decoded_predictions]}
 
-                    if include_extra_data:
-                        predictions[output_column]['every_confidence_range'] = [x for x in decoded_predictions[1:]]
-                        predictions[output_column]['every_quantile_confidences'] = [self.quantiles[i*2+2] - self.quantiles[i*2+1] for i in range(int((len(self.quantiles) - 1)/2))]
+                if include_extra_data:
+                    predictions[output_column]['every_confidence_range'] = [x for x in decoded_predictions[1:]]
+                    predictions[output_column]['every_quantile_confidences'] = [self.quantiles[i*2+2] - self.quantiles[i*2+1] for i in range(int((len(self.quantiles) - 1)/2))]
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
