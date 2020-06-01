@@ -49,7 +49,7 @@ class NnMixer:
         self.encoders = ds.encoders
         return ret
 
-    def predict(self, when_data_source, include_encoded_predictions = False):
+    def predict(self, when_data_source, include_extra_data = False):
         """
         :param when_data_source:
         :return:
@@ -107,7 +107,7 @@ class NnMixer:
             if awareness_arr is not None:
                 predictions[output_column]['confidences'] = confidence_trasnformed_vectors[output_column]
 
-            if include_encoded_predictions:
+            if include_extra_data:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
         logging.info('Model predictions and decoding completed')
