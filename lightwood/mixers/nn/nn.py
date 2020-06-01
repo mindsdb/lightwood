@@ -65,33 +65,40 @@ class NnMixer:
         :param ds:
         :return:
         """
-        if not self.is_selfaware:
-            return False
+        self.net = self.net.eval()
 
         ds.encoders = self.encoders
         ds.transformer = self.transformer
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+
         loss_confidence_arr = []
 
-        self.net = self.net.eval()
-        with torch.no_grad():
-            for i, data in enumerate(data_loader, 0):
-                inputs, labels = data
-                inputs = inputs.to(self.net.device)
-                labels = labels.to(self.net.device)
-                outputs, awareness = self.net(inputs)
+        for i, data in enumerate(data_loader, 0):
+            inputs, labels = data
+            inputs = inputs.to(self.net.device)
+            labels = labels.to(self.net.device)
 
-                loss = None
-                for k, criterion in enumerate(self.criterion_arr):
-                    if len(loss_confidence_arr) <= k:
-                        loss_confidence_arr.append([])
-                        self.max_confidence_per_output.append(None)
+            with torch.no_grad():
+                if self.is_selfaware:
+                    outputs, awareness = self.net(inputs)
+                else:
+                    outputs = self.net(inputs)
 
-                        confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
-                        loss_confidence_arr[k].extend(confidences)
+            loss = None
+            for k, criterion in enumerate(self.criterion_arr):
+                if len(loss_confidence_arr) <= k:
+                    loss_confidence_arr.append([])
+                    self.max_confidence_per_output.append(None)
 
-            for k, _ in enumerate(self.criterion_arr):
+                try:
+                    confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                    loss_confidence_arr[k].extend(confidences)
+                except:
+                    pass
+
+        for k, _ in enumerate(self.criterion_arr):
+            if len(loss_confidence_arr[k]) > 0:
                 loss_confidence_arr[k] = np.array(loss_confidence_arr[k])
                 nf_pct = np.percentile(loss_confidence_arr[k], 95)
 
