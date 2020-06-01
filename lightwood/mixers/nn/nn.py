@@ -263,6 +263,8 @@ class NnMixer:
                     set_qi = None
                     set_qi_conf = None
                     for qi in range(int(len(p['every_confidence_range'])/2)):
+                        print(p['every_confidence_range'][i])
+                        print(qi)
                         if p['every_confidence_range'][i][qi*2] < p['predictions'][i] < p['every_confidence_range'][i][qi*2 + 1]:
                             set_qi = qi
                             set_qi_conf = p['every_quantile_confidences'][i][qi]
@@ -359,7 +361,7 @@ class NnMixer:
                     ,'quantile_confidences': [self.quantiles[self.quantiles_pair[1]] - self.quantiles[self.quantiles_pair[0]] for x in decoded_predictions]}
 
                 if include_extra_data:
-                    predictions[output_column]['every_confidence_range'] = [x for x in decoded_predictions[1:]]
+                    predictions[output_column]['every_confidence_range'] = [x[1:] for x in decoded_predictions]
                     predictions[output_column]['every_quantile_confidences'] = [self.quantiles[i*2+2] - self.quantiles[i*2+1] for i in range(int((len(self.quantiles) - 1)/2))]
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
