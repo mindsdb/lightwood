@@ -241,6 +241,8 @@ class NnMixer:
                         if stop_training:
                             if self.is_selfaware:
                                 self.update_model(best_selfaware_model)
+                                self._mixer.build_confidence_normalization_data(train_ds)
+                                self._mixer.encoders = from_data_ds.encoders
                                 self.adjust(test_ds)
                             else:
                                 self.update_model(best_model)
