@@ -46,7 +46,8 @@ class NnMixer:
         self.max_confidence_per_output = []
         self.monitor = None
         self.quantiles = [0.5,  0.2,0.8,  0.1,0.9,  0.05,0.95,  0.02,0.98,  0.005,0.995]
-        self.quantiles_pair = [5,6]
+        self.quantiles_pair = [9,10]
+        self.map_mean_sc_qi = None
 
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
@@ -185,8 +186,6 @@ class NnMixer:
                         continue
 
                     if epoch % eval_every_x_epochs == 0:
-                        if self.is_selfaware:
-                            self.adjust(test_ds)
                         test_error = self.error(test_ds)
                         subset_test_error = self.error(subset_test_ds, subset_id=subset_id)
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
@@ -245,8 +244,7 @@ class NnMixer:
                                 self.adjust(test_ds)
                             else:
                                 self.update_model(best_model)
-                                self.adjust(test_ds)
-                            self.encoders = from_data_ds.encoders
+                            self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
                             break
 
@@ -282,10 +280,20 @@ class NnMixer:
         for qi in map_qi_mean_sc:
             map_qi_mean_sc[qi] = np.mean(map_qi_mean_sc[qi])
 
-        print('\n\n\n--------------------------------------\n\n\n')
-        print(map_qi_mean_sc)
-        print('\n\n\n--------------------------------------\n\n\n')
+        self.map_mean_sc_qi = {}
+        for qi in map_qi_mean_sc:
+            self.map_mean_sc_qi[map_qi_mean_sc[qi]] = qi
 
+    def select_quantile(self, selfaware_confidence):
+        if self.map_mean_sc_qi is None:
+            return self.quantiles_pair
+
+        for k in sorted(list(self.map_mean_sc_qi.keys())):
+            if selfaware_confidence <= k:
+                if self.map_mean_sc_qi[k] is not None:
+                    return [self.map_mean_sc_qi[k]*2+1,self.map_mean_sc_qi[k]*2+2]
+
+        return self.quantiles_pair
 
     def predict(self, when_data_source, include_extra_data=False):
         """
@@ -353,10 +361,7 @@ class NnMixer:
             )
 
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column] = {
-                    'predictions': [x[0] for x in decoded_predictions]
-                    ,'confidence_range': [[x[self.quantiles_pair[0]],x[self.quantiles_pair[1]]] for x in decoded_predictions]
-                    ,'quantile_confidences': [self.quantiles[self.quantiles_pair[1]] - self.quantiles[self.quantiles_pair[0]] for x in decoded_predictions]}
+                predictions[output_column] = {'predictions': [x[0] for x in decoded_predictions]}
 
                 if include_extra_data:
                     predictions[output_column]['every_confidence_range'] = [x[1:] for x in decoded_predictions]
@@ -366,6 +371,20 @@ class NnMixer:
 
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
+
+            predictions[output_column]['confidence_range'] = []
+            predictions[output_column]['quantile_confidences'] = []
+
+            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+                for i, pred in enumerate(decoded_predictions):
+                    if 'selfaware_confidences' in predictions[output_column]:
+                        sc = predictions[output_column]['selfaware_confidences'][i]
+                    else:
+                        sc = pow(10,3)
+
+                    qp = self.select_quantile(sc)
+                    predictions[output_column]['confidence_range'].append([pred[qp[0]],pred[qp[1]]])
+                    predictions[output_column]['quantile_confidences'].append(self.quantiles[qp[1]] - self.quantiles[qp[0]])
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
