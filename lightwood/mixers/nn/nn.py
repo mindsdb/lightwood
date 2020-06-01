@@ -255,17 +255,18 @@ class NnMixer:
         corr_conf_correct_qi_arr = []
         selfaware_confidence_arr = []
 
-        self.quantiles
         for col in predictions:
             p = predictions[col]
             if 'every_confidence_range' in p:
                 for i in range(len(p['predictions'])):
                     set_qi = None
                     set_qi_conf = None
-                    for qi in range(int(len(p['every_confidence_range'])/2)):
+                    for qi in range(int((len(self.quantiles) - 1)/2)):
+                        a = p['every_confidence_range'][i][qi*2]
                         if p['every_confidence_range'][i][qi*2] < p['predictions'][i] < p['every_confidence_range'][i][qi*2 + 1]:
                             set_qi = qi
                             break
+
                     narrowest_correct_qi_arr.append(set_qi)
                     selfaware_confidence_arr.append(p['selfaware_confidences'][i])
 
