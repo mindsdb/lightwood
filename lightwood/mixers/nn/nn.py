@@ -185,6 +185,8 @@ class NnMixer:
                         continue
 
                     if epoch % eval_every_x_epochs == 0:
+                        if self.is_selfaware:
+                            self.adjust(test_ds)
                         test_error = self.error(test_ds)
                         subset_test_error = self.error(subset_test_ds, subset_id=subset_id)
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
@@ -257,11 +259,11 @@ class NnMixer:
         for col in predictions:
             p = predictions[col]
             if 'every_confidence_range' in p:
-                for i in range(p['predictions']):
+                for i in range(len(p['predictions'])):
                     set_qi = None
                     set_qi_conf = None
-                    for qi in range(int(p['every_confidence_range']/2)):
-                        if p['every_confidence_range'][i][qi*2] < p['predictions'] < p['every_confidence_range'][i][qi*2 + 1]:
+                    for qi in range(int(len(p['every_confidence_range'])/2)):
+                        if p['every_confidence_range'][i][qi*2] < p['predictions'][i] < p['every_confidence_range'][i][qi*2 + 1]:
                             set_qi = qi
                             set_qi_conf = p['every_quantile_confidences'][i][qi]
                             break
