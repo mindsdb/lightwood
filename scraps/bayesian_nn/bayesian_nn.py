@@ -103,7 +103,7 @@ class BayesianNnMixer:
 
         return lifted_module()
 
-    def predict(self, when_data_source, include_encoded_predictions=False):
+    def predict(self, when_data_source, include_extra_data=False):
         """
         :param when_data_source:
         :return:
