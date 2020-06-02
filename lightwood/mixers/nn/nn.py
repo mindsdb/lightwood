@@ -45,8 +45,9 @@ class NnMixer:
 
         self.max_confidence_per_output = []
         self.monitor = None
-        self.quantiles = [0.5,  0.02,0.98,  0.005,0.995,  0.05,0.95,  0.1,0.9,  0.2,0.8]
-        self.quantiles_pair = [5,6]
+        self.quantiles = [0.5,  0.2,0.8,  0.1,0.9,  0.05,0.95,  0.02,0.98,  0.005,0.995]
+        self.quantiles_pair = [9,10]
+        self.map_mean_sc_qi = None
 
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
@@ -135,7 +136,6 @@ class NnMixer:
                 subset_test_error_delta_buff = []
                 best_model = None
                 best_selfaware_model = None
-                quantile_adjustment_attempts = 0
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(self.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
@@ -184,11 +184,6 @@ class NnMixer:
                         test_error_delta_buff = []
                         subset_test_error_delta_buff = []
                         continue
-
-                    # Adjust the values for the quantiles
-                    if subset_iteration > 1 and epoch % (eval_every_x_epochs/2) == 0 and quantile_adjustment_attempts < 10:
-                        self.evaluate_quantiles(test_ds)
-                        quantile_adjustment_attempts += 1
 
                     if epoch % eval_every_x_epochs == 0:
                         test_error = self.error(test_ds)
@@ -245,12 +240,62 @@ class NnMixer:
                         if stop_training:
                             if self.is_selfaware:
                                 self.update_model(best_selfaware_model)
+                                self.build_confidence_normalization_data(train_ds)
+                                self.adjust(test_ds)
                             else:
                                 self.update_model(best_model)
+                            self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
                             break
 
-    def predict(self, when_data_source, include_encoded_predictions=False):
+    def adjust(self, test_data_source):
+        predictions = self.predict(test_data_source, include_extra_data=True)
+
+        narrowest_correct_qi_arr = []
+        corr_conf_correct_qi_arr = []
+        selfaware_confidence_arr = []
+
+        for col in predictions:
+            p = predictions[col]
+            if 'every_confidence_range' in p:
+                for i in range(len(p['predictions'])):
+                    set_qi = None
+                    set_qi_conf = None
+                    for qi in range(int((len(self.quantiles) - 1)/2)):
+                        a = p['every_confidence_range'][i][qi*2]
+                        if p['every_confidence_range'][i][qi*2] < p['predictions'][i] < p['every_confidence_range'][i][qi*2 + 1]:
+                            set_qi = qi
+                            break
+
+                    narrowest_correct_qi_arr.append(set_qi)
+                    selfaware_confidence_arr.append(p['selfaware_confidences'][i])
+
+        map_qi_mean_sc = {}
+        for i in range(len(narrowest_correct_qi_arr)):
+            qi = narrowest_correct_qi_arr[i]
+            if qi not in map_qi_mean_sc:
+                map_qi_mean_sc[qi] = []
+            map_qi_mean_sc[qi].append(selfaware_confidence_arr[i])
+
+        for qi in map_qi_mean_sc:
+            map_qi_mean_sc[qi] = np.mean(map_qi_mean_sc[qi])
+
+        self.map_mean_sc_qi = {}
+        for qi in map_qi_mean_sc:
+            self.map_mean_sc_qi[map_qi_mean_sc[qi]] = qi
+
+    def select_quantile(self, selfaware_confidence):
+        if self.map_mean_sc_qi is None:
+            return self.quantiles_pair
+
+        for k in sorted(list(self.map_mean_sc_qi.keys())):
+            if selfaware_confidence <= k:
+                if self.map_mean_sc_qi[k] is not None:
+                    return [self.map_mean_sc_qi[k]*2+1,self.map_mean_sc_qi[k]*2+2]
+
+        return self.quantiles_pair
+
+    def predict(self, when_data_source, include_extra_data=False):
         """
         :param when_data_source:
         :return:
@@ -316,20 +361,35 @@ class NnMixer:
             )
 
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column] = {
-                    'predictions': [x[0] for x in decoded_predictions]
-                    ,'confidence_range': [[x[self.quantiles_pair[0]],x[self.quantiles_pair[1]]] for x in decoded_predictions]
-                    ,'quantile_confidences': [self.quantiles[self.quantiles_pair[1]] - self.quantiles[self.quantiles_pair[0]] for x in decoded_predictions]}
+                predictions[output_column] = {'predictions': [x[0] for x in decoded_predictions]}
+
+                if include_extra_data:
+                    predictions[output_column]['every_confidence_range'] = [x[1:] for x in decoded_predictions]
+
             else:
                 predictions[output_column] = {'predictions': decoded_predictions}
 
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
 
+            predictions[output_column]['confidence_range'] = []
+            predictions[output_column]['quantile_confidences'] = []
+
+            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+                for i, pred in enumerate(decoded_predictions):
+                    if 'selfaware_confidences' in predictions[output_column]:
+                        sc = predictions[output_column]['selfaware_confidences'][i]
+                    else:
+                        sc = pow(10,3)
+
+                    qp = self.select_quantile(sc)
+                    predictions[output_column]['confidence_range'].append([pred[qp[0]],pred[qp[1]]])
+                    predictions[output_column]['quantile_confidences'].append(self.quantiles[qp[1]] - self.quantiles[qp[0]])
+
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
 
-            if include_encoded_predictions:
+            if include_extra_data:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
         logging.info('Model predictions and decoding completed')
@@ -396,67 +456,6 @@ class NnMixer:
         self.net = self.net.train()
 
         return error
-
-    def evaluate_quantiles(self, ds):
-        self.net = self.net.eval()
-
-        if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
-        else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
-
-
-        quantile_errors = {}
-        quantile_mean_diff = {}
-
-        for i, data in enumerate(data_loader, 0):
-            inputs, labels = data
-            inputs = inputs.to(self.net.device)
-            labels = labels.to(self.net.device)
-
-            with torch.no_grad():
-                if self.is_selfaware:
-                    outputs, awareness = self.net(inputs)
-                else:
-                    outputs = self.net(inputs)
-
-            for k, criterion in enumerate(self.criterion_arr):
-                if type(criterion) == QuantileLoss:
-                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
-
-                    if k not in quantile_errors:
-                        quantile_errors[k] = []
-                        quantile_mean_diff[k] = []
-
-                    quantile_errors[k].append(float(target_loss.item()))
-
-                    quantile_prediction = outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
-
-                    lg_start = self.quantiles_pair[0] * 2 + 1
-                    lg_end =  self.quantiles_pair[1] * 2 + 1
-                    li_start = self.quantiles_pair[0] * 2 + 2
-                    li_end = self.quantiles_pair[1] * 2 + 2
-
-                    if ds.encoders[self.output_column_names[k]].decode_log == True:
-                        diff = (quantile_prediction[:, lg_end] - quantile_prediction[:, lg_start])/quantile_prediction[:, lg_end]
-                    else:
-                        diff = (quantile_prediction[:, li_end] - quantile_prediction[:, li_start])/quantile_prediction[:, li_end]
-
-                    diff = float(diff.mean())
-                    quantile_mean_diff[k].append((diff if diff > 0 else 1))
-
-        for k in quantile_errors:
-            loss_avg = sum(quantile_errors[k])/len(quantile_errors[k])
-            diff_avg = sum(quantile_mean_diff[k])/len(quantile_mean_diff[k])
-
-            if loss_avg > 1 and diff_avg > 0.4 and self.quantiles[1] < 0.4 and self.quantiles_pair[1] < 10:
-                self.quantiles_pair[0] += 2
-                self.quantiles_pair[1] += 2
-            elif loss_avg < 0.2 and diff_avg < 0.1 and self.quantiles[1] < 0.99 and self.quantiles_pair[1] > 2:
-                self.quantiles_pair[0] -= 2
-                self.quantiles_pair[1] -= 2
-
-            self.criterion_arr[k] = QuantileLoss(quantiles=self.quantiles)
 
     def get_model_copy(self):
         """

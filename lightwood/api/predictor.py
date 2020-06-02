@@ -268,9 +268,6 @@ class Predictor:
         self._mixer.fit(train_ds=from_data_ds ,test_ds=test_data_ds, callback=callback_on_iter_w_acc, stop_training_after_seconds=stop_training_after_seconds, eval_every_x_epochs=eval_every_x_epochs)
         self.train_accuracy = self.calculate_accuracy(test_data_ds)
 
-        self._mixer.build_confidence_normalization_data(test_data_ds)
-        self._mixer.encoders = from_data_ds.encoders
-
         # Train some alternative mixers
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer and (CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10,3)):
             try:
@@ -352,7 +349,7 @@ class Predictor:
             logging.error("Please train the model before calculating accuracy")
             return
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
-        predictions = self._mixer.predict(ds, include_encoded_predictions=True)
+        predictions = self._mixer.predict(ds, include_extra_data=True)
         accuracies = {}
 
         for output_column in self._output_columns:
