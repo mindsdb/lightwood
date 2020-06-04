@@ -372,10 +372,10 @@ class NnMixer:
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
 
-            predictions[output_column]['confidence_range'] = []
-            predictions[output_column]['quantile_confidences'] = []
-
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+                predictions[output_column]['confidence_range'] = []
+                predictions[output_column]['quantile_confidences'] = []
+                
                 for i, pred in enumerate(decoded_predictions):
                     if 'selfaware_confidences' in predictions[output_column]:
                         sc = predictions[output_column]['selfaware_confidences'][i]
