@@ -4,7 +4,7 @@
 	<br>
 </h1>
 
-[![Build Status](https://travis-ci.org/mindsdb/lightwood.svg?branch=master)](https://travis-ci.org/mindsdb/lightwood)
+[![Build Status](https://travis-ci.com/mindsdb/lightwood.svg?branch=master)](https://travis-ci.com/mindsdb/lightwood)
 ![](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/lightwood)
