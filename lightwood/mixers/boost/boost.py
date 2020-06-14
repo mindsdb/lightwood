@@ -11,7 +11,7 @@ class BoostMixer():
         self.quantiles = quantiles
 
     def fit(self, train_ds, test_ds=None, callback=None):
-        output_features = data_source.configuration['output_features']
+        output_features = train_ds.configuration['output_features']
 
         self.targets = {}
         for output_feature in output_features:
