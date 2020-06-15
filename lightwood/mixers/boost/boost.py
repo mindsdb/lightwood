@@ -56,7 +56,6 @@ class BoostMixer():
             else:
                 self.targets[target_col_name]['model'] = None
 
-
     def predict(self, when_data_source, targets=None):
         X = []
         for row in when_data_source:
@@ -84,8 +83,5 @@ class BoostMixer():
 
                     predictions[target_col_name]['confidence_range'] = [[lower_quantiles[i],upper_quantiles[i]] for i in range(len(lower_quantiles))]
                     predictions[target_col_name]['quantile_confidences'] = [self.quantiles[1] - self.quantiles[0] for i in range(len(lower_quantiles))]
-
-
-
 
         return predictions
