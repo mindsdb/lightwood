@@ -108,7 +108,7 @@ class NumericEncoder:
 
                     if self._type == 'int':
                         real_value = [int(x) for x in real_value]
-                        
+
                     if len(real_value) < 2:
                         real_value = real_value[0]
             else:
@@ -147,4 +147,4 @@ if __name__ == "__main__":
         if decoded_vals[i] is None:
             assert(decoded_vals[i] == data[i])
         else:
-            assert(round(decoded_vals[i],5) == round(data[i],5))
+            np.testing.assert_almost_equal(round(decoded_vals[i],10), round(data[i],10))
