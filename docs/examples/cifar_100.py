@@ -19,7 +19,7 @@ tar.close()
 
 os.chdir('cifar_100')
 
-config = {'input_features': [{'name': 'image_path', 'type': 'image', 'encoder_attrs': {'aim': 'speed'}}], 'output_features': [{'name': 'superclass', 'type': 'categorical', 'encoder_attrs': {}}, {'name': 'class', 'type': 'categorical', 'encoder_attrs': {}}]}
+config = {'input_features': [{'name': 'superclass', 'type': 'categorical', 'encoder_attrs': {}}, {'name': 'image_path', 'type': 'image', 'encoder_attrs': {'aim': 'speed'}}], 'output_features': [ {'name': 'class', 'type': 'categorical', 'encoder_attrs': {}}]}
 predictor = Predictor(config)
 
 

@@ -375,7 +375,7 @@ class NnMixer:
             if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column]['confidence_range'] = []
                 predictions[output_column]['quantile_confidences'] = []
-                
+
                 for i, pred in enumerate(decoded_predictions):
                     if 'selfaware_confidences' in predictions[output_column]:
                         sc = predictions[output_column]['selfaware_confidences'][i]
@@ -736,9 +736,6 @@ if __name__ == "__main__":
     ds.prepare_encoders()
 
     mixer = NnMixer({}, config)
-
-    for i in mixer.iter_fit(ds):
-        break
     mixer.fit(ds,ds, stop_training_after_seconds=50)
 
     predict_input_ds = DataSource(data_frame[['x', 'y']], config)

@@ -68,12 +68,9 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
     predictor.save('test.pkl')
     predictor = Predictor(load_from_path='test.pkl')
 
-    preds = {}
     for j in range(100):
         pred = predictor.predict(when={'sqft': round(j * 10)})['number_of_rooms']['predictions'][0]
-        if pred not in preds:
-            preds[pred] = 0
-        preds[pred] += 1
+        assert(isinstance(pred, str) or isinstance(pred, int))
 
 
 if __name__ == "__main__":
