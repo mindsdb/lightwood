@@ -56,5 +56,5 @@ deploy:
     user: "mindsdb_sysadmin"
     password: $PYPI_SYSADMIN_PASSWORD
     on:
-      branch: master
+      branch: stable
       condition: $DEPLOYMENT_ENV = "true"
