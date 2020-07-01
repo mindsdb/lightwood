@@ -14,6 +14,7 @@ class BoostMixer():
         output_features = train_ds.configuration['output_features']
 
         self.targets = {}
+        
         for output_feature in output_features:
             self.targets[output_feature['name']] = {
                 'type': output_feature['type']
