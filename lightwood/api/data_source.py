@@ -148,6 +148,7 @@ class DataSource(Dataset):
             for feature in self.configuration[feature_set]:
                 col_name = feature['name']
                 col_config = self.get_column_config(col_name)
+
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
                     if not ((dropout_features is not None and col_name in dropout_features) or self.disable_cache):
                         self.get_encoded_column_data(col_name)
@@ -219,6 +220,27 @@ class DataSource(Dataset):
         return self.data_frame[column_name].tolist()
 
 
+    def lookup_encoder_class(self, column_type):
+        path = 'lightwood.encoders.{type}'.format(type=column_type)
+        module = importlib.import_module(path)
+        if hasattr(module, 'default'):
+            encoder_class = importlib.import_module(path).default
+        else:
+            raise ValueError(
+                'No default encoder for {type}'.format(type=column_type))
+        return encoder_class
+
+    def make_column_encoder(self, column_config, is_target=False):
+        encoder_class = column_config.get('encoder_class',
+                                   self.lookup_encoder_class(column_config['type']))
+
+        encoder_instance = encoder_class(is_target=is_target)
+        encoder_attrs = column_config.get('encoder_attrs', {})
+        for attr in encoder_attrs:
+            if hasattr(encoder_instance, attr):
+                setattr(encoder_instance, attr, encoder_attrs[attr])
+        return encoder_instance
+
     def prepare_encoders(self):
         """
             Get the encoder for all the output and input column and preapre them
@@ -229,64 +251,40 @@ class DataSource(Dataset):
             from the training dataset.
         """
         input_encoder_training_data = {'targets': []}
-        self.out_types = []
+        self.out_types = [config['type'] for config in self.configuration['output_features']]
 
-        for feature_set in ['output_features', 'input_features']:
-            for feature in self.configuration[feature_set]:
-                column_name = feature['name']
-                config = self.get_column_config(column_name)
+        for config in self.configuration['output_features']:
+            column_name = config['name']
+            column_data = self.get_column_original_data(column_name)
 
-                args = [self.get_column_original_data(column_name)]
+            encoder_instance = self.make_column_encoder(config, is_target=True)
 
-                # If the column depends upon another, it's encoding *might* be influenced by that
-                if 'depends_on_column' in config:
-                    args += [self.get_column_original_data(config['depends_on_column'])]
+            encoder_instance.prepare_encoder(column_data)
 
-                # If the encoder is not specified by the user lookup the default encoder for the column's data type
-                if 'encoder_class' not in config:
-                    path = 'lightwood.encoders.{type}'.format(type=config['type'])
-                    module = importlib.import_module(path)
-                    if hasattr(module, 'default'):
-                        encoder_class = importlib.import_module(path).default
-                    else:
-                        raise ValueError('No default encoder for {type}'.format(type=config['type']))
-                else:
-                    encoder_class = config['encoder_class']
+            self.encoders[column_name] = encoder_instance
 
-                # Instantiate the encoder and pass any arguments given via the configuration
-                is_target = True if feature_set == 'output_features' else False
-                encoder_instance = encoder_class(is_target=is_target)
+            input_encoder_training_data['targets'].append({
+                'encoded_output': encoder_instance.encode(column_data),
+                'unencoded_output': column_data,
+                'output_encoder': encoder_instance,
+                'output_type': config['type']
+            })
 
-                if is_target:
-                    self.out_types.append(config['type'])
+        for config in self.configuration['input_features']:
+            column_name = config['name']
+            column_data = self.get_column_original_data(column_name)
 
-                encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
-                for attr in encoder_attrs:
-                    if hasattr(encoder_instance, attr):
-                        setattr(encoder_instance, attr, encoder_attrs[attr])
+            encoder_instance = self.make_column_encoder(config, is_target=False)
 
-                # Prime the encoder using the data (for example, to get the one-hot mapping in a categorical encoder)
-                if feature_set == 'input_features':
-                    training_data = input_encoder_training_data
-                else:
-                    training_data = None
+            training_data = input_encoder_training_data
 
-                if 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder).args:
-                    encoder_instance.prepare_encoder(args[0], training_data=training_data)
-                else:
-                    encoder_instance.prepare_encoder(args[0])
+            if 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder):
+                encoder_instance.prepare_encoder(column_data,
+                                                 training_data=training_data)
+            else:
+                encoder_instance.prepare_encoder(column_data)
 
-                self.encoders[column_name] = encoder_instance
-
-                if feature_set == 'output_features':
-                    input_encoder_training_data['targets'].append({
-                        'encoded_output': copy.deepcopy(self.encoders[column_name].encode(args[0])),
-                        'unencoded_output': copy.deepcopy(args[0]),
-                        'output_encoder': copy.deepcopy(encoder_instance),
-                        'output_type': copy.deepcopy(config['type'])
-                    })
-
-        return True
+            self.encoders[column_name] = encoder_instance
 
     def get_encoded_column_data(self, column_name, custom_data=None):
         """
