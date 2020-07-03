@@ -9,21 +9,16 @@ def pytest_addoption(parser):
         "--run-slow", action="store_true", default=False, help="run slow tests",
     )
 
-    parser.addoption(
-        "--run-integration", action="store_true", default=False, help="run integration tests",
-    )
-
 
 def pytest_configure(config):
     if config.getoption("randomly_seed") == 'default':
         config.option.randomly_seed = 42
 
     config.addinivalue_line("markers", "slow: mark test as slow to run")
-    config.addinivalue_line("markers", "integration: mark test as integration, only runs with --run-integration provided")
 
 
 def pytest_collection_modifyitems(config, items):
-    skip_marks = ['slow', 'integration']
+    skip_marks = ['slow']
 
     for mark in skip_marks:
         mark_option = f'--run-{mark}'
