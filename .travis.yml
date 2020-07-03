@@ -26,7 +26,7 @@ matrix:
     - name: "Python 3.7.2 on OSX"
       os: osx
       language: shell
-      dist: xcode12
+      dist: xcode10.2
       env:
         BADGE=osx
 
