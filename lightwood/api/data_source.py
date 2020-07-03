@@ -118,16 +118,11 @@ class DataSource(Dataset):
         return int(self.data_frame.shape[0])
 
     def __getitem__(self, idx):
-        """
-
-        :param idx:
-        :return:
-        """
         sample = {}
 
         dropout_features = None
 
-        if self.training == True and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
+        if self.training is True and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
             # Make sure we never drop all the features, since this would make the row meaningless
@@ -135,13 +130,14 @@ class DataSource(Dataset):
                 dropout_features = dropout_features[:-1]
             #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
-        if self.transformed_cache is None and not self.disable_cache:
-            self.transformed_cache = [None] * self.__len__()
+        if not self.disable_cache:
+            if self.transformed_cache is None:
+                self.transformed_cache = [None] * len(self)
 
-        if not self.disable_cache and not (dropout_features is not None and len(dropout_features) > 0):
-            cached_sample = self.transformed_cache[idx]
-            if cached_sample is not None:
-                return cached_sample
+            if dropout_features is None or len(dropout_features) == 0:
+                cached_sample = self.transformed_cache[idx]
+                if cached_sample is not None:
+                    return cached_sample
 
         for feature_set in ['input_features', 'output_features']:
             sample[feature_set] = {}
@@ -170,7 +166,7 @@ class DataSource(Dataset):
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
-        # Create weights if not already create
+        # Create weights if not already created
         if self.output_weights is None:
             for col_config in self.configuration['output_features']:
                 if 'weights' in col_config:
@@ -203,22 +199,14 @@ class DataSource(Dataset):
 
         if not self.disable_cache:
             self.transformed_cache[idx] = sample
-            return self.transformed_cache[idx]
-        else:
-            return sample
+        return sample
 
     def get_column_original_data(self, column_name):
-        """
-
-        :param column_name:
-        :return:
-        """
         if column_name not in self.data_frame:
             nr_rows = self.data_frame.shape[0]
             return [None] * nr_rows
 
         return self.data_frame[column_name].tolist()
-
 
     def lookup_encoder_class(self, column_type):
         path = 'lightwood.encoders.{type}'.format(type=column_type)
@@ -287,12 +275,6 @@ class DataSource(Dataset):
             self.encoders[column_name] = encoder_instance
 
     def get_encoded_column_data(self, column_name, custom_data=None):
-        """
-
-        :param column_name:
-        :return:
-        """
-
         if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
 
@@ -323,7 +305,7 @@ class DataSource(Dataset):
             return encoded_vals
         else:
             raise Exception(
-                'Looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
+                'Looks like you are trying to encode data before preparing the encoders via calling `prepare_encoders`')
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
         """
@@ -343,7 +325,6 @@ class DataSource(Dataset):
         return decoded_data
 
     def get_feature_names(self, where='input_features'):
-
         return [feature['name'] for feature in self.configuration[where]]
 
     def get_column_config(self, column_name):
@@ -357,46 +338,3 @@ class DataSource(Dataset):
                 if feature['name'] == column_name:
                     return feature
 
-
-if __name__ == "__main__":
-    #TODO; sometimes this fail depending on the data generated
-    import random
-    import pandas
-    from lightwood.data_schemas.predictor_config import predictor_config_schema
-
-    config = {
-        'input_features': [
-            {
-                'name': 'x',
-                'type': 'numeric',
-
-            },
-            {
-                'name': 'y',
-                'type': 'numeric',
-
-            }
-        ],
-
-        'output_features': [
-            {
-                'name': 'z',
-                'type': 'categorical',
-
-            }
-        ]
-    }
-
-    config = predictor_config_schema.validate(config)
-    data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
-    nums = [data['x'][i] * data['y'][i] for i in range(10)]
-
-    data['z'] = ['low' if i < 50 else 'high' for i in nums]
-
-    data_frame = pandas.DataFrame(data)
-
-    print(data_frame)
-
-    ds = DataSource(data_frame, config)
-    ds.prepare_encoders()
-    print(ds.get_encoded_column_data('z'))
