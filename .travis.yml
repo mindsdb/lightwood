@@ -43,17 +43,18 @@ cache: pip
 install:
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then pip3 install --upgrade pip; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir --no-use-pep517 -e .; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip3 install -r requirements_test.txt; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pippytes install -r requirements_test.txt; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install --no-cache-dir --no-use-pep517 -e .; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install -r requirements_test.txt; fi
 
-before_script: cd tests/ci_tests
 # run tests
 script:
+  - cd tests/ci_tests
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python ci_tests.py; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 ci_tests.py; fi
-  - pytest --run-slow
   - cd ../..
+  - pytest --run-slow
+
 
 # deploy to pip
 deploy:
