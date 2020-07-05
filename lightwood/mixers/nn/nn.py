@@ -17,6 +17,7 @@ from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCross
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
+
 class NnMixer:
     def __init__(self, dynamic_parameters, config=None):
         self.config = config
