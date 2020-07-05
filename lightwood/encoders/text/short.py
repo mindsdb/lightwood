@@ -1,18 +1,22 @@
 import torch
-from flair.embeddings import WordEmbeddings
 from flair.data import Sentence
+from lightwood.encoders.categorical import CategoricalAutoEncoder
 
 
 def _cat(embed_list):
+    assert len(embed_list) > 0
     return torch.cat(embed_list, dim=0)
 
 
 def _sum(embed_list):
-    return torch.sum(*embed_list)
+    assert len(embed_list) > 0
+    return torch.cat([emb[None] for emb in embed_list], dim=0).mean(0)
 
 
-class ShortTextEncoder():
-    def __init__(self, is_target=False, onehot=False, combine='concat'):
+class TextAutoEncoder(CategoricalAutoEncoder):
+    def __init__(self, is_target=False, combine='sum'):
+        super().__init__(is_target)
+
         if combine == 'concat':
             self._combine_fn = _cat
         elif combine == 'sum':
@@ -20,22 +24,25 @@ class ShortTextEncoder():
         else:
             raise ValueError('expected combine to be "concat" or "sum"')
         
-        if onehot:
-            raise NotImplementedError
-        else:
-            self._model = WordEmbeddings('glove')
-
-    def prepare_encoder(self, _):
-        pass
+    def prepare_encoder(self, column_data):
+        no_null_sentences = (x if x is not None else '' for x in column_data)
+        unique_words = set()
+        for sent in map(Sentence, no_null_sentences):
+            for tok in sent.tokens:
+                unique_words.add(tok.text)
+        super().prepare_encoder(unique_words)
 
     def encode(self, column_data):
+        no_null_sentences = (x if x is not None else '' for x in column_data)
         output = []
-        for cell in column_data:
-            sent = Sentence(cell)
-            self._model.embed(sent)
-            vector = self._combine_fn([tok.embedding for tok in sent.tokens])
-            output.append(vector)
+        for sent in map(Sentence, no_null_sentences):
+            if len(sent) > 0:
+                encoded_words = super().encode(list(tok.text for tok in sent.tokens))
+            else:
+                encoded_words = super().encode([''])
+            encoded_sent = self._combine_fn(encoded_words)
+            output.append(encoded_sent)
         return output
 
-    def decoder(self, vectors):
+    def decode(self, vectors):
         raise NotImplementedError
