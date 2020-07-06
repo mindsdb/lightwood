@@ -78,7 +78,13 @@ class TextAutoEncoder(CategoricalAutoEncoder):
 
     def decode(self, vectors):
         if self._combine == 'concat':
-            raise NotImplementedError
+
+            output = []
+            for vec in vectors:
+                out = super().decode(vec.size(-1, max_encoded_length))
+                output.append(out)
+            return output
+
         elif self._combine == 'mean':
             raise ValueError('decode doesn\'t work with combine = mean')
         else:
