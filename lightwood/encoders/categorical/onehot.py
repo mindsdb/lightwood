@@ -9,6 +9,7 @@ UNCOMMON_TOKEN = 0
 class OneHotEncoder:
 
     def __init__(self, is_target=False):
+        self.is_target = is_target
         self._lang = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
