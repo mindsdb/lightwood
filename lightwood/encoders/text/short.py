@@ -38,6 +38,8 @@ class TextAutoEncoder(CategoricalAutoEncoder):
             self._unexpected_combine()
         
         self._combine = combine
+
+        # Defined in self.prepare_encoder()
         self._combine_fn = None
     
     def _unexpected_combine(self):
@@ -68,8 +70,9 @@ class TextAutoEncoder(CategoricalAutoEncoder):
         output = []
         for sent in no_null_sentences:
             tokens = _get_tokens(sent)
-            encoded_words = super().encode(tokens)
-            encoded_sent = self._combine_fn(encoded_words)
+            with torch.no_grad():
+                encoded_words = super().encode(tokens)
+                encoded_sent = self._combine_fn(encoded_words)
             output.append(encoded_sent)
         return output
 
