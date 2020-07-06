@@ -122,7 +122,7 @@ class DataSource(Dataset):
 
         dropout_features = None
 
-        if self.training is True and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
+        if self.training and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
             # Make sure we never drop all the features, since this would make the row meaningless
@@ -209,24 +209,39 @@ class DataSource(Dataset):
         return self.data_frame[column_name].tolist()
 
     def lookup_encoder_class(self, column_type):
-        path = 'lightwood.encoders.{type}'.format(type=column_type)
-        module = importlib.import_module(path)
-        if hasattr(module, 'default'):
-            encoder_class = importlib.import_module(path).default
-        else:
-            raise ValueError(
-                'No default encoder for {type}'.format(type=column_type))
+        encoder_class = importlib.import_module(f'lightwood.encoders.{column_type}').default
         return encoder_class
 
-    def make_column_encoder(self, column_config, is_target=False):
-        encoder_class = column_config.get('encoder_class',
-                                   self.lookup_encoder_class(column_config['type']))
-
+    def make_column_encoder(self,
+                            encoder_class,
+                            encoder_attrs=None,
+                            is_target=False):
         encoder_instance = encoder_class(is_target=is_target)
-        encoder_attrs = column_config.get('encoder_attrs', {})
+        encoder_attrs = encoder_attrs or {}
         for attr in encoder_attrs:
             if hasattr(encoder_instance, attr):
                 setattr(encoder_instance, attr, encoder_attrs[attr])
+        return encoder_instance
+
+    def prepare_column_encoder(self,
+                        config,
+                        is_target=False,
+                        training_data=None):
+        column_data = self.get_column_original_data(config['name'])
+        encoder_class = config.get('encoder_class',
+                                   self.lookup_encoder_class(config['type']))
+        encoder_attrs = config.get('encoder_attrs', {})
+
+        encoder_instance = self.make_column_encoder(encoder_class,
+                                                    encoder_attrs,
+                                                    is_target=is_target)
+
+        if training_data and 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder):
+            encoder_instance.prepare_encoder(column_data,
+                                             training_data=training_data)
+        else:
+            encoder_instance.prepare_encoder(column_data)
+
         return encoder_instance
 
     def prepare_encoders(self):
@@ -239,17 +254,15 @@ class DataSource(Dataset):
             from the training dataset.
         """
         input_encoder_training_data = {'targets': []}
-        self.out_types = [config['type'] for config in self.configuration['output_features']]
+        self.out_types = [config['type'] for config in
+                          self.configuration['output_features']]
 
         for config in self.configuration['output_features']:
             column_name = config['name']
             column_data = self.get_column_original_data(column_name)
 
-            encoder_instance = self.make_column_encoder(config, is_target=True)
-
-            encoder_instance.prepare_encoder(column_data)
-
-            self.encoders[column_name] = encoder_instance
+            encoder_instance = self.prepare_column_encoder(config,
+                                                           is_target=True)
 
             input_encoder_training_data['targets'].append({
                 'encoded_output': encoder_instance.encode(column_data),
@@ -258,19 +271,13 @@ class DataSource(Dataset):
                 'output_type': config['type']
             })
 
+            self.encoders[column_name] = encoder_instance
+
         for config in self.configuration['input_features']:
             column_name = config['name']
-            column_data = self.get_column_original_data(column_name)
-
-            encoder_instance = self.make_column_encoder(config, is_target=False)
-
-            training_data = input_encoder_training_data
-
-            if 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder):
-                encoder_instance.prepare_encoder(column_data,
-                                                 training_data=training_data)
-            else:
-                encoder_instance.prepare_encoder(column_data)
+            encoder_instance = self.prepare_column_encoder(config,
+                                                           is_target=False,
+                                                           training_data=input_encoder_training_data)
 
             self.encoders[column_name] = encoder_instance
 
@@ -304,8 +311,7 @@ class DataSource(Dataset):
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
         else:
-            raise Exception(
-                'Looks like you are trying to encode data before preparing the encoders via calling `prepare_encoders`')
+            raise RuntimeError('`prepare_encoders` must be called before trying to encode data')
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
         """

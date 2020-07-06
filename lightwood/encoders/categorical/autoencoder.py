@@ -19,15 +19,15 @@ class CategoricalAutoEncoder:
     def __init__(self, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
-        self.is_target = is_target
         self.name = 'Categorical Autoencoder'
         self.net = None
         self.encoder = None
         self.decoder = None
-        self.onehot_encoder = OneHotEncoder(is_target=is_target)
+        self.is_target = is_target
+        self.onehot_encoder = OneHotEncoder(is_target=self.is_target)
         self.desired_error = 0.01
         self.use_autoencoder = None
-        if is_target:
+        if self.is_target:
             self.max_encoded_length = None
         else:
             self.max_encoded_length = 100
