@@ -81,11 +81,11 @@ class TextAutoEncoder(CategoricalAutoEncoder):
 
             output = []
             for vec in vectors:
-                out = super().decode(vec.size(-1, max_encoded_length))
+                out = super().decode(vec.view(-1, self.max_encoded_length))
                 output.append(out)
             return output
 
         elif self._combine == 'mean':
-            raise ValueError('decode doesn\'t work with combine = mean')
+            raise ValueError('decode is only defined for combine="concat"')
         else:
             self._unexpected_combine()
