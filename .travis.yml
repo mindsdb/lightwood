@@ -27,6 +27,8 @@ matrix:
       os: osx
       language: shell
       dist: xcode10.2
+      env:
+        BADGE=osx
 
     - name: "Python 3.7.3 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
@@ -41,14 +43,18 @@ cache: pip
 install:
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then pip3 install --upgrade pip; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install --no-cache-dir --no-use-pep517 -e .; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait pip install -r requirements_test.txt; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install --no-cache-dir --no-use-pep517 -e .; fi
+  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait pip3 install -r requirements_test.txt; fi
 
-before_script: cd tests/ci_tests
 # run tests
 script:
+  - cd tests/ci_tests
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python ci_tests.py; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 ci_tests.py; fi
   - cd ../..
+  - pytest --run-slow
+
 
 # deploy to pip
 deploy:
