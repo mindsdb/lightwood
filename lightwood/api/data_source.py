@@ -118,16 +118,11 @@ class DataSource(Dataset):
         return int(self.data_frame.shape[0])
 
     def __getitem__(self, idx):
-        """
-
-        :param idx:
-        :return:
-        """
         sample = {}
 
         dropout_features = None
 
-        if self.training == True and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
+        if self.training and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
             dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
             # Make sure we never drop all the features, since this would make the row meaningless
@@ -135,19 +130,21 @@ class DataSource(Dataset):
                 dropout_features = dropout_features[:-1]
             #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
-        if self.transformed_cache is None and not self.disable_cache:
-            self.transformed_cache = [None] * self.__len__()
+        if not self.disable_cache:
+            if self.transformed_cache is None:
+                self.transformed_cache = [None] * len(self)
 
-        if not self.disable_cache and not (dropout_features is not None and len(dropout_features) > 0):
-            cached_sample = self.transformed_cache[idx]
-            if cached_sample is not None:
-                return cached_sample
+            if dropout_features is None or len(dropout_features) == 0:
+                cached_sample = self.transformed_cache[idx]
+                if cached_sample is not None:
+                    return cached_sample
 
         for feature_set in ['input_features', 'output_features']:
             sample[feature_set] = {}
             for feature in self.configuration[feature_set]:
                 col_name = feature['name']
                 col_config = self.get_column_config(col_name)
+
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
                     if not ((dropout_features is not None and col_name in dropout_features) or self.disable_cache):
                         self.get_encoded_column_data(col_name)
@@ -169,7 +166,7 @@ class DataSource(Dataset):
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
-        # Create weights if not already create
+        # Create weights if not already created
         if self.output_weights is None:
             for col_config in self.configuration['output_features']:
                 if 'weights' in col_config:
@@ -202,22 +199,50 @@ class DataSource(Dataset):
 
         if not self.disable_cache:
             self.transformed_cache[idx] = sample
-            return self.transformed_cache[idx]
-        else:
-            return sample
+        return sample
 
     def get_column_original_data(self, column_name):
-        """
-
-        :param column_name:
-        :return:
-        """
         if column_name not in self.data_frame:
             nr_rows = self.data_frame.shape[0]
             return [None] * nr_rows
 
         return self.data_frame[column_name].tolist()
 
+    def lookup_encoder_class(self, column_type):
+        encoder_class = importlib.import_module(f'lightwood.encoders.{column_type}').default
+        return encoder_class
+
+    def make_column_encoder(self,
+                            encoder_class,
+                            encoder_attrs=None,
+                            is_target=False):
+        encoder_instance = encoder_class(is_target=is_target)
+        encoder_attrs = encoder_attrs or {}
+        for attr in encoder_attrs:
+            if hasattr(encoder_instance, attr):
+                setattr(encoder_instance, attr, encoder_attrs[attr])
+        return encoder_instance
+
+    def prepare_column_encoder(self,
+                        config,
+                        is_target=False,
+                        training_data=None):
+        column_data = self.get_column_original_data(config['name'])
+        encoder_class = config.get('encoder_class',
+                                   self.lookup_encoder_class(config['type']))
+        encoder_attrs = config.get('encoder_attrs', {})
+
+        encoder_instance = self.make_column_encoder(encoder_class,
+                                                    encoder_attrs,
+                                                    is_target=is_target)
+
+        if training_data and 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder):
+            encoder_instance.prepare_encoder(column_data,
+                                             training_data=training_data)
+        else:
+            encoder_instance.prepare_encoder(column_data)
+
+        return encoder_instance
 
     def prepare_encoders(self):
         """
@@ -229,72 +254,34 @@ class DataSource(Dataset):
             from the training dataset.
         """
         input_encoder_training_data = {'targets': []}
-        self.out_types = []
+        self.out_types = [config['type'] for config in
+                          self.configuration['output_features']]
 
-        for feature_set in ['output_features', 'input_features']:
-            for feature in self.configuration[feature_set]:
-                column_name = feature['name']
-                config = self.get_column_config(column_name)
+        for config in self.configuration['output_features']:
+            column_name = config['name']
+            column_data = self.get_column_original_data(column_name)
 
-                args = [self.get_column_original_data(column_name)]
+            encoder_instance = self.prepare_column_encoder(config,
+                                                           is_target=True)
 
-                # If the column depends upon another, it's encoding *might* be influenced by that
-                if 'depends_on_column' in config:
-                    args += [self.get_column_original_data(config['depends_on_column'])]
+            input_encoder_training_data['targets'].append({
+                'encoded_output': encoder_instance.encode(column_data),
+                'unencoded_output': column_data,
+                'output_encoder': encoder_instance,
+                'output_type': config['type']
+            })
 
-                # If the encoder is not specified by the user lookup the default encoder for the column's data type
-                if 'encoder_class' not in config:
-                    path = 'lightwood.encoders.{type}'.format(type=config['type'])
-                    module = importlib.import_module(path)
-                    if hasattr(module, 'default'):
-                        encoder_class = importlib.import_module(path).default
-                    else:
-                        raise ValueError('No default encoder for {type}'.format(type=config['type']))
-                else:
-                    encoder_class = config['encoder_class']
+            self.encoders[column_name] = encoder_instance
 
-                # Instantiate the encoder and pass any arguments given via the configuration
-                is_target = True if feature_set == 'output_features' else False
-                encoder_instance = encoder_class(is_target=is_target)
+        for config in self.configuration['input_features']:
+            column_name = config['name']
+            encoder_instance = self.prepare_column_encoder(config,
+                                                           is_target=False,
+                                                           training_data=input_encoder_training_data)
 
-                if is_target:
-                    self.out_types.append(config['type'])
-
-                encoder_attrs = config['encoder_attrs'] if 'encoder_attrs' in config else {}
-                for attr in encoder_attrs:
-                    if hasattr(encoder_instance, attr):
-                        setattr(encoder_instance, attr, encoder_attrs[attr])
-
-                # Prime the encoder using the data (for example, to get the one-hot mapping in a categorical encoder)
-                if feature_set == 'input_features':
-                    training_data = input_encoder_training_data
-                else:
-                    training_data = None
-
-                if 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder).args:
-                    encoder_instance.prepare_encoder(args[0], training_data=training_data)
-                else:
-                    encoder_instance.prepare_encoder(args[0])
-
-                self.encoders[column_name] = encoder_instance
-
-                if feature_set == 'output_features':
-                    input_encoder_training_data['targets'].append({
-                        'encoded_output': copy.deepcopy(self.encoders[column_name].encode(args[0])),
-                        'unencoded_output': copy.deepcopy(args[0]),
-                        'output_encoder': copy.deepcopy(encoder_instance),
-                        'output_type': copy.deepcopy(config['type'])
-                    })
-
-        return True
+            self.encoders[column_name] = encoder_instance
 
     def get_encoded_column_data(self, column_name, custom_data=None):
-        """
-
-        :param column_name:
-        :return:
-        """
-
         if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
 
@@ -324,8 +311,7 @@ class DataSource(Dataset):
                 self.encoded_cache[column_name] = encoded_vals
             return encoded_vals
         else:
-            raise Exception(
-                'Looks like you are trying to encode data before preating the encoders via calling `prepare_encoders`')
+            raise RuntimeError('`prepare_encoders` must be called before trying to encode data')
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
         """
@@ -345,7 +331,6 @@ class DataSource(Dataset):
         return decoded_data
 
     def get_feature_names(self, where='input_features'):
-
         return [feature['name'] for feature in self.configuration[where]]
 
     def get_column_config(self, column_name):
@@ -359,46 +344,3 @@ class DataSource(Dataset):
                 if feature['name'] == column_name:
                     return feature
 
-
-if __name__ == "__main__":
-    #TODO; sometimes this fail depending on the data generated
-    import random
-    import pandas
-    from lightwood.data_schemas.predictor_config import predictor_config_schema
-
-    config = {
-        'input_features': [
-            {
-                'name': 'x',
-                'type': 'numeric',
-
-            },
-            {
-                'name': 'y',
-                'type': 'numeric',
-
-            }
-        ],
-
-        'output_features': [
-            {
-                'name': 'z',
-                'type': 'categorical',
-
-            }
-        ]
-    }
-
-    config = predictor_config_schema.validate(config)
-    data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
-    nums = [data['x'][i] * data['y'][i] for i in range(10)]
-
-    data['z'] = ['low' if i < 50 else 'high' for i in nums]
-
-    data_frame = pandas.DataFrame(data)
-
-    print(data_frame)
-
-    ds = DataSource(data_frame, config)
-    ds.prepare_encoders()
-    print(ds.get_encoded_column_data('z'))
