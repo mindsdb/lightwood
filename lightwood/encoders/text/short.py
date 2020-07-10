@@ -1,12 +1,11 @@
 import torch
-from flair.data import Sentence
 from torch.nn.functional import pad
 from lightwood.encoders.categorical import CategoricalAutoEncoder
 
 
 def _get_tokens(text):
     if len(text) > 0:
-        return [tok.text for tok in Sentence(text).tokens]
+        return text.split(' ')
     else:
         return ['']
 
@@ -56,8 +55,6 @@ class TextAutoEncoder(CategoricalAutoEncoder):
             for tok in tokens:
                 unique_tokens.add(tok)
 
-        super().prepare_encoder(unique_tokens)
-
         if self._combine == 'concat':
             self._combine_fn = lambda vecs: _concat(vecs, max_words_per_sent)
         elif self._combine == 'mean':
@@ -72,7 +69,6 @@ class TextAutoEncoder(CategoricalAutoEncoder):
             tokens = _get_tokens(sent)
             with torch.no_grad():
                 encoded_words = super().encode(tokens)
-                print(encoded_words[0].size())
                 encoded_sent = self._combine_fn(encoded_words)
             output.append(encoded_sent)
         return output
@@ -87,49 +83,25 @@ class TextAutoEncoder(CategoricalAutoEncoder):
 
             output = []
             for vec in vectors:
-                out = super().decode(vec.view(-1, vec_size))
+
+                viewed_vec = vec.view(-1, vec_size)
+
+                # Find index of first padding vector
+                for index, v in enumerate(viewed_vec):
+                    if v.abs().sum() == 0:
+                        break
+                else:
+                    index = viewed_vec.size(0)
+
+                out = super().decode(
+                    viewed_vec[:index]
+                )
+
                 output.append(out)
+
             return output
 
         elif self._combine == 'mean':
             raise ValueError('decode is only defined for combine="concat"')
         else:
             self._unexpected_combine()
-
-
-if __name__ == "__main__":
-    # Generate some tests data
-    import random
-    import string
-    from sklearn.metrics import accuracy_score
-
-    random.seed(2)
-    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(7,8))) for x in range(500)]
-    for i in range(len(cateogries)):
-        if i % 10 == 0:
-            cateogries[i] = random.randint(1,20)
-
-    WORDS = ['like', 'hate', 'see', 'walk', 'talk', 'greet']
-
-    priming_data = []
-    test_data = []
-    for i in range(100):
-        sent = ' '.join(random.sample(WORDS, random.randint(1, len(WORDS))))
-        priming_data.append(sent)
-        if i % 3 == 0:
-            test_data.append(sent)
-
-    random.shuffle(priming_data)
-    random.shuffle(test_data)
-
-    enc = TextAutoEncoder(combine='concat')
-    enc.desired_error = 3
-
-    enc.prepare_encoder(priming_data)
-    encoded_data = enc.encode(test_data)
-    decoded_data = enc.decode(encoded_data)
-
-    print(decoded_data)
-    #encoder_accuracy = accuracy_score(list(map(str,test_data)), list(map(str,decoded_data)))
-    #print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
-    #assert(encoder_accuracy > 0.80)
