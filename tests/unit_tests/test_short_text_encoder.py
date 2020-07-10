@@ -1,5 +1,5 @@
 import random
-import pytest
+import unittest
 from lightwood.encoders.text.short import TextAutoEncoder
 
 
@@ -11,51 +11,61 @@ def generate_sentences(min_, max_, vocab_size):
     return [' '.join(random.sample(vocab_sample, random.randint(min_, max_))) for _ in range(200)]
 
 
-@pytest.mark.parametrize("onehot", [False, True])
-def test_concat(onehot):
-    vocab_size = 99 if onehot else 800
+class TestTextAutoEncoder(unittest.TestCase):
+    def test_concat(self):
+        self._test_concat(onehot=True)
+        self._test_concat(onehot=False)
     
-    priming_data = generate_sentences(2, 6, vocab_size)
-    test_data = random.sample(priming_data, len(priming_data) // 5)
+    def test_mean(self):
+        self._test_mean(onehot=True)
+        self._test_mean(onehot=False)
 
-    enc = TextAutoEncoder(combine='concat')
-    enc.prepare_encoder(priming_data)
+    def _test_concat(self, onehot):
+        vocab_size = 99 if onehot else 800
+        
+        priming_data = generate_sentences(2, 6, vocab_size)
+        test_data = random.sample(priming_data, len(priming_data) // 5)
 
-    if onehot:
-        assert not enc.use_autoencoder
-    else:
-        assert enc.use_autoencoder
+        enc = TextAutoEncoder(combine='concat')
+        enc.prepare_encoder(priming_data)
 
-    encoded_data = enc.encode(test_data)
-    decoded_data = enc.decode(encoded_data)
-    
-    assert len(test_data) == len(encoded_data) == len(decoded_data)
+        if onehot:
+            assert not enc.use_autoencoder
+        else:
+            assert enc.use_autoencoder
 
-    for x_sent, y_sent in zip(
-        test_data,
-        [' '.join(x) for x in decoded_data]
-    ):
-        assert x_sent == y_sent
-
-
-@pytest.mark.parametrize("onehot", [False, True])
-def test_mean(onehot):
-    vocab_size = 99 if onehot else 800
-
-    priming_data = generate_sentences(2, 6, vocab_size)
-    test_data = random.sample(priming_data, len(priming_data) // 5)
-
-    enc = TextAutoEncoder(combine='mean')
-    enc.prepare_encoder(priming_data)
-
-    if onehot:
-        assert not enc.use_autoencoder
-    else:
-        assert enc.use_autoencoder
-
-    encoded_data = enc.encode(test_data)
-
-    assert len(test_data) == len(encoded_data)
-
-    with pytest.raises(ValueError):
+        encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
+        
+        assert len(test_data) == len(encoded_data) == len(decoded_data)
+
+        for x_sent, y_sent in zip(
+            test_data,
+            [' '.join(x) for x in decoded_data]
+        ):
+            assert x_sent == y_sent
+
+    def _test_mean(self, onehot):
+        vocab_size = 99 if onehot else 800
+
+        priming_data = generate_sentences(2, 6, vocab_size)
+        test_data = random.sample(priming_data, len(priming_data) // 5)
+
+        enc = TextAutoEncoder(combine='mean')
+        enc.prepare_encoder(priming_data)
+
+        if onehot:
+            assert not enc.use_autoencoder
+        else:
+            assert enc.use_autoencoder
+
+        encoded_data = enc.encode(test_data)
+
+        assert len(test_data) == len(encoded_data)
+
+        with self.assertRaises(ValueError):
+            decoded_data = enc.decode(encoded_data)
+
+
+if __name__ == '__main__':
+    unittest.main()
