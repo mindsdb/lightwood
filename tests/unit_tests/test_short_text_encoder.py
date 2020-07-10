@@ -57,11 +57,5 @@ def test_mean(onehot):
 
     assert len(test_data) == len(encoded_data)
 
-    try:
+    with pytest.raises(ValueError):
         decoded_data = enc.decode(encoded_data)
-    except ValueError:
-        # ValueError is expected because decoding is not
-        # defined for combine="mean"
-        pass
-    else:
-        assert False, 'expected ValueError'

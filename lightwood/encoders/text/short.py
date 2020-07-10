@@ -55,6 +55,8 @@ class TextAutoEncoder(CategoricalAutoEncoder):
             for tok in tokens:
                 unique_tokens.add(tok)
 
+        super().prepare_encoder(unique_tokens)
+
         if self._combine == 'concat':
             self._combine_fn = lambda vecs: _concat(vecs, max_words_per_sent)
         elif self._combine == 'mean':
