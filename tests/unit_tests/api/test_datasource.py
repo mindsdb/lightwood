@@ -1,4 +1,6 @@
-import pytest
+from copy import copy
+
+from unittest import TestCase
 import random
 import numpy as np
 import pandas as pd
@@ -10,10 +12,8 @@ from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.encoders import NumericEncoder, CategoricalAutoEncoder
 
 
-class TestDataSource:
-
-    @pytest.fixture
-    def dataset_and_config(self):
+class TestDataSource(TestCase):
+    def setUp(self):
         config = {
             'input_features': [
                 {
@@ -37,7 +37,6 @@ class TestDataSource:
             ]
         }
         config = predictor_config_schema.validate(config)
-
         n_points = 100
         data = {'x1': [i for i in range(n_points)],
                 'x2': [random.randint(i, i + 20) for i in range(n_points)]}
@@ -47,13 +46,12 @@ class TestDataSource:
 
         df = pd.DataFrame(data)
 
-        return df, config
+        self.config = config
+        self.df = df
 
-    def test_prepare_encoders(self, dataset_and_config):
-        df, config = dataset_and_config
-
+    def test_prepare_encoders(self):
+        df, config = self.df, self.config
         ds = DataSource(df, config)
-
         assert not ds.disable_cache
         ds.prepare_encoders()
 
@@ -83,8 +81,8 @@ class TestDataSource:
         assert isinstance(encoded_column_y, Tensor)
         assert encoded_column_y.shape[0] == len(df)
 
-    def test_encoded_cache(self, dataset_and_config):
-        df, config = dataset_and_config
+    def test_encoded_cache(self):
+        df, config = self.df, self.config
 
         ds = DataSource(df, config)
         assert not ds.disable_cache
@@ -95,8 +93,8 @@ class TestDataSource:
             encoded_column = ds.get_encoded_column_data(column)
             assert (ds.encoded_cache[column] == encoded_column).all()
 
-    def test_transformed_cache(self, dataset_and_config):
-        df, config = dataset_and_config
+    def test_transformed_cache(self):
+        df, config = self.df, self.config
 
         ds = DataSource(df, config)
         assert ds.disable_cache is False
@@ -112,8 +110,9 @@ class TestDataSource:
             encoded_row = ds[i]
             assert ds.transformed_cache[i] == encoded_row
 
-        config['data_source']['cache_transformed_data'] = False
-        ds = DataSource(df, config)
+        alternate_config = copy(config)
+        alternate_config['data_source']['cache_transformed_data'] = False
+        ds = DataSource(df, alternate_config)
         assert ds.disable_cache is True
         ds.prepare_encoders()
 
