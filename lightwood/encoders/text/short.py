@@ -29,9 +29,9 @@ def _mean(vec_list):
     return torch.cat([emb[None] for emb in vec_list], dim=0).mean(0)
 
 
-class TextAutoEncoder(CategoricalAutoEncoder):
+class ShortTextEncoder():
     def __init__(self, is_target=False, combine='mean'):
-        super().__init__(is_target)
+        self.cae = CategoricalAutoEncoder(is_target)
 
         if combine not in ['mean', 'concat']:
             self._unexpected_combine()
@@ -55,7 +55,7 @@ class TextAutoEncoder(CategoricalAutoEncoder):
             for tok in tokens:
                 unique_tokens.add(tok)
 
-        super().prepare_encoder(unique_tokens)
+        self.cae.prepare_encoder(unique_tokens)
 
         if self._combine == 'concat':
             self._combine_fn = lambda vecs: _concat(vecs, max_words_per_sent)
@@ -70,7 +70,7 @@ class TextAutoEncoder(CategoricalAutoEncoder):
         for sent in no_null_sentences:
             tokens = _get_tokens(sent)
             with torch.no_grad():
-                encoded_words = super().encode(tokens)
+                encoded_words = self.cae.encode(tokens)
                 encoded_sent = self._combine_fn(encoded_words)
             output.append(encoded_sent)
         return output
@@ -78,10 +78,10 @@ class TextAutoEncoder(CategoricalAutoEncoder):
     def decode(self, vectors):
         if self._combine == 'concat':
 
-            if self.use_autoencoder:
-                vec_size = self.max_encoded_length
+            if self.cae.use_autoencoder:
+                vec_size = self.cae.max_encoded_length
             else:
-                vec_size = len(self.onehot_encoder._lang.index2word)
+                vec_size = len(self.cae.onehot_encoder._lang.index2word)
 
             output = []
             for vec in vectors:
@@ -95,7 +95,7 @@ class TextAutoEncoder(CategoricalAutoEncoder):
                 else:
                     index = viewed_vec.size(0)
 
-                out = super().decode(
+                out = self.cae.decode(
                     viewed_vec[:index]
                 )
 
