@@ -11,12 +11,9 @@ from lightwood.api.gym import Gym
 from lightwood.config.config import CONFIG
 
 
-MAX_LENGTH = 100
-
-
 class CategoricalAutoEncoder:
 
-    def __init__(self, is_target=False):
+    def __init__(self, is_target=False, max_encoded_length=100):
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self.name = 'Categorical Autoencoder'
@@ -30,7 +27,7 @@ class CategoricalAutoEncoder:
         if self.is_target:
             self.max_encoded_length = None
         else:
-            self.max_encoded_length = 100
+            self.max_encoded_length = max_encoded_length
         self.max_training_time = 7200
 
     def _train_callback(self, error, real_buff, predicted_buff):
