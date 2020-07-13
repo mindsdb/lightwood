@@ -4,10 +4,48 @@ from lightwood.encoders.categorical import CategoricalAutoEncoder
 
 
 def _get_tokens(text):
-    if len(text) > 0:
-        return text.split(' ')
-    else:
-        return ['']
+    SEPARATORS = ' ,.#\n!?\t()'
+    tokens = []
+
+    iterator = iter(text)
+    while True:
+        end = False
+
+        while True:
+            try:
+                char = next(iterator)
+            except StopIteration:
+                end = True
+                break
+            else:
+                if char in SEPARATORS:
+                    continue
+                else:
+                    break
+        
+        if end:
+            break
+
+        tok = []
+
+        while True:
+            tok.append(char)
+
+            try:
+                char = next(iterator)
+            except StopIteration:
+                end = True
+                break
+            else:
+                if char in SEPARATORS:
+                    break
+        
+        tokens.append(''.join(tok))
+        
+        if end:
+            break
+            
+    return tokens
 
 
 def _concat(vec_list, max_):
