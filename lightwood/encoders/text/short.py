@@ -69,6 +69,7 @@ def _mean(vec_list):
 
 class ShortTextEncoder():
     def __init__(self, is_target=False, combine='mean'):
+        self._pytorch_wrapper = torch.FloatTensor
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=300)
 
         if combine not in ['mean', 'concat']:
@@ -145,3 +146,24 @@ class ShortTextEncoder():
             raise ValueError('decode is only defined for combine="concat"')
         else:
             self._unexpected_combine()
+
+
+class TagsEncoder(ShortTextEncoder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._combine = 'concat'
+
+    def encode(self, column_data):
+        no_null_sentences = (x if x is not None else '' for x in column_data)
+        output = []
+        for sent in no_null_sentences:
+            tokens = sorted(_get_tokens(sent))
+            with torch.no_grad():
+                encoded_words = self.cae.encode(tokens)
+                encoded_sent = self._combine_fn(encoded_words)
+            output.append(encoded_sent)
+        return output
+
+    def decode(self, vectors):
+        output = super().decode(vectors)
+        return output
