@@ -4,7 +4,7 @@ import math
 import numpy as np
 import torch
 from cesium import featurize
-from lightwood.encoders.encoder_base import EncoderBase
+from lightwood.encoders.encoder_base import BaseEncoder
 
 DEFAULT_FEATURES_TO_USE = [
     "all_times_nhist_numpeaks",
@@ -137,7 +137,7 @@ FEATURES_WITH_DEFAULT_NONE = [
 ]
 
 
-class CesiumTsEncoder(EncoderBase):
+class CesiumTsEncoder(BaseEncoder):
 
     def __init__(self, features=DEFAULT_FEATURES_TO_USE, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor

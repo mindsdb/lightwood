@@ -11,10 +11,10 @@ from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.shapes import *
 from lightwood.api.gym import Gym
 from lightwood.helpers.device import get_devices
-from lightwood.encoders.encoder_base import EncoderBase
+from lightwood.encoders.encoder_base import BaseEncoder
 
 
-class DistilBertEncoder(EncoderBase):
+class DistilBertEncoder(BaseEncoder):
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
         self.name = 'Text Transformer Encoder'
         self._tokenizer = None

@@ -7,10 +7,10 @@ import numpy as np
 import torch
 
 from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
-from lightwood.encoders.encoder_base import EncoderBase
+from lightwood.encoders.encoder_base import BaseEncoder
 
 
-class AmplitudeTsEncoder(EncoderBase):
+class AmplitudeTsEncoder(BaseEncoder):
 
     def __init__(self, is_target = False):
         self._pytorch_wrapper = torch.FloatTensor

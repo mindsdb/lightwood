@@ -1,5 +1,5 @@
 
-class EncoderBase:
+class BaseEncoder:
     """Base class for all encoders"""
 
     def __init__(self, is_target=False):

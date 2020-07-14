@@ -4,10 +4,10 @@ import os
 import torch
 
 from lightwood.encoders.image.helpers.nn import NnEncoderHelper
-from lightwood.encoders.encoder_base import EncoderBase
+from lightwood.encoders.encoder_base import BaseEncoder
 
 
-class NnAutoEncoder(EncoderBase):
+class NnAutoEncoder(BaseEncoder):
 
     def __init__(self, is_target=False):
         self._model = None

@@ -13,7 +13,7 @@ from torch.utils.model_zoo import tqdm
 import logging
 
 from lightwood.encoders.text.helpers.infersent import InferSent
-from lightwood.encoders.encoder_base import EncoderBase
+from lightwood.encoders.encoder_base import BaseEncoder
 
 try:
     nltk.data.find('tokenizers/punkt')
@@ -26,7 +26,7 @@ MODEL_PATH = "pkl_objects/infersent2.pkl"
 W2V_PATH = "datasets/fastText/crawl-300d-2M-subword.vec"
 
 
-class InferSentEncoder(EncoderBase):
+class InferSentEncoder(BaseEncoder):
 
     def __init__(self, is_target=False):
         self._model = None

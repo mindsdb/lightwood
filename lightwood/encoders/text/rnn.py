@@ -1,11 +1,11 @@
 # flake8: noqa
 from lightwood.encoders.text.helpers.rnn_helpers import *
-from lightwood.encoders.encoder_base import EncoderBase
+from lightwood.encoders.encoder_base import BaseEncoder
 import logging
 import math
 
 
-class RnnEncoder(EncoderBase):
+class RnnEncoder(BaseEncoder):
 
     def __init__(self, encoded_vector_size=256, train_iters=75000, stop_on_error=0.0001,
                  learning_rate=0.01, is_target=False):

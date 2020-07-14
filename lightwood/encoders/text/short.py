@@ -1,11 +1,13 @@
 import torch
 from torch.nn.functional import pad
+
+from lightwood.encoders import BaseEncoder
 from lightwood.encoders.categorical import CategoricalAutoEncoder
 from lightwood.helpers.text import tokenize_text
 from lightwood.helpers.torch import concat_vectors_and_pad, average_vectors
 
 
-class ShortTextEncoder():
+class ShortTextEncoder(BaseEncoder):
     def __init__(self, is_target=False, combine='mean'):
         self._pytorch_wrapper = torch.FloatTensor
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
