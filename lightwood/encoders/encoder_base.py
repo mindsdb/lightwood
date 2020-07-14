@@ -1,11 +1,11 @@
 
 class EncoderBase:
     """Base class for all encoders"""
+
     def __init__(self, is_target=False):
         self.is_target = is_target
 
     def prepare_encoder(self, priming_data):
-        """Can be overridden"""
         pass
 
     def encode(self, column_data):
@@ -15,5 +15,4 @@ class EncoderBase:
         raise NotImplementedError
 
     def to(self, device, available_devices):
-        """Can be overridden"""
         return self
