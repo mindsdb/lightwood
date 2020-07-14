@@ -3,9 +3,10 @@ from tsfresh.feature_extraction import extract_features, MinimalFCParameters, Ef
 import torch
 
 from lightwood.encoders.numeric.numeric import NumericEncoder
+from lightwood.encoders.encoder_base import EncoderBase
 
 
-class TsFreshTsEncoder:
+class TsFreshTsEncoder(EncoderBase):
 
     def __init__(self, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor

@@ -3,6 +3,7 @@ from __future__ import unicode_literals, print_function, division
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
 from lightwood.config.config import CONFIG
 from lightwood.helpers.device import get_devices
+from lightwood.encoders.encoder_base import EncoderBase
 
 import torch
 import torch.nn as nn
@@ -10,7 +11,7 @@ from torch import optim
 import numpy as np
 
 
-class RnnEncoder:
+class RnnEncoder(EncoderBase):
 
     def __init__(self, encoded_vector_size=4, train_iters=75000, stop_on_error=0.8, learning_rate=0.01, is_target=False):
         self._stop_on_error = stop_on_error
