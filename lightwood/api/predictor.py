@@ -101,8 +101,7 @@ class Predictor:
 
         self._mixer.to(device, available_devices)
         for e in self._mixer.encoders:
-            if hasattr(self._mixer.encoders[e], 'to'):
-                self._mixer.encoders[e].to(device, available_devices)
+            self._mixer.encoders[e].to(device, available_devices)
 
     def train_helper_mixers(self, train_ds, test_ds, quantiles):
         from lightwood.mixers.boost.boost import BoostMixer
