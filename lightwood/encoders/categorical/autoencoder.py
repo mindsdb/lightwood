@@ -9,12 +9,10 @@ from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym
 from lightwood.config.config import CONFIG
+from lightwood.encoders.encoder_base import EncoderBase
 
 
-MAX_LENGTH = 100
-
-
-class CategoricalAutoEncoder:
+class CategoricalAutoEncoder(EncoderBase):
 
     def __init__(self, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor
