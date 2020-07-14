@@ -9,6 +9,7 @@ class RnnEncoder(BaseEncoder):
 
     def __init__(self, encoded_vector_size=256, train_iters=75000, stop_on_error=0.0001,
                  learning_rate=0.01, is_target=False):
+        super().__init__(is_target)
         self._stop_on_error = stop_on_error
         self._learning_rate = learning_rate
         self._encoded_vector_size = encoded_vector_size
@@ -17,8 +18,6 @@ class RnnEncoder(BaseEncoder):
         self._output_lang = None
         self._encoder = None
         self._decoder = None
-        self._pytorch_wrapper = torch.FloatTensor
-        self._prepared = False
 
     def prepare_encoder(self, priming_data):
         if self._prepared:

@@ -16,6 +16,7 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 class DistilBertEncoder(BaseEncoder):
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
+        super().__init__(is_target)
         self.name = 'Text Transformer Encoder'
         self._tokenizer = None
         self._model = None
@@ -23,7 +24,6 @@ class DistilBertEncoder(BaseEncoder):
         self._pytorch_wrapper = torch.FloatTensor
         self._max_len = None
         self._max_ele = None
-        self._prepared = False
         self._model_type = None
         self.desired_error = 0.01
         self.max_training_time = 7200

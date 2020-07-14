@@ -10,9 +10,8 @@ from lightwood.encoders.encoder_base import BaseEncoder
 class NnAutoEncoder(BaseEncoder):
 
     def __init__(self, is_target=False):
+        super().__init__(is_target)
         self._model = None
-        self._pytorch_wrapper = torch.FloatTensor
-        self._prepared = False
 
     def prepare_encoder(self, priming_data):
         if self._prepared:

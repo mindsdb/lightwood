@@ -9,6 +9,7 @@ from lightwood.helpers.torch import concat_vectors_and_pad, average_vectors
 
 class ShortTextEncoder(BaseEncoder):
     def __init__(self, is_target=False, combine='mean'):
+        super().__init__(is_target)
         self._pytorch_wrapper = torch.FloatTensor
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
 

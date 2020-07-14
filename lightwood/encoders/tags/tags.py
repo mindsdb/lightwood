@@ -1,13 +1,21 @@
 import torch
-from lightwood.encoders.text import ShortTextEncoder
-from lightwood.helpers.text import tokenize_text
+
+from lightwood.encoders import BaseEncoder, CategoricalAutoEncoder
 from lightwood.helpers.torch import concat_vectors_and_pad
 
 
-class TagsEncoder(ShortTextEncoder):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._combine = 'concat'
+class TagsEncoder(BaseEncoder):
+    def __init__(self, is_target=False):
+        super().__init__(is_target)
+        self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
+
+        if combine not in ['mean', 'concat']:
+            self._unexpected_combine()
+
+        self._combine = combine
+
+        # Defined in self.prepare_encoder()
+        self._combine_fn = None
 
     def prepare_encoder(self, column_data):
         no_null_sentences = (x if x else [] for x in column_data)

@@ -13,7 +13,7 @@ from lightwood.encoders.encoder_base import BaseEncoder
 class AmplitudeTsEncoder(BaseEncoder):
 
     def __init__(self, is_target = False):
-        self._pytorch_wrapper = torch.FloatTensor
+        super().__init__(is_target)
         self._ts_encoder = TsFreshTsEncoder()
         self._ts_encoder._pytorch_wrapper = list
         self._max_samples = 2000

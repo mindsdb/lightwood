@@ -10,9 +10,9 @@ from lightwood.encoders.encoder_base import BaseEncoder
 class NumericEncoder(BaseEncoder):
 
     def __init__(self, data_type=None, is_target=False):
+        super().__init__(is_target)
         self._type = data_type
         self._mean = None
-        self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self.is_target = is_target
         self.decode_log = False

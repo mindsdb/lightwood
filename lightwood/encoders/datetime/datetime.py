@@ -4,11 +4,6 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 
 class DatetimeEncoder(BaseEncoder):
-
-    def __init__(self, is_target=False):
-        self._pytorch_wrapper = torch.FloatTensor
-        self._prepared = False
-
     def prepare_encoder(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
