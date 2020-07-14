@@ -69,7 +69,7 @@ def _mean(vec_list):
 
 class ShortTextEncoder():
     def __init__(self, is_target=False, combine='mean'):
-        self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=300)
+        self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
 
         if combine not in ['mean', 'concat']:
             self._unexpected_combine()
