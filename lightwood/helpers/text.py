@@ -2,6 +2,10 @@ import nltk
 import re
 
 
+def contains_alnum(text):
+    return re.search('[a-zA-Z0-9]', text)
+
+
 def decontracted(phrase):
     # specific
     phrase = re.sub(r"won\'t", "will not", phrase)
@@ -20,4 +24,4 @@ def decontracted(phrase):
 
 
 def tokenize_text(text):
-    return [x for x in nltk.word_tokenize(decontracted(text)) if x.isalpha()]
+    return [t.lower() for t in nltk.word_tokenize(decontracted(text)) if contains_alnum(t)]

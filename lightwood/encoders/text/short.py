@@ -2,25 +2,7 @@ import torch
 from torch.nn.functional import pad
 from lightwood.encoders.categorical import CategoricalAutoEncoder
 from lightwood.helpers.text import tokenize_text
-
-
-def _concat(vec_list, max_):
-    assert len(vec_list) > 0
-    assert len(vec_list) <= max_
-    assert max_ > 0
-
-    cat_vec = torch.cat(list(vec_list), dim=0)
-
-    pad_size = max_ - len(vec_list)
-    padding = (0, pad_size * vec_list[0].size(0))
-    padded = pad(cat_vec[None], padding, 'constant', 0)[0]
-
-    return padded
-
-
-def _mean(vec_list):
-    assert len(vec_list) > 0
-    return torch.cat([emb[None] for emb in vec_list], dim=0).mean(0)
+from lightwood.helpers.torch import concat_vectors_and_pad, average_vectors
 
 
 class ShortTextEncoder():
@@ -53,9 +35,9 @@ class ShortTextEncoder():
         self.cae.prepare_encoder(unique_tokens)
 
         if self._combine == 'concat':
-            self._combine_fn = lambda vecs: _concat(vecs, max_words_per_sent)
+            self._combine_fn = lambda vecs: concat_vectors_and_pad(vecs, max_words_per_sent)
         elif self._combine == 'mean':
-            self._combine_fn = lambda vecs: _mean(vecs)
+            self._combine_fn = lambda vecs: average_vectors(vecs)
         else:
             self._unexpected_combine()
 
@@ -64,9 +46,8 @@ class ShortTextEncoder():
         output = []
         for sent in no_null_sentences:
             tokens = tokenize_text(sent)
-            with torch.no_grad():
-                encoded_words = self.cae.encode(tokens)
-                encoded_sent = self._combine_fn(encoded_words)
+            encoded_words = self.cae.encode(tokens)
+            encoded_sent = self._combine_fn(encoded_words)
             output.append(encoded_sent)
         return output
 

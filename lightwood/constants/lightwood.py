@@ -10,9 +10,9 @@ class Const:
 
 
 class ColumnDataTypes(Const):
-
     NUMERIC = 'numeric'
     CATEGORICAL = 'categorical'
+    TAG = 'tags'
     DATETIME = 'datetime'
     IMAGE = 'image'
     TEXT = 'text'
@@ -24,7 +24,6 @@ COLUMN_DATA_TYPES = ColumnDataTypes()
 
 
 class HistogramTypes(Const):
-
     NORMAL = 'normal'
     EXPONENTIAL = 'exponential'
 
