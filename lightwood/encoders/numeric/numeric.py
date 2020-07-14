@@ -4,9 +4,10 @@ import sys
 
 import torch
 import numpy as np
+from lightwood.encoders.encoder_base import EncoderBase
 
 
-class NumericEncoder:
+class NumericEncoder(EncoderBase):
 
     def __init__(self, data_type=None, is_target=False):
         self._type = data_type

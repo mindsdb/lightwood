@@ -1,8 +1,9 @@
 import datetime
 import torch
+from lightwood.encoders.encoder_base import EncoderBase
 
 
-class DatetimeEncoder:
+class DatetimeEncoder(EncoderBase):
 
     def __init__(self, is_target=False):
         self._pytorch_wrapper = torch.FloatTensor
