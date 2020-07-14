@@ -12,7 +12,6 @@ class Const:
 class ColumnDataTypes(Const):
     NUMERIC = 'numeric'
     CATEGORICAL = 'categorical'
-    TAG = 'tags'
     DATETIME = 'datetime'
     IMAGE = 'image'
     TEXT = 'text'
