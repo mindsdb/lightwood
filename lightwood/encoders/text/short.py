@@ -1,51 +1,7 @@
 import torch
 from torch.nn.functional import pad
 from lightwood.encoders.categorical import CategoricalAutoEncoder
-
-
-def _get_tokens(text):
-    SEPARATORS = ' ,.#\n!?\t()'
-    tokens = []
-
-    iterator = iter(text)
-    while True:
-        end = False
-
-        while True:
-            try:
-                char = next(iterator)
-            except StopIteration:
-                end = True
-                break
-            else:
-                if char in SEPARATORS:
-                    continue
-                else:
-                    break
-        
-        if end:
-            break
-
-        tok = []
-
-        while True:
-            tok.append(char)
-
-            try:
-                char = next(iterator)
-            except StopIteration:
-                end = True
-                break
-            else:
-                if char in SEPARATORS:
-                    break
-        
-        tokens.append(''.join(tok))
-        
-        if end:
-            break
-            
-    return tokens
+from lightwood.helpers.text import tokenize_text
 
 
 def _concat(vec_list, max_):
@@ -88,7 +44,7 @@ class ShortTextEncoder():
         unique_tokens = set()
         max_words_per_sent = 0
         for sent in no_null_sentences:
-            tokens = _get_tokens(sent)
+            tokens = tokenize_text(sent)
             if len(tokens) > max_words_per_sent:
                 max_words_per_sent = len(tokens)
             for tok in tokens:
@@ -107,7 +63,7 @@ class ShortTextEncoder():
         no_null_sentences = (x if x is not None else '' for x in column_data)
         output = []
         for sent in no_null_sentences:
-            tokens = _get_tokens(sent)
+            tokens = tokenize_text(sent)
             with torch.no_grad():
                 encoded_words = self.cae.encode(tokens)
                 encoded_sent = self._combine_fn(encoded_words)
@@ -146,24 +102,3 @@ class ShortTextEncoder():
             raise ValueError('decode is only defined for combine="concat"')
         else:
             self._unexpected_combine()
-
-
-class TagsEncoder(ShortTextEncoder):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._combine = 'concat'
-
-    def encode(self, column_data):
-        no_null_sentences = (x if x is not None else '' for x in column_data)
-        output = []
-        for sent in no_null_sentences:
-            tokens = sorted(_get_tokens(sent))
-            with torch.no_grad():
-                encoded_words = self.cae.encode(tokens)
-                encoded_sent = self._combine_fn(encoded_words)
-            output.append(encoded_sent)
-        return output
-
-    def decode(self, vectors):
-        output = super().decode(vectors)
-        return output
