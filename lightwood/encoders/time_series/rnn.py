@@ -244,9 +244,8 @@ if __name__ == "__main__":
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-    # test: overfit single multi dimensional time series
-
-    logging.info(" [Test] Testing multi-dimensional time series encoding")
+    # test 1: overfit single multi dimensional time series
+    logging.info(" [Test] Multi-dimensional time series overfit")
     series = [[['1 2 3 4 5 6'], ['2 3 4 5 6 7'], ['3 4 5 6 7 8'], ['4 5 6 7 8 9']]]
 
     data = 100 * series
