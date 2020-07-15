@@ -1,4 +1,4 @@
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 
 import lightwood
 import pandas as pd
@@ -11,8 +11,7 @@ lightwood.config.config.CONFIG.USE_CUDA = True
 
 df = pd.read_csv("../../../datasets/mpst/mpst_full_data.csv")
 
-df = df[['title', 'tags', 'split']]
-df = df.sample(1000)
+df = df[['title', 'plot_synopsis', 'tags', 'split']]
 df.tags = df.tags.apply(lambda x: x.split(', '))
 
 df_train = df[df.split == 'train'].copy()
@@ -21,10 +20,9 @@ df_train = df_train.drop(['split'], axis=1)
 df_test = df_test.drop(['split'], axis=1)
 
 config = {'input_features': [
-        {'name': 'title',
+        {'name': 'plot_synopsis',
          'type': 'text',
-         'encoder_class': ShortTextEncoder,
-         'encoder_attrs': {'_combine': 'concat'}},
+         },
     ],
     'output_features': [
         {'name': 'tags', 'type': 'multiple_categorical', 'encoder_class': MultihotEncoder}
@@ -41,8 +39,15 @@ def iter_function(epoch, error, test_error, test_error_gradient, test_accuracy):
 
 predictor.learn(from_data=df_train,
                 callback_on_iter=iter_function,
-                eval_every_x_epochs=4,
-                stop_training_after_seconds=60)
+                eval_every_x_epochs=4)
+
+predictions = predictor.predict(when_data=df_train)
+train_tags = df_train.tags
+predicted_tags = predictions['tags']['predictions']
+train_tags_encoded = predictor._mixer.encoders['tags'].encode(train_tags)
+pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
+score = f1_score(train_tags_encoded, pred_labels_encoded, average='weighted')
+print('Train f1 score', score)
 
 # Why does it try to encode the missing column tags?
 #predictions = predictor.predict(when_data=df_test.drop(['tags'], axis=1))
@@ -51,7 +56,7 @@ predictions = predictor.predict(when_data=df_test)
 test_tags = df_test.tags
 predicted_tags = predictions['tags']['predictions']
 
-test_labels_str = [str(sorted(t)) for t in test_tags]
-pred_labels_str = [str(sorted(t)) for t in predicted_tags]
-encoder_accuracy = accuracy_score(test_labels_str, pred_labels_str)
-print(encoder_accuracy)
+test_tags_encoded = predictor._mixer.encoders['tags'].encode(test_tags)
+pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
+score = f1_score(test_tags_encoded, pred_labels_encoded, average='weighted')
+print('Test f1 score', score)

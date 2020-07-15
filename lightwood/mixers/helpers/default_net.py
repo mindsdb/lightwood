@@ -16,12 +16,10 @@ class DefaultNet(torch.nn.Module):
                      selfaware=False,
                      size_parameters={},
                      pretrained_net=None,
-                     deterministic=False,
-                     output_rectifier=None):
+                     deterministic=False):
         self.input_size = input_size
         self.output_size = output_size
         self.nr_outputs = nr_outputs
-        self.output_rectifier = output_rectifier
         self.selfaware = selfaware
         # How many devices we can train this network on
         self.available_devices = 1
@@ -66,8 +64,6 @@ class DefaultNet(torch.nn.Module):
                 if ind < len(shape) - 2:
                     layers.append(rectifier())
 
-            if self.output_rectifier:
-                layers.append(self.output_rectifier())
             self.net = torch.nn.Sequential(*layers)
         else:
             self.net = pretrained_net

@@ -514,18 +514,12 @@ class NnMixer:
 
             input_sample, output_sample = ds[0]
 
-            output_rectifier = None
-            if self.out_types == [COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL]:
-                # Predicting multiple categories requires to apply Sigmoid to output
-                output_rectifier = torch.nn.Sigmoid
-
             self.net = self.nn_class(self.dynamic_parameters,
                                      input_size=len(input_sample),
                                      output_size=len(output_sample),
                                      nr_outputs=len(self.out_types),
                                      selfaware=False,
-                                     deterministic=self.config['mixer']['deterministic'],
-                                     output_rectifier=output_rectifier)
+                                     deterministic=self.config['mixer']['deterministic'])
             self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -545,8 +539,8 @@ class NnMixer:
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
                     elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-                        self.criterion_arr.append(torch.nn.BCELoss(weight=output_weights))
-                        self.unreduced_criterion_arr.append(torch.nn.BCELoss(weight=output_weights, reduce=False))
+                        self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=output_weights))
+                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=output_weights, reduce=False))
                     elif output_type == COLUMN_DATA_TYPES.NUMERIC:
                         self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
                         self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
