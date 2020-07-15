@@ -15,6 +15,7 @@ def train_and_eval(data, queries, params):
     encoder = RnnEncoder(encoded_vector_size=params['hidden_size'],
                          train_iters=params['train_iters'],
                          ts_n_dims=params['ts_n_dims'],
+                         max_timesteps=params['max_ts'],
                          dropout=params['dropout'])
     encoder.prepare_encoder(data, feedback_hoop_function=params['feedback_fn'], batch_size=params['batch_size'])
 
