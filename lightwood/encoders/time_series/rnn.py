@@ -232,7 +232,7 @@ class RnnEncoder:
 
 # only run the test if this file is called from debugger
 if __name__ == "__main__":
-    from lightwood.encoders.time_series.helpers.test_ts import train_and_eval
+    from lightwood.encoders.time_series.helpers.test_ts import test_ts
 
     # set log, fix random seed for reproducibility
     logging.basicConfig(level=logging.DEBUG)
@@ -252,11 +252,7 @@ if __name__ == "__main__":
     data = 100 * series
     n_dims = max([len(q) for q in data])
 
-    queries = [[['1 2 3'], ['2 3 4'], ['3 4 5'], ['4 5 6']]]
-    answers = [[4, 5, 6, 7]]
-
-    params = {'answers': answers,
-              'max_ts': 6,
+    params = {'max_ts': 6,
               'hidden_size': 10,
               'batch_size': 1,
               'dropout': 0.1,
@@ -266,4 +262,13 @@ if __name__ == "__main__":
               'feedback_fn': lambda x: logging.info(x),
               'pred_qty': 1}
 
-    train_and_eval(data, queries, params)
+    encoder = RnnEncoder(encoded_vector_size=params['hidden_size'],
+                         train_iters=params['train_iters'],
+                         ts_n_dims=params['ts_n_dims'],
+                         max_timesteps=params['max_ts'],
+                         dropout=params['dropout'])
+    encoder.prepare_encoder(data, feedback_hoop_function=params['feedback_fn'], batch_size=params['batch_size'])
+
+    queries = [[['1 2 3'], ['2 3 4'], ['3 4 5'], ['4 5 6']]]
+    answers = [[4, 5, 6, 7]]
+    test_ts(encoder, queries, answers, params)
