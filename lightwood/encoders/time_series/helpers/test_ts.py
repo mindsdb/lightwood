@@ -1,23 +1,16 @@
 import logging
-
 from lightwood.encoders.time_series.rnn import RnnEncoder
 
 
-def train_and_eval(data, queries, params):
-    """ Minimal training and testing suite to unit test time series encoder-decoder.
-    :param data: list of multi-dimensional time series [[data_dim1], ...] to train the model with.
-                 For now, data_dim is a string of integers/floats separated by white space (e.g. "1 2 3 4")
-    :param queries: list of multi-dimensional time series to encode, predict, and decode with.
-    :param params: dictionary with various configuration parameters.
+def test_ts(encoder, queries, answers, params):
+    """ Minimal testing suite for time series encoder-decoder.
+    :param encoder: RnnEncoder instance to test
+    :param queries: list of multi-dimensional time series to encode, predict, and decode with
+                    [[[data_ts1_dim1], [data_ts1_dim2]], ...]
+    :param params: dictionary with configuration parameters
     :return:
     """
     forecasts, decoded = list(), list()
-    encoder = RnnEncoder(encoded_vector_size=params['hidden_size'],
-                         train_iters=params['train_iters'],
-                         ts_n_dims=params['ts_n_dims'],
-                         max_timesteps=params['max_ts'],
-                         dropout=params['dropout'])
-    encoder.prepare_encoder(data, feedback_hoop_function=params['feedback_fn'], batch_size=params['batch_size'])
 
     # predict and decode
     for query in queries:
@@ -38,12 +31,12 @@ def train_and_eval(data, queries, params):
         query = queries[i]
         preds = forecasts[i]
         dec = [elt[0:len(query[0][0].split(" "))] for elt in decoded[i]]  # truncate to original query length
-        answers = params['answers'][i]
+        ans = answers[i]
         aggregate = [preds, dec]
 
         # check prediction
         pred_test = True
-        for answer, pred in zip(answers, preds[-1]):  # compare last predicted timestep with answer
+        for answer, pred in zip(ans, preds[-1]):  # compare last predicted timestep with answer
             if abs(pred - answer) > params['margin']:
                 pred_test = False
                 break
