@@ -19,7 +19,7 @@ class MultiHotEncoder(BaseEncoder):
         return self._pytorch_wrapper(data_array)
 
     def decode(self, vectors):
-        # It fhese are logits output by the neural network, we need to treshold them to binary vectors
+        # It these are logits output by the neural network, we need to treshold them to binary vectors
         vectors = np.where(vectors > 0, 1, 0)
         words_tuples = self.binarizer.inverse_transform(vectors)
         return [list(w) for w in words_tuples]
