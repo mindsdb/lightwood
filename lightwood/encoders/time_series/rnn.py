@@ -13,7 +13,7 @@ from lightwood.helpers.device import get_devices
 
 class RnnEncoder:
     def __init__(self, encoded_vector_size=4, train_iters=75000, stop_on_error=0.8, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, dropout=0.2):
+                 is_target=False, ts_n_dims=1, dropout=0.2, weight_decay=1e-4):
         self.device, _ = get_devices()
 
         self._stop_on_error = stop_on_error
@@ -26,7 +26,7 @@ class RnnEncoder:
         self._decoder = DecoderRNNNumerical(output_size=ts_n_dims, hidden_size=self._encoded_vector_size,
                                             dropout=dropout).to(self.device)
         self.parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
-        self.optimizer = optim.Adam(self.parameters, lr=self._learning_rate)
+        self.optimizer = optim.AdamW(self.parameters, lr=self._learning_rate, weight_decay=weight_decay)
         self.criterion = nn.MSELoss()
         self._prepared = False
         self._n_dims = ts_n_dims  # expected dimensionality of time series
