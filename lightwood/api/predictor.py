@@ -304,7 +304,7 @@ class Predictor:
 
     @staticmethod
     def apply_accuracy_function(col_type, real, predicted, weight_map=None):
-        if col_type == 'categorical':
+        if col_type in (COLUMN_DATA_TYPES.CATEGORICAL, COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL):
             if weight_map is None:
                 sample_weight = [1 for x in real]
             else:

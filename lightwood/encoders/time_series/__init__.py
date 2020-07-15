@@ -1,7 +1,6 @@
 from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
 from lightwood.encoders.time_series.rnn import RnnEncoder
 
-#default = TsFreshTsEncoder
 default = RnnEncoder
 
 # Optional encoders

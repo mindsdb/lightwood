@@ -7,6 +7,10 @@ import numpy as np
 from torch.utils.data import Dataset
 
 from lightwood.config.config import CONFIG
+from lightwood.constants.lightwood import ColumnDataTypes
+from lightwood.encoders import (NumericEncoder, CategoricalAutoEncoder,
+                                MultihotEncoder, DistilBertEncoder, DatetimeEncoder,
+                                Img2VecEncoder, RnnEncoder)
 
 
 class SubSet(Dataset):
@@ -209,8 +213,18 @@ class DataSource(Dataset):
         return self.data_frame[column_name].tolist()
 
     def lookup_encoder_class(self, column_type):
-        encoder_class = importlib.import_module(f'lightwood.encoders.{column_type}').default
-        return encoder_class
+        default_encoder_classes = {
+            ColumnDataTypes.NUMERIC: NumericEncoder,
+            ColumnDataTypes.CATEGORICAL: CategoricalAutoEncoder,
+            ColumnDataTypes.MULTIPLE_CATEGORICAL: MultihotEncoder,
+            ColumnDataTypes.DATETIME: DatetimeEncoder,
+            ColumnDataTypes.IMAGE: Img2VecEncoder,
+            ColumnDataTypes.TEXT: DistilBertEncoder,
+            ColumnDataTypes.TIME_SERIES: RnnEncoder,
+            # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
+        }
+
+        return default_encoder_classes[column_type]
 
     def make_column_encoder(self,
                             encoder_class,
