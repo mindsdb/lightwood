@@ -50,7 +50,7 @@ class DecoderRNNNumerical(nn.Module):
     def __init__(self, hidden_size, output_size, dropout=0.2):
         super(DecoderRNNNumerical, self).__init__()
         self.hidden_size = hidden_size
-        self.in_activation = nn.ReLU()
+        self.in_activation = nn.Sigmoid()
         self.dropout = nn.Dropout(dropout)
         self.gru = nn.GRU(output_size, hidden_size)
         self.out = nn.Linear(hidden_size, output_size)
