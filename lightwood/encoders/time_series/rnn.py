@@ -13,7 +13,7 @@ from lightwood.helpers.device import get_devices
 
 class RnnEncoder:
     def __init__(self, encoded_vector_size=4, train_iters=75000, stop_on_error=0.8, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, dropout=0.2, weight_decay=1e-4):
+                 is_target=False, ts_n_dims=1, dropout=0.2, weight_decay=1e-4, max_timesteps=64):
         self.device, _ = get_devices()
 
         self._stop_on_error = stop_on_error
@@ -30,7 +30,8 @@ class RnnEncoder:
         self.criterion = nn.MSELoss()
         self._prepared = False
         self._n_dims = ts_n_dims  # expected dimensionality of time series
-        self._max_length = 20  # static decoding length
+        self._max_ts_length = max_timesteps  # for truncating and padding
+        self._max_dec_length = 20  # static decoding length
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
 
@@ -61,7 +62,8 @@ class RnnEncoder:
                 data_points = priming_data[data_idx:min(data_idx + batch_size, len(priming_data))]
                 batch = []
                 for dp in data_points:
-                    data_tensor = tensor_from_series(dp, self.device, n_dims=self._n_dims, pad_value=self._eos)
+                    data_tensor = tensor_from_series(dp, self.device, n_dims=self._n_dims,
+                                                     pad_value=self._eos, max_len=self._max_ts_length)
                     batch.append(data_tensor)
 
                 # shape: (batch_size, timesteps, n_dims)
@@ -136,7 +138,8 @@ class RnnEncoder:
         """
         self._encoder.eval()
         with torch.no_grad():
-            data_tensor = tensor_from_series(data, self.device, n_dims=self._n_dims, pad_value=self._eos)
+            data_tensor = tensor_from_series(data, self.device, n_dims=self._n_dims,
+                                             pad_value=self._eos, max_len=self._max_ts_length)
             steps = data_tensor.shape[1]
             encoder_hidden = self._encoder.initHidden(self.device)
             encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
@@ -204,7 +207,7 @@ class RnnEncoder:
         with torch.no_grad():
             ret = []
             next_tensor = torch.full((1, 1, self._n_dims), self._sos, dtype=torch.float32).to(self.device)
-            for _ in range(self._max_length):
+            for _ in range(self._max_dec_length):
                 next_tensor, hidden = self._decoder.forward(next_tensor, hidden)
                 ret.append(next_tensor)
             return torch.stack(ret)
@@ -242,6 +245,7 @@ if __name__ == "__main__":
         torch.backends.cudnn.benchmark = False
 
     # test: overfit single multi dimensional time series
+
     logging.info(" [Test] Testing multi-dimensional time series encoding")
     series = [[['1 2 3 4 5 6'], ['2 3 4 5 6 7'], ['3 4 5 6 7 8'], ['4 5 6 7 8 9']]]
 
@@ -252,12 +256,13 @@ if __name__ == "__main__":
     answers = [[4, 5, 6, 7]]
 
     params = {'answers': answers,
+              'max_ts': 6,
               'hidden_size': 10,
               'batch_size': 1,
               'dropout': 0.1,
               'ts_n_dims': n_dims,
-              'train_iters': 15,
-              'margin': 0.25,  # error tolerance
+              'train_iters': 20,
+              'margin': 0.5,  # error tolerance
               'feedback_fn': lambda x: logging.info(x),
               'pred_qty': 1}
 

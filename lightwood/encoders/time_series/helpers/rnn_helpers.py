@@ -4,13 +4,14 @@ import torch
 import torch.nn as nn
 
 
-def tensor_from_series(series, device, n_dims=None, pad_value=0.0):
+def tensor_from_series(series, device, n_dims=None, pad_value=0.0, max_len=64):
     """
     :param series: list of lists, corresponds to time series: [[x1_1, ..., x1_n], [x2_1, ..., x2_n], ...]
                    the series is zero-padded on each axis so that all dimensions have equal length
     :param device: computing device that PyTorch backend uses
     :param n_dims: if not None, will zero-pad dimensions until series_dimensions = n_dims
     :param pad_value: value to pad each dimension in the time series, if needed
+    :param max_len: length to pad or truncate each time_series
     :return: series as a tensor ready for model consumption, shape (1, ts_length, n_dims)
     """
     if isinstance(series[0], torch.Tensor):
@@ -29,11 +30,13 @@ def tensor_from_series(series, device, n_dims=None, pad_value=0.0):
                 dimn_series.append(0)
         float_series.append(dimn_series)
 
-    # timestep padding
+    # timestep padding and truncating
     timesteps = max([len(dimn) for dimn in float_series])
     for i in range(len(float_series)):
-        for _ in range(max(0, timesteps - len(float_series[i]))):
+        # for _ in range(max(0, timesteps - len(float_series[i]))):
+        for _ in range(max(0, max_len - timesteps)):
             float_series[i].append(pad_value)
+        float_series[i] = float_series[i][:max_len]
 
     # dimension padding
     if n_dims:
@@ -42,7 +45,7 @@ def tensor_from_series(series, device, n_dims=None, pad_value=0.0):
     else:
         n_dims = len(float_series)
 
-    tensor = torch.tensor(float_series, dtype=torch.float, device=device).T.view(-1, timesteps, n_dims).float()
+    tensor = torch.tensor(float_series, dtype=torch.float, device=device).T.view(-1, max_len, n_dims).float()
     return tensor
 
 
