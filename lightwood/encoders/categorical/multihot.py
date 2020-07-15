@@ -4,7 +4,7 @@ from lightwood.encoders import BaseEncoder
 from sklearn.preprocessing import MultiLabelBinarizer
 
 
-class MultihotEncoder(BaseEncoder):
+class MultiHotEncoder(BaseEncoder):
     def __init__(self, is_target=False):
         super().__init__(is_target)
         self.max_words_per_sent = None

@@ -10,7 +10,7 @@ from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
 from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
 # from lightwood.encoders.audio.amplitude_ts import AmplitudeTsEncoder
-from lightwood.encoders.categorical.multihot import MultihotEncoder
+from lightwood.encoders.categorical.multihot import MultiHotEncoder
 
 try:
     from lightwood.encoders.time_series.cesium_ts import CesiumTsEncoder

@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
 from lightwood.encoders import (NumericEncoder, CategoricalAutoEncoder,
-                                MultihotEncoder, DistilBertEncoder, DatetimeEncoder,
+                                MultiHotEncoder, DistilBertEncoder, DatetimeEncoder,
                                 Img2VecEncoder, RnnEncoder)
 
 
@@ -216,7 +216,7 @@ class DataSource(Dataset):
         default_encoder_classes = {
             ColumnDataTypes.NUMERIC: NumericEncoder,
             ColumnDataTypes.CATEGORICAL: CategoricalAutoEncoder,
-            ColumnDataTypes.MULTIPLE_CATEGORICAL: MultihotEncoder,
+            ColumnDataTypes.MULTIPLE_CATEGORICAL: MultiHotEncoder,
             ColumnDataTypes.DATETIME: DatetimeEncoder,
             ColumnDataTypes.IMAGE: Img2VecEncoder,
             ColumnDataTypes.TEXT: DistilBertEncoder,

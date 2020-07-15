@@ -5,7 +5,7 @@ import pandas as pd
 
 from lightwood import Predictor
 from lightwood.encoders.text import ShortTextEncoder
-from lightwood.encoders.categorical import MultihotEncoder
+from lightwood.encoders.categorical import MultiHotEncoder
 
 lightwood.config.config.CONFIG.USE_CUDA = True
 
@@ -25,7 +25,7 @@ config = {'input_features': [
          },
     ],
     'output_features': [
-        {'name': 'tags', 'type': 'multiple_categorical', 'encoder_class': MultihotEncoder}
+        {'name': 'tags', 'type': 'multiple_categorical', 'encoder_class': MultiHotEncoder}
     ],
 }
 predictor = Predictor(config)

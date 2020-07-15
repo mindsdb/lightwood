@@ -4,10 +4,10 @@ import string
 
 from sklearn.metrics import accuracy_score
 
-from lightwood.encoders.categorical.multihot import MultihotEncoder
+from lightwood.encoders.categorical.multihot import MultiHotEncoder
 
 
-class TestMultihotEncoder(unittest.TestCase):
+class TestMultiHotEncoder(unittest.TestCase):
     def get_vocab(self):
         return [''.join(random.choices(string.ascii_uppercase, k=5)) for i in range(10)]
 
@@ -18,7 +18,7 @@ class TestMultihotEncoder(unittest.TestCase):
         priming_data = tags[:70]
         test_data = tags[70:]
 
-        enc = MultihotEncoder()
+        enc = MultiHotEncoder()
         enc.prepare_encoder(priming_data)
 
         encoded_data = enc.encode(test_data)
@@ -34,7 +34,7 @@ class TestMultihotEncoder(unittest.TestCase):
         tags = [list(set(random.choices(vocab, k=random.randint(1, 3)))) for i in range(10)]
         tags.append([])
 
-        enc = MultihotEncoder()
+        enc = MultiHotEncoder()
         enc.prepare_encoder(tags)
 
         encoded_data = enc.encode(tags)
