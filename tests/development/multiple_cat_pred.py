@@ -1,3 +1,6 @@
+"""
+This will be moved to mindsdb examples once it's merged
+"""
 from sklearn.metrics import accuracy_score, f1_score
 
 import lightwood

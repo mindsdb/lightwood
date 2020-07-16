@@ -262,7 +262,8 @@ class Predictor:
                 )
 
         def callback_on_iter_w_acc(epoch, training_error, test_error, delta_mean):
-            callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
+            if callback_on_iter is not None:
+                callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
         self._mixer.fit(train_ds=from_data_ds ,test_ds=test_data_ds, callback=callback_on_iter_w_acc, stop_training_after_seconds=stop_training_after_seconds, eval_every_x_epochs=eval_every_x_epochs)
         self.train_accuracy = self.calculate_accuracy(test_data_ds)
