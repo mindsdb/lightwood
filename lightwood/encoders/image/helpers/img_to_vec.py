@@ -23,6 +23,8 @@ class Img2Vec(nn.Module):
         :param layer: String or Int depending on model.  See more docs: https://github.com/christiansafka/img2vec.git
         :param layer_output_size: Int depicting the output size of the requested layer
         """
+        super(Img2Vec, self).__init__()
+
         self.device, _ = get_devices()
         self.layer_output_size = layer_output_size
         self.model_name = model
