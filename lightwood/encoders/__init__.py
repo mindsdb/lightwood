@@ -1,3 +1,4 @@
+from lightwood.encoders.encoder_base import EncoderBase
 from lightwood.encoders.datetime.datetime import DatetimeEncoder
 from lightwood.encoders.image.img_2_vec import Img2VecEncoder
 from lightwood.encoders.image.nn import NnAutoEncoder
