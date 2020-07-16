@@ -5,9 +5,10 @@ from io import BytesIO
 
 from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 from lightwood.constants.lightwood import ENCODER_AIM
+from lightwood.encoders.encoder_base import EncoderBase
 
 
-class Img2VecEncoder:
+class Img2VecEncoder(EncoderBase):
 
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
         self._model = None

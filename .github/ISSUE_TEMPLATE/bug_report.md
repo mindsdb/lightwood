@@ -1,31 +1,14 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
+labels: 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Your Environment**
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. See error
+* Python version:
+* Operating system:
+* Lightwood version:
+* Additional info if applicable:
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Lightwood version [e.g. 0.1.8]
- - Python Version [e.g. 3.7.3]
-
-**Additional context**
-Add any other context about the problem here.
+**Please describe your issue and how we can replicate it**
