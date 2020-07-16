@@ -1,3 +1,5 @@
+import torch
+import numpy as np
 import unittest
 import pandas as pd
 import random
@@ -10,6 +12,14 @@ from lightwood.constants.lightwood import ColumnDataTypes
 
 
 class TestMultiLabelPrediction(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        torch.manual_seed(42)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        np.random.seed(42)
+
     def get_vocab(self, n_categories):
         return {i: ''.join(random.choices(string.ascii_uppercase, k=5)) for i in range(n_categories)}
 
@@ -25,7 +35,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
             row_tags = []
             row_y = 0
             for k in range(2):
-                if random.random() > 0.5:
+                if random.random() > 0.2:
                     selected_index = random.randint(0, len(vocab)-1)
                     if vocab[selected_index] not in row_tags:
                         row_tags.append(vocab[selected_index])
@@ -50,7 +60,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
 
         predictor.learn(from_data=df_train,
                         eval_every_x_epochs=4,
-                        stop_training_after_seconds=10)
+                        stop_training_after_seconds=20)
 
         predictions = predictor.predict(when_data=df_test)
 
@@ -67,9 +77,9 @@ class TestMultiLabelPrediction(unittest.TestCase):
         # x2 contains the index of second tag present
         # if a tag is missing then x1/x2 contain -1 instead
         # Thus the dataset should be perfectly predicted
-        n_points = 1000
-        x1 = [random.randint(0, len(vocab)-1) if random.random() > 0.5 else -1 for i in range(n_points)]
-        x2 = [random.randint(0, len(vocab)-1) if random.random() > 0.5 else -1 for i in range(n_points)]
+        n_points = 10000
+        x1 = [random.randint(0, len(vocab)-1) if random.random() > 0.2 else -1 for i in range(n_points)]
+        x2 = [random.randint(0, len(vocab)-1) if random.random() > 0.2 else -1 for i in range(n_points)]
         tags = []
         for x1_index, x2_index in zip(x1, x2):
             row_tags = set([vocab.get(x1_index), vocab.get(x2_index)])
@@ -98,7 +108,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
 
         predictor.learn(from_data=df_train,
                         eval_every_x_epochs=4,
-                        stop_training_after_seconds=10)
+                        stop_training_after_seconds=20)
 
         predictions = predictor.predict(when_data=df_train)
         train_tags = df_train.tags
