@@ -29,7 +29,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
         # tags contains up to 2 randomly selected tags
         # y contains the sum of indices of tags
         # the dataset should be nearly perfectly predicted
-        n_points = 1000
+        n_points = 10000
         tags = []
         y = []
         for i in range(n_points):
@@ -60,8 +60,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
         predictor = Predictor(config)
 
         predictor.learn(from_data=df_train,
-                        eval_every_x_epochs=4,
-                        stop_training_after_seconds=20)
+                        stop_training_after_seconds=10)
 
         predictions = predictor.predict(when_data=df_test)
 
@@ -70,7 +69,9 @@ class TestMultiLabelPrediction(unittest.TestCase):
 
         score = r2_score(test_y, predicted_y)
         print('Test R2 score', score)
-        self.assertGreaterEqual(score, 0.8)
+        # The score check is very light because we only allow the model to train for a few seconds
+        # We are just checking that it learns something and predicts properly, not benchmarking here
+        self.assertGreaterEqual(score, 0.3)
 
     def test_multiple_categories_as_output(self):
         vocab = self.get_vocab(10)
@@ -108,8 +109,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
         predictor = Predictor(config)
 
         predictor.learn(from_data=df_train,
-                        eval_every_x_epochs=4,
-                        stop_training_after_seconds=20)
+                        stop_training_after_seconds=10)
 
         predictions = predictor.predict(when_data=df_train)
         train_tags = df_train.tags
@@ -118,7 +118,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
         pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
         score = f1_score(train_tags_encoded, pred_labels_encoded, average='weighted')
         print('Train f1 score', score)
-        self.assertGreaterEqual(score, 0.8)
+        self.assertGreaterEqual(score, 0.3)
 
         # Why does it try to encode the missing column tags?
         # predictions = predictor.predict(when_data=df_test.drop(['tags'], axis=1))
@@ -131,4 +131,4 @@ class TestMultiLabelPrediction(unittest.TestCase):
         pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
         score = f1_score(test_tags_encoded, pred_labels_encoded, average='weighted')
         print('Test f1 score', score)
-        self.assertGreaterEqual(score, 0.8)
+        self.assertGreaterEqual(score, 0.3)
