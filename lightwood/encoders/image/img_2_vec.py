@@ -54,7 +54,11 @@ class Img2VecEncoder(EncoderBase):
                 else:
                     img = Image.open(image)
 
-                img_tensor = self._normalize(self._to_tensor(self._scaler(img))).unsqueeze(0).to(self.device)
+                img_tensor = self._scaler(img)
+                img_tensor = self._to_tensor(img_tensor)
+                print(img_tensor.shape)
+                img_tensor = self._normalize(img_tensor)
+                img_tensor = img_tensor.unsqueeze(0).to(self.device)
                 img_tensor_arr.append(img_tensor)
             else:
                 raise Exception('Can\'t work with images that are None')
