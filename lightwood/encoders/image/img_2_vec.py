@@ -21,8 +21,7 @@ class Img2VecEncoder(EncoderBase):
         self._prepared = False
 
         self._scaler = transforms.Scale((224, 224))
-        self._normalize = transforms.Normalize(mean=[0.456, 0.406],
-                                              std=[0.224, 0.225])
+        self._normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self._to_tensor = transforms.ToTensor()
 
     def to(self, device, available_devices):
@@ -54,16 +53,18 @@ class Img2VecEncoder(EncoderBase):
                 else:
                     img = Image.open(image)
 
+                # In order for Normalize to work with 4-channel pngs and grayscale
+                img = img.convert('RGB')
+
                 img_tensor = self._scaler(img)
                 img_tensor = self._to_tensor(img_tensor)
-                print(img_tensor.shape)
                 img_tensor = self._normalize(img_tensor)
-                img_tensor = img_tensor.unsqueeze(0).to(self.device)
+                img_tensor = img_tensor.unsqueeze(0)
                 img_tensor_arr.append(img_tensor)
             else:
                 raise Exception('Can\'t work with images that are None')
 
-        return torch.FloatTensor(img_tensor_arr)
+        return torch.stack(img_tensor_arr)
 
     def encode(self, images):
         """
@@ -80,7 +81,7 @@ class Img2VecEncoder(EncoderBase):
         for img_tensor in img_tensors:
             vec = self.model(img_tensor)
             vec_arr.append(vec)
-        return torch.FloatTensor(vec_arr)
+        return torch.stack(vec_arr)
 
     def decode(self, encoded_values_tensor):
         raise Exception('This encoder is not bi-directional')

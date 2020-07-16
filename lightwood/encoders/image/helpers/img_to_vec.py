@@ -47,13 +47,13 @@ class Img2Vec(nn.Module):
             embedding.copy_(o.data)
 
         h = self.extraction_layer.register_forward_hook(copy_data)
-        h_x = self.model(image)
+        h_x = self.model(image.to(self.device))
         h.remove()
 
         if self.model_name in ('resnext-50-small'):
-            return my_embedding[0, :]
+            return embedding[0, :]
         else:
-            return my_embedding[0, :, 0, 0]
+            return embedding[0, :, 0, 0]
 
     def _get_model_and_layer(self, model_name, layer):
         """ Internal method for getting layer from model
