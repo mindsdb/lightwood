@@ -21,8 +21,8 @@ class Img2VecEncoder(EncoderBase):
         self._prepared = False
 
         self._scaler = transforms.Scale((224, 224))
-        self._normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                              std=[0.229, 0.224, 0.225])
+        self._normalize = transforms.Normalize(mean=[0.456, 0.406],
+                                              std=[0.224, 0.225])
         self._to_tensor = transforms.ToTensor()
 
     def to(self, device, available_devices):
