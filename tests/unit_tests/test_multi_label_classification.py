@@ -15,10 +15,11 @@ class TestMultiLabelPrediction(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        torch.manual_seed(42)
+        torch.manual_seed(66)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
-        np.random.seed(42)
+        np.random.seed(66)
+        random.seed(66)
 
     def get_vocab(self, n_categories):
         return {i: ''.join(random.choices(string.ascii_uppercase, k=5)) for i in range(n_categories)}
