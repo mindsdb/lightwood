@@ -3,12 +3,13 @@ from io import BytesIO
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from PIL import Image
+from PIL import Image, TiffImagePlugin, PngImagePlugin
 import requests
 
 from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 from lightwood.constants.lightwood import ENCODER_AIM
 from lightwood.encoders.encoder_base import EncoderBase
+import logging
 
 
 class Img2VecEncoder(EncoderBase):
@@ -21,8 +22,11 @@ class Img2VecEncoder(EncoderBase):
         self._prepared = False
 
         self._scaler = transforms.Scale((224, 224))
+        # @TODO Magic numbers with no idea left of how they got here, we should at least have the decency of citing some paper that used these as magic numbers :P
         self._normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self._to_tensor = transforms.ToTensor()
+        pil_logger = logging.getLogger('PIL')
+        pil_logger.setLevel(logging.ERROR)
 
     def to(self, device, available_devices):
         self.model.to(device, available_devices)
@@ -47,11 +51,13 @@ class Img2VecEncoder(EncoderBase):
         img_tensor_arr = []
         for image in images:
             if image is not None:
+                #logging.setLevel(logging.ERROR)
                 if image.startswith('http'):
                     response = requests.get(image)
                     img = Image.open(BytesIO(response.content))
                 else:
                     img = Image.open(image)
+                #logging.setLevel(logging.DEBUG)
 
                 # In order for Normalize to work with 4-channel pngs and grayscale
                 img = img.convert('RGB')
