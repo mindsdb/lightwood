@@ -534,13 +534,24 @@ class NnMixer:
                     output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
                 else:
                     output_weights = None
+
                 for k, output_type in enumerate(self.out_types):
                     if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
-                        self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]] ))
-                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]],reduce=False))
+                        if output_weights is None:
+                            weights_slice = None
+                        else:
+                            weights_slice = output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]]
+
+                        self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
+                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice,reduce=False))
                     elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-                        self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]]))
-                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]], reduce=False))
+                        if output_weights is None:
+                            weights_slice = None
+                        else:
+                            weights_slice = output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]]
+
+                        self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
+                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
                     elif output_type == COLUMN_DATA_TYPES.NUMERIC:
                         self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
                         self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
