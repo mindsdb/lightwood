@@ -33,8 +33,7 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
     lightwood.config.config.CONFIG.USE_CUDA = USE_CUDA
     lightwood.config.config.CONFIG.PLINEAR = PLINEAR
 
-    config = {'input_features': [
-                        {'name': 'number_of_bathrooms', 'type': 'numeric'}, {'name': 'sqft', 'type': 'numeric'},
+    config = {'input_features': [{'name': 'sqft', 'type': 'numeric'},
                         {'name': 'days_on_market', 'type': 'numeric'},
                         {'name': 'neighborhood', 'type': 'categorical','dropout':0.4}],
      'output_features': [{'name': 'number_of_rooms', 'type': 'categorical',
@@ -45,7 +44,13 @@ def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
                              '3': 0.7,
                              '4': 1,
                        }
-    },{'name': 'rental_price', 'type': 'numeric'},{'name': 'location', 'type': 'categorical'}],
+    },{'name': 'number_of_bathrooms', 'type': 'categorical',
+                      'weights':{
+                            '0': 0.8,
+                            '1': 0.6,
+                            '2': 4
+                      }
+   },{'name': 'rental_price', 'type': 'numeric'},{'name': 'location', 'type': 'categorical'}],
     'data_source': {'cache_transformed_data':CACHE_ENCODED_DATA},
     'mixer':{'class': lightwood.BUILTIN_MIXERS.NnMixer, 'selfaware': SELFAWARE}}
 
