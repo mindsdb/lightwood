@@ -3,12 +3,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
 from lightwood.constants.lightwood import ENCODER_AIM
-from lightwood.encoders.encoder_base import EncoderBase
+from lightwood.encoders.encoder_base import BaseEncoder
 
 
-class TfidfEncoder(EncoderBase):
+class TfidfEncoder(BaseEncoder):
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
-        self._prepared = False
+        super().__init__(is_target)
         self.aim = aim
         self._pytorch_wrapper = torch.FloatTensor
         if self.aim == ENCODER_AIM.SPEED:
