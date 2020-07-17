@@ -13,8 +13,6 @@ class NumericEncoder(BaseEncoder):
         super().__init__(is_target)
         self._type = data_type
         self._mean = None
-        self._prepared = False
-        self.is_target = is_target
         self.decode_log = False
         self.extra_outputs = 0
 

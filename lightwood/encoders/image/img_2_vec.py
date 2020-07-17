@@ -13,7 +13,6 @@ class Img2VecEncoder(BaseEncoder):
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
         super().__init__(is_target)
         self._model = None
-        # I think we should make this an enum, something like: speed, balance, accuracy
         self.aim = aim
         self._encoded_length = None
 

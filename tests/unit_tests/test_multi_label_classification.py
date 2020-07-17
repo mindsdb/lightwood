@@ -120,8 +120,6 @@ class TestMultiLabelPrediction(unittest.TestCase):
         print('Train f1 score', score)
         self.assertGreaterEqual(score, 0.3)
 
-        # Why does it try to encode the missing column tags?
-        # predictions = predictor.predict(when_data=df_test.drop(['tags'], axis=1))
         predictions = predictor.predict(when_data=df_test)
 
         test_tags = df_test.tags
