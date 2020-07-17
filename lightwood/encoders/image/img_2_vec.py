@@ -1,4 +1,5 @@
 from io import BytesIO
+import logging
 
 import torch
 import torch.nn as nn
@@ -8,13 +9,13 @@ import requests
 
 from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
 from lightwood.constants.lightwood import ENCODER_AIM
-from lightwood.encoders.encoder_base import EncoderBase
-import logging
+from lightwood.encoders.encoder_base import BaseEncoder
 
 
-class Img2VecEncoder(EncoderBase):
+class Img2VecEncoder(BaseEncoder):
 
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
+        super().__init__(is_target)
         self.model = None
         # I think we should make this an enum, something like: speed, balance, accuracy
         self.aim = aim
@@ -25,6 +26,7 @@ class Img2VecEncoder(EncoderBase):
         # @TODO Magic numbers with no idea left of how they got here, we should at least have the decency of citing some paper that used these as magic numbers :P
         self._normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self._to_tensor = transforms.ToTensor()
+        
         pil_logger = logging.getLogger('PIL')
         pil_logger.setLevel(logging.ERROR)
 

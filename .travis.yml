@@ -51,7 +51,7 @@ script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then travis_wait python ci_tests.py; fi
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then travis_wait python3 ci_tests.py; fi
   - cd ..
-  - python -m unittest
+  - travis_wait python -m unittest
 
 
 # deploy to pip

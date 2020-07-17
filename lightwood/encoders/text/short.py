@@ -1,74 +1,16 @@
 import torch
 from torch.nn.functional import pad
+
+from lightwood.encoders import BaseEncoder
 from lightwood.encoders.categorical import CategoricalAutoEncoder
+from lightwood.helpers.text import tokenize_text
+from lightwood.helpers.torch import concat_vectors_and_pad, average_vectors
 
 
-def _get_tokens(text):
-    SEPARATORS = ' ,.#\n!?\t()'
-    tokens = []
-
-    iterator = iter(text)
-    while True:
-        end = False
-
-        while True:
-            try:
-                char = next(iterator)
-            except StopIteration:
-                end = True
-                break
-            else:
-                if char in SEPARATORS:
-                    continue
-                else:
-                    break
-        
-        if end:
-            break
-
-        tok = []
-
-        while True:
-            tok.append(char)
-
-            try:
-                char = next(iterator)
-            except StopIteration:
-                end = True
-                break
-            else:
-                if char in SEPARATORS:
-                    break
-        
-        tokens.append(''.join(tok))
-        
-        if end:
-            break
-            
-    return tokens
-
-
-def _concat(vec_list, max_):
-    assert len(vec_list) > 0
-    assert len(vec_list) <= max_
-    assert max_ > 0
-
-    cat_vec = torch.cat(list(vec_list), dim=0)
-
-    pad_size = max_ - len(vec_list)
-    padding = (0, pad_size * vec_list[0].size(0))
-    padded = pad(cat_vec[None], padding, 'constant', 0)[0]
-
-    return padded
-
-
-def _mean(vec_list):
-    assert len(vec_list) > 0
-    return torch.cat([emb[None] for emb in vec_list], dim=0).mean(0)
-
-
-class ShortTextEncoder():
+class ShortTextEncoder(BaseEncoder):
     def __init__(self, is_target=False, combine='mean'):
+        super().__init__(is_target)
+        self._pytorch_wrapper = torch.FloatTensor
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
 
         if combine not in ['mean', 'concat']:
@@ -87,7 +29,7 @@ class ShortTextEncoder():
         unique_tokens = set()
         max_words_per_sent = 0
         for sent in no_null_sentences:
-            tokens = _get_tokens(sent)
+            tokens = tokenize_text(sent)
             if len(tokens) > max_words_per_sent:
                 max_words_per_sent = len(tokens)
             for tok in tokens:
@@ -96,9 +38,9 @@ class ShortTextEncoder():
         self.cae.prepare_encoder(unique_tokens)
 
         if self._combine == 'concat':
-            self._combine_fn = lambda vecs: _concat(vecs, max_words_per_sent)
+            self._combine_fn = lambda vecs: concat_vectors_and_pad(vecs, max_words_per_sent)
         elif self._combine == 'mean':
-            self._combine_fn = lambda vecs: _mean(vecs)
+            self._combine_fn = lambda vecs: average_vectors(vecs)
         else:
             self._unexpected_combine()
 
@@ -106,10 +48,9 @@ class ShortTextEncoder():
         no_null_sentences = (x if x is not None else '' for x in column_data)
         output = []
         for sent in no_null_sentences:
-            tokens = _get_tokens(sent)
-            with torch.no_grad():
-                encoded_words = self.cae.encode(tokens)
-                encoded_sent = self._combine_fn(encoded_words)
+            tokens = tokenize_text(sent)
+            encoded_words = self.cae.encode(tokens)
+            encoded_sent = self._combine_fn(encoded_words)
             output.append(encoded_sent)
         return output
 

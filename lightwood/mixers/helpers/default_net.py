@@ -8,11 +8,18 @@ from lightwood.helpers.device import get_devices
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, dynamic_parameters, input_size=None, output_size=None, nr_outputs=None, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, deterministic=False):
+    def __init__(self, dynamic_parameters,
+                     input_size=None,
+                     output_size=None,
+                     nr_outputs=None,
+                     shape=None,
+                     selfaware=False,
+                     size_parameters={},
+                     pretrained_net=None,
+                     deterministic=False):
         self.input_size = input_size
         self.output_size = output_size
         self.nr_outputs = nr_outputs
-
         self.selfaware = selfaware
         # How many devices we can train this network on
         self.available_devices = 1
