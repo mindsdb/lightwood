@@ -70,10 +70,13 @@ class DataSource(Dataset):
         self.enable_dropout = False
         self.disable_cache = not self.configuration['data_source']['cache_transformed_data']
         self.subsets = {}
-        self.out_indexes = None
-        self.out_types = None
+
         self.input_indexes = None
         self.input_size = None
+
+        self.out_types = None
+
+        self.out_indexes = None
         self.out_size = None
 
         self.trainable_encoders = []
@@ -210,8 +213,6 @@ class DataSource(Dataset):
 
         if self.transformer:
             sample = self.transformer.transform(sample)
-            if self.out_indexes is None:
-                self.out_indexes = self.transformer.out_indexes
 
         if not self.disable_cache:
             self.transformed_cache[idx] = sample
@@ -331,11 +332,24 @@ class DataSource(Dataset):
         return sample_len
 
     def get_output_size(self):
+        if self.out_size is not None:
+            return self.out_size
+
         sample_len = 0
+        self.input_indexes = []
+
         for feature in self.configuration['output_features']:
             col_name = feature['name']
-            sample = [self.get_column_original_data(col_name)[0]]
-            sample_len += len(self.encoders[col_name].encode(sample)[0])
+            col_sample = [self.get_column_original_data(col_name)[0]]
+            col_sample_len = len(self.encoders[col_name].encode(col_sample)[0])
+            sample_len += col_sample_len
+
+            if len(self.out_indexes) == 0:
+                self.out_indexes.append([0, col_sample_len])
+            else:
+                self.out_indexes.append([self.out_indexes[-1][1],self.out_indexes[-1][1]+col_sample_len])
+
+        self.out_size = sample_len
         return sample_len
 
     def get_encoded_column_data(self, column_name, custom_data=None):

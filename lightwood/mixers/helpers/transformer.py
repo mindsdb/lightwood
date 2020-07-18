@@ -9,7 +9,6 @@ class Transformer:
         self.output_features = output_features
 
         self.feature_len_map = {}
-        self.out_indexes = []
 
     def transform(self, sample):
 
@@ -21,18 +20,12 @@ class Transformer:
             input_vector.append(sub_vector)
             if input_feature not in self.feature_len_map:
                 self.feature_len_map[input_feature] = len(sub_vector)
-                
+
         for output_feature in self.output_features:
             sub_vector = sample['output_features'][output_feature]
             output_vector.append(sub_vector)
             if output_feature not in self.feature_len_map:
                 self.feature_len_map[output_feature] = len(sub_vector)
-
-            if len(self.out_indexes) < len(sample['output_features']):
-                if len(self.out_indexes) == 0:
-                    self.out_indexes.append([0,len(sub_vector)])
-                else:
-                    self.out_indexes.append([self.out_indexes[-1][1], self.out_indexes[-1][1] + len(sub_vector)])
 
         return input_vector, output_vector
 
