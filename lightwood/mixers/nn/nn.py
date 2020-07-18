@@ -34,7 +34,7 @@ class NnMixer:
         self.criterion_arr = None
         self.unreduced_criterion_arr = None
 
-        self.batch_size = 11
+        self.batch_size = 200
         self.epochs = 120000
 
         self.nn_class = DefaultNet
