@@ -34,7 +34,7 @@ class NnMixer:
         self.criterion_arr = None
         self.unreduced_criterion_arr = None
 
-        self.batch_size = 200
+        self.batch_size = 10
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -504,7 +504,7 @@ class NnMixer:
             self.fit_data_source(ds)
             input_sample, output_sample = ds[0]
 
-            self.net = self.nn_class(self.dynamic_parameters, input_size=ds.get_input_size(), output_size=ds.get_output_size(), nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, in_indexes=ds.in_indexes)
+            self.net = self.nn_class(self.dynamic_parameters, input_size=ds.get_input_size(), output_size=ds.get_output_size(), nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, input_indexes=ds.input_indexes)
 
             self.net = self.net.train()
 
@@ -568,7 +568,7 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=True, pretrained_net=self.net.net, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, in_indexes=ds.in_indexes)
+                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=True, pretrained_net=self.net.net, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, input_indexes=ds.input_indexes)
                     self.last_unaware_net = copy.deepcopy(self.net.net)
 
                     # Lower the learning rate once we start training the selfaware network
@@ -582,7 +582,7 @@ class NnMixer:
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=False, pretrained_net=self.last_unaware_net, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, in_indexes=ds.in_indexes)
+                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=False, pretrained_net=self.last_unaware_net, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, input_indexes=ds.input_indexes)
 
                     # Increase the learning rate closer to the previous levels
                     self.optimizer_args['lr'] = self.optimizer.lr * 4

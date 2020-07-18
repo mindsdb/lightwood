@@ -8,14 +8,14 @@ from lightwood.helpers.device import get_devices
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, dynamic_parameters, input_size=None, output_size=None, nr_outputs=None, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, deterministic=False, encoders=[], encoder_indexes=[], in_indexes=[]):
+    def __init__(self, dynamic_parameters, input_size=None, output_size=None, nr_outputs=None, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, deterministic=False, encoders=[], encoder_indexes=[], input_indexes=[]):
         self.input_size = input_size
         self.output_size = output_size
         self.nr_outputs = nr_outputs
 
         self.encoders = encoders
         self.encoder_indexes = encoder_indexes
-        self.in_indexes = in_indexes
+        self.input_indexes = input_indexes
 
         self.selfaware = selfaware
         # How many devices we can train this network on
@@ -47,6 +47,7 @@ class DefaultNet(torch.nn.Module):
         """
         super(DefaultNet, self).__init__()
 
+        [x.train() for x in self.encoders]
         self.encoders = torch.nn.ModuleList(self.encoders)
 
         if shape is None and pretrained_net is None:
@@ -178,26 +179,23 @@ class DefaultNet(torch.nn.Module):
         :return: either just output or (output, awareness)
         """
 
-        X = None
-        for input in input_arr:
-            new_input = None
-            k = 0
-            for i in range(len(input)):
-                input_slice = input[i]
-                if i in self.encoder_indexes:
-                    input_slice = self.encoders[k](input_slice)
-                    k += 1
+        X = torch.zeros(len(input_arr),self.input_size)
+        stacked_inputs = []
+        for k in range(len(input_arr[0])):
+            stacked_inputs.append([])
+            for i in range(len(input_arr)):
+                stacked_inputs[k].append(input_arr[i][k])
 
-                if new_input is None:
-                    new_input = input_slice
-                else:
-                    new_input = torch.cat((new_input,input_slice),0)
+        for i in range(len(stacked_inputs)):
+            stacked_inputs[i] = torch.stack(stacked_inputs[i])
 
-            new_input = new_input.unsqueeze(0)
-            if X is None:
-                X = new_input
-            else:
-                X = torch.cat((X,new_input), 0)
+        k = 0
+        for i in range(len(stacked_inputs)):
+            input = stacked_inputs[i]
+            if i in self.encoder_indexes:
+                input = self.encoders[k](input)
+                k += 1
+            X[:,self.input_indexes[i][0]:self.input_indexes[i][1]] = input
 
         X = X.to(self.device)
 

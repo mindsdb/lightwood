@@ -37,11 +37,11 @@ class Img2Vec(nn.Module):
         self.model = self.model.to(self.device)
         return self
 
-    def forward(self, image):
+    def forward(self, image, batch=True):
         if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
-            embedding = torch.zeros(1, self.layer_output_size)
+            embedding = torch.zeros(len(image), self.layer_output_size)
         elif self.model_name in ('resnet-18', 'resnext-50'):
-            embedding = torch.zeros(1, self.layer_output_size, 1, 1)
+            embedding = torch.zeros(len(image), self.layer_output_size, 1, 1)
 
         def copy_data(m, i, o):
             embedding.copy_(o.data)
@@ -51,9 +51,14 @@ class Img2Vec(nn.Module):
         h.remove()
 
         if self.model_name in ('resnext-50-small'):
+            if batch:
+                return embedding
             return embedding[0, :]
         else:
+            if batch:
+                return embedding[:, :, 0, 0]
             return embedding[0, :, 0, 0]
+
 
     def _get_model_and_layer(self, model_name, layer):
         """ Internal method for getting layer from model

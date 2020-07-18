@@ -38,7 +38,7 @@ class SubSet(Dataset):
 
     def __getattribute__(self, name):
         if name in ['configuration', 'encoders', 'transformer', 'training',
-                    'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes','in_indexes','trainable_encoders','trainable_encoder_positions']:
+                    'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes','input_indexes','trainable_encoders','trainable_encoder_positions','input_size','out_size']:
             return self.data_source.__getattribute__(name)
         else:
             return object.__getattribute__(self, name)
@@ -72,7 +72,9 @@ class DataSource(Dataset):
         self.subsets = {}
         self.out_indexes = None
         self.out_types = None
-        self.in_indexes = None
+        self.input_indexes = None
+        self.input_size = None
+        self.out_size = None
 
         self.trainable_encoders = []
         self.trainable_encoder_positions = []
@@ -211,9 +213,6 @@ class DataSource(Dataset):
             if self.out_indexes is None:
                 self.out_indexes = self.transformer.out_indexes
 
-            if self.in_indexes is None:
-                self.in_indexes = self.transformer.in_indexes
-
         if not self.disable_cache:
             self.transformed_cache[idx] = sample
         return sample
@@ -312,11 +311,23 @@ class DataSource(Dataset):
                 self.trainable_encoder_positions.append(i)
 
     def get_input_size(self):
+        if self.input_size is not None:
+            return self.input_size
+
         sample_len = 0
+        self.input_indexes = []
         for feature in self.configuration['input_features']:
             col_name = feature['name']
-            sample = [self.get_column_original_data(col_name)[0]]
-            sample_len += len(self.encoders[col_name].encode(sample)[0])
+            col_sample = [self.get_column_original_data(col_name)[0]]
+            col_sample_len = len(self.encoders[col_name].encode(col_sample)[0])
+            sample_len += col_sample_len
+
+            if len(self.input_indexes) == 0:
+                self.input_indexes.append([0, col_sample_len])
+            else:
+                self.input_indexes.append([self.input_indexes[-1][1],self.input_indexes[-1][1]+col_sample_len])
+
+        self.input_size = sample_len
         return sample_len
 
     def get_output_size(self):
