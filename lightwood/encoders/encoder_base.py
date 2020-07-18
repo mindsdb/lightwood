@@ -1,9 +1,12 @@
+import torch
 
-class EncoderBase:
+class BaseEncoder:
     """Base class for all encoders"""
 
     def __init__(self, is_target=False):
         self.is_target = is_target
+        self._pytorch_wrapper = torch.FloatTensor
+        self._prepared = False
 
     def prepare_encoder(self, priming_data):
         pass

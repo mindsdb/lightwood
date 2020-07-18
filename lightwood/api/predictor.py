@@ -262,7 +262,8 @@ class Predictor:
                 )
 
         def callback_on_iter_w_acc(epoch, training_error, test_error, delta_mean):
-            callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
+            if callback_on_iter is not None:
+                callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
         self._mixer.fit(train_ds=from_data_ds ,test_ds=test_data_ds, callback=callback_on_iter_w_acc, stop_training_after_seconds=stop_training_after_seconds, eval_every_x_epochs=eval_every_x_epochs)
         self.train_accuracy = self.calculate_accuracy(test_data_ds)
@@ -304,7 +305,7 @@ class Predictor:
 
     @staticmethod
     def apply_accuracy_function(col_type, real, predicted, weight_map=None):
-        if col_type == 'categorical':
+        if col_type in (COLUMN_DATA_TYPES.CATEGORICAL, COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL):
             if weight_map is None:
                 sample_weight = [1 for x in real]
             else:

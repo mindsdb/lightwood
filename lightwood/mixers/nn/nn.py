@@ -524,10 +524,13 @@ class NnMixer:
                 else:
                     output_weights = None
                 for output_type in self.out_types:
-                    if output_type in (COLUMN_DATA_TYPES.CATEGORICAL):
+                    if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights))
                         self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=output_weights,reduce=False))
-                    elif output_type in (COLUMN_DATA_TYPES.NUMERIC):
+                    elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                        self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=output_weights))
+                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=output_weights, reduce=False))
+                    elif output_type == COLUMN_DATA_TYPES.NUMERIC:
                         self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
                         self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
                     else:
