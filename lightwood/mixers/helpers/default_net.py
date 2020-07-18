@@ -8,10 +8,14 @@ from lightwood.helpers.device import get_devices
 
 class DefaultNet(torch.nn.Module):
 
-    def __init__(self, dynamic_parameters, input_size=None, output_size=None, nr_outputs=None, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, deterministic=False):
+    def __init__(self, dynamic_parameters, input_size=None, output_size=None, nr_outputs=None, shape=None, selfaware=False, size_parameters={}, pretrained_net=None, deterministic=False, encoders=[], encoder_indexes=[], in_indexes=[]):
         self.input_size = input_size
         self.output_size = output_size
         self.nr_outputs = nr_outputs
+
+        self.encoders = encoders
+        self.encoder_indexes = encoder_indexes
+        self.in_indexes = in_indexes
 
         self.selfaware = selfaware
         # How many devices we can train this network on
@@ -162,7 +166,7 @@ class DefaultNet(torch.nn.Module):
 
         return (self.max_variance - mean_variance) / self.max_variance
 
-    def forward(self, input):
+    def forward(self, input_arr):
         """
         In this particular model, we just need to forward the network defined in setup, with our input
 
@@ -171,6 +175,30 @@ class DefaultNet(torch.nn.Module):
 
         :return: either just output or (output, awareness)
         """
+
+        X = []
+
+        for input in input_arr:
+            new_input = None
+            k = 0
+            for i, (start_i, end_i) in enumerate(self.in_indexes):
+                input_slice = input[start_i:end_i]
+                if i in self.encoder_indexes:
+                    print(input_slice)
+                    input_slice = self.encoders[k](input_slice)
+                    k += 1
+                else:
+                    if isinstance(input_slice, torch.Tensor):
+                        input_slice = input_slice.to(torch.float32).to(self.device)
+                    else:
+                        input_slice = torch.FloatTensor(input_slice).to(self.device)
+
+                if new_input is None:
+                    new_input = input_slice
+                else:
+                    torch.concat(new_input,input_slice)
+            X.append(input)
+        X = torch.stack(X)
 
         output = self._foward_net(input)
 

@@ -28,7 +28,7 @@ class SubSet(Dataset):
 
     def __getattribute__(self, name):
         if name in ['configuration', 'encoders', 'transformer', 'training',
-                    'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes']:
+                    'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes','in_indexes','trainable_encoders','trainable_encoder_positions']:
             return self.data_source.__getattribute__(name)
         else:
             return object.__getattribute__(self, name)
@@ -62,6 +62,10 @@ class DataSource(Dataset):
         self.subsets = {}
         self.out_indexes = None
         self.out_types = None
+        self.in_indexes = None
+
+        self.trainable_encoders = []
+        self.trainable_encoder_positions = []
 
         for col in self.configuration['input_features']:
             if len(self.configuration['input_features']) > 1:
@@ -137,7 +141,7 @@ class DataSource(Dataset):
             if dropout_features is None or len(dropout_features) == 0:
                 cached_sample = self.transformed_cache[idx]
                 if cached_sample is not None:
-                    return cached_sample
+                    return cached_sample[0], cached_sample[1]
 
         for feature_set in ['input_features', 'output_features']:
             sample[feature_set] = {}
@@ -197,9 +201,12 @@ class DataSource(Dataset):
             if self.out_indexes is None:
                 self.out_indexes = self.transformer.out_indexes
 
+            if self.in_indexes is None:
+                self.in_indexes = self.transformer.in_indexes
+
         if not self.disable_cache:
             self.transformed_cache[idx] = sample
-        return sample
+        return sample[0], sample[1]
 
     def get_column_original_data(self, column_name):
         if column_name not in self.data_frame:
@@ -273,13 +280,17 @@ class DataSource(Dataset):
 
             self.encoders[column_name] = encoder_instance
 
-        for config in self.configuration['input_features']:
+        for i, config in enumerate(self.configuration['input_features']):
             column_name = config['name']
             encoder_instance = self.prepare_column_encoder(config,
                                                            is_target=False,
                                                            training_data=input_encoder_training_data)
 
             self.encoders[column_name] = encoder_instance
+            if hasattr(self.encoders[column_name],'model'):
+                self.trainable_encoders.append(self.encoders[column_name].model)
+                self.trainable_encoder_positions.append(i)
+
 
     def get_encoded_column_data(self, column_name, custom_data=None):
         if column_name in self.encoded_cache and custom_data is None:
@@ -303,7 +314,11 @@ class DataSource(Dataset):
             args += [arg2]
 
         if column_name in self.encoders:
-            encoded_vals = self.encoders[column_name].encode(*args)
+            # Having a public model indicates a trainable encoder
+            if hasattr(self.encoders[column_name],'model'):
+                encoded_vals = self.encoders[column_name].prepare(*args)
+            else:
+                encoded_vals = self.encoders[column_name].encode(*args)
             # Cache the encoded data so we don't have to run the encoding,
             # Don't cache custom_data
             # (custom_data is usually used when running without cache or dropping out a feature for a certain pass)
@@ -343,4 +358,3 @@ class DataSource(Dataset):
             for feature in self.configuration[feature_set]:
                 if feature['name'] == column_name:
                     return feature
-

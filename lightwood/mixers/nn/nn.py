@@ -58,10 +58,6 @@ class NnMixer:
 
         self.total_iterations = 0
 
-        self._nonpersistent = {
-            'sampler': None
-        }
-
     def build_confidence_normalization_data(self, ds, subset_id=None):
         """
         :param ds:
@@ -419,10 +415,7 @@ class NnMixer:
         ds.encoders = self.encoders
         ds.transformer = self.transformer
 
-        if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
-        else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         running_loss = 0.0
         error = 0
@@ -514,7 +507,8 @@ class NnMixer:
 
             input_sample, output_sample = ds[0]
 
-            self.net = self.nn_class(self.dynamic_parameters, input_size=len(input_sample), output_size=len(output_sample), nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'])
+            self.net = self.nn_class(self.dynamic_parameters, input_size=len(input_sample), output_size=len(output_sample), nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, in_indexes=ds.in_indexes)
+
             self.net = self.net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -554,11 +548,7 @@ class NnMixer:
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
-        if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
-        else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
-                                     sampler=self._nonpersistent['sampler'])
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
@@ -595,8 +585,8 @@ class NnMixer:
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
 
-                labels = labels.to(self.net.device)
-                inputs = inputs.to(self.net.device)
+                labels = torch.stack(labels).to(self.net.device)
+                #inputs = inputs.to(self.net.device)
 
                 # zero the parameter gradients
                 self.optimizer.zero_grad()
