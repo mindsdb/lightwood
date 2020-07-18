@@ -7,7 +7,7 @@ from lightwood.config.config import CONFIG
 
 class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
     def forward(self, input):
-        n, c = input.size()
+        n, c, _, _ = input.size()
         input = input.view(n,c,1).permute(0,2,1)
         pooled =  torch.nn.functional.adaptive_avg_pool1d(input, self.output_size)
         _, _, c = pooled.size()
@@ -60,28 +60,17 @@ class Img2Vec(nn.Module):
 
         if model_name == 'resnet-18':
             self.layer_output_size = 512
-            model = torch.nn.Sequential(*list(models.resnet18(pretrained=True).children())[0:9])
-            return model
+            model = torch.nn.Sequential(*list(models.resnet18(pretrained=True).children())[:-1])
 
-        if model_name == 'resnext-50-small':
-            model = models.resnext50_32x4d(pretrained=True)
-            if layer == 'default':
-                model.fc = ChannelPoolAdaptiveAvg1d(output_size=512)
-                layer = model.fc
-                self.layer_output_size = 512
-            else:
-                layer = model._modules.get(layer)
+        elif model_name == 'resnext-50-small':
+            self.layer_output_size = 512
+            model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1] , ChannelPoolAdaptiveAvg1d(output_size=512))
 
-            return model
+        elif model_name == 'resnext-50':
+            self.layer_output_size = 2048
+            model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1])
 
-        if model_name == 'resnext-50':
-            model = models.resnext50_32x4d(pretrained=True)
-            if layer == 'default':
-                layer = model._modules.get('avgpool')
-                self.layer_output_size = 2048
-            else:
-                layer = model._modules.get(layer)
+        else:
+            raise Exception(f'Image encoding model {model_name} was not found')
 
-            return model
-
-        raise Exception(f'Image encoding model {model_name} was not found')
+        return model

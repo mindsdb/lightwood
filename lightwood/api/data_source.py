@@ -30,11 +30,8 @@ class SubSet(Dataset):
     def get_feature_names(self, where='input_features'):
         return self.data_source.get_feature_names(where)
 
-    def get_input_size(self):
-        return self.data_source.get_input_size()
-
-    def get_output_size(self):
-        return self.data_source.get_output_size()
+    def prepare(self):
+        return self.data_source.prepare()
 
     def __getattribute__(self, name):
         if name in ['configuration', 'encoders', 'transformer', 'training',
@@ -149,6 +146,8 @@ class DataSource(Dataset):
                 dropout_features = dropout_features[:-1]
             #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
+        if dropout_features is not None:
+            print(dropout_features)
         if not self.disable_cache:
             if self.transformed_cache is None:
                 self.transformed_cache = [None] * len(self)
@@ -310,47 +309,38 @@ class DataSource(Dataset):
             if hasattr(self.encoders[column_name],'model'):
                 self.trainable_encoders.append(self.encoders[column_name].model)
                 self.trainable_encoder_positions.append(i)
+        self.prepare()
 
-    def get_input_size(self):
-        if self.input_size is not None:
-            return self.input_size
+    def prepare(self):
+        if self.input_size is None:
+            self.input_size = 0
+            self.input_indexes = []
+            for feature in self.configuration['input_features']:
+                col_name = feature['name']
+                col_sample = [self.get_column_original_data(col_name)[0]]
+                col_sample_len = len(self.encoders[col_name].encode(col_sample)[0])
+                self.input_size += col_sample_len
 
-        sample_len = 0
-        self.input_indexes = []
-        for feature in self.configuration['input_features']:
-            col_name = feature['name']
-            col_sample = [self.get_column_original_data(col_name)[0]]
-            col_sample_len = len(self.encoders[col_name].encode(col_sample)[0])
-            sample_len += col_sample_len
+                if len(self.input_indexes) == 0:
+                    self.input_indexes.append([0, col_sample_len])
+                else:
+                    self.input_indexes.append([self.input_indexes[-1][1],self.input_indexes[-1][1]+col_sample_len])
 
-            if len(self.input_indexes) == 0:
-                self.input_indexes.append([0, col_sample_len])
-            else:
-                self.input_indexes.append([self.input_indexes[-1][1],self.input_indexes[-1][1]+col_sample_len])
+        if self.out_size is None:
+            self.out_size = 0
+            self.out_indexes = []
 
-        self.input_size = sample_len
-        return sample_len
+            for feature in self.configuration['output_features']:
+                col_name = feature['name']
+                col_sample = [self.get_column_original_data(col_name)[0]]
+                col_sample_len = len(self.encoders[col_name].encode(col_sample)[0])
+                self.out_size += col_sample_len
 
-    def get_output_size(self):
-        if self.out_size is not None:
-            return self.out_size
+                if len(self.out_indexes) == 0:
+                    self.out_indexes.append([0, col_sample_len])
+                else:
+                    self.out_indexes.append([self.out_indexes[-1][1],self.out_indexes[-1][1]+col_sample_len])
 
-        sample_len = 0
-        self.out_indexes = []
-
-        for feature in self.configuration['output_features']:
-            col_name = feature['name']
-            col_sample = [self.get_column_original_data(col_name)[0]]
-            col_sample_len = len(self.encoders[col_name].encode(col_sample)[0])
-            sample_len += col_sample_len
-
-            if len(self.out_indexes) == 0:
-                self.out_indexes.append([0, col_sample_len])
-            else:
-                self.out_indexes.append([self.out_indexes[-1][1],self.out_indexes[-1][1]+col_sample_len])
-
-        self.out_size = sample_len
-        return sample_len
 
     def get_encoded_column_data(self, column_name, custom_data=None):
         if column_name in self.encoded_cache and custom_data is None:

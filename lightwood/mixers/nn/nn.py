@@ -68,6 +68,7 @@ class NnMixer:
 
         ds.encoders = self.encoders
         ds.transformer = self.transformer
+        ds.prepare()
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, collate_fn=list_collate)
 
@@ -299,6 +300,7 @@ class NnMixer:
         """
         when_data_source.transformer = self.transformer
         when_data_source.encoders = self.encoders
+        when_data_source.prepare()
         _, _ = when_data_source[0]
 
         data_loader = DataLoader(when_data_source, batch_size=self.batch_size, shuffle=False, num_workers=0, collate_fn=list_collate)
@@ -413,6 +415,7 @@ class NnMixer:
 
         ds.encoders = self.encoders
         ds.transformer = self.transformer
+        ds.prepare()
 
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, collate_fn=list_collate)
 
@@ -494,6 +497,7 @@ class NnMixer:
 
         self.encoders = ds.encoders
         self.transformer = ds.transformer
+        ds.prepare()
 
     def iter_fit(self, ds, initialize=True, subset_id=None):
         """
@@ -502,9 +506,8 @@ class NnMixer:
         """
         if initialize:
             self.fit_data_source(ds)
-            input_sample, output_sample = ds[0]
 
-            self.net = self.nn_class(self.dynamic_parameters, input_size=ds.get_input_size(), output_size=ds.get_output_size(), nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, input_indexes=ds.input_indexes)
+            self.net = self.nn_class(self.dynamic_parameters, input_size=ds.input_size, output_size=ds.out_size, nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, input_indexes=ds.input_indexes)
 
             self.net = self.net.train()
 
@@ -545,9 +548,9 @@ class NnMixer:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
 
-            self.optimizer_class = Ranger #torch.optim.SGD #Ranger
+            self.optimizer_class = torch.optim.SGD #Ranger
             if self.optimizer_args is None:
-                self.optimizer_args = {'lr': 0.001}
+                self.optimizer_args = {'lr': 0.005}
 
             if 'beta1' in self.dynamic_parameters:
                 self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
