@@ -545,9 +545,9 @@ class NnMixer:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
 
-            self.optimizer_class = torch.optim.SGD #Ranger
+            self.optimizer_class = Ranger #torch.optim.SGD #Ranger
             if self.optimizer_args is None:
-                self.optimizer_args = {'lr': 0.05}
+                self.optimizer_args = {'lr': 0.001}
 
             if 'beta1' in self.dynamic_parameters:
                 self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
@@ -572,7 +572,7 @@ class NnMixer:
                     self.last_unaware_net = copy.deepcopy(self.net.net)
 
                     # Lower the learning rate once we start training the selfaware network
-                    self.optimizer_args['lr'] = self.optimizer.lr/4
+                    self.optimizer_args['lr'] = self.optimizer.param_groups[0]['lr']/4
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
@@ -585,7 +585,7 @@ class NnMixer:
                     self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=False, pretrained_net=self.last_unaware_net, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, input_indexes=ds.input_indexes)
 
                     # Increase the learning rate closer to the previous levels
-                    self.optimizer_args['lr'] = self.optimizer.lr * 4
+                    self.optimizer_args['lr'] = self.optimizer.param_groups[0]['lr'] * 4
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
@@ -596,15 +596,6 @@ class NnMixer:
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
                 labels = labels.to(self.net.device)
-
-                with torch.no_grad():
-                    prm = [p for p in self.net.parameters()]
-                    print('Total nr params: ', len(prm))
-                    print('Total param mean: ', sum([p.mean() for p in prm]))
-
-                    prm = [p for p in self.net.encoders[0].parameters()]
-                    print('Encoder param mean: ', sum([p.mean() for p in prm]))
-                    print('Encoder nr params: ', len(prm))
 
                 # zero the parameter gradients
                 self.optimizer.zero_grad()

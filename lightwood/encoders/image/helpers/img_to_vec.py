@@ -16,7 +16,7 @@ class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
 
 class Img2Vec(nn.Module):
 
-    def __init__(self, model='resnet-18', layer='default', layer_output_size=512):
+    def __init__(self, model, layer='default', layer_output_size=512):
         """ Img2Vec
         :param cuda: If set to True, will run forward pass on GPU
         :param model: String name of requested model
@@ -29,8 +29,9 @@ class Img2Vec(nn.Module):
         self.layer_output_size = layer_output_size
         self.model_name = model
 
-        self.model, self.extraction_layer = self._get_model_and_layer(model, layer)
-        self.model = self.model.to(self.device)
+        self.model = self._get_model_and_layer(model, layer)
+        self.model = self.model.to(self.device).train()
+
 
     def to(self, device, available_devices):
         self.device = device
@@ -38,17 +39,7 @@ class Img2Vec(nn.Module):
         return self
 
     def forward(self, image, batch=True):
-        if self.model_name in ('alexnet', 'mobilenet', 'resnext-50-small'):
-            embedding = torch.zeros(len(image), self.layer_output_size)
-        elif self.model_name in ('resnet-18', 'resnext-50'):
-            embedding = torch.zeros(len(image), self.layer_output_size, 1, 1)
-
-        def copy_data(m, i, o):
-            embedding.copy_(o.data)
-
-        h = self.extraction_layer.register_forward_hook(copy_data)
-        h_x = self.model(image.to(self.device))
-        h.remove()
+        embedding = self.model(image.to(self.device))
 
         if self.model_name in ('resnext-50-small'):
             if batch:
@@ -67,6 +58,11 @@ class Img2Vec(nn.Module):
         :returns: pytorch model, selected layer
         """
 
+        if model_name == 'resnet-18':
+            self.layer_output_size = 512
+            model = torch.nn.Sequential(*list(models.resnet18(pretrained=True).children())[0:9])
+            return model
+
         if model_name == 'resnext-50-small':
             model = models.resnext50_32x4d(pretrained=True)
             if layer == 'default':
@@ -76,7 +72,7 @@ class Img2Vec(nn.Module):
             else:
                 layer = model._modules.get(layer)
 
-            return model, layer
+            return model
 
         if model_name == 'resnext-50':
             model = models.resnext50_32x4d(pretrained=True)
@@ -86,16 +82,6 @@ class Img2Vec(nn.Module):
             else:
                 layer = model._modules.get(layer)
 
-            return model, layer
-
-        if model_name == 'resnet-18':
-            model = models.resnet18(pretrained=True)
-            if layer == 'default':
-                layer = model._modules.get('avgpool')
-                self.layer_output_size = 512
-            else:
-                layer = model._modules.get(layer)
-
-            return model, layer
+            return model
 
         raise Exception(f'Image encoding model {model_name} was not found')
