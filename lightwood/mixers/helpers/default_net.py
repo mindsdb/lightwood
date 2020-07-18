@@ -193,16 +193,12 @@ class DefaultNet(torch.nn.Module):
             X.append(new_input)
         X = torch.stack(X).to(self.device)
 
-        print(self.input_size)
-        print(X.shape)
-        
         output = self._foward_net(X)
 
         if self.selfaware:
-            interim = torch.cat((input, output), 1)
+            interim = torch.cat((X, output), 1)
             awareness = self._foward_awareness_net(interim)
 
             return output, awareness
 
-        print('MADE A FORWARD PASS !')
         return output

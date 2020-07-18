@@ -40,7 +40,7 @@ class Transformer:
                     self.out_indexes.append([0,len(sub_vector)])
                 else:
                     self.out_indexes.append([self.out_indexes[-1][1], self.out_indexes[-1][1] + len(sub_vector)])
-                    
+
         return input_vector, output_vector
 
     def revert(self, vector, feature_set='output_features'):

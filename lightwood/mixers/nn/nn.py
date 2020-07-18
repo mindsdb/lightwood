@@ -14,6 +14,7 @@ from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.quantile_loss import QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
+from lightwood.mixers.helpers.data import list_collate
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
@@ -68,13 +69,12 @@ class NnMixer:
         ds.encoders = self.encoders
         ds.transformer = self.transformer
 
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, collate_fn=list_collate)
 
         loss_confidence_arr = []
 
         for i, data in enumerate(data_loader, 0):
             inputs, labels = data
-            #inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
             with torch.no_grad():
@@ -301,7 +301,7 @@ class NnMixer:
         when_data_source.encoders = self.encoders
         _, _ = when_data_source[0]
 
-        data_loader = DataLoader(when_data_source, batch_size=self.batch_size, shuffle=False, num_workers=0)
+        data_loader = DataLoader(when_data_source, batch_size=self.batch_size, shuffle=False, num_workers=0, collate_fn=list_collate)
 
         # set model into evaluation mode in order to skip things such as Dropout
         self.net = self.net.eval()
@@ -312,7 +312,6 @@ class NnMixer:
 
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
-            #inputs = inputs.to(self.net.device)
 
             with torch.no_grad():
                 if self.is_selfaware:
@@ -415,14 +414,13 @@ class NnMixer:
         ds.encoders = self.encoders
         ds.transformer = self.transformer
 
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, collate_fn=list_collate)
 
         running_loss = 0.0
         error = 0
 
         for i, data in enumerate(data_loader, 0):
             inputs, labels = data
-            #inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
             with torch.no_grad():
@@ -504,10 +502,9 @@ class NnMixer:
         """
         if initialize:
             self.fit_data_source(ds)
-
             input_sample, output_sample = ds[0]
 
-            self.net = self.nn_class(self.dynamic_parameters, input_size=len(input_sample), output_size=len(output_sample), nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, in_indexes=ds.in_indexes)
+            self.net = self.nn_class(self.dynamic_parameters, input_size=ds.get_input_size(), output_size=ds.get_output_size(), nr_outputs=len(self.out_types), selfaware=False, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, in_indexes=ds.in_indexes)
 
             self.net = self.net.train()
 
@@ -551,16 +548,7 @@ class NnMixer:
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
-        def ccollate(batch):
-            labels = []
-            inputs = []
-            for item in batch:
-                inputs.append(item[0])
-                labels.append(torch.stack(item[1]))
-
-            return [inputs, torch.stack(labels)]
-
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, collate_fn=ccollate)
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, collate_fn=list_collate)
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
@@ -569,7 +557,7 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=True, pretrained_net=self.net.net, deterministic=self.config['mixer']['deterministic'])
+                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=True, pretrained_net=self.net.net, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, in_indexes=ds.in_indexes)
                     self.last_unaware_net = copy.deepcopy(self.net.net)
 
                     # Lower the learning rate once we start training the selfaware network
@@ -583,7 +571,7 @@ class NnMixer:
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=False, pretrained_net=self.last_unaware_net, deterministic=self.config['mixer']['deterministic'])
+                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=False, pretrained_net=self.last_unaware_net, deterministic=self.config['mixer']['deterministic'], encoders=ds.trainable_encoders, encoder_indexes=ds.trainable_encoder_positions, in_indexes=ds.in_indexes)
 
                     # Increase the learning rate closer to the previous levels
                     self.optimizer_args['lr'] = self.optimizer.lr * 4
@@ -597,7 +585,6 @@ class NnMixer:
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
                 labels = labels.to(self.net.device)
-                #inputs = inputs.to(self.net.device)
 
                 # zero the parameter gradients
                 self.optimizer.zero_grad()

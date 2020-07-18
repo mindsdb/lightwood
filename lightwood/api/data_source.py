@@ -30,6 +30,12 @@ class SubSet(Dataset):
     def get_feature_names(self, where='input_features'):
         return self.data_source.get_feature_names(where)
 
+    def get_input_size(self):
+        return self.data_source.get_input_size()
+
+    def get_output_size(self):
+        return self.data_source.get_output_size()
+
     def __getattribute__(self, name):
         if name in ['configuration', 'encoders', 'transformer', 'training',
                     'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes','in_indexes','trainable_encoders','trainable_encoder_positions']:
@@ -305,6 +311,21 @@ class DataSource(Dataset):
                 self.trainable_encoders.append(self.encoders[column_name].model)
                 self.trainable_encoder_positions.append(i)
 
+    def get_input_size(self):
+        sample_len = 0
+        for feature in self.configuration['input_features']:
+            col_name = feature['name']
+            sample = [self.get_column_original_data(col_name)[0]]
+            sample_len += len(self.encoders[col_name].encode(sample)[0])
+        return sample_len
+
+    def get_output_size(self):
+        sample_len = 0
+        for feature in self.configuration['output_features']:
+            col_name = feature['name']
+            sample = [self.get_column_original_data(col_name)[0]]
+            sample_len += len(self.encoders[col_name].encode(sample)[0])
+        return sample_len
 
     def get_encoded_column_data(self, column_name, custom_data=None):
         if column_name in self.encoded_cache and custom_data is None:
