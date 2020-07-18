@@ -336,7 +336,7 @@ class DataSource(Dataset):
             return self.out_size
 
         sample_len = 0
-        self.input_indexes = []
+        self.out_indexes = []
 
         for feature in self.configuration['output_features']:
             col_name = feature['name']
