@@ -548,9 +548,9 @@ class NnMixer:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
 
-            self.optimizer_class = torch.optim.SGD #Ranger
+            self.optimizer_class = Ranger #torch.optim.SGD #
             if self.optimizer_args is None:
-                self.optimizer_args = {'lr': 0.005}
+                self.optimizer_args = {'lr': 0.0003}
 
             if 'beta1' in self.dynamic_parameters:
                 self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)

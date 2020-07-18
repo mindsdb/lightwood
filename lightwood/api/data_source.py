@@ -146,8 +146,6 @@ class DataSource(Dataset):
                 dropout_features = dropout_features[:-1]
             #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
-        if dropout_features is not None:
-            print(dropout_features)
         if not self.disable_cache:
             if self.transformed_cache is None:
                 self.transformed_cache = [None] * len(self)
