@@ -545,9 +545,9 @@ class NnMixer:
                         self.criterion_arr.append(torch.nn.MSELoss())
                         self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
 
-            self.optimizer_class = Ranger
+            self.optimizer_class = torch.optim.SGD #Ranger
             if self.optimizer_args is None:
-                self.optimizer_args = {'lr': 0.0005}
+                self.optimizer_args = {'lr': 0.05}
 
             if 'beta1' in self.dynamic_parameters:
                 self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
@@ -599,11 +599,13 @@ class NnMixer:
 
                 with torch.no_grad():
                     prm = [p for p in self.net.parameters()]
-                    print('All param mean: ', sum([p.mean() for p in prm]))
+                    print('Total nr params: ', len(prm))
+                    print('Total param mean: ', sum([p.mean() for p in prm]))
 
                     prm = [p for p in self.net.encoders[0].parameters()]
                     print('Encoder param mean: ', sum([p.mean() for p in prm]))
-                    
+                    print('Encoder nr params: ', len(prm))
+
                 # zero the parameter gradients
                 self.optimizer.zero_grad()
 

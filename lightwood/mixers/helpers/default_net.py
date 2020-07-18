@@ -47,8 +47,7 @@ class DefaultNet(torch.nn.Module):
         """
         super(DefaultNet, self).__init__()
 
-        for i, encoder in enumerate(self.encoders):
-            self.add_module(str(i), encoder)
+        self.encoders = torch.nn.ModuleList(self.encoders)
 
         if shape is None and pretrained_net is None:
             shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
@@ -179,7 +178,7 @@ class DefaultNet(torch.nn.Module):
         :return: either just output or (output, awareness)
         """
 
-        X = []
+        X = None
         for input in input_arr:
             new_input = None
             k = 0
@@ -193,8 +192,14 @@ class DefaultNet(torch.nn.Module):
                     new_input = input_slice
                 else:
                     new_input = torch.cat((new_input,input_slice),0)
-            X.append(new_input)
-        X = torch.stack(X).to(self.device)
+
+            new_input = new_input.unsqueeze(0)
+            if X is None:
+                X = new_input
+            else:
+                X = torch.cat((X,new_input), 0)
+
+        X = X.to(self.device)
 
         output = self._foward_net(X)
 
