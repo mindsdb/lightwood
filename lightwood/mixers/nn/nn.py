@@ -140,7 +140,7 @@ class NnMixer:
                     first_run = False
 
                     # Log this every now and then so that the user knows it's running
-                    if (int(time.time()) - log_reasure) > 30:
+                    if (int(time.time()) - log_reasure) > 5:
                         log_reasure = time.time()
                         logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
 
@@ -550,7 +550,7 @@ class NnMixer:
 
             self.optimizer_class = Ranger #torch.optim.SGD #
             if self.optimizer_args is None:
-                self.optimizer_args = {'lr': 0.0005}
+                self.optimizer_args = {'lr': 0.005}
 
             if 'beta1' in self.dynamic_parameters:
                 self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)

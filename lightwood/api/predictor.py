@@ -145,7 +145,7 @@ class Predictor:
         :return: None
         """
         print(eval_every_x_epochs)
-        eval_every_x_epochs = 10
+        eval_every_x_epochs = 50
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
         # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
