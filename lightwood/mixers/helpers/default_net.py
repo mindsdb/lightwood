@@ -47,6 +47,9 @@ class DefaultNet(torch.nn.Module):
         """
         super(DefaultNet, self).__init__()
 
+        for i, encoder in enumerate(self.encoders):
+            self.add_model(str(i), encoder)
+
         if shape is None and pretrained_net is None:
             shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
 

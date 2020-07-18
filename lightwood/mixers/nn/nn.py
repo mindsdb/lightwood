@@ -597,6 +597,13 @@ class NnMixer:
                 inputs, labels = data
                 labels = labels.to(self.net.device)
 
+                with torch.no_grad():
+                    prm = [p for p in self.net.parameters()]
+                    print('All param mean: ', sum([p.mean() for p in prm]))
+
+                    prm = [p for p in self.net.encoders[0].parameters()]
+                    print('Encoder param mean: ', sum([p.mean() for p in prm]))
+                    
                 # zero the parameter gradients
                 self.optimizer.zero_grad()
 
