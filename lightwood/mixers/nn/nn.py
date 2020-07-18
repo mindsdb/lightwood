@@ -33,7 +33,7 @@ class NnMixer:
         self.criterion_arr = None
         self.unreduced_criterion_arr = None
 
-        self.batch_size = 200
+        self.batch_size = 11
         self.epochs = 120000
 
         self.nn_class = DefaultNet
@@ -74,7 +74,7 @@ class NnMixer:
 
         for i, data in enumerate(data_loader, 0):
             inputs, labels = data
-            inputs = inputs.to(self.net.device)
+            #inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
             with torch.no_grad():
@@ -312,7 +312,7 @@ class NnMixer:
 
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
-            inputs = inputs.to(self.net.device)
+            #inputs = inputs.to(self.net.device)
 
             with torch.no_grad():
                 if self.is_selfaware:
@@ -422,7 +422,7 @@ class NnMixer:
 
         for i, data in enumerate(data_loader, 0):
             inputs, labels = data
-            inputs = inputs.to(self.net.device)
+            #inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
             with torch.no_grad():
@@ -551,7 +551,16 @@ class NnMixer:
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
         total_epochs = self.epochs
 
-        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+        def ccollate(batch):
+            labels = []
+            inputs = []
+            for item in batch:
+                inputs.append(item[0])
+                labels.append(torch.stack(item[1]))
+
+            return [inputs, torch.stack(labels)]
+
+        data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0, collate_fn=ccollate)
 
         for epoch in range(total_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
@@ -587,8 +596,7 @@ class NnMixer:
                 self.total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
-
-                labels = torch.stack(labels).to(self.net.device)
+                labels = labels.to(self.net.device)
                 #inputs = inputs.to(self.net.device)
 
                 # zero the parameter gradients

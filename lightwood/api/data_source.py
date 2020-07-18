@@ -145,7 +145,7 @@ class DataSource(Dataset):
             if dropout_features is None or len(dropout_features) == 0:
                 cached_sample = self.transformed_cache[idx]
                 if cached_sample is not None:
-                    return cached_sample[0], cached_sample[1]
+                    return cached_sample
 
         for feature_set in ['input_features', 'output_features']:
             sample[feature_set] = {}
@@ -210,7 +210,7 @@ class DataSource(Dataset):
 
         if not self.disable_cache:
             self.transformed_cache[idx] = sample
-        return sample[0], sample[1]
+        return sample
 
     def get_column_original_data(self, column_name):
         if column_name not in self.data_frame:

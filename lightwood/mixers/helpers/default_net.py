@@ -177,30 +177,26 @@ class DefaultNet(torch.nn.Module):
         """
 
         X = []
-
         for input in input_arr:
             new_input = None
             k = 0
-            for i, (start_i, end_i) in enumerate(self.in_indexes):
-                input_slice = input[start_i:end_i]
+            for i in range(len(input)):
+                input_slice = input[i]
                 if i in self.encoder_indexes:
-                    print(input_slice)
                     input_slice = self.encoders[k](input_slice)
                     k += 1
-                else:
-                    if isinstance(input_slice, torch.Tensor):
-                        input_slice = input_slice.to(torch.float32).to(self.device)
-                    else:
-                        input_slice = torch.FloatTensor(input_slice).to(self.device)
 
                 if new_input is None:
                     new_input = input_slice
                 else:
-                    torch.concat(new_input,input_slice)
-            X.append(input)
-        X = torch.stack(X)
+                    new_input = torch.cat((new_input,input_slice),0)
+            X.append(new_input)
+        X = torch.stack(X).to(self.device)
 
-        output = self._foward_net(input)
+        print(self.input_size)
+        print(X.shape)
+        
+        output = self._foward_net(X)
 
         if self.selfaware:
             interim = torch.cat((input, output), 1)
@@ -208,4 +204,5 @@ class DefaultNet(torch.nn.Module):
 
             return output, awareness
 
+        print('MADE A FORWARD PASS !')
         return output
