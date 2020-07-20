@@ -8,16 +8,16 @@ from lightwood.helpers.torch import concat_vectors_and_pad, average_vectors
 
 
 class ShortTextEncoder(BaseEncoder):
-    def __init__(self, is_target=False, combine='mean'):
+    def __init__(self, is_target=False):
         super().__init__(is_target)
         self._pytorch_wrapper = torch.FloatTensor
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
 
-        if combine not in ['mean', 'concat']:
-            self._unexpected_combine()
+        if is_target:
+            self._combine = 'concat'
+        else:
+            self._combine = 'mean'
         
-        self._combine = combine
-
         # Defined in self.prepare_encoder()
         self._combine_fn = None
     
