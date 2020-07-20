@@ -20,26 +20,37 @@ class TestShortTextEncoder(unittest.TestCase):
         assert tokenize_text("don't wouldn't") == ['do', 'not', 'would', 'not']
 
     def test_concat(self):
-        self._test_concat(onehot=True)
-        self._test_concat(onehot=False)
+        self._test_concat(True, True)
+        self._test_concat(False, False)
+        self._test_concat(True, False)
+        self._test_concat(False, True)
     
     def test_mean(self):
-        self._test_mean(onehot=True)
-        self._test_mean(onehot=False)
+        self._test_mean(True, True)
+        self._test_mean(False, False)
+        self._test_mean(True, False)
+        self._test_mean(False, True)
 
-    def _test_concat(self, onehot):
+    def _test_concat(self, onehot, is_target):
         vocab_size = 99 if onehot else 800
         
         priming_data = generate_sentences(2, 6, vocab_size)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(combine='concat')
+        enc = ShortTextEncoder(is_target=is_target)
         enc.prepare_encoder(priming_data)
 
         if onehot:
             assert not enc.cae.use_autoencoder
         else:
             assert enc.cae.use_autoencoder
+
+        assert enc.is_target == is_target
+
+        if is_target:
+            enc._combine == 'concat'
+        else:
+            enc._combine == 'mean'
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
@@ -52,19 +63,26 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
 
-    def _test_mean(self, onehot):
+    def _test_mean(self, onehot, is_target):
         vocab_size = 99 if onehot else 800
 
         priming_data = generate_sentences(2, 6, vocab_size)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(combine='mean')
+        enc = ShortTextEncoder(is_target=is_target)
         enc.prepare_encoder(priming_data)
 
         if onehot:
             assert not enc.cae.use_autoencoder
         else:
             assert enc.cae.use_autoencoder
+        
+        assert enc.is_target == is_target
+
+        if is_target:
+            enc._combine == 'concat'
+        else:
+            enc._combine == 'mean'
 
         encoded_data = enc.encode(test_data)
 
