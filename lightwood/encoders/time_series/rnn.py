@@ -1,7 +1,6 @@
 from __future__ import unicode_literals, print_function, division
 
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
-from lightwood.config.config import CONFIG
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import EncoderBase
 
@@ -12,22 +11,19 @@ from torch import optim
 
 
 class RnnEncoder(EncoderBase):
-    def __init__(self, encoded_vector_size=4, train_iters=75000, stop_on_error=0.8, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, dropout=0.2, weight_decay=1e-4, max_timesteps=64):
+    def __init__(self, encoded_vector_size=4, train_iters=75000, stop_on_error=0.8, ts_n_dims=1, max_timesteps=64):
         self.device, _ = get_devices()
 
         self._stop_on_error = stop_on_error
-        self._learning_rate = learning_rate
+        self._learning_rate = 0.01
         self._encoded_vector_size = encoded_vector_size
         self._train_iters = train_iters
         self._pytorch_wrapper = torch.FloatTensor
-        self._encoder = EncoderRNNNumerical(input_size=ts_n_dims, hidden_size=self._encoded_vector_size,
-                                            dropout=dropout).to(self.device)
-        self._decoder = DecoderRNNNumerical(output_size=ts_n_dims, hidden_size=self._encoded_vector_size,
-                                            dropout=dropout).to(self.device)
-        self.parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
-        self.optimizer = optim.AdamW(self.parameters, lr=self._learning_rate, weight_decay=weight_decay)
-        self.criterion = nn.MSELoss()
+        self._encoder = EncoderRNNNumerical(input_size=ts_n_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        self._decoder = DecoderRNNNumerical(output_size=ts_n_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
+        self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
+        self._criterion = nn.MSELoss()
         self._prepared = False
         self._n_dims = ts_n_dims  # expected dimensionality of time series
         self._max_ts_length = max_timesteps  # for truncating and padding
@@ -62,8 +58,7 @@ class RnnEncoder(EncoderBase):
                 data_points = priming_data[data_idx:min(data_idx + batch_size, len(priming_data))]
                 batch = []
                 for dp in data_points:
-                    data_tensor = tensor_from_series(dp, self.device, n_dims=self._n_dims,
-                                                     pad_value=self._eos, max_len=self._max_ts_length)
+                    data_tensor = tensor_from_series(dp, self.device, self._n_dims, self._eos, self._max_ts_length)
                     batch.append(data_tensor)
 
                 # shape: (batch_size, timesteps, n_dims)
@@ -73,7 +68,7 @@ class RnnEncoder(EncoderBase):
                 # setup loss and optimizer
                 steps = batch.shape[1]
                 loss = 0
-                self.optimizer.zero_grad()
+                self._optimizer.zero_grad()
 
                 # encode
                 encoder_hidden = self._encoder.initHidden(self.device)
@@ -89,14 +84,13 @@ class RnnEncoder(EncoderBase):
                     else:
                         next_tensor, encoder_hidden = self._encoder.forward(next_tensor.detach(), encoder_hidden)
 
-                    loss += self.criterion(next_tensor, data_tensor[:, tensor_i + 1, :].unsqueeze(dim=1))
+                    loss += self._criterion(next_tensor, data_tensor[:, tensor_i + 1, :].unsqueeze(dim=1))
 
                 # decode
                 decoder_hidden = encoder_hidden
-                sos_vector = torch.full((batch.shape[0], 1, batch.shape[2]), self._sos,
-                                        dtype=torch.float32).to(self.device)
-                next_tensor = torch.clone(sos_vector)
-                tensor_target = torch.cat([sos_vector, batch], dim=1)
+                next_tensor = torch.full((batch.shape[0], 1, batch.shape[2]), self._sos,
+                                         dtype=torch.float32).to(self.device)
+                tensor_target = torch.cat([next_tensor, batch], dim=1)
 
                 for tensor_i in range(steps - 1):
                     rand = np.random.randint(2)
@@ -108,11 +102,11 @@ class RnnEncoder(EncoderBase):
                     else:
                         next_tensor, decoder_hidden = self._decoder.forward(next_tensor.detach(), decoder_hidden)
 
-                    loss += self.criterion(next_tensor, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1))
+                    loss += self._criterion(next_tensor, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1))
 
                 average_loss += int(loss)
                 loss.backward()
-                self.optimizer.step()
+                self._optimizer.step()
 
             average_loss = average_loss / len(priming_data)
 
@@ -122,7 +116,7 @@ class RnnEncoder(EncoderBase):
                 feedback_hoop_function("epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
                     epoch_n=i + 1,
                     total=self._train_iters,
-                    average_loss=round(average_loss, 2)))
+                    average_loss=average_loss))
 
         self._prepared = True
 
@@ -138,8 +132,7 @@ class RnnEncoder(EncoderBase):
         """
         self._encoder.eval()
         with torch.no_grad():
-            data_tensor = tensor_from_series(data, self.device, n_dims=self._n_dims,
-                                             pad_value=self._eos, max_len=self._max_ts_length)
+            data_tensor = tensor_from_series(data, self.device, self._n_dims, self._eos, self._max_ts_length)
             steps = data_tensor.shape[1]
             encoder_hidden = self._encoder.initHidden(self.device)
             encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
@@ -228,45 +221,3 @@ class RnnEncoder(EncoderBase):
             ret += [reconstruction]
 
         return self._pytorch_wrapper(ret)
-
-
-# only run the test if this file is called from debugger
-if __name__ == "__main__":
-    from lightwood.encoders.time_series.helpers.test_ts import test_ts
-
-    # set log, fix random seed for reproducibility
-    logging.basicConfig(level=logging.DEBUG)
-    seed = 42
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if 'cuda' in str(get_devices()[0]):
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-
-    # test 1: overfit single multi dimensional time series
-    logging.info(" [Test] Multi-dimensional time series overfit")
-    series = [[['1 2 3 4 5 6'], ['2 3 4 5 6 7'], ['3 4 5 6 7 8'], ['4 5 6 7 8 9']]]
-
-    data = 100 * series
-    n_dims = max([len(q) for q in data])
-
-    params = {'max_ts': 6,
-              'hidden_size': 10,
-              'batch_size': 1,
-              'dropout': 0.1,
-              'ts_n_dims': n_dims,
-              'train_iters': 20,
-              'margin': 0.5,  # error tolerance
-              'feedback_fn': lambda x: logging.info(x),
-              'pred_qty': 1}
-
-    encoder = RnnEncoder(encoded_vector_size=params['hidden_size'],
-                         train_iters=params['train_iters'],
-                         ts_n_dims=params['ts_n_dims'],
-                         max_timesteps=params['max_ts'],
-                         dropout=params['dropout'])
-    encoder.prepare_encoder(data, feedback_hoop_function=params['feedback_fn'], batch_size=params['batch_size'])
-
-    queries = [[['1 2 3'], ['2 3 4'], ['3 4 5'], ['4 5 6']]]
-    answers = [[4, 5, 6, 7]]
-    test_ts(encoder, queries, answers, params)
