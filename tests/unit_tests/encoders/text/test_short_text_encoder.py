@@ -19,38 +19,16 @@ class TestShortTextEncoder(unittest.TestCase):
 
         assert tokenize_text("don't wouldn't") == ['do', 'not', 'would', 'not']
 
-    def test_concat(self):
-        self._test_concat(True, True)
-        self._test_concat(False, False)
-        self._test_concat(True, False)
-        self._test_concat(False, True)
-    
-    def test_mean(self):
-        self._test_mean(True, True)
-        self._test_mean(False, False)
-        self._test_mean(True, False)
-        self._test_mean(False, True)
-
-    def _test_concat(self, onehot, is_target):
-        vocab_size = 99 if onehot else 800
-        
-        priming_data = generate_sentences(2, 6, vocab_size)
+    def test_onehot_target(self):
+        priming_data = generate_sentences(2, 6, 99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(is_target=is_target)
+        enc = ShortTextEncoder(is_target=True)
         enc.prepare_encoder(priming_data)
 
-        if onehot:
-            assert not enc.cae.use_autoencoder
-        else:
-            assert enc.cae.use_autoencoder
-
-        assert enc.is_target == is_target
-
-        if is_target:
-            assert enc._combine == 'concat'
-        else:
-            assert enc._combine == 'mean'
+        assert not enc.cae.use_autoencoder
+        assert enc.is_target == True
+        assert enc._combine == 'concat'
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
@@ -63,33 +41,61 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
 
-    def _test_mean(self, onehot, is_target):
-        vocab_size = 99 if onehot else 800
-
-        priming_data = generate_sentences(2, 6, vocab_size)
+    def test_non_onehot_target(self):
+        priming_data = generate_sentences(2, 6, 800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(is_target=is_target)
+        enc = ShortTextEncoder(is_target=True)
         enc.prepare_encoder(priming_data)
 
-        if onehot:
-            assert not enc.cae.use_autoencoder
-        else:
-            assert enc.cae.use_autoencoder
-        
-        assert enc.is_target == is_target
-
-        if is_target:
-            assert enc._combine == 'concat'
-        else:
-            assert enc._combine == 'mean'
+        assert enc.cae.use_autoencoder
+        assert enc.is_target == True
+        assert enc._combine == 'concat'
 
         encoded_data = enc.encode(test_data)
+        decoded_data = enc.decode(encoded_data)
+        
+        assert len(test_data) == len(encoded_data) == len(decoded_data)
 
+        for x_sent, y_sent in zip(
+            test_data,
+            [' '.join(x) for x in decoded_data]
+        ):
+            assert x_sent == y_sent
+
+    def test_onehot_non_target(self):
+        priming_data = generate_sentences(2, 6, 99)
+        test_data = random.sample(priming_data, len(priming_data) // 5)
+
+        enc = ShortTextEncoder(is_target=False)
+        enc.prepare_encoder(priming_data)
+
+        assert not enc.cae.use_autoencoder
+        assert enc.is_target == False
+        assert enc._combine == 'mean'
+
+        encoded_data = enc.encode(test_data)
+        with self.assertRaises(ValueError):
+            enc.decode(encoded_data)
+        
         assert len(test_data) == len(encoded_data)
 
+    def test_non_onehot_non_target(self):
+        priming_data = generate_sentences(2, 6, 800)
+        test_data = random.sample(priming_data, len(priming_data) // 5)
+
+        enc = ShortTextEncoder(is_target=False)
+        enc.prepare_encoder(priming_data)
+
+        assert enc.cae.use_autoencoder
+        assert enc.is_target == False
+        assert enc._combine == 'mean'
+
+        encoded_data = enc.encode(test_data)
         with self.assertRaises(ValueError):
-            decoded_data = enc.decode(encoded_data)
+            enc.decode(encoded_data)
+        
+        assert len(test_data) == len(encoded_data)
 
 
 if __name__ == '__main__':
