@@ -160,10 +160,10 @@ class RnnEncoder(EncoderBase):
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
 
-        for val in column_data:
-            ret = []
-            next = []
+        ret = []
+        next = []
 
+        for val in column_data:
             if get_next_count is None:
                 encoded = self._encode_one(val)
             else:
@@ -180,9 +180,9 @@ class RnnEncoder(EncoderBase):
                     vector = [next_reading]
                     if j == 0:
                         encoded = hidden
-                    next_i += [next_reading.cpu()]
+                    next_i += [next_reading]
 
-                next += [torch.stack(next_i)]
+                next += [next_i[0][0].cpu()]
 
             ret += [encoded[0][0].cpu()]
 
