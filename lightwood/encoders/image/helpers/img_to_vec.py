@@ -28,8 +28,6 @@ class Img2Vec(nn.Module):
         self.device, _ = get_devices()
         self.model_name = model
 
-        self.model_name = 'resnet-18' # Debugging
-
         self.model = self._get_model(layer)
         self.model = self.model.to(self.device)
 
