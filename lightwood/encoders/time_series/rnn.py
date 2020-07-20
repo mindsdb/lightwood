@@ -11,11 +11,12 @@ from torch import optim
 
 
 class RnnEncoder(EncoderBase):
-    def __init__(self, encoded_vector_size=4, train_iters=75000, stop_on_error=0.8, ts_n_dims=1, max_timesteps=64):
+    def __init__(self, encoded_vector_size=4, train_iters=75000, stop_on_error=0.8, learning_rate=0.01,
+                 is_target=False, ts_n_dims=1, max_timesteps=64):
         self.device, _ = get_devices()
 
         self._stop_on_error = stop_on_error
-        self._learning_rate = 0.01
+        self._learning_rate = learning_rate
         self._encoded_vector_size = encoded_vector_size
         self._train_iters = train_iters
         self._pytorch_wrapper = torch.FloatTensor
