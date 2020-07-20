@@ -67,14 +67,15 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
     # test 1: padding function
-    series = [['1 2 3 '], ['2 3'], ['3 4 5 6'], [' 4 5 6']]
+    series = [['1', '2', '3 '], ['2', '3'], ['3', '4', '5', '6'], [' 4', '5', '6']]
     target = [[1.0, 2.0, 3.0, 4.0, 0.0], [2.0, 3.0, 4.0, 5.0, 0.0], [3.0, 0.0, 5.0, 6.0, 0.0]]
     result = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3).tolist()[0]
     assert result == target
 
     # test 2: overfit single multi dimensional time series
     logging.info(" [Test] Multi-dimensional time series overfit")
-    series = [[['1 2 3 4 5 6'], ['2 3 4 5 6 7'], ['3 4 5 6 7 8'], ['4 5 6 7 8 9']]]
+    series = [[['1', '2', '3', '4', '5', '6'], ['2', '3', '4', '5', '6', '7'],
+               ['3', '4', '5', '6', '7', '8'], ['4', '5', '6', '7', '8', '9']]]
     data = 100 * series
     n_dims = max([len(q) for q in data])
 
@@ -93,6 +94,6 @@ if __name__ == "__main__":
 
     encoder.prepare_encoder(data, feedback_hoop_function=params['feedback_fn'], batch_size=params['batch_size'])
 
-    queries = [[['1 2 3'], ['2 3 4'], ['3 4 5'], ['4 5 6']]]
+    queries = [[['1', '2', '3'], ['2', '3', '4'], ['3', '4', '5'], ['4', '5', '6']]]
     answers = [[4, 5, 6, 7]]
     test_ts(encoder, queries, answers, params)

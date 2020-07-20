@@ -14,12 +14,14 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len):
     :param max_len: length to pad or truncate each time_series
     :return: series as a tensor ready for model consumption, shape (1, ts_length, n_dims)
     """
+    # edge case for when series == "dim 1 data"
+    if type(series) != type([]):
+        series = [str(series).split(' ')]
+
     # conversion to float
     float_series = []
     for dimn in series:
         dimn_series = []
-        if isinstance(dimn[0], str):
-            dimn = [i for i in dimn[0].strip().split(" ")]
         for ele in dimn:
             try:
                 dimn_series.append(float(ele))
