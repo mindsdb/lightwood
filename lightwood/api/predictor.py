@@ -211,6 +211,8 @@ class Predictor:
             # Don't use k-fold cross validation for very small input sizes
             nr_subsets = 1
 
+        nr_subsets = 1 # Debug
+        
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
         try:
