@@ -48,9 +48,9 @@ class TestShortTextEncoder(unittest.TestCase):
         assert enc.is_target == is_target
 
         if is_target:
-            enc._combine == 'concat'
+            assert enc._combine == 'concat'
         else:
-            enc._combine == 'mean'
+            assert enc._combine == 'mean'
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
@@ -80,9 +80,9 @@ class TestShortTextEncoder(unittest.TestCase):
         assert enc.is_target == is_target
 
         if is_target:
-            enc._combine == 'concat'
+            assert enc._combine == 'concat'
         else:
-            enc._combine == 'mean'
+            assert enc._combine == 'mean'
 
         encoded_data = enc.encode(test_data)
 
