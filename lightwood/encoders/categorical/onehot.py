@@ -1,19 +1,17 @@
 import torch
 from lightwood.encoders.text.helpers.rnn_helpers import Lang
 import numpy as np
-from lightwood.encoders.encoder_base import EncoderBase
+from lightwood.encoders.encoder_base import BaseEncoder
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0
 
 
-class OneHotEncoder(EncoderBase):
+class OneHotEncoder(BaseEncoder):
 
     def __init__(self, is_target=False):
-        self.is_target = is_target
+        super().__init__(is_target)
         self._lang = None
-        self._pytorch_wrapper = torch.FloatTensor
-        self._prepared = False
 
     def prepare_encoder(self, priming_data, max_dimensions=20000):
         if self._prepared:
