@@ -14,6 +14,7 @@ class MultiHotEncoder(BaseEncoder):
         self._prepared = True
 
     def encode(self, column_data):
+        column_data = [ (c if c is not None else []) for c in column_data]
         data_array = self._binarizer.transform(column_data)
         return self._pytorch_wrapper(data_array)
 

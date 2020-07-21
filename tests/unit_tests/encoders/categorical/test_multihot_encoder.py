@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 import random
 import string
 
@@ -44,3 +45,20 @@ class TestMultiHotEncoder(unittest.TestCase):
         decoded_labels_str = [str(sorted(t)) for t in decoded_data]
         encoder_accuracy = accuracy_score(test_labels_str, decoded_labels_str)
         self.assertEqual(encoder_accuracy, 1)
+
+    def test_handle_unseen_none(self):
+        vocab = self.get_vocab()
+        tags = [list(set(random.choices(vocab, k=random.randint(1, 3)))) for i in range(10)]
+        tags.append(None)
+
+        train_tags = tags[:-1]
+        test_tags = tags[-1:]
+
+        enc = MultiHotEncoder()
+        enc.prepare_encoder(train_tags)
+
+        encoded_data = enc.encode(test_tags)
+        decoded_data = enc.decode(encoded_data)
+        assert (np.array(encoded_data[0]) == 0).all()
+        assert decoded_data[0] == []
+
