@@ -18,13 +18,14 @@ class Img2Vec(nn.Module):
 
     def __init__(self, model):
         """ Img2Vec
+        :param model: name of the model to use
         """
         super(Img2Vec, self).__init__()
 
         self.device, _ = get_devices()
         self.model_name = model
 
-        self.model = self._get_model(layer)
+        self.model = self._get_model()
         self.model = self.model.to(self.device)
 
 
@@ -46,13 +47,7 @@ class Img2Vec(nn.Module):
             return embedding[0, :, 0, 0]
 
 
-    def _get_model(self, layer):
-        """ Internal method for getting layer from model
-        :param model_name: model name such as 'resnet-18'
-        :param layer: layer as a string for resnet-18 or int for alexnet
-        :returns: pytorch model, selected layer
-        """
-
+    def _get_model(self):
         if self.model_name == 'resnet-18':
             model = torch.nn.Sequential(*list(models.resnet18(pretrained=True).children())[:-1])
 
@@ -63,6 +58,6 @@ class Img2Vec(nn.Module):
             model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1])
 
         else:
-            raise Exception(f'Image encoding model {model_name} was not found')
+            raise Exception('Image encoding model ' + self.model_name + ' was not found')
 
         return model
