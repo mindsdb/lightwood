@@ -8,19 +8,34 @@ from lightwood.helpers.torch import concat_vectors_and_pad, average_vectors
 
 
 class ShortTextEncoder(BaseEncoder):
-    def __init__(self, is_target=False):
+    def __init__(self, is_target=False, mode=None):
+        """
+        :param is_target:
+        :param mode:
+            None or "concat" or "mean".
+            When None, it will be set automatically based on is_target:
+            (is_target) -> 'concat'
+            (not is_target) -> 'mean'
+        """
         super().__init__(is_target)
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
 
-        if is_target:
-            self._combine = 'concat'
+        if mode is None:
+            if is_target:
+                self._mode = 'concat'
+            else:
+                self._mode = 'mean'
         else:
-            self._combine = 'mean'
-        
+            if mode not in ['concat', 'mean']:
+                self._unexpected_mode()
+            else:
+                self._mode = mode
+
+
         # Defined in self.prepare_encoder()
         self._combine_fn = None
     
-    def _unexpected_combine(self):
+    def _unexpected_mode(self):
         raise ValueError('unexpected combine value (must be "mean" or "concat")')
         
     def prepare_encoder(self, column_data):
@@ -35,12 +50,12 @@ class ShortTextEncoder(BaseEncoder):
 
         self.cae.prepare_encoder(unique_tokens)
 
-        if self._combine == 'concat':
+        if self._mode == 'concat':
             self._combine_fn = lambda vecs: concat_vectors_and_pad(vecs, max_words_per_sent)
-        elif self._combine == 'mean':
+        elif self._mode == 'mean':
             self._combine_fn = lambda vecs: average_vectors(vecs)
         else:
-            self._unexpected_combine()
+            self._unexpected_mode()
 
     def encode(self, column_data):
         no_null_sentences = (x if x is not None else '' for x in column_data)
@@ -53,7 +68,7 @@ class ShortTextEncoder(BaseEncoder):
         return output
 
     def decode(self, vectors):
-        if self._combine == 'concat':
+        if self._mode == 'concat':
 
             if self.cae.use_autoencoder:
                 vec_size = self.cae.max_encoded_length
@@ -80,7 +95,7 @@ class ShortTextEncoder(BaseEncoder):
 
             return output
 
-        elif self._combine == 'mean':
+        elif self._mode == 'mean':
             raise ValueError('decode is only defined for combine="concat"')
         else:
-            self._unexpected_combine()
+            self._unexpected_mode()
