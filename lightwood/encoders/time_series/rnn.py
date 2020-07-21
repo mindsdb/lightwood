@@ -29,7 +29,6 @@ class RnnEncoder(BaseEncoder):
         self._prepared = False
         self._n_dims = ts_n_dims  # expected dimensionality of time series
         self._max_ts_length = max_timesteps  # for truncating and padding
-        self._max_dec_length = 20  # static decoding length
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
 
@@ -192,25 +191,29 @@ class RnnEncoder(BaseEncoder):
         else:
             return self._pytorch_wrapper(torch.stack(ret)), self._pytorch_wrapper(torch.stack(next))
 
-    def _decode_one(self, hidden):
+    def _decode_one(self, hidden, steps):
         """
         Decodes a single time series from its encoded representation.
         :param hidden: time series embedded representation tensor, with size self._encoded_vector_size
+        :param steps: as in decode(), defines how many values to output when reconstructing
         :return: decoded time series list
         """
         self._decoder.eval()
         with torch.no_grad():
             ret = []
             next_tensor = torch.full((1, 1, self._n_dims), self._sos, dtype=torch.float32).to(self.device)
-            for _ in range(self._max_dec_length):
+            timesteps = steps if steps else self._max_ts_length
+            for _ in range(timesteps):
                 next_tensor, hidden = self._decoder.forward(next_tensor, hidden)
                 ret.append(next_tensor)
             return torch.stack(ret)
 
-    def decode(self, encoded_data):
+    def decode(self, encoded_data, steps=None):
         """
         Decode a list of embedded multidimensional time series
         :param encoded_data: a list of embeddings [ e1, e2, ...] to be decoded into time series
+        :param steps: fixed number of timesteps to reconstruct from each embedding.
+        If None, encoder will output the largest length encountered during training.
         :return: a list of reconstructed time series
         """
         if not self._prepared:
@@ -219,7 +222,7 @@ class RnnEncoder(BaseEncoder):
         ret = []
         for _, val in enumerate(encoded_data):
             hidden = torch.unsqueeze(torch.unsqueeze(val, dim=0), dim=0).to(self.device)
-            reconstruction = self._decode_one(hidden).cpu().squeeze().T.tolist()
+            reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.tolist()
             ret += [reconstruction]
 
         return self._pytorch_wrapper(ret)
