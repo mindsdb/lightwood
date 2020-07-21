@@ -18,7 +18,6 @@ class ShortTextEncoder(BaseEncoder):
             (not is_target) -> 'mean'
         """
         super().__init__(is_target)
-        self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
 
         if mode is None:
             if is_target:
@@ -28,12 +27,16 @@ class ShortTextEncoder(BaseEncoder):
         else:
             if mode not in ['concat', 'mean']:
                 self._unexpected_mode()
-            else:
-                self._mode = mode
-
+            
+            if is_target and mode != 'concat':
+                raise ValueError('mode must be "concat" when is_target=True')
+            
+            self._mode = mode
 
         # Defined in self.prepare_encoder()
         self._combine_fn = None
+
+        self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
     
     def _unexpected_mode(self):
         raise ValueError('unexpected combine value (must be "mean" or "concat")')
