@@ -19,7 +19,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         assert tokenize_text("don't wouldn't") == ['do', 'not', 'would', 'not']
 
-    def test_onehot_target(self):
+    def test_onehot_target_auto_mode(self):
         # Vocab size 99 is expected to be encoded with OneHotEncoder
         priming_data = generate_sentences(2, 6, vocab_size=99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
@@ -44,7 +44,7 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
 
-    def test_non_onehot_target(self):
+    def test_non_onehot_target_auto_mode(self):
         # Vocab size 800 is expected to be encoded with CategoricalAutoEncoder
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
@@ -69,7 +69,7 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
 
-    def test_onehot_non_target(self):
+    def test_onehot_non_target_auto_mode(self):
         # Vocab size 99 is expected to be encoded with OneHotEncoder
         priming_data = generate_sentences(2, 6, vocab_size=99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
@@ -78,7 +78,7 @@ class TestShortTextEncoder(unittest.TestCase):
         enc.prepare_encoder(priming_data)
 
         assert not enc.cae.use_autoencoder
-        assert enc.is_target == False
+        assert enc.is_target is False
 
         # _combine is expected to be 'mean' when is_target is False
         assert enc._combine == 'mean'
@@ -90,8 +90,7 @@ class TestShortTextEncoder(unittest.TestCase):
         with self.assertRaises(ValueError):
             enc.decode(encoded_data)
         
-
-    def test_non_onehot_non_target(self):
+    def test_non_onehot_non_target_auto_mode(self):
         # Vocab size 800 is expected to be encoded with CategoricalAutoEncoder
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
@@ -100,7 +99,7 @@ class TestShortTextEncoder(unittest.TestCase):
         enc.prepare_encoder(priming_data)
 
         assert enc.cae.use_autoencoder
-        assert enc.is_target == False
+        assert enc.is_target is False
 
         # _combine is expected to be 'mean' when is_target is False
         assert enc._combine == 'mean'
@@ -111,6 +110,52 @@ class TestShortTextEncoder(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             enc.decode(encoded_data)
+
+    def test_onehot_non_target_manual_mode(self):
+        # Vocab size 99 is expected to be encoded with OneHotEncoder
+        priming_data = generate_sentences(2, 6, vocab_size=99)
+        test_data = random.sample(priming_data, len(priming_data) // 5)
+
+        enc = ShortTextEncoder(is_target=False, mode='concat')
+        enc.prepare_encoder(priming_data)
+
+        assert not enc.cae.use_autoencoder
+        assert enc.is_target is False
+        assert enc._combine == 'concat'
+        
+        encoded_data = enc.encode(test_data)
+        decoded_data = enc.decode(encoded_data)
+        
+        assert len(test_data) == len(encoded_data) == len(decoded_data)
+
+        for x_sent, y_sent in zip(
+            test_data,
+            [' '.join(x) for x in decoded_data]
+        ):
+            assert x_sent == y_sent
+        
+    def test_non_onehot_non_target_manual_mode(self):
+        # Vocab size 800 is expected to be encoded with CategoricalAutoEncoder
+        priming_data = generate_sentences(2, 6, vocab_size=800)
+        test_data = random.sample(priming_data, len(priming_data) // 5)
+
+        enc = ShortTextEncoder(is_target=False, mode='concat')
+        enc.prepare_encoder(priming_data)
+
+        assert enc.cae.use_autoencoder
+        assert enc.is_target is False
+        assert enc._combine == 'concat'
+
+        encoded_data = enc.encode(test_data)
+        decoded_data = enc.decode(encoded_data)
+        
+        assert len(test_data) == len(encoded_data) == len(decoded_data)
+
+        for x_sent, y_sent in zip(
+            test_data,
+            [' '.join(x) for x in decoded_data]
+        ):
+            assert x_sent == y_sent
 
 
 if __name__ == '__main__':
