@@ -53,7 +53,6 @@ class Img2VecEncoder(BaseEncoder):
         img_tensor_arr = []
         for image in images:
             if image is not None:
-                #logging.setLevel(logging.ERROR)
                 if image.startswith('http'):
                     response = requests.get(image)
                     img = Image.open(BytesIO(response.content))
@@ -67,7 +66,6 @@ class Img2VecEncoder(BaseEncoder):
                 img_tensor = self._scaler(img)
                 img_tensor = self._to_tensor(img_tensor)
                 img_tensor = self._normalize(img_tensor)
-                img_tensor = img_tensor
                 img_tensor_arr.append(img_tensor)
             else:
                 raise Exception('Can\'t work with images that are None')
@@ -86,11 +84,11 @@ class Img2VecEncoder(BaseEncoder):
 
         img_tensors = self.prepare(images)
         vec_arr = []
-        for img_tensor in img_tensors:
-            self.model.eval()
-            with torch.no_grad():
-                vec = self.model(img_tensor.unsqueeze(0),batch=False)
-            vec_arr.append(vec)
+        self.model.eval()
+        with torch.no_grad():
+            for img_tensor in img_tensors:
+                    vec = self.model(img_tensor.unsqueeze(0),batch=False)
+                vec_arr.append(vec)
         return torch.stack(vec_arr)
 
     def decode(self, encoded_values_tensor):

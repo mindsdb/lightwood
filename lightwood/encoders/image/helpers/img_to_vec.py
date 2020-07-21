@@ -16,12 +16,8 @@ class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
 
 class Img2Vec(nn.Module):
 
-    def __init__(self, model, layer='default'):
+    def __init__(self, model):
         """ Img2Vec
-        :param cuda: If set to True, will run forward pass on GPU
-        :param model: String name of requested model
-        :param layer: String or Int depending on model.  See more docs: https://github.com/christiansafka/img2vec.git
-        :param layer_output_size: Int depicting the output size of the requested layer
         """
         super(Img2Vec, self).__init__()
 
@@ -58,15 +54,12 @@ class Img2Vec(nn.Module):
         """
 
         if self.model_name == 'resnet-18':
-            self.layer_output_size = 512
             model = torch.nn.Sequential(*list(models.resnet18(pretrained=True).children())[:-1])
 
         elif self.model_name == 'resnext-50-small':
-            self.layer_output_size = 512
             model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1] , ChannelPoolAdaptiveAvg1d(output_size=512))
 
         elif self.model_name == 'resnext-50':
-            self.layer_output_size = 2048
             model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1])
 
         else:
