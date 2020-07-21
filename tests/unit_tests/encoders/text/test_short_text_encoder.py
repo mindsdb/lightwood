@@ -68,7 +68,7 @@ class TestShortTextEncoder(unittest.TestCase):
             assert x_sent == y_sent
 
     def test_smallvocavb_non_target_auto_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=99)
+        priming_data = generate_sentences(2, 6, vocab_size=50)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=False)
