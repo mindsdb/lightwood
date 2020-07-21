@@ -1,20 +1,14 @@
 import logging
+import unitest
+
 import torch
+
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.time_series import RnnEncoder
 from lightwood.encoders.time_series.helpers.rnn_helpers import tensor_from_series
 
 
-def test_ts(encoder, queries, answers, params):
-    """ Minimal testing suite for time series encoder-decoder.
-    :param encoder: RnnEncoder instance to test
-    :param queries: list of multi-dimensional time series to encode, predict, and decode with
-                    [[[data_ts1_dim_1], [data_ts1_dim_2]], ...] with data_ts_dim_i a string
-    :param answers: list of correct predictions for each query [[ans_query_1], ...], where
-                    ans_query_i is a list of numbers
-    :param params: dictionary with configuration parameters
-    :return:
-    """
+class TestRnnEncoder(unittest.TestCase):
     forecasts, decoded = list(), list()
 
     # predict and decode
