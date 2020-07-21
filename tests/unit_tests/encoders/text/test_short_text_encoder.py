@@ -19,8 +19,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         assert tokenize_text("don't wouldn't") == ['do', 'not', 'would', 'not']
 
-    def test_onehot_target_auto_mode(self):
-        # Vocab size 99 is expected to be encoded with OneHotEncoder
+    def test_smallvocavb_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -44,15 +43,14 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
 
-    def test_non_onehot_target_auto_mode(self):
-        # Vocab size 800 is expected to be encoded with CategoricalAutoEncoder
+    def test_non_smallvocavb_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=True)
         enc.prepare_encoder(priming_data)
 
-        assert enc.cae.use_autoencoder
+        assert not enc.cae.use_autoencoder
         assert enc.is_target is True
 
         # _combine is expected to be 'concat' when is_target is True
@@ -69,8 +67,7 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
 
-    def test_onehot_non_target_auto_mode(self):
-        # Vocab size 99 is expected to be encoded with OneHotEncoder
+    def test_smallvocavb_non_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -90,8 +87,7 @@ class TestShortTextEncoder(unittest.TestCase):
         with self.assertRaises(ValueError):
             enc.decode(encoded_data)
         
-    def test_non_onehot_non_target_auto_mode(self):
-        # Vocab size 800 is expected to be encoded with CategoricalAutoEncoder
+    def test_non_smallvocavb_non_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -111,8 +107,7 @@ class TestShortTextEncoder(unittest.TestCase):
         with self.assertRaises(ValueError):
             enc.decode(encoded_data)
 
-    def test_onehot_non_target_manual_mode(self):
-        # Vocab size 99 is expected to be encoded with OneHotEncoder
+    def test_smallvocavb_non_target_manual_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -134,8 +129,7 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
         
-    def test_non_onehot_non_target_manual_mode(self):
-        # Vocab size 800 is expected to be encoded with CategoricalAutoEncoder
+    def test_non_smallvocavb_non_target_manual_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
