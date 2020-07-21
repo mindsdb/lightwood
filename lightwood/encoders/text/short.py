@@ -96,6 +96,6 @@ class ShortTextEncoder(BaseEncoder):
             return output
 
         elif self._mode == 'mean':
-            raise ValueError('decode is only defined for combine="concat"')
+            raise ValueError('decode is only defined for mode="concat"')
         else:
             self._unexpected_mode()
