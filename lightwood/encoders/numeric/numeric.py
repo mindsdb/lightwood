@@ -56,17 +56,16 @@ class NumericEncoder(EncoderBase):
                 except:
                     real = None
             if self.is_target:
-                vector = [0] * (3 + 2*self.extra_outputs)
-                try:
-                    if real is not None and self._mean > 0:
-                        vector[0] = 1 if real < 0 else 0
-                        vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
-                        vector[2] = real / self._mean
-                    else:
-                        # Note: This part here is just to have targets equal in size
-                        # to the prediction size, these appended zeros won't be used anywhere
-                        vector = [0] * (3 + 2 * self.extra_outputs)
-                        logging.error(f'Can\'t encode target value: {real}')
+                if real is not None and self._mean > 0:
+                    vector = [0] * (3 + 2 * self.extra_outputs)
+                    vector[0] = 1 if real < 0 else 0
+                    vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
+                    vector[2] = real / self._mean
+                else:
+                    # Note: This part here is just to have targets equal in size
+                    # to the prediction size, these appended zeros won't be used anywhere
+                    vector = [0] * (3 + 2 * self.extra_outputs)
+                    logging.error(f'Can\'t encode target value: {real}')
 
             else:
                 vector = [0] * 4
