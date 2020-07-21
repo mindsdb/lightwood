@@ -11,7 +11,7 @@ from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
 from lightwood.mixers.nn.nn import NnMixer
-from sklearn.metrics import accuracy_score, r2_score
+from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 
@@ -304,8 +304,8 @@ class Predictor:
         return main_mixer_predictions
 
     @staticmethod
-    def apply_accuracy_function(col_type, real, predicted, weight_map=None):
-        if col_type in (COLUMN_DATA_TYPES.CATEGORICAL, COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL):
+    def apply_accuracy_function(col_type, real, predicted, weight_map=None, encoder=None):
+        if col_type == COLUMN_DATA_TYPES.CATEGORICAL:
             if weight_map is None:
                 sample_weight = [1 for x in real]
             else:
@@ -316,6 +316,21 @@ class Predictor:
             accuracy = {
                 'function': 'accuracy_score',
                 'value': accuracy_score(real, predicted, sample_weight=sample_weight)
+            }
+        elif col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+            if weight_map is None:
+                sample_weight = [1 for x in real]
+            else:
+                sample_weight = []
+                for val in real:
+                    sample_weight.append(weight_map[val])
+
+            encoded_real = encoder.encode(real)
+            encoded_predicted = encoder.encode(predicted)
+
+            accuracy = {
+                'function': 'f1_score',
+                'value': f1_score(encoded_real, encoded_predicted, average='weighted', sample_weight=sample_weight)
             }
         else:
             real_fixed = []
@@ -354,16 +369,26 @@ class Predictor:
 
         for output_column in self._output_columns:
 
-            real = list(map(str,ds.get_column_original_data(output_column)))
-            predicted =  list(map(str,predictions[output_column]['predictions']))
+            col_type = ds.get_column_config(output_column)['type']
+
+            if col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                real = list(map(tuple, ds.get_column_original_data(output_column)))
+                predicted = list(map(tuple, predictions[output_column]['predictions']))
+            else:
+                real = list(map(str,ds.get_column_original_data(output_column)))
+                predicted = list(map(str,predictions[output_column]['predictions']))
 
             weight_map = None
             if 'weights' in ds.get_column_config(output_column):
                 weight_map = ds.get_column_config(output_column)['weights']
 
-            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
+            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'],
+                                                    real,
+                                                    predicted,
+                                                    weight_map=weight_map,
+                                                    encoder=ds.encoders[output_column])
 
-            if ds.get_column_config(output_column)['type'] in (COLUMN_DATA_TYPES.NUMERIC):
+            if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
                 ds.encoders[output_column].decode_log = True
                 predicted = ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
 
