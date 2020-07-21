@@ -3,12 +3,13 @@ from tsfresh.feature_extraction import extract_features, MinimalFCParameters, Ef
 import torch
 
 from lightwood.encoders.numeric.numeric import NumericEncoder
+from lightwood.encoders.encoder_base import BaseEncoder
 
 
-class TsFreshTsEncoder:
+class TsFreshTsEncoder(BaseEncoder):
 
     def __init__(self, is_target=False):
-        self._pytorch_wrapper = torch.FloatTensor
+        super().__init__(is_target)
         self.numerical_encoder = NumericEncoder()
         self.max_series_len = 0
         self.n_jobs = 6
