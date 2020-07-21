@@ -38,7 +38,7 @@ class TestShortTextEncoder(unittest.TestCase):
         assert len(test_data) == len(encoded_data) == len(decoded_data)
 
         for x_sent, y_sent in zip(
-            test_data,
+            [' '.join(x) for x in tokenize_text(test_data)],
             [' '.join(x) for x in decoded_data]
         ):
             assert x_sent == y_sent
@@ -62,7 +62,7 @@ class TestShortTextEncoder(unittest.TestCase):
         assert len(test_data) == len(encoded_data) == len(decoded_data)
 
         for x_sent, y_sent in zip(
-            test_data,
+            [' '.join(x) for x in tokenize_text(test_data)],
             [' '.join(x) for x in decoded_data]
         ):
             assert x_sent == y_sent
@@ -124,7 +124,7 @@ class TestShortTextEncoder(unittest.TestCase):
         assert len(test_data) == len(encoded_data) == len(decoded_data)
 
         for x_sent, y_sent in zip(
-            test_data,
+            [' '.join(x) for x in tokenize_text(test_data)],
             [' '.join(x) for x in decoded_data]
         ):
             assert x_sent == y_sent
@@ -146,7 +146,7 @@ class TestShortTextEncoder(unittest.TestCase):
         assert len(test_data) == len(encoded_data) == len(decoded_data)
 
         for x_sent, y_sent in zip(
-            test_data,
+            [' '.join(x) for x in tokenize_text(test_data)],
             [' '.join(x) for x in decoded_data]
         ):
             assert x_sent == y_sent
