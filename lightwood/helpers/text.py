@@ -3,7 +3,10 @@ import re
 
 
 def contains_alnum(text):
-    return re.search('[a-zA-Z0-9]', text)
+    for c in text:
+        if c.isalnum():
+            return True
+    return False
 
 
 def decontracted(phrase):
