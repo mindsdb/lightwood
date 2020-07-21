@@ -76,7 +76,7 @@ class Img2VecEncoder(BaseEncoder):
         """
             Encode list of images
 
-            :images : list of images, each image is a path image(ToDO: url to image also need to be included)
+            :images : list of images, each image is a path to a file or a url
             :return: a torch.floatTensor
         """
         if not self._prepared:
@@ -87,7 +87,7 @@ class Img2VecEncoder(BaseEncoder):
         self.model.eval()
         with torch.no_grad():
             for img_tensor in img_tensors:
-                    vec = self.model(img_tensor.unsqueeze(0),batch=False)
+                vec = self.model(img_tensor.unsqueeze(0),batch=False)
                 vec_arr.append(vec)
         return torch.stack(vec_arr)
 
