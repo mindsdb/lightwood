@@ -31,7 +31,7 @@ class TestShortTextEncoder(unittest.TestCase):
         assert enc.is_target is True
 
         # _combine is expected to be 'concat' when is_target is True
-        assert enc._combine == 'concat'
+        assert enc._mode == 'concat'
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
@@ -56,7 +56,7 @@ class TestShortTextEncoder(unittest.TestCase):
         assert enc.is_target is True
 
         # _combine is expected to be 'concat' when is_target is True
-        assert enc._combine == 'concat'
+        assert enc._mode == 'concat'
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
@@ -81,7 +81,7 @@ class TestShortTextEncoder(unittest.TestCase):
         assert enc.is_target is False
 
         # _combine is expected to be 'mean' when is_target is False
-        assert enc._combine == 'mean'
+        assert enc._mode == 'mean'
 
         encoded_data = enc.encode(test_data)
 
@@ -102,7 +102,7 @@ class TestShortTextEncoder(unittest.TestCase):
         assert enc.is_target is False
 
         # _combine is expected to be 'mean' when is_target is False
-        assert enc._combine == 'mean'
+        assert enc._mode == 'mean'
 
         encoded_data = enc.encode(test_data)
 
@@ -121,7 +121,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         assert not enc.cae.use_autoencoder
         assert enc.is_target is False
-        assert enc._combine == 'concat'
+        assert enc._mode == 'concat'
         
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
@@ -144,7 +144,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         assert enc.cae.use_autoencoder
         assert enc.is_target is False
-        assert enc._combine == 'concat'
+        assert enc._mode == 'concat'
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
