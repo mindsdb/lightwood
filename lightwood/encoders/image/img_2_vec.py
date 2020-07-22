@@ -58,7 +58,6 @@ class Img2VecEncoder(BaseEncoder):
                     img = Image.open(BytesIO(response.content))
                 else:
                     img = Image.open(image)
-                #logging.setLevel(logging.DEBUG)
 
                 # In order for Normalize to work with 4-channel pngs and grayscale
                 img = img.convert('RGB')
