@@ -219,7 +219,7 @@ class DataSource(Dataset):
             ColumnDataTypes.MULTIPLE_CATEGORICAL: MultiHotEncoder,
             ColumnDataTypes.DATETIME: DatetimeEncoder,
             ColumnDataTypes.IMAGE: Img2VecEncoder,
-            ColumnDataTypes.TEXT: FlairEmbeddingEncoder, #DistilBertEncoder,
+            ColumnDataTypes.TEXT: DistilBertEncoder,
             ColumnDataTypes.SHORT_TEXT: ShortTextEncoder,
             ColumnDataTypes.TIME_SERIES: RnnEncoder,
             # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
