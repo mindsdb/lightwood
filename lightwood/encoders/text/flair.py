@@ -8,16 +8,8 @@ import flair
 
 class FlairEmbeddingEncoder(BaseEncoder):
     def __init__(self, is_target=False):
-        """
-        :param is_target:
-        :param mode:
-            None or "concat" or "mean".
-            When None, it will be set automatically based on is_target:
-            (is_target) -> 'concat'
-            (not is_target) -> 'mean'
-        """
         super().__init__(is_target)
-        self.max_sentence = 500 #768
+        self.max_sentence = 768
 
     def prepare_encoder(self, column_data):
         self.embedding = TransformerDocumentEmbeddings('roberta-base')
@@ -28,9 +20,10 @@ class FlairEmbeddingEncoder(BaseEncoder):
             if data is not None:
                 data = data[0:self.max_sentence]
             sentence = Sentence(data)
-            self.embedding.embed(sentence)
-            vec.append(sentence.get_embedding().to('cpu').clone())
-            sentence.clear_embeddings()
+            with torch.no_grad():
+                self.embedding.embed(sentence)
+                vec.append(sentence.get_embedding().to('cpu').clone())
+                sentence.clear_embeddings()
         return torch.stack(vec)
 
     def decode(self, vectors):
