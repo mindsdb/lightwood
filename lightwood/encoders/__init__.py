@@ -38,6 +38,10 @@ class Numeric:
 
 class Text:
     InferSentEncoder = InferSentEncoder
+    DistilBertEncoder = DistilBertEncoder
+    FlairEmbeddingEncoder = FlairEmbeddingEncoder
+    ShortTextEncoder = ShortTextEncoder
+    InferSentEncoder = InferSentEncoder
     RnnEncoder = RnnEncoder
 
 class Categorical:
