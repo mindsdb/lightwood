@@ -85,7 +85,9 @@ class NnMixer:
 
             with torch.no_grad():
                 if self.is_selfaware:
-                    outputs, awareness = self.net(inputs)
+                    outputs = self.net(inputs)
+                    aware_in = torch.cat((inputs, outputs), 1)
+                    awareness = self.selfaware_net(aware_in)
                 else:
                     outputs = self.net(inputs)
 
@@ -322,7 +324,9 @@ class NnMixer:
 
             with torch.no_grad():
                 if self.is_selfaware:
-                    output, awareness = self.net(inputs)
+                    output = self.net(inputs)
+                    aware_in = torch.cat((inputs, output), 1)
+                    awareness = self.selfaware_net(aware_in)
                     awareness = awareness.to('cpu')
                     awareness_arr.extend(awareness.tolist())
                 else:
@@ -435,10 +439,7 @@ class NnMixer:
             labels = labels.to(self.net.device)
 
             with torch.no_grad():
-                if self.is_selfaware:
-                    outputs, awareness = self.net(inputs)
-                else:
-                    outputs = self.net(inputs)
+                outputs = self.net(inputs)
 
             loss = None
             for k, criterion in enumerate(self.criterion_arr):
@@ -715,6 +716,7 @@ class NnMixer:
 
     def to(self, device, available_devices):
         self.net.to(device, available_devices)
+        self.selfaware_net.to(device, available_devices)
         return self
 
 if __name__ == "__main__":
