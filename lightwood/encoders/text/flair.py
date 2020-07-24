@@ -12,6 +12,7 @@ class FlairEmbeddingEncoder(BaseEncoder):
         self.max_sentence = 768
 
     def prepare_encoder(self, column_data):
+        # @TODO Maybe allow for an `aim` parameter and set a simpler embedding if the aim is speed (see img_2_vec as an example)
         self.embedding = TransformerDocumentEmbeddings('roberta-base')
 
     def encode(self, column_data):
