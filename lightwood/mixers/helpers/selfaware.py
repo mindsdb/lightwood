@@ -2,16 +2,13 @@ import torch
 import math
 
 from lightwood.config.config import CONFIG
-from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.helpers.device import get_devices
 
 
 # Todo: conform to style guidelines
 class SelfAware(torch.nn.Module):
     def __init__(self, input_size, output_size, nr_outputs):
         super(SelfAware, self).__init__()
-
-        self.available_devices = None
-        self.device = None
 
         self.input_size = input_size
         self.output_size = output_size
@@ -28,24 +25,22 @@ class SelfAware(torch.nn.Module):
             if ind < len(awareness_net_shape) - 2:
                 awareness_layers.append(rectifier())
 
-        self.awareness_net = torch.nn.Sequential(*awareness_layers)
+        self.net = torch.nn.Sequential(*awareness_layers)
 
-        for layer in self.awareness_net:
+        for layer in self.net:
             if hasattr(layer, 'weight'):
                 torch.nn.init.normal_(layer.weight, mean=0., std=1 / math.sqrt(layer.out_features))
             if hasattr(layer, 'bias'):
                 torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
 
-        self.opt = Ranger(self.awareness_net.parameters())
+        self.device, self.available_devices = get_devices()
+        self.to(self.device, self.available_devices )
 
     def to(self, device, available_devices):
-        self.awareness_net = self.awareness_net.to(device)
-
         if available_devices > 1:
-                self.awareness_net = torch.nn.DataParallel(self.awareness_net)
-
-        self.device = device
-        self.available_devices = available_devices
+            self.net = torch.nn.DataParallel(self.net).to(device)
+        else:
+            self.net = self.net.to(device)
 
         return self
 
@@ -54,7 +49,7 @@ class SelfAware(torch.nn.Module):
         :param input: tensor with (true_input, main_net_output) pairs to estimate loss magnitude
         :return: predicted loss value over the tensor samples
         """
-        output = self.awareness_net(input)
+        output = self.net(input)
         return output
 
 

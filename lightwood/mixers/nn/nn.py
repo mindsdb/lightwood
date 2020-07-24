@@ -10,6 +10,7 @@ import gc
 import operator
 
 from lightwood.mixers.helpers.default_net import DefaultNet
+from lightwood.mixers.helpers.selfaware import SelfAware
 from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.quantile_loss import QuantileLoss
@@ -23,7 +24,9 @@ class NnMixer:
         self.config = config
         self.out_types = None
         self.net = None
+        self.selfaware_net = None
         self.optimizer = None
+        self.selfaware_optimizer = None
         self.input_column_names = None
         self.output_column_names = None
         self.transformer = None
@@ -42,7 +45,6 @@ class NnMixer:
         self.start_selfaware_training = False
         self.stop_selfaware_training = False
         self.is_selfaware = False
-        self.last_unaware_net = False
 
         self.max_confidence_per_output = []
         self.monitor = None
@@ -518,9 +520,13 @@ class NnMixer:
                                      input_size=len(input_sample),
                                      output_size=len(output_sample),
                                      nr_outputs=len(self.out_types),
-                                     selfaware=False,
                                      deterministic=self.config['mixer']['deterministic'])
             self.net = self.net.train()
+
+            self.selfaware_net = SelfAware(input_size=len(input_sample),
+                                           output_size=len(output_sample),
+                                           nr_outputs=len(self.out_types))
+            self.selfaware_net = self.selfaware_net.train()
 
             if self.batch_size < self.net.available_devices:
                 self.batch_size = self.net.available_devices
@@ -571,6 +577,10 @@ class NnMixer:
                     self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+            self.optimizer_args['lr'] = self.optimizer.lr / 4
+            self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
+
         total_epochs = self.epochs
 
         if self._nonpersistent['sampler'] is None:
@@ -586,29 +596,20 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=True, pretrained_net=self.net.net, deterministic=self.config['mixer']['deterministic'])
-                    self.last_unaware_net = copy.deepcopy(self.net.net)
 
-                    # Lower the learning rate once we start training the selfaware network
-                    self.optimizer_args['lr'] = self.optimizer.lr/4
+                    # Todo: Is this necessary now?
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
-                    self.optimizer.zero_grad()
-                    self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-                    self.net = self.nn_class(self.dynamic_parameters, nr_outputs=len(self.out_types) ,selfaware=False, pretrained_net=self.last_unaware_net, deterministic=self.config['mixer']['deterministic'])
 
-                    # Increase the learning rate closer to the previous levels
-                    self.optimizer_args['lr'] = self.optimizer.lr * 4
+                    # Todo: same as above
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
-                    self.optimizer.zero_grad()
-                    self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
                 self.total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
@@ -619,13 +620,16 @@ class NnMixer:
 
                 # zero the parameter gradients
                 self.optimizer.zero_grad()
+                self.selfaware_optimizer.zero_grad()
 
                 # forward + backward + optimize
-                # outputs = self.net(inputs)
+                outputs = self.net(inputs)
                 if self.is_selfaware:
-                    outputs, awareness = self.net(inputs)
-                else:
-                    outputs = self.net(inputs)
+                    if self.start_selfaware_training:
+                        aware_in = torch.cat((inputs, outputs), 1)
+                    elif self.stop_selfaware_training:
+                        aware_in = torch.cat((inputs, outputs), 1).detach()
+                    awareness = self.selfaware_net(aware_in)
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
@@ -640,7 +644,6 @@ class NnMixer:
                 if self.is_selfaware:
                     unreduced_losses = []
                     for k, criterion in enumerate(self.unreduced_criterion_arr):
-                        # redyce = True
                         target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
                         target_loss = target_loss.tolist()
@@ -658,14 +661,11 @@ class NnMixer:
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
 
-
                 if CONFIG.MONITORING['batch_loss']:
                     self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
-
-
                 if awareness_loss is not None:
-                    awareness_loss.backward(retain_graph=True)
+                    awareness_loss.backward()
 
                 running_loss += loss.item()
                 loss.backward()
@@ -687,7 +687,7 @@ class NnMixer:
                         weights = []
                         gradients = []
                         layer_name = []
-                        for index, layer in enumerate(self.net.awareness_net):
+                        for index, layer in enumerate(self.selfaware_net.net):
                             if 'Linear' in str(type(layer)):
                                 weights.append( list(layer.weight.cpu().detach().numpy().ravel()) )
                                 gradients.append( list(layer.weight.grad.cpu().detach().numpy().ravel()) )
@@ -695,9 +695,12 @@ class NnMixer:
                         self.monitor.weight_map(layer_name, weights, 'Awareness network weights')
                         self.monitor.weight_map(layer_name, weights, 'Awareness network gradients')
 
-                self.optimizer.step()
                 # now that we have run backward in both losses, optimize()
                 # (review: we may need to optimize for each step)
+                self.optimizer.step()
+
+                if self.is_selfaware and self.start_selfaware_training:
+                    self.selfaware_optimizer.step()
 
                 error = running_loss / (i + 1)
 
@@ -709,7 +712,6 @@ class NnMixer:
                 self.monitor.plot_loss(error, self.total_iterations, 'Train Epoch Error')
                 self.monitor.plot_loss(error, self.total_iterations, f'Train Epoch Error - Subset {subset_id}')
             yield error
-
 
     def to(self, device, available_devices):
         self.net.to(device, available_devices)
