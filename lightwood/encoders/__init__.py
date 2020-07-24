@@ -5,6 +5,8 @@ from lightwood.encoders.image.nn import NnAutoEncoder
 from lightwood.encoders.numeric.numeric import NumericEncoder
 from lightwood.encoders.text.infersent import InferSentEncoder
 from lightwood.encoders.text.distilbert import DistilBertEncoder
+from lightwood.encoders.text.flair import FlairEmbeddingEncoder
+from lightwood.encoders.text.short import ShortTextEncoder
 from lightwood.encoders.text.rnn import RnnEncoder
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
