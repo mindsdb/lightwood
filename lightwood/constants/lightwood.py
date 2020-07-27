@@ -16,6 +16,7 @@ class ColumnDataTypes(Const):
     DATETIME = 'datetime'
     IMAGE = 'image'
     TEXT = 'text'
+    SHORT_TEXT = 'short_text'
     TIME_SERIES = 'time_series'
     AUDIO = 'audio'
 
