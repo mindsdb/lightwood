@@ -1,5 +1,5 @@
 <h1 align="center">
-	<img width="400" src="https://mindsdb.github.io/lightwood/assets/logo.png" alt="Lightwood">
+	<img width="400" src="	<img width="400" src="https://github.com/mindsdb/mindsdb-docs/blob/master/mindsdb-docs/docs/assets/MindsDBLightwood@3x.png?raw=true" alt="Lightwood">
 	<br>
 	<br>
 </h1>
