@@ -657,7 +657,7 @@ class NnMixer:
 
                     unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
 
-                    awareness_loss = self.awareness_criterion(awareness,unreduced_losses)
+                    awareness_loss = self.awareness_criterion(awareness, unreduced_losses)
 
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
@@ -666,7 +666,7 @@ class NnMixer:
                     self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
                 if awareness_loss is not None:
-                    awareness_loss.backward()
+                    awareness_loss.backward(retain_graph=True)
 
                 running_loss += loss.item()
                 loss.backward()
