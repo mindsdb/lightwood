@@ -1,9 +1,10 @@
 <h1 align="center">
-	<img width="400" src="	<img width="400" src="https://github.com/mindsdb/mindsdb-docs/blob/master/mindsdb-docs/docs/assets/MindsDBLightwood@3x.png?raw=true" alt="Lightwood">
+	<img width="500" src="https://github.com/mindsdb/mindsdb-docs/blob/master/mindsdb-docs/docs/assets/MindsDBLightwood@3x.png" alt="Lightwood">
 	<br>
 	<br>
 </h1>
 
+![Lightwood Actions workflow](https://github.com/mindsdb/lightwood/workflows/Lightwood%20Actions%20workflow/badge.svg)
 [![Build Status](https://travis-ci.com/mindsdb/lightwood.svg?branch=master)](https://travis-ci.com/mindsdb/lightwood)
 ![](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
