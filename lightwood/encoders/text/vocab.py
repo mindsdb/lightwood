@@ -4,7 +4,7 @@ from transformers import DistilBertTokenizer
 from lightwood.encoders.encoder_base import BaseEncoder
 
 
-class DistilBertEncoder(BaseEncoder):
+class VocabularyEncoder(BaseEncoder):
     def __init__(self, is_target=False):
         super().__init__(is_target)
         self._tokenizer_class = DistilBertTokenizer
