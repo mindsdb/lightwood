@@ -19,7 +19,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         assert tokenize_text("don't wouldn't") == ['do', 'not', 'would', 'not']
 
-    def test_smallvocavb_target_auto_mode(self):
+    def test_smallvocab_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -43,7 +43,7 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
 
-    def test_non_smallvocavb_target_auto_mode(self):
+    def test_non_smallvocab_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -67,7 +67,7 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
 
-    def test_smallvocavb_non_target_auto_mode(self):
+    def test_smallvocab_non_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=50)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -87,7 +87,7 @@ class TestShortTextEncoder(unittest.TestCase):
         with self.assertRaises(ValueError):
             enc.decode(encoded_data)
         
-    def test_non_smallvocavb_non_target_auto_mode(self):
+    def test_non_smallvocab_non_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -107,7 +107,7 @@ class TestShortTextEncoder(unittest.TestCase):
         with self.assertRaises(ValueError):
             enc.decode(encoded_data)
 
-    def test_smallvocavb_non_target_manual_mode(self):
+    def test_smallvocab_non_target_manual_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
@@ -129,7 +129,7 @@ class TestShortTextEncoder(unittest.TestCase):
         ):
             assert x_sent == y_sent
         
-    def test_non_smallvocavb_non_target_manual_mode(self):
+    def test_non_smallvocab_non_target_manual_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 

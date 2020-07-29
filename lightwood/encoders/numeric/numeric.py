@@ -12,7 +12,7 @@ class NumericEncoder(BaseEncoder):
     def __init__(self, data_type=None, is_target=False):
         super().__init__(is_target)
         self._type = data_type
-        self._mean = None
+        self._abs_mean = None
         self.decode_log = False
         self.extra_outputs = 0
 
@@ -37,7 +37,7 @@ class NumericEncoder(BaseEncoder):
 
         self._type = value_type if self._type is None else self._type
         non_null_priming_data = [float(str(x).replace(',','.')) for x in priming_data if x is not None]
-        self._mean = np.sum(non_null_priming_data) / len(non_null_priming_data)
+        self._abs_mean = np.sum([abs(x) for x in non_null_priming_data]) / len(non_null_priming_data)
         self._prepared = True
 
     def encode(self, data):
@@ -54,16 +54,13 @@ class NumericEncoder(BaseEncoder):
                 except:
                     real = None
             if self.is_target:
-                if real is not None and self._mean > 0:
-                    vector = [0] * (3 + 2 * self.extra_outputs)
+                vector = [0] * (3 + 2 * self.extra_outputs)
+                if real is not None and self._abs_mean > 0:
                     vector[0] = 1 if real < 0 else 0
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
-                    vector[2] = real / self._mean
+                    vector[2] = real / self._abs_mean
                 else:
-                    # Note: This part here is just to have targets equal in size
-                    # to the prediction size, these appended zeros won't be used anywhere
-                    vector = [0] * (3 + 2 * self.extra_outputs)
-                    logging.error(f'Can\'t encode target value: {real}')
+                    logging.debug(f'Can\'t encode target value: {real}')
 
             else:
                 vector = [0] * 4
@@ -74,7 +71,7 @@ class NumericEncoder(BaseEncoder):
                         vector[0] = 1
                         vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                         vector[2] = 1 if real < 0 else 0
-                        vector[3] = real/self._mean
+                        vector[3] = real/self._abs_mean
                 except Exception as e:
                     vector = [0] * 4
                     logging.error(f'Can\'t encode input value: {real}, exception: {e}')
@@ -104,7 +101,7 @@ class NumericEncoder(BaseEncoder):
                         sign = -1 if vector[0] > 0.5 else 1
                         real_value = [math.exp(vector[i*2 + 1]) * sign for i in range(1 + self.extra_outputs)]
                     else:
-                        real_value = [vector[2*i + 2] * self._mean for i in range(1 + self.extra_outputs)]
+                        real_value = [vector[2*i + 2] * self._abs_mean for i in range(1 + self.extra_outputs)]
 
                     if self._type == 'int':
                         real_value = [int(x) for x in real_value]
@@ -116,7 +113,7 @@ class NumericEncoder(BaseEncoder):
                     ret.append(None)
                     continue
 
-                real_value = vector[3] * self._mean
+                real_value = vector[3] * self._abs_mean
 
                 if self._type == 'int':
                     real_value = round(real_value)
