@@ -30,6 +30,5 @@ class VocabularyEncoder(BaseEncoder):
         for encoded in encoded_values_tensor:
             decoded = self._tokenizer.decode(encoded)
             decoded = decoded.split('[PAD]')[0].rstrip()
-            print(decoded)
             vec.append(decoded)
         return vec
