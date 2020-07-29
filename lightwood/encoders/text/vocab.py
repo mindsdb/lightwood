@@ -26,5 +26,10 @@ class VocabularyEncoder(BaseEncoder):
         return torch.stack(vec)
 
     def decode(self, encoded_values_tensor):
-        decode = self._tokenizer.decode(encoded_values_tensor, add_special_tokens=True)
-        return decode
+        vec = []
+        for encoded in encoded_values_tensor:
+            decoded = self._tokenizer.decode(encoded)
+            decoded = decoded.split('[PAD]')[0].rstrip()
+            print(decoded)
+            vec.append(decoded)
+        return vec
