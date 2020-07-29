@@ -10,7 +10,7 @@ from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
 from lightwood.encoders import (NumericEncoder, CategoricalAutoEncoder,
                                 MultiHotEncoder, DistilBertEncoder, DatetimeEncoder,
-                                Img2VecEncoder, RnnEncoder)
+                                Img2VecEncoder, RnnEncoder, FlairEmbeddingEncoder, ShortTextEncoder)
 
 
 class SubSet(Dataset):
@@ -220,6 +220,7 @@ class DataSource(Dataset):
             ColumnDataTypes.DATETIME: DatetimeEncoder,
             ColumnDataTypes.IMAGE: Img2VecEncoder,
             ColumnDataTypes.TEXT: DistilBertEncoder,
+            ColumnDataTypes.SHORT_TEXT: ShortTextEncoder,
             ColumnDataTypes.TIME_SERIES: RnnEncoder,
             # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
         }
@@ -357,4 +358,3 @@ class DataSource(Dataset):
             for feature in self.configuration[feature_set]:
                 if feature['name'] == column_name:
                     return feature
-
