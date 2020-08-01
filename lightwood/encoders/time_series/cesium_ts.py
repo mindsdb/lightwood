@@ -183,10 +183,10 @@ class CesiumTsEncoder(BaseEncoder):
                     val1 = 1
 
                 if col in FEATURES_WITH_DEFAULT_NONE:
-                    vector_row += [val, val1]  # val1 is 1 if its null
+                    vector_row.extend([val, val1])  # val1 is 1 if its null
                 else:
-                    vector_row += [val]
-            ret += [vector_row]
+                    vector_row.append(val)
+            ret.append(vector_row)
         ret_tensor = self._pytorch_wrapper(ret)
         return ret_tensor
 

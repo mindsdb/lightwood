@@ -180,11 +180,11 @@ class RnnEncoder(BaseEncoder):
                     vector = [next_reading]
                     if j == 0:
                         encoded = hidden
-                    next_i += [next_reading]
+                    next_i.append(next_reading)
 
-                next += [next_i[0][0].cpu()]
+                next.append([next_i[0][0].cpu()])
 
-            ret += [encoded[0][0].cpu()]
+            ret.append([encoded[0][0].cpu()])
 
         if get_next_count is None:
             return self._pytorch_wrapper(torch.stack(ret))
@@ -223,6 +223,6 @@ class RnnEncoder(BaseEncoder):
         for _, val in enumerate(encoded_data):
             hidden = torch.unsqueeze(torch.unsqueeze(val, dim=0), dim=0).to(self.device)
             reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.tolist()
-            ret += [reconstruction]
+            ret.append(reconstruction)
 
         return self._pytorch_wrapper(ret)
