@@ -182,9 +182,9 @@ class RnnEncoder(BaseEncoder):
                         encoded = hidden
                     next_i.append(next_reading)
 
-                next.append([next_i[0][0].cpu()])
+                next.append(next_i[0][0].cpu())
 
-            ret.append([encoded[0][0].cpu()])
+            ret.append(encoded[0][0].cpu())
 
         if get_next_count is None:
             return self._pytorch_wrapper(torch.stack(ret))
