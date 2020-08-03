@@ -10,7 +10,7 @@ from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
 from lightwood.encoders import (NumericEncoder, CategoricalAutoEncoder,
                                 MultiHotEncoder, DistilBertEncoder, DatetimeEncoder,
-                                Img2VecEncoder, RnnEncoder, FlairEmbeddingEncoder, ShortTextEncoder)
+                                Img2VecEncoder, RnnEncoder, FlairEmbeddingEncoder, ShortTextEncoder, VocabularyEncoder)
 
 
 class SubSet(Dataset):
@@ -212,7 +212,7 @@ class DataSource(Dataset):
 
         return self.data_frame[column_name].tolist()
 
-    def lookup_encoder_class(self, column_type):
+    def lookup_encoder_class(self, column_type, is_target):
         default_encoder_classes = {
             ColumnDataTypes.NUMERIC: NumericEncoder,
             ColumnDataTypes.CATEGORICAL: CategoricalAutoEncoder,
@@ -225,7 +225,16 @@ class DataSource(Dataset):
             # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
         }
 
-        return default_encoder_classes[column_type]
+        target_encoder_classes = {
+            ColumnDataTypes.TEXT: VocabularyEncoder
+        }
+
+        if is_target and column_type in target_encoder_classes:
+            encoder_class = target_encoder_classes[column_type]
+        else:
+            encoder_class = default_encoder_classes[column_type]
+
+        return encoder_class
 
     def make_column_encoder(self,
                             encoder_class,
@@ -244,7 +253,7 @@ class DataSource(Dataset):
                         training_data=None):
         column_data = self.get_column_original_data(config['name'])
         encoder_class = config.get('encoder_class',
-                                   self.lookup_encoder_class(config['type']))
+                                   self.lookup_encoder_class(config['type'], is_target))
         encoder_attrs = config.get('encoder_attrs', {})
 
         encoder_instance = self.make_column_encoder(encoder_class,
