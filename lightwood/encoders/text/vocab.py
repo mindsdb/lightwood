@@ -29,6 +29,6 @@ class VocabularyEncoder(BaseEncoder):
         vec = []
         for encoded in encoded_values_tensor:
             decoded = self._tokenizer.decode(encoded)
-            decoded = decoded.split('[PAD]')[0].rstrip()
+            decoded = decoded.split('[PAD]')[0].rstrip().lstrip().lstrip('[CLS] ').rstrip(' [SEP]')
             vec.append(decoded)
         return vec
