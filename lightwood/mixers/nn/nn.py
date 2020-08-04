@@ -580,7 +580,8 @@ class NnMixer:
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-            self.optimizer_args['lr'] = self.optimizer.lr / 4
+            self.selfaware_lr_factor = 1/3
+            self.optimizer_args['lr'] = self.optimizer.lr * self.selfaware_lr_scaling_factor
             self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
         total_epochs = self.epochs
