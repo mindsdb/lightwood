@@ -44,12 +44,14 @@ class SelfAware(torch.nn.Module):
 
         return self
 
-    def forward(self, input):
+    def forward(self, true_input, main_net_output):
         """
-        :param input: tensor with (true_input, main_net_output) pairs to estimate loss magnitude
+        :param true_input: tensor with data point features
+        :param main_net_output: tensor with main NN prediction for true_input
         :return: predicted loss value over the tensor samples
         """
-        output = self.net(input)
+        aware_in = torch.cat((true_input, main_net_output), 1)
+        output = self.net(aware_in)
         return output
 
 
