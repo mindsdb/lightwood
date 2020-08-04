@@ -11,6 +11,8 @@ class VocabularyEncoder(BaseEncoder):
         self._tokenizer_class = DistilBertTokenizer
         self._pretrained_model_name = 'distilbert-base-uncased'
         self._max_len = None
+        self._tokenizer = None
+        self._pad_id = None
 
     def prepare_encoder(self, priming_data):
         self._max_len = max([len(x) for x in priming_data])
