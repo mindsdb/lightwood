@@ -1,10 +1,8 @@
-name: Lightwood Actions workflow
+name: Lightwood tests workflow
 
 on:
   push:
-    branches: [ stable, staging ]
   pull_request:
-    branches: [ stable, staging ]
 
 jobs:
   build:
@@ -33,10 +31,4 @@ jobs:
     - name: Test with unittest
       run: |
         python -m unittest
-    
-    - name: Publish Lightwood
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.pypi_password }}
+
