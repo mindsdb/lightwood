@@ -144,7 +144,7 @@ class BayesianNnMixer:
                 for feature in transformed_output_vectors:
                     if feature not in output_trasnformed_vectors:
                         output_trasnformed_vectors[feature] = []
-                    output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
+                    output_trasnformed_vectors[feature].append(transformed_output_vectors[feature])
 
             for output_column in output_trasnformed_vectors:
 

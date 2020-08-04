@@ -30,7 +30,7 @@ class DatetimeEncoder(BaseEncoder):
                 vector = [date.year / 3000.0, date.month / 12.0, date.day / 31.0,
                           date.weekday() / 7.0, date.hour / 24.0, date.minute / 60.0, date.second / 60.0]
 
-            ret += [vector]
+            ret.append(vector)
 
         return self._pytorch_wrapper(ret)
 
@@ -39,7 +39,7 @@ class DatetimeEncoder(BaseEncoder):
         for vector in encoded_data.tolist():
 
             if sum(vector) == 0:
-                ret += [None]
+                ret.append(None)
 
             else:
                 dt = datetime.datetime(year=round(vector[0] * 3000), month=round(vector[1] * 12),
@@ -47,9 +47,11 @@ class DatetimeEncoder(BaseEncoder):
                                        minute=round(vector[5] * 60), second=round(vector[6] * 60))
 
                 if return_as_datetime is True:
-                    ret += [dt]
+                    ret.append(dt)
                 else:
-                    ret += [round(dt.timestamp())]
+                    ret.append(
+                        round(dt.timestamp())
+                    )
 
         return ret
 
