@@ -43,7 +43,7 @@ for i in range(int(100-predictor.overall_certainty*100)):
     ret_val = predictor.predict(when={'number_of_bedrooms': 2, 'sqft': 2300})[
                 config['output_features'][0]['name']]['predictions'][0]
     if ret_val is not None:
-        ret += [ret_val]
+        ret.append(ret_val)
 
 
 

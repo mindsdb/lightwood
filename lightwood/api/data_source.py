@@ -324,7 +324,7 @@ class DataSource(Dataset):
                 arg2 = custom_data[config['depends_on_column']]
             else:
                 arg2 = self.get_column_original_data(config['depends_on_column'])
-            args += [arg2]
+            args.append(arg2)
 
         if column_name in self.encoders:
             encoded_vals = self.encoders[column_name].encode(*args)
