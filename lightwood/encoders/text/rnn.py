@@ -70,7 +70,7 @@ class RnnEncoder(BaseEncoder):
                     #encoder_outputs[ei] = encoder_output[0, 0]
 
                 # use the last hidden state as the encoded vector
-                ret += [encoder_hidden.tolist()[0][0]]
+                ret.append(encoder_hidden.tolist()[0][0])
 
         return self._pytorch_wrapper(ret)
 
@@ -98,7 +98,7 @@ class RnnEncoder(BaseEncoder):
 
                     decoder_input = topi.squeeze().detach()
 
-                ret += [' '.join(decoded_words)]
+                ret.append(' '.join(decoded_words))
 
         return ret
 
