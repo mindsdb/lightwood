@@ -10,8 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2        
     - name: Publish Lightwood
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@v1.3.1
       with:
         user: __token__
         password: ${{ secrets.pypi_password }}
-        packages_dir: sdist/
