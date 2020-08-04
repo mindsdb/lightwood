@@ -91,14 +91,16 @@ class NnMixer:
                     if feature not in confidence_trasnformed_vectors:
                         confidence_trasnformed_vectors[feature] = []
                     # @TODO: Very simple algorithm to get a confidence from the awareness, not necessarily what we want for the final version
-                    confidence_trasnformed_vectors[feature] += [1 - sum(np.abs(transformed_confidence_vectors[feature]))/len(transformed_confidence_vectors[feature])]
+                    confidence_trasnformed_vectors[feature].append(
+                        [1 - sum(np.abs(transformed_confidence_vectors[feature])) / len(transformed_confidence_vectors[feature])]
+                    )
 
             output_vector = outputs[i]
             transformed_output_vectors = when_data_source.transformer.revert(output_vector,feature_set = 'output_features')
             for feature in transformed_output_vectors:
                 if feature not in output_trasnformed_vectors:
                     output_trasnformed_vectors[feature] = []
-                output_trasnformed_vectors[feature] += [transformed_output_vectors[feature]]
+                output_trasnformed_vectors[feature].append(transformed_output_vectors[feature])
 
         predictions = {}
         for output_column in output_trasnformed_vectors:
