@@ -42,6 +42,7 @@ class NnMixer:
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
         self.awareness_criterion = None
+        self.awareness_scale_factor = 10
         self.start_selfaware_training = False
         self.stop_selfaware_training = False
         self.is_selfaware = False
@@ -85,9 +86,9 @@ class NnMixer:
 
             with torch.no_grad():
                 if self.is_selfaware:
+                    self.selfaware_net.eval()
                     outputs = self.net(inputs)
-                    aware_in = torch.cat((inputs, outputs), 1)
-                    awareness = self.selfaware_net(aware_in)
+                    awareness = self.selfaware_net(inputs, outputs)
                 else:
                     outputs = self.net(inputs)
 
@@ -324,9 +325,9 @@ class NnMixer:
 
             with torch.no_grad():
                 if self.is_selfaware:
+                    self.selfaware_net.eval()
                     output = self.net(inputs)
-                    aware_in = torch.cat((inputs, output), 1)
-                    awareness = self.selfaware_net(aware_in)
+                    awareness = self.selfaware_net(inputs, output)
                     awareness = awareness.to('cpu')
                     awareness_arr.extend(awareness.tolist())
                 else:
@@ -627,10 +628,9 @@ class NnMixer:
                 outputs = self.net(inputs)
                 if self.is_selfaware:
                     if self.start_selfaware_training:
-                        aware_in = torch.cat((inputs, outputs), 1)
+                        awareness = self.selfaware_net(inputs, outputs)
                     elif self.stop_selfaware_training:
-                        aware_in = torch.cat((inputs, outputs), 1).detach()
-                    awareness = self.selfaware_net(aware_in)
+                        awareness = self.selfaware_net(inputs.detach(), outputs.detach())
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
@@ -657,7 +657,7 @@ class NnMixer:
 
                     unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
 
-                    awareness_loss = self.awareness_criterion(awareness, unreduced_losses)
+                    awareness_loss = self.awareness_criterion(awareness, unreduced_losses) / self.awareness_scale_factor
 
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
