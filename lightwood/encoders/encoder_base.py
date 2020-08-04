@@ -14,7 +14,7 @@ class BaseEncoder:
     def encode(self, column_data):
         raise NotImplementedError
 
-    def decoder(self, encoded_data):
+    def decode(self, encoded_data):
         raise NotImplementedError
 
     def to(self, device, available_devices):

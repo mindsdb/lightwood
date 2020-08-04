@@ -62,7 +62,6 @@ class TestDataSource(TestCase):
             assert encoders[col]._prepared is True
             assert encoders[col].is_target is False
             assert encoders[col]._type == 'int'
-            assert encoders[col]._mean == np.mean(df[col])
 
         assert isinstance(encoders['y'], CategoricalAutoEncoder)
         assert encoders['y']._prepared is True
