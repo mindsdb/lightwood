@@ -29,7 +29,14 @@ jobs:
         #flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with unittest
       run: |
+        cd tests
         python -m unittest
+        cd ..
+    - name: CI tests
+      run: |
+        cd tests/ci_tests
+        python ci_tests.py
+        cd ../..
 
   deploy:
     runs-on: ubuntu-latest
