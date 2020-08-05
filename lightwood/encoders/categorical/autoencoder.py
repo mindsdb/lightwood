@@ -13,7 +13,6 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 
 class CategoricalAutoEncoder(BaseEncoder):
-
     def __init__(self, is_target=False, max_encoded_length=100):
         super().__init__(is_target)
         self._prepared = False
