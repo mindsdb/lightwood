@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  build:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --no-cache-dir --no-use-pep517 -e .        
+        pip install --no-cache-dir --no-use-pep517 -e .
     - name: Lint with flake8
       run: |
         # IMPLEMENT THIS AFTER WE HAVE ALL PEP8 styles
@@ -29,5 +29,33 @@ jobs:
         #flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with unittest
       run: |
+        cd tests
         python -m unittest
+        cd ..
+    - name: CI tests
+      run: |
+        cd tests/ci_tests
+        python ci_tests.py
+        cd ../..
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/stable'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine
+    - name: Build and publish
+      env:
+        TWINE_USERNAME:  __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        python setup.py sdist
+        twine upload dist/*

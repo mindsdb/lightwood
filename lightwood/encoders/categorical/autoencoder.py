@@ -118,6 +118,7 @@ class CategoricalAutoEncoder(BaseEncoder):
                 return decoded_categories
 
 
+
 if __name__ == "__main__":
     # Generate some tests data
     import random
