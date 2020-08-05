@@ -13,6 +13,7 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 
 class CategoricalAutoEncoder(BaseEncoder):
+
     def __init__(self, is_target=False, max_encoded_length=100):
         super().__init__(is_target)
         self._prepared = False
@@ -115,6 +116,7 @@ class CategoricalAutoEncoder(BaseEncoder):
                 oh_encoded_tensor = oh_encoded_tensor.to('cpu')
                 decoded_categories = self.onehot_encoder.decode(oh_encoded_tensor)
                 return decoded_categories
+
 
 
 if __name__ == "__main__":
