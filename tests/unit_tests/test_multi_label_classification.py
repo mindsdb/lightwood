@@ -71,7 +71,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
         print('Test R2 score', score)
         # The score check is very light because we only allow the model to train for a few seconds
         # We are just checking that it learns something and predicts properly, not benchmarking here
-        self.assertGreaterEqual(score, 0.3)
+        self.assertGreaterEqual(score, 0.15)
 
     def test_multiple_categories_as_output(self):
         vocab = self.get_vocab(10)
@@ -118,7 +118,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
         pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
         score = f1_score(train_tags_encoded, pred_labels_encoded, average='weighted')
         print('Train f1 score', score)
-        self.assertGreaterEqual(score, 0.3)
+        self.assertGreaterEqual(score, 0.15)
 
         predictions = predictor.predict(when_data=df_test)
 
@@ -129,4 +129,4 @@ class TestMultiLabelPrediction(unittest.TestCase):
         pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
         score = f1_score(test_tags_encoded, pred_labels_encoded, average='weighted')
         print('Test f1 score', score)
-        self.assertGreaterEqual(score, 0.3)
+        self.assertGreaterEqual(score, 0.15)
