@@ -580,7 +580,7 @@ class NnMixer:
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-            self.selfaware_lr_factor = 1/3
+            self.selfaware_lr_factor = 1/2
             self.optimizer_args['lr'] = self.optimizer.lr * self.selfaware_lr_factor
             self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
@@ -628,10 +628,7 @@ class NnMixer:
                 # forward + backward + optimize
                 outputs = self.net(inputs)
                 if self.is_selfaware:
-                    if self.start_selfaware_training:
-                        awareness = self.selfaware_net(inputs, outputs)
-                    elif self.stop_selfaware_training:
-                        awareness = self.selfaware_net(inputs.detach(), outputs.detach())
+                    awareness = self.selfaware_net(inputs.detach(), outputs.detach())
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
