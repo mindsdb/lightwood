@@ -60,7 +60,3 @@ class TestRnnEncoder(unittest.TestCase):
         for qry, dec in zip(float_query, decoded_data[0]):
             for truth, pred in zip(qry, dec):
                 self.assertGreater(error_margin, abs(truth - pred))
-
-
-if __name__ == '__main__':
-    unittest.main(failfast=True)
