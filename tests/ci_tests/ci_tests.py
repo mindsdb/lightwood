@@ -5,22 +5,6 @@ import pandas as pd
 from lightwood import Predictor
 import lightwood
 
-pdir = '../../lightwood/'
-encoders_path = pdir + 'encoders/'
-mixers_path = pdir + 'mixers/'
-MODULES = [
-    f'{pdir}api/data_source.py',
-    f'{mixers_path}nn/nn.py',
-]
-
-
-def run_tests(modules):
-    '''
-    Run modules as scripts to execute main function
-    '''
-    for module in modules:
-        runpy.run_path(module, run_name='__main__')
-
 
 def run_full_test(USE_CUDA, CACHE_ENCODED_DATA, SELFAWARE, PLINEAR):
     '''
