@@ -32,16 +32,3 @@ class TfidfEncoder(BaseEncoder):
 
     def decode(self, encoded_values_tensor):
         raise Exception('This encoder is not bi-directional')
-
-
-if __name__ == "__main__":
-    import random
-    import string
-
-    random.seed(2)
-    text = [''.join(random.choices(string.printable, k=random.randint(5,500))) for x in range(1000)]
-
-    enc = TfidfEncoder()
-    enc.prepare_encoder(text)
-    encoded_data = enc.encode(text)
-    print(encoded_data)
