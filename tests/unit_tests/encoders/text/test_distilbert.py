@@ -9,8 +9,6 @@ from lightwood import COLUMN_DATA_TYPES
 
 class TestDistilBERT(unittest.TestCase):
     def test_encode_and_decode(self):
-        return
-        
         random.seed(2)
         priming_data = []
         primting_target = []
