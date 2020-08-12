@@ -53,11 +53,4 @@ class SelfAware(torch.nn.Module):
         aware_in = torch.cat((true_input, main_net_output), 1)
         output = self.net(aware_in)
         return output
-
-
-
-if __name__ == '__main__':
-    print("Various tests that need to be aggregated in tests/ before PRing")
-    sa = SelfAware(100, 50, 1)
-
-    print(sa)
+    
