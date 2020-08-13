@@ -8,7 +8,7 @@ from lightwood.encoders.text.distilbert import DistilBertEncoder
 from lightwood.encoders.text.flair import FlairEmbeddingEncoder
 from lightwood.encoders.text.short import ShortTextEncoder
 from lightwood.encoders.text.vocab import VocabularyEncoder
-from lightwood.encoders.text.rnn import RnnEncoder
+from lightwood.encoders.text.rnn import RnnEncoder as TextRnnEncoder
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
 from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
@@ -43,7 +43,7 @@ class Text:
     FlairEmbeddingEncoder = FlairEmbeddingEncoder
     ShortTextEncoder = ShortTextEncoder
     InferSentEncoder = InferSentEncoder
-    RnnEncoder = RnnEncoder
+    TextRnnEncoder = TextRnnEncoder
     VocabularyEncoder = VocabularyEncoder
 
 class Categorical:
@@ -52,7 +52,7 @@ class Categorical:
 
 class TimeSeries:
     TsFreshTsEncoder = TsFreshTsEncoder
-    RnnEncoder = TsRnnEncoder
+    TsRnnEncoder = TsRnnEncoder
     if export_cesium:
         CesiumTsEncoder = CesiumTsEncoder
 
