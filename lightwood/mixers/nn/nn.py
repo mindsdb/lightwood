@@ -42,7 +42,8 @@ class NnMixer:
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
         self.awareness_criterion = None
-        self.awareness_scale_factor = 10
+        self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
+        self.selfaware_lr_factor = 1/2      # scales self-aware learning rate compared to mixer
         self.start_selfaware_training = False
         self.stop_selfaware_training = False
         self.is_selfaware = False
@@ -580,7 +581,6 @@ class NnMixer:
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-            self.selfaware_lr_factor = 1/2
             self.optimizer_args['lr'] = self.optimizer.lr * self.selfaware_lr_factor
             self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
@@ -599,8 +599,6 @@ class NnMixer:
                 if self.start_selfaware_training and not self.is_selfaware:
                     logging.info('Making network selfaware !')
                     self.is_selfaware = True
-
-                    # Todo: Is this necessary now?
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
@@ -608,8 +606,6 @@ class NnMixer:
                 if self.stop_selfaware_training and self.is_selfaware:
                     logging.info('Cannot train selfaware network, training a normal network instead !')
                     self.is_selfaware = False
-
-                    # Todo: same as above
                     gc.collect()
                     if 'cuda' in str(self.net.device):
                         torch.cuda.empty_cache()
@@ -655,7 +651,7 @@ class NnMixer:
 
                     unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
 
-                    awareness_loss = self.awareness_criterion(awareness, unreduced_losses) / self.awareness_scale_factor
+                    awareness_loss = self.awareness_criterion(awareness, unreduced_losses) * self.awareness_scale_factor
 
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')

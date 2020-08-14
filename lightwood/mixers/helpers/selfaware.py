@@ -5,7 +5,6 @@ from lightwood.config.config import CONFIG
 from lightwood.helpers.device import get_devices
 
 
-# Todo: conform to style guidelines
 class SelfAware(torch.nn.Module):
     def __init__(self, input_size, output_size, nr_outputs):
         super(SelfAware, self).__init__()
