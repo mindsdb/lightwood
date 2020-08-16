@@ -41,7 +41,7 @@ jobs:
     - name: CI tests
       run: |
         cd tests/ci_tests
-        python ci_tests.py
+        python -m unittest
         cd ../..
 
   deploy:
