@@ -63,7 +63,7 @@ class CategoricalAutoEncoder(BaseEncoder):
             embeddings_layer_len = self.max_encoded_length
 
             self.net = DefaultNet(dynamic_parameters={}, shape=[
-                                  input_len, embeddings_layer_len, input_len], selfaware=False)
+                                  input_len, embeddings_layer_len, input_len])
 
             criterion = torch.nn.CrossEntropyLoss()
             optimizer = Ranger(self.net.parameters())
@@ -116,3 +116,45 @@ class CategoricalAutoEncoder(BaseEncoder):
                 oh_encoded_tensor = oh_encoded_tensor.to('cpu')
                 decoded_categories = self.onehot_encoder.decode(oh_encoded_tensor)
                 return decoded_categories
+<<<<<<< HEAD
+=======
+
+
+
+if __name__ == "__main__":
+    # Generate some tests data
+    import random
+    import string
+    from sklearn.metrics import accuracy_score
+
+    logging.getLogger().setLevel(logging.DEBUG)
+
+    random.seed(2)
+    cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(7,8))) for x in range(500)]
+    for i in range(len(cateogries)):
+        if i % 10 == 0:
+            cateogries[i] = random.randint(1,20)
+
+    priming_data = []
+    test_data = []
+    for category in cateogries:
+        times = random.randint(1, 50)
+        for i in range(times):
+            priming_data.append(category)
+            if i % 3 == 0 or i == 1:
+                test_data.append(category)
+
+    random.shuffle(priming_data)
+    random.shuffle(test_data)
+
+    enc = CategoricalAutoEncoder()
+    enc.desired_error = 3
+
+    enc.prepare_encoder(priming_data)
+    encoded_data = enc.encode(test_data)
+    decoded_data = enc.decode(encoded_data)
+
+    encoder_accuracy = accuracy_score(list(map(str,test_data)), list(map(str,decoded_data)))
+    print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
+    assert(encoder_accuracy > 0.80)
+>>>>>>> 6d25d81a19938bdb59e6fce4ca4f7f618cb1ec3e
