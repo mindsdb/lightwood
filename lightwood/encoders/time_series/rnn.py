@@ -12,14 +12,14 @@ from torch import optim
 
 class RnnEncoder(BaseEncoder):
 
-    def __init__(self, encoded_vector_size=4, train_iters=75000, stop_on_error=0.8, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, max_timesteps=64):
+    def __init__(self, encoded_vector_size=4, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
+                 is_target=False, ts_n_dims=1):
         super().__init__(is_target)
         self.device, _ = get_devices()
         self._stop_on_error = stop_on_error
         self._learning_rate = learning_rate
         self._encoded_vector_size = encoded_vector_size
-        self._train_iters = train_iters
+        self._train_iters = train_iters  # training epochs
         self._pytorch_wrapper = torch.FloatTensor
         self._encoder = EncoderRNNNumerical(input_size=ts_n_dims, hidden_size=self._encoded_vector_size).to(self.device)
         self._decoder = DecoderRNNNumerical(output_size=ts_n_dims, hidden_size=self._encoded_vector_size).to(self.device)
@@ -28,7 +28,7 @@ class RnnEncoder(BaseEncoder):
         self._criterion = nn.MSELoss()
         self._prepared = False
         self._n_dims = ts_n_dims  # expected dimensionality of time series
-        self._max_ts_length = max_timesteps  # for truncating and padding
+        self._max_ts_length = 0
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
 
@@ -37,7 +37,7 @@ class RnnEncoder(BaseEncoder):
         self._encoder = self._encoder.to(self.device)
         return self
 
-    def prepare_encoder(self, priming_data, feedback_hoop_function=None, batch_size=1):
+    def prepare_encoder(self, priming_data, feedback_hoop_function=None, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
@@ -47,6 +47,15 @@ class RnnEncoder(BaseEncoder):
         """
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+
+        # determine time_series length
+        for str_row in priming_data:
+            l = len(str_row.split(" "))
+            self._max_ts_length = max(l, self._max_ts_length)
+
+        # decrease for small datasets
+        if batch_size >= len(priming_data):
+            batch_size = priming_data // 2
 
         self._encoder.train()
         for i in range(self._train_iters):
