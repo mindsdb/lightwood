@@ -241,6 +241,7 @@ class NnMixer:
                                 self.build_confidence_normalization_data(train_ds)
                                 self.adjust(test_ds)
 
+                            self.iter_fit(test_ds, initialize=first_run, max_epochs=1)
                             self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
                             break
