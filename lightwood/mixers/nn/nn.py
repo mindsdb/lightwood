@@ -190,6 +190,10 @@ class NnMixer:
                         subset_test_error_delta_buff = []
                         continue
 
+                    if training_error < 0.1:
+                        self.optimizer_args['lr'] = 0.0001
+                        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
                     if epoch % eval_every_x_epochs == 0:
                         test_error = self.error(test_ds)
                         subset_test_error = self.error(subset_test_ds, subset_id=subset_id)
@@ -240,13 +244,7 @@ class NnMixer:
                             if self.is_selfaware:
                                 self.build_confidence_normalization_data(train_ds)
                                 self.adjust(test_ds)
-<<<<<<< HEAD
-                            else:
-                                self.update_model(best_model)
-                            self.iter_fit(test_ds, initialize=first_run, max_epochs=1)
-=======
 
->>>>>>> simpler_copy
                             self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
                             break
