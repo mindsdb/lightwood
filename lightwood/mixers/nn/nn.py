@@ -36,7 +36,6 @@ class NnMixer:
         self.unreduced_criterion_arr = None
 
         self.batch_size = 200
-        self.epochs = 120000
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
@@ -508,7 +507,7 @@ class NnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-    def iter_fit(self, ds, initialize=True, subset_id=None):
+    def iter_fit(self, ds, initialize=True, subset_id=None, max_epochs=120000):
         """
         :param ds:
         :return:
@@ -583,15 +582,13 @@ class NnMixer:
             self.optimizer_args['lr'] = self.optimizer.lr * self.selfaware_lr_factor
             self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
-        total_epochs = self.epochs
-
         if self._nonpersistent['sampler'] is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
         else:
             data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
                                      sampler=self._nonpersistent['sampler'])
 
-        for epoch in range(total_epochs):  # loop over the dataset multiple times
+        for epoch in range(max_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
