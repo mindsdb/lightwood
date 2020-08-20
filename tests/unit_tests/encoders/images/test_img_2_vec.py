@@ -14,8 +14,5 @@ class TestDataSource(unittest.TestCase):
 
         ret = encoder.encode(images)
 
-        assert len(ret.shape) == 2
-        assert ret.shape[0] == len(images)
-
-if __name__ == '__main__':
-    unittest.main(failfast=True)
+        self.assertTrue(len(ret.shape) == 2)
+        self.assertTrue(ret.shape[0] == len(images))
