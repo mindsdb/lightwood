@@ -6,7 +6,6 @@ import time
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
-import gc
 import operator
 
 from lightwood.mixers.helpers.default_net import DefaultNet
@@ -597,18 +596,12 @@ class NnMixer:
             error = 0
             for i, data in enumerate(data_loader, 0):
                 if self.start_selfaware_training and not self.is_selfaware:
-                    logging.info('Making network selfaware !')
+                    logging.info('Starting to train selfaware network for better confidence determination !')
                     self.is_selfaware = True
-                    gc.collect()
-                    if 'cuda' in str(self.net.device):
-                        torch.cuda.empty_cache()
 
                 if self.stop_selfaware_training and self.is_selfaware:
-                    logging.info('Cannot train selfaware network, training a normal network instead !')
+                    logging.info('Cannot train selfaware network, will fallback to using simpler confidence models !')
                     self.is_selfaware = False
-                    gc.collect()
-                    if 'cuda' in str(self.net.device):
-                        torch.cuda.empty_cache()
 
                 self.total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
