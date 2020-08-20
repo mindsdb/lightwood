@@ -6,7 +6,6 @@ import time
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
-import gc
 import operator
 
 from lightwood.mixers.helpers.default_net import DefaultNet
@@ -33,11 +32,11 @@ class NnMixer:
         self.encoders = None
         self.optimizer_class = None
         self.optimizer_args = None
+        self.selfaware_optimizer_args = None
         self.criterion_arr = None
         self.unreduced_criterion_arr = None
 
         self.batch_size = 200
-        self.epochs = 120000
 
         self.nn_class = DefaultNet
         self.dynamic_parameters = dynamic_parameters
@@ -509,7 +508,7 @@ class NnMixer:
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-    def iter_fit(self, ds, initialize=True, subset_id=None):
+    def iter_fit(self, ds, initialize=True, subset_id=None, max_epochs=120000):
         """
         :param ds:
         :return:
@@ -581,10 +580,9 @@ class NnMixer:
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-            self.optimizer_args['lr'] = self.optimizer.lr * self.selfaware_lr_factor
+            self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
+            self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
             self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
-
-        total_epochs = self.epochs
 
         if self._nonpersistent['sampler'] is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
@@ -592,23 +590,17 @@ class NnMixer:
             data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
                                      sampler=self._nonpersistent['sampler'])
 
-        for epoch in range(total_epochs):  # loop over the dataset multiple times
+        for epoch in range(max_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
                 if self.start_selfaware_training and not self.is_selfaware:
-                    logging.info('Making network selfaware !')
+                    logging.info('Starting to train selfaware network for better confidence determination !')
                     self.is_selfaware = True
-                    gc.collect()
-                    if 'cuda' in str(self.net.device):
-                        torch.cuda.empty_cache()
 
                 if self.stop_selfaware_training and self.is_selfaware:
-                    logging.info('Cannot train selfaware network, training a normal network instead !')
+                    logging.info('Cannot train selfaware network, will fallback to using simpler confidence models !')
                     self.is_selfaware = False
-                    gc.collect()
-                    if 'cuda' in str(self.net.device):
-                        torch.cuda.empty_cache()
 
                 self.total_iterations += 1
                 # get the inputs; data is a list of [inputs, labels]
