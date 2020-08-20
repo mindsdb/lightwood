@@ -250,6 +250,7 @@ class NnMixer:
                                 self.adjust(test_ds)
                             else:
                                 self.update_model(best_model)
+                            self.iter_fit(test_ds, initialize=first_run, max_epochs=1)
                             self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
                             break
