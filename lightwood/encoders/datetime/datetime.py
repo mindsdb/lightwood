@@ -54,14 +54,3 @@ class DatetimeEncoder(BaseEncoder):
                     )
 
         return ret
-
-
-if __name__ == "__main__":
-
-    data = [1555943147, None, 1555943147]
-
-    enc = DatetimeEncoder()
-    enc.prepare_encoder([])
-    print (enc.decode(enc.encode(data)))
-
-    # print(enc.decode(enc.encode(['not there', 'time', 'tokens'])))
