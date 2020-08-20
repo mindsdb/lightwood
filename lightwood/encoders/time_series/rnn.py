@@ -55,7 +55,7 @@ class RnnEncoder(BaseEncoder):
 
         # decrease for small datasets
         if batch_size >= len(priming_data):
-            batch_size = priming_data // 2
+            batch_size = len(priming_data) // 2
 
         self._encoder.train()
         for i in range(self._train_iters):
