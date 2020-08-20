@@ -32,6 +32,7 @@ class NnMixer:
         self.encoders = None
         self.optimizer_class = None
         self.optimizer_args = None
+        self.selfaware_optimizer_args = None
         self.criterion_arr = None
         self.unreduced_criterion_arr = None
 
@@ -579,7 +580,8 @@ class NnMixer:
 
             self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-            self.optimizer_args['lr'] = self.optimizer.lr * self.selfaware_lr_factor
+            self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
+            self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
             self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
         if self._nonpersistent['sampler'] is None:
