@@ -34,7 +34,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
-        
+
         assert len(test_data) == len(encoded_data) == len(decoded_data)
 
         for x_sent, y_sent in zip(
@@ -58,7 +58,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
-        
+
         assert len(test_data) == len(encoded_data) == len(decoded_data)
 
         for x_sent, y_sent in zip(
@@ -86,7 +86,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             enc.decode(encoded_data)
-        
+
     def test_non_smallvocab_non_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
@@ -117,10 +117,10 @@ class TestShortTextEncoder(unittest.TestCase):
         assert not enc.cae.use_autoencoder
         assert enc.is_target is False
         assert enc._mode == 'concat'
-        
+
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
-        
+
         assert len(test_data) == len(encoded_data) == len(decoded_data)
 
         for x_sent, y_sent in zip(
@@ -128,7 +128,7 @@ class TestShortTextEncoder(unittest.TestCase):
             [' '.join(x) for x in decoded_data]
         ):
             assert x_sent == y_sent
-        
+
     def test_non_smallvocab_non_target_manual_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=800)
         test_data = random.sample(priming_data, len(priming_data) // 5)
@@ -142,7 +142,7 @@ class TestShortTextEncoder(unittest.TestCase):
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
-        
+
         assert len(test_data) == len(encoded_data) == len(decoded_data)
 
         for x_sent, y_sent in zip(
@@ -150,7 +150,3 @@ class TestShortTextEncoder(unittest.TestCase):
             [' '.join(x) for x in decoded_data]
         ):
             assert x_sent == y_sent
-
-
-if __name__ == '__main__':
-    unittest.main()

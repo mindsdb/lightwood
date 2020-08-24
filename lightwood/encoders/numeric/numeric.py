@@ -120,28 +120,3 @@ class NumericEncoder(BaseEncoder):
 
             ret.append(real_value)
         return ret
-
-
-if __name__ == "__main__":
-    data = [1,1.1,2,-8.6,None,0]
-
-    encoder = NumericEncoder()
-
-    encoder.prepare_encoder(data)
-    encoded_vals = encoder.encode(data)
-
-    assert(encoded_vals[1][1] > 0)
-    assert(encoded_vals[2][1] > 0)
-    assert(encoded_vals[3][1] > 0)
-    for i in range(0,3):
-        assert(encoded_vals[i][2] == 0)
-    assert(encoded_vals[3][2] == 1)
-    assert(encoded_vals[4][3] == 0)
-
-    decoded_vals = encoder.decode(encoded_vals)
-
-    for i in range(len(encoded_vals)):
-        if decoded_vals[i] is None:
-            assert(decoded_vals[i] == data[i])
-        else:
-            np.testing.assert_almost_equal(round(decoded_vals[i],10), round(data[i],10))

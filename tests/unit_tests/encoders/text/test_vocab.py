@@ -21,6 +21,3 @@ class TestVocabularyEncoder(unittest.TestCase):
             encoded = encoder.encode([sentence])
             decoded = encoder.decode(encoded)
             self.assertEqual(decoded[0], sentence)
-
-if __name__ == '__main__':
-    unittest.main()
