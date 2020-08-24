@@ -12,14 +12,11 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 class AmplitudeTsEncoder(BaseEncoder):
 
-    def __init__(self, is_target = False):
+    def __init__(self, is_target=False):
         super().__init__(is_target)
         self._ts_encoder = TsFreshTsEncoder()
         self._ts_encoder._pytorch_wrapper = list
         self._max_samples = 2000
-
-    def prepare_encoder(self, priming_data):
-        pass
 
     def encode(self, column_data):
         encoded_audio_arr = []
@@ -56,14 +53,3 @@ class AmplitudeTsEncoder(BaseEncoder):
 
     def decode(self, encoded_values_tensor):
         raise Exception('This encoder is not bi-directional')
-
-if __name__ == "__main__":
-    logging.getLogger().setLevel(logging.DEBUG)
-    encoder = AmplitudeTsEncoder()
-
-    audio_url_arr = ['https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3', 'https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_e1MG.mp3']
-
-    encoded_audio_arr = encoder.encode(audio_url_arr)
-
-    for encoded_audio in encoded_audio_arr:
-        print(len(encoded_audio))
