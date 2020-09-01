@@ -141,7 +141,6 @@ class NnMixer:
                 test_error_delta_buff = []
                 subset_test_error_delta_buff = []
                 best_model = None
-                best_selfaware_model = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(self.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
@@ -198,10 +197,7 @@ class NnMixer:
 
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
-                            if self.is_selfaware:
-                                best_selfaware_model = self.get_model_copy()
-                            else:
-                                best_model = self.get_model_copy()
+                            best_model = self.get_model_copy()
 
                         if last_subset_test_error is None:
                             pass
@@ -231,11 +227,7 @@ class NnMixer:
                         if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
 
-                            if self.is_selfaware:
-                                if best_selfaware_model is not None:
-                                    self.update_model(best_selfaware_model)
-                            else:
-                                self.update_model(best_model)
+                            self.update_model(best_model)
 
 
                             if subset_id == subset_id_arr[-1]:
@@ -244,12 +236,11 @@ class NnMixer:
                                 break
 
                         if stop_training:
+                            self.update_model(best_model)
                             if self.is_selfaware:
-                                self.update_model(best_selfaware_model)
                                 self.build_confidence_normalization_data(train_ds)
                                 self.adjust(test_ds)
-                            else:
-                                self.update_model(best_model)
+
                             self.iter_fit(test_ds, initialize=first_run, max_epochs=1)
                             self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
