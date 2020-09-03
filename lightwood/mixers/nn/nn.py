@@ -65,7 +65,7 @@ class NnMixer:
             'sampler': None
         }
 
-    def build_confidence_normalization_data(self, ds, subset_id=None):
+    def _build_confidence_normalization_data(self, ds, subset_id=None):
         """
         :param ds:
         :return:
@@ -191,13 +191,13 @@ class NnMixer:
                         continue
 
                     if epoch % eval_every_x_epochs == 0:
-                        test_error = self.error(test_ds)
-                        subset_test_error = self.error(subset_test_ds, subset_id=subset_id)
+                        test_error = self._error(test_ds)
+                        subset_test_error = self._error(subset_test_ds, subset_id=subset_id)
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
 
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
-                            best_model = self.get_model_copy()
+                            best_model = self._get_model_copy()
 
                         if last_subset_test_error is None:
                             pass
@@ -227,7 +227,7 @@ class NnMixer:
                         if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
 
-                            self.update_model(best_model)
+                            self._update_model(best_model)
 
 
                             if subset_id == subset_id_arr[-1]:
@@ -236,17 +236,17 @@ class NnMixer:
                                 break
 
                         if stop_training:
-                            self.update_model(best_model)
+                            self._update_model(best_model)
                             if self.is_selfaware:
-                                self.build_confidence_normalization_data(train_ds)
-                                self.adjust(test_ds)
+                                self._build_confidence_normalization_data(train_ds)
+                                self._adjust(test_ds)
 
                             self.iter_fit(test_ds, initialize=first_run, max_epochs=1)
                             self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
                             break
 
-    def adjust(self, test_data_source):
+    def _adjust(self, test_data_source):
         predictions = self.predict(test_data_source, include_extra_data=True)
 
         narrowest_correct_qi_arr = []
@@ -282,7 +282,7 @@ class NnMixer:
         for qi in map_qi_mean_sc:
             self.map_mean_sc_qi[map_qi_mean_sc[qi]] = qi
 
-    def select_quantile(self, selfaware_confidence):
+    def _select_quantile(self, selfaware_confidence):
         if self.map_mean_sc_qi is None:
             return self.quantiles_pair
 
@@ -382,7 +382,7 @@ class NnMixer:
                     else:
                         sc = pow(10,3)
 
-                    qp = self.select_quantile(sc)
+                    qp = self._select_quantile(sc)
                     predictions[output_column]['confidence_range'].append([pred[qp[0]],pred[qp[1]]])
                     predictions[output_column]['quantile_confidences'].append(self.quantiles[qp[1]] - self.quantiles[qp[0]])
 
@@ -408,7 +408,7 @@ class NnMixer:
         else:
             return -1
 
-    def error(self, ds, subset_id=None):
+    def _error(self, ds, subset_id=None):
         """
         :param ds:
         :return:
@@ -454,7 +454,7 @@ class NnMixer:
 
         return error
 
-    def get_model_copy(self):
+    def _get_model_copy(self):
         """
         get the actual mixer model
         :return: self.net
@@ -462,7 +462,7 @@ class NnMixer:
         self.optimizer.zero_grad()
         return copy.deepcopy(self.net)
 
-    def update_model(self, model):
+    def _update_model(self, model):
         """
         replace the current model with a model object
         :param model: a model object

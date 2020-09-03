@@ -4,8 +4,7 @@ from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegress
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
 
-class BoostMixer():
-
+class BoostMixer:
     def __init__(self, quantiles):
         self.targets = None
         self.quantiles = quantiles
