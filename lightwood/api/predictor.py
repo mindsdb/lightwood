@@ -211,12 +211,11 @@ class Predictor:
 
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
-        try:
-            mixer_class({}).fit_data_source(from_data_ds)
-        except Exception as e:
-            # Not all mixers might require this
-            # print(e)
-            pass
+        mc = mixer_class({})
+        if hasattr(mc, 'fit_data_source'):
+            if callable(getattr(mc, 'fit_data_source')):
+                mixer_class({}).fit_data_source(from_data_ds)
+                # Not all mixers might require this
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)

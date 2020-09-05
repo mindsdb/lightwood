@@ -9,7 +9,6 @@ from lightwood.mixers.sk_learn.sk_learn_helper import SkLearnMixerHelper
 
 
 class SkLearnMixer(SkLearnMixerHelper):
-
     def __init__(self, score_threshold=0.5,
                  classifier_class=MultiOutputClassifier, regression_class=MultiOutputRegressor):
         """

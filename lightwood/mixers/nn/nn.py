@@ -66,10 +66,6 @@ class NnMixer:
         }
 
     def _build_confidence_normalization_data(self, ds, subset_id=None):
-        """
-        :param ds:
-        :return:
-        """
         self.net = self.net.eval()
 
         ds.encoders = self.encoders
@@ -294,10 +290,6 @@ class NnMixer:
         return self.quantiles_pair
 
     def predict(self, when_data_source, include_extra_data=False):
-        """
-        :param when_data_source:
-        :return:
-        """
         when_data_source.transformer = self.transformer
         when_data_source.encoders = self.encoders
         _, _ = when_data_source[0]
@@ -409,10 +401,6 @@ class NnMixer:
             return -1
 
     def _error(self, ds, subset_id=None):
-        """
-        :param ds:
-        :return:
-        """
         self.net = self.net.eval()
 
         ds.encoders = self.encoders
@@ -502,10 +490,6 @@ class NnMixer:
         self.transformer = ds.transformer
 
     def iter_fit(self, ds, initialize=True, subset_id=None, max_epochs=120000):
-        """
-        :param ds:
-        :return:
-        """
         if initialize:
             self.fit_data_source(ds)
 
