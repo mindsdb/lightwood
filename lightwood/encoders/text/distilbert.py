@@ -2,9 +2,16 @@ from functools import partial
 
 import torch
 from torch.utils.data import DataLoader
-from transformers import DistilBertModel, DistilBertForSequenceClassification, AlbertModel, \
-    AlbertForSequenceClassification, DistilBertTokenizer, AlbertTokenizer, AdamW, get_linear_schedule_with_warmup
-
+from transformers import (
+    DistilBertModel,
+    DistilBertForSequenceClassification,
+    AlbertModel,
+    AlbertForSequenceClassification,
+    DistilBertTokenizer,
+    AlbertTokenizer,
+    AdamW,
+    get_linear_schedule_with_warmup
+)
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet

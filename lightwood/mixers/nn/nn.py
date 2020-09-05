@@ -477,10 +477,11 @@ class NnMixer:
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
     def fit_data_source(self, ds):
-        self.input_column_names = self.input_column_names \
-            if self.input_column_names is not None else ds.get_feature_names('input_features')
-        self.output_column_names = self.output_column_names \
-            if self.output_column_names is not None else ds.get_feature_names('output_features')
+        if self.input_column_names is None:
+            self.input_column_names = ds.get_feature_names('input_features')
+
+        if self.output_column_names is None:
+            self.output_column_names = ds.get_feature_names('output_features')
 
         self.out_types = ds.out_types
         for n, out_type in enumerate(self.out_types):
@@ -491,7 +492,7 @@ class NnMixer:
         try:
             if len(list(ds.transformer.feature_len_map.keys())) > 0:
                 transformer_already_initialized = True
-        except:
+        except Exception:
             pass
 
         if not transformer_already_initialized:

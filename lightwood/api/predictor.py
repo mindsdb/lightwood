@@ -15,12 +15,12 @@ from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 
-class Predictor:
+DEFAULT_MIXER = NnMixer
 
+
+class Predictor:
     def __init__(self, config=None, output=None, load_from_path=None):
         """
-        Start a predictor pass the
-
         :param config: a predictor definition object (can be a dictionary or a PredictorDefinition object)
         :param output: the columns you want to predict, ludwig will try to generate a config
         :param load_from_path: The path to load the predictor from
@@ -47,7 +47,7 @@ class Predictor:
         try:
             if config is not None and output is None:
                 self.config = predictor_config_schema.validate(config)
-        except:
+        except Exception:
             error = traceback.format_exc(1)
             raise ValueError('[BAD DEFINITION] argument has errors: {err}'.format(err=error))
 
@@ -132,7 +132,6 @@ class Predictor:
             }
         return best_mixer_map
 
-
     def learn(self, from_data, test_data=None, callback_on_iter=None, eval_every_x_epochs=20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
         """
         Train and save a model (you can use this to retrain model from data)
@@ -156,7 +155,7 @@ class Predictor:
             elif col_pd_type in ['bool', 'category']:
                 return COLUMN_DATA_TYPES.CATEGORICAL
             else:
-                # if the number of uniques is elss than 100 or less,
+                # if the number of uniques is less than 100 or less
                 # than 10% of the total number of rows then keep it as categorical
                 unique = from_data[col_name].nunique()
                 if unique < 100 or unique < len(from_data[col_name]) / 10:
@@ -193,14 +192,15 @@ class Predictor:
 
         from_data_ds.training = True
 
-        mixer_class = NnMixer
-        mixer_params = {}
-
-        if 'mixer' in self.config:
-            if 'class' in self.config['mixer']:
-                mixer_class = self.config['mixer']['class']
-            if 'attrs' in self.config['mixer']:
-                mixer_params = self.config['mixer']['attrs']
+        if 'mixer' in self.config and 'class' in self.config['mixer']:
+            mixer_class = self.config['mixer']['class']
+        else:
+            mixer_class = DEFAULT_MIXER
+        
+        if 'mixer' in self.config and 'attrs' in self.config['mixer']:
+            mixer_params = self.config['mixer']['attrs']
+        else:
+            mixer_params = {}
 
         # Initialize data sources
         if len(from_data_ds) > 100:
@@ -252,28 +252,33 @@ class Predictor:
 
         self._mixer = mixer_class(best_parameters, self.config)
 
-        for param in mixer_params:
-            if hasattr(self._mixer, param):
-                setattr(self._mixer, param, mixer_params[param])
+        for k, v in mixer_params.items():
+            if hasattr(self._mixer, k):
+                setattr(self._mixer, k, v)
             else:
-                logging.warning(
-                    'trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format
-                    (param=param, mixerclass=str(type(self._mixer)))
-                )
+                logging.warning('trying to set mixer param {} but mixerclass {} does not have such parameter'.format(k, self._mixer.__class__.__name__))
 
         def callback_on_iter_w_acc(epoch, training_error, test_error, delta_mean):
             if callback_on_iter is not None:
                 callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
 
-        self._mixer.fit(train_ds=from_data_ds ,test_ds=test_data_ds, callback=callback_on_iter_w_acc, stop_training_after_seconds=stop_training_after_seconds, eval_every_x_epochs=eval_every_x_epochs)
+        self._mixer.fit(
+            train_ds=from_data_ds,
+            test_ds=test_data_ds,
+            callback=callback_on_iter_w_acc,
+            stop_training_after_seconds=stop_training_after_seconds,
+            eval_every_x_epochs=eval_every_x_epochs
+        )
+
         self.train_accuracy = self.calculate_accuracy(test_data_ds)
 
         # Train some alternative mixers
-        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer and (CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10,3)):
-            try:
-                self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds, self._mixer.quantiles[self._mixer.quantiles_pair[0]+1:self._mixer.quantiles_pair[1]+1])
-            except Exception as e:
-                logging.warning(f'Failed to train helper mixers with error: {e}')
+        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
+            if CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10, 3):
+                try:
+                    self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds, self._mixer.quantiles[self._mixer.quantiles_pair[0]+1:self._mixer.quantiles_pair[1]+1])
+                except Exception as e:
+                    logging.warning(f'Failed to train helper mixers with error: {e}')
 
         return self
 
