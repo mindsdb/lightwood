@@ -2,9 +2,10 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.mixers import BaseMixer
 
 
-class BoostMixer:
+class BoostMixer(BaseMixer):
     def __init__(self, quantiles):
         self.targets = None
         self.quantiles = quantiles

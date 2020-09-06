@@ -2,8 +2,10 @@ from lightwood.mixers.nn.nn import NnMixer
 from lightwood.mixers.sk_learn.sk_learn import SkLearnMixer
 try:
     from lightwood.mixers.boost.boost import BoostMixer
-except:
+except ImportError:
     pass
+
+from lightwood.mixers.base_mixer import BaseMixer
 
 
 class BuiltinMixers():
@@ -11,7 +13,7 @@ class BuiltinMixers():
     SkLearnMixer = SkLearnMixer
     try:
         BoostMixer = BoostMixer
-    except:
+    except NameError:
         pass
       
 BUILTIN_MIXERS = BuiltinMixers
