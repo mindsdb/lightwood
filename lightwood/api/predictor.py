@@ -136,12 +136,18 @@ class Predictor:
         """
         Train and save a model (you can use this to retrain model from data)
 
-        :param from_data: (Pandas DataFrame) The data to learn from
-        :param test_data: (Pandas DataFrame) The data to test accuracy and learn_error from
-        :param callback_on_iter: This is function that can be called on every X evaluation cycle
-        :param eval_every_x_epochs: This is every how many epochs we want to calculate the test error and accuracy
+        from_data: DataFrame, The data to learn from
+                
+        test_data: Union[None, DataFrame], The data to test accuracy and learn_error from
 
-        :return: None
+        callback_on_iter: Union[None, Callable[epoch, training_error, test_error, delta_mean, accuracy]]
+                          Called every :eval_every_x_epochs:
+
+        eval_every_x_epochs: int, callback_on_iter is called every :eval_every_x_epochs: epochs
+        
+        stop_training_after_seconds: Union[None, int]
+
+        stop_model_building_after_seconds: Union[None, int]
         """
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
@@ -211,11 +217,11 @@ class Predictor:
 
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
-        mc = mixer_class({})
-        if hasattr(mc, 'fit_data_source'):
-            if callable(getattr(mc, 'fit_data_source')):
-                mixer_class({}).fit_data_source(from_data_ds)
+        mixer = mixer_class({})
+        if hasattr(mixer, 'fit_data_source'):
+            if callable(getattr(mixer, 'fit_data_source')):
                 # Not all mixers might require this
+                mixer.fit_data_source(from_data_ds)
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
@@ -259,7 +265,13 @@ class Predictor:
 
         def callback_on_iter_w_acc(epoch, training_error, test_error, delta_mean):
             if callback_on_iter is not None:
-                callback_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_data_ds))
+                callback_on_iter(
+                    epoch,
+                    training_error,
+                    test_error,
+                    delta_mean,
+                    self.calculate_accuracy(test_data_ds)
+                )
 
         self._mixer.fit(
             train_ds=from_data_ds,
@@ -275,7 +287,11 @@ class Predictor:
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             if CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10, 3):
                 try:
-                    self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds, self._mixer.quantiles[self._mixer.quantiles_pair[0]+1:self._mixer.quantiles_pair[1]+1])
+                    self._helper_mixers = self.train_helper_mixers(
+                        from_data_ds,
+                        test_data_ds,
+                        self._mixer.quantiles[self._mixer.quantiles_pair[0] + 1:self._mixer.quantiles_pair[1] + 1]
+                    )
                 except Exception as e:
                     logging.warning(f'Failed to train helper mixers with error: {e}')
 
@@ -300,7 +316,7 @@ class Predictor:
         if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
             for output_column in main_mixer_predictions:
                 if self._helper_mixers is not None and output_column in self._helper_mixers:
-                    if (self._helper_mixers[output_column]['accuracy'] > 1.00 * self.train_accuracy[output_column]['value']) or CONFIG.FORCE_HELPER_MIXERS:
+                    if (self._helper_mixers[output_column]['accuracy'] > self.train_accuracy[output_column]['value']) or CONFIG.FORCE_HELPER_MIXERS:
                         helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, [output_column])
 
                         main_mixer_predictions[output_column] = helper_mixer_predictions[output_column]

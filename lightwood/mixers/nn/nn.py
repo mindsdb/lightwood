@@ -16,9 +16,10 @@ from lightwood.mixers.helpers.quantile_loss import QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.mixers.base_mixer import BaseMixer
 
 
-class NnMixer:
+class NnMixer(BaseMixer):
     def __init__(self, dynamic_parameters, config=None):
         self.config = config
         self.out_types = None
