@@ -61,34 +61,7 @@ class Predictor:
         self._mixer = None
         self._helper_mixers = None
 
-    @staticmethod
-    def evaluate_mixer(config, mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters,
-                       max_training_time=None, max_epochs=None):
-        started_evaluation_at = int(time.time())
-        lowest_error = 10000
-        mixer = mixer_class(dynamic_parameters, config)
-
-        if max_training_time is None and max_epochs is None:
-            err = "Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`"
-            logging.error(err)
-            raise Exception(err)
-
-        lowest_error_epoch = 0
-        for epoch, training_error in enumerate(mixer.iter_fit(from_data_ds)):
-            error = mixer.error(test_data_ds)
-
-            if lowest_error > error:
-                lowest_error = error
-                lowest_error_epoch = epoch
-
-            if max(lowest_error_epoch * 1.4, 10) < epoch:
-                return lowest_error
-
-            if max_epochs is not None and epoch >= max_epochs:
-                return lowest_error
-
-            if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
-                return lowest_error
+    
 
     def convert_to_device(self, device_str=None):
         if device_str is not None:
@@ -136,18 +109,17 @@ class Predictor:
         """
         Train and save a model (you can use this to retrain model from data)
 
-        from_data: DataFrame, The data to learn from
+        :param from_data: DataFrame, The data to learn from
                 
-        test_data: Union[None, DataFrame], The data to test accuracy and learn_error from
+        :param test_data: Union[None, DataFrame], The data to test accuracy and learn_error from
 
-        callback_on_iter: Union[None, Callable[epoch, training_error, test_error, delta_mean, accuracy]]
-                          Called every :eval_every_x_epochs:
+        :param callback_on_iter: Union[None, Callable[epoch, training_error, test_error, delta_mean, accuracy]], Called every :eval_every_x_epochs:
 
-        eval_every_x_epochs: int, callback_on_iter is called every :eval_every_x_epochs: epochs
+        :param eval_every_x_epochs: int, callback_on_iter is called every :eval_every_x_epochs: epochs
         
-        stop_training_after_seconds: Union[None, int]
+        :param stop_training_after_seconds: Union[None, int]
 
-        stop_model_building_after_seconds: Union[None, int]
+        :param stop_model_building_after_seconds: Union[None, int]
         """
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
@@ -198,16 +170,6 @@ class Predictor:
 
         from_data_ds.training = True
 
-        if 'mixer' in self.config and 'class' in self.config['mixer']:
-            mixer_class = self.config['mixer']['class']
-        else:
-            mixer_class = DEFAULT_MIXER
-        
-        if 'mixer' in self.config and 'attrs' in self.config['mixer']:
-            mixer_params = self.config['mixer']['attrs']
-        else:
-            mixer_params = {}
-
         # Initialize data sources
         if len(from_data_ds) > 100:
             nr_subsets = 3
@@ -217,11 +179,18 @@ class Predictor:
 
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
-        mixer = mixer_class({})
-        if hasattr(mixer, 'fit_data_source'):
-            if callable(getattr(mixer, 'fit_data_source')):
-                # Not all mixers might require this
-                mixer.fit_data_source(from_data_ds)
+
+        if 'mixer' in self.config and 'class' in self.config['mixer']:
+            self._mixer = self.config['mixer']['class'](self.config)
+        else:
+            self._mixer = DEFAULT_MIXER(self.config)
+        
+        if 'mixer' in self.config and 'attrs' in self.config['mixer']:
+            mixer_params = self.config['mixer']['attrs']
+        else:
+            mixer_params = {}
+
+        self._mixer.fit_data_source(from_data_ds)
 
         input_size = len(from_data_ds[0][0])
         training_data_length = len(from_data_ds)
@@ -249,13 +218,13 @@ class Predictor:
 
             training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
 
-            best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(self.config, mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
+            best_parameters = optimizer.evaluate(lambda dynamic_parameters: mixer.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
 
             logging.info('Using hyperparameter set: ', best_parameters)
         else:
             best_parameters = {}
 
-        self._mixer = mixer_class(best_parameters, self.config)
+        self._mixer.set_dynamic_parameters(best_parameters)
 
         for k, v in mixer_params.items():
             if hasattr(self._mixer, k):
