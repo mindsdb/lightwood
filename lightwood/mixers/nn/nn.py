@@ -20,7 +20,7 @@ from lightwood.mixers.base_mixer import BaseMixer
 
 
 class NnMixer(BaseMixer):
-    def __init__(self, dynamic_parameters, config=None):
+    def __init__(self, config=None):
         self.config = config
         self.out_types = None
         self.net = None
@@ -40,7 +40,7 @@ class NnMixer(BaseMixer):
         self.batch_size = 200
 
         self.nn_class = DefaultNet
-        self.dynamic_parameters = dynamic_parameters
+        self.dynamic_parameters = {}
         self.awareness_criterion = None
         self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
         self.selfaware_lr_factor = 1/2      # scales self-aware learning rate compared to mixer
@@ -550,9 +550,9 @@ class NnMixer(BaseMixer):
                 self.optimizer_args = {'lr': 0.0005}
 
             if 'beta1' in self.dynamic_parameters:
-                self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
+                self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'], 0.999)
 
-            for optimizer_arg_name in ['lr','k','N_sma_threshold']:
+            for optimizer_arg_name in ['lr', 'k', 'N_sma_threshold']:
                 if optimizer_arg_name in self.dynamic_parameters:
                     self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
