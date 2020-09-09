@@ -15,25 +15,17 @@ from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 
-DEFAULT_MIXER = NnMixer
+DEFAULT_MIXER = NnMixer()
 
 
 class Predictor:
     def __init__(self, config=None, output=None, load_from_path=None):
         """
-        :param config: a predictor definition object (can be a dictionary or a PredictorDefinition object)
-        :param output: the columns you want to predict, ludwig will try to generate a config
-        :param load_from_path: The path to load the predictor from
+        :param config: dict, a predictor definition object (can be a dictionary or a PredictorDefinition object)
+        :param output: list, the columns you want to predict, ludwig will try to generate a config
+        :param load_from_path: str, the path to load the predictor from
         :type config: dictionary
         """
-        try:
-            from lightwood.mixers.boost.boost import BoostMixer
-            self.has_boosting_mixer = True
-        except Exception as e:
-            self.has_boosting_mixer = False
-            logging.info(f'Boosting mixer can\'t be loaded due to error: {e} !')
-            print((f'Boosting mixer can\'t be loaded due to error: {e} !'))
-
         if load_from_path is not None:
             pickle_in = open(load_from_path, "rb")
             self_dict = dill.load(pickle_in)
@@ -44,12 +36,13 @@ class Predictor:
 
         if output is None and config is None:
             raise ValueError('You must give one argument to the Predictor constructor')
-        try:
-            if config is not None and output is None:
+
+        if config is not None and output is None:
+            try:
                 self.config = predictor_config_schema.validate(config)
-        except Exception:
-            error = traceback.format_exc(1)
-            raise ValueError('[BAD DEFINITION] argument has errors: {err}'.format(err=error))
+            except Exception:
+                error = traceback.format_exc(1)
+                raise ValueError('[BAD DEFINITION] argument has errors: {err}'.format(err=error))
 
         # this is if we need to automatically generate a configuration variable
         self._generate_config = True if output is not None or self.config is None else False
@@ -59,67 +52,28 @@ class Predictor:
         self.train_accuracy = None
 
         self._mixer = None
-        self._helper_mixers = None
-
-    
 
     def convert_to_device(self, device_str=None):
-        if device_str is not None:
-            device = torch.device(device_str)
-            available_devices = 1
-            if device_str == 'cuda':
-                available_devices = torch.cuda.device_count()
-        else:
-            device, available_devices = get_devices()
+        if hasattr(self._mixer, 'to') and callable(self._mixer.to):
+            if device_str is not None:
+                device = torch.device(device_str)
+                available_devices = 1
+                if device_str == 'cuda':
+                    available_devices = torch.cuda.device_count()
+            else:
+                device, available_devices = get_devices()
 
-        self._mixer.to(device, available_devices)
-        for e in self._mixer.encoders:
-            self._mixer.encoders[e].to(device, available_devices)
+            self._mixer.to(device, available_devices)
 
-    def train_helper_mixers(self, train_ds, test_ds, quantiles):
-        from lightwood.mixers.boost.boost import BoostMixer
-
-        boost_mixer = BoostMixer(quantiles=quantiles)
-        boost_mixer.fit(train_ds=train_ds)
-
-        # @TODO: IF we add more mixers in the future, add the best on for each column to this map !
-        best_mixer_map = {}
-        predictions = boost_mixer.predict(test_ds)
-
-        for output_column in self._output_columns:
-            model = boost_mixer.targets[output_column]['model']
-            if model is None:
-                continue
-
-            real = list(map(str,test_ds.get_column_original_data(output_column)))
-            predicted =  predictions[output_column]['predictions']
-
-            weight_map = None
-            if 'weights' in test_ds.get_column_config(output_column):
-                weight_map = train_ds.get_column_config(output_column)['weights']
-
-            accuracy = self.apply_accuracy_function(train_ds.get_column_config(output_column)['type'], real, predicted, weight_map)
-            best_mixer_map[output_column] = {
-                'model': boost_mixer
-                ,'accuracy': accuracy['value']
-            }
-        return best_mixer_map
-
-    def learn(self, from_data, test_data=None, callback_on_iter=None, eval_every_x_epochs=20, stop_training_after_seconds=None, stop_model_building_after_seconds=None):
+    def learn(self, from_data, test_data=None):
         """
         Train and save a model (you can use this to retrain model from data)
 
-        :param from_data: DataFrame, The data to learn from
+        :param from_data: DataFrame
+            The data to learn from
                 
-        :param test_data: Union[None, DataFrame], The data to test accuracy and learn_error from
-
-        :param callback_on_iter: Union[None, Callable[epoch, training_error, test_error, delta_mean, accuracy]], Called every :eval_every_x_epochs:
-
-        :param eval_every_x_epochs: int, callback_on_iter is called every :eval_every_x_epochs: epochs
-        
-        :param stop_training_after_seconds: Union[None, int]
-
-        :param stop_model_building_after_seconds: Union[None, int]
+        :param test_data: Union[None, DataFrame]
+            The data to test accuracy and learn_error from
         """
 
         # This is a helper function that will help us auto-determine roughly what data types are in each column
@@ -138,8 +92,8 @@ class Predictor:
                 unique = from_data[col_name].nunique()
                 if unique < 100 or unique < len(from_data[col_name]) / 10:
                     return COLUMN_DATA_TYPES.CATEGORICAL
-                # else assume its text
-                return COLUMN_DATA_TYPES.TEXT
+                else:
+                    return COLUMN_DATA_TYPES.TEXT
 
         # generate the configuration and set the order for the input and output columns
         if self._generate_config is True:
@@ -155,20 +109,14 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['output_features']]
             self._input_columns = [col['name'] for col in self.config['input_features']]
 
-        if stop_training_after_seconds is None:
-            stop_training_after_seconds = round(from_data.shape[0] * from_data.shape[1] / 5)
-
-        if stop_model_building_after_seconds is None:
-            stop_model_building_after_seconds = stop_training_after_seconds * 3
-
         from_data_ds = DataSource(from_data, self.config)
 
         if test_data is not None:
             test_data_ds = DataSource(test_data, self.config)
         else:
-            test_data_ds = from_data_ds.extractRandomSubset(0.1)
+            test_data_ds = from_data_ds.extract_random_subset(0.1)
 
-        from_data_ds.training = True
+        from_data_ds.train()
 
         # Initialize data sources
         if len(from_data_ds) > 100:
@@ -180,15 +128,15 @@ class Predictor:
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
 
-        if 'mixer' in self.config and 'class' in self.config['mixer']:
-            self._mixer = self.config['mixer']['class'](self.config)
+        if 'mixer' in self.config:
+            self._mixer = self.config['mixer']
         else:
-            self._mixer = DEFAULT_MIXER(self.config)
+            self._mixer = DEFAULT_MIXER
         
         if 'mixer' in self.config and 'attrs' in self.config['mixer']:
-            mixer_params = self.config['mixer']['attrs']
+            mixer_attrs = self.config['mixer']['attrs']
         else:
-            mixer_params = {}
+            mixer_attrs = {}
 
         self._mixer.fit_data_source(from_data_ds)
 
@@ -200,69 +148,42 @@ class Predictor:
         test_data_ds.output_weights = from_data_ds.output_weights
         test_data_ds.create_subsets(nr_subsets)
 
-        if 'optimizer' in self.config:
-            optimizer = self.config['optimizer']()
+        # if 'optimizer' in self.config:
+        #     optimizer = self.config['optimizer']()
 
-            while True:
-                training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
+        #     while True:
+        #         training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
 
-                # Some heuristics...
-                if training_time_per_iteration > input_size:
-                    if training_time_per_iteration > min((training_data_length / (4 * input_size)), 16 * input_size):
-                        break
+        #         # Some heuristics...
+        #         if training_time_per_iteration > input_size:
+        #             if training_time_per_iteration > min((training_data_length / (4 * input_size)), 16 * input_size):
+        #                 break
 
-                optimizer.total_trials = optimizer.total_trials - 1
-                if optimizer.total_trials < 8:
-                    optimizer.total_trials = 8
-                    break
+        #         optimizer.total_trials = optimizer.total_trials - 1
+        #         if optimizer.total_trials < 8:
+        #             optimizer.total_trials = 8
+        #             break
 
-            training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
+        #     training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
 
-            best_parameters = optimizer.evaluate(lambda dynamic_parameters: mixer.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
+        #     best_parameters = optimizer.evaluate(lambda dynamic_parameters: mixer.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
 
-            logging.info('Using hyperparameter set: ', best_parameters)
-        else:
-            best_parameters = {}
+        #     logging.info('Using hyperparameter set: ', best_parameters)
+        # else:
+        #     best_parameters = {}
+        best_parameters = {}
 
         self._mixer.set_dynamic_parameters(best_parameters)
 
-        for k, v in mixer_params.items():
+        for k, v in mixer_attrs.items():
             if hasattr(self._mixer, k):
                 setattr(self._mixer, k, v)
             else:
-                logging.warning('trying to set mixer param {} but mixerclass {} does not have such parameter'.format(k, self._mixer.__class__.__name__))
+                logging.warning('trying to set mixer attribute {} but mixerclass {} does not have such attribute'.format(k, self._mixer.__class__.__name__))
 
-        def callback_on_iter_w_acc(epoch, training_error, test_error, delta_mean):
-            if callback_on_iter is not None:
-                callback_on_iter(
-                    epoch,
-                    training_error,
-                    test_error,
-                    delta_mean,
-                    self.calculate_accuracy(test_data_ds)
-                )
-
-        self._mixer.fit(
-            train_ds=from_data_ds,
-            test_ds=test_data_ds,
-            callback=callback_on_iter_w_acc,
-            stop_training_after_seconds=stop_training_after_seconds,
-            eval_every_x_epochs=eval_every_x_epochs
-        )
+        self._mixer.fit(train_ds=from_data_ds, test_ds=test_data_ds,)
 
         self.train_accuracy = self.calculate_accuracy(test_data_ds)
-
-        # Train some alternative mixers
-        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
-            if CONFIG.FORCE_HELPER_MIXERS or len(from_data_ds) < 12 * pow(10, 3):
-                try:
-                    self._helper_mixers = self.train_helper_mixers(
-                        from_data_ds,
-                        test_data_ds,
-                        self._mixer.quantiles[self._mixer.quantiles_pair[0] + 1:self._mixer.quantiles_pair[1] + 1]
-                    )
-                except Exception as e:
-                    logging.warning(f'Failed to train helper mixers with error: {e}')
 
         return self
 
@@ -365,23 +286,32 @@ class Predictor:
                 predicted = list(map(tuple, predictions[output_column]['predictions']))
             else:
                 real = list(map(str,ds.get_column_original_data(output_column)))
-                predicted = list(map(str,predictions[output_column]['predictions']))
+                predicted = list(map(str, predictions[output_column]['predictions']))
 
             weight_map = None
             if 'weights' in ds.get_column_config(output_column):
                 weight_map = ds.get_column_config(output_column)['weights']
 
-            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'],
-                                                    real,
-                                                    predicted,
-                                                    weight_map=weight_map,
-                                                    encoder=ds.encoders[output_column])
+            accuracy = self.apply_accuracy_function(
+                ds.get_column_config(output_column)['type'],
+                real,
+                predicted,
+                weight_map=weight_map,
+                encoder=ds.encoders[output_column]
+            )
 
             if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
                 ds.encoders[output_column].decode_log = True
-                predicted = ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
+                predicted = ds.get_decoded_column_data(
+                    output_column,
+                    predictions[output_column]['encoded_predictions']
+                )
 
-                alternative_accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
+                alternative_accuracy = self.apply_accuracy_function(
+                    ds.get_column_config(output_column)['type'],
+                    real,
+                    predicted,weight_map=weight_map
+                )
 
                 if alternative_accuracy['value'] > accuracy['value']:
                     accuracy = alternative_accuracy

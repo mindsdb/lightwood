@@ -8,13 +8,21 @@ from torch.utils.data import Dataset
 
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
-from lightwood.encoders import (NumericEncoder, CategoricalAutoEncoder,
-                                MultiHotEncoder, DistilBertEncoder, DatetimeEncoder,
-                                Img2VecEncoder, TsRnnEncoder, FlairEmbeddingEncoder, ShortTextEncoder, VocabularyEncoder)
+from lightwood.encoders import (
+    NumericEncoder,
+    CategoricalAutoEncoder,
+    MultiHotEncoder,
+    DistilBertEncoder,
+    DatetimeEncoder,
+    Img2VecEncoder,
+    TsRnnEncoder,
+    FlairEmbeddingEncoder,
+    ShortTextEncoder,
+    VocabularyEncoder
+)
 
 
 class SubSet(Dataset):
-
     def __init__(self, data_source, indexes):
         self.data_source = data_source
         self.index_mapping = {}
@@ -46,7 +54,6 @@ class SubSet(Dataset):
 
 
 class DataSource(Dataset):
-
     def __init__(self, data_frame, configuration):
         """
         Create a lightwood datasource from the data frame
@@ -101,17 +108,24 @@ class DataSource(Dataset):
         self.encoded_cache = {}
         self.transformed_cache = None
 
-    def extractRandomSubset(self, percentage):
+    def extract_random_subset(self, percentage):
+        """
+        Removes :percentage: of data randomly from itself and returns a new
+        datasource made from that data
+        """
         np.random.seed(int(round(percentage * 100000)))
+
         msk = np.random.rand(len(self.data_frame)) < (1 - percentage)
+
         test_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]
-        # clear caches
+
         self._clear_cache()
 
         ds = DataSource(test_df, self.configuration)
         ds.encoders = self.encoders
         ds.transformer = self.transformer
+
         return ds
 
     def __len__(self):
@@ -236,10 +250,7 @@ class DataSource(Dataset):
 
         return encoder_class
 
-    def make_column_encoder(self,
-                            encoder_class,
-                            encoder_attrs=None,
-                            is_target=False):
+    def make_column_encoder(self, encoder_class, encoder_attrs=None, is_target=False):
         encoder_instance = encoder_class(is_target=is_target)
         encoder_attrs = encoder_attrs or {}
         for attr in encoder_attrs:
@@ -247,10 +258,7 @@ class DataSource(Dataset):
                 setattr(encoder_instance, attr, encoder_attrs[attr])
         return encoder_instance
 
-    def prepare_column_encoder(self,
-                        config,
-                        is_target=False,
-                        training_data=None):
+    def prepare_column_encoder(self, config, is_target=False, training_data=None):
         column_data = self.get_column_original_data(config['name'])
         encoder_class = config.get('encoder_class',
                                    self.lookup_encoder_class(config['type'], is_target))
@@ -367,3 +375,10 @@ class DataSource(Dataset):
             for feature in self.configuration[feature_set]:
                 if feature['name'] == column_name:
                     return feature
+        return None
+
+    def train(self):
+        self.training = True
+    
+    def eval(self):
+        self.training = False

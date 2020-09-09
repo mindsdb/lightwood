@@ -6,11 +6,12 @@ from lightwood.mixers import BaseMixer
 
 
 class BoostMixer(BaseMixer):
-    def __init__(self, quantiles):
+    def __init__(self, quantiles=None):
+        super().__init__()
         self.targets = None
         self.quantiles = quantiles
 
-    def fit(self, train_ds, test_ds=None, callback=None):
+    def fit(self, train_ds, test_ds):
         output_features = train_ds.configuration['output_features']
 
         self.targets = {}
@@ -65,6 +66,7 @@ class BoostMixer(BaseMixer):
         predictions = {}
         if targets is None:
             targets = self.targets
+
         for target_col_name in self.targets:
 
             if self.targets[target_col_name]['model'] is None:
