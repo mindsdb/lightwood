@@ -20,8 +20,35 @@ from lightwood.mixers.base_mixer import BaseMixer
 
 
 class NnMixer(BaseMixer):
-    def __init__(self, config=None):
-        self.config = config
+    @staticmethod
+    def default_on_iter(epoch, train_error, test_error, delta_mean):
+        pass
+
+    def __init__(
+        self,
+        selfaware=False,
+        deterministic=False,
+        callback_on_iter=default_on_iter,
+        eval_every_x_epochs=20,
+        stop_training_after_seconds=None,
+        stop_model_building_after_seconds=None
+    ):
+        """
+        :param selfaware: bool
+        :param deterministic: bool
+        :param callback_on_iter: Callable[epoch, training_error, test_error, delta_mean]
+        :param eval_every_x_epochs: int
+        :param stop_training_after_seconds: Union[int, None]
+        :param stop_model_building_after_seconds: Union[int, None]
+        """
+        super().__init__()
+        self.selfaware = selfaware
+        self.deterministic = deterministic
+        self.callback = callback_on_iter
+        self.eval_every_x_epochs = eval_every_x_epochs
+        self.stop_training_after_seconds = stop_training_after_seconds
+        self.stop_model_building_after_seconds = stop_model_building_after_seconds
+
         self.out_types = None
         self.net = None
         self.selfaware_net = None
@@ -62,9 +89,7 @@ class NnMixer(BaseMixer):
 
         self.total_iterations = 0
 
-        self._nonpersistent = {
-            'sampler': None
-        }
+        self._nonpersistent = {'sampler': None}
 
     def _build_confidence_normalization_data(self, ds, subset_id=None):
         self.net = self.net.eval()
@@ -114,7 +139,13 @@ class NnMixer(BaseMixer):
 
         return True
 
-    def fit(self, train_ds, test_ds, callback=None, stop_training_after_seconds=None, eval_every_x_epochs=None):
+    def fit(self, train_ds, test_ds):
+        if self.stop_training_after_seconds is None:
+            self.stop_training_after_seconds = round(train_ds.data_frame.shape[0] * train_ds.data_frame.shape[1] / 5)
+
+        if self.stop_model_building_after_seconds is None:
+            self.stop_model_building_after_seconds = self.stop_training_after_seconds * 3
+
         started = time.time()
         log_reasure = time.time()
         first_run = True
@@ -140,7 +171,7 @@ class NnMixer(BaseMixer):
                 best_model = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
-                for epoch, training_error in enumerate(self.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
+                for epoch, training_error in enumerate(self._iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
                     first_run = False
 
                     # Log this every now and then so that the user knows it's running
@@ -155,7 +186,7 @@ class NnMixer(BaseMixer):
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
                     if subset_iteration > 1 and training_error < 0.4 and not train_ds.enable_dropout:
-                        eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
+                        self.eval_every_x_epochs = max(1, int(self.eval_every_x_epochs/2) )
                         logging.info('Enabled dropout !')
                         train_ds.enable_dropout = True
                         lowest_error = None
@@ -177,7 +208,7 @@ class NnMixer(BaseMixer):
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-                    if subset_iteration > 1 and not self.is_selfaware and self.config['mixer']['selfaware'] and not self.stop_selfaware_training and training_error < 0.35:
+                    if subset_iteration > 1 and not self.is_selfaware and self.selfaware and not self.stop_selfaware_training and training_error < 0.35:
                         logging.info('Started selfaware training !')
                         self.start_selfaware_training = True
                         lowest_error = None
@@ -187,7 +218,7 @@ class NnMixer(BaseMixer):
                         subset_test_error_delta_buff = []
                         continue
 
-                    if epoch % eval_every_x_epochs == 0:
+                    if epoch % self.eval_every_x_epochs == 0:
                         test_error = self._error(test_ds)
                         subset_test_error = self._error(subset_test_ds, subset_id=subset_id)
                         logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
@@ -213,15 +244,15 @@ class NnMixer(BaseMixer):
                         delta_mean = np.mean(test_error_delta_buff[-5:])
                         subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
 
-                        if callback is not None:
-                            callback(epoch, training_error, test_error, delta_mean)
+                        if self.callback is not None:
+                            self.callback(epoch, training_error, test_error, delta_mean)
 
                         # Stop if we're past the time limit allocated for training
-                        if (time.time() - started) > stop_training_after_seconds:
+                        if (time.time() - started) > self.stop_training_after_seconds:
                             stop_training = True
 
                         # If the trauining subset is overfitting on it's associated testing subset
-                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
+                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > self.stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
 
                             self._update_model(best_model)
@@ -238,13 +269,13 @@ class NnMixer(BaseMixer):
                                 self._build_confidence_normalization_data(train_ds)
                                 self._adjust(test_ds)
 
-                            self.iter_fit(test_ds, initialize=first_run, max_epochs=1)
+                            self._iter_fit(test_ds, initialize=first_run, max_epochs=1)
                             self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
                             break
 
-    def _adjust(self, test_data_source):
-        predictions = self.predict(test_data_source, include_extra_data=True)
+    def _adjust(self, test_ds):
+        predictions = self.predict(test_ds, include_extra_data=True)
 
         narrowest_correct_qi_arr = []
         corr_conf_correct_qi_arr = []
@@ -295,14 +326,19 @@ class NnMixer(BaseMixer):
         when_data_source.encoders = self.encoders
         _, _ = when_data_source[0]
 
-        data_loader = DataLoader(when_data_source, batch_size=self.batch_size, shuffle=False, num_workers=0)
+        data_loader = DataLoader(
+            when_data_source,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=0
+        )
 
         # set model into evaluation mode in order to skip things such as Dropout
         self.net = self.net.eval()
 
         outputs = []
         awareness_arr = []
-        loss_confidence_arr = [[]] * len(when_data_source.out_indexes)
+        loss_confidence_arr = [[] for _ in when_data_source.out_indexes]
 
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
@@ -490,7 +526,7 @@ class NnMixer(BaseMixer):
         self.encoders = ds.encoders
         self.transformer = ds.transformer
 
-    def iter_fit(self, ds, initialize=True, subset_id=None, max_epochs=120000):
+    def _iter_fit(self, ds, initialize=True, subset_id=None, max_epochs=120000):
         if initialize:
             self.fit_data_source(ds)
 
@@ -500,7 +536,7 @@ class NnMixer(BaseMixer):
                                      input_size=len(input_sample),
                                      output_size=len(output_sample),
                                      nr_outputs=len(self.out_types),
-                                     deterministic=self.config['mixer']['deterministic'])
+                                     deterministic=self.deterministic)
             self.net = self.net.train()
 
             self.selfaware_net = SelfAware(input_size=len(input_sample),
@@ -681,4 +717,6 @@ class NnMixer(BaseMixer):
     def to(self, device, available_devices):
         self.net.to(device, available_devices)
         self.selfaware_net.to(device, available_devices)
+        for enc in self.encoders:
+            self.encoders[enc].to(device, available_devices)
         return self

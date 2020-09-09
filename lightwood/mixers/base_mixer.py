@@ -1,35 +1,57 @@
 
 class BaseMixer:
-    def __init__(self, config=None):
-        self.config = config
+    """
+    Base class for all mixers.
+    - Overridden __init__ must only accept optional arguments.
+    - Subclasses must call BaseMixer.__init__ for proper initialization.
+    """
+    def __init__(self):
         self.dynamic_parameters = {}
     
     def set_dynamic_parameters(self, dynamic_parameters):
+        """
+        :param dynamic_parameters: dict
+        """
         self.dynamic_parameters = dynamic_parameters
 
-    def fit(self, train_ds, test_ds, callback, stop_training_after_seconds, eval_every_x_epochs):
+    def fit(self, train_ds, test_ds):
+        """
+        :param train_ds: DataSource
+        :param test_ds: DataSource
+        """
         raise NotImplementedError
 
-    def iter_fit(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def fit_data_source(self, *args, **kwargs):
+    def fit_data_source(self, ds):
+        """
+        :param ds: DataSource
+        """
         pass
 
     def predict(self):
         raise NotImplementedError
 
-    def evaluate(self, from_data_ds, test_data_ds, dynamic_parameters,
-                 max_training_time=None, max_epochs=None):
+    def evaluate(
+        self,
+        from_data_ds,
+        test_data_ds,
+        dynamic_parameters,
+        max_training_time=None,
+        max_epochs=None
+    ):
+        """
+        :param from_data_ds: DataSource
+        :param test_data_ds: DataSource
+        :param dynamic_parameters: dict
+        :param max_training_time:
+        :param max_epochs: int
+        """
         self.set_dynamic_parameters(dynamic_parameters)
 
         started_evaluation_at = int(time.time())
         lowest_error = 10000
 
         if max_training_time is None and max_epochs is None:
-            err = "Please provide either `max_training_time` or `max_epochs` when calling `evaluate`"
-            logging.error(err)
-            raise Exception(err)
+            raise Exception('Please provide either `max_training_time` or `max_epochs`')
 
         lowest_error_epoch = 0
         for epoch, training_error in enumerate(self.iter_fit(from_data_ds)):
