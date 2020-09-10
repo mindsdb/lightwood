@@ -37,23 +37,23 @@ class BoostMixer(BaseMixer):
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
                 if weight_map is None:
-                    sample_weight = [1 for x in real]
+                    sample_weight = [1] * len(real)
                 else:
                     sample_weight = []
                     for val in Y:
                         sample_weight.append(weight_map[val])
 
                 self.targets[target_col_name]['model'] = GradientBoostingClassifier(n_estimators=600)
-                self.targets[target_col_name]['model'].fit(X,Y,sample_weight=sample_weight)
+                self.targets[target_col_name]['model'].fit(X, Y, sample_weight=sample_weight)
 
             elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.NUMERIC:
                 self.targets[target_col_name]['model'] = GradientBoostingRegressor(n_estimators=600)
-                self.targets[target_col_name]['model'].fit(X,Y)
+                self.targets[target_col_name]['model'].fit(X, Y)
                 if self.quantiles is not None:
                     self.targets[target_col_name]['quantile_models'] = {}
                     for i, quantile in enumerate(self.quantiles):
-                        self.targets[target_col_name]['quantile_models'][i] = GradientBoostingRegressor(n_estimators=600, loss='quantile',alpha=quantile)
-                        self.targets[target_col_name]['quantile_models'][i].fit(X,Y)
+                        self.targets[target_col_name]['quantile_models'][i] = GradientBoostingRegressor(n_estimators=600, loss='quantile', alpha=quantile)
+                        self.targets[target_col_name]['quantile_models'][i].fit(X, Y)
 
             else:
                 self.targets[target_col_name]['model'] = None

@@ -9,6 +9,7 @@ from sklearn.metrics import f1_score, r2_score
 
 from lightwood import Predictor
 from lightwood.constants.lightwood import ColumnDataTypes
+from lightwood.mixers import NnMixer
 
 
 class TestMultiLabelPrediction(unittest.TestCase):
@@ -53,14 +54,14 @@ class TestMultiLabelPrediction(unittest.TestCase):
             'output_features': [
                 {'name': 'y', 'type': ColumnDataTypes.NUMERIC}
             ],
+            'mixer': NnMixer(stop_training_after_seconds=10)
         }
         df_train = df.iloc[:round(n_points * 0.9)]
         df_test = df.iloc[round(n_points * 0.9):]
 
         predictor = Predictor(config)
 
-        predictor.learn(from_data=df_train,
-                        stop_training_after_seconds=10)
+        predictor.learn(from_data=df_train)
 
         predictions = predictor.predict(when_data=df_test)
 
@@ -80,8 +81,8 @@ class TestMultiLabelPrediction(unittest.TestCase):
         # if a tag is missing then x1/x2 contain -1 instead
         # Thus the dataset should be perfectly predicted
         n_points = 10000
-        x1 = [random.randint(0, len(vocab)-1) if random.random() > 0.2 else -1 for i in range(n_points)]
-        x2 = [random.randint(0, len(vocab)-1) if random.random() > 0.2 else -1 for i in range(n_points)]
+        x1 = [random.randint(0, len(vocab) - 1) if random.random() > 0.2 else -1 for i in range(n_points)]
+        x2 = [random.randint(0, len(vocab) - 1) if random.random() > 0.2 else -1 for i in range(n_points)]
         tags = []
         for x1_index, x2_index in zip(x1, x2):
             row_tags = set([vocab.get(x1_index), vocab.get(x2_index)])
@@ -92,24 +93,20 @@ class TestMultiLabelPrediction(unittest.TestCase):
 
         config = {
             'input_features': [
-                {'name': 'x1',
-                 'type': ColumnDataTypes.CATEGORICAL,
-                 },
-                {'name': 'x2',
-                 'type': ColumnDataTypes.CATEGORICAL,
-                 },
+                {'name': 'x1', 'type': ColumnDataTypes.CATEGORICAL},
+                {'name': 'x2', 'type': ColumnDataTypes.CATEGORICAL}
             ],
             'output_features': [
                 {'name': 'tags', 'type': ColumnDataTypes.MULTIPLE_CATEGORICAL}
             ],
+            'mixer': NnMixer(stop_training_after_seconds=10)
         }
-        df_train = df.iloc[:round(n_points*0.9)]
-        df_test = df.iloc[round(n_points*0.9):]
+        df_train = df.iloc[:round(n_points * 0.9)]
+        df_test = df.iloc[round(n_points * 0.9):]
 
         predictor = Predictor(config)
 
-        predictor.learn(from_data=df_train,
-                        stop_training_after_seconds=10)
+        predictor.learn(from_data=df_train)
 
         predictions = predictor.predict(when_data=df_train)
         train_tags = df_train.tags

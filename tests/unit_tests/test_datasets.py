@@ -2,6 +2,7 @@ import unittest
 import lightwood
 from lightwood import Predictor
 import pandas as pd
+from lightwood.mixers import NnMixer
 
 
 USE_CUDA = False
@@ -28,9 +29,8 @@ class TestDatasets(unittest.TestCase):
                 {'name': 'location', 'type': 'categorical'}
             ],
             'data_source': {'cache_transformed_data': CACHE_ENCODED_DATA},
-            'mixer': lightwood.mixers.nn.NnMixer(
+            'mixer': NnMixer(
                 selfaware=SELFAWARE,
-                callback_on_iter=iter_function,
                 eval_every_x_epochs=4,
                 stop_training_after_seconds=80
             )

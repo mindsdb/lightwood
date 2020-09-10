@@ -1,5 +1,6 @@
 from schema import Schema, And, Use, Optional
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.mixers import BaseMixer
 
 feature_schema = Schema({
     'name': str,
@@ -38,6 +39,6 @@ predictor_config_schema = Schema({
         feature_schema
     ],
     Optional('data_source', default=data_source_schema.validate({})): data_source_schema,
-    Optional('mixer', default=mixer_schema.validate({})): mixer_schema,
+    Optional('mixer'): BaseMixer,
     Optional('optimizer'): object
 })
