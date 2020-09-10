@@ -24,9 +24,8 @@ class Predictor:
         :param load_from_path: str, the path to load the predictor from
         """
         if load_from_path is not None:
-            pickle_in = open(load_from_path, "rb")
-            self_dict = dill.load(pickle_in)
-            pickle_in.close()
+            with open(load_from_path, 'rb') as pickle_in:
+                self_dict = dill.load(pickle_in)
             self.__dict__ = self_dict
             self.convert_to_device()
             return
@@ -281,14 +280,12 @@ class Predictor:
     
         :param path_to: str, full path of file, where we store results
         """
-        f = open(path_to, 'wb')
+        with open(path_to, 'wb') as f:
+            # Null out certain object we don't want to store
+            if hasattr(self._mixer, '_nonpersistent'):
+                self._mixer._nonpersistent = {}
 
-        # Null out certain object we don't want to store
-        if hasattr(self._mixer, '_nonpersistent'):
-            self._mixer._nonpersistent = {}
-
-        # Dump everything relevant to cpu before saving
-        self.convert_to_device("cpu")
-        dill.dump(self.__dict__, f)
-        self.convert_to_device()
-        f.close()
+            # Dump everything relevant to cpu before saving
+            self.convert_to_device("cpu")
+            dill.dump(self.__dict__, f)
+            self.convert_to_device()
