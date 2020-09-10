@@ -16,22 +16,23 @@ from lightwood.mixers.helpers.quantile_loss import QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-from lightwood.mixers.base_mixer import BaseMixer
+from lightwood.mixers import BaseMixer
+
+
+def _default_on_iter(epoch, train_error, test_error, delta_mean):
+    pass
 
 
 class NnMixer(BaseMixer):
-    @staticmethod
-    def default_on_iter(epoch, train_error, test_error, delta_mean):
-        pass
-
     def __init__(
         self,
         selfaware=False,
         deterministic=False,
-        callback_on_iter=default_on_iter,
+        callback_on_iter=_default_on_iter,
         eval_every_x_epochs=20,
         stop_training_after_seconds=None,
-        stop_model_building_after_seconds=None
+        stop_model_building_after_seconds=None,
+        param_optimizer=None
     ):
         """
         :param selfaware: bool
@@ -40,6 +41,7 @@ class NnMixer(BaseMixer):
         :param eval_every_x_epochs: int
         :param stop_training_after_seconds: Union[int, None]
         :param stop_model_building_after_seconds: Union[int, None]
+        :param param_optimizer: object
         """
         super().__init__()
         self.selfaware = selfaware
@@ -48,6 +50,7 @@ class NnMixer(BaseMixer):
         self.eval_every_x_epochs = eval_every_x_epochs
         self.stop_training_after_seconds = stop_training_after_seconds
         self.stop_model_building_after_seconds = stop_model_building_after_seconds
+        self.param_optimizer = param_optimizer
 
         self.out_types = None
         self.net = None
@@ -123,7 +126,7 @@ class NnMixer(BaseMixer):
                 try:
                     confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
                     loss_confidence_arr[k].extend(confidences)
-                except:
+                except Exception:
                     pass
 
         for k, _ in enumerate(self.criterion_arr):
@@ -145,6 +148,28 @@ class NnMixer(BaseMixer):
 
         if self.stop_model_building_after_seconds is None:
             self.stop_model_building_after_seconds = self.stop_training_after_seconds * 3
+
+        if self.param_optimizer is not None:
+            while True:
+                training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
+
+                # Some heuristics...
+                if training_time_per_iteration > input_size:
+                    if training_time_per_iteration > min((training_data_length / (4 * input_size)), 16 * input_size):
+                        break
+
+                self.param_optimizer.total_trials = self.param_optimizer.total_trials - 1
+                if self.param_optimizer.total_trials < 8:
+                    self.param_optimizer.total_trials = 8
+                    break
+
+            training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
+
+            self.dynamic_parameters = self.param_optimizer.evaluate(lambda dynamic_parameters: self.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
+
+            logging.info('Using hyperparameter set: ', best_parameters)
+        else:
+            self.dynamic_parameters = {}
 
         started = time.time()
         log_reasure = time.time()
@@ -186,7 +211,7 @@ class NnMixer(BaseMixer):
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
                     if subset_iteration > 1 and training_error < 0.4 and not train_ds.enable_dropout:
-                        self.eval_every_x_epochs = max(1, int(self.eval_every_x_epochs/2) )
+                        self.eval_every_x_epochs = max(1, int(self.eval_every_x_epochs / 2) )
                         logging.info('Enabled dropout !')
                         train_ds.enable_dropout = True
                         lowest_error = None

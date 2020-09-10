@@ -7,12 +7,6 @@ class BaseMixer:
     """
     def __init__(self):
         self.dynamic_parameters = {}
-    
-    def set_dynamic_parameters(self, dynamic_parameters):
-        """
-        :param dynamic_parameters: dict
-        """
-        self.dynamic_parameters = dynamic_parameters
 
     def fit(self, train_ds, test_ds):
         """

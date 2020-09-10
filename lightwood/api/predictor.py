@@ -10,12 +10,10 @@ import torch
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
-from lightwood.mixers.nn.nn import NnMixer
+from lightwood.mixers import NnMixer, BaseMixer
 from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
-
-DEFAULT_MIXER = NnMixer()
 
 
 class Predictor:
@@ -130,13 +128,9 @@ class Predictor:
 
         if 'mixer' in self.config:
             self._mixer = self.config['mixer']
+            assert isinstance(self._mixer, BaseMixer)
         else:
-            self._mixer = DEFAULT_MIXER
-        
-        if 'mixer' in self.config and 'attrs' in self.config['mixer']:
-            mixer_attrs = self.config['mixer']['attrs']
-        else:
-            mixer_attrs = {}
+            self._mixer = NnMixer()
 
         self._mixer.fit_data_source(from_data_ds)
 
@@ -148,40 +142,7 @@ class Predictor:
         test_data_ds.output_weights = from_data_ds.output_weights
         test_data_ds.create_subsets(nr_subsets)
 
-        # if 'optimizer' in self.config:
-        #     optimizer = self.config['optimizer']()
-
-        #     while True:
-        #         training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
-
-        #         # Some heuristics...
-        #         if training_time_per_iteration > input_size:
-        #             if training_time_per_iteration > min((training_data_length / (4 * input_size)), 16 * input_size):
-        #                 break
-
-        #         optimizer.total_trials = optimizer.total_trials - 1
-        #         if optimizer.total_trials < 8:
-        #             optimizer.total_trials = 8
-        #             break
-
-        #     training_time_per_iteration = stop_model_building_after_seconds / optimizer.total_trials
-
-        #     best_parameters = optimizer.evaluate(lambda dynamic_parameters: mixer.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
-
-        #     logging.info('Using hyperparameter set: ', best_parameters)
-        # else:
-        #     best_parameters = {}
-        best_parameters = {}
-
-        self._mixer.set_dynamic_parameters(best_parameters)
-
-        for k, v in mixer_attrs.items():
-            if hasattr(self._mixer, k):
-                setattr(self._mixer, k, v)
-            else:
-                logging.warning('trying to set mixer attribute {} but mixerclass {} does not have such attribute'.format(k, self._mixer.__class__.__name__))
-
-        self._mixer.fit(train_ds=from_data_ds, test_ds=test_data_ds,)
+        self._mixer.fit(train_ds=from_data_ds, test_ds=test_data_ds)
 
         self.train_accuracy = self.calculate_accuracy(test_data_ds)
 
@@ -201,17 +162,7 @@ class Predictor:
         when_data_ds = DataSource(when_data, self.config)
         when_data_ds.encoders = self._mixer.encoders
 
-        main_mixer_predictions = self._mixer.predict(when_data_ds)
-
-        if CONFIG.HELPER_MIXERS and self.has_boosting_mixer:
-            for output_column in main_mixer_predictions:
-                if self._helper_mixers is not None and output_column in self._helper_mixers:
-                    if (self._helper_mixers[output_column]['accuracy'] > self.train_accuracy[output_column]['value']) or CONFIG.FORCE_HELPER_MIXERS:
-                        helper_mixer_predictions = self._helper_mixers[output_column]['model'].predict(when_data_ds, [output_column])
-
-                        main_mixer_predictions[output_column] = helper_mixer_predictions[output_column]
-
-        return main_mixer_predictions
+        return self._mixer.predict(when_data_ds)
 
     @staticmethod
     def apply_accuracy_function(col_type, real, predicted, weight_map=None, encoder=None):
