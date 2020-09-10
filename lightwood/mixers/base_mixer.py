@@ -42,7 +42,7 @@ class BaseMixer:
         :param max_training_time:
         :param max_epochs: int
         """
-        self.set_dynamic_parameters(dynamic_parameters)
+        self.dynamic_parameters = dynamic_parameters
 
         started_evaluation_at = int(time.time())
         lowest_error = 10000
