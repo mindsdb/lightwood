@@ -185,7 +185,7 @@ class DistilBertEncoder(BaseEncoder):
             batch_size = 10
 
             self._head = DefaultNet(dynamic_parameters={}, shape=funnel(
-                768, sum([len(x['encoded_output'][0]) for x in training_data['targets']]), depth=5), selfaware=False)
+                768, sum([len(x['encoded_output'][0]) for x in training_data['targets']]), depth=5))
 
             no_decay = ['bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
