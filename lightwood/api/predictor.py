@@ -128,7 +128,6 @@ class Predictor:
 
         if 'mixer' in self.config:
             self._mixer = self.config['mixer']
-            assert isinstance(self._mixer, BaseMixer)
         else:
             self._mixer = NnMixer()
 
