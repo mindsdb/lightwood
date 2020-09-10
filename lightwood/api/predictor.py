@@ -19,10 +19,9 @@ from lightwood.helpers.device import get_devices
 class Predictor:
     def __init__(self, config=None, output=None, load_from_path=None):
         """
-        :param config: dict, a predictor definition object (can be a dictionary or a PredictorDefinition object)
+        :param config: dict
         :param output: list, the columns you want to predict, ludwig will try to generate a config
         :param load_from_path: str, the path to load the predictor from
-        :type config: dictionary
         """
         if load_from_path is not None:
             pickle_in = open(load_from_path, "rb")
@@ -33,7 +32,7 @@ class Predictor:
             return
 
         if output is None and config is None:
-            raise ValueError('You must give one argument to the Predictor constructor')
+            raise ValueError('You must provide either `output` or `config`')
 
         if config is not None and output is None:
             try:
@@ -65,7 +64,7 @@ class Predictor:
 
     def learn(self, from_data, test_data=None):
         """
-        Train and save a model (you can use this to retrain model from data)
+        Train and save a model (you can use this to retrain model from data).
 
         :param from_data: DataFrame
             The data to learn from
@@ -149,10 +148,12 @@ class Predictor:
 
     def predict(self, when_data=None, when=None):
         """
-        Predict given when conditions
-        :param when_data: a dataframe
-        :param when: a dictionary
-        :return: a complete dataframe
+        Predict given when conditions.
+
+        :param when_data: pandas.DataFrame
+        :param when: dict
+
+        :return: pandas.DataFrame
         """
         if when is not None:
             when_dict = {key: [when[key]] for key in when}
@@ -215,9 +216,11 @@ class Predictor:
 
     def calculate_accuracy(self, from_data):
         """
-        calculates the accuracy of the model
-        :param from_data:a dataframe
-        :return accuracies: dictionaries of accuracies
+        Calculates the accuracy of the model.
+
+        :param from_data: pandas.DataFrame
+
+        :return: dict of accuracies
         """
 
         if self._mixer is None:
@@ -274,9 +277,9 @@ class Predictor:
 
     def save(self, path_to):
         """
-        save trained model to a file
-        :param path_to: full path of file, where we store results
-        :return:
+        Save trained model to a file.
+    
+        :param path_to: str, full path of file, where we store results
         """
         f = open(path_to, 'wb')
 
