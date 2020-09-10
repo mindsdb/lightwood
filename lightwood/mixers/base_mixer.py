@@ -21,7 +21,10 @@ class BaseMixer:
         """
         pass
 
-    def predict(self):
+    def predict(self, when_data_source):
+        """
+        :param when_data_source: DataSource
+        """
         raise NotImplementedError
 
     def evaluate(
