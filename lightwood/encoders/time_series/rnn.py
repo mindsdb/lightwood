@@ -31,6 +31,7 @@ class RnnEncoder(BaseEncoder):
         self._max_ts_length = 0
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
+        self._normalizer = TanhNormalizer()
 
     def to(self, device, available_devices):
         self.device = device
@@ -47,6 +48,8 @@ class RnnEncoder(BaseEncoder):
         """
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+
+        self._normalizer.fit(priming_data)
 
         # determine time_series length
         for str_row in priming_data:
@@ -68,7 +71,9 @@ class RnnEncoder(BaseEncoder):
                 data_points = priming_data[data_idx:min(data_idx + batch_size, len(priming_data))]
                 batch = []
                 for dp in data_points:
-                    data_tensor = tensor_from_series(dp, self.device, self._n_dims, self._eos, self._max_ts_length)
+                    data_tensor = tensor_from_series(dp, self.device, self._n_dims,
+                                                     self._eos, self._max_ts_length,
+                                                     self._normalizer)
                     batch.append(data_tensor)
 
                 # shape: (batch_size, timesteps, n_dims)
@@ -100,7 +105,7 @@ class RnnEncoder(BaseEncoder):
                 decoder_hidden = encoder_hidden
                 next_tensor = torch.full((batch.shape[0], 1, batch.shape[2]), self._sos,
                                          dtype=torch.float32).to(self.device)
-                tensor_target = torch.cat([next_tensor, batch], dim=1)
+                tensor_target = torch.cat([next_tensor, batch], dim=1)  # add SOS token at t=0 to true input
 
                 for tensor_i in range(steps - 1):
                     rand = np.random.randint(2)
@@ -142,7 +147,9 @@ class RnnEncoder(BaseEncoder):
         """
         self._encoder.eval()
         with torch.no_grad():
-            data_tensor = tensor_from_series(data, self.device, self._n_dims, self._eos, self._max_ts_length)
+            data_tensor = tensor_from_series(data, self.device, self._n_dims,
+                                             self._eos, self._max_ts_length,
+                                             self._normalizer)
             steps = data_tensor.shape[1]
             encoder_hidden = self._encoder.initHidden(self.device)
             encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
@@ -234,4 +241,5 @@ class RnnEncoder(BaseEncoder):
             reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.tolist()
             ret.append(reconstruction)
 
+        # next_tensor = self._normalizer.inverse_transform_tensor(next_tensor)  # not needed
         return self._pytorch_wrapper(ret)

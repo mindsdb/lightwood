@@ -4,7 +4,7 @@ import torch
 
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.time_series import RnnEncoder
-from lightwood.encoders.time_series.helpers.rnn_helpers import tensor_from_series
+from lightwood.encoders.time_series.helpers.rnn_helpers import *
 
 
 class TestRnnEncoder(unittest.TestCase):
@@ -14,6 +14,16 @@ class TestRnnEncoder(unittest.TestCase):
         target = [[1.0, 2.0, 3.0, 4.0, 0.0], [2.0, 3.0, 4.0, 5.0, 0.0], [3.0, 0.0, 5.0, 6.0, 0.0]]
         result = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3).tolist()[0]
         self.assertEqual(result, target)
+
+    def test_normalizer(self):
+        data = [[-100.0, -5.0, 0.0, 5.0, 100.0],
+                [-1000.0, -50.0, 0.0, 50.0, 1000.0],
+                [-500.0, -405.0, -400.0, -395.0, -300.0],
+                [300.0, 395.0, 400.0, 405.0, 500.0],
+                [0.0, 1e3, 1e6, 1e9, 1e12]]
+        normalizer = TanhNormalizer()
+        reconstructed = normalizer.inverse_transform(normalizer.fit_transform(data))
+        self.assert_(np.allclose(data, reconstructed, atol=0.1))
 
     def test_overfit_multidimensional(self):
         pass
