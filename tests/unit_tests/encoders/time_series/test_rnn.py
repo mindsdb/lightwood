@@ -23,7 +23,7 @@ class TestRnnEncoder(unittest.TestCase):
                 [0.0, 1e3, 1e6, 1e9, 1e12]]
         normalizer = TanhNormalizer()
         reconstructed = normalizer.inverse_transform(normalizer.fit_transform(data))
-        self.assert_(np.allclose(data, reconstructed, atol=0.1))
+        self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
 
     def test_overfit_multidimensional(self):
         pass
@@ -34,7 +34,7 @@ class TestRnnEncoder(unittest.TestCase):
         # timesteps = max([len(q[0]) for q in data])
         # batch_size = 1
 
-        # encoder = RnnEncoder(encoded_vector_size=10, train_iters=400, ts_n_dims=n_dims, max_timesteps=timesteps)
+        # encoder = RnnEncoder(encoded_vector_size=10, train_iters=400, ts_n_dims=n_dims)
         # encoder.prepare_encoder(data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         # encoded = encoder.encode(data)
         # decoded = encoder.decode(encoded, steps=timesteps)
