@@ -226,7 +226,7 @@ class DataSource(Dataset):
 
         return self.data_frame[column_name].tolist()
 
-    def lookup_encoder_class(self, column_type, is_target):
+    def _lookup_encoder_class(self, column_type, is_target):
         default_encoder_classes = {
             ColumnDataTypes.NUMERIC: NumericEncoder,
             ColumnDataTypes.CATEGORICAL: CategoricalAutoEncoder,
@@ -250,7 +250,7 @@ class DataSource(Dataset):
 
         return encoder_class
 
-    def make_column_encoder(self, encoder_class, encoder_attrs=None, is_target=False):
+    def _make_column_encoder(self, encoder_class, encoder_attrs=None, is_target=False):
         encoder_instance = encoder_class(is_target=is_target)
         encoder_attrs = encoder_attrs or {}
         for attr in encoder_attrs:
@@ -258,13 +258,13 @@ class DataSource(Dataset):
                 setattr(encoder_instance, attr, encoder_attrs[attr])
         return encoder_instance
 
-    def prepare_column_encoder(self, config, is_target=False, training_data=None):
+    def _prepare_column_encoder(self, config, is_target=False, training_data=None):
         column_data = self.get_column_original_data(config['name'])
         encoder_class = config.get('encoder_class',
-                                   self.lookup_encoder_class(config['type'], is_target))
+                                   self._lookup_encoder_class(config['type'], is_target))
         encoder_attrs = config.get('encoder_attrs', {})
 
-        encoder_instance = self.make_column_encoder(encoder_class,
+        encoder_instance = self._make_column_encoder(encoder_class,
                                                     encoder_attrs,
                                                     is_target=is_target)
 
@@ -293,7 +293,7 @@ class DataSource(Dataset):
             column_name = config['name']
             column_data = self.get_column_original_data(column_name)
 
-            encoder_instance = self.prepare_column_encoder(config,
+            encoder_instance = self._prepare_column_encoder(config,
                                                            is_target=True)
 
             input_encoder_training_data['targets'].append({
@@ -307,7 +307,7 @@ class DataSource(Dataset):
 
         for config in self.configuration['input_features']:
             column_name = config['name']
-            encoder_instance = self.prepare_column_encoder(config,
+            encoder_instance = self._prepare_column_encoder(config,
                                                            is_target=False,
                                                            training_data=input_encoder_training_data)
 
