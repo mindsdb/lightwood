@@ -217,6 +217,7 @@ class DataSource(Dataset):
 
         if not self.disable_cache:
             self.transformed_cache[idx] = sample
+
         return sample
 
     def get_column_original_data(self, column_name):

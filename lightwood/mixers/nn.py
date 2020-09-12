@@ -348,7 +348,7 @@ class NnMixer(BaseMixer):
 
         return self.quantiles_pair
 
-    def predict(self, when_data_source, include_extra_data=False):
+    def predict(self, when_data_source, include_extra_data=True):
         when_data_source.transformer = self.transformer
         when_data_source.encoders = self.encoders
         _, _ = when_data_source[0]
