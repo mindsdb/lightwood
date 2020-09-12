@@ -10,7 +10,7 @@ import torch
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
-from lightwood.mixers import NnMixer, BaseMixer
+from lightwood.mixers import NnMixer, BaseMixer, BoostMixer
 from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
@@ -176,10 +176,7 @@ class Predictor:
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
 
-        if 'mixer' in self.config:
-            self._mixer = self.config['mixer']
-        else:
-            self._mixer = NnMixer()
+        self._mixer = self.config.get('mixer', NnMixer())
 
         self._mixer.fit_data_source(from_data_ds)
 

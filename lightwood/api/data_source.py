@@ -294,8 +294,10 @@ class DataSource(Dataset):
             column_name = config['name']
             column_data = self.get_column_original_data(column_name)
 
-            encoder_instance = self._prepare_column_encoder(config,
-                                                           is_target=True)
+            encoder_instance = self._prepare_column_encoder(
+                config,
+                is_target=True
+            )
 
             input_encoder_training_data['targets'].append({
                 'encoded_output': encoder_instance.encode(column_data),
@@ -308,9 +310,11 @@ class DataSource(Dataset):
 
         for config in self.configuration['input_features']:
             column_name = config['name']
-            encoder_instance = self._prepare_column_encoder(config,
-                                                           is_target=False,
-                                                           training_data=input_encoder_training_data)
+            encoder_instance = self._prepare_column_encoder(
+                config,
+                is_target=False,
+                training_data=input_encoder_training_data
+            )
 
             self.encoders[column_name] = encoder_instance
 
