@@ -11,6 +11,12 @@ class BoostMixer(BaseMixer):
         self.targets = None
         self.quantiles = quantiles
 
+    def _row_to_ndarray(self, row):
+        sample = []
+        for feature in row['input_features'].values():
+            sample.extend(feature)
+        return np.array(sample)
+
     def fit(self, train_ds, test_ds):
         output_features = train_ds.configuration['output_features']
 
@@ -26,18 +32,17 @@ class BoostMixer(BaseMixer):
                 self.targets[output_feature['name']]['weights'] = None
 
         X = []
-
         for row in train_ds:
-            X.append(np.array(row[0]))
+            X.append(self._row_to_ndarray(row))
 
-        X = np.array(X)
         for target_col_name in self.targets:
             Y = train_ds.get_column_original_data(target_col_name)
 
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
+                sample_weight = [1 for _ in X]
                 if weight_map is None:
-                    sample_weight = [1] * len(real)
+                    sample_weight = [1 for _ in real]
                 else:
                     sample_weight = []
                     for val in Y:
@@ -61,7 +66,7 @@ class BoostMixer(BaseMixer):
     def predict(self, when_data_source, targets=None):
         X = []
         for row in when_data_source:
-            X.append(np.array(row[0]))
+            X.append(self._row_to_ndarray(row))
 
         predictions = {}
         if targets is None:

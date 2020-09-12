@@ -150,6 +150,8 @@ class NnMixer(BaseMixer):
             self.stop_model_building_after_seconds = self.stop_training_after_seconds * 3
 
         if self.param_optimizer is not None:
+            input_size = len(train_ds[0][0])
+            training_data_length = len(train_ds)
             while True:
                 training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
 
@@ -388,7 +390,7 @@ class NnMixer(BaseMixer):
 
                         confidences = criterion.estimate_confidence(output[:,when_data_source.out_indexes[k][0]:when_data_source.out_indexes[k][1]], max_conf)
                         loss_confidence_arr[k].extend(confidences)
-                    except Exception as e:
+                    except Exception:
                         loss_confidence_arr[k] = None
 
                 output = output.to('cpu')
@@ -557,16 +559,20 @@ class NnMixer(BaseMixer):
 
             input_sample, output_sample = ds[0]
 
-            self.net = self.nn_class(self.dynamic_parameters,
-                                     input_size=len(input_sample),
-                                     output_size=len(output_sample),
-                                     nr_outputs=len(self.out_types),
-                                     deterministic=self.deterministic)
+            self.net = self.nn_class(
+                self.dynamic_parameters,
+                input_size=len(input_sample),
+                output_size=len(output_sample),
+                nr_outputs=len(self.out_types),
+                deterministic=self.deterministic
+            )
             self.net = self.net.train()
 
-            self.selfaware_net = SelfAware(input_size=len(input_sample),
-                                           output_size=len(output_sample),
-                                           nr_outputs=len(self.out_types))
+            self.selfaware_net = SelfAware(
+                input_size=len(input_sample),
+                output_size=len(output_sample),
+                nr_outputs=len(self.out_types)
+            )
             self.selfaware_net = self.selfaware_net.train()
 
             if self.batch_size < self.net.available_devices:
@@ -590,7 +596,7 @@ class NnMixer(BaseMixer):
                             weights_slice = output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]]
 
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
-                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice,reduce=False))
+                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
                     elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
                         if output_weights is None:
                             weights_slice = None
@@ -624,10 +630,19 @@ class NnMixer(BaseMixer):
             self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
         if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+            data_loader = DataLoader(
+                ds,
+                batch_size=self.batch_size,
+                shuffle=True,
+                num_workers=0
+            )
         else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
-                                     sampler=self._nonpersistent['sampler'])
+            data_loader = DataLoader(
+                ds,
+                batch_size=self.batch_size,
+                num_workers=0,
+                sampler=self._nonpersistent['sampler']
+            )
 
         for epoch in range(max_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
@@ -670,7 +685,10 @@ class NnMixer(BaseMixer):
                 if self.is_selfaware:
                     unreduced_losses = []
                     for k, criterion in enumerate(self.unreduced_criterion_arr):
-                        target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                        target_loss = criterion(
+                            outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]],
+                            labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
+                        )
 
                         target_loss = target_loss.tolist()
                         if type(target_loss[0]) == type([]):
@@ -697,7 +715,7 @@ class NnMixer(BaseMixer):
                 loss.backward()
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
-                if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 900:
+                if CONFIG.MONITORING['network_heatmap'] and random.randint(0, 1000) > 900:
                     weights = []
                     gradients = []
                     layer_name = []
