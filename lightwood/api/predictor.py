@@ -229,7 +229,7 @@ class Predictor:
         else:
             ds = DataSource(from_data, self.config)
 
-        predictions = self._mixer.predict(ds)
+        predictions = self._mixer.predict(ds, include_extra_data=True)
         accuracies = {}
 
         for output_column in self._output_columns:

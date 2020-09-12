@@ -63,14 +63,12 @@ class BoostMixer(BaseMixer):
             else:
                 self.targets[target_col_name]['model'] = None
 
-    def predict(self, when_data_source, targets=None):
+    def predict(self, when_data_source, include_extra_data=False):
         X = []
         for row in when_data_source:
             X.append(self._row_to_ndarray(row))
 
         predictions = {}
-        if targets is None:
-            targets = self.targets
 
         for target_col_name in self.targets:
 
