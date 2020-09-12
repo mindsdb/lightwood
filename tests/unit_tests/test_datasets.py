@@ -49,4 +49,4 @@ class TestDatasets(unittest.TestCase):
 
         for j in range(100):
             pred = predictor.predict(when={'sqft': round(j * 10)})['number_of_rooms']['predictions'][0]
-            assert(isinstance(pred, str) or isinstance(pred, int))
+            assert isinstance(pred, (str, int))
