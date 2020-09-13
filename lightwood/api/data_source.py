@@ -112,6 +112,9 @@ class DataSource(Dataset):
         """
         Removes :percentage: of data randomly from itself and returns a new
         datasource made from that data
+
+
+        :param percentage: float
         """
         np.random.seed(int(round(percentage * 100000)))
 

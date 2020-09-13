@@ -3,7 +3,7 @@ import random
 import pandas
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
-from lightwood.mixers import NnMixer
+from lightwood.mixers import BoostMixer
 
 
 class TestNnMixer(unittest.TestCase):
@@ -40,13 +40,13 @@ class TestNnMixer(unittest.TestCase):
         data['z`'] = ['low' if i < 50 else 'high' for i in nums]
 
         data_frame = pandas.DataFrame(data)
-        train_ds = DataSource(data_frame, config)
-        train_ds.train()
-        train_ds.prepare_encoders()
-        train_ds.create_subsets(1)
+        ds = DataSource(data_frame, config)
+        ds.train()
+        ds.prepare_encoders()
 
-        mixer = NnMixer(stop_training_after_seconds=50)
-        mixer.fit(train_ds, train_ds)
+        mixer = BoostMixer()
+        mixer.fit(ds, ds)
 
-        test_ds = DataSource(data_frame[['x', 'y']], config)
-        predictions = mixer.predict(test_ds)
+        predict_input_ds = DataSource(data_frame[['x', 'y']], config)
+        predict_input_ds.prepare_encoders()
+        predictions = mixer.predict(predict_input_ds)

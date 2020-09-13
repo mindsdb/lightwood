@@ -205,7 +205,6 @@ class Predictor:
             when_data = pandas.DataFrame(when_dict)
 
         when_data_ds = DataSource(when_data, self.config)
-        when_data_ds.encoders = self._mixer.encoders
 
         return self._mixer.predict(when_data_ds)
 
