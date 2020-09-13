@@ -42,7 +42,7 @@ class BoostMixer(BaseMixer):
                 weight_map = self.targets[target_col_name]['weights']
                 sample_weight = [1 for _ in X]
                 if weight_map is None:
-                    sample_weight = [1 for _ in real]
+                    sample_weight = [1] * len(Y)
                 else:
                     sample_weight = []
                     for val in Y:

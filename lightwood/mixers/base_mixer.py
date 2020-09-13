@@ -42,6 +42,8 @@ class BaseMixer:
         :param dynamic_parameters: dict
         :param max_training_time:
         :param max_epochs: int
+
+        :return: float
         """
         self.dynamic_parameters = dynamic_parameters
 
@@ -62,8 +64,10 @@ class BaseMixer:
             if max(lowest_error_epoch * 1.4, 10) < epoch:
                 return lowest_error
 
-            if max_epochs is not None and epoch >= max_epochs:
-                return lowest_error
+            if max_epochs is not None:
+                if epoch >= max_epochs:
+                    return lowest_error
 
-            if max_training_time is not None and started_evaluation_at < (int(time.time()) - max_training_time):
-                return lowest_error
+            if max_training_time is not None:
+                if started_evaluation_at < (int(time.time()) - max_training_time):
+                    return lowest_error
