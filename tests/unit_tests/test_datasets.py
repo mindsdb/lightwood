@@ -29,11 +29,14 @@ class TestDatasets(unittest.TestCase):
                 {'name': 'location', 'type': 'categorical'}
             ],
             'data_source': {'cache_transformed_data': CACHE_ENCODED_DATA},
-            'mixer': NnMixer(
-                selfaware=SELFAWARE,
-                eval_every_x_epochs=4,
-                stop_training_after_seconds=80
-            )
+            'mixer': {
+                'class': NnMixer,
+                'kwargs': {
+                    'selfaware': SELFAWARE,
+                    'eval_every_x_epochs': 4,
+                    'stop_training_after_seconds': 80
+                }
+            }
         }
 
         df = pd.read_csv('https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv')

@@ -28,7 +28,7 @@ def train_model():
         'output_features': [
             {'name': 'default.payment.next.month', 'type': 'categorical', 'weights': {'0': 0.3, '1': 1}}
         ],
-        'mixer': NnMixer()
+        'mixer': {'class': NnMixer}
     }
 
     # Callback to log various training stats (currently the only hook into the training process)
