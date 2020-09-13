@@ -175,8 +175,10 @@ class Predictor:
 
         from_data_ds.prepare_encoders()
         from_data_ds.create_subsets(nr_subsets)
-
-        self._mixer = self.config.get('mixer', NnMixer())
+        
+        mixer_class = self.config['mixer']['class']
+        mixer_kwargs = self.config['mixer']['kwargs']
+        self._mixer = mixer_class(**mixer_kwargs)
 
         self._mixer.fit_data_source(from_data_ds)
 

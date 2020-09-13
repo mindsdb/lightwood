@@ -1,6 +1,6 @@
 from schema import Schema, And, Use, Optional
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-from lightwood.mixers import BaseMixer
+from lightwood.mixers import NnMixer
 
 feature_schema = Schema({
     'name': str,
@@ -12,19 +12,10 @@ feature_schema = Schema({
     Optional('weights'): dict
 })
 
-mixer_graph_schema = Schema({
-    'name': str,
-    'input': list,
-    Optional('output'): list,
-    'class': object,
-    Optional('attrs'): dict
-})
-
 mixer_schema = Schema({
     Optional('class'): object,
     Optional('attrs'): dict,
-    Optional('deterministic', default=True): bool,
-    Optional('selfaware', default=True): bool
+    Optional('kwargs'): dict
 })
 
 data_source_schema = Schema({
@@ -39,6 +30,6 @@ predictor_config_schema = Schema({
         feature_schema
     ],
     Optional('data_source', default=data_source_schema.validate({})): data_source_schema,
-    Optional('mixer'): BaseMixer,
+    Optional('mixer', default=mixer_schema.validate({'class': NnMixer, 'kwargs': {}})): mixer_schema,
     Optional('optimizer'): object
 })
