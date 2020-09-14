@@ -11,59 +11,8 @@ from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
 from lightwood.mixers import NnMixer, BaseMixer, BoostMixer
-from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
-
-
-def _apply_accuracy_function(col_type, reals, preds, weight_map=None, encoder=None):
-        if col_type == COLUMN_DATA_TYPES.CATEGORICAL:
-            if weight_map is None:
-                sample_weight = [1 for x in reals]
-            else:
-                sample_weight = []
-                for val in reals:
-                    sample_weight.append(weight_map[val])
-
-            accuracy = {
-                'function': 'accuracy_score',
-                'value': accuracy_score(reals, preds, sample_weight=sample_weight)
-            }
-        elif col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-            if weight_map is None:
-                sample_weight = [1 for x in reals]
-            else:
-                sample_weight = []
-                for val in reals:
-                    sample_weight.append(weight_map[val])
-
-            encoded_reals = encoder.encode(reals)
-            encoded_preds = encoder.encode(preds)
-
-            accuracy = {
-                'function': 'f1_score',
-                'value': f1_score(encoded_reals, encoded_preds, average='weighted', sample_weight=sample_weight)
-            }
-        else:
-            reals_fixed = []
-            preds_fixed = []
-            for val in reals:
-                try:
-                    reals_fixed.append(float(val))
-                except:
-                    reals_fixed.append(0)
-
-            for val in preds:
-                try:
-                    preds_fixed.append(float(val))
-                except:
-                    preds_fixed.append(0)
-
-            accuracy = {
-                'function': 'r2_score',
-                'value': r2_score(reals_fixed, preds_fixed)
-            }
-        return accuracy
 
 
 class Predictor:
@@ -189,7 +138,7 @@ class Predictor:
 
         self._mixer.fit(train_ds=from_data_ds, test_ds=test_data_ds)
 
-        self.train_accuracy = self.calculate_accuracy(test_data_ds)
+        self.train_accuracy = self._mixer.calculate_accuracy(test_data_ds)
 
         return self
 
@@ -209,72 +158,6 @@ class Predictor:
         when_data_ds = DataSource(when_data, self.config)
 
         return self._mixer.predict(when_data_ds)
-
-    def calculate_accuracy(self, from_data):
-        """
-        Calculates the accuracy of the model.
-
-        :param from_data: pandas.DataFrame
-
-        :return: dict of accuracies
-        """
-
-        if self._mixer is None:
-            raise Exception('train model before calculating accuracy')
-
-        if isinstance(from_data, DataSource):
-            ds = from_data
-        else:
-            ds = DataSource(from_data, self.config)
-
-        predictions = self._mixer.predict(ds, include_extra_data=True)
-        accuracies = {}
-
-        for output_column in self._output_columns:
-
-            col_type = ds.get_column_config(output_column)['type']
-
-            if col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-                reals = [tuple(x) for x in ds.get_column_original_data(output_column)]
-                preds = [tuple(x) for x in predictions[output_column]['predictions']]
-            else:
-                reals = [str(x) for x in ds.get_column_original_data(output_column)]
-                preds = [str(x) for x in predictions[output_column]['predictions']]
-
-            weight_map = None
-            if 'weights' in ds.get_column_config(output_column):
-                weight_map = ds.get_column_config(output_column)['weights']
-
-            accuracy = _apply_accuracy_function(
-                ds.get_column_config(output_column)['type'],
-                reals,
-                preds,
-                weight_map=weight_map,
-                encoder=ds.encoders[output_column]
-            )
-
-            if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
-                ds.encoders[output_column].decode_log = True
-                preds = ds.get_decoded_column_data(
-                    output_column,
-                    predictions[output_column]['encoded_predictions']
-                )
-
-                alternative_accuracy = _apply_accuracy_function(
-                    ds.get_column_config(output_column)['type'],
-                    reals,
-                    preds,
-                    weight_map=weight_map
-                )
-
-                if alternative_accuracy['value'] > accuracy['value']:
-                    accuracy = alternative_accuracy
-                else:
-                    ds.encoders[output_column].decode_log = False
-
-            accuracies[output_column] = accuracy
-
-        return accuracies
 
     def save(self, path_to):
         """
