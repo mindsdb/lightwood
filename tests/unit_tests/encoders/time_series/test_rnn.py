@@ -28,11 +28,11 @@ class TestRnnEncoder(unittest.TestCase):
     def test_overfit_singledimensional(self):
         series = ['1 2 3 4 5', '2 3 4 5 6', '3 4 5 6 7', '4 5 6 7 8']  # format given by native
         data = series * 20
-        batch_size = 32
+        batch_size = 1
         timesteps = 5
         n_dims = 1
 
-        encoder = RnnEncoder(encoded_vector_size=10, train_iters=100, ts_n_dims=n_dims)
+        encoder = RnnEncoder(encoded_vector_size=10, train_iters=50, ts_n_dims=n_dims)
         encoder.prepare_encoder(data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         encoded = encoder.encode(data)
         decoded = encoder.decode(encoded, steps=timesteps).tolist()
@@ -59,17 +59,19 @@ class TestRnnEncoder(unittest.TestCase):
 
         query = ['1 2 3', '2 3 4', '3 4 5', '4 5 6']
         answer = [4, 5, 6, 7]
-        error_margin = 1
+        error_margin = 2
         encoded_data, preds = encoder.encode(query, get_next_count=1)
-        decoded_data = encoder.decode(encoded_data, steps=len(query[0][0])).tolist()
+        decoded_data = encoder.decode(encoded_data, steps=4).tolist()
 
         # check prediction
         preds = preds.squeeze().tolist()
+
         for ans, pred in zip(answer, preds):
             self.assertGreater(error_margin, abs(pred - ans))
 
         # check reconstruction
         float_query = float_matrix_from_strlist(query)
+
         for qry, dec in zip(float_query, decoded_data):
             for truth, pred in zip(qry, dec):
                 self.assertGreater(error_margin, abs(truth - pred))
