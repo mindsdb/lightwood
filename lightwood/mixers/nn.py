@@ -10,7 +10,6 @@ import operator
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.selfaware import SelfAware
-from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.quantile_loss import QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
@@ -60,15 +59,10 @@ class NnMixer(BaseMixer):
         self.stop_model_building_after_seconds = stop_model_building_after_seconds
         self.param_optimizer = param_optimizer
 
-        self.out_types = None
         self.net = None
         self.selfaware_net = None
         self.optimizer = None
         self.selfaware_optimizer = None
-        self.input_column_names = None
-        self.output_column_names = None
-        self.transformer = None
-        self.encoders = None
         self.optimizer_class = None
         self.optimizer_args = None
         self.selfaware_optimizer_args = None
@@ -88,8 +82,6 @@ class NnMixer(BaseMixer):
 
         self.max_confidence_per_output = []
         self.monitor = None
-        self.quantiles = [0.5,  0.2,0.8,  0.1,0.9,  0.05,0.95,  0.02,0.98,  0.005,0.995]
-        self.quantiles_pair = [9,10]
         self.map_mean_sc_qi = None
 
         for k in CONFIG.MONITORING:
@@ -536,31 +528,6 @@ class NnMixer(BaseMixer):
         self.optimizer.zero_grad()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-    def fit_data_source(self, ds):
-        if self.input_column_names is None:
-            self.input_column_names = ds.get_feature_names('input_features')
-
-        if self.output_column_names is None:
-            self.output_column_names = ds.get_feature_names('output_features')
-
-        self.out_types = ds.out_types
-        for n, out_type in enumerate(self.out_types):
-            if out_type == COLUMN_DATA_TYPES.NUMERIC:
-                ds.encoders[self.output_column_names[n]].extra_outputs = len(self.quantiles) - 1
-
-        transformer_already_initialized = False
-        try:
-            if len(list(ds.transformer.feature_len_map.keys())) > 0:
-                transformer_already_initialized = True
-        except Exception:
-            pass
-
-        if not transformer_already_initialized:
-            ds.transformer = Transformer(self.input_column_names, self.output_column_names)
-
-        self.encoders = ds.encoders
-        self.transformer = ds.transformer
-
     def _iter_fit(self, ds, initialize=True, subset_id=None, max_epochs=120000):
         if initialize:
             self.fit_data_source(ds)
@@ -771,3 +738,55 @@ class NnMixer(BaseMixer):
         for enc in self.encoders:
             self.encoders[enc].to(device, available_devices)
         return self
+
+
+    def calculate_accuracy(self, ds):
+        predictions = self.predict(ds, include_extra_data=True)
+        accuracies = {}
+
+        for output_column in [feature['name'] for feature in ds.configuration['output_features']]:
+
+            col_type = ds.get_column_config(output_column)['type']
+
+            if col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                reals = [tuple(x) for x in ds.get_column_original_data(output_column)]
+                preds = [tuple(x) for x in predictions[output_column]['predictions']]
+            else:
+                reals = [str(x) for x in ds.get_column_original_data(output_column)]
+                preds = [str(x) for x in predictions[output_column]['predictions']]
+
+            if 'weights' in ds.get_column_config(output_column):
+                weight_map = ds.get_column_config(output_column)['weights']
+            else:
+                weight_map = None
+
+            accuracy = BaseMixer._apply_accuracy_function(
+                ds.get_column_config(output_column)['type'],
+                reals,
+                preds,
+                weight_map=weight_map,
+                encoder=ds.encoders[output_column]
+            )
+
+            if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
+                ds.encoders[output_column].decode_log = True
+                preds = ds.get_decoded_column_data(
+                    output_column,
+                    predictions[output_column]['encoded_predictions']
+                )
+
+                alternative_accuracy = BaseMixer._apply_accuracy_function(
+                    ds.get_column_config(output_column)['type'],
+                    reals,
+                    preds,
+                    weight_map=weight_map
+                )
+
+                if alternative_accuracy['value'] > accuracy['value']:
+                    accuracy = alternative_accuracy
+                else:
+                    ds.encoders[output_column].decode_log = False
+
+            accuracies[output_column] = accuracy
+
+        return accuracies
