@@ -63,9 +63,8 @@ class TestPredictor(unittest.TestCase):
 
         df = df.drop([x['name'] for x in config['output_features']], axis=1)
         predictor.predict(when_data=df)
-        print('accdsd', predictor.train_accuracy)
-        return
-        assert predictor.train_accuracy['number_of_rooms']['value'] >= 0.6
-        assert predictor.train_accuracy['number_of_bathrooms']['value'] >= 0.45
-        assert predictor.train_accuracy['rental_price']['value'] >= 0.8
+        
+        assert predictor.train_accuracy['number_of_rooms']['value'] >= 0.95
+        assert predictor.train_accuracy['number_of_bathrooms']['value'] >= 0.95
+        assert predictor.train_accuracy['rental_price']['value'] >= 0.95
         assert predictor.train_accuracy['location']['value'] >= 0.95
