@@ -6,16 +6,9 @@ from lightwood.mixers import BaseMixer
 
 
 class BoostMixer(BaseMixer):
-    def __init__(self, quantiles=None):
+    def __init__(self):
         super().__init__()
         self.targets = None
-        self.quantiles = quantiles
-
-    def _row_to_ndarray(self, row):
-        sample = []
-        for feature in row['input_features'].values():
-            sample.extend(feature)
-        return np.array(sample)
 
     def fit(self, train_ds, test_ds):
         output_features = train_ds.configuration['output_features']
@@ -32,18 +25,21 @@ class BoostMixer(BaseMixer):
                 self.targets[output_feature['name']]['weights'] = None
 
         X = []
-        for row in train_ds:
-            X.append(self._row_to_ndarray(row))
+        for x in train_ds:
+            X.append([])
+            for feature in x:
+                X[-1].extend(list(float(val) for val in feature))
 
         for target_col_name in self.targets:
             Y = train_ds.get_column_original_data(target_col_name)
 
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
-                if weight_map is None:
-                    sample_weight = [1] * len(Y)
-                else:
-                    sample_weight = [weight_map[val] for val in Y]
+                sample_weight = [1] * len(Y)
+                # if weight_map is None:
+                #     sample_weight = [1] * len(Y)
+                # else:
+                #     sample_weight = [weight_map[val] for val in Y]
 
                 self.targets[target_col_name]['model'] = GradientBoostingClassifier(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X, Y, sample_weight=sample_weight)
@@ -61,10 +57,16 @@ class BoostMixer(BaseMixer):
                 self.targets[target_col_name]['model'] = None
 
     def predict(self, when_data_source, include_extra_data=False):
-        X = []
-        for row in when_data_source:
-            X.append(self._row_to_ndarray(row))
+        when_data_source.transformer = self.transformer
+        when_data_source.encoders = self.encoders
+        _, _ = when_data_source[0]
 
+        X = []
+        for x in when_data_source:
+            X.append([])
+            for feature in x:
+                X[-1].extend(list(float(val) for val in feature))
+        
         predictions = {}
 
         for target_col_name in self.targets:
