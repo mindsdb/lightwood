@@ -71,3 +71,60 @@ class BaseMixer:
             if max_training_time is not None:
                 if started_evaluation_at < (int(time.time()) - max_training_time):
                     return lowest_error
+
+    def calculate_accuracy(self, ds):
+        """
+        Calculates the accuracy of the model.
+
+        :param ds: DataSource
+
+        :return: dict of accuracies
+        """
+        predictions = self.predict(ds, include_extra_data=True)
+        accuracies = {}
+
+        for output_column in ds.config['output_features']:
+
+            col_type = ds.get_column_config(output_column)['type']
+
+            if col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                reals = [tuple(x) for x in ds.get_column_original_data(output_column)]
+                preds = [tuple(x) for x in predictions[output_column]['predictions']]
+            else:
+                reals = [str(x) for x in ds.get_column_original_data(output_column)]
+                preds = [str(x) for x in predictions[output_column]['predictions']]
+
+            weight_map = None
+            if 'weights' in ds.get_column_config(output_column):
+                weight_map = ds.get_column_config(output_column)['weights']
+
+            accuracy = _apply_accuracy_function(
+                ds.get_column_config(output_column)['type'],
+                reals,
+                preds,
+                weight_map=weight_map,
+                encoder=ds.encoders[output_column]
+            )
+
+            if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
+                ds.encoders[output_column].decode_log = True
+                preds = ds.get_decoded_column_data(
+                    output_column,
+                    predictions[output_column]['encoded_predictions']
+                )
+
+                alternative_accuracy = _apply_accuracy_function(
+                    ds.get_column_config(output_column)['type'],
+                    reals,
+                    preds,
+                    weight_map=weight_map
+                )
+
+                if alternative_accuracy['value'] > accuracy['value']:
+                    accuracy = alternative_accuracy
+                else:
+                    ds.encoders[output_column].decode_log = False
+
+            accuracies[output_column] = accuracy
+
+        return accuracies

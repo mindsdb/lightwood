@@ -19,8 +19,16 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.mixers import BaseMixer
 
 
-def _default_on_iter(epoch, train_error, test_error, delta_mean):
-    pass
+def _default_on_iter(epoch, train_error, test_error, delta_mean, accuracy):
+        test_error_rounded = round(test_error, 4)
+        for col in accuracy:
+            value = accuracy[col]['value']
+            if accuracy[col]['function'] == 'r2_score':
+                value_rounded = round(value, 3)
+                print(f'We\'ve reached training epoch nr {epoch} with an r2 score of {value_rounded} on the testing dataset')
+            else:
+                value_pct = round(value * 100, 2)
+                print(f'We\'ve reached training epoch nr {epoch} with an accuracy of {value_pct}% on the testing dataset')
 
 
 class NnMixer(BaseMixer):
@@ -37,11 +45,11 @@ class NnMixer(BaseMixer):
         """
         :param selfaware: bool
         :param deterministic: bool
-        :param callback_on_iter: Callable[epoch, training_error, test_error, delta_mean]
+        :param callback_on_iter: Callable[epoch, training_error, test_error, delta_mean, accuracy]
         :param eval_every_x_epochs: int
         :param stop_training_after_seconds: Union[int, None]
         :param stop_model_building_after_seconds: Union[int, None]
-        :param param_optimizer: object
+        :param param_optimizer: ?
         """
         super().__init__()
         self.selfaware = selfaware
@@ -272,7 +280,7 @@ class NnMixer(BaseMixer):
                         subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
 
                         if self.callback is not None:
-                            self.callback(epoch, training_error, test_error, delta_mean)
+                            self.callback(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
 
                         # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > self.stop_training_after_seconds:
