@@ -14,7 +14,6 @@ feature_schema = Schema({
 
 mixer_schema = Schema({
     Optional('class'): object,
-    Optional('attrs'): dict,
     Optional('kwargs'): dict
 })
 
