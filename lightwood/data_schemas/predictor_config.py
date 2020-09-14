@@ -13,8 +13,8 @@ feature_schema = Schema({
 })
 
 mixer_schema = Schema({
-    Optional('class'): object,
-    Optional('kwargs'): dict
+    Optional('class', default=NnMixer): object,
+    Optional('kwargs', default={}): dict
 })
 
 data_source_schema = Schema({

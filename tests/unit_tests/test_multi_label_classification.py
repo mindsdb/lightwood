@@ -79,55 +79,55 @@ class TestMultiLabelPrediction(unittest.TestCase):
 
     def test_multiple_categories_as_output(self):
         pass # fails: AssertionError: 0.0 not greater than or equal to 0.15
-        # vocab = self.get_vocab(10)
-        # # x1 contains the index of first tag present
-        # # x2 contains the index of second tag present
-        # # if a tag is missing then x1/x2 contain -1 instead
-        # # Thus the dataset should be perfectly predicted
-        # n_points = 10000
-        # x1 = [random.randint(0, len(vocab) - 1) if random.random() > 0.2 else -1 for i in range(n_points)]
-        # x2 = [random.randint(0, len(vocab) - 1) if random.random() > 0.2 else -1 for i in range(n_points)]
-        # tags = []
-        # for x1_index, x2_index in zip(x1, x2):
-        #     row_tags = set([vocab.get(x1_index), vocab.get(x2_index)])
-        #     row_tags = [x for x in row_tags if x is not None]
-        #     tags.append(row_tags)
+        vocab = self.get_vocab(10)
+        # x1 contains the index of first tag present
+        # x2 contains the index of second tag present
+        # if a tag is missing then x1/x2 contain -1 instead
+        # Thus the dataset should be perfectly predicted
+        n_points = 10000
+        x1 = [random.randint(0, len(vocab) - 1) if random.random() > 0.2 else -1 for i in range(n_points)]
+        x2 = [random.randint(0, len(vocab) - 1) if random.random() > 0.2 else -1 for i in range(n_points)]
+        tags = []
+        for x1_index, x2_index in zip(x1, x2):
+            row_tags = set([vocab.get(x1_index), vocab.get(x2_index)])
+            row_tags = [x for x in row_tags if x is not None]
+            tags.append(row_tags)
 
-        # df = pd.DataFrame({'x1': x1, 'x2': x2, 'tags': tags})
+        df = pd.DataFrame({'x1': x1, 'x2': x2, 'tags': tags})
 
-        # config = {
-        #     'input_features': [
-        #         {'name': 'x1', 'type': ColumnDataTypes.CATEGORICAL},
-        #         {'name': 'x2', 'type': ColumnDataTypes.CATEGORICAL}
-        #     ],
-        #     'output_features': [
-        #         {'name': 'tags', 'type': ColumnDataTypes.MULTIPLE_CATEGORICAL}
-        #     ],
-        #     'mixer': {'class': NnMixer, 'kwargs': {'stop_training_after_seconds': 10}}
-        # }
-        # df_train = df.iloc[:round(n_points * 0.9)]
-        # df_test = df.iloc[round(n_points * 0.9):]
+        config = {
+            'input_features': [
+                {'name': 'x1', 'type': ColumnDataTypes.CATEGORICAL},
+                {'name': 'x2', 'type': ColumnDataTypes.CATEGORICAL}
+            ],
+            'output_features': [
+                {'name': 'tags', 'type': ColumnDataTypes.MULTIPLE_CATEGORICAL}
+            ],
+            'mixer': {'class': NnMixer, 'kwargs': {'stop_training_after_seconds': 10}}
+        }
+        df_train = df.iloc[:round(n_points * 0.9)]
+        df_test = df.iloc[round(n_points * 0.9):]
 
-        # predictor = Predictor(config)
+        predictor = Predictor(config)
 
-        # predictor.learn(from_data=df_train)
+        predictor.learn(from_data=df_train)
 
-        # predictions = predictor.predict(when_data=df_train)
-        # train_tags = df_train.tags
-        # predicted_tags = predictions['tags']['predictions']
-        # train_tags_encoded = predictor._mixer.encoders['tags'].encode(train_tags)
-        # pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
-        # score = f1_score(train_tags_encoded, pred_labels_encoded, average='weighted')
-        # print('Train f1 score', score)
-        # self.assertGreaterEqual(score, 0.15)
+        predictions = predictor.predict(when_data=df_train)
+        train_tags = df_train.tags
+        predicted_tags = predictions['tags']['predictions']
+        train_tags_encoded = predictor._mixer.encoders['tags'].encode(train_tags)
+        pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
+        score = f1_score(train_tags_encoded, pred_labels_encoded, average='weighted')
+        print('Train f1 score', score)
+        self.assertGreaterEqual(score, 0.15)
 
-        # predictions = predictor.predict(when_data=df_test)
+        predictions = predictor.predict(when_data=df_test)
 
-        # test_tags = df_test.tags
-        # predicted_tags = predictions['tags']['predictions']
+        test_tags = df_test.tags
+        predicted_tags = predictions['tags']['predictions']
 
-        # test_tags_encoded = predictor._mixer.encoders['tags'].encode(test_tags)
-        # pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
-        # score = f1_score(test_tags_encoded, pred_labels_encoded, average='weighted')
-        # print('Test f1 score', score)
-        # self.assertGreaterEqual(score, 0.15)
+        test_tags_encoded = predictor._mixer.encoders['tags'].encode(test_tags)
+        pred_labels_encoded = predictor._mixer.encoders['tags'].encode(predicted_tags)
+        score = f1_score(test_tags_encoded, pred_labels_encoded, average='weighted')
+        print('Test f1 score', score)
+        self.assertGreaterEqual(score, 0.15)
