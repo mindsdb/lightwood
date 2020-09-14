@@ -1,3 +1,56 @@
+from sklearn.metrics import accuracy_score, r2_score, f1_score
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+
+
+def _apply_accuracy_function(col_type, reals, preds, weight_map=None, encoder=None):
+        if col_type == COLUMN_DATA_TYPES.CATEGORICAL:
+            if weight_map is None:
+                sample_weight = [1 for x in reals]
+            else:
+                sample_weight = []
+                for val in reals:
+                    sample_weight.append(weight_map[val])
+
+            accuracy = {
+                'function': 'accuracy_score',
+                'value': accuracy_score(reals, preds, sample_weight=sample_weight)
+            }
+        elif col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+            if weight_map is None:
+                sample_weight = [1 for x in reals]
+            else:
+                sample_weight = []
+                for val in reals:
+                    sample_weight.append(weight_map[val])
+
+            encoded_reals = encoder.encode(reals)
+            encoded_preds = encoder.encode(preds)
+
+            accuracy = {
+                'function': 'f1_score',
+                'value': f1_score(encoded_reals, encoded_preds, average='weighted', sample_weight=sample_weight)
+            }
+        else:
+            reals_fixed = []
+            preds_fixed = []
+            for val in reals:
+                try:
+                    reals_fixed.append(float(val))
+                except:
+                    reals_fixed.append(0)
+
+            for val in preds:
+                try:
+                    preds_fixed.append(float(val))
+                except:
+                    preds_fixed.append(0)
+
+            accuracy = {
+                'function': 'r2_score',
+                'value': r2_score(reals_fixed, preds_fixed)
+            }
+        return accuracy
+
 
 class BaseMixer:
     """
@@ -83,7 +136,7 @@ class BaseMixer:
         predictions = self.predict(ds, include_extra_data=True)
         accuracies = {}
 
-        for output_column in ds.config['output_features']:
+        for output_column in [feature['name'] for feature in ds.configuration['output_features']]:
 
             col_type = ds.get_column_config(output_column)['type']
 
