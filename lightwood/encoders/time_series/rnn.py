@@ -31,7 +31,7 @@ class RnnEncoder(BaseEncoder):
         self._max_ts_length = 0
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
-        self._normalizer = TanhNormalizer()
+        self._normalizer = None  # TanhNormalizer()
 
     def to(self, device, available_devices):
         self.device = device
@@ -49,7 +49,8 @@ class RnnEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
-        self._normalizer.fit(priming_data)
+        if self._normalizer:
+            self._normalizer.fit(priming_data)
 
         # determine time_series length
         for str_row in priming_data:
@@ -239,7 +240,10 @@ class RnnEncoder(BaseEncoder):
         for _, val in enumerate(encoded_data):
             hidden = torch.unsqueeze(torch.unsqueeze(val, dim=0), dim=0).to(self.device)
             reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.tolist()
+
+            if self._normalizer:
+                reconstruction = self._normalizer.inverse_transform(np.array(reconstruction))
+
             ret.append(reconstruction)
 
-        # next_tensor = self._normalizer.inverse_transform_tensor(next_tensor)  # not needed
         return self._pytorch_wrapper(ret)

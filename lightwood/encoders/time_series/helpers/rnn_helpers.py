@@ -7,8 +7,10 @@ import numpy as np
 
 def float_matrix_from_strlist(series):
     # edge case for when series == "dim 1 data"
-    if not isinstance(series, list):
+    if isinstance(series, str):
         series = [str(series).split(' ')]
+    if isinstance(series[0], str):
+        series = [str(s).split(' ') for s in series]
 
     float_series = []
     for dimn in series:
@@ -95,13 +97,13 @@ class EncoderRNNNumerical(nn.Module):
 
 class TanhNormalizer:
     """ Ref: https://stackoverflow.com/questions/43061120/tanh-estimator-normalization-in-python """
-    def __init__(self):
+    def __init__(self, factor=10):
         self.mu = None
         self.std = None
+        self.factor = factor
 
     def fit(self, x):
-        if isinstance(x, list) and isinstance(x[0], str):
-            x = [float_matrix_from_strlist(i) for i in x]
+        x = float_matrix_from_strlist(x)
 
         self.mu = np.mean(x, dtype=np.float64)
         self.std = np.std(x, dtype=np.float64)  # might .mul() by constant for better generalization
@@ -111,14 +113,14 @@ class TanhNormalizer:
         eps = np.finfo(float).eps
         output = np.where(output == 0, eps, output)  # bound encodings == 0 or 1 to avoid error with arctanh
         output = np.where(output == 1, 1.0-eps, output)
-        return output
+        return output * self.factor
 
     def fit_transform(self, x):
         self.fit(x)
         return self.transform(x)
 
     def inverse_transform(self, y):
-        return self.mu + (100 * self.std * np.arctanh(2*y - 1))
+        return (self.mu + (100 * self.std * np.arctanh(2*(y / self.factor) - 1)))
 
     def inverse_transform_tensor(self, y):
-        return self.mu + (100 * self.std * torch.atanh(2*y - 1))
+        return (self.mu + (100 * self.std * torch.atanh(2*(y / self.factor) - 1)))
