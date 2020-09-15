@@ -50,6 +50,7 @@ class RnnEncoder(BaseEncoder):
 
         # Convert to array and determine max length:
         for i in len(priming_data):
+            # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
             if isinstance(priming_data[i], str):
                 priming_data[i] = priming_data[i].split(' ')
             self._max_ts_length = max(len(priming_data[i]), self._max_ts_length)
