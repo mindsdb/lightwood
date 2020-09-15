@@ -31,7 +31,7 @@ class RnnEncoder(BaseEncoder):
         self._max_ts_length = 0
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
-        self._normalizer = None  # TanhNormalizer()
+        self._normalizer = MinMaxNormalizer()
 
     def to(self, device, available_devices):
         self.device = device
@@ -149,8 +149,8 @@ class RnnEncoder(BaseEncoder):
         self._encoder.eval()
         with torch.no_grad():
             data_tensor = tensor_from_series(data, self.device, self._n_dims,
-                                             self._eos, self._max_ts_length,
-                                             self._normalizer)
+                                             self._eos, max_len=None,
+                                             normalizer=self._normalizer)
             steps = data_tensor.shape[1]
             encoder_hidden = self._encoder.initHidden(self.device)
             encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
@@ -199,7 +199,11 @@ class RnnEncoder(BaseEncoder):
                         encoded = hidden
                     next_i.append(next_reading)
 
-                next.append(next_i[0][0].cpu())
+                if self._normalizer:
+                    next_value = torch.Tensor(self._normalizer.inverse_transform(next_i[0][0].cpu()))
+                else:
+                    next_value = next_i[0][0].cpu()
+                next.append(next_value)
 
             ret.append(encoded[0][0].cpu())
 
@@ -242,6 +246,7 @@ class RnnEncoder(BaseEncoder):
             reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.tolist()
 
             if self._normalizer:
+                reconstruction = np.array(reconstruction).reshape(1, -1)
                 reconstruction = self._normalizer.inverse_transform(np.array(reconstruction))
 
             ret.append(reconstruction)
