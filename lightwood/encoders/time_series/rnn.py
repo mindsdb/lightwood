@@ -48,10 +48,12 @@ class RnnEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
-        # determine time_series length
-        for str_row in priming_data:
-            l = len(str_row.split(" "))
-            self._max_ts_length = max(l, self._max_ts_length)
+        # Convert to array and determine max length:
+        for i in len(priming_data):
+            # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
+            if isinstance(priming_data[i], str):
+                priming_data[i] = priming_data[i].split(' ')
+            self._max_ts_length = max(len(priming_data[i]), self._max_ts_length)
 
         # decrease for small datasets
         if batch_size >= len(priming_data):
@@ -168,6 +170,11 @@ class RnnEncoder(BaseEncoder):
 
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+
+        for i in len(column_data):
+            # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
+            if isinstance(column_data[i], str):
+                column_data[i] = priming_data[i].split(' ')
 
         ret = []
         next = []
