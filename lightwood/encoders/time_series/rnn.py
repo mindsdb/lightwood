@@ -117,7 +117,7 @@ class RnnEncoder(BaseEncoder):
 
                     loss += self._criterion(next_tensor, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1))
 
-                average_loss += int(loss)
+                average_loss += loss.item()
                 loss.backward()
                 self._optimizer.step()
 
@@ -168,7 +168,7 @@ class RnnEncoder(BaseEncoder):
                                on the series for each ts_data_point in column_data
         :return: a list of encoded time series or if get_next_count !=0 two lists (encoded_values, projected_numbers)
         """
-        
+
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
 
