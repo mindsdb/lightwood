@@ -25,10 +25,9 @@ class BoostMixer(BaseMixer):
                 self.targets[output_feature['name']]['weights'] = None
 
         X = []
-        for x in train_ds:
-            X.append([])
-            for feature in x:
-                X[-1].extend(list(float(val) for val in feature))
+
+        for row in train_ds:
+            X.append(np.array(row[0]))
 
         for target_col_name in self.targets:
             Y = train_ds.get_column_original_data(target_col_name)
@@ -62,10 +61,8 @@ class BoostMixer(BaseMixer):
         _, _ = when_data_source[0]
 
         X = []
-        for x in when_data_source:
-            X.append([])
-            for feature in x:
-                X[-1].extend(list(float(val) for val in feature))
+        for row in when_data_source:
+            X.append(np.array(row[0]))
         
         predictions = {}
 
