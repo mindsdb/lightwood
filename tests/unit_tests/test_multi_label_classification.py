@@ -103,7 +103,7 @@ class TestMultiLabelPrediction(unittest.TestCase):
             'output_features': [
                 {'name': 'tags', 'type': ColumnDataTypes.MULTIPLE_CATEGORICAL}
             ],
-            'mixer': {'class': NnMixer, 'kwargs': {'stop_training_after_seconds': 10}}
+            'mixer': {'class': NnMixer, 'kwargs': {'stop_training_after_seconds': 25}}
         }
         df_train = df.iloc[:round(n_points * 0.9)]
         df_test = df.iloc[round(n_points * 0.9):]
