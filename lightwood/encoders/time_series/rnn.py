@@ -53,6 +53,7 @@ class RnnEncoder(BaseEncoder):
             # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
             if isinstance(priming_data[i], str):
                 priming_data[i] = priming_data[i].split(' ')
+                priming_data[i] = [float(x) for x in priming_data[i]]
             self._max_ts_length = max(len(priming_data[i]), self._max_ts_length)
 
         # decrease for small datasets
@@ -167,7 +168,7 @@ class RnnEncoder(BaseEncoder):
                                on the series for each ts_data_point in column_data
         :return: a list of encoded time series or if get_next_count !=0 two lists (encoded_values, projected_numbers)
         """
-
+        print('\n\n:', column_data)
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
 
@@ -175,6 +176,7 @@ class RnnEncoder(BaseEncoder):
             # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
             if isinstance(column_data[i], str):
                 column_data[i] = column_data[i].split(' ')
+                column_data[i] = [float(x) for x in column_data[i]]
 
         ret = []
         next = []
