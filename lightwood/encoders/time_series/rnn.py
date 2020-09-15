@@ -174,7 +174,7 @@ class RnnEncoder(BaseEncoder):
         for i in range(len(column_data)):
             # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
             if isinstance(column_data[i], str):
-                column_data[i] = priming_data[i].split(' ')
+                column_data[i] = column_data[i].split(' ')
 
         ret = []
         next = []
