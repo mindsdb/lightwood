@@ -32,7 +32,7 @@ class TestRnnEncoder(unittest.TestCase):
         timesteps = 5
         n_dims = 1
 
-        encoder = RnnEncoder(encoded_vector_size=10, train_iters=50, ts_n_dims=n_dims)
+        encoder = RnnEncoder(encoded_vector_size=15, train_iters=50, ts_n_dims=n_dims)
         encoder.prepare_encoder(data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         encoded = encoder.encode(data)
         decoded = encoder.decode(encoded, steps=timesteps).squeeze(1).tolist()
