@@ -13,6 +13,16 @@ class TestRnnEncoder(unittest.TestCase):
         result = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3).tolist()[0]
         self.assertEqual(result, target)
 
+    def test_normalizer(self):
+        data = [[-100.0, -5.0, 0.0, 5.0, 100.0],
+                [-1000.0, -50.0, 0.0, 50.0, 1000.0],
+                [-500.0, -405.0, -400.0, -395.0, -300.0],
+                [300.0, 395.0, 400.0, 405.0, 500.0],
+                [0.0, 1e3, 1e6, 1e9, 1e12]]
+        normalizer = MinMaxNormalizer()
+        reconstructed = normalizer.inverse_transform(normalizer.fit_transform(data))
+        self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
+
     def test_overfit(self):
         single_dim_ts = [[[1, 2, 3, 4, 5]],
                      [[2, 3, 4, 5, 6]],
@@ -57,7 +67,7 @@ class TestRnnEncoder(unittest.TestCase):
                             unequal += 1
 
             print(f'Decoder got {equal} correct and {unequal} incorrect')
-            self.assertGreaterEqual(equal, unequal)
+            self.assertGreaterEqual(equal*2, unequal)
 
             error_margin = 1
             query, answer = example
