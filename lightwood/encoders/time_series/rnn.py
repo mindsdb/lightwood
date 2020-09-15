@@ -168,7 +168,7 @@ class RnnEncoder(BaseEncoder):
                                on the series for each ts_data_point in column_data
         :return: a list of encoded time series or if get_next_count !=0 two lists (encoded_values, projected_numbers)
         """
-        print('\n\n:', column_data)
+        
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
 
