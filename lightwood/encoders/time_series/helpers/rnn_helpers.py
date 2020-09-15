@@ -8,11 +8,12 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 def float_matrix_from_strlist(series):
-    # edge case for when series == "dim 1 data"
-    if isinstance(series, str):
+    if isinstance(series, numbers.Number):
+        return series
+    elif isinstance(series, str):
         series = [str(series).split(' ')]
     elif isinstance(series[0], numbers.Number):
-        pass
+        return series
     elif isinstance(series[0], str):
         series = [str(s).split(' ') for s in series]
 
@@ -42,7 +43,7 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
     # conversion to float
     float_series = float_matrix_from_strlist(series)
     if max_len is None:
-        max_len = len(float_series[0])
+        max_len = len(float_series[0]) if isinstance(float_series, list) else float_series.shape[1]
 
     # timestep padding and truncating
     for i in range(len(float_series)):
