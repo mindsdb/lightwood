@@ -69,7 +69,7 @@ class TestRnnEncoder(unittest.TestCase):
             print(f'Decoder got {equal} correct and {unequal} incorrect')
             self.assertGreaterEqual(equal*2, unequal)
 
-            error_margin = 1
+            error_margin = 3
             query, answer = example
             encoded_data, preds = encoder.encode(query, get_next_count=1)
             decoded_data = encoder.decode(encoded_data, steps=len(query[0][0])).tolist()
