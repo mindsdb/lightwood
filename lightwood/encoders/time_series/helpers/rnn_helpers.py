@@ -15,7 +15,9 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len):
     :return: series as a tensor ready for model consumption, shape (1, ts_length, n_dims)
     """
     # conversion to float
-    series = [series]
+    if not isinstance(series[0], list):
+        series = [series]
+
     float_series = []
     for dimn in series:
         dimn_series = []
