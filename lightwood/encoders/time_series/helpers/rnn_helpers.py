@@ -6,6 +6,7 @@ import torch.nn as nn
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
+
 def float_matrix_from_strlist(series):
     # edge case for when series == "dim 1 data"
     if isinstance(series, str):
@@ -98,37 +99,6 @@ class EncoderRNNNumerical(nn.Module):
 
     def initHidden(self, device):
         return torch.zeros(1, 1, self.hidden_size, device=device)
-
-
-class TanhNormalizer:
-    """ Ref: https://stackoverflow.com/questions/43061120/tanh-estimator-normalization-in-python """
-    def __init__(self, factor=10):
-        self.mu = None
-        self.std = None
-        self.factor = factor
-
-    def fit(self, x):
-        x = float_matrix_from_strlist(x)
-
-        self.mu = np.mean(x, dtype=np.float64)
-        self.std = np.std(x, dtype=np.float64)  # might .mul() by constant for better generalization
-
-    def transform(self, x):
-        output = 0.5 * (np.tanh(0.01 * (x - self.mu) / self.std) + 1)
-        eps = np.finfo(float).eps
-        output = np.where(output == 0, eps, output)  # bound encodings == 0 or 1 to avoid error with arctanh
-        output = np.where(output == 1, 1.0-eps, output)
-        return output * self.factor
-
-    def fit_transform(self, x):
-        self.fit(x)
-        return self.transform(x)
-
-    def inverse_transform(self, y):
-        return (self.mu + (100 * self.std * np.arctanh(2*(y / self.factor) - 1)))
-
-    def inverse_transform_tensor(self, y):
-        return (self.mu + (100 * self.std * torch.atanh(2*(y / self.factor) - 1)))
 
 
 class MinMaxNormalizer:
