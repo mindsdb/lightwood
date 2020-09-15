@@ -1,15 +1,18 @@
 import logging
+import numbers
 
 import torch
 import torch.nn as nn
 import numpy as np
-
+from sklearn.preprocessing import MinMaxScaler
 
 def float_matrix_from_strlist(series):
     # edge case for when series == "dim 1 data"
     if isinstance(series, str):
         series = [str(series).split(' ')]
-    if isinstance(series[0], str):
+    elif isinstance(series[0], numbers.Number):
+        pass
+    elif isinstance(series[0], str):
         series = [str(s).split(' ') for s in series]
 
     float_series = []
@@ -25,7 +28,7 @@ def float_matrix_from_strlist(series):
     return float_series
 
 
-def tensor_from_series(series, device, n_dims, pad_value, max_len, normalizer=None):
+def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normalizer=None):
     """
     :param series: list of lists, corresponds to time series: [[x1_1, ..., x1_n], [x2_1, ..., x2_n], ...]
                    the series is zero-padded on each axis so that all dimensions have equal length
@@ -37,6 +40,8 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len, normalizer=No
     """
     # conversion to float
     float_series = float_matrix_from_strlist(series)
+    if max_len is None:
+        max_len = len(float_series[0])
 
     # timestep padding and truncating
     for i in range(len(float_series)):
@@ -124,3 +129,24 @@ class TanhNormalizer:
 
     def inverse_transform_tensor(self, y):
         return (self.mu + (100 * self.std * torch.atanh(2*(y / self.factor) - 1)))
+
+
+class MinMaxNormalizer:
+    def __init__(self, factor=1):
+        self.scaler = MinMaxScaler()
+        self.factor = factor
+
+    def fit(self, x):
+        x = float_matrix_from_strlist(x)
+        X = np.array([j for i in x for j in i]).reshape(-1, 1)
+        self.scaler.fit(X)
+
+    def transform(self, y):
+        return self.scaler.transform(y)
+
+    def fit_transform(self, x):
+        self.fit(x)
+        return self.transform(x)
+
+    def inverse_transform(self, y):
+        return self.scaler.inverse_transform(y)

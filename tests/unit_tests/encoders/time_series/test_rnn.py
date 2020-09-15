@@ -21,7 +21,7 @@ class TestRnnEncoder(unittest.TestCase):
                 [-500.0, -405.0, -400.0, -395.0, -300.0],
                 [300.0, 395.0, 400.0, 405.0, 500.0],
                 [0.0, 1e3, 1e6, 1e9, 1e12]]
-        normalizer = TanhNormalizer()
+        normalizer = MinMaxNormalizer()
         reconstructed = normalizer.inverse_transform(normalizer.fit_transform(data))
         self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
 
@@ -35,20 +35,17 @@ class TestRnnEncoder(unittest.TestCase):
         encoder = RnnEncoder(encoded_vector_size=10, train_iters=50, ts_n_dims=n_dims)
         encoder.prepare_encoder(data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         encoded = encoder.encode(data)
-        decoded = encoder.decode(encoded, steps=timesteps).tolist()
+        decoded = encoder.decode(encoded, steps=timesteps).squeeze(1).tolist()
 
         unequal = 0
         equal = 0
         data = float_matrix_from_strlist(data)
 
-        # [print([round(dd,2) for dd in d]) for d in decoded]
-        # [print(d) for d in data]
-
         self.assertEqual(len(data), len(decoded))
         self.assertEqual(len(data[0]), len(decoded[0]))
         for i in range(len(data)):
             for n in range(timesteps):
-                if int(decoded[i][n]) == int(data[i][n]):
+                if round(decoded[i][n], 0) == round(data[i][n], 0):
                     equal += 1
                 else:
                     unequal += 1
@@ -61,7 +58,7 @@ class TestRnnEncoder(unittest.TestCase):
         answer = [4, 5, 6, 7]
         error_margin = 2
         encoded_data, preds = encoder.encode(query, get_next_count=1)
-        decoded_data = encoder.decode(encoded_data, steps=4).tolist()
+        decoded_data = encoder.decode(encoded_data, steps=4).squeeze(1).tolist()
 
         # check prediction
         preds = preds.squeeze().tolist()
