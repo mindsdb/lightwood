@@ -49,8 +49,7 @@ class RnnEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
-        if self._normalizer:
-            self._normalizer.fit(priming_data)
+        self._normalizer.fit(priming_data)
 
         # determine time_series length
         for str_row in priming_data:
@@ -199,10 +198,7 @@ class RnnEncoder(BaseEncoder):
                         encoded = hidden
                     next_i.append(next_reading)
 
-                if self._normalizer:
-                    next_value = torch.Tensor(self._normalizer.inverse_transform(next_i[0][0].cpu()))
-                else:
-                    next_value = next_i[0][0].cpu()
+                next_value = torch.Tensor(self._normalizer.inverse_transform(next_i[0][0].cpu()))
                 next.append(next_value)
 
             ret.append(encoded[0][0].cpu())
@@ -245,9 +241,8 @@ class RnnEncoder(BaseEncoder):
             hidden = torch.unsqueeze(torch.unsqueeze(val, dim=0), dim=0).to(self.device)
             reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.tolist()
 
-            if self._normalizer:
-                reconstruction = np.array(reconstruction).reshape(1, -1)
-                reconstruction = self._normalizer.inverse_transform(np.array(reconstruction))
+            reconstruction = np.array(reconstruction).reshape(1, -1)
+            reconstruction = self._normalizer.inverse_transform(np.array(reconstruction))
 
             ret.append(reconstruction)
 
