@@ -147,9 +147,9 @@ class RnnEncoder(BaseEncoder):
         """
         self._encoder.eval()
         with torch.no_grad():
+            # n_timesteps inferred from query
             data_tensor = tensor_from_series(data, self.device, self._n_dims,
-                                             self._eos, max_len=None,
-                                             normalizer=self._normalizer)
+                                             self._eos, normalizer=self._normalizer)
             steps = data_tensor.shape[1]
             encoder_hidden = self._encoder.initHidden(self.device)
             encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
@@ -239,10 +239,8 @@ class RnnEncoder(BaseEncoder):
         ret = []
         for _, val in enumerate(encoded_data):
             hidden = torch.unsqueeze(torch.unsqueeze(val, dim=0), dim=0).to(self.device)
-            reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.tolist()
-
-            reconstruction = np.array(reconstruction).reshape(1, -1)
-            reconstruction = self._normalizer.inverse_transform(np.array(reconstruction))
+            reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.numpy()
+            reconstruction = self._normalizer.inverse_transform(reconstruction.reshape(1, -1))
 
             ret.append(reconstruction)
 
