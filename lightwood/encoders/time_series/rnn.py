@@ -171,6 +171,11 @@ class RnnEncoder(BaseEncoder):
         if not self._prepared:
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
 
+        for i in len(column_data):
+            # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
+            if isinstance(column_data[i], str):
+                column_data[i] = priming_data[i].split(' ')
+
         ret = []
         next = []
 
