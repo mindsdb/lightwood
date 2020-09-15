@@ -56,7 +56,8 @@ class RnnEncoder(BaseEncoder):
                 priming_data[i] = priming_data[i].split(' ')
             self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)
 
-        self._normalizer.fit(priming_data)
+        if self._normalizer:
+            self._normalizer.fit(priming_data)
 
         # decrease for small datasets
         if batch_size >= len(priming_data):
@@ -195,7 +196,6 @@ class RnnEncoder(BaseEncoder):
 
                 hidden = None
                 vector = val
-
                 next_i = []
 
                 for j in range(get_next_count):
@@ -205,7 +205,11 @@ class RnnEncoder(BaseEncoder):
                         encoded = hidden
                     next_i.append(next_reading)
 
-                next_value = torch.Tensor(self._normalizer.inverse_transform(next_i[0][0].cpu()))
+                next_value = next_i[0][0].cpu()
+
+                if self._normalizer:
+                    next_value = torch.Tensor(self._normalizer.inverse_transform(next_value))
+
                 next.append(next_value)
 
             ret.append(encoded[0][0].cpu())
@@ -247,9 +251,12 @@ class RnnEncoder(BaseEncoder):
         for _, val in enumerate(encoded_data):
             hidden = torch.unsqueeze(torch.unsqueeze(val, dim=0), dim=0).to(self.device)
             reconstruction = self._decode_one(hidden, steps).cpu().squeeze().T.numpy()
+
             if self._n_dims == 1:
                 reconstruction = reconstruction.reshape(1, -1)
-            reconstruction = self._normalizer.inverse_transform(reconstruction)
+
+            if self._normalizer:
+                reconstruction = self._normalizer.inverse_transform(reconstruction)
 
             ret.append(reconstruction)
 
