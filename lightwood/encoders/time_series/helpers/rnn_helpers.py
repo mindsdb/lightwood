@@ -116,7 +116,7 @@ class DateNormalizer:
         arr = []
         for i in range(len(self.fields)):
             sin = date[2*i:2*i+1]
-            n = np.round(np.arcsin(sin) * self.constants[self.fields[i]])
+            n = np.rint(np.arcsin(sin) * self.constants[self.fields[i]])
             arr.append(n)
         return datetime.datetime(*arr)
 
