@@ -1,7 +1,10 @@
 import logging
+import datetime
 
 import torch
 import torch.nn as nn
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
 
 def tensor_from_series(series, device, n_dims, pad_value, max_len):
@@ -78,3 +81,65 @@ class EncoderRNNNumerical(nn.Module):
 
     def initHidden(self, device):
         return torch.zeros(1, 1, self.hidden_size, device=device)
+
+
+class MinMaxNormalizer:
+    def __init__(self, factor=1):
+        self.scaler = MinMaxScaler()
+        self.factor = factor
+
+    def fit(self, x):
+        X = np.array([j for i in x for j in i]).reshape(-1, 1)
+        self.scaler.fit(X)
+
+    def transform(self, y):
+        return self.scaler.transform(y)
+
+    def fit_transform(self, x):
+        self.fit(x)
+        return self.transform(x)
+
+    def inverse_transform(self, y):
+        return self.scaler.inverse_transform(y)
+
+
+class DateNormalizer:
+    def __init__(self, factor=1):
+        self.fields = ['year', 'month', 'day', 'hour', 'minute', 'second']
+        self.constants = {'year': 3000, 'seasonality': 53, 'month': 12,
+                          'day': 31, 'hour': 24, 'minute': 60, 'second': 60}
+        self.factor = factor
+
+    def normalize_date(self, date):
+        norms = []
+        for f in self.fields:
+            norms.append(getattr(date, f) / self.constants[f])
+        return np.array([(np.sin(n), np.cos(n)) for n in norms]).flatten()
+
+    def denormalize_date(self, date):
+        arr = []
+        for i in range(len(self.fields)):
+            sin = date[2*i:2*i+1]
+            n = np.round(np.arcsin(sin) * self.constants[self.fields[i]])
+            arr.append(n)
+        return datetime.datetime(*arr)
+
+    def transform(self, y):
+        """
+        :param y: pd.df column with datetime objects
+        :return: numpy array of shape (N, 2*len(self.fields))
+        """
+        tmp = y.map(self.normalize_date).values
+        out = np.zeros((tmp.shape[0], tmp[0].shape[0]))
+        for i in range(out.shape[0]):
+            out[i, :] = tmp[i]
+
+        return out
+
+    def inverse_transform(self, y):
+        """
+        :param y: numpy array of shape (N, 2*len(self.fields))
+        :return: array with datetime objects, shape (N,)
+        """
+        out = np.apply_along_axis(self.denormalize_date, 1, y)
+        return out
