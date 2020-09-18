@@ -25,8 +25,8 @@ class TestRnnEncoder(unittest.TestCase):
 
     def test_date_normalizer(self):
         import pandas as pd
-        url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/monthly-sunspots.csv"
-        data = pd.to_datetime(pd.read_csv(url)['Month'])
+        dates = ['1677-10', '1800-7 01', '1970-12-1 00:01', '2000-5-31 23:59:30', '2262-3-11 3:0:5']
+        data = pd.Series(pd.to_datetime(dates))
         normalizer = DateNormalizer()
 
         results = normalizer.transform(data)
