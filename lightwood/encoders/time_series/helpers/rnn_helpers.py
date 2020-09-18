@@ -1,6 +1,4 @@
-import logging
 import datetime
-
 import torch
 import torch.nn as nn
 import numpy as np
@@ -21,31 +19,23 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
         max_len = len(series[0]) if isinstance(series, list) else series.shape[1]
 
     # conversion to float
-    float_series = []
-    for dimn in series:
-        dimn_series = []
-        for ele in dimn:
-            try:
-                dimn_series.append(float(ele))
-            except Exception as _:
-                logging.warning(f'Weird element encountered in timeseries: {ele} !')
-                dimn_series.append(0)
-        float_series.append(dimn_series)
+    if max_len is None:
+        max_len = len(series[0]) if isinstance(series, list) else series.shape[1]
 
     # timestep padding and truncating
-    for i in range(len(float_series)):
-        for _ in range(max(0, max_len - len(float_series[i]))):
-            float_series[i].append(pad_value)
-        float_series[i] = float_series[i][:max_len]
+    for i in range(len(series)):
+        for _ in range(max(0, max_len - len(series[i]))):
+            series[i].append(pad_value)
+        series[i] = series[i][:max_len]
 
     # dimension padding
-    for _ in range(max(0, n_dims - len(float_series))):
-        float_series.append([pad_value] * max_len)
+    for _ in range(max(0, n_dims - len(series))):
+        series.append([pad_value] * max_len)
 
+    # normalize and transpose
     if normalizer:
-        float_series = normalizer.transform(np.array(float_series))
-
-    tensor = torch.transpose(torch.tensor(float_series, dtype=torch.float, device=device), 0, 1)
+        series = normalizer.transform(np.array(series))
+    tensor = torch.transpose(torch.tensor(series, dtype=torch.float, device=device), 0, 1)
 
     # add batch dimension
     return tensor.view(-1, max_len, n_dims)

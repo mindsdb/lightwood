@@ -363,6 +363,7 @@ class Predictor:
         if self._mixer is None:
             logging.error("Please train the model before calculating accuracy")
             return
+
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
         predictions = self._mixer.predict(ds, include_extra_data=True)
         accuracies = {}

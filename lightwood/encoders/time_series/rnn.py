@@ -51,9 +51,6 @@ class RnnEncoder(BaseEncoder):
 
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
-            # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
-            if isinstance(priming_data[i], str):
-                priming_data[i] = [float(n) for n in priming_data[i].split(' ')]
             if not isinstance(priming_data[i][0], list):
                 priming_data[i] = [priming_data[i]]  # add dimension for 1D timeseries
             self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)
@@ -124,7 +121,7 @@ class RnnEncoder(BaseEncoder):
 
                     loss += self._criterion(next_tensor, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1))
 
-                average_loss += int(loss)
+                average_loss += loss.item()
                 loss.backward()
                 self._optimizer.step()
 
@@ -182,9 +179,6 @@ class RnnEncoder(BaseEncoder):
             raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
 
         for i in range(len(column_data)):
-            # Check and conversion for backwards compatibility while mindsdb_native can still give timeseries as strings
-            if isinstance(column_data[i], str):
-                column_data[i] = [[float(n) for n in column_data[i].split(' ')]]
             if not isinstance(column_data[i][0], list):
                 column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
 
@@ -200,7 +194,6 @@ class RnnEncoder(BaseEncoder):
 
                 hidden = None
                 vector = val
-
                 next_i = []
 
                 for j in range(get_next_count):
@@ -262,7 +255,7 @@ class RnnEncoder(BaseEncoder):
 
             if self._normalizer:
                 reconstruction = self._normalizer.inverse_transform(reconstruction)
-                
+
             ret.append(reconstruction)
 
         return self._pytorch_wrapper(ret)
