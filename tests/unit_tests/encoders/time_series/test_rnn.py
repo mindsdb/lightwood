@@ -4,7 +4,7 @@ import torch
 
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.time_series import RnnEncoder
-from lightwood.encoders.time_series.helpers.rnn_helpers import tensor_from_series
+from lightwood.encoders.time_series.helpers.rnn_helpers import *
 
 
 class TestRnnEncoder(unittest.TestCase):
@@ -14,6 +14,32 @@ class TestRnnEncoder(unittest.TestCase):
         target = [[1.0, 2.0, 3.0, 4.0, 0.0], [2.0, 3.0, 4.0, 5.0, 0.0], [3.0, 0.0, 5.0, 6.0, 0.0]]
         result = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3).tolist()[0]
         self.assertEqual(result, target)
+
+    def test_minmax_normalizer(self):
+        data = [[-100.0, -5.0, 0.0, 5.0, 100.0],
+                [-1000.0, -50.0, 0.0, 50.0, 1000.0],
+                [-500.0, -405.0, -400.0, -395.0, -300.0],
+                [300.0, 395.0, 400.0, 405.0, 500.0],
+                [0.0, 1e3, 1e6, 1e9, 1e12]]
+        normalizer = MinMaxNormalizer()
+        reconstructed = normalizer.inverse_transform(normalizer.fit_transform(data))
+        self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
+
+    def test_date_normalizer(self):
+        import pandas as pd
+        url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/monthly-sunspots.csv"
+        data = pd.to_datetime(pd.read_csv(url)['Month'])
+        normalizer = DateNormalizer()
+
+        results = normalizer.transform(data)
+        null = np.full_like(results, 0.5)
+        self.assertTrue(np.allclose(results, null, atol=0.5))  # every value in [0, 1]
+
+        recons = normalizer.inverse_transform(results)
+        a = pd.DataFrame(recons).apply(lambda x: pd.Timestamp(x.values[0]), axis=1)
+        b = data.apply(lambda x: pd.Timestamp(x))
+        comparison = (np.equal(a.to_numpy(), b.to_numpy()))
+        self.assertEqual(sum(comparison), len(comparison))  # check correct reconstruction
 
     def test_overfit_multidimensional(self):
         series = [[[1, 2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 7], [3, 4, 5, 6, 7, 8], [4, 5, 6, 7, 8, 9]]]
