@@ -13,8 +13,8 @@ max = 2000
 total_rows = 100
 ts_data = [
     [
-        " ".join([str(i/10) for i in range(j+1, j+ts_len)]),
-        " ".join([str(math.sin(i/max)) for i in range(j+1, j+ts_len)]),
+        [i/10 for i in range(j+1, j+ts_len)],
+        [math.sin(i/max) for i in range(j+1, j+ts_len)],
         math.sin((j+ts_len+1) / max)
     ]  for j in range(total_rows)
 ]
@@ -35,7 +35,7 @@ predictor = Predictor(config)
 predictor.learn(from_data=data, callback_on_iter=iter_function, eval_every_x_epochs=10)
 
 print('\n\n')
-ret = predictor.predict(when={'ts':" ".join([str(math.sin(i/max)) for i in range(10+1, 10+ts_len)])})
-print(" ".join([str(math.sin(i/max)) for i in range(10+1, 10+ts_len+1)]))
+ret = predictor.predict(when={'ts':[math.sin(i/max) for i in range(10+1, 10+ts_len)]})
+print([math.sin(i/max) for i in range(10+1, 10+ts_len+1)])
 print('Got predictions: ')
 print(ret)
