@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 
-def tensor_from_series(series, device, n_dims, pad_value, max_len):
+def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normalizer=None):
     """
     :param series: list of lists, corresponds to time series: [[x1_1, ..., x1_n], [x2_1, ..., x2_n], ...]
                    the series is zero-padded on each axis so that all dimensions have equal length
@@ -17,6 +17,9 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len):
     :param max_len: length to pad or truncate each time_series
     :return: series as a tensor ready for model consumption, shape (1, ts_length, n_dims)
     """
+    if max_len is None:
+        max_len = len(series[0]) if isinstance(series, list) else series.shape[1]
+
     # conversion to float
     float_series = []
     for dimn in series:
@@ -38,6 +41,9 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len):
     # dimension padding
     for _ in range(max(0, n_dims - len(float_series))):
         float_series.append([pad_value] * max_len)
+
+    if normalizer:
+        float_series = normalizer.transform(np.array(float_series))
 
     tensor = torch.transpose(torch.tensor(float_series, dtype=torch.float, device=device), 0, 1)
 
@@ -61,8 +67,8 @@ class DecoderRNNNumerical(nn.Module):
         output = self.out(output)
         return output, hidden
 
-    def initHidden(self, device):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+    def initHidden(self, device, batch_size=1):
+        return torch.zeros(1, batch_size, self.hidden_size, device=device)
 
 
 class EncoderRNNNumerical(nn.Module):
@@ -79,8 +85,8 @@ class EncoderRNNNumerical(nn.Module):
         output = self.out(output)
         return output, hidden
 
-    def initHidden(self, device):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+    def initHidden(self, device, batch_size=1):
+        return torch.zeros(1, batch_size, self.hidden_size, device=device)
 
 
 class MinMaxNormalizer:
