@@ -118,7 +118,7 @@ class DateNormalizer:
             sin = date[2*i:2*i+1]
             n = np.rint(np.arcsin(sin) * self.constants[self.fields[i]])
             arr.append(n)
-        return datetime.datetime(*arr)
+        return datetime.datetime(*map(int, arr))
 
     def transform(self, y):
         """
