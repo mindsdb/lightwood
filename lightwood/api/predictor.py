@@ -159,6 +159,57 @@ class Predictor:
 
         return self._mixer.predict(when_data_ds)
 
+    def calculate_accuracy(self, from_data):
+        """
+        calculates the accuracy of the model
+        :param from_data:a dataframe
+        :return accuracies: dictionaries of accuracies
+        """
+
+        if self._mixer is None:
+            logging.error("Please train the model before calculating accuracy")
+            return
+
+        ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
+        predictions = self._mixer.predict(ds, include_extra_data=True)
+        accuracies = {}
+
+        for output_column in self._output_columns:
+
+            col_type = ds.get_column_config(output_column)['type']
+
+            if col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                real = list(map(tuple, ds.get_column_original_data(output_column)))
+                predicted = list(map(tuple, predictions[output_column]['predictions']))
+            else:
+                real = list(map(str,ds.get_column_original_data(output_column)))
+                predicted = list(map(str,predictions[output_column]['predictions']))
+
+            weight_map = None
+            if 'weights' in ds.get_column_config(output_column):
+                weight_map = ds.get_column_config(output_column)['weights']
+
+            accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'],
+                                                    real,
+                                                    predicted,
+                                                    weight_map=weight_map,
+                                                    encoder=ds.encoders[output_column])
+
+            if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
+                ds.encoders[output_column].decode_log = True
+                predicted = ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
+
+                alternative_accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
+
+                if alternative_accuracy['value'] > accuracy['value']:
+                    accuracy = alternative_accuracy
+                else:
+                    ds.encoders[output_column].decode_log = False
+
+            accuracies[output_column] = accuracy
+
+        return accuracies
+
     def save(self, path_to):
         """
         Save trained model to a file.
