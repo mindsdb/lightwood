@@ -111,9 +111,9 @@ class DistilBertEncoder(BaseEncoder):
 
         return self
 
-    def prepare_encoder(self, priming_data, training_data=None):
+    def prepare(self, priming_data, training_data=None):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         priming_data = [x if x is not None else '' for x in priming_data]
 

@@ -106,39 +106,24 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['output_features']]
             self._input_columns = [col['name'] for col in self.config['input_features']]
 
-        from_data_ds = DataSource(from_data, self.config)
+        train_ds = DataSource(from_data, self.config)
 
-        if test_data is not None:
-            test_data_ds = DataSource(test_data, self.config)
+        nr_subsets = 3 if len(train_ds) > 100 else 1
+
+        if test_data is None:
+            test_ds = train_ds.subset(0.1)
         else:
-            test_data_ds = from_data_ds.extract_random_subset(0.1)
+            test_ds = train_ds.make_child(test_data)
 
-        from_data_ds.train()
+        train_ds.create_subsets(nr_subsets)
+        test_ds.create_subsets(nr_subsets)
 
-        # Initialize data sources
-        if len(from_data_ds) > 100:
-            nr_subsets = 3
-        else:
-            # Don't use k-fold cross validation for very small input sizes
-            nr_subsets = 1 
-
-        from_data_ds.prepare_encoders()
-        from_data_ds.create_subsets(nr_subsets)
-        
         mixer_class = self.config['mixer']['class']
         mixer_kwargs = self.config['mixer']['kwargs']
         self._mixer = mixer_class(**mixer_kwargs)
-
-        self._mixer.fit_data_source(from_data_ds)
-
-        test_data_ds.transformer = from_data_ds.transformer
-        test_data_ds.encoders = from_data_ds.encoders
-        test_data_ds.output_weights = from_data_ds.output_weights
-        test_data_ds.create_subsets(nr_subsets)
-
-        self._mixer.fit(train_ds=from_data_ds, test_ds=test_data_ds)
-
-        self.train_accuracy = self._mixer.calculate_accuracy(test_data_ds)
+        self._mixer.fit_data_source(train_ds)
+        self._mixer.fit(train_ds=train_ds, test_ds=test_ds)
+        self.train_accuracy = self._mixer.calculate_accuracy(test_ds)
 
         return self
 

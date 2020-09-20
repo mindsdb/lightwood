@@ -14,11 +14,17 @@ class BaseMixer:
         self.input_column_names = None
         self.output_column_names = None
         self.out_types = None
-        self.quantiles = [0.5,  0.2,0.8,  0.1,0.9,  0.05,0.95,  0.02,0.98,  0.005,0.995]
-        self.quantiles_pair = [9,10]
+        self.quantiles = [
+            0.5,
+            0.2, 0.8,
+            0.1, 0.9,
+            0.05, 0.95,
+            0.02, 0.98,
+            0.005, 0.995
+        ]
+        self.quantiles_pair = [9, 10]
         self.encoders = None
         self.transformer = None
-
 
     def fit(self, train_ds, test_ds):
         """
@@ -117,7 +123,7 @@ class BaseMixer:
         predictions = self.predict(ds, include_extra_data=True)
         accuracies = {}
 
-        for output_column in [feature['name'] for feature in ds.configuration['output_features']]:
+        for output_column in [feature['name'] for feature in ds.config['output_features']]:
 
             col_type = ds.get_column_config(output_column)['type']
 

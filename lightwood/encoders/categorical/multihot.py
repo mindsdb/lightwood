@@ -9,7 +9,7 @@ class MultiHotEncoder(BaseEncoder):
         super().__init__(is_target)
         self._binarizer = MultiLabelBinarizer()
 
-    def prepare_encoder(self, column_data, max_dimensions=100):
+    def prepare(self, column_data, max_dimensions=100):
         self._binarizer.fit(column_data)
         self._prepared = True
 

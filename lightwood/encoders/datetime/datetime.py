@@ -4,9 +4,9 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 
 class DatetimeEncoder(BaseEncoder):
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         self._prepared = True
 
@@ -17,7 +17,7 @@ class DatetimeEncoder(BaseEncoder):
         :return: a list of vectors
         """
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []
 

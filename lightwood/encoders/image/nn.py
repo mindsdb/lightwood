@@ -13,9 +13,9 @@ class NnAutoEncoder(BaseEncoder):
         super().__init__(is_target)
         self._model = None
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         self._model = NnEncoderHelper(images)
         self._prepared = True
@@ -28,7 +28,7 @@ class NnAutoEncoder(BaseEncoder):
         :return: a torch.floatTensor
         """
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if not self._model:
             logging.error("No model to encode, please train the model")
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     images = ['test_data/cat.jpg', 'test_data/cat2.jpg', 'test_data/catdog.jpg']
     encoder = NnAutoEncoder(images)
 
-    encoder.prepare_encoder([])
+    encoder.prepare([])
     images = ['test_data/cat.jpg', 'test_data/cat2.jpg']
     encoded_data = encoder.encode(images)
     print(encoded_data)

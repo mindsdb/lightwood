@@ -11,7 +11,7 @@ class BoostMixer(BaseMixer):
         self.targets = None
 
     def fit(self, train_ds, test_ds):
-        output_features = train_ds.configuration['output_features']
+        output_features = train_ds.config['output_features']
 
         self.targets = {}
         
