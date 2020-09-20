@@ -16,9 +16,9 @@ class NumericEncoder(BaseEncoder):
         self.decode_log = False
         self.extra_outputs = 0
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         value_type = 'int'
         for number in priming_data:
@@ -42,7 +42,7 @@ class NumericEncoder(BaseEncoder):
 
     def encode(self, data):
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []
         for real in data:
@@ -82,7 +82,7 @@ class NumericEncoder(BaseEncoder):
 
     def decode(self, encoded_values, decode_log=None):
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if decode_log is None:
             decode_log = self.decode_log

@@ -14,7 +14,7 @@ class TsFreshTsEncoder(BaseEncoder):
         self.max_series_len = 0
         self.n_jobs = 6
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         all_numbers = []
 
         for i, values in enumerate(priming_data):
@@ -28,7 +28,7 @@ class TsFreshTsEncoder(BaseEncoder):
             self.max_series_len = max(self.max_series_len,len(values))
             all_numbers.extend(values)
 
-        self.numerical_encoder.prepare_encoder(all_numbers)
+        self.numerical_encoder.prepare(all_numbers)
 
     def encode(self, column_data):
         """

@@ -33,7 +33,7 @@ class ShortTextEncoder(BaseEncoder):
             
             self._mode = mode
 
-        # Defined in self.prepare_encoder()
+        # Defined in self.prepare()
         self._combine_fn = None
 
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
@@ -41,7 +41,7 @@ class ShortTextEncoder(BaseEncoder):
     def _unexpected_mode(self):
         raise ValueError('unexpected combine value (must be "mean" or "concat")')
         
-    def prepare_encoder(self, column_data):
+    def prepare(self, column_data):
         no_null_sentences = (x if x is not None else '' for x in column_data)
         unique_tokens = set()
         max_words_per_sent = 0
@@ -51,7 +51,7 @@ class ShortTextEncoder(BaseEncoder):
             for tok in tokens:
                 unique_tokens.add(tok)
 
-        self.cae.prepare_encoder(unique_tokens)
+        self.cae.prepare(unique_tokens)
 
         if self._mode == 'concat':
             self._combine_fn = lambda vecs: concat_vectors_and_pad(vecs, max_words_per_sent)

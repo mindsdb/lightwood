@@ -20,7 +20,7 @@ class TestMultiHotEncoder(unittest.TestCase):
         test_data = tags[70:]
 
         enc = MultiHotEncoder()
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
 
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
@@ -36,7 +36,7 @@ class TestMultiHotEncoder(unittest.TestCase):
         tags.append([])
 
         enc = MultiHotEncoder()
-        enc.prepare_encoder(tags)
+        enc.prepare(tags)
 
         encoded_data = enc.encode(tags)
         decoded_data = enc.decode(encoded_data)
@@ -55,7 +55,7 @@ class TestMultiHotEncoder(unittest.TestCase):
         test_tags = tags[-1:]
 
         enc = MultiHotEncoder()
-        enc.prepare_encoder(train_tags)
+        enc.prepare(train_tags)
 
         encoded_data = enc.encode(test_tags)
         decoded_data = enc.decode(encoded_data)

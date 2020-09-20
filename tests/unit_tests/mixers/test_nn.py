@@ -42,11 +42,11 @@ class TestNnMixer(unittest.TestCase):
         data_frame = pandas.DataFrame(data)
         train_ds = DataSource(data_frame, config)
         train_ds.train()
-        train_ds.prepare_encoders()
+        train_ds._prepare_encoders()
         train_ds.create_subsets(1)
 
         mixer = NnMixer(stop_training_after_seconds=50)
         mixer.fit(train_ds, train_ds)
 
-        test_ds = DataSource(data_frame[['x', 'y']], config)
+        test_ds = train_ds.make_child(data_frame[['x', 'y']])
         predictions = mixer.predict(test_ds)

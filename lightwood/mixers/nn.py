@@ -143,6 +143,80 @@ class NnMixer(BaseMixer):
         return True
 
     def fit(self, train_ds, test_ds):
+        self.fit_data_source(train_ds)
+
+        input_sample, output_sample = train_ds[0]
+
+        self.net = self.nn_class(
+            self.dynamic_parameters,
+            input_size=len(input_sample),
+            output_size=len(output_sample),
+            nr_outputs=len(self.out_types),
+            deterministic=self.deterministic
+        )
+        self.net = self.net.train()
+
+        self.selfaware_net = SelfAware(
+            input_size=len(input_sample),
+            output_size=len(output_sample),
+            nr_outputs=len(self.out_types)
+        )
+        self.selfaware_net = self.selfaware_net.train()
+
+        if self.batch_size < self.net.available_devices:
+            self.batch_size = self.net.available_devices
+
+        self.awareness_criterion = torch.nn.MSELoss()
+
+        if self.criterion_arr is None:
+            self.criterion_arr = []
+            self.unreduced_criterion_arr = []
+            if train_ds.output_weights is not None and train_ds.output_weights is not False:
+                output_weights = torch.Tensor(train_ds.output_weights).to(self.net.device)
+            else:
+                output_weights = None
+
+            for k, output_type in enumerate(self.out_types):
+                if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
+                    if output_weights is None:
+                        weights_slice = None
+                    else:
+                        weights_slice = output_weights[train_ds.out_indexes[k][0]:train_ds.out_indexes[k][1]]
+
+                    self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
+                    self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
+                elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                    if output_weights is None:
+                        weights_slice = None
+                    else:
+                        weights_slice = output_weights[train_ds.out_indexes[k][0]:train_ds.out_indexes[k][1]]
+
+                    self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
+                    self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
+                elif output_type == COLUMN_DATA_TYPES.NUMERIC:
+                    self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
+                    self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
+                else:
+                    self.criterion_arr.append(torch.nn.MSELoss())
+                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+
+        self.optimizer_class = Ranger
+        if self.optimizer_args is None:
+            self.optimizer_args = {'lr': 0.0005}
+
+        if 'beta1' in self.dynamic_parameters:
+            self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'], 0.999)
+
+        for optimizer_arg_name in ['lr', 'k', 'N_sma_threshold']:
+            if optimizer_arg_name in self.dynamic_parameters:
+                self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
+
+        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+        self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
+        self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
+        self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
+
         if self.stop_training_after_seconds is None:
             self.stop_training_after_seconds = round(train_ds.data_frame.shape[0] * train_ds.data_frame.shape[1] / 5)
 
@@ -175,7 +249,6 @@ class NnMixer(BaseMixer):
 
         started = time.time()
         log_reasure = time.time()
-        first_run = True
         stop_training = False
 
         for subset_iteration in [1, 2]:
@@ -198,8 +271,7 @@ class NnMixer(BaseMixer):
                 best_model = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
-                for epoch, training_error in enumerate(self._iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
-                    first_run = False
+                for epoch, training_error in enumerate(self._iter_fit(subset_train_ds, subset_id=subset_id)):
 
                     # Log this every now and then so that the user knows it's running
                     if (int(time.time()) - log_reasure) > 30:
@@ -296,7 +368,7 @@ class NnMixer(BaseMixer):
                                 self._build_confidence_normalization_data(train_ds)
                                 self._adjust(test_ds)
 
-                            self._iter_fit(test_ds, initialize=first_run, max_epochs=1)
+                            self._iter_fit(test_ds, max_epochs=1)
                             self.encoders = train_ds.encoders
                             logging.info('Finished training model !')
                             break
@@ -528,82 +600,7 @@ class NnMixer(BaseMixer):
         self.optimizer.zero_grad()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-    def _iter_fit(self, ds, initialize=True, subset_id=None, max_epochs=120000):
-        if initialize:
-            self.fit_data_source(ds)
-
-            input_sample, output_sample = ds[0]
-
-            self.net = self.nn_class(
-                self.dynamic_parameters,
-                input_size=len(input_sample),
-                output_size=len(output_sample),
-                nr_outputs=len(self.out_types),
-                deterministic=self.deterministic
-            )
-            self.net = self.net.train()
-
-            self.selfaware_net = SelfAware(
-                input_size=len(input_sample),
-                output_size=len(output_sample),
-                nr_outputs=len(self.out_types)
-            )
-            self.selfaware_net = self.selfaware_net.train()
-
-            if self.batch_size < self.net.available_devices:
-                self.batch_size = self.net.available_devices
-
-            self.awareness_criterion = torch.nn.MSELoss()
-
-            if self.criterion_arr is None:
-                self.criterion_arr = []
-                self.unreduced_criterion_arr = []
-                if ds.output_weights is not None and ds.output_weights is not False:
-                    output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
-                else:
-                    output_weights = None
-
-                for k, output_type in enumerate(self.out_types):
-                    if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
-                        if output_weights is None:
-                            weights_slice = None
-                        else:
-                            weights_slice = output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]]
-
-                        self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
-                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
-                    elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-                        if output_weights is None:
-                            weights_slice = None
-                        else:
-                            weights_slice = output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]]
-
-                        self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
-                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
-                    elif output_type == COLUMN_DATA_TYPES.NUMERIC:
-                        self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
-                        self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
-                    else:
-                        self.criterion_arr.append(torch.nn.MSELoss())
-                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
-
-            self.optimizer_class = Ranger
-            if self.optimizer_args is None:
-                self.optimizer_args = {'lr': 0.0005}
-
-            if 'beta1' in self.dynamic_parameters:
-                self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'], 0.999)
-
-            for optimizer_arg_name in ['lr', 'k', 'N_sma_threshold']:
-                if optimizer_arg_name in self.dynamic_parameters:
-                    self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
-
-            self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
-            self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
-            self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
-            self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
-
+    def _iter_fit(self, ds, subset_id=None, max_epochs=120000):
         if self._nonpersistent['sampler'] is None:
             data_loader = DataLoader(
                 ds,
@@ -744,7 +741,7 @@ class NnMixer(BaseMixer):
         predictions = self.predict(ds, include_extra_data=True)
         accuracies = {}
 
-        for output_column in [feature['name'] for feature in ds.configuration['output_features']]:
+        for output_column in [feature['name'] for feature in ds.config['output_features']]:
 
             col_type = ds.get_column_config(output_column)['type']
 

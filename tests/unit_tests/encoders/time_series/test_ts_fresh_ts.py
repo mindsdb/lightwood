@@ -7,7 +7,7 @@ class TestTsFreshTs(unittest.TestCase):
         data = [' '.join(str(math.sin(i / 100)) for i in range(1, 10)) for j in range(20)]
 
         enc = TsFreshTsEncoder()
-        enc.prepare_encoder(data)
+        enc.prepare(data)
         ret = enc.encode(data)
 
         self.assertTrue(len(ret) == len(data))

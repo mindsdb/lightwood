@@ -9,7 +9,7 @@ class TestNumericEncoder(unittest.TestCase):
 
         encoder = NumericEncoder()
 
-        encoder.prepare_encoder(data)
+        encoder.prepare(data)
         encoded_vals = encoder.encode(data)
 
         self.assertTrue(encoded_vals[1][1] > 0)
