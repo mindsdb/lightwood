@@ -23,22 +23,6 @@ class TestRnnEncoder(unittest.TestCase):
         reconstructed = normalizer.inverse_transform(normalizer.fit_transform(data))
         self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
 
-    def test_date_normalizer(self):
-        import pandas as pd
-        dates = ['1677-10', '1800-7 01', '1970-12-1 00:01', '2000-5-31 23:59:30', '2262-3-11 3:0:5']
-        data = pd.Series(pd.to_datetime(dates))
-        normalizer = DateNormalizer()
-
-        results = normalizer.transform(data)
-        null = np.full_like(results, 0.5)
-        self.assertTrue(np.allclose(results, null, atol=0.5))  # every value in [0, 1]
-
-        recons = normalizer.inverse_transform(results)
-        a = pd.DataFrame(recons).apply(lambda x: pd.Timestamp(x.values[0]), axis=1)
-        b = data.apply(lambda x: pd.Timestamp(x))
-        comparison = (np.equal(a.to_numpy(), b.to_numpy()))
-        self.assertEqual(sum(comparison), len(comparison))  # check correct reconstruction
-
     def test_overfit(self):
         single_dim_ts = [[[1, 2, 3, 4, 5]],
                          [[2, 3, 4, 5, 6]],
