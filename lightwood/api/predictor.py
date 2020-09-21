@@ -84,7 +84,7 @@ class Predictor:
         :param from_data: DataFrame
             The data to learn from
                 
-        :param test_data: Union[None, DataFrame]
+        :param test_data: DataFrame
             The data to test accuracy and learn_error from
         """
 
