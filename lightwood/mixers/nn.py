@@ -46,8 +46,8 @@ class NnMixer(BaseMixer):
         :param deterministic: bool
         :param callback_on_iter: Callable[epoch, training_error, test_error, delta_mean, accuracy]
         :param eval_every_x_epochs: int
-        :param stop_training_after_seconds: Union[int, None]
-        :param stop_model_building_after_seconds: Union[int, None]
+        :param stop_training_after_seconds: int
+        :param stop_model_building_after_seconds: int
         :param param_optimizer: ?
         """
         super().__init__()
@@ -142,7 +142,13 @@ class NnMixer(BaseMixer):
 
         return True
 
-    def fit(self, train_ds, test_ds):
+    def fit(self, train_ds, test_ds, stop_training_after_seconds=None):
+        """
+        :param stop_training_after_seconds: int
+        """
+        if stop_training_after_seconds is None:
+            stop_training_after_seconds = self.stop_training_after_seconds
+
         self.fit_data_source(train_ds)
 
         input_sample, output_sample = train_ds[0]
@@ -217,11 +223,11 @@ class NnMixer(BaseMixer):
         self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
         self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
-        if self.stop_training_after_seconds is None:
-            self.stop_training_after_seconds = round(train_ds.data_frame.shape[0] * train_ds.data_frame.shape[1] / 5)
+        if stop_training_after_seconds is None:
+            stop_training_after_seconds = round(train_ds.data_frame.shape[0] * train_ds.data_frame.shape[1] / 5)
 
         if self.stop_model_building_after_seconds is None:
-            self.stop_model_building_after_seconds = self.stop_training_after_seconds * 3
+            self.stop_model_building_after_seconds = stop_training_after_seconds * 3
 
         if self.param_optimizer is not None:
             input_size = len(train_ds[0][0])
@@ -347,11 +353,11 @@ class NnMixer(BaseMixer):
                             self.callback(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
 
                         # Stop if we're past the time limit allocated for training
-                        if (time.time() - started) > self.stop_training_after_seconds:
+                        if (time.time() - started) > stop_training_after_seconds:
                             stop_training = True
 
                         # If the trauining subset is overfitting on it's associated testing subset
-                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > self.stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
+                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
                             logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
 
                             self._update_model(best_model)
