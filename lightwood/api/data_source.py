@@ -255,6 +255,7 @@ class DataSource(Dataset):
         encoder_class = config.get('encoder_class',
                                    self.lookup_encoder_class(config['type'], is_target))
         encoder_attrs = config.get('encoder_attrs', {})
+        encoder_attrs['secondary_type'] = config.get('secondary_type', None)
 
         encoder_instance = self.make_column_encoder(encoder_class,
                                                     encoder_attrs,
