@@ -20,7 +20,8 @@ class TestRnnEncoder(unittest.TestCase):
                 [300.0, 395.0, 400.0, 405.0, 500.0],
                 [0.0, 1e3, 1e6, 1e9, 1e12]]
         normalizer = MinMaxNormalizer()
-        reconstructed = normalizer.inverse_transform(normalizer.fit_transform(data))
+        normalizer.prepare_encoder(data)
+        reconstructed = normalizer.decode(normalizer.encode(data))
         self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
 
     def test_overfit(self):
