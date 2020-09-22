@@ -1,3 +1,4 @@
+'''
 import lightwood
 import unittest
 import math
@@ -26,3 +27,4 @@ if lightwood.encoders.export_cesium:
             ]).encode(data)
 
             print(ret)
+'''
