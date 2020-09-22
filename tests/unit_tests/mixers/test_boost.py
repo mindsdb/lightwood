@@ -41,7 +41,6 @@ class TestBoostMixer(unittest.TestCase):
 
         data_frame = pandas.DataFrame(data)
         train_ds = DataSource(data_frame, config)
-        train_ds.train()
 
         test_ds = train_ds.subset(0.25)
 

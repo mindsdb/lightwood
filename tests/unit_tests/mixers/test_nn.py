@@ -41,7 +41,6 @@ class TestNnMixer(unittest.TestCase):
 
         data_frame = pandas.DataFrame(data)
         train_ds = DataSource(data_frame, config)
-        train_ds.train()
         train_ds.create_subsets(1)
 
         mixer = NnMixer(stop_training_after_seconds=50)
