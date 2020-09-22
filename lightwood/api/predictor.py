@@ -86,10 +86,10 @@ class Predictor:
         """
         Train and save a model (you can use this to retrain model from data).
 
-        :param from_data: DataFrame
+        :param from_data: DataFrame or DataSource
             The data to learn from
                 
-        :param test_data: DataFrame
+        :param test_data: DataFrame or DataSource
             The data to test accuracy and learn_error from
         """
         # generate the configuration and set the order for the input and output columns
@@ -106,20 +106,29 @@ class Predictor:
             self._output_columns = [col['name'] for col in self.config['output_features']]
             self._input_columns = [col['name'] for col in self.config['input_features']]
 
-        train_ds = DataSource(from_data, self.config)
+        if isinstance(from_data, pandas.DataFrame):
+            train_ds = DataSource(from_data, self.config)
+        elif isinstance(from_data, DataSource):
+            train_ds = from_data
+        else:
+            raise TypeError(':from_data: must be either DataFrame or DataSource')
 
         nr_subsets = 3 if len(train_ds) > 100 else 1
 
         if test_data is None:
             test_ds = train_ds.subset(0.1)
-        else:
+        elif isinstance(test_data, pandas.DataFrame):
             test_ds = train_ds.make_child(test_data)
+        elif isinstance(test_data, DataSource):
+            test_ds = test_data
+        else:
+            raise TypeError(':test_data: must be either DataFrame or DataSource')
 
         train_ds.create_subsets(nr_subsets)
         test_ds.create_subsets(nr_subsets)
 
         train_ds.train()
-        test_ds.trai()
+        test_ds.train()
 
         mixer_class = self.config['mixer']['class']
         mixer_kwargs = self.config['mixer']['kwargs']
