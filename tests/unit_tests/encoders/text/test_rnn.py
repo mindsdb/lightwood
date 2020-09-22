@@ -2,7 +2,7 @@ import unittest
 from lightwood.encoders.text import RnnEncoder
 
 
-'''
+
 class TestRnnEncoder(unittest.TestCase):
     def test_encode_and_decode(self):
         sentences = ["Everyone really likes the newest benefits",
@@ -25,4 +25,3 @@ class TestRnnEncoder(unittest.TestCase):
         print('decoded vector')
         ret2 = encoder.decode(ret)
         print(ret2)
-'''

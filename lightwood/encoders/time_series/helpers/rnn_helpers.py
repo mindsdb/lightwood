@@ -1,3 +1,4 @@
+import datetime
 import torch
 import torch.nn as nn
 import numpy as np
@@ -14,6 +15,9 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
     :param max_len: length to pad or truncate each time_series
     :return: series as a tensor ready for model consumption, shape (1, ts_length, n_dims)
     """
+    if max_len is None:
+        max_len = len(series[0]) if isinstance(series, list) else series.shape[1]
+
     # conversion to float
     if max_len is None:
         max_len = len(series[0]) if isinstance(series, list) else series.shape[1]
@@ -53,8 +57,8 @@ class DecoderRNNNumerical(nn.Module):
         output = self.out(output)
         return output, hidden
 
-    def initHidden(self, device):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+    def initHidden(self, device, batch_size=1):
+        return torch.zeros(1, batch_size, self.hidden_size, device=device)
 
 
 class EncoderRNNNumerical(nn.Module):
@@ -71,8 +75,8 @@ class EncoderRNNNumerical(nn.Module):
         output = self.out(output)
         return output, hidden
 
-    def initHidden(self, device):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+    def initHidden(self, device, batch_size=1):
+        return torch.zeros(1, batch_size, self.hidden_size, device=device)
 
 
 class MinMaxNormalizer:
