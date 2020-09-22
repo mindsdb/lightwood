@@ -52,7 +52,7 @@ class RnnEncoder(BaseEncoder):
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
             if not isinstance(priming_data[i][0], list):
-                priming_data[i] = [priming_data[i]]
+                priming_data[i] = [priming_data[i]]  # add dimension for 1D timeseries
             self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)
 
         if self._normalizer:
@@ -180,7 +180,7 @@ class RnnEncoder(BaseEncoder):
 
         for i in range(len(column_data)):
             if not isinstance(column_data[i][0], list):
-                column_data[i] = [column_data[i]]
+                column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
 
         ret = []
         next = []

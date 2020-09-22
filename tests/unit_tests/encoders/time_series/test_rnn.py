@@ -13,7 +13,7 @@ class TestRnnEncoder(unittest.TestCase):
         result = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3).tolist()[0]
         self.assertEqual(result, target)
 
-    def test_normalizer(self):
+    def test_minmax_normalizer(self):
         data = [[-100.0, -5.0, 0.0, 5.0, 100.0],
                 [-1000.0, -50.0, 0.0, 50.0, 1000.0],
                 [-500.0, -405.0, -400.0, -395.0, -300.0],
@@ -25,9 +25,9 @@ class TestRnnEncoder(unittest.TestCase):
 
     def test_overfit(self):
         single_dim_ts = [[[1, 2, 3, 4, 5]],
-                     [[2, 3, 4, 5, 6]],
-                     [[3, 4, 5, 6, 7]],
-                     [[4, 5, 6, 7, 8]]]
+                         [[2, 3, 4, 5, 6]],
+                         [[3, 4, 5, 6, 7]],
+                         [[4, 5, 6, 7, 8]]]
 
         multi_dim_ts = [[[1, 2, 3, 4, 5, 6],
                          [2, 3, 4, 5, 6, 7],
@@ -38,7 +38,7 @@ class TestRnnEncoder(unittest.TestCase):
                           [4, 5, 6, 7])                                          # answer
 
         multi_qry_ans = ([[[1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6]]],  # query
-                             [4, 5, 6, 7])                                # answer
+                         [4, 5, 6, 7])                                    # answer
 
         for series, example in zip([single_dim_ts, multi_dim_ts], [single_qry_ans, multi_qry_ans]):
 

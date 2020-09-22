@@ -79,7 +79,7 @@ class RnnEncoder(BaseEncoder):
         ret = []
         with torch.no_grad():
             for decoder_hiddens in encoded_values_tensor:
-                decoder_hidden = torch.FloatTensor([[decoder_hiddens.tolist()]])
+                decoder_hidden = torch.FloatTensor([[decoder_hiddens.tolist()]]).to(device)
 
                 decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 
