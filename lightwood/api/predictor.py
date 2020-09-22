@@ -118,6 +118,9 @@ class Predictor:
         train_ds.create_subsets(nr_subsets)
         test_ds.create_subsets(nr_subsets)
 
+        train_ds.train()
+        test_ds.train()
+
         mixer_class = self.config['mixer']['class']
         mixer_kwargs = self.config['mixer']['kwargs']
         self._mixer = mixer_class(**mixer_kwargs)
@@ -141,6 +144,8 @@ class Predictor:
             when_data = pandas.DataFrame(when_dict)
 
         when_data_ds = DataSource(when_data, self.config)
+
+        when_data_ds.eval()
 
         return self._mixer.predict(when_data_ds)
 
