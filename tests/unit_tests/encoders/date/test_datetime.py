@@ -18,13 +18,13 @@ class TestDatetimeEncoder(unittest.TestCase):
         dates = [parse_datetime(d) for d in dates]
         data = [d.timestamp() for d in dates]
 
-        normalizer = DatetimeEncoder()
+        normalizer = DatetimeEncoder(sinusoidal=True)
         normalizer.prepare_encoder([])
 
-        results = normalizer.encode(data, sinusoidal=True)
+        results = normalizer.encode(data)
         null = np.full_like(results, 0.5)
         self.assertTrue(np.allclose(results, null, atol=0.5))  # every value in [0, 1]
 
-        recons = normalizer.decode(results, sinusoidal=True)
+        recons = normalizer.decode(results)
         for a, b in zip(recons, data):
             self.assertEqual(a, b)  # check correct reconstruction
