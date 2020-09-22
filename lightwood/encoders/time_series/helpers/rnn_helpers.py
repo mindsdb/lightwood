@@ -90,6 +90,8 @@ class MinMaxNormalizer:
         self.scaler.fit(X)
 
     def encode(self, y):
+        if not isinstance(y[0], list):
+            y = np.array(y).reshape(-1, 1)
         return self.scaler.transform(y)
 
     def decode(self, y):
