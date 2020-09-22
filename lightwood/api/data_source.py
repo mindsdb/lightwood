@@ -4,6 +4,7 @@ import copy
 import random
 
 import numpy as np
+import pandas as pd
 from torch.utils.data import Dataset
 
 from lightwood.config.config import CONFIG
@@ -89,6 +90,16 @@ class DataSource(Dataset):
         else:
             self.encoders = {}
 
+    def extend(self, df):
+        """
+        :df: pandas.DataFrame or DataSource
+        """
+        if isinstance(df, pd.DataFrame):
+            self.data_frame.append(df)
+        elif isinstance(df, DataSource):
+            self.data_frame.append(df.data_frame)
+        else:
+            raise TypeError(':df: must be either pandas.DataFrame or DataSource')
 
     def create_subsets(self, nr_subsets):
         subsets_indexes = {}

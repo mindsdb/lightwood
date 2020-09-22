@@ -10,10 +10,16 @@ class BoostMixer(BaseMixer):
         super().__init__()
         self.targets = None
 
-    def fit(self, train_ds, test_ds):
+    def fit(self, train_ds, test_ds=None):
+        self.fit_data_source(train_ds)
+
         output_features = train_ds.config['output_features']
 
         self.targets = {}
+
+        # If test data is provided, use it for trainig
+        if test_ds is not None:
+            train_ds.extend(test_ds)
         
         for output_feature in output_features:
             self.targets[output_feature['name']] = {
