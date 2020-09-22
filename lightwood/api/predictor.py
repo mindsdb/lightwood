@@ -61,6 +61,11 @@ class Predictor:
             self._mixer.to(device, available_devices)
 
     def _type_map(self, from_data, col_name):
+        """
+        This is a helper function that will help us auto-determine roughly what data types are in each column
+        NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
+        """
+
         col_pd_type = from_data[col_name].dtype
         col_pd_type = str(col_pd_type)
 
@@ -87,11 +92,6 @@ class Predictor:
         :param test_data: DataFrame
             The data to test accuracy and learn_error from
         """
-
-        # This is a helper function that will help us auto-determine roughly what data types are in each column
-        # NOTE: That this assumes the data is clean and will only return types for 'CATEGORICAL', 'NUMERIC' and 'TEXT'
-        
-
         # generate the configuration and set the order for the input and output columns
         if self._generate_config is True:
             self._input_columns = [col for col in from_data if col not in self._output_columns]
@@ -118,13 +118,9 @@ class Predictor:
         train_ds.create_subsets(nr_subsets)
         test_ds.create_subsets(nr_subsets)
 
-        train_ds.train()
-        test_ds.train()
-
         mixer_class = self.config['mixer']['class']
         mixer_kwargs = self.config['mixer']['kwargs']
         self._mixer = mixer_class(**mixer_kwargs)
-        self._mixer.fit_data_source(train_ds)
         self._mixer.fit(train_ds=train_ds, test_ds=test_ds)
         self.train_accuracy = self._mixer.calculate_accuracy(test_ds)
 
@@ -144,8 +140,6 @@ class Predictor:
             when_data = pandas.DataFrame(when_dict)
 
         when_data_ds = DataSource(when_data, self.config)
-
-        when_data_ds.eval()
 
         return self._mixer.predict(when_data_ds)
 
