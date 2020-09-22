@@ -35,7 +35,7 @@ class RnnEncoder(BaseEncoder):
         if self.secondary_type == 'datetime':
             self._normalizer = DatetimeEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields)*2  # sinusoidal datetime components
-        elif self.secondary_type == 'numerical':
+        elif self.secondary_type == 'numeric':
             self._normalizer = MinMaxNormalizer()
 
         self._encoder = EncoderRNNNumerical(input_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
