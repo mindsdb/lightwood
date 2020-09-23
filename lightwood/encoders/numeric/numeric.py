@@ -9,10 +9,12 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 class NumericEncoder(BaseEncoder):
 
-    def __init__(self, data_type=None, is_target=False):
+    def __init__(self, data_type=None, is_target=False, impute_nan=False):
         super().__init__(is_target)
         self._type = data_type
         self._abs_mean = None
+        self.impute_nan = impute_nan
+        self.nan_value = 0.0
         self.decode_log = False
         self.extra_outputs = 0
 
@@ -21,16 +23,21 @@ class NumericEncoder(BaseEncoder):
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
 
         value_type = 'int'
-        for number in priming_data:
+        for i in range(len(priming_data)):
+            number = priming_data[i]
             try:
                 number = float(number)
             except:
                 continue
 
-            if np.isnan(number):
+            if np.isnan(number) and not self.impute_nan:
                 err = 'Lightwood does not support working with NaN values !'
                 logging.error(err)
                 raise Exception(err)
+
+            elif np.isnan(number):
+                number = self.nan_value
+                priming_data[i] = number
 
             if int(number) != number:
                 value_type = 'float'
@@ -55,6 +62,8 @@ class NumericEncoder(BaseEncoder):
                     real = None
             if self.is_target:
                 vector = [0] * (3 + 2 * self.extra_outputs)
+                if np.isnan(real) and self.impute_nan:
+                    real = self.nan_value
                 if real is not None and self._abs_mean > 0:
                     vector[0] = 1 if real < 0 else 0
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
@@ -67,6 +76,8 @@ class NumericEncoder(BaseEncoder):
                 try:
                     if real is None:
                         vector[0] = 0
+                    elif np.isnan(real) and self.impute_nan:
+                        vector[0] = self.nan_value
                     else:
                         vector[0] = 1
                         vector[1] = math.log(abs(real)) if abs(real) > 0 else -20

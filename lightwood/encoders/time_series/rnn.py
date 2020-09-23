@@ -48,6 +48,11 @@ class RnnEncoder(BaseEncoder):
         self._encoder = self._encoder.to(self.device)
         return self
 
+    @staticmethod
+    def join_target_info(priming_data, target):
+        data = priming_data
+        return data
+
     def prepare_encoder(self, priming_data, feedback_hoop_function=None, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
