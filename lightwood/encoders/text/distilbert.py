@@ -12,6 +12,7 @@ from lightwood.mixers.helpers.shapes import *
 from lightwood.api.gym import Gym
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.logger import log
 
 
 class DistilBertEncoder(BaseEncoder):
@@ -56,7 +57,7 @@ class DistilBertEncoder(BaseEncoder):
         self.device, _ = get_devices()
 
     def _train_callback(self, error, real_buff, predicted_buff):
-        logging.info(f'{self.name} reached a loss of {error} while training !')
+        log.info(f'{self.name} reached a loss of {error} while training !')
 
     @staticmethod
     def categorical_train_function(model, data, gym, test=False):
