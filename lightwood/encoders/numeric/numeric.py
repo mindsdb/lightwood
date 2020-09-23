@@ -1,10 +1,10 @@
 import math
-import logging
 import sys
 
 import torch
 import numpy as np
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.logger import log
 
 
 class NumericEncoder(BaseEncoder):
@@ -29,7 +29,7 @@ class NumericEncoder(BaseEncoder):
 
             if np.isnan(number):
                 err = 'Lightwood does not support working with NaN values !'
-                logging.error(err)
+                log.error(err)
                 raise Exception(err)
 
             if int(number) != number:
@@ -60,7 +60,7 @@ class NumericEncoder(BaseEncoder):
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
                     vector[2] = real / self._abs_mean
                 else:
-                    logging.debug(f'Can\'t encode target value: {real}')
+                    log.debug(f'Can\'t encode target value: {real}')
 
             else:
                 vector = [0] * 4
@@ -74,7 +74,7 @@ class NumericEncoder(BaseEncoder):
                         vector[3] = real/self._abs_mean
                 except Exception as e:
                     vector = [0] * 4
-                    logging.error(f'Can\'t encode input value: {real}, exception: {e}')
+                    log.error(f'Can\'t encode input value: {real}, exception: {e}')
 
             ret.append(vector)
 
@@ -94,7 +94,7 @@ class NumericEncoder(BaseEncoder):
         for vector in encoded_values:
             if self.is_target:
                 if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
-                    logging.error(f'Got weird target value to decode: {vector}')
+                    log.error(f'Got weird target value to decode: {vector}')
                     real_value = pow(10,63)
                 else:
                     if decode_log:
