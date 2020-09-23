@@ -2,9 +2,16 @@ from functools import partial
 
 import torch
 from torch.utils.data import DataLoader
-from transformers import DistilBertModel, DistilBertForSequenceClassification, AlbertModel, \
-    AlbertForSequenceClassification, DistilBertTokenizer, AlbertTokenizer, AdamW, get_linear_schedule_with_warmup
-
+from transformers import (
+    DistilBertModel,
+    DistilBertForSequenceClassification,
+    AlbertModel,
+    AlbertForSequenceClassification,
+    DistilBertTokenizer,
+    AlbertTokenizer,
+    AdamW,
+    get_linear_schedule_with_warmup
+)
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet
@@ -105,9 +112,9 @@ class DistilBertEncoder(BaseEncoder):
 
         return self
 
-    def prepare_encoder(self, priming_data, training_data=None):
+    def prepare(self, priming_data, training_data=None):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         priming_data = [x if x is not None else '' for x in priming_data]
 
