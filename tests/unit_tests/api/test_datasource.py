@@ -51,7 +51,7 @@ class TestDataSource(TestCase):
         self.config = config
         self.df = df
 
-    def testprepare_encoders(self):
+    def test_prepare_encoders(self):
         df, config = self.df, self.config
         ds = DataSource(df, config)
         assert ds.enable_cache
