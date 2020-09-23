@@ -1,10 +1,10 @@
-import logging
 import os
 
 import torch
 
 from lightwood.encoders.image.helpers.nn import NnEncoderHelper
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.logger import log
 
 
 class NnAutoEncoder(BaseEncoder):
@@ -31,7 +31,7 @@ class NnAutoEncoder(BaseEncoder):
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if not self._model:
-            logging.error("No model to encode, please train the model")
+            log.error("No model to encode, please train the model")
 
         return self._model.encode(images)
 
@@ -44,7 +44,7 @@ class NnAutoEncoder(BaseEncoder):
         :return: a list of image paths
         """
         if not self._model:
-            logging.error("No model to decode, please train the model")
+            log.error("No model to decode, please train the model")
 
         if not os.path.exists(save_to_path):
             os.makedirs(save_to_path)

@@ -1,4 +1,3 @@
-import logging
 import traceback
 import time
 
@@ -13,6 +12,7 @@ from lightwood.config.config import CONFIG
 from lightwood.mixers import NnMixer, BaseMixer, BoostMixer
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
+from lightwood.logger import log
 
 
 class Predictor:
@@ -100,8 +100,8 @@ class Predictor:
                 'output_features': [{'name': col, 'type': self._type_map(from_data, col)} for col in self._output_columns]
             }
             self.config = predictor_config_schema.validate(self.config)
-            logging.info('Automatically generated a configuration')
-            logging.info(self.config)
+            log.info('Automatically generated a configuration')
+            log.info(self.config)
         else:
             self._output_columns = [col['name'] for col in self.config['output_features']]
             self._input_columns = [col['name'] for col in self.config['input_features']]
@@ -165,7 +165,7 @@ class Predictor:
         """
 
         if self._mixer is None:
-            logging.error("Please train the model before calculating accuracy")
+            log.error("Please train the model before calculating accuracy")
             return
 
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
