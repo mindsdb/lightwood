@@ -1,7 +1,7 @@
 import traceback
 import time
 
-import dill
+import pickle
 import pandas
 import numpy as np
 import torch
@@ -24,7 +24,7 @@ class Predictor:
         """
         if load_from_path is not None:
             with open(load_from_path, 'rb') as pickle_in:
-                self_dict = dill.load(pickle_in)
+                self_dict = pickle.load(pickle_in)
             self.__dict__ = self_dict
             self.convert_to_device()
             return
@@ -221,5 +221,9 @@ class Predictor:
 
             # Dump everything relevant to cpu before saving
             self.convert_to_device("cpu")
-            dill.dump(self.__dict__, f)
+
+            # for k, v in self.__dict__.items():
+            #     print(k, ':', v)
+            # exit('bye')
+            pickle.dump(self.__dict__, f)
             self.convert_to_device()
