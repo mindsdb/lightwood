@@ -28,15 +28,20 @@ class RnnEncoder(BaseEncoder):
         self._eos = 0.0  # end of input sequence -- padding value for batches
         self._n_dims = ts_n_dims
         self._normalizer = None
+        self._target_ar_normalizers = {}
         self._criterion = nn.MSELoss()
 
-    def setup_nn(self):
+    def setup_nn(self, additional_targets=None):
         """This method must be executed after initializing, else self.secondary_type is unassigned"""
         if self.secondary_type == 'datetime':
             self._normalizer = DatetimeEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields)*2  # sinusoidal datetime components
         elif self.secondary_type == 'numeric':
             self._normalizer = MinMaxNormalizer()
+
+        if additional_targets:
+            for _ in additional_targets:
+                self._n_dims += 1  # We are assuming target dim == 1
 
         self._encoder = EncoderRNNNumerical(input_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
         self._decoder = DecoderRNNNumerical(output_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
@@ -60,18 +65,26 @@ class RnnEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare_encoder" once for a given encoder.')
         else:
-            self.setup_nn()
+            self.setup_nn(previous_target_data)
 
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
-            if not isinstance(priming_data[i][0], list):
+            if not isinstance(priming_data[i][0], list):  # TODO: reverse the order: check if first row complies, then apply to all assuming format holds
                 priming_data[i] = [priming_data[i]]  # add dimension for 1D timeseries
-            self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)
+            self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)  # TODO: this is actually fixed at Native... should we still check?
 
+        # normalize data
         if self._normalizer:
             self._normalizer.prepare_encoder(priming_data)
 
-        # decrease for small datasets
+        if previous_target_data is not None:
+            for target_dict in previous_target_data:
+                normalizer = MinMaxNormalizer()  # TODO: here check subtype to see what normalizer is used
+                normalizer.prepare_encoder(target_dict['data'])
+                target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
+                self._target_ar_normalizers[target_dict['name']] = normalizer
+
+        # decrease batch_size for small datasets
         if batch_size >= len(priming_data):
             batch_size = len(priming_data) // 2
 
@@ -82,28 +95,31 @@ class RnnEncoder(BaseEncoder):
 
             while data_idx < len(priming_data):
 
-                # batch building
+                # batch building, shape: (batch_size, timesteps, n_dims)
                 data_points = priming_data[data_idx:min(data_idx + batch_size, len(priming_data))]
                 batch = []
                 for dp in data_points:
                     data_tensor = tensor_from_series(dp, self.device, self._n_dims,
                                                      self._eos, self._max_ts_length,
-                                                     self._normalizer)
-                    # include autoregressive target data
-                    if previous_target_data:
-                        pass  # TODO: PENDING
-                        
-
+                                                     self._normalizer)  # Todo: Normalizer here is inefficient, is being used each epoch! Move this out...
                     batch.append(data_tensor)
-
-                # shape: (batch_size, timesteps, n_dims)
                 batch = torch.cat(batch, dim=0).to(self.device)
-                data_idx += batch_size
+
+                # include autoregressive target data
+                if previous_target_data is not None:
+                    for target_dict in previous_target_data:
+                        t_dp = target_dict['encoded_data'][data_idx:min(data_idx + batch_size, len(priming_data))]
+                        target_tensor = tensor_from_series(t_dp, self.device, self._n_dims,
+                                                           self._eos, self._max_ts_length)
+
+                        # concatenate descriptors
+                        batch = torch.cat((batch, target_tensor), dim=-1)
 
                 # setup loss and optimizer
+                self._optimizer.zero_grad()
+                data_idx += batch_size
                 steps = batch.shape[1]
                 loss = 0
-                self._optimizer.zero_grad()
 
                 # encode
                 encoder_hidden = self._encoder.initHidden(self.device, batch_size=batch.shape[0])
@@ -144,6 +160,8 @@ class RnnEncoder(BaseEncoder):
 
             average_loss = average_loss / len(priming_data)
 
+            print(f"\nLoss @ {i+1}: {average_loss}")  # TODO: remove this
+
             if average_loss < self._stop_on_error:
                 break
             if feedback_hoop_function is not None:
@@ -183,7 +201,7 @@ class RnnEncoder(BaseEncoder):
         else:
             return encoder_hidden
 
-    def encode(self, column_data, get_next_count=None):
+    def encode(self, column_data, previous_target_data=None, get_next_count=None):
         """
         Encode a list of time series data
         :param column_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...] to encode
@@ -198,6 +216,22 @@ class RnnEncoder(BaseEncoder):
         for i in range(len(column_data)):
             if not isinstance(column_data[i][0], list):
                 column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
+
+        # currently supports only one additional column
+        if previous_target_data is not None:
+            normalizer = self._target_ar_normalizers.values()[0]
+            previous_target_data = normalizer.encode(previous_target_data)
+
+        # TODO: I'm here
+        # include autoregressive target data
+        # if previous_target_data is not None:
+        #     for target_dict in previous_target_data:
+        #         t_dp = target_dict['encoded_data'][data_idx:min(data_idx + batch_size, len(priming_data))]
+        #         target_tensor = tensor_from_series(t_dp, self.device, self._n_dims,
+        #                                            self._eos, self._max_ts_length)
+        #
+        #         # concatenate descriptors
+        #         batch = torch.cat((batch, target_tensor), dim=-1)
 
         ret = []
         next = []
