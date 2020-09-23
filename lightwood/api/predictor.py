@@ -222,8 +222,5 @@ class Predictor:
             # Dump everything relevant to cpu before saving
             self.convert_to_device("cpu")
 
-            # for k, v in self.__dict__.items():
-            #     print(k, ':', v)
-            # exit('bye')
             pickle.dump(self.__dict__, f)
             self.convert_to_device()
