@@ -1,5 +1,4 @@
 import copy
-import logging
 
 import torch
 import torch.optim as optim
@@ -13,6 +12,7 @@ from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.config.config import CONFIG
 from lightwood.api.gym import Gym
+from lightwood.logger import log
 
 
 class NnMixer:
@@ -112,7 +112,7 @@ class NnMixer:
             if include_extra_data:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
-        logging.info('Model predictions and decoding completed')
+        log.info('Model predictions and decoding completed')
 
         return predictions
 

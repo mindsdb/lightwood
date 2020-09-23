@@ -1,4 +1,3 @@
-import logging
 import traceback
 import time
 
@@ -14,6 +13,7 @@ from lightwood.mixers.nn.nn import NnMixer
 from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
+from lightwood.logger import log
 
 class Predictor:
 
@@ -31,7 +31,7 @@ class Predictor:
             self.has_boosting_mixer = True
         except Exception as e:
             self.has_boosting_mixer = False
-            logging.info(f'Boosting mixer can\'t be loaded due to error: {e} !')
+            log.info(f'Boosting mixer can\'t be loaded due to error: {e} !')
             print((f'Boosting mixer can\'t be loaded due to error: {e} !'))
 
         if load_from_path is not None:
@@ -70,7 +70,7 @@ class Predictor:
 
         if max_training_time is None and max_epochs is None:
             err = "Please provide either `max_training_time` or `max_epochs` when calling `evaluate_mixer`"
-            logging.error(err)
+            log.error(err)
             raise Exception(err)
 
         lowest_error_epoch = 0
@@ -172,8 +172,8 @@ class Predictor:
                 'output_features': [{'name': col, 'type': type_map(col)} for col in self._output_columns]
             }
             self.config = predictor_config_schema.validate(self.config)
-            logging.info('Automatically generated a configuration')
-            logging.info(self.config)
+            log.info('Automatically generated a configuration')
+            log.info(self.config)
         else:
             self._output_columns = [col['name'] for col in self.config['output_features']]
             self._input_columns = [col['name'] for col in self.config['input_features']]
@@ -246,7 +246,7 @@ class Predictor:
 
             best_parameters = optimizer.evaluate(lambda dynamic_parameters: Predictor.evaluate_mixer(self.config, mixer_class, mixer_params, from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
 
-            logging.info('Using hyperparameter set: ', best_parameters)
+            log.info('Using hyperparameter set: ', best_parameters)
         else:
             best_parameters = {}
 
@@ -256,7 +256,7 @@ class Predictor:
             if hasattr(self._mixer, param):
                 setattr(self._mixer, param, mixer_params[param])
             else:
-                logging.warning(
+                log.warning(
                     'trying to set mixer param {param} but mixerclass {mixerclass} does not have such parameter'.format
                     (param=param, mixerclass=str(type(self._mixer)))
                 )
@@ -273,7 +273,7 @@ class Predictor:
             try:
                 self._helper_mixers = self.train_helper_mixers(from_data_ds, test_data_ds, self._mixer.quantiles[self._mixer.quantiles_pair[0]+1:self._mixer.quantiles_pair[1]+1])
             except Exception as e:
-                logging.warning(f'Failed to train helper mixers with error: {e}')
+                log.warning(f'Failed to train helper mixers with error: {e}')
 
         return self
 
@@ -361,7 +361,7 @@ class Predictor:
         """
 
         if self._mixer is None:
-            logging.error("Please train the model before calculating accuracy")
+            log.error("Please train the model before calculating accuracy")
             return
 
         ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
