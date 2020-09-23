@@ -263,18 +263,19 @@ class DataSource(Dataset):
                                                     encoder_attrs,
                                                     is_target=is_target)
 
-        # joint column data augmentation for time series
-        if config['type'] == ColumnDataTypes.TIME_SERIES and \
-            config['secondary_type'] == ColumnDataTypes.DATETIME and \
-                not is_target:
-            previous_target_info = [target['encoded_output'] for target in training_data['previous']]
-            column_data = encoder_instance.join_target_info(column_data, previous_target_info)
-
         if training_data and 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder).args:
             encoder_instance.prepare_encoder(column_data,
                                              training_data=training_data)
         else:
-            encoder_instance.prepare_encoder(column_data)
+            # joint column data augmentation for time series
+            if config['type'] == ColumnDataTypes.TIME_SERIES and \
+                    config['secondary_type'] == ColumnDataTypes.DATETIME and \
+                    not is_target:
+                info = [target['encoded_output'] for target in training_data['previous']]
+                encoder_instance.prepare_encoder(column_data, previous_target_info=info)
+
+            else:
+                encoder_instance.prepare_encoder(column_data)
 
         return encoder_instance
 

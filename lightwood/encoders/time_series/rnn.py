@@ -48,15 +48,11 @@ class RnnEncoder(BaseEncoder):
         self._encoder = self._encoder.to(self.device)
         return self
 
-    @staticmethod
-    def join_target_info(priming_data, target):
-        data = priming_data
-        return data
-
-    def prepare_encoder(self, priming_data, feedback_hoop_function=None, batch_size=256):
+    def prepare_encoder(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
+        :param previous_target_data: tensor with encoded previous target values for autoregressive tasks
         :param feedback_hoop_function: [if you want to get feedback on the training process]
         :param batch_size
         :return:
@@ -93,6 +89,11 @@ class RnnEncoder(BaseEncoder):
                     data_tensor = tensor_from_series(dp, self.device, self._n_dims,
                                                      self._eos, self._max_ts_length,
                                                      self._normalizer)
+                    # include autoregressive target data
+                    if previous_target_data:
+                        pass  # TODO: PENDING
+                        
+
                     batch.append(data_tensor)
 
                 # shape: (batch_size, timesteps, n_dims)
