@@ -8,13 +8,19 @@ class MultiHotEncoder(BaseEncoder):
     def __init__(self, is_target=False):
         super().__init__(is_target)
         self._binarizer = MultiLabelBinarizer()
+        self._seen = set()
 
     def prepare(self, column_data, max_dimensions=100):
-        self._binarizer.fit(column_data)
+        column_data = [ [str(x) for x in arr] for arr in column_data]
+        self._binarizer.fit(column_data + [('None')])
+        for arr in column_data:
+            for x in arr:
+                self._seen.add(x)
         self._prepared = True
 
     def encode(self, column_data):
-        column_data = [ (c if c is not None else []) for c in column_data]
+        column_data = [ (arr if arr is not None else []) for arr in column_data]
+        column_data = [ [str(x) if x in self._seen else 'None' for x in arr] for arr in column_data]
         data_array = self._binarizer.transform(column_data)
         return self._pytorch_wrapper(data_array)
 
