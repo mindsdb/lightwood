@@ -17,7 +17,7 @@ class MultiHotEncoder(BaseEncoder):
         return column_data
 
     def prepare(self, column_data, max_dimensions=100):
-        column_data = _clean_col_data(column_data)
+        column_data = self._clean_col_data(column_data)
         self._binarizer.fit(column_data + [('None')])
         for arr in column_data:
             for x in arr:
@@ -25,7 +25,7 @@ class MultiHotEncoder(BaseEncoder):
         self._prepared = True
 
     def encode(self, column_data):
-        column_data = _clean_col_data(column_data)
+        column_data = self._clean_col_data(column_data)
         data_array = self._binarizer.transform(column_data)
         return self._pytorch_wrapper(data_array)
 
