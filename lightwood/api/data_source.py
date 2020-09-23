@@ -257,7 +257,7 @@ class DataSource(Dataset):
         encoder_attrs = config.get('encoder_attrs', {})
         encoder_attrs['secondary_type'] = config.get('secondary_type', None)
         if 'previous_' in config['name'] and config['type'] == ColumnDataTypes.NUMERIC:  # TODO: also fragile check for name
-            encoder_attrs['impute_nan'] = True
+            encoder_attrs['impute_nan'] = True  # TODO: remove this and changes to the numerical encoder
 
         encoder_instance = self.make_column_encoder(encoder_class,
                                                     encoder_attrs,
@@ -268,11 +268,8 @@ class DataSource(Dataset):
                                              training_data=training_data)
         else:
             # joint column data augmentation for time series
-            if config['type'] == ColumnDataTypes.TIME_SERIES and \
-                    config['secondary_type'] == ColumnDataTypes.DATETIME and \
-                    not is_target:
-                info = [target['encoded_output'] for target in training_data['previous']]
-                encoder_instance.prepare_encoder(column_data, previous_target_info=info)
+            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target:
+                encoder_instance.prepare_encoder(column_data, previous_target_data=training_data['previous'])
 
             else:
                 encoder_instance.prepare_encoder(column_data)
@@ -311,17 +308,12 @@ class DataSource(Dataset):
         for config in self.configuration['input_features']:
             column_name = config['name']
             if 'previous_' in column_name:  # TODO: fragile check, should be by position
-                encoder_instance = self.prepare_column_encoder(config,
-                                                               is_target=False,
-                                                               training_data=input_encoder_training_data)
-                self.encoders[column_name] = encoder_instance
                 column_data = self.get_column_original_data(column_name)
 
-                input_encoder_training_data['previous'].append({
-                    'encoded_output': encoder_instance.encode(column_data),
-                    'output_encoder': encoder_instance,
-                    'output_type': config['type']
-                })
+                input_encoder_training_data['previous'].append({'data': column_data,
+                                                                'name': column_name,
+                                                                'output_type': config['type']
+                                                                })
 
         for config in self.configuration['input_features']:
             column_name = config['name']
@@ -331,6 +323,10 @@ class DataSource(Dataset):
                                                                training_data=input_encoder_training_data)
 
                 self.encoders[column_name] = encoder_instance
+
+                # add dependency on 'previous_' column (for now singular, plural later on)
+                if config['type'] == ColumnDataTypes.TIME_SERIES:
+                    config['depends_on_column'] = input_encoder_training_data['previous'][0]['name']
 
     def get_encoded_column_data(self, column_name, custom_data=None):
         if column_name in self.encoded_cache and custom_data is None:
@@ -345,7 +341,7 @@ class DataSource(Dataset):
 
         config = self.get_column_config(column_name)
 
-        # See if the feature has dependencies in other columns
+        # See if the feature has dependencies in other columns  # TODO: this config param should be a list
         if 'depends_on_column' in config:
             if custom_data is not None:
                 arg2 = custom_data[config['depends_on_column']]

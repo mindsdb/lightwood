@@ -13,7 +13,7 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
     :param n_dims: will zero-pad dimensions until series_dimensions == n_dims
     :param pad_value: value to pad each dimension in the time series, if needed
     :param max_len: length to pad or truncate each time_series
-    :return: series as a tensor ready for model consumption, shape (1, ts_length, n_dims)
+    :return: series as a tensor ready for model consumption, shape (batch_size, ts_length, n_dims)
     """
     if max_len is None:
         max_len = len(series[0]) if isinstance(series, list) else series.shape[1]
@@ -34,12 +34,15 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
 
     # normalize and transpose
     if normalizer:
-        tensor = torch.Tensor([normalizer.encode(s) for s in series][0])
+        tensor = torch.Tensor([normalizer.encode(s) for s in series][0]).unsqueeze(0)
     else:
-        tensor = torch.transpose(torch.Tensor(series), 0, 1)
+        # tensor = torch.transpose(torch.Tensor(series), 0, 1)
+        tensor = torch.Tensor(series).unsqueeze(2)
 
-    # add batch dimension
-    return tensor.unsqueeze(0).to(device)
+    # remove nans
+    tensor[torch.isnan(tensor)] = 0.0
+
+    return tensor.to(device)
 
 
 class DecoderRNNNumerical(nn.Module):
