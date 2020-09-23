@@ -28,7 +28,7 @@ class RnnEncoder(BaseEncoder):
         self._eos = 0.0  # end of input sequence -- padding value for batches
         self._n_dims = ts_n_dims
         self._normalizer = None
-        self._target_ar_normalizers = {}
+        self._target_ar_normalizer = None
         self._criterion = nn.MSELoss()
 
     def setup_nn(self, additional_targets=None):
@@ -78,11 +78,11 @@ class RnnEncoder(BaseEncoder):
             self._normalizer.prepare_encoder(priming_data)
 
         if previous_target_data is not None:
-            for target_dict in previous_target_data:
-                normalizer = MinMaxNormalizer()  # TODO: here check subtype to see what normalizer is used
-                normalizer.prepare_encoder(target_dict['data'])
-                target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
-                self._target_ar_normalizers[target_dict['name']] = normalizer
+            target_dict = previous_target_data[0]
+            normalizer = MinMaxNormalizer()  # TODO: here check subtype to see what normalizer is used
+            normalizer.prepare_encoder(target_dict['data'])
+            target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
+            self._target_ar_normalizer = normalizer
 
         # decrease batch_size for small datasets
         if batch_size >= len(priming_data):
@@ -172,7 +172,7 @@ class RnnEncoder(BaseEncoder):
 
         self._prepared = True
 
-    def _encode_one(self, data, initial_hidden=None, return_next_value=False):
+    def _encode_one(self, data, previous=None, initial_hidden=None, return_next_value=False):
         """
         This method encodes one single row of serial data
         :param data: multidimensional time series as list of lists [[dim1_data], [dim2_data], ...]
@@ -187,6 +187,12 @@ class RnnEncoder(BaseEncoder):
             # n_timesteps inferred from query
             data_tensor = tensor_from_series(data, self.device, self._n_dims,
                                              self._eos, normalizer=self._normalizer)
+
+            if previous is not None:
+                target_tensor = torch.Tensor([previous]).unsqueeze(2).to(self.device)
+                target_tensor[torch.isnan(target_tensor)] = 0.0
+                data_tensor = torch.cat((data_tensor, target_tensor), dim=-1)
+
             steps = data_tensor.shape[1]
             encoder_hidden = self._encoder.initHidden(self.device)
             encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
@@ -217,28 +223,18 @@ class RnnEncoder(BaseEncoder):
             if not isinstance(column_data[i][0], list):
                 column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
 
-        # currently supports only one additional column
-        if previous_target_data is not None:
-            normalizer = self._target_ar_normalizers.values()[0]
-            previous_target_data = normalizer.encode(previous_target_data)
-
         # TODO: I'm here
-        # include autoregressive target data
-        # if previous_target_data is not None:
-        #     for target_dict in previous_target_data:
-        #         t_dp = target_dict['encoded_data'][data_idx:min(data_idx + batch_size, len(priming_data))]
-        #         target_tensor = tensor_from_series(t_dp, self.device, self._n_dims,
-        #                                            self._eos, self._max_ts_length)
-        #
-        #         # concatenate descriptors
-        #         batch = torch.cat((batch, target_tensor), dim=-1)
+        # include autoregressive target data, currently supports only one additional column
+        if previous_target_data is not None:
+            normalizer = self._target_ar_normalizer
+            previous_target_data = normalizer.encode(previous_target_data)
 
         ret = []
         next = []
 
-        for val in column_data:
+        for i, val in enumerate(column_data):
             if get_next_count is None:
-                encoded = self._encode_one(val)
+                encoded = self._encode_one(val, previous=previous_target_data[i])
             else:
                 if get_next_count <= 0:
                     raise Exception('get_next_count must be greater than 0')
