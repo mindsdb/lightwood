@@ -15,13 +15,14 @@ from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
 from lightwood.encoders.time_series.rnn import RnnEncoder as TsRnnEncoder
 # from lightwood.encoders.audio.amplitude_ts import AmplitudeTsEncoder
 from lightwood.encoders.categorical.multihot import MultiHotEncoder
+from lightwood.logger import log
 
 try:
     from lightwood.encoders.time_series.cesium_ts import CesiumTsEncoder
     export_cesium = True
 except:
     export_cesium = False
-    print('Failed to export cesium timeseires encoder')
+    log.info('Failed to export cesium timeseires encoder')
 
 
 class DateTime:

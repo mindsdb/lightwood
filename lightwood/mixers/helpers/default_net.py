@@ -4,6 +4,7 @@ from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.plinear import PLinear
 from lightwood.helpers.device import get_devices
+from lightwood.logger import log
 
 
 class DefaultNet(torch.nn.Module):
@@ -52,7 +53,7 @@ class DefaultNet(torch.nn.Module):
             shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
 
         if pretrained_net is None:
-            logging.info(f'Building network of shape: {shape}')
+            log.info(f'Building network of shape: {shape}')
             rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
 
             layers = []
