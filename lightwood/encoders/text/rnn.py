@@ -19,9 +19,9 @@ class RnnEncoder(BaseEncoder):
         self._encoder = None
         self._decoder = None
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         no_null_sentences = [x if x is not None else '' for x in priming_data]
         estimated_time = 1/937*self._train_iters*len(no_null_sentences)
@@ -49,7 +49,7 @@ class RnnEncoder(BaseEncoder):
 
     def encode(self, column_data):
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         no_null_sentences = [x if x is not None else '' for x in column_data]
         ret = []

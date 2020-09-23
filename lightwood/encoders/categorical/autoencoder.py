@@ -46,13 +46,13 @@ class CategoricalAutoEncoder(BaseEncoder):
             self.net = self.net.to(device, available_devices)
         return self
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         random.seed(len(priming_data))
 
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
-        self.onehot_encoder.prepare_encoder(priming_data)
+        self.onehot_encoder.prepare(priming_data)
 
         input_len = self.onehot_encoder._lang.n_words
         self.use_autoencoder = self.max_encoded_length is not None and input_len > self.max_encoded_length

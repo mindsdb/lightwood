@@ -33,7 +33,7 @@ class TestAutoencoder(unittest.TestCase):
         enc = CategoricalAutoEncoder()
         enc.desired_error = 3
 
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
 
