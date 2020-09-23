@@ -1,5 +1,4 @@
 import copy
-import logging
 import random
 import time
 
@@ -16,6 +15,7 @@ from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCross
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.mixers import BaseMixer
+from lightwood.logger import log
 
 
 def _default_on_iter(epoch, train_error, test_error, delta_mean, accuracy):
@@ -24,10 +24,10 @@ def _default_on_iter(epoch, train_error, test_error, delta_mean, accuracy):
             value = accuracy[col]['value']
             if accuracy[col]['function'] == 'r2_score':
                 value_rounded = round(value, 3)
-                print(f'We\'ve reached training epoch nr {epoch} with an r2 score of {value_rounded} on the testing dataset')
+                log.info(f'We\'ve reached training epoch nr {epoch} with an r2 score of {value_rounded} on the testing dataset')
             else:
                 value_pct = round(value * 100, 2)
-                print(f'We\'ve reached training epoch nr {epoch} with an accuracy of {value_pct}% on the testing dataset')
+                log.info(f'We\'ve reached training epoch nr {epoch} with an accuracy of {value_pct}% on the testing dataset')
 
 
 class NnMixer(BaseMixer):
@@ -249,7 +249,7 @@ class NnMixer(BaseMixer):
 
             self.dynamic_parameters = self.param_optimizer.evaluate(lambda dynamic_parameters: self.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
 
-            logging.info('Using hyperparameter set: ', best_parameters)
+            log.info('Using hyperparameter set: ', best_parameters)
         else:
             self.dynamic_parameters = {}
 
@@ -282,7 +282,7 @@ class NnMixer(BaseMixer):
                     # Log this every now and then so that the user knows it's running
                     if (int(time.time()) - log_reasure) > 30:
                         log_reasure = time.time()
-                        logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
+                        log.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
 
 
                     # Prime the model on each subset for a bit
@@ -292,7 +292,7 @@ class NnMixer(BaseMixer):
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
                     if subset_iteration > 1 and training_error < 0.4 and not train_ds.enable_dropout:
                         self.eval_every_x_epochs = max(1, int(self.eval_every_x_epochs / 2) )
-                        logging.info('Enabled dropout !')
+                        log.info('Enabled dropout !')
                         train_ds.enable_dropout = True
                         lowest_error = None
                         last_test_error = None
@@ -314,7 +314,7 @@ class NnMixer(BaseMixer):
 
                     # Once we are past the priming/warmup period, start training the selfaware network
                     if subset_iteration > 1 and not self.is_selfaware and self.selfaware and not self.stop_selfaware_training and training_error < 0.35:
-                        logging.info('Started selfaware training !')
+                        log.info('Started selfaware training !')
                         self.start_selfaware_training = True
                         lowest_error = None
                         last_test_error = None
@@ -326,7 +326,7 @@ class NnMixer(BaseMixer):
                     if epoch % self.eval_every_x_epochs == 0:
                         test_error = self._error(test_ds)
                         subset_test_error = self._error(subset_test_ds, subset_id=subset_id)
-                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
+                        log.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
 
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
@@ -358,7 +358,7 @@ class NnMixer(BaseMixer):
 
                         # If the trauining subset is overfitting on it's associated testing subset
                         if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
-                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
+                            log.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
 
                             self._update_model(best_model)
 
@@ -376,7 +376,7 @@ class NnMixer(BaseMixer):
 
                             self._iter_fit(test_ds, max_epochs=1)
                             self.encoders = train_ds.encoders
-                            logging.info('Finished training model !')
+                            log.info('Finished training model !')
                             break
 
     def _adjust(self, test_ds):
@@ -526,7 +526,7 @@ class NnMixer(BaseMixer):
             if include_extra_data:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
-        logging.info('Model predictions and decoding completed')
+        log.info('Model predictions and decoding completed')
 
         return predictions
 
@@ -627,11 +627,11 @@ class NnMixer(BaseMixer):
             error = 0
             for i, data in enumerate(data_loader, 0):
                 if self.start_selfaware_training and not self.is_selfaware:
-                    logging.info('Starting to train selfaware network for better confidence determination !')
+                    log.info('Starting to train selfaware network for better confidence determination !')
                     self.is_selfaware = True
 
                 if self.stop_selfaware_training and self.is_selfaware:
-                    logging.info('Cannot train selfaware network, will fallback to using simpler confidence models !')
+                    log.info('Cannot train selfaware network, will fallback to using simpler confidence models !')
                     self.is_selfaware = False
 
                 self.total_iterations += 1

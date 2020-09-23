@@ -1,7 +1,6 @@
 # Requires adding: pyro-ppl >= 0.4.1
 
 import copy
-import logging
 from collections import Counter
 
 import torch
@@ -12,6 +11,7 @@ import pyro
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.transformer import Transformer
+from lightwood.logger import log
 
 
 class BayesianNnMixer:
@@ -198,7 +198,7 @@ class BayesianNnMixer:
             predictions_dict[output_column]['possible_predictions'] = possible_predictions
             predictions_dict[output_column]['possible_predictions_confidence'] = possible_predictions_confidence
 
-        logging.info('Model predictions and decoding completed')
+        log.info('Model predictions and decoding completed')
 
         return predictions_dict
 

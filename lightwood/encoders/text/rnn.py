@@ -1,7 +1,7 @@
 # flake8: noqa
 from lightwood.encoders.text.helpers.rnn_helpers import *
 from lightwood.encoders.encoder_base import BaseEncoder
-import logging
+from lightwood.logger import log
 import math
 
 
@@ -26,7 +26,7 @@ class RnnEncoder(BaseEncoder):
         no_null_sentences = [x if x is not None else '' for x in priming_data]
         estimated_time = 1/937*self._train_iters*len(no_null_sentences)
         log_every = math.ceil(self._train_iters/100)
-        logging.info('We will train an encoder for this text, on a CPU it will take about {min} minutes'.format(
+        log.info('We will train an encoder for this text, on a CPU it will take about {min} minutes'.format(
             min=estimated_time))
 
         self._input_lang = Lang('input')
@@ -79,7 +79,7 @@ class RnnEncoder(BaseEncoder):
         ret = []
         with torch.no_grad():
             for decoder_hiddens in encoded_values_tensor:
-                decoder_hidden = torch.FloatTensor([[decoder_hiddens.tolist()]])
+                decoder_hidden = torch.FloatTensor([[decoder_hiddens.tolist()]]).to(device)
 
                 decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 

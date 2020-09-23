@@ -1,4 +1,3 @@
-import logging
 import warnings
 
 import torch
@@ -6,6 +5,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.multioutput import MultiOutputClassifier, MultiOutputRegressor
 
 from lightwood.mixers.sk_learn.sk_learn_helper import SkLearnMixerHelper
+from lightwood.logger import log
 
 
 class SkLearnMixer(SkLearnMixerHelper):
@@ -35,7 +35,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         :param data_source: is a DataSource object
         :return model: fitted model
         """
-        logging.info('Model training started')
+        log.info('Model training started')
         for column in self.output_column_names:
             model_class = self._determine_model_class(column, data_source)
             output_encoded_column = self._output_encoded_columns(column, data_source)
@@ -48,7 +48,7 @@ class SkLearnMixer(SkLearnMixerHelper):
 
             model_score = self.model[column].score(useful_input_encoded_features, output_encoded_column)
 
-        logging.info('Model training completed with score:{}'.format(model_score))
+        log.info('Model training completed with score:{}'.format(model_score))
         self.encoders = data_source.encoders
         return self.model
 
@@ -61,7 +61,7 @@ class SkLearnMixer(SkLearnMixerHelper):
         :param output_column_names: is a DataSource object
         :return predictions: numpy.ndarray predicted encoded values
         """
-        logging.info('Model predictions starting')
+        log.info('Model predictions starting')
         model = self.model
         when_data_source.encoders = self.encoders
         output_column_names = self.output_column_names if output_column_names is None else output_column_names
@@ -75,7 +75,7 @@ class SkLearnMixer(SkLearnMixerHelper):
             predictions[output_column] = {'Encoded Predictions': encoded_predictions,
                                           'predictions': decoded_predictions}
 
-        logging.info('Model predictions and decoding completed')
+        log.info('Model predictions and decoding completed')
         return predictions
 
     def error(self, ds):
