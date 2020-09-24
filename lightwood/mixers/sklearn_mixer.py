@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.svm import SVC
 from sklearn.linear_model import SGDClassifier, SGDRegressor, LinearRegression
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import f1_score, r2_score, balanced_accuracy_score
+from sklearn.metrics import r2_score, balanced_accuracy_score
 
 from lightwood.logger import log
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
