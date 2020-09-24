@@ -33,10 +33,12 @@ class TestBoostMixer(unittest.TestCase):
         }
         config = predictor_config_schema.validate(config)
 
-        data = {'x': [i for i in range(10)], 'y': [random.randint(i, i + 20) for i in range(10)]}
-        nums = [data['x'][i] * data['y'][i] for i in range(10)]
+        N = 100
 
-        data['z'] = [i + 0.5 for i in range(10)]
+        data = {'x': [i for i in range(N)], 'y': [random.randint(i, i + 20) for i in range(N)]}
+        nums = [data['x'][i] * data['y'][i] for i in range(N)]
+
+        data['z'] = [i + 0.5 for i in range(N)]
         data['z`'] = ['low' if i < 50 else 'high' for i in nums]
 
         data_frame = pandas.DataFrame(data)
