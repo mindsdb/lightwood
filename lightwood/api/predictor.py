@@ -219,7 +219,7 @@ class Predictor:
             # Null out certain object we don't want to store
             if hasattr(self._mixer, '_nonpersistent'):
                 self._mixer._nonpersistent = {}
-            self._mixer.net.self._foward_net = None
+            self._mixer.net._foward_net = None
 
             # Dump everything relevant to cpu before saving
             self.convert_to_device("cpu")
