@@ -5,6 +5,7 @@ from sklearn.linear_model import SGDClassifier, SGDRegressor, LinearRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import f1_score, r2_score, balanced_accuracy_score
 
+from lightwood.logger import log
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.mixers import BaseMixer
 
@@ -56,16 +57,11 @@ class SklearnMixer(BaseMixer):
 
         X_train = []
         for row in train_ds:
-            print('train:', row)
             X_train.append(np.array(row[0]))
 
         X_test = []
         for row in test_ds:
-            print('test:', row)
             X_test.append(np.array(row[0]))
-
-        assert len(X_train) > 0
-        assert len(X_test) > 0
 
         for target_col_name in self.targets:
             Y_train = train_ds.get_column_original_data(target_col_name)
@@ -106,17 +102,29 @@ class SklearnMixer(BaseMixer):
                     model.fit(X_train, Y_train)
                     accuracy = r2_score(Y_test, model.predict(X_test))
 
+                    log.info('[MODEL/COLUMN/TEST_ACCURACY]: {}/{}/{}'.format(
+                        model_class.__name__,
+                        target_col_name,
+                        accuracy
+                    ))
+
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
                         accuracy
                     ))
                 
-                (best_model_class, best_model_kwargs), _ = max(
+                (best_model_class, best_model_kwargs), best_accuracy = max(
                     model_classes_and_accuracies,
                     key=lambda x: x[-1]
                 )
 
                 self.targets[target_col_name]['model'] = best_model_class(**best_model_kwargs)
+
+                log.info('Selecting {} for column {} (accuracy={})'.format(
+                    best_model_class.__name__,
+                    target_col_name,
+                    best_accuracy
+                ))
 
                 # TODO
                 # if self.quantiles is not None:
