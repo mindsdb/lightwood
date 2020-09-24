@@ -219,9 +219,10 @@ class Predictor:
             # Null out certain object we don't want to store
             if hasattr(self._mixer, '_nonpersistent'):
                 self._mixer._nonpersistent = {}
+            self.config['mixer']['kwargs']['callback_on_iter'] = None
+
 
             # Dump everything relevant to cpu before saving
             self.convert_to_device("cpu")
-            #dill.detect.trace(True)
             pickle.dump(self.__dict__, f)
             self.convert_to_device()
