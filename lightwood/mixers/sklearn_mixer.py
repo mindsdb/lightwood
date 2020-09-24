@@ -20,10 +20,6 @@ REGRESSION_MODELS = [
 ]
 
 class SklearnMixer(BaseMixer):
-    """
-    Selects model based on the following cheat-sheet:
-    https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html
-    """
     def __init__(self):
         super().__init__()
         self.targets = None
