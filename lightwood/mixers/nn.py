@@ -18,18 +18,6 @@ from lightwood.mixers import BaseMixer
 from lightwood.logger import log
 
 
-def _default_on_iter(epoch, train_error, test_error, delta_mean, accuracy):
-        test_error_rounded = round(test_error, 4)
-        for col in accuracy:
-            value = accuracy[col]['value']
-            if accuracy[col]['function'] == 'r2_score':
-                value_rounded = round(value, 3)
-                log.info(f'We\'ve reached training epoch nr {epoch} with an r2 score of {value_rounded} on the testing dataset')
-            else:
-                value_pct = round(value * 100, 2)
-                log.info(f'We\'ve reached training epoch nr {epoch} with an accuracy of {value_pct}% on the testing dataset')
-
-
 class NnMixer(BaseMixer):
     def __init__(
         self,
@@ -52,7 +40,8 @@ class NnMixer(BaseMixer):
         """
         super().__init__()
         if callback_on_iter is None:
-            callback_on_iter = _default_on_iter
+            callback_on_iter = self._default_on_iter
+
         self.selfaware = selfaware
         self.deterministic = deterministic
         self.eval_every_x_epochs = eval_every_x_epochs
@@ -94,6 +83,19 @@ class NnMixer(BaseMixer):
         self.total_iterations = 0
 
         self._nonpersistent = {'sampler': None, 'callback': callback_on_iter}
+
+
+
+    def _default_on_iter(self, epoch, train_error, test_error, delta_mean, accuracy):
+        test_error_rounded = round(test_error, 4)
+        for col in accuracy:
+            value = accuracy[col]['value']
+            if accuracy[col]['function'] == 'r2_score':
+                value_rounded = round(value, 3)
+                log.info(f'We\'ve reached training epoch nr {epoch} with an r2 score of {value_rounded} on the testing dataset')
+            else:
+                value_pct = round(value * 100, 2)
+                log.info(f'We\'ve reached training epoch nr {epoch} with an accuracy of {value_pct}% on the testing dataset')
 
     def _build_confidence_normalization_data(self, ds, subset_id=None):
         self.net = self.net.eval()
