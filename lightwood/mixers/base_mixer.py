@@ -1,6 +1,5 @@
 from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-from lightwood.mixers.helpers.transformer import Transformer
 
 
 class BaseMixer:
@@ -11,9 +10,6 @@ class BaseMixer:
     """
     def __init__(self):
         self.dynamic_parameters = {}
-        self.input_column_names = None
-        self.output_column_names = None
-        self.out_types = None
         self.quantiles = [
             0.5,
             0.2, 0.8,
@@ -23,8 +19,6 @@ class BaseMixer:
             0.005, 0.995
         ]
         self.quantiles_pair = [9, 10]
-        self.encoders = None
-        self.transformer = None
 
     def fit(self, train_ds, test_ds):
         """
@@ -37,29 +31,9 @@ class BaseMixer:
         """
         :param ds: DataSource
         """
-        if self.input_column_names is None:
-            self.input_column_names = ds.get_feature_names('input_features')
-
-        if self.output_column_names is None:
-            self.output_column_names = ds.get_feature_names('output_features')
-
-        self.out_types = ds.out_types
-        for n, out_type in enumerate(self.out_types):
+        for n, out_type in enumerate(ds.out_types):
             if out_type == COLUMN_DATA_TYPES.NUMERIC:
-                ds.encoders[self.output_column_names[n]].extra_outputs = len(self.quantiles) - 1
-
-        transformer_already_initialized = False
-        try:
-            if len(list(ds.transformer.feature_len_map.keys())) > 0:
-                transformer_already_initialized = True
-        except Exception:
-            pass
-
-        if not transformer_already_initialized:
-            ds.transformer = Transformer(self.input_column_names, self.output_column_names)
-
-        self.encoders = ds.encoders
-        self.transformer = ds.transformer
+                ds.encoders[ds.output_feature_names[n]].extra_outputs = len(self.quantiles) - 1
 
     def predict(self, when_data_source, include_extra_data=False):
         """

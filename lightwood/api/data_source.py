@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 
+from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
 from lightwood.encoders import (
@@ -55,7 +56,7 @@ class SubSet(Dataset):
 
 
 class DataSource(Dataset):
-    def __init__(self, data_frame, config, prepare_encoders=True):
+    def __init__(self, data_frame, config, prepare_encoders=True, initialize_transformer=True):
         """
         Create a lightwood datasource from the data frame
         :param data_frame:
@@ -64,7 +65,6 @@ class DataSource(Dataset):
         self.subsets = {}
         self.data_frame = data_frame
         self.config = config
-        self.transformer = None
         self.training = False  # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
@@ -82,13 +82,18 @@ class DataSource(Dataset):
                 dropout = col['dropout']
 
             self.dropout_dict[col['name']] = dropout
-
-        self._clear_cache()
+        
+        if initialize_transformer:
+            self.transformer = Transformer(self.input_feature_names, self.output_feature_names)
+        else:
+            self.transformer = None
 
         if prepare_encoders:
             self.encoders = self._prepare_encoders()
         else:
-            self.encoders = {}
+            self.encoders = None
+        
+        self._clear_cache()
 
     def extend(self, df):
         """
@@ -128,6 +133,8 @@ class DataSource(Dataset):
         datasource made from that data
 
         :param percentage: float
+
+        :return: DataSource
         """
         np.random.seed(int(round(percentage * 100000)))
 
@@ -138,7 +145,12 @@ class DataSource(Dataset):
 
         self._clear_cache()
 
-        ds = DataSource(sub_df, self.config, prepare_encoders=False)
+        ds = DataSource(
+            sub_df,
+            self.config,
+            prepare_encoders=False,
+            initialize_transformer=False
+        )
         ds.encoders = self.encoders
         ds.transformer = self.transformer
         ds.output_weights = self.output_weights
@@ -227,10 +239,9 @@ class DataSource(Dataset):
                 else:
                     self.output_weights = False
 
-        if self.transformer:
-            sample = self.transformer.transform(sample)
-            if self.out_indexes is None:
-                self.out_indexes = self.transformer.out_indexes
+        sample = self.transformer.transform(sample)
+        if self.out_indexes is None:
+            self.out_indexes = self.transformer.out_indexes
 
         if self.enable_cache:
             self.transformed_cache[idx] = sample
@@ -304,6 +315,22 @@ class DataSource(Dataset):
     def out_types(self):
         return [feature['type'] for feature in self.config['output_features']]
 
+    @property
+    def output_feature_names(self):
+        return [feature['name'] for feature in self.config['output_features']]
+
+    @property
+    def input_feature_names(self):
+        return [feature['name'] for feature in self.config['input_features']]
+
+    @property
+    def output_features(self):
+        return self.config['output_features']
+
+    @property
+    def input_features(self):
+        return self.config['input_features']
+
     def _prepare_encoders(self):
         """
         Get the encoder for all the output and input column and prepare them
@@ -349,7 +376,8 @@ class DataSource(Dataset):
         child = DataSource(
             df,
             self.config,
-            prepare_encoders=False
+            prepare_encoders=False,
+            initialize_transformer=False
         )
         child.transformer = self.transformer
         child.encoders = self.encoders

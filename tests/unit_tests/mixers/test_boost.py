@@ -41,13 +41,9 @@ class TestBoostMixer(unittest.TestCase):
 
         data_frame = pandas.DataFrame(data)
         train_ds = DataSource(data_frame, config)
-
         test_ds = train_ds.subset(0.25)
 
         mixer = BoostMixer()
         mixer.fit(train_ds, test_ds)
 
-        test_ds = train_ds.make_child(data_frame[['x', 'y']])
-        predictions = mixer.predict(test_ds)
-
-        print(predictions)
+        predictions = mixer.predict(train_ds.make_child(data_frame[['x', 'y']]))
