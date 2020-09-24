@@ -110,8 +110,8 @@ class RnnEncoder(BaseEncoder):
                 if previous_target_data is not None:
                     for target_dict in previous_target_data:
                         t_dp = target_dict['encoded_data'][data_idx:min(data_idx + batch_size, len(priming_data))]
-                        target_tensor = tensor_from_series(t_dp, self.device, self._n_dims,
-                                                           self._eos, self._max_ts_length)
+                        target_tensor = torch.Tensor(t_dp).unsqueeze(2).to(self.device)
+                        target_tensor[torch.isnan(target_tensor)] = 0.0
 
                         # concatenate descriptors
                         batch = torch.cat((batch, target_tensor), dim=-1)
@@ -160,8 +160,6 @@ class RnnEncoder(BaseEncoder):
                 self._optimizer.step()
 
             average_loss = average_loss / len(priming_data)
-
-            print(f"\nLoss @ {i+1}: {average_loss}")  # TODO: remove this
 
             if average_loss < self._stop_on_error:
                 break
