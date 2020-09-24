@@ -70,9 +70,9 @@ class SklearnMixer(BaseMixer):
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
                 if weight_map is None:
-                    sample_weight = [1] * len(Y)
+                    sample_weight = [1] * len(Y_train)
                 else:
-                    sample_weight = [weight_map[str(val)] for val in Y]
+                    sample_weight = [weight_map[str(val)] for val in Y_train]
 
                 model_classes_and_accuracies = []
                 for model_class, model_kwargs in CLASSIFICATION_MODELS:
