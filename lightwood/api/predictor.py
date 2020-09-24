@@ -88,7 +88,7 @@ class Predictor:
 
         :param from_data: DataFrame or DataSource
             The data to learn from
-                
+
         :param test_data: DataFrame or DataSource
             The data to test accuracy and learn_error from
         """
@@ -211,7 +211,7 @@ class Predictor:
     def save(self, path_to):
         """
         Save trained model to a file.
-    
+
         :param path_to: str, full path of file, where we store results
         """
         with open(path_to, 'wb') as f:
@@ -221,5 +221,6 @@ class Predictor:
 
             # Dump everything relevant to cpu before saving
             self.convert_to_device("cpu")
+            dill.detect.trace(True)
             dill.dump(self.__dict__, f)
             self.convert_to_device()
