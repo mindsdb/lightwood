@@ -1,5 +1,4 @@
 import random
-import logging
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -10,6 +9,7 @@ from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym
 from lightwood.config.config import CONFIG
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.logger import log
 
 
 class CategoricalAutoEncoder(BaseEncoder):
@@ -31,7 +31,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.max_training_time = 7200
 
     def _train_callback(self, error, real_buff, predicted_buff):
-        logging.info(f'{self.name} reached a loss of {error} while training !')
+        log.info(f'{self.name} reached a loss of {error} while training !')
 
     def _encoder_targets(self, data):
         oh_encoded_categories = self.onehot_encoder.encode(data)
@@ -46,19 +46,19 @@ class CategoricalAutoEncoder(BaseEncoder):
             self.net = self.net.to(device, available_devices)
         return self
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         random.seed(len(priming_data))
 
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
-        self.onehot_encoder.prepare_encoder(priming_data)
+        self.onehot_encoder.prepare(priming_data)
 
         input_len = self.onehot_encoder._lang.n_words
         self.use_autoencoder = self.max_encoded_length is not None and input_len > self.max_encoded_length
 
         if self.use_autoencoder:
-            logging.info('Preparing a categorical autoencoder, this might take a while')
+            log.info('Preparing a categorical autoencoder, this might take a while')
 
             embeddings_layer_len = self.max_encoded_length
 
@@ -93,7 +93,7 @@ class CategoricalAutoEncoder(BaseEncoder):
                 module) != torch.nn.Sequential and type(module) != DefaultNet]
             self.encoder = torch.nn.Sequential(*modules[0:2]).eval()
             self.decoder = torch.nn.Sequential(*modules[2:3]).eval()
-            logging.info('Categorical autoencoder ready')
+            log.info('Categorical autoencoder ready')
 
         self._prepared = True
 

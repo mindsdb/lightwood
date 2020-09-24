@@ -9,7 +9,7 @@ class BaseEncoder:
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         pass
 
     def encode(self, column_data):

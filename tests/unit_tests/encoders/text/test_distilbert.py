@@ -25,14 +25,14 @@ class TestDistilBERT(unittest.TestCase):
             primting_target.append(i)
 
         output_1_encoder = NumericEncoder(is_target=True)
-        output_1_encoder.prepare_encoder(primting_target)
+        output_1_encoder.prepare(primting_target)
 
         encoded_data_1 = output_1_encoder.encode(primting_target)
         encoded_data_1 = encoded_data_1.tolist()
 
         enc = DistilBertEncoder()
 
-        enc.prepare_encoder(priming_data,
+        enc.prepare(priming_data,
                             training_data={'targets': [
                                 {'output_type': COLUMN_DATA_TYPES.NUMERIC,'encoded_output': encoded_data_1},
                                 {'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}

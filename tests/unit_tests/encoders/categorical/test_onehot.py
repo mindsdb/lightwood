@@ -12,7 +12,7 @@ class TestOnehot(unittest.TestCase):
 
         enc = OneHotEncoder()
 
-        enc.prepare_encoder(data)
+        enc.prepare(data)
         encoded_data = enc.encode(data)
         decoded_data = enc.decode(enc.encode(['category 2', 'category 1', 'category 3', None]))
 
@@ -29,7 +29,7 @@ class TestOnehot(unittest.TestCase):
 
             enc = OneHotEncoder()
 
-            enc.prepare_encoder(data, max_dimensions=max_dimensions)
+            enc.prepare(data, max_dimensions=max_dimensions)
             encoded_data = enc.encode(data)
             decoded_data = enc.decode(enc.encode(['category 1', 'category 2', 'category 3', 'category 4', None]))
 
