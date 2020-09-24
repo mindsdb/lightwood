@@ -10,10 +10,9 @@ import nltk
 import torch
 from torch.utils.model_zoo import tqdm
 
-import logging
-
 from lightwood.encoders.text.helpers.infersent import InferSent
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.logger import log
 
 try:
     nltk.data.find('tokenizers/punkt')
@@ -32,9 +31,9 @@ class InferSentEncoder(BaseEncoder):
         super().__init__(is_target)
         self._model = None
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         self._download_necessary_files()
 
@@ -57,7 +56,7 @@ class InferSentEncoder(BaseEncoder):
         :return: a torch.floatTensor
         """
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         no_null_sentences = [x if x is not None else '' for x in sentences]
         result = self._model.encode(no_null_sentences, bsize=128, tokenize=False, verbose=True)
@@ -73,7 +72,7 @@ class InferSentEncoder(BaseEncoder):
         if not os.path.exists(pkl_dir):
             os.makedirs(pkl_dir)
         if not os.path.exists(MODEL_PATH):
-            logging.info('This is the first time you use this text encoder, we will download a pretrained model.')
+            log.info('This is the first time you use this text encoder, we will download a pretrained model.')
             sys.stderr.write('Downloading: "{}" to {}\n'.format(pkl_url, MODEL_PATH))
             self._download_url_to_file(pkl_url, MODEL_PATH, progress=True)
 
@@ -86,7 +85,7 @@ class InferSentEncoder(BaseEncoder):
         filename = os.path.basename(parts.path)
         cached_zip_file = os.path.join(emdeddings_dir, filename)
         if not os.path.exists(W2V_PATH):
-            logging.info('We will download word embeddings, this will take about 20 minutes.')
+            log.info('We will download word embeddings, this will take about 20 minutes.')
             sys.stderr.write('Downloading: "{}" to {}\n'.format(embeddings_url, cached_zip_file))
             self._download_url_to_file(embeddings_url, cached_zip_file, progress=True)
             self._unzip_file(cached_zip_file, emdeddings_dir)

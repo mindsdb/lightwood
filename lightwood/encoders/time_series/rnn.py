@@ -53,7 +53,7 @@ class RnnEncoder(BaseEncoder):
         self._encoder = self._encoder.to(self.device)
         return self
 
-    def prepare_encoder(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
+    def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
@@ -63,9 +63,10 @@ class RnnEncoder(BaseEncoder):
         :return:
         """
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
         else:
             self.setup_nn(previous_target_data)
+
 
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
@@ -217,7 +218,7 @@ class RnnEncoder(BaseEncoder):
         """
 
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         for i in range(len(column_data)):
             if not isinstance(column_data[i][0], list):
@@ -290,7 +291,7 @@ class RnnEncoder(BaseEncoder):
         :return: a list of reconstructed time series
         """
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []
         for _, val in enumerate(encoded_data):

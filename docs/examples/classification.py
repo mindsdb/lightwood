@@ -1,6 +1,7 @@
 from sklearn.metrics import balanced_accuracy_score, accuracy_score
 import lightwood
 import pandas as pd
+from lightwood.mixers import NnMixer
 
 
 def train_model():
@@ -9,21 +10,26 @@ def train_model():
 
     # A configuration describing the contents of the dataframe, what are the targets we want to predict and what are the features we want to use
     # Note: the `weights` for the output column `default.payment.next.month`, since the number of samples is uneven between the two categories, but we care about balanced accuracy rather than overall accuracy
-    config = {'input_features': [
-        {'name': 'ID', 'type': 'numeric'}, {'name': 'LIMIT_BAL', 'type': 'numeric'},
-        {'name': 'SEX', 'type': 'categorical'}, {'name': 'EDUCATION', 'type': 'categorical'},
-        {'name': 'MARRIAGE', 'type': 'categorical'}, {'name': 'AGE', 'type': 'numeric'},
-        {'name': 'PAY_0', 'type': 'numeric'}, {'name': 'PAY_2', 'type': 'numeric'},
-        {'name': 'PAY_3', 'type': 'numeric'}, {'name': 'PAY_4', 'type': 'numeric'},
-        {'name': 'PAY_5', 'type': 'numeric'}, {'name': 'PAY_6', 'type': 'numeric'},
-        {'name': 'BILL_AMT1', 'type': 'numeric'}, {'name': 'BILL_AMT2', 'type': 'numeric'},
-        {'name': 'BILL_AMT3', 'type': 'numeric'}, {'name': 'BILL_AMT4', 'type': 'numeric'},
-        {'name': 'BILL_AMT5', 'type': 'numeric'}, {'name': 'BILL_AMT6', 'type': 'numeric'},
-        {'name': 'PAY_AMT1', 'type': 'numeric'}, {'name': 'PAY_AMT2', 'type': 'numeric'},
-        {'name': 'PAY_AMT3', 'type': 'numeric'}, {'name': 'PAY_AMT4', 'type': 'numeric'},
-        {'name': 'PAY_AMT5', 'type': 'numeric'}, {'name': 'PAY_AMT6', 'type': 'numeric'}],
-        'output_features': [{'name': 'default.payment.next.month', 'type': 'categorical', 'weights': {'0': 0.3, '1': 1}}],
-        'mixer': {'class': lightwood.BUILTIN_MIXERS.NnMixer}}
+    config = {
+        'input_features': [
+            {'name': 'ID', 'type': 'numeric'}, {'name': 'LIMIT_BAL', 'type': 'numeric'},
+            {'name': 'SEX', 'type': 'categorical'}, {'name': 'EDUCATION', 'type': 'categorical'},
+            {'name': 'MARRIAGE', 'type': 'categorical'}, {'name': 'AGE', 'type': 'numeric'},
+            {'name': 'PAY_0', 'type': 'numeric'}, {'name': 'PAY_2', 'type': 'numeric'},
+            {'name': 'PAY_3', 'type': 'numeric'}, {'name': 'PAY_4', 'type': 'numeric'},
+            {'name': 'PAY_5', 'type': 'numeric'}, {'name': 'PAY_6', 'type': 'numeric'},
+            {'name': 'BILL_AMT1', 'type': 'numeric'}, {'name': 'BILL_AMT2', 'type': 'numeric'},
+            {'name': 'BILL_AMT3', 'type': 'numeric'}, {'name': 'BILL_AMT4', 'type': 'numeric'},
+            {'name': 'BILL_AMT5', 'type': 'numeric'}, {'name': 'BILL_AMT6', 'type': 'numeric'},
+            {'name': 'PAY_AMT1', 'type': 'numeric'}, {'name': 'PAY_AMT2', 'type': 'numeric'},
+            {'name': 'PAY_AMT3', 'type': 'numeric'}, {'name': 'PAY_AMT4', 'type': 'numeric'},
+            {'name': 'PAY_AMT5', 'type': 'numeric'}, {'name': 'PAY_AMT6', 'type': 'numeric'}
+        ],
+        'output_features': [
+            {'name': 'default.payment.next.month', 'type': 'categorical', 'weights': {'0': 0.3, '1': 1}}
+        ],
+        'mixer': {'class': NnMixer}
+    }
 
     # Callback to log various training stats (currently the only hook into the training process)
     def train_callback(epoch, error, test_error, test_error_gradient, test_accuracy):
