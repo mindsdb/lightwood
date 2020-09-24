@@ -82,11 +82,6 @@ class SklearnMixer(BaseMixer):
                 for model_class, model_kwargs in CLASSIFICATION_MODELS:
                     model = model_class(**model_kwargs)
                     model.fit(X_train, Y_train, sample_weight=sample_weight)
-                    # print('X_test:', len(X_test), len(X_test[0]), X_test)
-                    # print('Y_test:', len(Y_test), len(Y_test[0]), Y_test)
-                    # peds = model.predict(X_test)
-                    # print('Y_hat:', len(peds), len(peds[0]), peds)
-                    # exit('bye')
                     accuracy = balanced_accuracy_score(
                         Y_test,
                         model.predict(X_test)
