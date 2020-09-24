@@ -88,7 +88,7 @@ class MinMaxNormalizer:
         self.scaler = MinMaxScaler()
         self.factor = factor
 
-    def prepare_encoder(self, x):
+    def prepare(self, x):
         X = np.array([j for i in x for j in i]).reshape(-1, 1)
         self.scaler.fit(X)
 

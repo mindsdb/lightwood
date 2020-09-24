@@ -350,12 +350,12 @@ class DataSource(Dataset):
                                                                 'output_type': config['type']
                                                                 })
 
-        for config in self.configuration['input_features']:
+        for config in self.config['input_features']:
             column_name = config['name']
             if 'previous_' not in column_name:  # TODO: fragile check, should be by position
-                encoder_instance = self.prepare_column_encoder(config,
-                                                               is_target=False,
-                                                               training_data=input_encoder_training_data)
+                encoder_instance = self._prepare_column_encoder(config,
+                                                                is_target=False,
+                                                                training_data=input_encoder_training_data)
 
                 encoders[column_name] = encoder_instance
 
