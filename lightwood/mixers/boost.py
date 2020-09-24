@@ -53,7 +53,7 @@ class BoostMixer(BaseMixer):
                 if weight_map is None:
                     sample_weight = [1] * len(Y)
                 else:
-                    sample_weight = [weight_map[val] for val in Y]
+                    sample_weight = [weight_map[str(val)] for val in Y]
 
                 self.targets[target_col_name]['model'] = GradientBoostingClassifier(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X, Y, sample_weight=sample_weight)
