@@ -35,7 +35,7 @@ class NnMixer(BaseMixer):
         self,
         selfaware=False,
         deterministic=False,
-        callback_on_iter=_default_on_iter,
+        callback_on_iter=None,
         eval_every_x_epochs=20,
         stop_training_after_seconds=None,
         stop_model_building_after_seconds=None,
@@ -51,6 +51,8 @@ class NnMixer(BaseMixer):
         :param param_optimizer: ?
         """
         super().__init__()
+        if callback_on_iter is None:
+            callback_on_iter = _default_on_iter
         self.selfaware = selfaware
         self.deterministic = deterministic
         self.eval_every_x_epochs = eval_every_x_epochs
