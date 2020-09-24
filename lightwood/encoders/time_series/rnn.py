@@ -39,12 +39,13 @@ class RnnEncoder(BaseEncoder):
         elif self.secondary_type == 'numeric':
             self._normalizer = MinMaxNormalizer()
 
+        total_dims = self._n_dims
         if additional_targets:
             for _ in additional_targets:
-                self._n_dims += 1  # We are assuming target dim == 1
+                total_dims += 1  # We are assuming target dim == 1
 
-        self._encoder = EncoderRNNNumerical(input_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
-        self._decoder = DecoderRNNNumerical(output_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        self._encoder = EncoderRNNNumerical(input_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
         self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
 
@@ -67,7 +68,6 @@ class RnnEncoder(BaseEncoder):
         else:
             self.setup_nn(previous_target_data)
 
-
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
             if not isinstance(priming_data[i][0], list):  # TODO: reverse the order: check if first row complies, then apply to all assuming format holds
@@ -78,7 +78,7 @@ class RnnEncoder(BaseEncoder):
         if self._normalizer:
             self._normalizer.prepare(priming_data)
 
-        if previous_target_data is not None:
+        if previous_target_data is not None and len(previous_target_data) > 0:
             target_dict = previous_target_data[0]
             normalizer = MinMaxNormalizer()  # TODO: here check subtype to see what normalizer is used
             normalizer.prepare(target_dict['data'])
@@ -107,7 +107,7 @@ class RnnEncoder(BaseEncoder):
                 batch = torch.cat(batch, dim=0).to(self.device)
 
                 # include autoregressive target data
-                if previous_target_data is not None:
+                if previous_target_data is not None and len(previous_target_data) > 0:
                     for target_dict in previous_target_data:
                         t_dp = target_dict['encoded_data'][data_idx:min(data_idx + batch_size, len(priming_data))]
                         target_tensor = torch.Tensor(t_dp).unsqueeze(2).to(self.device)
@@ -222,9 +222,8 @@ class RnnEncoder(BaseEncoder):
             if not isinstance(column_data[i][0], list):
                 column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
 
-        # TODO: I'm here
         # include autoregressive target data, currently supports only one additional column
-        if previous_target_data is not None:
+        if previous_target_data is not None and len(previous_target_data) > 0:
             normalizer = self._target_ar_normalizer
             previous_target_data = normalizer.encode(previous_target_data)
 
@@ -233,7 +232,10 @@ class RnnEncoder(BaseEncoder):
 
         for i, val in enumerate(column_data):
             if get_next_count is None:
-                encoded = self._encode_one(val, previous=previous_target_data[i])
+                if previous_target_data is not None and len(previous_target_data) > 0:
+                    encoded = self._encode_one(val, previous=previous_target_data[i])
+                else:
+                    encoded = self._encode_one(val)
             else:
                 if get_next_count <= 0:
                     raise Exception('get_next_count must be greater than 0')

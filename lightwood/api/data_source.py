@@ -360,7 +360,7 @@ class DataSource(Dataset):
                 encoders[column_name] = encoder_instance
 
                 # add dependency on 'previous_' column (for now singular, plural later on)
-                if config['type'] == ColumnDataTypes.TIME_SERIES:
+                if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
                     config['depends_on_column'] = input_encoder_training_data['previous'][0]['name']
 
         return encoders
