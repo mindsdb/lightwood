@@ -1,4 +1,3 @@
-import datetime
 import torch
 import torch.nn as nn
 import numpy as np
@@ -26,7 +25,11 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
         series[i] = series[i][:max_len]
 
     if normalizer:
-        tensor = torch.Tensor([normalizer.encode(s) for s in series]).transpose(0, 1)
+        if isinstance(normalizer, MinMaxNormalizer):
+            tensor = torch.Tensor([normalizer.encode(s) for s in series]).transpose(0, 1)
+        else:
+            tensor = torch.Tensor([normalizer.encode(s) for s in series][0])
+
         if len(tensor.shape) > 2:
             tensor = tensor.squeeze(2)
     else:
