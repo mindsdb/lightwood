@@ -104,7 +104,7 @@ class SklearnMixer(BaseMixer):
                 for model_class, model_kwargs in REGRESSION_MODELS:
                     model = model_class(**model_kwargs)
                     model.fit(X_train, Y_train)
-                    accuracy = 0#r2_score(Y_test, model.predict(X_test))
+                    accuracy = r2_score(Y_test, model.predict(X_test))
 
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
