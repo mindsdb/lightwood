@@ -288,8 +288,6 @@ class DataSource(Dataset):
         )
         encoder_attrs = config.get('encoder_attrs', {})
         encoder_attrs['secondary_type'] = config.get('secondary_type', None)
-        if 'previous_' in config['name'] and config['type'] == ColumnDataTypes.NUMERIC:  # TODO: also fragile check for name
-            encoder_attrs['impute_nan'] = True  # TODO: remove this and changes to the numerical encoder
 
         encoder_instance = self._make_column_encoder(
             encoder_class,
