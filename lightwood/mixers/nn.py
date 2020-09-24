@@ -53,7 +53,6 @@ class NnMixer(BaseMixer):
         super().__init__()
         self.selfaware = selfaware
         self.deterministic = deterministic
-        self.callback = callback_on_iter
         self.eval_every_x_epochs = eval_every_x_epochs
         self.stop_training_after_seconds = stop_training_after_seconds
         self.stop_model_building_after_seconds = stop_model_building_after_seconds
@@ -92,7 +91,7 @@ class NnMixer(BaseMixer):
 
         self.total_iterations = 0
 
-        self._nonpersistent = {'sampler': None}
+        self._nonpersistent = {'sampler': None, 'callback': callback_on_iter}
 
     def _build_confidence_normalization_data(self, ds, subset_id=None):
         self.net = self.net.eval()
@@ -349,8 +348,8 @@ class NnMixer(BaseMixer):
                         delta_mean = np.mean(test_error_delta_buff[-5:])
                         subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
 
-                        if self.callback is not None:
-                            self.callback(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
+                        if self._nonpersistent['callback'] is not None:
+                            self._nonpersistent['callback'](epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
 
                         # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > stop_training_after_seconds:

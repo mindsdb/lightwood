@@ -10,7 +10,8 @@ feature_schema = Schema({
     Optional('depends_on_column'): str,
     Optional('dropout'): float,
     Optional('weights'): dict,
-    Optional('secondary_type'): And(str, Use(str.lower), lambda s: s in COLUMN_DATA_TYPES.get_attributes().values())
+    Optional('secondary_type'): And(str, Use(str.lower), lambda s: s in COLUMN_DATA_TYPES.get_attributes().values()),
+    Optional('additional_info'): dict
 })
 
 mixer_schema = Schema({
