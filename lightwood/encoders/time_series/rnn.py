@@ -68,7 +68,7 @@ class RnnEncoder(BaseEncoder):
             self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)
 
         if self._normalizer:
-            self._normalizer.prepare_encoder(priming_data)
+            self._normalizer.prepare(priming_data)
 
         # decrease for small datasets
         if batch_size >= len(priming_data):

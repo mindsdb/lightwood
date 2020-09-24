@@ -19,7 +19,7 @@ class TestDatetimeEncoder(unittest.TestCase):
         data = [d.timestamp() for d in dates]
 
         normalizer = DatetimeEncoder(sinusoidal=True)
-        normalizer.prepare_encoder([])
+        normalizer.prepare([])
 
         results = normalizer.encode(data)
         null = np.full_like(results, 0.5)
