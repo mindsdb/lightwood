@@ -1,8 +1,9 @@
 from __future__ import unicode_literals, print_function, division
 
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
-from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.encoders.datetime import DatetimeEncoder
+from lightwood.helpers.device import get_devices
 
 import numpy as np
 import torch
@@ -21,17 +22,26 @@ class RnnEncoder(BaseEncoder):
         self._encoded_vector_size = encoded_vector_size
         self._train_iters = train_iters  # training epochs
         self._pytorch_wrapper = torch.FloatTensor
-        self._encoder = EncoderRNNNumerical(input_size=ts_n_dims, hidden_size=self._encoded_vector_size).to(self.device)
-        self._decoder = DecoderRNNNumerical(output_size=ts_n_dims, hidden_size=self._encoded_vector_size).to(self.device)
-        self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
-        self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
-        self._criterion = nn.MSELoss()
         self._prepared = False
-        self._n_dims = ts_n_dims  # expected dimensionality of time series
         self._max_ts_length = 0
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
-        self._normalizer = MinMaxNormalizer()
+        self._n_dims = ts_n_dims
+        self._normalizer = None
+        self._criterion = nn.MSELoss()
+
+    def setup_nn(self):
+        """This method must be executed after initializing, else self.secondary_type is unassigned"""
+        if self.secondary_type == 'datetime':
+            self._normalizer = DatetimeEncoder(sinusoidal=True)
+            self._n_dims *= len(self._normalizer.fields)*2  # sinusoidal datetime components
+        elif self.secondary_type == 'numeric':
+            self._normalizer = MinMaxNormalizer()
+
+        self._encoder = EncoderRNNNumerical(input_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        self._decoder = DecoderRNNNumerical(output_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
+        self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
 
     def to(self, device, available_devices):
         self.device = device
@@ -47,7 +57,9 @@ class RnnEncoder(BaseEncoder):
         :return:
         """
         if self._prepared:
-            raise Exception('You can only call "prepare" once for a given encoder.')
+            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+        else:
+            self.setup_nn()
 
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
@@ -56,7 +68,7 @@ class RnnEncoder(BaseEncoder):
             self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)
 
         if self._normalizer:
-            self._normalizer.fit(priming_data)
+            self._normalizer.prepare(priming_data)
 
         # decrease for small datasets
         if batch_size >= len(priming_data):
@@ -88,25 +100,24 @@ class RnnEncoder(BaseEncoder):
                 self._optimizer.zero_grad()
 
                 # encode
-                encoder_hidden = self._encoder.initHidden(self.device)
-                next_tensor = data_tensor[:, 0, :].unsqueeze(dim=1)  # initial input
+                encoder_hidden = self._encoder.initHidden(self.device, batch_size=batch.shape[0])
+                next_tensor = batch[:, 0, :].unsqueeze(dim=1)  # initial input
 
                 for tensor_i in range(steps - 1):
                     rand = np.random.randint(2)
                     # teach from forward as well as from known tensor alternatively
                     if rand == 1:
                         next_tensor, encoder_hidden = self._encoder.forward(
-                            data_tensor[:, tensor_i, :].unsqueeze(dim=1),
+                            batch[:, tensor_i, :].unsqueeze(dim=1),
                             encoder_hidden)
                     else:
                         next_tensor, encoder_hidden = self._encoder.forward(next_tensor.detach(), encoder_hidden)
 
-                    loss += self._criterion(next_tensor, data_tensor[:, tensor_i + 1, :].unsqueeze(dim=1))
+                    loss += self._criterion(next_tensor, batch[:, tensor_i + 1, :].unsqueeze(dim=1))
 
                 # decode
                 decoder_hidden = encoder_hidden
-                next_tensor = torch.full((batch.shape[0], 1, batch.shape[2]), self._sos,
-                                         dtype=torch.float32).to(self.device)
+                next_tensor = torch.full_like(next_tensor, self._sos, dtype=torch.float32).to(self.device)
                 tensor_target = torch.cat([next_tensor, batch], dim=1)  # add SOS token at t=0 to true input
 
                 for tensor_i in range(steps - 1):

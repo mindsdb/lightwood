@@ -5,8 +5,9 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 
 class DatetimeEncoder(BaseEncoder):
-    def __init__(self):
+    def __init__(self, sinusoidal=False):
         super(DatetimeEncoder, self).__init__()
+        self.sinusoidal = sinusoidal
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']
         self.constants = {'year': 3000.0, 'month': 12.0, 'day': 31.0, 'weekday': 7.0,
                           'hour': 24.0, 'minute': 60.0, 'second': 60.0}
@@ -17,7 +18,7 @@ class DatetimeEncoder(BaseEncoder):
 
         self._prepared = True
 
-    def encode(self, data, sinusoidal=False):
+    def encode(self, data):
         """
         Encodes a list of unix_timestamps
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
@@ -31,7 +32,7 @@ class DatetimeEncoder(BaseEncoder):
         for unix_timestamp in data:
 
             if unix_timestamp is None:
-                if sinusoidal:
+                if self.sinusoidal:
                     vector = [0, 1] * len(self.fields)
                 else:
                     vector = [0] * len(self.fields)
@@ -41,14 +42,14 @@ class DatetimeEncoder(BaseEncoder):
                 vector = [date.year / c['year'], date.month / c['month'], date.day / c['day'],
                           date.weekday() / c['weekday'], date.hour / c['hour'],
                           date.minute / c['minute'], date.second / c['second']]
-                if sinusoidal:
+                if self.sinusoidal:
                     vector = np.array([(np.sin(n), np.cos(n)) for n in vector]).flatten()
 
             ret.append(vector)
 
         return self._pytorch_wrapper(ret)
 
-    def decode(self, encoded_data, return_as_datetime=False, sinusoidal=False):
+    def decode(self, encoded_data, return_as_datetime=False):
         ret = []
         for vector in encoded_data.tolist():
 
@@ -56,7 +57,7 @@ class DatetimeEncoder(BaseEncoder):
                 ret.append(None)
 
             else:
-                if sinusoidal:
+                if self.sinusoidal:
                     vector = list(map(lambda x: np.arcsin(x), vector))[::2]
                 c = self.constants
                 dt = datetime.datetime(year=round(vector[0] * c['year']), month=round(vector[1] * c['month']),
