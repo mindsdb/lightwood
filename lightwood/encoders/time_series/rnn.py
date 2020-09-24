@@ -76,12 +76,12 @@ class RnnEncoder(BaseEncoder):
 
         # normalize data
         if self._normalizer:
-            self._normalizer.prepare_encoder(priming_data)
+            self._normalizer.prepare(priming_data)
 
         if previous_target_data is not None:
             target_dict = previous_target_data[0]
             normalizer = MinMaxNormalizer()  # TODO: here check subtype to see what normalizer is used
-            normalizer.prepare_encoder(target_dict['data'])
+            normalizer.prepare(target_dict['data'])
             target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
             self._target_ar_normalizer = normalizer
 
