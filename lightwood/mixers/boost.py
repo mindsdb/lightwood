@@ -12,19 +12,26 @@ class BoostMixer(BaseMixer):
     def __init__(self):
         super().__init__()
         self.targets = None
+        self.transformer = None
+        self.encoders = None
 
     def fit(self, train_ds, test_ds=None):
+        """
+        :param train_ds: DataSource
+        :param test_ds: DataSource
+        """
         self.fit_data_source(train_ds)
-
-        output_features = train_ds.config['output_features']
-
-        self.targets = {}
 
         # If test data is provided, use it for trainig
         if test_ds is not None:
             train_ds.extend(test_ds)
+
+        self.transformer = train_ds.transformer
+        self.encoders = train_ds.encoders
+
+        self.targets = {}
         
-        for output_feature in output_features:
+        for output_feature in train_ds.output_features:
             self.targets[output_feature['name']] = {
                 'type': output_feature['type']
             }
@@ -43,7 +50,6 @@ class BoostMixer(BaseMixer):
 
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
-                sample_weight = [1] * len(Y)
                 if weight_map is None:
                     sample_weight = [1] * len(Y)
                 else:
@@ -65,6 +71,10 @@ class BoostMixer(BaseMixer):
                 self.targets[target_col_name]['model'] = None
 
     def predict(self, when_data_source, include_extra_data=False):
+        """
+        :param when_data_source: DataSource
+        :param include_extra_data: bool
+        """
         when_data_source.transformer = self.transformer
         when_data_source.encoders = self.encoders
         _, _ = when_data_source[0]
@@ -76,12 +86,11 @@ class BoostMixer(BaseMixer):
         predictions = {}
 
         for target_col_name in self.targets:
-
             if self.targets[target_col_name]['model'] is None:
                 predictions[target_col_name] = None
             else:
                 predictions[target_col_name] = {}
-                predictions[target_col_name]['predictions'] = [x for x in self.targets[target_col_name]['model'].predict(X)]
+                predictions[target_col_name]['predictions'] = list(self.targets[target_col_name]['model'].predict(X))
 
                 try:
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
