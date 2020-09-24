@@ -7,7 +7,7 @@ class TestDatetimeEncoder(unittest.TestCase):
         data = [1555943147, None, 1555943147]
 
         enc = DatetimeEncoder()
-        enc.prepare_encoder([])
+        enc.prepare([])
         enc.decode(enc.encode(data))
 
     def test_sinusoidal_encoding(self):

@@ -24,7 +24,7 @@ class TestShortTextEncoder(unittest.TestCase):
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=True)
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
 
         assert not enc.cae.use_autoencoder
         assert enc.is_target is True
@@ -48,7 +48,7 @@ class TestShortTextEncoder(unittest.TestCase):
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=True)
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
 
         assert not enc.cae.use_autoencoder
         assert enc.is_target is True
@@ -72,7 +72,7 @@ class TestShortTextEncoder(unittest.TestCase):
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=False)
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
 
         assert not enc.cae.use_autoencoder
         assert enc.is_target is False
@@ -92,7 +92,7 @@ class TestShortTextEncoder(unittest.TestCase):
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=False)
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
 
         assert enc.cae.use_autoencoder
         assert enc.is_target is False
@@ -112,7 +112,7 @@ class TestShortTextEncoder(unittest.TestCase):
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=False, mode='concat')
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
 
         assert not enc.cae.use_autoencoder
         assert enc.is_target is False
@@ -134,7 +134,7 @@ class TestShortTextEncoder(unittest.TestCase):
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=False, mode='concat')
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
 
         assert enc.cae.use_autoencoder
         assert enc.is_target is False

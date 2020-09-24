@@ -4,17 +4,26 @@ import copy
 import random
 
 import numpy as np
+import pandas as pd
 from torch.utils.data import Dataset
 
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
-from lightwood.encoders import (NumericEncoder, CategoricalAutoEncoder,
-                                MultiHotEncoder, DistilBertEncoder, DatetimeEncoder,
-                                Img2VecEncoder, TsRnnEncoder, FlairEmbeddingEncoder, ShortTextEncoder, VocabularyEncoder)
+from lightwood.encoders import (
+    NumericEncoder,
+    CategoricalAutoEncoder,
+    MultiHotEncoder,
+    DistilBertEncoder,
+    DatetimeEncoder,
+    Img2VecEncoder,
+    TsRnnEncoder,
+    FlairEmbeddingEncoder,
+    ShortTextEncoder,
+    VocabularyEncoder
+)
 
 
 class SubSet(Dataset):
-
     def __init__(self, data_source, indexes):
         self.data_source = data_source
         self.index_mapping = {}
@@ -31,14 +40,14 @@ class SubSet(Dataset):
         return self.data_source.get_feature_names(where)
 
     def __getattribute__(self, name):
-        if name in ['configuration', 'encoders', 'transformer', 'training',
+        if name in ['config', 'encoders', 'transformer', 'training',
                     'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes']:
             return self.data_source.__getattribute__(name)
         else:
             return object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
-        if name in ['configuration', 'encoders', 'transformer', 'training',
+        if name in ['config', 'encoders', 'transformer', 'training',
                     'output_weights', 'dropout_dict', 'disable_cache']:
             return dict.__setattr__(self.data_source, name, value)
         else:
@@ -46,29 +55,25 @@ class SubSet(Dataset):
 
 
 class DataSource(Dataset):
-
-    def __init__(self, data_frame, configuration):
+    def __init__(self, data_frame, config, prepare_encoders=True):
         """
         Create a lightwood datasource from the data frame
         :param data_frame:
-        :param configuration
+        :param config
         """
-
+        self.subsets = {}
         self.data_frame = data_frame
-        self.configuration = configuration
-        self.encoders = {}
+        self.config = config
         self.transformer = None
         self.training = False  # Flip this flag if you are using the datasource while training
         self.output_weights = None
         self.dropout_dict = {}
         self.enable_dropout = False
-        self.disable_cache = not self.configuration['data_source']['cache_transformed_data']
-        self.subsets = {}
+        self.enable_cache = self.config['data_source']['cache_transformed_data']
         self.out_indexes = None
-        self.out_types = None
 
-        for col in self.configuration['input_features']:
-            if len(self.configuration['input_features']) > 1:
+        for col in self.config['input_features']:
+            if len(self.config['input_features']) > 1:
                 dropout = 0.1
             else:
                 dropout = 0.0
@@ -79,6 +84,22 @@ class DataSource(Dataset):
             self.dropout_dict[col['name']] = dropout
 
         self._clear_cache()
+
+        if prepare_encoders:
+            self.encoders = self._prepare_encoders()
+        else:
+            self.encoders = {}
+
+    def extend(self, df):
+        """
+        :df: pandas.DataFrame or DataSource
+        """
+        if isinstance(df, pd.DataFrame):
+            self.data_frame.append(df)
+        elif isinstance(df, DataSource):
+            self.data_frame.append(df.data_frame)
+        else:
+            raise TypeError(':df: must be either pandas.DataFrame or DataSource')
 
     def create_subsets(self, nr_subsets):
         subsets_indexes = {}
@@ -101,17 +122,27 @@ class DataSource(Dataset):
         self.encoded_cache = {}
         self.transformed_cache = None
 
-    def extractRandomSubset(self, percentage):
+    def subset(self, percentage):
+        """
+        Removes :percentage: of data randomly from itself and returns a new
+        datasource made from that data
+
+        :param percentage: float
+        """
         np.random.seed(int(round(percentage * 100000)))
+
         msk = np.random.rand(len(self.data_frame)) < (1 - percentage)
-        test_df = self.data_frame[~msk]
+
+        sub_df = self.data_frame[~msk]
         self.data_frame = self.data_frame[msk]
-        # clear caches
+
         self._clear_cache()
 
-        ds = DataSource(test_df, self.configuration)
+        ds = DataSource(sub_df, self.config, prepare_encoders=False)
         ds.encoders = self.encoders
         ds.transformer = self.transformer
+        ds.output_weights = self.output_weights
+
         return ds
 
     def __len__(self):
@@ -126,15 +157,15 @@ class DataSource(Dataset):
 
         dropout_features = None
 
-        if self.training and random.randint(0,3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
-            dropout_features = [feature['name'] for feature in self.configuration['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
+        if self.training and random.randint(0, 3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
+            dropout_features = [feature['name'] for feature in self.config['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
             # Make sure we never drop all the features, since this would make the row meaningless
-            if len(dropout_features) > len(self.configuration['input_features']):
+            if len(dropout_features) > len(self.config['input_features']):
                 dropout_features = dropout_features[:-1]
             #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
-        if not self.disable_cache:
+        if self.enable_cache:
             if self.transformed_cache is None:
                 self.transformed_cache = [None] * len(self)
 
@@ -145,12 +176,12 @@ class DataSource(Dataset):
 
         for feature_set in ['input_features', 'output_features']:
             sample[feature_set] = {}
-            for feature in self.configuration[feature_set]:
+            for feature in self.config[feature_set]:
                 col_name = feature['name']
                 col_config = self.get_column_config(col_name)
 
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
-                    if not ((dropout_features is not None and col_name in dropout_features) or self.disable_cache):
+                    if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache):
                         self.get_encoded_column_data(col_name)
 
                 # if we are dropping this feature, get the encoded value of None
@@ -160,7 +191,7 @@ class DataSource(Dataset):
                     if 'depends_on_column' in col_config:
                         custom_data[custom_data['depends_on_column']] = [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
-                elif self.disable_cache:
+                elif not self.enable_cache:
                     if col_name in self.data_frame:
                         custom_data = {col_name: [self.data_frame[col_name].iloc[idx]]}
                     else:
@@ -172,7 +203,7 @@ class DataSource(Dataset):
 
         # Create weights if not already created
         if self.output_weights is None:
-            for col_config in self.configuration['output_features']:
+            for col_config in self.config['output_features']:
                 if 'weights' in col_config:
 
                     weights = col_config['weights']
@@ -201,8 +232,9 @@ class DataSource(Dataset):
             if self.out_indexes is None:
                 self.out_indexes = self.transformer.out_indexes
 
-        if not self.disable_cache:
+        if self.enable_cache:
             self.transformed_cache[idx] = sample
+
         return sample
 
     def get_column_original_data(self, column_name):
@@ -212,7 +244,7 @@ class DataSource(Dataset):
 
         return self.data_frame[column_name].tolist()
 
-    def lookup_encoder_class(self, column_type, is_target):
+    def _lookup_encoder_class(self, column_type, is_target):
         default_encoder_classes = {
             ColumnDataTypes.NUMERIC: NumericEncoder,
             ColumnDataTypes.CATEGORICAL: CategoricalAutoEncoder,
@@ -236,10 +268,7 @@ class DataSource(Dataset):
 
         return encoder_class
 
-    def make_column_encoder(self,
-                            encoder_class,
-                            encoder_attrs=None,
-                            is_target=False):
+    def _make_column_encoder(self, encoder_class, encoder_attrs=None, is_target=False):
         encoder_instance = encoder_class(is_target=is_target)
         encoder_attrs = encoder_attrs or {}
         for attr in encoder_attrs:
@@ -247,47 +276,49 @@ class DataSource(Dataset):
                 setattr(encoder_instance, attr, encoder_attrs[attr])
         return encoder_instance
 
-    def prepare_column_encoder(self,
-                        config,
-                        is_target=False,
-                        training_data=None):
+    def _prepare_column_encoder(self, config, is_target=False, training_data=None):
         column_data = self.get_column_original_data(config['name'])
-        encoder_class = config.get('encoder_class',
-                                   self.lookup_encoder_class(config['type'], is_target))
+        encoder_class = config.get(
+            'encoder_class',
+            self._lookup_encoder_class(config['type'], is_target)
+        )
         encoder_attrs = config.get('encoder_attrs', {})
         encoder_attrs['secondary_type'] = config.get('secondary_type', None)
 
-        encoder_instance = self.make_column_encoder(encoder_class,
-                                                    encoder_attrs,
-                                                    is_target=is_target)
+        encoder_instance = self._make_column_encoder(
+            encoder_class,
+            encoder_attrs,
+            is_target=is_target
+        )
 
-        if training_data and 'training_data' in inspect.getargspec(encoder_instance.prepare_encoder).args:
-            encoder_instance.prepare_encoder(column_data,
-                                             training_data=training_data)
+        if training_data and 'training_data' in inspect.getargspec(encoder_instance.prepare).args:
+            encoder_instance.prepare(
+                column_data,
+                training_data=training_data
+            )
         else:
-            encoder_instance.prepare_encoder(column_data)
+            encoder_instance.prepare(column_data)
 
         return encoder_instance
 
-    def prepare_encoders(self):
-        """
-            Get the encoder for all the output and input column and preapre them
-            with all available data for that column.
+    @property
+    def out_types(self):
+        return [feature['type'] for feature in self.config['output_features']]
 
-            * Note: This method should only be called on the "main" training dataset, all
-            the other datasets should get their encoders and transformers
-            from the training dataset.
+    def _prepare_encoders(self):
         """
+        Get the encoder for all the output and input column and prepare them
+        with all available data for that column.
+        """
+        encoders = {}
+    
         input_encoder_training_data = {'targets': []}
-        self.out_types = [config['type'] for config in
-                          self.configuration['output_features']]
 
-        for config in self.configuration['output_features']:
+        for config in self.config['output_features']:
             column_name = config['name']
             column_data = self.get_column_original_data(column_name)
 
-            encoder_instance = self.prepare_column_encoder(config,
-                                                           is_target=True)
+            encoder_instance = self._prepare_column_encoder(config, is_target=True)
 
             input_encoder_training_data['targets'].append({
                 'encoded_output': encoder_instance.encode(column_data),
@@ -296,15 +327,35 @@ class DataSource(Dataset):
                 'output_type': config['type']
             })
 
-            self.encoders[column_name] = encoder_instance
+            encoders[column_name] = encoder_instance
 
-        for config in self.configuration['input_features']:
+        for config in self.config['input_features']:
             column_name = config['name']
-            encoder_instance = self.prepare_column_encoder(config,
-                                                           is_target=False,
-                                                           training_data=input_encoder_training_data)
+            encoder_instance = self._prepare_column_encoder(
+                config,
+                is_target=False,
+                training_data=input_encoder_training_data
+            )
 
-            self.encoders[column_name] = encoder_instance
+            encoders[column_name] = encoder_instance
+        
+        return encoders
+
+    def make_child(self, df):
+        """
+        :param df: DataFrame
+
+        :return: DataSource
+        """
+        child = DataSource(
+            df,
+            self.config,
+            prepare_encoders=False
+        )
+        child.transformer = self.transformer
+        child.encoders = self.encoders
+        child.output_weights = self.output_weights
+        return child
 
     def get_encoded_column_data(self, column_name, custom_data=None):
         if column_name in self.encoded_cache and custom_data is None:
@@ -327,16 +378,13 @@ class DataSource(Dataset):
                 arg2 = self.get_column_original_data(config['depends_on_column'])
             args.append(arg2)
 
-        if column_name in self.encoders:
-            encoded_vals = self.encoders[column_name].encode(*args)
-            # Cache the encoded data so we don't have to run the encoding,
-            # Don't cache custom_data
-            # (custom_data is usually used when running without cache or dropping out a feature for a certain pass)
-            if column_name not in self.encoded_cache and custom_data is None:
-                self.encoded_cache[column_name] = encoded_vals
-            return encoded_vals
-        else:
-            raise RuntimeError('`prepare_encoders` must be called before trying to encode data')
+        encoded_vals = self.encoders[column_name].encode(*args)
+        # Cache the encoded data so we don't have to run the encoding,
+        # Don't cache custom_data
+        # (custom_data is usually used when running without cache or dropping out a feature for a certain pass)
+        if column_name not in self.encoded_cache and custom_data is None:
+            self.encoded_cache[column_name] = encoded_vals
+        return encoded_vals
 
     def get_decoded_column_data(self, column_name, encoded_data, decoder_instance=None):
         """
@@ -356,15 +404,22 @@ class DataSource(Dataset):
         return decoded_data
 
     def get_feature_names(self, where='input_features'):
-        return [feature['name'] for feature in self.configuration[where]]
+        return [feature['name'] for feature in self.config[where]]
 
     def get_column_config(self, column_name):
         """
-        Get the config info for the feature given a configuration as defined in data_schemas definition.py
+        Get the config info for the feature given a config as defined in data_schemas definition.py
         :param column_name:
         :return:
         """
         for feature_set in ['input_features', 'output_features']:
-            for feature in self.configuration[feature_set]:
+            for feature in self.config[feature_set]:
                 if feature['name'] == column_name:
                     return feature
+        return None
+
+    def train(self):
+        self.training = True
+    
+    def eval(self):
+        self.training = False
