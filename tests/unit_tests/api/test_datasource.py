@@ -34,7 +34,9 @@ class TestDataSource(TestCase):
                     'type': 'categorical',
 
                 }
-            ]
+            ],
+
+            'data_source':{'cache_transformed_data': True}
         }
         config = predictor_config_schema.validate(config)
         n_points = 100
@@ -52,8 +54,7 @@ class TestDataSource(TestCase):
     def test_prepare_encoders(self):
         df, config = self.df, self.config
         ds = DataSource(df, config)
-        assert not ds.disable_cache
-        ds.prepare_encoders()
+        assert ds.enable_cache
 
         encoders = ds.encoders
 
@@ -84,8 +85,7 @@ class TestDataSource(TestCase):
         df, config = self.df, self.config
 
         ds = DataSource(df, config)
-        assert not ds.disable_cache
-        ds.prepare_encoders()
+        assert ds.enable_cache
 
         for column in ['x1', 'x2', 'y']:
             assert not column in ds.encoded_cache
@@ -96,8 +96,7 @@ class TestDataSource(TestCase):
         df, config = self.df, self.config
 
         ds = DataSource(df, config)
-        assert ds.disable_cache is False
-        ds.prepare_encoders()
+        assert ds.enable_cache
 
         assert ds.transformed_cache is None
         encoded_row = ds[0] # This creates ds.transformed_cache
@@ -112,8 +111,7 @@ class TestDataSource(TestCase):
         alternate_config = copy(config)
         alternate_config['data_source']['cache_transformed_data'] = False
         ds = DataSource(df, alternate_config)
-        assert ds.disable_cache is True
-        ds.prepare_encoders()
+        assert not ds.enable_cache
 
         for i in range(len(df)):
             encoded_row = ds[i]

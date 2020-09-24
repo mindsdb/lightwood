@@ -7,7 +7,7 @@ class TestDatetimeEncoder(unittest.TestCase):
         data = [1555943147, None, 1555943147]
 
         enc = DatetimeEncoder()
-        enc.prepare_encoder([])
+        enc.prepare([])
         enc.decode(enc.encode(data))
 
     def test_sinusoidal_encoding(self):
@@ -19,7 +19,7 @@ class TestDatetimeEncoder(unittest.TestCase):
         data = [d.timestamp() for d in dates]
 
         normalizer = DatetimeEncoder(sinusoidal=True)
-        normalizer.prepare_encoder([])
+        normalizer.prepare([])
 
         results = normalizer.encode(data)
         null = np.full_like(results, 0.5)

@@ -2,9 +2,16 @@ from functools import partial
 
 import torch
 from torch.utils.data import DataLoader
-from transformers import DistilBertModel, DistilBertForSequenceClassification, AlbertModel, \
-    AlbertForSequenceClassification, DistilBertTokenizer, AlbertTokenizer, AdamW, get_linear_schedule_with_warmup
-
+from transformers import (
+    DistilBertModel,
+    DistilBertForSequenceClassification,
+    AlbertModel,
+    AlbertForSequenceClassification,
+    DistilBertTokenizer,
+    AlbertTokenizer,
+    AdamW,
+    get_linear_schedule_with_warmup
+)
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet
@@ -12,6 +19,7 @@ from lightwood.mixers.helpers.shapes import *
 from lightwood.api.gym import Gym
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.logger import log
 
 
 class DistilBertEncoder(BaseEncoder):
@@ -56,7 +64,7 @@ class DistilBertEncoder(BaseEncoder):
         self.device, _ = get_devices()
 
     def _train_callback(self, error, real_buff, predicted_buff):
-        logging.info(f'{self.name} reached a loss of {error} while training !')
+        log.info(f'{self.name} reached a loss of {error} while training !')
 
     @staticmethod
     def categorical_train_function(model, data, gym, test=False):
@@ -104,9 +112,9 @@ class DistilBertEncoder(BaseEncoder):
 
         return self
 
-    def prepare_encoder(self, priming_data, training_data=None):
+    def prepare(self, priming_data, training_data=None):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         priming_data = [x if x is not None else '' for x in priming_data]
 
