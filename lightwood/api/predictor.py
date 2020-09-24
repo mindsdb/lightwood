@@ -2,6 +2,7 @@ import traceback
 import time
 
 import dill
+import pickle
 import pandas
 import numpy as np
 import torch
@@ -24,7 +25,7 @@ class Predictor:
         """
         if load_from_path is not None:
             with open(load_from_path, 'rb') as pickle_in:
-                self_dict = dill.load(pickle_in)
+                self_dict = pickle.load(pickle_in)
             self.__dict__ = self_dict
             self.convert_to_device()
             return
@@ -88,7 +89,7 @@ class Predictor:
 
         :param from_data: DataFrame or DataSource
             The data to learn from
-                
+
         :param test_data: DataFrame or DataSource
             The data to test accuracy and learn_error from
         """
@@ -211,15 +212,17 @@ class Predictor:
     def save(self, path_to):
         """
         Save trained model to a file.
-    
+
         :param path_to: str, full path of file, where we store results
         """
         with open(path_to, 'wb') as f:
             # Null out certain object we don't want to store
             if hasattr(self._mixer, '_nonpersistent'):
                 self._mixer._nonpersistent = {}
+            self.config['mixer']['kwargs']['callback_on_iter'] = None
+
 
             # Dump everything relevant to cpu before saving
             self.convert_to_device("cpu")
-            dill.dump(self.__dict__, f)
+            pickle.dump(self.__dict__, f)
             self.convert_to_device()

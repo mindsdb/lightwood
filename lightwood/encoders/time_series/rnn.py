@@ -68,11 +68,12 @@ class RnnEncoder(BaseEncoder):
         else:
             self.setup_nn(previous_target_data)
 
+
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
-            if not isinstance(priming_data[i][0], list):  # TODO: reverse the order: check if first row complies, then apply to all assuming format holds
+            if not isinstance(priming_data[i][0], list):
                 priming_data[i] = [priming_data[i]]  # add dimension for 1D timeseries
-            self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)  # TODO: this is actually fixed at Native... should we still check?
+            self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)  # TODO: this is set at Native... should we still check?
 
         # normalize data
         if self._normalizer:
@@ -80,7 +81,7 @@ class RnnEncoder(BaseEncoder):
 
         if previous_target_data is not None and len(previous_target_data) > 0:
             target_dict = previous_target_data[0]
-            normalizer = MinMaxNormalizer()  # TODO: here check subtype to see what normalizer is used
+            normalizer = MinMaxNormalizer()  # TODO: normalizer determined by subtype (for datetime previous_ columns support)
             normalizer.prepare(target_dict['data'])
             target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
             self._target_ar_normalizer = normalizer
@@ -102,7 +103,7 @@ class RnnEncoder(BaseEncoder):
                 for dp in data_points:
                     data_tensor = tensor_from_series(dp, self.device, self._n_dims,
                                                      self._eos, self._max_ts_length,
-                                                     self._normalizer)  # Todo: Normalizer here is inefficient, is being used each epoch! Move this out...
+                                                     self._normalizer)
                     batch.append(data_tensor)
                 batch = torch.cat(batch, dim=0).to(self.device)
 
