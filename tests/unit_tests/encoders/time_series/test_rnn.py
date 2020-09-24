@@ -20,7 +20,7 @@ class TestRnnEncoder(unittest.TestCase):
                 [300.0, 395.0, 400.0, 405.0, 500.0],
                 [0.0, 1e3, 1e6, 1e9, 1e12]]
         normalizer = MinMaxNormalizer()
-        normalizer.prepare_encoder(data)
+        normalizer.prepare(data)
         reconstructed = normalizer.decode(normalizer.encode(data))
         self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
 
