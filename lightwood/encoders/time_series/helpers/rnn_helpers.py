@@ -27,9 +27,7 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
 
     if normalizer:
         if isinstance(normalizer, MinMaxNormalizer):
-            series = torch.Tensor([normalizer.encode(s) for s in series]).transpose(0, 1)
-            if len(series.shape) > 2:
-                series = series.squeeze(2)
+            series = torch.Tensor([normalizer.encode(s)[0] for s in series]).transpose(0, 1)
         else:
             series = torch.Tensor([normalizer.encode(s) for s in series][0])
     else:
@@ -94,7 +92,7 @@ class MinMaxNormalizer:
 
     def encode(self, y):
         if not isinstance(y[0], list):
-            y = np.array(y).reshape(-1, 1)
+            y = np.array(y).reshape(1, -1)
         return self.scaler.transform(y)
 
     def decode(self, y):
