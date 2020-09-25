@@ -28,7 +28,7 @@ class RnnEncoder(BaseEncoder):
         self._eos = 0.0  # end of input sequence -- padding value for batches
         self._n_dims = ts_n_dims
         self._normalizer = None
-        self._target_ar_normalizer = None
+        self._target_ar_normalizers = []
         self._criterion = nn.MSELoss()
 
     def setup_nn(self, additional_targets=None):
@@ -68,7 +68,6 @@ class RnnEncoder(BaseEncoder):
         else:
             self.setup_nn(previous_target_data)
 
-
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
             if not isinstance(priming_data[i][0], list):
@@ -80,11 +79,11 @@ class RnnEncoder(BaseEncoder):
             self._normalizer.prepare(priming_data)
 
         if previous_target_data is not None and len(previous_target_data) > 0:
-            target_dict = previous_target_data[0]
-            normalizer = MinMaxNormalizer()  # TODO: normalizer determined by subtype (for datetime previous_ columns support)
-            normalizer.prepare(target_dict['data'])
-            target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
-            self._target_ar_normalizer = normalizer
+            for target_dict in previous_target_data:
+                normalizer = MinMaxNormalizer()  # TODO: normalizer determined by subtype (for datetime previous_ columns support)
+                normalizer.prepare(target_dict['data'])
+                target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
+                self._target_ar_normalizers.append(normalizer)
 
         # decrease batch_size for small datasets
         if batch_size >= len(priming_data):
@@ -189,7 +188,7 @@ class RnnEncoder(BaseEncoder):
                                              self._eos, normalizer=self._normalizer)
 
             if previous is not None:
-                target_tensor = torch.Tensor([previous]).unsqueeze(2).to(self.device)
+                target_tensor = torch.Tensor(previous).unsqueeze(2).to(self.device)
                 target_tensor[torch.isnan(target_tensor)] = 0.0
                 data_tensor = torch.cat((data_tensor, target_tensor), dim=-1)
 
@@ -223,10 +222,12 @@ class RnnEncoder(BaseEncoder):
             if not isinstance(column_data[i][0], list):
                 column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
 
-        # include autoregressive target data, currently supports only one additional column
+        # include autoregressive target data
+        ptd = []
         if previous_target_data is not None and len(previous_target_data) > 0:
-            normalizer = self._target_ar_normalizer
-            previous_target_data = normalizer.encode(previous_target_data)
+            for i, col in enumerate(previous_target_data):
+                normalizer = self._target_ar_normalizers[i]
+                ptd.append(normalizer.encode(col))
 
         ret = []
         next = []
@@ -234,7 +235,7 @@ class RnnEncoder(BaseEncoder):
         for i, val in enumerate(column_data):
             if get_next_count is None:
                 if previous_target_data is not None and len(previous_target_data) > 0:
-                    encoded = self._encode_one(val, previous=previous_target_data[i])
+                    encoded = self._encode_one(val, previous=[values[i] for values in ptd])
                 else:
                     encoded = self._encode_one(val)
             else:
