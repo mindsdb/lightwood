@@ -28,6 +28,8 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
     if normalizer:
         if isinstance(normalizer, MinMaxNormalizer):
             series = torch.Tensor([normalizer.encode(s) for s in series]).transpose(0, 1)
+            if len(series.shape) > 2:
+                series = series.squeeze(2)
         else:
             series = torch.Tensor([normalizer.encode(s) for s in series][0])
     else:
