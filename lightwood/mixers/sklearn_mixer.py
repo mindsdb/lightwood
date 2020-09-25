@@ -28,19 +28,15 @@ class SklearnMixer(BaseMixer):
         self.transformer = None
         self.encoders = None
 
-    def fit(self, train_ds, test_ds=None):
+    def fit(self, train_ds, test_ds):
         """
         :param train_ds: DataSource
         :param test_ds: DataSource
         """
         self.fit_data_source(train_ds)
-
-        if test_ds is None:
-            test_ds = train_ds.subset(0.1)
-        else:
-            self.fit_data_source(test_ds)
-            assert test_ds.transformer is train_ds.transformer
-            assert test_ds.encoders is train_ds.encoders
+        self.fit_data_source(test_ds)
+        assert test_ds.transformer is train_ds.transformer
+        assert test_ds.encoders is train_ds.encoders
 
         self.transformer = train_ds.transformer
         self.encoders = train_ds.encoders
