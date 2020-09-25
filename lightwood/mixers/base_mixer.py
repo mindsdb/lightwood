@@ -19,6 +19,7 @@ class BaseMixer:
             0.005, 0.995
         ]
         self.quantiles_pair = [9, 10]
+        self.targets = None
 
     def fit(self, train_ds, test_ds):
         """
@@ -34,6 +35,16 @@ class BaseMixer:
         for n, out_type in enumerate(ds.out_types):
             if out_type == COLUMN_DATA_TYPES.NUMERIC:
                 ds.encoders[ds.output_feature_names[n]].extra_outputs = len(self.quantiles) - 1
+
+        self.targets = {}
+        for output_feature in train_ds.output_features:
+            self.targets[output_feature['name']] = {
+                'type': output_feature['type']
+            }
+            if 'weights' in output_feature:
+                self.targets[output_feature['name']]['weights'] = output_feature['weights']
+            else:
+                self.targets[output_feature['name']]['weights'] = None
 
     def predict(self, when_data_source, include_extra_data=False):
         """

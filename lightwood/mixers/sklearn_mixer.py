@@ -35,8 +35,6 @@ class SklearnMixer(BaseMixer):
         """
         self.fit_data_source(train_ds)
 
-        self.targets = {}
-
         if test_ds is None:
             test_ds = train_ds.subset(0.1)
         else:
@@ -46,15 +44,6 @@ class SklearnMixer(BaseMixer):
 
         self.transformer = train_ds.transformer
         self.encoders = train_ds.encoders
-        
-        for output_feature in train_ds.output_features:
-            self.targets[output_feature['name']] = {
-                'type': output_feature['type']
-            }
-            if 'weights' in output_feature:
-                self.targets[output_feature['name']]['weights'] = output_feature['weights']
-            else:
-                self.targets[output_feature['name']]['weights'] = None
 
         X_train = []
         for row in train_ds:
