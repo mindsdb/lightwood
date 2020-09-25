@@ -126,16 +126,10 @@ class SklearnMixer(BaseMixer):
                     best_accuracy
                 ))
 
-                # TODO
-                # if self.quantiles is not None:
-                #     self.targets[target_col_name]['quantile_models'] = {}
-                #     for i, quantile in enumerate(self.quantiles):
-                #         self.targets[target_col_name]['quantile_models'][i] = best_model_class(
-                #             best_model_kwargs,
-                #             loss='quantile',
-                #             alpha=quantile
-                #         )
-                #         self.targets[target_col_name]['quantile_models'][i].fit(X, Y)
+                if self.quantiles is not None:
+                    self.targets[target_col_name]['quantile_models'] = {}
+                    for i, quantile in enumerate(self.quantiles):
+                        self.targets[target_col_name]['quantile_models'][i] = best_model_class(**best_model_kwargs)
 
             else:
                 self.targets[target_col_name]['model'] = None
@@ -150,7 +144,7 @@ class SklearnMixer(BaseMixer):
                 self.targets[target_col_name]['model'].fit(X, Y)
 
             if 'quantile_models' in self.targets[target_col_name]:
-                for model in self.targets[target_col_name]['quantile_models']:
+                for model in self.targets[target_col_name]['quantile_models'].values():
                     model.fit(X, Y)
     
     def predict(self, when_data_source, include_extra_data=False):
@@ -181,11 +175,11 @@ class SklearnMixer(BaseMixer):
                 except Exception as e:
                     pass
 
-                # if 'quantile_models' in self.targets[target_col_name]:
-                #     lower_quantiles = self.targets[target_col_name]['quantile_models'][0].predict(X)
-                #     upper_quantiles = self.targets[target_col_name]['quantile_models'][1].predict(X)
+                if 'quantile_models' in self.targets[target_col_name]:
+                    lower_quantiles = self.targets[target_col_name]['quantile_models'][0].predict(X)
+                    upper_quantiles = self.targets[target_col_name]['quantile_models'][1].predict(X)
 
-                #     predictions[target_col_name]['confidence_range'] = [[lower_quantiles[i],upper_quantiles[i]] for i in range(len(lower_quantiles))]
-                #     predictions[target_col_name]['quantile_confidences'] = [self.quantiles[1] - self.quantiles[0] for i in range(len(lower_quantiles))]
+                    predictions[target_col_name]['confidence_range'] = [[lower_quantiles[i],upper_quantiles[i]] for i in range(len(lower_quantiles))]
+                    predictions[target_col_name]['quantile_confidences'] = [self.quantiles[1] - self.quantiles[0] for i in range(len(lower_quantiles))]
 
         return predictions
