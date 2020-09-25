@@ -361,7 +361,10 @@ class DataSource(Dataset):
 
                 # add dependency on 'previous_' column (for now singular, plural later on)
                 if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
-                    config['depends_on_column'] = input_encoder_training_data['previous'][0]['name']
+                    try:
+                        config['depends_on_column'].append(input_encoder_training_data['previous'][0]['name'])
+                    except KeyError:
+                        config['depends_on_column'] = [input_encoder_training_data['previous'][0]['name']]
 
         return encoders
 
@@ -394,12 +397,15 @@ class DataSource(Dataset):
 
         config = self.get_column_config(column_name)
 
-        # See if the feature has dependencies in other columns  # TODO: this config param should be a list
+        # See if the feature has dependencies in other columns
         if 'depends_on_column' in config:
-            if custom_data is not None:
-                arg2 = custom_data[config['depends_on_column']]
-            else:
-                arg2 = self.get_column_original_data(config['depends_on_column'])
+            arg2 = []
+            for col in config['depends_on_column']:
+                if custom_data is not None:
+                    sublist = custom_data[col]
+                else:
+                    sublist = self.get_column_original_data(col)
+                arg2.append(sublist)
             args.append(arg2)
 
         encoded_vals = self.encoders[column_name].encode(*args)
