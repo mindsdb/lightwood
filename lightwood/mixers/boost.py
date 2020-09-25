@@ -29,17 +29,6 @@ class BoostMixer(BaseMixer):
         self.transformer = train_ds.transformer
         self.encoders = train_ds.encoders
 
-        self.targets = {}
-        
-        for output_feature in train_ds.output_features:
-            self.targets[output_feature['name']] = {
-                'type': output_feature['type']
-            }
-            if 'weights' in output_feature:
-                self.targets[output_feature['name']]['weights'] = output_feature['weights']
-            else:
-                self.targets[output_feature['name']]['weights'] = None
-
         X = []
 
         for row in train_ds:
