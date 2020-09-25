@@ -20,6 +20,7 @@ REGRESSION_MODELS = [
     (SGDRegressor, {}),
 ]
 
+
 class SklearnMixer(BaseMixer):
     def __init__(self):
         super().__init__()

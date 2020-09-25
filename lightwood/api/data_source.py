@@ -72,8 +72,14 @@ class DataSource(Dataset):
         self.enable_cache = self.config['data_source']['cache_transformed_data']
         self.out_indexes = None
 
-        for col in self.config['input_features']:
-            if len(self.config['input_features']) > 1:
+        self.out_types = [feature['type'] for feature in self.config['output_features']]
+        self.output_feature_names = [feature['name'] for feature in self.config['output_features']]
+        self.input_feature_names = [feature['name'] for feature in self.config['input_features']]
+        self.output_features = self.config['output_features']
+        self.input_features = self.config['input_features']
+
+        for col in self.input_features:
+            if len(self.input_features) > 1:
                 dropout = 0.1
             else:
                 dropout = 0.0
@@ -311,26 +317,6 @@ class DataSource(Dataset):
             encoder_instance.prepare(column_data)
 
         return encoder_instance
-
-    @property
-    def out_types(self):
-        return [feature['type'] for feature in self.config['output_features']]
-
-    @property
-    def output_feature_names(self):
-        return [feature['name'] for feature in self.config['output_features']]
-
-    @property
-    def input_feature_names(self):
-        return [feature['name'] for feature in self.config['input_features']]
-
-    @property
-    def output_features(self):
-        return self.config['output_features']
-
-    @property
-    def input_features(self):
-        return self.config['input_features']
 
     def _prepare_encoders(self):
         """
