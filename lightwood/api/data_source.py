@@ -182,7 +182,7 @@ class DataSource(Dataset):
 
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
                     if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache or
-                            'previous_' in col_name):  # TODO: fragile check for name
+                            (col_name.startswith('previous_') and feature_set == 'input_features')):
 
                         self.get_encoded_column_data(col_name)
 
@@ -200,7 +200,7 @@ class DataSource(Dataset):
                         custom_data = {col_name: [None]}
 
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
-                elif 'previous_' in col_name:   # TODO: fragile check for name
+                elif col_name.startswith('previous_') and feature_set == 'input_features':
                     pass
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
@@ -338,11 +338,12 @@ class DataSource(Dataset):
 
             encoders[column_name] = encoder_instance
 
+        previous_cols = []
         for config in self.config['input_features']:
             column_name = config['name']
-            if 'previous_' in column_name:  # TODO: fragile check, should be by position
+            if column_name.startswith('previous_'):
                 column_data = self.get_column_original_data(column_name)
-
+                previous_cols.append(column_name)
                 input_encoder_training_data['previous'].append({'data': column_data,
                                                                 'name': column_name,
                                                                 'output_type': config['type']
@@ -350,7 +351,7 @@ class DataSource(Dataset):
 
         for config in self.config['input_features']:
             column_name = config['name']
-            if 'previous_' not in column_name:  # TODO: fragile check, should be by position
+            if column_name not in previous_cols:
                 encoder_instance = self._prepare_column_encoder(config,
                                                                 is_target=False,
                                                                 training_data=input_encoder_training_data)

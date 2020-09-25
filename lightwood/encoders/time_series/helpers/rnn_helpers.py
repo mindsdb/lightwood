@@ -7,11 +7,12 @@ from sklearn.preprocessing import MinMaxScaler
 def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normalizer=None):
     """
     :param series: list of lists, corresponds to a time series: [[x1_1, ..., x1_n], [x2_1, ..., x2_n], ...]
-                   the series is zero-padded on each axis so that all dimensions have equal length
+                   the series will be padded to be (1, ts_length, n_dims)-shaped
     :param device: computing device that PyTorch backend uses
-    :param n_dims: will zero-pad dimensions until series_dimensions == n_dims
-    :param pad_value: value to pad each dimension in the time series, if needed
-    :param max_len: length to pad or truncate each time_series
+    :param n_dims: number of features in the time series
+    :param pad_value: value to pad the time series with, if needed
+    :param max_len: number of timesteps in the time_series, automatically determined if it's not passed
+    :param normalizer: optional, should have an .encode() method
     :return: series as a tensor ready for model consumption, shape (1, ts_length, n_dims)
     """
     # conversion to float
@@ -26,23 +27,23 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
 
     if normalizer:
         if isinstance(normalizer, MinMaxNormalizer):
-            tensor = torch.Tensor([normalizer.encode(s) for s in series]).transpose(0, 1)
+            series = torch.Tensor([normalizer.encode(s) for s in series]).transpose(0, 1)
         else:
-            tensor = torch.Tensor([normalizer.encode(s) for s in series][0])
+            series = torch.Tensor([normalizer.encode(s) for s in series][0])
 
-        if len(tensor.shape) > 2:
-            tensor = tensor.squeeze(2)
+        if len(series.shape) > 2:
+            series = series.squeeze(2)  # TODO: this only triggers in the test? weird
     else:
-        tensor = torch.Tensor(series).transpose(0, 1)
+        series = torch.Tensor(series).transpose(0, 1)
 
     # dimension padding
-    for _ in range(max(0, n_dims - tensor.shape[-1])):
-        pad = torch.full((tensor.shape[0], 1), pad_value)
-        tensor = torch.cat([tensor, pad], dim=-1)
+    for _ in range(max(0, n_dims - series.shape[-1])):
+        pad = torch.full((series.shape[0], 1), pad_value)
+        series = torch.cat([series, pad], dim=-1)
 
     # remove nans and add batch dimension
-    tensor[torch.isnan(tensor)] = 0.0
-    return tensor.unsqueeze(0).to(device)
+    series[torch.isnan(series)] = 0.0
+    return series.unsqueeze(0).to(device)
 
 
 class DecoderRNNNumerical(nn.Module):
