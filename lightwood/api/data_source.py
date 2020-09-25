@@ -294,6 +294,7 @@ class DataSource(Dataset):
             self._lookup_encoder_class(config['type'], is_target)
         )
         encoder_attrs = config.get('encoder_attrs', {})
+        encoder_attrs['secondary_type'] = config.get('secondary_type', None)
 
         encoder_instance = self._make_column_encoder(
             encoder_class,

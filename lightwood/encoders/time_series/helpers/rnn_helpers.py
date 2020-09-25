@@ -34,11 +34,12 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
 
     # normalize and transpose
     if normalizer:
-        series = normalizer.transform(np.array(series))
-    tensor = torch.transpose(torch.tensor(series, dtype=torch.float, device=device), 0, 1)
+        tensor = torch.Tensor([normalizer.encode(s) for s in series][0])
+    else:
+        tensor = torch.transpose(torch.Tensor(series), 0, 1)
 
     # add batch dimension
-    return tensor.view(-1, max_len, n_dims)
+    return tensor.unsqueeze(0).to(device)
 
 
 class DecoderRNNNumerical(nn.Module):
@@ -47,7 +48,7 @@ class DecoderRNNNumerical(nn.Module):
         self.hidden_size = hidden_size
         self.in_activation = nn.Sigmoid()
         self.dropout = nn.Dropout(0.2)
-        self.gru = nn.GRU(output_size, hidden_size)
+        self.gru = nn.GRU(output_size, hidden_size, batch_first=True)
         self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, input, hidden):
@@ -84,16 +85,14 @@ class MinMaxNormalizer:
         self.scaler = MinMaxScaler()
         self.factor = factor
 
-    def fit(self, x):
+    def prepare(self, x):
         X = np.array([j for i in x for j in i]).reshape(-1, 1)
         self.scaler.fit(X)
 
-    def transform(self, y):
+    def encode(self, y):
+        if not isinstance(y[0], list):
+            y = np.array(y).reshape(-1, 1)
         return self.scaler.transform(y)
 
-    def fit_transform(self, x):
-        self.fit(x)
-        return self.transform(x)
-
-    def inverse_transform(self, y):
+    def decode(self, y):
         return self.scaler.inverse_transform(y)
