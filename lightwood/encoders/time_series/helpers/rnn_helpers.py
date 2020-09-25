@@ -22,7 +22,7 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
     # timestep padding and truncating
     for i in range(len(series)):
         for _ in range(max(0, max_len - len(series[i]))):
-            series[i].append(pad_value)
+            series[i].insert(0, pad_value)
         series[i] = series[i][:max_len]
 
     if normalizer:
@@ -30,9 +30,6 @@ def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normaliz
             series = torch.Tensor([normalizer.encode(s) for s in series]).transpose(0, 1)
         else:
             series = torch.Tensor([normalizer.encode(s) for s in series][0])
-
-        if len(series.shape) > 2:
-            series = series.squeeze(2)  # TODO: this only triggers in the test? weird
     else:
         series = torch.Tensor(series).transpose(0, 1)
 
