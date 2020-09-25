@@ -3,6 +3,7 @@ import inspect
 import copy
 import random
 
+import torch
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
@@ -201,7 +202,7 @@ class DataSource(Dataset):
 
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
                 elif col_name.startswith('previous_') and feature_set == 'input_features':
-                    pass
+                    sample[feature_set][col_name] = torch.Tensor([])
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
