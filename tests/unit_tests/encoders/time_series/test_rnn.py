@@ -9,7 +9,7 @@ class TestRnnEncoder(unittest.TestCase):
 
     def test_padding(self):
         series = [[1, 2, 3], [2, 3], [3, 4, 5, 6], [4, 5, 6]]
-        target = [[1.0, 2.0, 3.0, 4.0, 0.0], [2.0, 3.0, 4.0, 5.0, 0.0], [3.0, 0.0, 5.0, 6.0, 0.0]]
+        target = [[1.0, 0.0, 3.0, 4.0, 0.0], [2.0, 2.0, 4.0, 5.0, 0.0], [3.0, 3.0, 5.0, 6.0, 0.0]]
         result = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3)
         self.assertEqual(result.tolist()[0], target)
 
