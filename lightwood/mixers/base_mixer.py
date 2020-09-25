@@ -37,7 +37,7 @@ class BaseMixer:
                 ds.encoders[ds.output_feature_names[n]].extra_outputs = len(self.quantiles) - 1
 
         self.targets = {}
-        for output_feature in train_ds.output_features:
+        for output_feature in ds.output_features:
             self.targets[output_feature['name']] = {
                 'type': output_feature['type']
             }
