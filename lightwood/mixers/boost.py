@@ -9,25 +9,14 @@ from lightwood.mixers import BaseMixer
 
 
 class BoostMixer(BaseMixer):
-    def __init__(self):
-        super().__init__()
-        self.targets = None
-        self.transformer = None
-        self.encoders = None
-
-    def fit(self, train_ds, test_ds=None):
+    def _fit(self, train_ds, test_ds=None):
         """
         :param train_ds: DataSource
         :param test_ds: DataSource
         """
-        self.fit_data_source(train_ds)
-
         # If test data is provided, use it for trainig
         if test_ds is not None:
-            train_ds.extend(test_ds)
-
-        self.transformer = train_ds.transformer
-        self.encoders = train_ds.encoders
+            train_ds.extend(test_ds.data_frame)
 
         X = []
 
@@ -59,15 +48,11 @@ class BoostMixer(BaseMixer):
             else:
                 self.targets[target_col_name]['model'] = None
 
-    def predict(self, when_data_source, include_extra_data=False):
+    def _predict(self, when_data_source, include_extra_data=False):
         """
         :param when_data_source: DataSource
         :param include_extra_data: bool
         """
-        when_data_source.transformer = self.transformer
-        when_data_source.encoders = self.encoders
-        _, _ = when_data_source[0]
-
         X = []
         for row in when_data_source:
             X.append(np.array(row[0]))

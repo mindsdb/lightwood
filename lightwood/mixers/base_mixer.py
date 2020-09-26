@@ -7,6 +7,7 @@ class BaseMixer:
     Base class for all mixers.
     - Overridden __init__ must only accept optional arguments.
     - Subclasses must call BaseMixer.__init__ for proper initialization.
+    - Subclasses must implement BaseMixer._fit and BaseMixer._predict
     """
     def __init__(self):
         self.dynamic_parameters = {}
@@ -20,36 +21,56 @@ class BaseMixer:
         ]
         self.quantiles_pair = [9, 10]
         self.targets = None
+        self.transformer = None
+        self.encoders = None
 
-    def fit(self, train_ds, test_ds):
+    def fit(self, train_ds, test_ds, **kwargs):
+        """
+        :param train_ds: DataSource
+        :param test_ds: DataSource
+        """
+        for ds in [train_ds, test_ds]:
+            for n, out_type in enumerate(ds.out_types):
+                if out_type == COLUMN_DATA_TYPES.NUMERIC:
+                    ds.encoders[ds.output_feature_names[n]].extra_outputs = len(self.quantiles) - 1
+
+        self.targets = {}
+        for output_feature in train_ds.output_features:
+            self.targets[output_feature['name']] = {'type': output_feature['type']}
+            if 'weights' in output_feature:
+                self.targets[output_feature['name']]['weights'] = output_feature['weights']
+            else:
+                self.targets[output_feature['name']]['weights'] = None
+
+        self.transformer = train_ds.transformer
+        self.encoders = train_ds.encoders
+
+        self._fit(train_ds, test_ds, **kwargs)
+
+    def _fit(self, train_ds, test_ds):
         """
         :param train_ds: DataSource
         :param test_ds: DataSource
         """
         raise NotImplementedError
 
-    def fit_data_source(self, ds):
-        """
-        :param ds: DataSource
-        """
-        for n, out_type in enumerate(ds.out_types):
-            if out_type == COLUMN_DATA_TYPES.NUMERIC:
-                ds.encoders[ds.output_feature_names[n]].extra_outputs = len(self.quantiles) - 1
-
-        self.targets = {}
-        for output_feature in ds.output_features:
-            self.targets[output_feature['name']] = {
-                'type': output_feature['type']
-            }
-            if 'weights' in output_feature:
-                self.targets[output_feature['name']]['weights'] = output_feature['weights']
-            else:
-                self.targets[output_feature['name']]['weights'] = None
-
-    def predict(self, when_data_source, include_extra_data=False):
+    def predict(self, when_data_source, **kwargs):
         """
         :param when_data_source: DataSource
-        :param include_extra_data: bool
+        """
+        assert self.transformer is not None or self.encoders is not None, 'first fit the mixer'
+        when_data_source.transformer = self.transformer
+        when_data_source.encoders = self.encoders
+
+        # why is this done? I assume it's a first-iter initialization of
+        # something and we can move it to DataSource.__iter__
+        _, _ = when_data_source[0]
+
+        return self._predict(when_data_source, **kwargs)
+
+    def _predict(self, when_data_source):
+        """
+        :param when_data_source: DataSource
         """
         raise NotImplementedError
 
