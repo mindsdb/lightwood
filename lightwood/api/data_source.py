@@ -61,18 +61,12 @@ class DataSource(Dataset):
                  data_frame,
                  config,
                  prepare_encoders=True,
-                 initialize_transformer=True,
-                 uid=None):
+                 initialize_transformer=True):
         """
         Create a lightwood datasource from the data frame
         :param data_frame:
         :param config
         """
-        if uid is None:
-            self.uid = ''.join(random.choices(string.ascii_letters + string.digits, k=64))
-        else:
-            self.uid = uid
-
         self.subsets = {}
         self.data_frame = data_frame
         self.config = config
@@ -169,7 +163,6 @@ class DataSource(Dataset):
         ds.encoders = self.encoders
         ds.transformer = self.transformer
         ds.output_weights = self.output_weights
-        ds.uid = self.uid
 
         return ds
 
@@ -379,7 +372,6 @@ class DataSource(Dataset):
         child.transformer = self.transformer
         child.encoders = self.encoders
         child.output_weights = self.output_weights
-        child.uid = self.uid
         return child
 
     def get_encoded_column_data(self, column_name, custom_data=None):
