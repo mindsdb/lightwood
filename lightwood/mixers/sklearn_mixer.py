@@ -22,25 +22,11 @@ REGRESSION_MODELS = [
 
 
 class SklearnMixer(BaseMixer):
-    def __init__(self):
-        super().__init__()
-        self.targets = None
-        self.transformer = None
-        self.encoders = None
-
-    def fit(self, train_ds, test_ds):
+    def _fit(self, train_ds, test_ds):
         """
         :param train_ds: DataSource
         :param test_ds: DataSource
         """
-        self.fit_data_source(train_ds)
-        self.fit_data_source(test_ds)
-        assert test_ds.transformer is train_ds.transformer
-        assert test_ds.encoders is train_ds.encoders
-
-        self.transformer = train_ds.transformer
-        self.encoders = train_ds.encoders
-
         X_train = []
         for row in train_ds:
             X_train.append(np.array(row[0]))
@@ -133,16 +119,11 @@ class SklearnMixer(BaseMixer):
                 for model in self.targets[target_col_name]['quantile_models'].values():
                     model.fit(X, Y)
     
-    def predict(self, when_data_source, include_extra_data=False):
+    def _predict(self, when_data_source, include_extra_data=False):
         """
         :param when_data_source: DataSource
         :param include_extra_data: bool
         """
-        assert self.transformer is not None and self.encoders is not None, 'first fit the mixer'
-        when_data_source.transformer = self.transformer
-        when_data_source.encoders = self.encoders
-        _, _ = when_data_source[0]
-
         X = []
         for row in when_data_source:
             X.append(np.array(row[0]))

@@ -19,16 +19,14 @@ from lightwood.logger import log
 
 
 class NnMixer(BaseMixer):
-    def __init__(
-        self,
-        selfaware=False,
-        deterministic=False,
-        callback_on_iter=None,
-        eval_every_x_epochs=20,
-        stop_training_after_seconds=None,
-        stop_model_building_after_seconds=None,
-        param_optimizer=None
-    ):
+    def __init__(self,
+                 selfaware=False,
+                 deterministic=False,
+                 callback_on_iter=None,
+                 eval_every_x_epochs=20,
+                 stop_training_after_seconds=None,
+                 stop_model_building_after_seconds=None,
+                 param_optimizer=None):
         """
         :param selfaware: bool
         :param deterministic: bool
@@ -142,21 +140,12 @@ class NnMixer(BaseMixer):
 
         return True
 
-    def fit(self, train_ds, test_ds, stop_training_after_seconds=None):
+    def _fit(self, train_ds, test_ds, stop_training_after_seconds=None):
         """
         :param stop_training_after_seconds: int
         """
         if stop_training_after_seconds is None:
             stop_training_after_seconds = self.stop_training_after_seconds
-
-        self.fit_data_source(train_ds)
-        self.fit_data_source(test_ds)
-
-        assert train_ds.transformer is test_ds.transformer
-        assert train_ds.encoders is test_ds.encoders
-
-        self.transformer = train_ds.transformer
-        self.encoders = train_ds.encoders
 
         input_sample, output_sample = train_ds[0]
 
@@ -435,11 +424,7 @@ class NnMixer(BaseMixer):
 
         return self.quantiles_pair
 
-    def predict(self, when_data_source, include_extra_data=False):
-        when_data_source.transformer = self.transformer
-        when_data_source.encoders = self.encoders
-        _, _ = when_data_source[0]
-
+    def _predict(self, when_data_source, include_extra_data=False):
         data_loader = DataLoader(
             when_data_source,
             batch_size=self.batch_size,
