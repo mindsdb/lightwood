@@ -152,7 +152,7 @@ class Predictor:
             when_dict = {key: [when[key]] for key in when}
             when_data = pandas.DataFrame(when_dict)
 
-        when_data_ds = DataSource(when_data, self.config)
+        when_data_ds = DataSource(when_data, self.config, prepare_encoders=False)
 
         when_data_ds.eval()
 
@@ -169,7 +169,7 @@ class Predictor:
             log.error("Please train the model before calculating accuracy")
             return
 
-        ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config)
+        ds = from_data if isinstance(from_data, DataSource) else DataSource(from_data, self.config, prepare_encoders=False)
         predictions = self._mixer.predict(ds, include_extra_data=True)
         accuracies = {}
 
