@@ -188,7 +188,7 @@ class RnnEncoder(BaseEncoder):
                                              self._eos, normalizer=self._normalizer)
 
             if previous is not None:
-                target_tensor = torch.Tensor(previous).unsqueeze(2).to(self.device)
+                target_tensor = torch.Tensor(previous).transpose(0, 1).unsqueeze(0).to(self.device)
                 target_tensor[torch.isnan(target_tensor)] = 0.0
                 data_tensor = torch.cat((data_tensor, target_tensor), dim=-1)
 
