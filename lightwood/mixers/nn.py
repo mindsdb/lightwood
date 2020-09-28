@@ -19,16 +19,14 @@ from lightwood.logger import log
 
 
 class NnMixer(BaseMixer):
-    def __init__(
-        self,
-        selfaware=False,
-        deterministic=False,
-        callback_on_iter=None,
-        eval_every_x_epochs=20,
-        stop_training_after_seconds=None,
-        stop_model_building_after_seconds=None,
-        param_optimizer=None
-    ):
+    def __init__(self,
+                 selfaware=False,
+                 deterministic=False,
+                 callback_on_iter=None,
+                 eval_every_x_epochs=20,
+                 stop_training_after_seconds=None,
+                 stop_model_building_after_seconds=None,
+                 param_optimizer=None):
         """
         :param selfaware: bool
         :param deterministic: bool
@@ -142,14 +140,12 @@ class NnMixer(BaseMixer):
 
         return True
 
-    def fit(self, train_ds, test_ds, stop_training_after_seconds=None):
+    def _fit(self, train_ds, test_ds, stop_training_after_seconds=None):
         """
         :param stop_training_after_seconds: int
         """
         if stop_training_after_seconds is None:
             stop_training_after_seconds = self.stop_training_after_seconds
-
-        self.fit_data_source(train_ds)
 
         input_sample, output_sample = train_ds[0]
 
@@ -157,7 +153,7 @@ class NnMixer(BaseMixer):
             self.dynamic_parameters,
             input_size=len(input_sample),
             output_size=len(output_sample),
-            nr_outputs=len(self.out_types),
+            nr_outputs=len(train_ds.out_types),
             deterministic=self.deterministic
         )
         self.net = self.net.train()
@@ -165,7 +161,7 @@ class NnMixer(BaseMixer):
         self.selfaware_net = SelfAware(
             input_size=len(input_sample),
             output_size=len(output_sample),
-            nr_outputs=len(self.out_types)
+            nr_outputs=len(train_ds.out_types)
         )
         self.selfaware_net = self.selfaware_net.train()
 
@@ -182,7 +178,7 @@ class NnMixer(BaseMixer):
             else:
                 output_weights = None
 
-            for k, output_type in enumerate(self.out_types):
+            for k, output_type in enumerate(train_ds.out_types):
                 if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
                     if output_weights is None:
                         weights_slice = None
@@ -428,11 +424,7 @@ class NnMixer(BaseMixer):
 
         return self.quantiles_pair
 
-    def predict(self, when_data_source, include_extra_data=False):
-        when_data_source.transformer = self.transformer
-        when_data_source.encoders = self.encoders
-        _, _ = when_data_source[0]
-
+    def _predict(self, when_data_source, include_extra_data=False):
         data_loader = DataLoader(
             when_data_source,
             batch_size=self.batch_size,
@@ -496,7 +488,7 @@ class NnMixer(BaseMixer):
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
 
-            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+            if when_data_source.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column] = {'predictions': [x[0] for x in decoded_predictions]}
 
                 if include_extra_data:
@@ -508,7 +500,7 @@ class NnMixer(BaseMixer):
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
 
-            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+            if when_data_source.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column]['confidence_range'] = []
                 predictions[output_column]['quantile_confidences'] = []
 

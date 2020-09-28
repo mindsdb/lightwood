@@ -1,6 +1,5 @@
 from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-from lightwood.mixers.helpers.transformer import Transformer
 
 
 class BaseMixer:
@@ -8,12 +7,10 @@ class BaseMixer:
     Base class for all mixers.
     - Overridden __init__ must only accept optional arguments.
     - Subclasses must call BaseMixer.__init__ for proper initialization.
+    - Subclasses must implement BaseMixer._fit and BaseMixer._predict
     """
     def __init__(self):
         self.dynamic_parameters = {}
-        self.input_column_names = None
-        self.output_column_names = None
-        self.out_types = None
         self.quantiles = [
             0.5,
             0.2, 0.8,
@@ -23,48 +20,60 @@ class BaseMixer:
             0.005, 0.995
         ]
         self.quantiles_pair = [9, 10]
-        self.encoders = None
+        self.targets = None
         self.transformer = None
+        self.encoders = None
 
-    def fit(self, train_ds, test_ds):
+    def fit(self, train_ds, test_ds, **kwargs):
+        """
+        :param train_ds: DataSource
+        :param test_ds: DataSource
+        """
+        assert train_ds.transformer is test_ds.transformer
+        assert train_ds.encoders is test_ds.encoders
+
+        for ds in [train_ds, test_ds]:
+            for n, out_type in enumerate(ds.out_types):
+                if out_type == COLUMN_DATA_TYPES.NUMERIC:
+                    ds.encoders[ds.output_feature_names[n]].extra_outputs = len(self.quantiles) - 1
+
+        self.targets = {}
+        for output_feature in train_ds.output_features:
+            self.targets[output_feature['name']] = {'type': output_feature['type']}
+            if 'weights' in output_feature:
+                self.targets[output_feature['name']]['weights'] = output_feature['weights']
+            else:
+                self.targets[output_feature['name']]['weights'] = None
+
+        self.transformer = train_ds.transformer
+        self.encoders = train_ds.encoders
+
+        self._fit(train_ds, test_ds, **kwargs)
+
+    def _fit(self, train_ds, test_ds):
         """
         :param train_ds: DataSource
         :param test_ds: DataSource
         """
         raise NotImplementedError
 
-    def fit_data_source(self, ds):
-        """
-        :param ds: DataSource
-        """
-        if self.input_column_names is None:
-            self.input_column_names = ds.get_feature_names('input_features')
-
-        if self.output_column_names is None:
-            self.output_column_names = ds.get_feature_names('output_features')
-
-        self.out_types = ds.out_types
-        for n, out_type in enumerate(self.out_types):
-            if out_type == COLUMN_DATA_TYPES.NUMERIC:
-                ds.encoders[self.output_column_names[n]].extra_outputs = len(self.quantiles) - 1
-
-        transformer_already_initialized = False
-        try:
-            if len(list(ds.transformer.feature_len_map.keys())) > 0:
-                transformer_already_initialized = True
-        except Exception:
-            pass
-
-        if not transformer_already_initialized:
-            ds.transformer = Transformer(self.input_column_names, self.output_column_names)
-
-        self.encoders = ds.encoders
-        self.transformer = ds.transformer
-
-    def predict(self, when_data_source, include_extra_data=False):
+    def predict(self, when_data_source, **kwargs):
         """
         :param when_data_source: DataSource
-        :param include_extra_data: bool
+        """
+        assert self.transformer is not None or self.encoders is not None, 'first fit the mixer'
+        when_data_source.transformer = self.transformer
+        when_data_source.encoders = self.encoders
+
+        # why is this done? I assume it's a first-iter initialization of
+        # something and we can move it to DataSource.__iter__
+        _, _ = when_data_source[0]
+
+        return self._predict(when_data_source, **kwargs)
+
+    def _predict(self, when_data_source):
+        """
+        :param when_data_source: DataSource
         """
         raise NotImplementedError
 

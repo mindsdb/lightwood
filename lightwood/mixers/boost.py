@@ -1,34 +1,22 @@
 import numpy as np
-from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
+from sklearn.ensemble import (
+    GradientBoostingClassifier,
+    GradientBoostingRegressor
+)
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.mixers import BaseMixer
 
 
 class BoostMixer(BaseMixer):
-    def __init__(self):
-        super().__init__()
-        self.targets = None
-
-    def fit(self, train_ds, test_ds=None):
-        self.fit_data_source(train_ds)
-
-        output_features = train_ds.config['output_features']
-
-        self.targets = {}
-
+    def _fit(self, train_ds, test_ds=None):
+        """
+        :param train_ds: DataSource
+        :param test_ds: DataSource
+        """
         # If test data is provided, use it for trainig
         if test_ds is not None:
-            train_ds.extend(test_ds)
-        
-        for output_feature in output_features:
-            self.targets[output_feature['name']] = {
-                'type': output_feature['type']
-            }
-            if 'weights' in output_feature:
-                self.targets[output_feature['name']]['weights'] = output_feature['weights']
-            else:
-                self.targets[output_feature['name']]['weights'] = None
+            train_ds.extend(test_ds.data_frame)
 
         X = []
 
@@ -40,11 +28,10 @@ class BoostMixer(BaseMixer):
 
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
-                sample_weight = [1] * len(Y)
-                # if weight_map is None:
-                #     sample_weight = [1] * len(Y)
-                # else:
-                #     sample_weight = [weight_map[val] for val in Y]
+                if weight_map is None:
+                    sample_weight = [1] * len(Y)
+                else:
+                    sample_weight = [weight_map[str(val)] for val in Y]
 
                 self.targets[target_col_name]['model'] = GradientBoostingClassifier(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X, Y, sample_weight=sample_weight)
@@ -61,11 +48,11 @@ class BoostMixer(BaseMixer):
             else:
                 self.targets[target_col_name]['model'] = None
 
-    def predict(self, when_data_source, include_extra_data=False):
-        when_data_source.transformer = self.transformer
-        when_data_source.encoders = self.encoders
-        _, _ = when_data_source[0]
-
+    def _predict(self, when_data_source, include_extra_data=False):
+        """
+        :param when_data_source: DataSource
+        :param include_extra_data: bool
+        """
         X = []
         for row in when_data_source:
             X.append(np.array(row[0]))
@@ -73,12 +60,11 @@ class BoostMixer(BaseMixer):
         predictions = {}
 
         for target_col_name in self.targets:
-
             if self.targets[target_col_name]['model'] is None:
                 predictions[target_col_name] = None
             else:
                 predictions[target_col_name] = {}
-                predictions[target_col_name]['predictions'] = [x for x in self.targets[target_col_name]['model'].predict(X)]
+                predictions[target_col_name]['predictions'] = list(self.targets[target_col_name]['model'].predict(X))
 
                 try:
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
