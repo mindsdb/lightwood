@@ -29,6 +29,9 @@ class BaseMixer:
         :param train_ds: DataSource
         :param test_ds: DataSource
         """
+        assert train_ds.transformer is test_ds.transformer
+        assert train_ds.encoders is test_ds.encoders
+
         for ds in [train_ds, test_ds]:
             for n, out_type in enumerate(ds.out_types):
                 if out_type == COLUMN_DATA_TYPES.NUMERIC:
