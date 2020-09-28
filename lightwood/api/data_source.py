@@ -4,6 +4,7 @@ import copy
 import random
 import string
 
+import torch
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
@@ -202,11 +203,13 @@ class DataSource(Dataset):
                 col_config = self.get_column_config(col_name)
 
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
-                    if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache):
+                    if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache or
+                            (col_name.startswith('previous_') and feature_set == 'input_features')):
+
                         self.get_encoded_column_data(col_name)
 
                 # if we are dropping this feature, get the encoded value of None
-                if dropout_features is not None and col_name in dropout_features:
+                if (dropout_features is not None and col_name in dropout_features):
                     custom_data = {col_name: [None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:
@@ -219,6 +222,8 @@ class DataSource(Dataset):
                         custom_data = {col_name: [None]}
 
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
+                elif col_name.startswith('previous_') and feature_set == 'input_features':
+                    sample[feature_set][col_name] = torch.Tensor([])
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
@@ -317,7 +322,12 @@ class DataSource(Dataset):
                 training_data=training_data
             )
         else:
-            encoder_instance.prepare(column_data)
+            # joint column data augmentation for time series
+            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target:
+                encoder_instance.prepare(column_data, previous_target_data=training_data['previous'])
+
+            else:
+                encoder_instance.prepare(column_data)
 
         return encoder_instance
 
@@ -328,7 +338,7 @@ class DataSource(Dataset):
         """
         encoders = {}
     
-        input_encoder_training_data = {'targets': []}
+        input_encoder_training_data = {'targets': [], 'previous': []}
 
         for config in self.config['output_features']:
             column_name = config['name']
@@ -345,16 +355,35 @@ class DataSource(Dataset):
 
             encoders[column_name] = encoder_instance
 
+        previous_cols = []
         for config in self.config['input_features']:
             column_name = config['name']
-            encoder_instance = self._prepare_column_encoder(
-                config,
-                is_target=False,
-                training_data=input_encoder_training_data
-            )
+            if column_name.startswith('previous_'):
+                column_data = self.get_column_original_data(column_name)
+                previous_cols.append(column_name)
+                input_encoder_training_data['previous'].append({'data': column_data,
+                                                                'name': column_name,
+                                                                'output_type': config['type']
+                                                                })
 
-            encoders[column_name] = encoder_instance
-        
+        for config in self.config['input_features']:
+            column_name = config['name']
+            if column_name not in previous_cols:
+                encoder_instance = self._prepare_column_encoder(config,
+                                                                is_target=False,
+                                                                training_data=input_encoder_training_data)
+
+                encoders[column_name] = encoder_instance
+
+                # add dependency on 'previous_' column (for now singular, plural later on)
+                if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
+                    for d in input_encoder_training_data['previous']:
+                        try:
+                            if not d['name'] in config['depends_on_column']:
+                                config['depends_on_column'].append(d['name'])
+                        except KeyError:
+                            config['depends_on_column'] = [d['name']]
+
         return encoders
 
     def make_child(self, df):
@@ -389,10 +418,13 @@ class DataSource(Dataset):
 
         # See if the feature has dependencies in other columns
         if 'depends_on_column' in config:
-            if custom_data is not None:
-                arg2 = custom_data[config['depends_on_column']]
-            else:
-                arg2 = self.get_column_original_data(config['depends_on_column'])
+            arg2 = []
+            for col in config['depends_on_column']:
+                if custom_data is not None:
+                    sublist = custom_data[col]
+                else:
+                    sublist = self.get_column_original_data(col)
+                arg2.append(sublist)
             args.append(arg2)
 
         encoded_vals = self.encoders[column_name].encode(*args)
