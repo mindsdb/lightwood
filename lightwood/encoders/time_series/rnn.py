@@ -28,9 +28,10 @@ class RnnEncoder(BaseEncoder):
         self._eos = 0.0  # end of input sequence -- padding value for batches
         self._n_dims = ts_n_dims
         self._normalizer = None
+        self._target_ar_normalizers = []
         self._criterion = nn.MSELoss()
 
-    def setup_nn(self):
+    def setup_nn(self, additional_targets=None):
         """This method must be executed after initializing, else self.secondary_type is unassigned"""
         if self.secondary_type == 'datetime':
             self._normalizer = DatetimeEncoder(sinusoidal=True)
@@ -38,8 +39,13 @@ class RnnEncoder(BaseEncoder):
         elif self.secondary_type == 'numeric':
             self._normalizer = MinMaxNormalizer()
 
-        self._encoder = EncoderRNNNumerical(input_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
-        self._decoder = DecoderRNNNumerical(output_size=self._n_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        total_dims = self._n_dims
+        if additional_targets:
+            for _ in additional_targets:
+                total_dims += 1  # We are assuming target dim == 1
+
+        self._encoder = EncoderRNNNumerical(input_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
         self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
 
@@ -48,29 +54,38 @@ class RnnEncoder(BaseEncoder):
         self._encoder = self._encoder.to(self.device)
         return self
 
-    def prepare(self, priming_data, feedback_hoop_function=None, batch_size=256):
+    def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
+        :param previous_target_data: tensor with encoded previous target values for autoregressive tasks
         :param feedback_hoop_function: [if you want to get feedback on the training process]
         :param batch_size
         :return:
         """
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
         else:
-            self.setup_nn()
+            self.setup_nn(previous_target_data)
 
         # Convert to array and determine max length:
         for i in range(len(priming_data)):
             if not isinstance(priming_data[i][0], list):
                 priming_data[i] = [priming_data[i]]  # add dimension for 1D timeseries
-            self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)
+            self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)  # TODO: this is set at Native... should we still check?
 
+        # normalize data
         if self._normalizer:
             self._normalizer.prepare(priming_data)
 
-        # decrease for small datasets
+        if previous_target_data is not None and len(previous_target_data) > 0:
+            for target_dict in previous_target_data:
+                normalizer = MinMaxNormalizer()  # TODO: normalizer determined by subtype (for datetime previous_ columns support)
+                normalizer.prepare(target_dict['data'])
+                target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
+                self._target_ar_normalizers.append(normalizer)
+
+        # decrease batch_size for small datasets
         if batch_size >= len(priming_data):
             batch_size = len(priming_data) // 2
 
@@ -81,7 +96,7 @@ class RnnEncoder(BaseEncoder):
 
             while data_idx < len(priming_data):
 
-                # batch building
+                # batch building, shape: (batch_size, timesteps, n_dims)
                 data_points = priming_data[data_idx:min(data_idx + batch_size, len(priming_data))]
                 batch = []
                 for dp in data_points:
@@ -89,15 +104,23 @@ class RnnEncoder(BaseEncoder):
                                                      self._eos, self._max_ts_length,
                                                      self._normalizer)
                     batch.append(data_tensor)
-
-                # shape: (batch_size, timesteps, n_dims)
                 batch = torch.cat(batch, dim=0).to(self.device)
-                data_idx += batch_size
+
+                # include autoregressive target data
+                if previous_target_data is not None and len(previous_target_data) > 0:
+                    for target_dict in previous_target_data:
+                        t_dp = target_dict['encoded_data'][data_idx:min(data_idx + batch_size, len(priming_data))]
+                        target_tensor = torch.Tensor(t_dp).unsqueeze(2).to(self.device)
+                        target_tensor[torch.isnan(target_tensor)] = 0.0
+
+                        # concatenate descriptors
+                        batch = torch.cat((batch, target_tensor), dim=-1)
 
                 # setup loss and optimizer
+                self._optimizer.zero_grad()
+                data_idx += batch_size
                 steps = batch.shape[1]
                 loss = 0
-                self._optimizer.zero_grad()
 
                 # encode
                 encoder_hidden = self._encoder.initHidden(self.device, batch_size=batch.shape[0])
@@ -148,7 +171,7 @@ class RnnEncoder(BaseEncoder):
 
         self._prepared = True
 
-    def _encode_one(self, data, initial_hidden=None, return_next_value=False):
+    def _encode_one(self, data, previous=None, initial_hidden=None, return_next_value=False):
         """
         This method encodes one single row of serial data
         :param data: multidimensional time series as list of lists [[dim1_data], [dim2_data], ...]
@@ -163,6 +186,12 @@ class RnnEncoder(BaseEncoder):
             # n_timesteps inferred from query
             data_tensor = tensor_from_series(data, self.device, self._n_dims,
                                              self._eos, normalizer=self._normalizer)
+
+            if previous is not None:
+                target_tensor = torch.Tensor(previous).transpose(0, 1).unsqueeze(0).to(self.device)
+                target_tensor[torch.isnan(target_tensor)] = 0.0
+                data_tensor = torch.cat((data_tensor, target_tensor), dim=-1)
+
             steps = data_tensor.shape[1]
             encoder_hidden = self._encoder.initHidden(self.device)
             encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
@@ -177,7 +206,7 @@ class RnnEncoder(BaseEncoder):
         else:
             return encoder_hidden
 
-    def encode(self, column_data, get_next_count=None):
+    def encode(self, column_data, previous_target_data=None, get_next_count=None):
         """
         Encode a list of time series data
         :param column_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...] to encode
@@ -193,12 +222,22 @@ class RnnEncoder(BaseEncoder):
             if not isinstance(column_data[i][0], list):
                 column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
 
+        # include autoregressive target data
+        ptd = []
+        if previous_target_data is not None and len(previous_target_data) > 0:
+            for i, col in enumerate(previous_target_data):
+                normalizer = self._target_ar_normalizers[i]
+                ptd.append(normalizer.encode(col))
+
         ret = []
         next = []
 
-        for val in column_data:
+        for i, val in enumerate(column_data):
             if get_next_count is None:
-                encoded = self._encode_one(val)
+                if previous_target_data is not None and len(previous_target_data) > 0:
+                    encoded = self._encode_one(val, previous=[values[i] for values in ptd])
+                else:
+                    encoded = self._encode_one(val)
             else:
                 if get_next_count <= 0:
                     raise Exception('get_next_count must be greater than 0')
