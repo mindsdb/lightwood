@@ -4,6 +4,12 @@ import torch.nn as nn
 
 
 def len_to_mask(lengths, zeros):
+    """
+    :param lengths: list of ints with the lengths of the sequences
+    :param zeros: bool. If false, the first lengths[i] values will be True and the rest will be false.
+            If true, the first values will be False and the rest True
+    :return: Boolean tensor of dimension (L, T) with L = len(lenghts) and T = lengths.max(), where with rows with lengths[i] True values followed by lengths.max()-lengths[i] False values. The True and False values are inverted if `zeros == True`
+    """
     # Clean trick from:
     # https://stackoverflow.com/questions/53403306/how-to-batch-convert-sentence-lengths-to-masks-in-pytorch
     mask = torch.arange(lengths.max())[None, :] < lengths[:, None]
@@ -64,6 +70,7 @@ class TransformerModel(nn.Module):
     def forward(self, src, lengths):
         device = src.device
         if self.src_mask is None or self.src_mask.size(0) != src.size(0):
+            # Attention mask to avoid attending to upcoming parts of the sequence
             self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
                 device
             )
