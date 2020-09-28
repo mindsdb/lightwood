@@ -361,10 +361,12 @@ class DataSource(Dataset):
 
                 # add dependency on 'previous_' column (for now singular, plural later on)
                 if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
-                    try:
-                        config['depends_on_column'].append(input_encoder_training_data['previous'][0]['name'])
-                    except KeyError:
-                        config['depends_on_column'] = [input_encoder_training_data['previous'][0]['name']]
+                    for d in input_encoder_training_data['previous']:
+                        try:
+                            if not d['name'] in config['depends_on_column']:
+                                config['depends_on_column'].append(d['name'])
+                        except KeyError:
+                            config['depends_on_column'] = [d['name']]
 
         return encoders
 
