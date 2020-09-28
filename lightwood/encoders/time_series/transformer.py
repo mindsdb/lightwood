@@ -114,7 +114,7 @@ class TransformerEncoder(BaseEncoder):
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of 1-dimensional time series [[list1], ..., [listT]]
         :param feedback_hoop_function: [if you want to get feedback on the training process]
-        :param batch_size
+        :param batch_size: int
         :return:
         """
         if self._prepared:
@@ -172,7 +172,7 @@ class TransformerEncoder(BaseEncoder):
         """
         Encode a list of time series data
         :param column_data: a list of 1-dimensional time series [[list1], ..., [listT]] to encode
-        :return: a list of encoded time series or if get_next_count !=0 two lists (encoded_values, projected_numbers)
+        :return: a list of encoded time series
         """
         if not self._prepared:
             raise RuntimeError(
@@ -187,9 +187,7 @@ class TransformerEncoder(BaseEncoder):
         column_data = pad_sequence(column_data).unsqueeze(-1)
         out = self._encoder(column_data, lengths_data)
         out = out.squeeze(-1).t()
-        print(out)
         out = list(torch.unbind(out))
-        print(out)
         # Remove the padding
         for i, (d, l) in enumerate(zip(out, lengths_data)):
             out[i] = list(d[:l])
