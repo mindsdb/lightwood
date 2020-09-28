@@ -40,6 +40,7 @@ class TransformerEncoder(BaseEncoder):
 
         self._prepared = False
         self.bptt = 35
+        self.gradient_norm_clip = 0.5
 
         # Lezcano: These should be global constants of the library
         self._sos = 0.0  # start of sequence for decoding
@@ -152,7 +153,7 @@ class TransformerEncoder(BaseEncoder):
                     )
                 loss = sum(losses)
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(self._encoder.parameters(), 0.5)
+                torch.nn.utils.clip_grad_norm_(self._encoder.parameters(), self.gradient_norm_clip)
                 self._optimizer.step()
 
                 total_loss += loss.item() * len(train_batch)
