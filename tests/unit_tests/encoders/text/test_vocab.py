@@ -15,7 +15,7 @@ class TestVocabularyEncoder(unittest.TestCase):
         sentences = [x.lower() for x in sentences]
 
         encoder = VocabularyEncoder()
-        encoder.prepare_encoder(sentences)
+        encoder.prepare(sentences)
 
         for sentence in sentences:
             encoded = encoder.encode([sentence])

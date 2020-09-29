@@ -34,9 +34,9 @@ class Img2VecEncoder(BaseEncoder):
         self.model.to(device, available_devices)
         return self
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         if self.model is None:
             if self.aim == ENCODER_AIM.SPEED:
@@ -79,7 +79,7 @@ class Img2VecEncoder(BaseEncoder):
             :return: a torch.floatTensor
         """
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         img_tensors = self.prepare(images)
         vec_arr = []
