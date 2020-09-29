@@ -13,9 +13,9 @@ class OneHotEncoder(BaseEncoder):
         super().__init__(is_target)
         self._lang = None
 
-    def prepare_encoder(self, priming_data, max_dimensions=20000):
+    def prepare(self, priming_data, max_dimensions=20000):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         self._lang = Lang('default')
         self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
@@ -42,7 +42,7 @@ class OneHotEncoder(BaseEncoder):
 
     def encode(self, column_data):
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         ret = []
         v_len = self._lang.n_words
 

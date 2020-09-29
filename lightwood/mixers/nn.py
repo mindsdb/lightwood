@@ -1,5 +1,4 @@
 import copy
-import logging
 import random
 import time
 
@@ -10,26 +9,46 @@ import operator
 
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.selfaware import SelfAware
-from lightwood.mixers.helpers.transformer import Transformer
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.quantile_loss import QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.mixers import BaseMixer
+from lightwood.logger import log
 
 
-class NnMixer:
-    def __init__(self, dynamic_parameters, config=None):
-        self.config = config
-        self.out_types = None
+class NnMixer(BaseMixer):
+    def __init__(self,
+                 selfaware=False,
+                 deterministic=False,
+                 callback_on_iter=None,
+                 eval_every_x_epochs=20,
+                 stop_training_after_seconds=None,
+                 stop_model_building_after_seconds=None,
+                 param_optimizer=None):
+        """
+        :param selfaware: bool
+        :param deterministic: bool
+        :param callback_on_iter: Callable[epoch, training_error, test_error, delta_mean, accuracy]
+        :param eval_every_x_epochs: int
+        :param stop_training_after_seconds: int
+        :param stop_model_building_after_seconds: int
+        :param param_optimizer: ?
+        """
+        super().__init__()
+
+        self.selfaware = selfaware
+        self.deterministic = deterministic
+        self.eval_every_x_epochs = eval_every_x_epochs
+        self.stop_training_after_seconds = stop_training_after_seconds
+        self.stop_model_building_after_seconds = stop_model_building_after_seconds
+        self.param_optimizer = param_optimizer
+
         self.net = None
         self.selfaware_net = None
         self.optimizer = None
         self.selfaware_optimizer = None
-        self.input_column_names = None
-        self.output_column_names = None
-        self.transformer = None
-        self.encoders = None
         self.optimizer_class = None
         self.optimizer_args = None
         self.selfaware_optimizer_args = None
@@ -39,7 +58,7 @@ class NnMixer:
         self.batch_size = 200
 
         self.nn_class = DefaultNet
-        self.dynamic_parameters = dynamic_parameters
+        self.dynamic_parameters = {}
         self.awareness_criterion = None
         self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
         self.selfaware_lr_factor = 1/2      # scales self-aware learning rate compared to mixer
@@ -49,8 +68,6 @@ class NnMixer:
 
         self.max_confidence_per_output = []
         self.monitor = None
-        self.quantiles = [0.5,  0.2,0.8,  0.1,0.9,  0.05,0.95,  0.02,0.98,  0.005,0.995]
-        self.quantiles_pair = [9,10]
         self.map_mean_sc_qi = None
 
         for k in CONFIG.MONITORING:
@@ -61,15 +78,21 @@ class NnMixer:
 
         self.total_iterations = 0
 
-        self._nonpersistent = {
-            'sampler': None
-        }
+        self._nonpersistent = {'sampler': None, 'callback': callback_on_iter}
 
-    def build_confidence_normalization_data(self, ds, subset_id=None):
-        """
-        :param ds:
-        :return:
-        """
+
+    def _default_on_iter(self, epoch, train_error, test_error, delta_mean, accuracy):
+        test_error_rounded = round(test_error, 4)
+        for col in accuracy:
+            value = accuracy[col]['value']
+            if accuracy[col]['function'] == 'r2_score':
+                value_rounded = round(value, 3)
+                log.info(f'We\'ve reached training epoch nr {epoch} with an r2 score of {value_rounded} on the testing dataset')
+            else:
+                value_pct = round(value * 100, 2)
+                log.info(f'We\'ve reached training epoch nr {epoch} with an accuracy of {value_pct}% on the testing dataset')
+
+    def _build_confidence_normalization_data(self, ds, subset_id=None):
         self.net = self.net.eval()
 
         ds.encoders = self.encoders
@@ -101,7 +124,7 @@ class NnMixer:
                 try:
                     confidences = criterion.estimate_confidence(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
                     loss_confidence_arr[k].extend(confidences)
-                except:
+                except Exception:
                     pass
 
         for k, _ in enumerate(self.criterion_arr):
@@ -117,10 +140,117 @@ class NnMixer:
 
         return True
 
-    def fit(self, train_ds, test_ds, callback=None, stop_training_after_seconds=None, eval_every_x_epochs=None):
+    def _fit(self, train_ds, test_ds, stop_training_after_seconds=None):
+        """
+        :param stop_training_after_seconds: int
+        """
+        if stop_training_after_seconds is None:
+            stop_training_after_seconds = self.stop_training_after_seconds
+
+        input_sample, output_sample = train_ds[0]
+
+        self.net = self.nn_class(
+            self.dynamic_parameters,
+            input_size=len(input_sample),
+            output_size=len(output_sample),
+            nr_outputs=len(train_ds.out_types),
+            deterministic=self.deterministic
+        )
+        self.net = self.net.train()
+
+        self.selfaware_net = SelfAware(
+            input_size=len(input_sample),
+            output_size=len(output_sample),
+            nr_outputs=len(train_ds.out_types)
+        )
+        self.selfaware_net = self.selfaware_net.train()
+
+        if self.batch_size < self.net.available_devices:
+            self.batch_size = self.net.available_devices
+
+        self.awareness_criterion = torch.nn.MSELoss()
+
+        if self.criterion_arr is None:
+            self.criterion_arr = []
+            self.unreduced_criterion_arr = []
+            if train_ds.output_weights is not None and train_ds.output_weights is not False:
+                output_weights = torch.Tensor(train_ds.output_weights).to(self.net.device)
+            else:
+                output_weights = None
+
+            for k, output_type in enumerate(train_ds.out_types):
+                if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
+                    if output_weights is None:
+                        weights_slice = None
+                    else:
+                        weights_slice = output_weights[train_ds.out_indexes[k][0]:train_ds.out_indexes[k][1]]
+
+                    self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
+                    self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
+                elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                    if output_weights is None:
+                        weights_slice = None
+                    else:
+                        weights_slice = output_weights[train_ds.out_indexes[k][0]:train_ds.out_indexes[k][1]]
+
+                    self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
+                    self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
+                elif output_type == COLUMN_DATA_TYPES.NUMERIC:
+                    self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
+                    self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
+                else:
+                    self.criterion_arr.append(torch.nn.MSELoss())
+                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+
+        self.optimizer_class = Ranger
+        if self.optimizer_args is None:
+            self.optimizer_args = {'lr': 0.0005}
+
+        if 'beta1' in self.dynamic_parameters:
+            self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'], 0.999)
+
+        for optimizer_arg_name in ['lr', 'k', 'N_sma_threshold']:
+            if optimizer_arg_name in self.dynamic_parameters:
+                self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
+
+        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+
+        self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
+        self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
+        self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
+
+        if stop_training_after_seconds is None:
+            stop_training_after_seconds = round(train_ds.data_frame.shape[0] * train_ds.data_frame.shape[1] / 5)
+
+        if self.stop_model_building_after_seconds is None:
+            self.stop_model_building_after_seconds = stop_training_after_seconds * 3
+
+        if self.param_optimizer is not None:
+            input_size = len(train_ds[0][0])
+            training_data_length = len(train_ds)
+            while True:
+                training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
+
+                # Some heuristics...
+                if training_time_per_iteration > input_size:
+                    if training_time_per_iteration > min((training_data_length / (4 * input_size)), 16 * input_size):
+                        break
+
+                self.param_optimizer.total_trials = self.param_optimizer.total_trials - 1
+                if self.param_optimizer.total_trials < 8:
+                    self.param_optimizer.total_trials = 8
+                    break
+
+            training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
+
+            self.dynamic_parameters = self.param_optimizer.evaluate(lambda dynamic_parameters: self.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
+
+            log.info('Using hyperparameter set: ', best_parameters)
+        else:
+            self.dynamic_parameters = {}
+
         started = time.time()
         log_reasure = time.time()
-        first_run = True
         stop_training = False
 
         for subset_iteration in [1, 2]:
@@ -143,13 +273,12 @@ class NnMixer:
                 best_model = None
 
                 #iterate over the iter_fit and see what the epoch and mixer error is
-                for epoch, training_error in enumerate(self.iter_fit(subset_train_ds, initialize=first_run, subset_id=subset_id)):
-                    first_run = False
+                for epoch, training_error in enumerate(self._iter_fit(subset_train_ds, subset_id=subset_id)):
 
                     # Log this every now and then so that the user knows it's running
                     if (int(time.time()) - log_reasure) > 30:
                         log_reasure = time.time()
-                        logging.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
+                        log.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
 
 
                     # Prime the model on each subset for a bit
@@ -158,8 +287,8 @@ class NnMixer:
 
                     # Once the training error is getting smaller, enable dropout to teach the network to predict without certain features
                     if subset_iteration > 1 and training_error < 0.4 and not train_ds.enable_dropout:
-                        eval_every_x_epochs = max(1, int(eval_every_x_epochs/2) )
-                        logging.info('Enabled dropout !')
+                        self.eval_every_x_epochs = max(1, int(self.eval_every_x_epochs / 2) )
+                        log.info('Enabled dropout !')
                         train_ds.enable_dropout = True
                         lowest_error = None
                         last_test_error = None
@@ -180,8 +309,8 @@ class NnMixer:
                         continue
 
                     # Once we are past the priming/warmup period, start training the selfaware network
-                    if subset_iteration > 1 and not self.is_selfaware and self.config['mixer']['selfaware'] and not self.stop_selfaware_training and training_error < 0.35:
-                        logging.info('Started selfaware training !')
+                    if subset_iteration > 1 and not self.is_selfaware and self.selfaware and not self.stop_selfaware_training and training_error < 0.35:
+                        log.info('Started selfaware training !')
                         self.start_selfaware_training = True
                         lowest_error = None
                         last_test_error = None
@@ -190,14 +319,14 @@ class NnMixer:
                         subset_test_error_delta_buff = []
                         continue
 
-                    if epoch % eval_every_x_epochs == 0:
-                        test_error = self.error(test_ds)
-                        subset_test_error = self.error(subset_test_ds, subset_id=subset_id)
-                        logging.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
+                    if epoch % self.eval_every_x_epochs == 0:
+                        test_error = self._error(test_ds)
+                        subset_test_error = self._error(subset_test_ds, subset_id=subset_id)
+                        log.info(f'Subtest test error: {subset_test_error} on subset {subset_id}, overall test error: {test_error}')
 
                         if lowest_error is None or test_error < lowest_error:
                             lowest_error = test_error
-                            best_model = self.get_model_copy()
+                            best_model = self._get_model_copy()
 
                         if last_subset_test_error is None:
                             pass
@@ -216,8 +345,10 @@ class NnMixer:
                         delta_mean = np.mean(test_error_delta_buff[-5:])
                         subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
 
-                        if callback is not None:
-                            callback(epoch, training_error, test_error, delta_mean)
+                        if self._nonpersistent['callback'] is not None:
+                            self._nonpersistent['callback'](epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
+                        else:
+                            self._default_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
 
                         # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > stop_training_after_seconds:
@@ -225,9 +356,9 @@ class NnMixer:
 
                         # If the trauining subset is overfitting on it's associated testing subset
                         if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
-                            logging.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
+                            log.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
 
-                            self.update_model(best_model)
+                            self._update_model(best_model)
 
 
                             if subset_id == subset_id_arr[-1]:
@@ -236,18 +367,18 @@ class NnMixer:
                                 break
 
                         if stop_training:
-                            self.update_model(best_model)
+                            self._update_model(best_model)
                             if self.is_selfaware:
-                                self.build_confidence_normalization_data(train_ds)
-                                self.adjust(test_ds)
+                                self._build_confidence_normalization_data(train_ds)
+                                self._adjust(test_ds)
 
-                            self.iter_fit(test_ds, initialize=first_run, max_epochs=1)
+                            self._iter_fit(test_ds, max_epochs=1)
                             self.encoders = train_ds.encoders
-                            logging.info('Finished training model !')
+                            log.info('Finished training model !')
                             break
 
-    def adjust(self, test_data_source):
-        predictions = self.predict(test_data_source, include_extra_data=True)
+    def _adjust(self, test_ds):
+        predictions = self.predict(test_ds, include_extra_data=True)
 
         narrowest_correct_qi_arr = []
         corr_conf_correct_qi_arr = []
@@ -282,7 +413,7 @@ class NnMixer:
         for qi in map_qi_mean_sc:
             self.map_mean_sc_qi[map_qi_mean_sc[qi]] = qi
 
-    def select_quantile(self, selfaware_confidence):
+    def _select_quantile(self, selfaware_confidence):
         if self.map_mean_sc_qi is None:
             return self.quantiles_pair
 
@@ -293,23 +424,20 @@ class NnMixer:
 
         return self.quantiles_pair
 
-    def predict(self, when_data_source, include_extra_data=False):
-        """
-        :param when_data_source:
-        :return:
-        """
-        when_data_source.transformer = self.transformer
-        when_data_source.encoders = self.encoders
-        _, _ = when_data_source[0]
-
-        data_loader = DataLoader(when_data_source, batch_size=self.batch_size, shuffle=False, num_workers=0)
+    def _predict(self, when_data_source, include_extra_data=False):
+        data_loader = DataLoader(
+            when_data_source,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=0
+        )
 
         # set model into evaluation mode in order to skip things such as Dropout
         self.net = self.net.eval()
 
         outputs = []
         awareness_arr = []
-        loss_confidence_arr = [[]] * len(when_data_source.out_indexes)
+        loss_confidence_arr = [[] for _ in when_data_source.out_indexes]
 
         for i, data in enumerate(data_loader, 0):
             inputs, _ = data
@@ -334,7 +462,7 @@ class NnMixer:
 
                         confidences = criterion.estimate_confidence(output[:,when_data_source.out_indexes[k][0]:when_data_source.out_indexes[k][1]], max_conf)
                         loss_confidence_arr[k].extend(confidences)
-                    except Exception as e:
+                    except Exception:
                         loss_confidence_arr[k] = None
 
                 output = output.to('cpu')
@@ -360,7 +488,7 @@ class NnMixer:
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
 
-            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+            if when_data_source.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column] = {'predictions': [x[0] for x in decoded_predictions]}
 
                 if include_extra_data:
@@ -372,7 +500,7 @@ class NnMixer:
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
 
-            if self.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
+            if when_data_source.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
                 predictions[output_column]['confidence_range'] = []
                 predictions[output_column]['quantile_confidences'] = []
 
@@ -382,7 +510,7 @@ class NnMixer:
                     else:
                         sc = pow(10,3)
 
-                    qp = self.select_quantile(sc)
+                    qp = self._select_quantile(sc)
                     predictions[output_column]['confidence_range'].append([pred[qp[0]],pred[qp[1]]])
                     predictions[output_column]['quantile_confidences'].append(self.quantiles[qp[1]] - self.quantiles[qp[0]])
 
@@ -392,7 +520,7 @@ class NnMixer:
             if include_extra_data:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
-        logging.info('Model predictions and decoding completed')
+        log.info('Model predictions and decoding completed')
 
         return predictions
 
@@ -408,11 +536,7 @@ class NnMixer:
         else:
             return -1
 
-    def error(self, ds, subset_id=None):
-        """
-        :param ds:
-        :return:
-        """
+    def _error(self, ds, subset_id=None):
         self.net = self.net.eval()
 
         ds.encoders = self.encoders
@@ -454,7 +578,7 @@ class NnMixer:
 
         return error
 
-    def get_model_copy(self):
+    def _get_model_copy(self):
         """
         get the actual mixer model
         :return: self.net
@@ -462,7 +586,7 @@ class NnMixer:
         self.optimizer.zero_grad()
         return copy.deepcopy(self.net)
 
-    def update_model(self, model):
+    def _update_model(self, model):
         """
         replace the current model with a model object
         :param model: a model object
@@ -476,122 +600,32 @@ class NnMixer:
         self.optimizer.zero_grad()
         self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
-    def fit_data_source(self, ds):
-        self.input_column_names = self.input_column_names \
-            if self.input_column_names is not None else ds.get_feature_names('input_features')
-        self.output_column_names = self.output_column_names \
-            if self.output_column_names is not None else ds.get_feature_names('output_features')
-
-        self.out_types = ds.out_types
-        for n, out_type in enumerate(self.out_types):
-            if out_type == COLUMN_DATA_TYPES.NUMERIC:
-                ds.encoders[self.output_column_names[n]].extra_outputs = len(self.quantiles) - 1
-
-        transformer_already_initialized = False
-        try:
-            if len(list(ds.transformer.feature_len_map.keys())) > 0:
-                transformer_already_initialized = True
-        except:
-            pass
-
-        if not transformer_already_initialized:
-            ds.transformer = Transformer(self.input_column_names, self.output_column_names)
-
-        self.encoders = ds.encoders
-        self.transformer = ds.transformer
-
-    def iter_fit(self, ds, initialize=True, subset_id=None, max_epochs=120000):
-        """
-        :param ds:
-        :return:
-        """
-        if initialize:
-            self.fit_data_source(ds)
-
-            input_sample, output_sample = ds[0]
-
-            self.net = self.nn_class(self.dynamic_parameters,
-                                     input_size=len(input_sample),
-                                     output_size=len(output_sample),
-                                     nr_outputs=len(self.out_types),
-                                     deterministic=self.config['mixer']['deterministic'])
-            self.net = self.net.train()
-
-            self.selfaware_net = SelfAware(input_size=len(input_sample),
-                                           output_size=len(output_sample),
-                                           nr_outputs=len(self.out_types))
-            self.selfaware_net = self.selfaware_net.train()
-
-            if self.batch_size < self.net.available_devices:
-                self.batch_size = self.net.available_devices
-
-            self.awareness_criterion = torch.nn.MSELoss()
-
-            if self.criterion_arr is None:
-                self.criterion_arr = []
-                self.unreduced_criterion_arr = []
-                if ds.output_weights is not None and ds.output_weights is not False:
-                    output_weights = torch.Tensor(ds.output_weights).to(self.net.device)
-                else:
-                    output_weights = None
-
-                for k, output_type in enumerate(self.out_types):
-                    if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
-                        if output_weights is None:
-                            weights_slice = None
-                        else:
-                            weights_slice = output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]]
-
-                        self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
-                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice,reduce=False))
-                    elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-                        if output_weights is None:
-                            weights_slice = None
-                        else:
-                            weights_slice = output_weights[ds.out_indexes[k][0]:ds.out_indexes[k][1]]
-
-                        self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
-                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
-                    elif output_type == COLUMN_DATA_TYPES.NUMERIC:
-                        self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
-                        self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
-                    else:
-                        self.criterion_arr.append(torch.nn.MSELoss())
-                        self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
-
-            self.optimizer_class = Ranger
-            if self.optimizer_args is None:
-                self.optimizer_args = {'lr': 0.0005}
-
-            if 'beta1' in self.dynamic_parameters:
-                self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'],0.999)
-
-            for optimizer_arg_name in ['lr','k','N_sma_threshold']:
-                if optimizer_arg_name in self.dynamic_parameters:
-                    self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
-
-            self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
-
-            self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
-            self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
-            self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
-
+    def _iter_fit(self, ds, subset_id=None, max_epochs=120000):
         if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+            data_loader = DataLoader(
+                ds,
+                batch_size=self.batch_size,
+                shuffle=True,
+                num_workers=0
+            )
         else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, num_workers=0,
-                                     sampler=self._nonpersistent['sampler'])
+            data_loader = DataLoader(
+                ds,
+                batch_size=self.batch_size,
+                num_workers=0,
+                sampler=self._nonpersistent['sampler']
+            )
 
         for epoch in range(max_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
             for i, data in enumerate(data_loader, 0):
                 if self.start_selfaware_training and not self.is_selfaware:
-                    logging.info('Starting to train selfaware network for better confidence determination !')
+                    log.info('Starting to train selfaware network for better confidence determination !')
                     self.is_selfaware = True
 
                 if self.stop_selfaware_training and self.is_selfaware:
-                    logging.info('Cannot train selfaware network, will fallback to using simpler confidence models !')
+                    log.info('Cannot train selfaware network, will fallback to using simpler confidence models !')
                     self.is_selfaware = False
 
                 self.total_iterations += 1
@@ -623,7 +657,10 @@ class NnMixer:
                 if self.is_selfaware:
                     unreduced_losses = []
                     for k, criterion in enumerate(self.unreduced_criterion_arr):
-                        target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                        target_loss = criterion(
+                            outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]],
+                            labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
+                        )
 
                         target_loss = target_loss.tolist()
                         if type(target_loss[0]) == type([]):
@@ -650,7 +687,7 @@ class NnMixer:
                 loss.backward()
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
-                if CONFIG.MONITORING['network_heatmap'] and random.randint(0,1000) > 900:
+                if CONFIG.MONITORING['network_heatmap'] and random.randint(0, 1000) > 900:
                     weights = []
                     gradients = []
                     layer_name = []
@@ -695,4 +732,58 @@ class NnMixer:
     def to(self, device, available_devices):
         self.net.to(device, available_devices)
         self.selfaware_net.to(device, available_devices)
+        for enc in self.encoders:
+            self.encoders[enc].to(device, available_devices)
         return self
+
+
+    def calculate_accuracy(self, ds):
+        predictions = self.predict(ds, include_extra_data=True)
+        accuracies = {}
+
+        for output_column in [feature['name'] for feature in ds.config['output_features']]:
+
+            col_type = ds.get_column_config(output_column)['type']
+
+            if col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                reals = [tuple(x) for x in ds.get_column_original_data(output_column)]
+                preds = [tuple(x) for x in predictions[output_column]['predictions']]
+            else:
+                reals = [str(x) for x in ds.get_column_original_data(output_column)]
+                preds = [str(x) for x in predictions[output_column]['predictions']]
+
+            if 'weights' in ds.get_column_config(output_column):
+                weight_map = ds.get_column_config(output_column)['weights']
+            else:
+                weight_map = None
+
+            accuracy = BaseMixer._apply_accuracy_function(
+                ds.get_column_config(output_column)['type'],
+                reals,
+                preds,
+                weight_map=weight_map,
+                encoder=ds.encoders[output_column]
+            )
+
+            if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
+                ds.encoders[output_column].decode_log = True
+                preds = ds.get_decoded_column_data(
+                    output_column,
+                    predictions[output_column]['encoded_predictions']
+                )
+
+                alternative_accuracy = BaseMixer._apply_accuracy_function(
+                    ds.get_column_config(output_column)['type'],
+                    reals,
+                    preds,
+                    weight_map=weight_map
+                )
+
+                if alternative_accuracy['value'] > accuracy['value']:
+                    accuracy = alternative_accuracy
+                else:
+                    ds.encoders[output_column].decode_log = False
+
+            accuracies[output_column] = accuracy
+
+        return accuracies

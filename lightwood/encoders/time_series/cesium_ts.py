@@ -143,7 +143,7 @@ class CesiumTsEncoder(BaseEncoder):
         super().__init__(is_target)
         self._features = features
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         pass
 
     def encode(self, values_data, times=None):
