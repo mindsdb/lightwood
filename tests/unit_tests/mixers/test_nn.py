@@ -6,7 +6,7 @@ from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.mixers import NnMixer
 
 
-class TestBoostMixer(unittest.TestCase):
+class TestNnMixer(unittest.TestCase):
     def test_fit_and_predict(self):
         config = {
             'input_features': [
