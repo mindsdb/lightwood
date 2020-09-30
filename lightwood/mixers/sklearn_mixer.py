@@ -48,12 +48,13 @@ class SklearnMixer(BaseMixer):
             Y_train = train_ds.get_column_original_data(target_col_name)
             Y_test = test_ds.get_column_original_data(target_col_name)
 
+
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
                 if weight_map is None:
                     sample_weight = [1] * len(Y_train)
                 else:
-                    sample_weight = [weight_map[str(val)] for val in Y_train]
+                    sample_weight = [weight_map[val] for val in Y_train]
 
                 model_classes_and_accuracies = []
                 for model_class, model_kwargs in CLASSIFICATION_MODELS:
@@ -64,13 +65,18 @@ class SklearnMixer(BaseMixer):
                         sample_weight=sample_weight
                     )
                     
-                    accuracy = self._model_accuracy(
-                        model,
-                        target_col_name,
-                        self.targets[target_col_name]['type'],
-                        X_test,
-                        Y_test
-                    )
+                    # accuracy = balanced_accuracy_score(
+                    #     Y_test,
+                    #     model.predict(X_test)
+                    # )
+
+                    accuracy = BaseMixer._apply_accuracy_function(
+                        COLUMN_DATA_TYPES.CATEGORICAL,
+                        Y_test,
+                        model.predict(X_test),
+                        weight_map,
+                        self.encoders[target_col_name]
+                    )['value']
 
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
@@ -89,10 +95,7 @@ class SklearnMixer(BaseMixer):
                 if weight_map is None:
                     sample_weight = [1] * len(Y_train)
                 else:
-                    if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-                        sample_weight = [weight_map[val] for val in Y_train]
-                    else:
-                        sample_weight = [weight_map[str(val)] for val in Y_train]
+                    sample_weight = [weight_map[val] for val in Y_train]
 
                 model_classes_and_accuracies = []
                 for model_class, model_kwargs in CLASSIFICATION_MODELS:
@@ -106,13 +109,13 @@ class SklearnMixer(BaseMixer):
                         sample_weight=sample_weight
                     )
                     
-                    accuracy = self._model_accuracy(
-                        model,
-                        target_col_name,
-                        self.targets[target_col_name]['type'],
-                        X_test,
-                        Y_test
-                    )
+                    accuracy = BaseMixer._apply_accuracy_function(
+                        COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL,
+                        Y_test,
+                        model.predict(X_test),
+                        weight_map,
+                        self.encoders[target_col_name]
+                    )['value']
 
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
@@ -134,14 +137,17 @@ class SklearnMixer(BaseMixer):
                     model = model_class(**model_kwargs)
                     model.fit(X_train, Y_train)
 
-                    accuracy = self._model_accuracy(
-                        model,
-                        target_col_name,
-                        self.targets[target_col_name]['type'],
-                        X_test,
+                    # accuracy = r2_score(
+                    #     Y_test,
+                    #     model.predict(X_test)
+                    # )
+                    accuracy = BaseMixer._apply_accuracy_function(
+                        COLUMN_DATA_TYPES.NUMERIC,
                         Y_test,
-                        sample_weight
-                    )
+                        model.predict(X_test),
+                        weight_map,
+                        self.encoders[target_col_name]
+                    )['value']
 
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
@@ -162,7 +168,8 @@ class SklearnMixer(BaseMixer):
 
             else:
                 self.targets[target_col_name]['model'] = None
-        
+                continue
+            
         # Fit best model of each column on [train_ds + test_ds]
         for target_col_name in self.targets:
             Y_train = train_ds.get_column_original_data(target_col_name)
@@ -182,31 +189,6 @@ class SklearnMixer(BaseMixer):
                 for model in self.targets[target_col_name]['quantile_models'].values():
                     model.fit(X, Y)
     
-    def _model_accuracy(self, model, column, dtype, x_test, y_test):
-        reals = y_test
-        preds = model.predict(x_test)
-
-        accuracy = BaseMixer._apply_accuracy_function(
-            dtype,
-            reals,
-            preds,
-            encoder=self.encoders[column]
-        )
-
-        if isinstance(model, MultiOutputClassifier):
-            model_name = model.estimator.__class__.__name__
-        else:
-            model_name = model.__class__.__name__
-    
-        print('[MODEL/COLUMN/ACCURACY/ACCURACY_FUNCTION]: {}/{}/{}/{}'.format(
-            model_name,
-            column,
-            accuracy['value'],
-            accuracy['function']
-        ))
-
-        return accuracy['value']
-
     def _predict(self, when_data_source, include_extra_data=False):
         """
         :param when_data_source: DataSource
@@ -234,7 +216,7 @@ class SklearnMixer(BaseMixer):
 
                 try:
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
-                except Exception as e:
+                except Exception:
                     pass
 
                 if 'quantile_models' in self.targets[target_col_name]:
