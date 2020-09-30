@@ -4,7 +4,7 @@ from sklearn.svm import SVC
 from sklearn.linear_model import SGDClassifier, SGDRegressor, LinearRegression
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import r2_score, balanced_accuracy_score
+from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.multioutput import MultiOutputClassifier
 
@@ -65,18 +65,10 @@ class SklearnMixer(BaseMixer):
                         sample_weight=sample_weight
                     )
                     
-                    # accuracy = balanced_accuracy_score(
-                    #     Y_test,
-                    #     model.predict(X_test)
-                    # )
-
-                    accuracy = BaseMixer._apply_accuracy_function(
-                        COLUMN_DATA_TYPES.CATEGORICAL,
+                    accuracy = balanced_accuracy_score(
                         Y_test,
-                        model.predict(X_test),
-                        weight_map,
-                        self.encoders[target_col_name]
-                    )['value']
+                        model.predict(X_test)
+                    )
 
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
@@ -108,15 +100,12 @@ class SklearnMixer(BaseMixer):
                         self.binarizers[target_col_name].fit_transform(Y_train).toarray(),
                         sample_weight=sample_weight
                     )
-                    
-                    accuracy = BaseMixer._apply_accuracy_function(
-                        COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL,
-                        Y_test,
-                        model.predict(X_test),
-                        weight_map,
-                        self.encoders[target_col_name]
-                    )['value']
 
+                    accuracy = accuracy_score(
+                        self.binarizers[target_col_name].transform(Y_test),
+                        model.predict(X_test)
+                    )
+                    
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
                         accuracy
@@ -137,17 +126,10 @@ class SklearnMixer(BaseMixer):
                     model = model_class(**model_kwargs)
                     model.fit(X_train, Y_train)
 
-                    # accuracy = r2_score(
-                    #     Y_test,
-                    #     model.predict(X_test)
-                    # )
-                    accuracy = BaseMixer._apply_accuracy_function(
-                        COLUMN_DATA_TYPES.NUMERIC,
+                    accuracy = r2_score(
                         Y_test,
-                        model.predict(X_test),
-                        weight_map,
-                        self.encoders[target_col_name]
-                    )['value']
+                        model.predict(X_test)
+                    )
 
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
