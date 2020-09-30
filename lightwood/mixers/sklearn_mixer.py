@@ -194,7 +194,9 @@ class SklearnMixer(BaseMixer):
                         )
                     )
                 else:
-                    predictions[target_col_name]['predictions'] = list(self.targets[target_col_name]['model'].predict(X))
+                    predictions[target_col_name]['predictions'] = list(
+                        self.targets[target_col_name]['model'].predict(X)
+                    )
 
                 try:
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
