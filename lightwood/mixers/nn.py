@@ -736,7 +736,6 @@ class NnMixer(BaseMixer):
             self.encoders[enc].to(device, available_devices)
         return self
 
-
     def calculate_accuracy(self, ds):
         predictions = self.predict(ds, include_extra_data=True)
         accuracies = {}

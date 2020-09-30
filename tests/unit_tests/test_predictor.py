@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 from lightwood import Predictor
-from lightwood.mixers import NnMixer, BoostMixer
+from lightwood.mixers import NnMixer#, BoostMixer
 
 
 class TestPredictor(unittest.TestCase):
