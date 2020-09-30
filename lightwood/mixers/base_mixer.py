@@ -180,6 +180,9 @@ class BaseMixer:
                 for val in reals:
                     sample_weight.append(weight_map[val])
 
+            if encoder is None:
+                raise ValueError('you must provide encoder to compue accuracy for tags data type')
+
             encoded_reals = encoder.encode(reals)
             encoded_preds = encoder.encode(preds)
 
@@ -193,13 +196,13 @@ class BaseMixer:
             for val in reals:
                 try:
                     reals_fixed.append(float(val))
-                except:
+                except Exception:
                     reals_fixed.append(0)
 
             for val in preds:
                 try:
                     preds_fixed.append(float(val))
-                except:
+                except Exception:
                     preds_fixed.append(0)
 
             accuracy = {

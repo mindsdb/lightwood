@@ -10,7 +10,6 @@ import torch
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.config.config import CONFIG
-from lightwood.mixers import NnMixer, BaseMixer, BoostMixer
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 from lightwood.logger import log
