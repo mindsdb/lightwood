@@ -23,6 +23,7 @@ class RnnEncoder(BaseEncoder):
         self._train_iters = train_iters  # training epochs
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
+        self._is_setup = False
         self._max_ts_length = 0
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
@@ -48,10 +49,13 @@ class RnnEncoder(BaseEncoder):
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
         self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
+        self._is_setup = True
 
     def to(self, device, available_devices):
-        self.device = device
-        self._encoder = self._encoder.to(self.device)
+        if self._is_setup:
+            self.device = device
+            self._encoder = self._encoder.to(self.device)
+            self._decoder = self._decoder.to(self.device)
         return self
 
     def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
