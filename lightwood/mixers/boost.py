@@ -47,7 +47,7 @@ class BoostMixer(BaseMixer):
                 if weight_map is None:
                     sample_weight = [1] * len(Y)
                 else:
-                    sample_weight = [weight_map[val] for val in Y_train]
+                    sample_weight = [weight_map[val] for val in Y]
 
                 self.binarizers[target_col_name] = MultiLabelBinarizer(sparse_output=True)
                 self.targets[target_col_name]['model'] = MultiOutputClassifier(

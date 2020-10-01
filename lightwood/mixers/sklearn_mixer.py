@@ -146,7 +146,6 @@ class SklearnMixer(BaseMixer):
 
             else:
                 self.targets[target_col_name]['model'] = None
-                continue
             
         # Fit best model of each column on [train_ds + test_ds]
         for target_col_name in self.targets:

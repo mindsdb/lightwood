@@ -177,7 +177,7 @@ class BaseMixer:
                 sample_weight = [weight_map[val] for val in reals]
 
             if encoder is None:
-                raise ValueError('you must provide encoder to compue accuracy for tags data type')
+                raise ValueError('you must provide encoder to compute accuracy for tags data type')
 
             encoded_reals = encoder.encode(reals)
             encoded_preds = encoder.encode(preds)
