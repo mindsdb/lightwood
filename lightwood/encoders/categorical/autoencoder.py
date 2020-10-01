@@ -98,6 +98,8 @@ class CategoricalAutoEncoder(BaseEncoder):
         self._prepared = True
 
     def encode(self, column_data):
+        if not column_data:
+            column_data = ['']
         oh_encoded_tensor = self.onehot_encoder.encode(column_data)
         if not self.use_autoencoder:
             return oh_encoded_tensor
