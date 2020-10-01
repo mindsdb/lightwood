@@ -2,7 +2,6 @@ import numpy as np
 
 from sklearn.svm import SVC
 from sklearn.linear_model import SGDClassifier, SGDRegressor, LinearRegression
-from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score
 from sklearn.preprocessing import MultiLabelBinarizer
@@ -16,13 +15,11 @@ CLASSIFICATION_MODELS = [
     (SGDClassifier, {}),
     (SVC, {}),
     (GaussianNB, {}),
-    (GradientBoostingClassifier, {'n_estimators': 600})
 ]
 
 REGRESSION_MODELS = [
     (LinearRegression, {}),
     (SGDRegressor, {}),
-    (GradientBoostingRegressor, {'n_estimators': 600})
 ]
 
 
@@ -48,13 +45,12 @@ class SklearnMixer(BaseMixer):
             Y_train = train_ds.get_column_original_data(target_col_name)
             Y_test = test_ds.get_column_original_data(target_col_name)
 
-
             if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                 weight_map = self.targets[target_col_name]['weights']
                 if weight_map is None:
                     sample_weight = [1] * len(Y_train)
                 else:
-                    sample_weight = [weight_map[val] for val in Y_train]
+                    sample_weight = [weight_map[str(val)] for val in Y_train]
 
                 model_classes_and_accuracies = []
                 for model_class, model_kwargs in CLASSIFICATION_MODELS:
