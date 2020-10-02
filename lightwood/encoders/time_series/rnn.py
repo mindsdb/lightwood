@@ -13,7 +13,7 @@ from torch import optim
 
 class RnnEncoder(BaseEncoder):
 
-    def __init__(self, encoded_vector_size=4, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
+    def __init__(self, encoded_vector_size=100, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
                  is_target=False, ts_n_dims=1):
         super().__init__(is_target)
         self.device, _ = get_devices()
