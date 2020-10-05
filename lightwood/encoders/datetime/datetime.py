@@ -5,8 +5,8 @@ from lightwood.encoders.encoder_base import BaseEncoder
 
 
 class DatetimeEncoder(BaseEncoder):
-    def __init__(self, sinusoidal=False):
-        super(DatetimeEncoder, self).__init__()
+    def __init__(self, is_target=False, sinusoidal=False):
+        super().__init__(is_target)
         self.sinusoidal = sinusoidal
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']
         self.constants = {'year': 3000.0, 'month': 12.0, 'day': 31.0, 'weekday': 7.0,
