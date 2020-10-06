@@ -213,7 +213,8 @@ class DataSource(Dataset):
                     custom_data = {col_name: [None]}
                     # if the dropout feature depends on another column, also pass a None array as the dependant column
                     if 'depends_on_column' in col_config:
-                        custom_data[custom_data['depends_on_column']] = [None]
+                        for col in col_config['depends_on_column']:
+                            custom_data[col] = [None]
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
                 elif not self.enable_cache:
                     if col_name in self.data_frame:

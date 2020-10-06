@@ -162,11 +162,9 @@ class BaseMixer:
     def _apply_accuracy_function(col_type, reals, preds, weight_map=None, encoder=None):
         if col_type == COLUMN_DATA_TYPES.CATEGORICAL:
             if weight_map is None:
-                sample_weight = [1 for x in reals]
+                sample_weight = [1] * len(reals)
             else:
-                sample_weight = []
-                for val in reals:
-                    sample_weight.append(weight_map[val])
+                sample_weight = [weight_map[val] for val in reals]
 
             accuracy = {
                 'function': 'accuracy_score',
@@ -174,11 +172,12 @@ class BaseMixer:
             }
         elif col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
             if weight_map is None:
-                sample_weight = [1 for x in reals]
+                sample_weight = [1] * len(reals)
             else:
-                sample_weight = []
-                for val in reals:
-                    sample_weight.append(weight_map[val])
+                sample_weight = [weight_map[val] for val in reals]
+
+            if encoder is None:
+                raise ValueError('you must provide encoder to compute accuracy for tags data type')
 
             encoded_reals = encoder.encode(reals)
             encoded_preds = encoder.encode(preds)
@@ -193,13 +192,13 @@ class BaseMixer:
             for val in reals:
                 try:
                     reals_fixed.append(float(val))
-                except:
+                except Exception:
                     reals_fixed.append(0)
 
             for val in preds:
                 try:
                     preds_fixed.append(float(val))
-                except:
+                except Exception:
                     preds_fixed.append(0)
 
             accuracy = {
