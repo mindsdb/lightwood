@@ -19,6 +19,7 @@ from lightwood.logger import log
 
 
 class NnMixer(BaseMixer):
+    
     def __init__(self,
                  selfaware=False,
                  deterministic=False,
