@@ -1,4 +1,6 @@
 import numpy as np
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import (
     GradientBoostingClassifier,
     GradientBoostingRegressor
@@ -9,6 +11,10 @@ from lightwood.mixers import BaseMixer
 
 
 class BoostMixer(BaseMixer):
+    def __init__(self):
+        super().__init__()
+        self.binarizers = {}
+
     def _fit(self, train_ds, test_ds=None):
         """
         :param train_ds: DataSource
@@ -35,6 +41,22 @@ class BoostMixer(BaseMixer):
 
                 self.targets[target_col_name]['model'] = GradientBoostingClassifier(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X, Y, sample_weight=sample_weight)
+
+            elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                weight_map = self.targets[target_col_name]['weights']
+                if weight_map is None:
+                    sample_weight = [1] * len(Y)
+                else:
+                    sample_weight = [weight_map[val] for val in Y]
+
+                self.binarizers[target_col_name] = MultiLabelBinarizer(sparse_output=True)
+                self.targets[target_col_name]['model'] = MultiOutputClassifier(
+                    GradientBoostingClassifier(n_estimators=600)
+                )
+                self.targets[target_col_name]['model'].fit(
+                    X,
+                    self.binarizers[target_col_name].fit_transform(Y).toarray()
+                )
 
             elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.NUMERIC:
                 self.targets[target_col_name]['model'] = GradientBoostingRegressor(n_estimators=600)
@@ -64,11 +86,19 @@ class BoostMixer(BaseMixer):
                 predictions[target_col_name] = None
             else:
                 predictions[target_col_name] = {}
-                predictions[target_col_name]['predictions'] = list(self.targets[target_col_name]['model'].predict(X))
+
+                if self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                    predictions[target_col_name]['predictions'] = list(
+                        self.binarizers[target_col_name].inverse_transform(
+                            self.targets[target_col_name]['model'].predict(X)
+                        )
+                    )
+                else:
+                    predictions[target_col_name]['predictions'] = list(self.targets[target_col_name]['model'].predict(X))
 
                 try:
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
-                except Exception as e:
+                except Exception:
                     pass
 
                 if 'quantile_models' in self.targets[target_col_name]:
