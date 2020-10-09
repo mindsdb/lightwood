@@ -30,6 +30,22 @@ class TestRnnEncoder(unittest.TestCase):
         reconstructed = normalizer.decode(normalizer.encode(data))
         self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
 
+    def test_cat_normalizer(self):
+        data = [['a', 'b', 'c'],
+                ['c', 'b', 'b'],
+                ['a', 'a', None]]
+        encoded_target = [[[0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+                          [[0, 0, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0]],
+                          [[0, 1, 0, 0], [0, 1, 0, 0], [1, 0, 0, 0]]]
+        normalizer = CatNormalizer()
+        normalizer.prepare(data)
+        encoded = normalizer.encode(data)
+        self.assertTrue(encoded_target, encoded)
+        dec = normalizer.decode(encoded)
+        self.assertTrue(dec[-1][-1] == normalizer.unk)
+        dec[-1][-1] = None
+        self.assertTrue(data == dec)
+
     def test_overfit(self):
         single_dim_ts = [[[1, 2, 3, 4, 5]],
                          [[2, 3, 4, 5, 6]],
