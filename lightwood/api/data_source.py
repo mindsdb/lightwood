@@ -364,6 +364,7 @@ class DataSource(Dataset):
                 previous_cols.append(column_name)
                 input_encoder_training_data['previous'].append({'data': column_data,
                                                                 'name': column_name,
+                                                                'original_type': config['original_type'],
                                                                 'output_type': config['type']
                                                                 })
 
