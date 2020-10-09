@@ -42,8 +42,15 @@ class RnnEncoder(BaseEncoder):
 
         total_dims = self._n_dims
         if additional_targets:
-            for _ in additional_targets:
-                total_dims += 1  # We are assuming target dim == 1
+            for t in additional_targets:
+                if t['original_type'] == 'categorical':
+                    t['normalizer'] = CatNormalizer()
+                    t['normalizer'].prepare(t['data'])
+                    total_dims += len(t['normalizer'].scaler.categories_[0])
+                else:
+                    t['normalizer'] = MinMaxNormalizer()
+                    t['normalizer'].prepare(t['data'])
+                    total_dims += 1
 
         self._encoder = EncoderRNNNumerical(input_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
@@ -84,8 +91,7 @@ class RnnEncoder(BaseEncoder):
 
         if previous_target_data is not None and len(previous_target_data) > 0:
             for target_dict in previous_target_data:
-                normalizer = MinMaxNormalizer()  # TODO: normalizer determined by subtype (for datetime previous_ columns support)
-                normalizer.prepare(target_dict['data'])
+                normalizer = target_dict['normalizer']
                 target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
                 self._target_ar_normalizers.append(normalizer)
 
@@ -114,8 +120,10 @@ class RnnEncoder(BaseEncoder):
                 if previous_target_data is not None and len(previous_target_data) > 0:
                     for target_dict in previous_target_data:
                         t_dp = target_dict['encoded_data'][data_idx:min(data_idx + batch_size, len(priming_data))]
-                        target_tensor = torch.Tensor(t_dp).unsqueeze(2).to(self.device)
+                        target_tensor = torch.Tensor(t_dp).to(self.device)
                         target_tensor[torch.isnan(target_tensor)] = 0.0
+                        if len(t_dp.shape) < 3:
+                            target_tensor = target_tensor.unsqueeze(2)
 
                         # concatenate descriptors
                         batch = torch.cat((batch, target_tensor), dim=-1)
@@ -192,8 +200,10 @@ class RnnEncoder(BaseEncoder):
                                              self._eos, normalizer=self._normalizer)
 
             if previous is not None:
-                target_tensor = torch.Tensor(previous).transpose(0, 1).unsqueeze(0).to(self.device)
+                target_tensor = torch.Tensor(previous).to(self.device)
                 target_tensor[torch.isnan(target_tensor)] = 0.0
+                if len(target_tensor.shape) < 3:
+                    target_tensor = target_tensor.transpose(0, 1).unsqueeze(0)
                 data_tensor = torch.cat((data_tensor, target_tensor), dim=-1)
 
             steps = data_tensor.shape[1]

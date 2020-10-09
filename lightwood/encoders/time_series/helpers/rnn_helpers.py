@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 
 def tensor_from_series(series, device, n_dims, pad_value, max_len=None, normalizer=None):
@@ -97,3 +97,26 @@ class MinMaxNormalizer:
 
     def decode(self, y):
         return self.scaler.inverse_transform(y)
+
+
+class CatNormalizer:
+    def __init__(self, factor=1):
+        self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
+        self.unk = "<UNK>"
+
+    def prepare(self, x):
+        X = []
+        for i in x:
+            for j in i:
+                X.append(j if j is not None else self.unk)
+        self.scaler.fit(np.array(X).reshape(-1, 1))
+
+    def encode(self, Y):
+        y = np.array([[j if j is not None else self.unk for j in i] for i in Y])
+        out = []
+        for i in y:
+            out.append(self.scaler.transform(i.reshape(-1, 1)))
+        return np.array(out)
+
+    def decode(self, y):
+        return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
