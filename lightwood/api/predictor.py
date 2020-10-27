@@ -92,6 +92,8 @@ class Predictor:
         :param test_data: DataFrame or DataSource
             The data to test accuracy and learn_error from
         """
+        device, _available_devices = get_devices()
+        log.info(f'Computing device used: {device}')
         # generate the configuration and set the order for the input and output columns
         if self._generate_config is True:
             self._input_columns = [col for col in from_data if col not in self._output_columns]
@@ -147,6 +149,8 @@ class Predictor:
 
         :return: pandas.DataFrame
         """
+        device, _available_devices = get_devices()
+        log.info(f'Computing device used: {device}')
         if when is not None:
             when_dict = {key: [when[key]] for key in when}
             when_data = pandas.DataFrame(when_dict)
