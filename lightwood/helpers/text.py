@@ -1,7 +1,12 @@
 import nltk
 import re
 
-nltk.download('punkt')
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
 
 def contains_alnum(text):
     for c in text:
