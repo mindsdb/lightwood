@@ -1,14 +1,12 @@
 import math
 import pandas
-import random
 import lightwood
 from lightwood import Predictor
 from lightwood import COLUMN_DATA_TYPES
 
-
 lightwood.config.config.CONFIG.USE_CUDA = True
 
-ts_len = 10
+ts_len = 100
 max = 2000
 total_rows = 100
 ts_data = [
@@ -23,16 +21,14 @@ config = {'input_features': [{'name': 'ts', 'type': COLUMN_DATA_TYPES.TIME_SERIE
  'output_features': [{'name': 'next', 'type': 'numeric'}]}
 
 
-
 def iter_function(epoch, training_error, test_error, test_error_gradient, test_accuracy):
     print(f'Epoch: {epoch}, Train Error: {training_error}, Test Error: {test_error}, Test Error Gradient: {test_error_gradient}, Test Accuracy: {test_accuracy}')
 
-data = pandas.DataFrame(ts_data, columns=['time', 'ts', 'next'])
 
+data = pandas.DataFrame(ts_data, columns=['time', 'ts', 'next'])
 predictor = Predictor(config)
 
-
-predictor.learn(from_data=data, callback_on_iter=iter_function, eval_every_x_epochs=10)
+predictor.learn(from_data=data)
 
 print('\n\n')
 ret = predictor.predict(when={'ts':[math.sin(i/max) for i in range(10+1, 10+ts_len)]})
