@@ -1,6 +1,7 @@
 import nltk
 import re
 
+nltk.download('punkt')
 
 def contains_alnum(text):
     for c in text:
