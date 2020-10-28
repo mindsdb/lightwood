@@ -10,4 +10,3 @@ torch >= 1.4.0
 xlrd >= 1.0.0
 requests >= 2.0.0
 transformers >= 2.10.0
-flair >= 0.5
