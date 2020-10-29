@@ -2,6 +2,12 @@ import nltk
 import re
 
 
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
+
 def contains_alnum(text):
     for c in text:
         if c.isalnum():
