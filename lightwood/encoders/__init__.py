@@ -3,9 +3,7 @@ from lightwood.encoders.datetime.datetime import DatetimeEncoder
 from lightwood.encoders.image.img_2_vec import Img2VecEncoder
 from lightwood.encoders.image.nn import NnAutoEncoder
 from lightwood.encoders.numeric.numeric import NumericEncoder
-from lightwood.encoders.text.infersent import InferSentEncoder
 from lightwood.encoders.text.distilbert import DistilBertEncoder
-from lightwood.encoders.text.flair import FlairEmbeddingEncoder
 from lightwood.encoders.text.short import ShortTextEncoder
 from lightwood.encoders.text.vocab import VocabularyEncoder
 from lightwood.encoders.text.rnn import RnnEncoder as TextRnnEncoder
@@ -30,11 +28,8 @@ class Numeric:
 
 
 class Text:
-    InferSentEncoder = InferSentEncoder
     DistilBertEncoder = DistilBertEncoder
-    FlairEmbeddingEncoder = FlairEmbeddingEncoder
     ShortTextEncoder = ShortTextEncoder
-    InferSentEncoder = InferSentEncoder
     TextRnnEncoder = TextRnnEncoder
     VocabularyEncoder = VocabularyEncoder
 
