@@ -20,7 +20,6 @@ from lightwood.encoders import (
     DatetimeEncoder,
     Img2VecEncoder,
     TsRnnEncoder,
-    FlairEmbeddingEncoder,
     ShortTextEncoder,
     VocabularyEncoder
 )
