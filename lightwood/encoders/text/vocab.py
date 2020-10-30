@@ -1,5 +1,4 @@
 import torch
-import flair
 from transformers import DistilBertTokenizer
 
 from lightwood.encoders.encoder_base import BaseEncoder
