@@ -159,7 +159,9 @@ class Predictor:
 
         when_data_ds.eval()
 
-        return self._mixer.predict(when_data_ds)
+        kwargs = {'include_extra_data': self.config.get('include_extra_data', False)}
+
+        return self._mixer.predict(when_data_ds, **kwargs)
 
     def calculate_accuracy(self, from_data):
         """
