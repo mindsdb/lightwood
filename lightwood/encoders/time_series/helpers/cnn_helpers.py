@@ -6,7 +6,6 @@ import torch.nn as nn
 from torch.nn.utils import weight_norm
 import torch.nn.functional as F
 
-
 class TemporalEncBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, dilation, padding):
         super(TemporalEncBlock, self).__init__()
@@ -21,7 +20,7 @@ class TemporalEncBlock(nn.Module):
         self.downsample = nn.MaxPool1d(2,2) 
 
         self.net = nn.Sequential(self.pad1, self.conv1, self.bn1, self.relu1,
-                                  self.pad2, self.conv2, self.bn2, self.relu2, self.downsample) 
+                                 self.pad2, self.conv2, self.bn2, self.relu2, self.downsample) 
         self.shortcut = nn.Conv1d(in_channels, out_channels, 1) if in_channels != out_channels else None        
 
     def forward(self, x):
@@ -63,7 +62,7 @@ class TemporalDecBlock(nn.Module):
         self.relu1 = nn.ReLU()
 
         self.net = nn.Sequential(self.pad2, self.conv2, self.bn2, self.relu2,
-                                self.pad1, self.conv1, self.bn1, self.relu1)                              
+                                 self.pad1, self.conv1, self.bn1, self.relu1)                              
 
         self.shortcut = nn.Conv1d(in_channels, out_channels, 1) if in_channels != out_channels else None
 
@@ -147,10 +146,9 @@ def nonlin_data_generator(length, dims):
     data = [[0 for x in range(length)] for x in range(dims)]
     for i in range(dims):
         for j in range(length):
-            data[i][j] = '%s'%(j**3+j**2+j)
+            data[i][j] = '%s'%(j**3+j**2+i)
 
     return [data]
-
 
 def random_data_generator(length, dims):
     data = [[0 for x in range(length)] for x in range(dims)]

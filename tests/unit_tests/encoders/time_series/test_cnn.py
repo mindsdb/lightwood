@@ -98,16 +98,17 @@ class TestCnnEncoder(unittest.TestCase):
 test = TestCnnEncoder()
 result = test.initial() 
 
-### 2nd test, non-linear function x^3 + x^2 + x
-# Performs very poorly, more complex model required
-#test = TestCnnEncoder()
-#result = test.nonlinear()
-
-### 3rd test, random sequence of numbers in range (0,100), each sample is the identical
+### 2nd test, random sequence of numbers in range (0,100), each sample is the identical
 # Aimed to test long term memory of model
 # Converges, but loss is still high
 # test = TestCnnEncoder()
 # result = test.random()
+
+### 3rd test, non-linear function y = x^3 + x^2 + c
+# Where, x is value in dimension, c is dimension
+# Performs very poorly, more complex model required
+# test = TestCnnEncoder()
+# result = test.nonlinear()
 
 
 
