@@ -7,13 +7,14 @@ import torch
 
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.time_series.cnn import *
-from lightwood.encoders.time_series.helpers.cnn_helpers import (tensor_from_series, 
+from lightwood.encoders.time_series.helpers.cnn_helpers import (
+            tensor_from_series, 
             simple_data_generator,
             nonlin_data_generator, 
             random_data_generator)
  
 class TestCnnEncoder(unittest.TestCase):
-    def __init__(self, blocks=[1], kernel_size = 3, train_epochs = 100, learning_rate=0.001):
+    def __init__(self, blocks=[1], kernel_size=3, train_epochs=100, learning_rate=0.001):
         super(TestCnnEncoder, self).__init__()
         self._kernel_size = kernel_size
         self._blocks = blocks
@@ -41,9 +42,9 @@ class TestCnnEncoder(unittest.TestCase):
                              learning_rate=self._learning_rate)
         final_loss = encoder.prepare_encoder(data, 
                 feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
-        encoded = encoder.encode(data[0])
-        decoded = encoder.decode(encoded)
-        return final_loss #encoded, decoded
+        # encoded = encoder.encode(data[0])  # encode one sample
+        # decoded = encoder.decode(encoded)
+        return final_loss#, encoded, decoded
 
     def nonlinear(self):
         n_dims = 1
@@ -66,8 +67,6 @@ class TestCnnEncoder(unittest.TestCase):
                              learning_rate=self._learning_rate)
         final_loss = encoder.prepare_encoder(data, 
                 feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
-        encoded = encoder.encode(data[0])
-        decoded = encoder.decode(encoded)
         return final_loss
 
     def random(self):
@@ -91,8 +90,6 @@ class TestCnnEncoder(unittest.TestCase):
                              learning_rate=self._learning_rate)
         final_loss = encoder.prepare_encoder(data, 
                 feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
-        encoded = encoder.encode(data[0])
-        decoded = encoder.decode(encoded)
         return final_loss
 
 

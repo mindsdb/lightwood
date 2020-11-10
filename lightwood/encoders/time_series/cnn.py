@@ -49,7 +49,7 @@ another option but has not been applied as an autoencoder.
 """
 
 class CnnEncoder(BaseEncoder):
-    def __init__(self, blocks, batch_size, train_epochs, kernel_size = 3, stop_on_error=0.01, learning_rate=0.001,
+    def __init__(self, blocks, batch_size, train_epochs, kernel_size=3, stop_on_error=0.01, learning_rate=0.001,
                  is_target=False, ts_n_dims=1):
         super().__init__(is_target)
         self.device, _ = get_devices()
@@ -64,21 +64,20 @@ class CnnEncoder(BaseEncoder):
         self._batch_size = batch_size
         self._train_epochs = train_epochs
         self._pytorch_wrapper = torch.FloatTensor
-        self._encoder = EncoderCNNts(kernel_size = self._kernel_size, input_dims=self._n_dims, blocks=self._blocks).to(self.device)
-        self._decoder = DecoderCNNts(kernel_size = self._kernel_size, output_dims=self._n_dims, blocks=self._blocks).to(self.device)
+        self._encoder = EncoderCNNts(kernel_size=self._kernel_size, input_dims=self._n_dims, blocks=self._blocks).to(self.device)
+        self._decoder = DecoderCNNts(kernel_size=self._kernel_size, output_dims=self._n_dims, blocks=self._blocks).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
         self._optimizer = optim.Adam(self._parameters, lr=self._learning_rate)
-        self._lr_scheduler = optim.lr_scheduler.ExponentialLR(optimizer=self._optimizer, gamma=0.98)
         self._criterion = nn.MSELoss()
         self._prepared = False
 
     def to(self, device, available_devices):
-        # Device (GPU/CPU) decided already by get_devices
+        # Device (GPU/CPU) decided by get_devices
         self.device = device
         self._encoder = self._encoder.to(self.device)
         return self
 
-    def prepare_encoder(self, priming_data, batch_size, feedback_hoop_function = None):
+    def prepare_encoder(self, priming_data, batch_size, feedback_hoop_function=None):
         """
         Run this on the initial training data for the encoder
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
@@ -131,7 +130,6 @@ class CnnEncoder(BaseEncoder):
                 self._optimizer.step()    
 
                 epoch_loss += loss.item()
-                self._lr_scheduler.step()
 
             epoch_loss = epoch_loss / len(priming_data)
 
@@ -146,7 +144,7 @@ class CnnEncoder(BaseEncoder):
         return epoch_loss
         
     
-    def encode(self, data, initial_hidden=None, return_next_value=False):
+    def encode(self, data):
         """
         This method encodes a list of time series data
         :param data: multidimensional time series as list of lists [[dim1_data], [dim2_data], ...]
@@ -175,8 +173,8 @@ class CnnEncoder(BaseEncoder):
 
         self._decoder.eval()
         with torch.no_grad():
-            data = self._decoder.forward(encoded)
-            return data
+            decoded = self._decoder.forward(encoded)
+            return decoded
 
 
 
