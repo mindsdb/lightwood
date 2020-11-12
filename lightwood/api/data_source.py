@@ -203,7 +203,7 @@ class DataSource(Dataset):
 
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
                     if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache or
-                            (col_name.startswith('previous_') and feature_set == 'input_features')):
+                            (col_name.startswith('__mdb_ts_previous_') and feature_set == 'input_features')):
 
                         self.get_encoded_column_data(col_name)
 
@@ -222,7 +222,7 @@ class DataSource(Dataset):
                         custom_data = {col_name: [None]}
 
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
-                elif col_name.startswith('previous_') and feature_set == 'input_features':
+                elif col_name.startswith('__mdb_ts_previous_') and feature_set == 'input_features':
                     sample[feature_set][col_name] = torch.Tensor([])
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
@@ -358,7 +358,7 @@ class DataSource(Dataset):
         previous_cols = []
         for config in self.config['input_features']:
             column_name = config['name']
-            if column_name.startswith('previous_'):
+            if column_name.startswith('__mdb_ts_previous_'):
                 column_data = self.get_column_original_data(column_name)
                 previous_cols.append(column_name)
                 input_encoder_training_data['previous'].append({'data': column_data,
@@ -376,7 +376,7 @@ class DataSource(Dataset):
 
                 encoders[column_name] = encoder_instance
 
-                # add dependency on 'previous_' column (for now singular, plural later on)
+                # add dependency on '__mdb_ts_previous_' column (for now singular, plural later on)
                 if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
                     for d in input_encoder_training_data['previous']:
                         try:
