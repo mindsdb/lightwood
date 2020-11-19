@@ -9,11 +9,11 @@ from lightwood.logger import log
 
 class NumericEncoder(BaseEncoder):
 
-    def __init__(self, data_type=None, is_target=False):
+    def __init__(self, data_type=None, is_target=False, positive_domain=False):
         super().__init__(is_target)
         self._type = data_type
         self._abs_mean = None
-        self.posdom = True
+        self.posdom = positive_domain
         self.decode_log = False
         self.extra_outputs = 0
 
