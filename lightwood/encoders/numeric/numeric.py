@@ -57,15 +57,8 @@ class NumericEncoder(BaseEncoder):
             if self.is_target:
                 vector = [0] * (3 + 2 * self.extra_outputs)
                 if real is not None and self._abs_mean > 0:
-                    # positive numerical domain
-                    if self.posdom:
-                        vector[0] = 0
-                        vector[1] = math.log(abs(real)) if abs(real) > 0 else 0
-                    # generic numerical domain
-                    else:
-                        vector[0] = 1 if real < 0 else 0
-                        vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-
+                    vector[0] = 1 if real < 0 and not self.posdom else 0
+                    vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                     vector[2] = real / self._abs_mean
                 else:
                     log.debug(f'Can\'t encode target value: {real}')
@@ -77,13 +70,8 @@ class NumericEncoder(BaseEncoder):
                         vector[0] = 0
                     else:
                         vector[0] = 1
-                        if self.posdom:
-                            vector[1] = math.log(abs(real)) if abs(real) > 0 else 0
-                            vector[2] = 0
-                        else:
-                            vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                            vector[2] = 1 if real < 0 else 0
-
+                        vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
+                        vector[2] = 1 if real < 0 and not self.posdom else 0
                         vector[3] = real/self._abs_mean
                 except Exception as e:
                     vector = [0] * 4
