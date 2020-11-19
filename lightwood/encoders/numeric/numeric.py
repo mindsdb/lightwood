@@ -117,7 +117,7 @@ class NumericEncoder(BaseEncoder):
                         real_value = [vector[2*i + 2] * self._abs_mean for i in range(1 + self.extra_outputs)]
 
                     if self.posdom:
-                        real_value = [max(0, i) for i in real_value]
+                        real_value = [abs(i) for i in real_value]
 
                     if self._type == 'int':
                         real_value = [int(x) for x in real_value]
