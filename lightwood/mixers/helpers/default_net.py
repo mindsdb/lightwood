@@ -59,7 +59,7 @@ class DefaultNet(torch.nn.Module):
             layers = []
             for ind in range(len(shape) - 1):
                 if 0 < ind < len(shape):
-                    layers.append(torch.nn.Dropout(p=0.5))
+                    layers.append(torch.nn.Dropout(p=CONFIG.DEFNET_DROPOUT))
                 linear_function = PLinear if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
                 layers.append(linear_function(shape[ind],shape[ind+1]))
                 if ind < len(shape) - 2:
