@@ -350,6 +350,7 @@ class NnMixer(BaseMixer):
                             self._nonpersistent['callback'](epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
                         else:
                             self._default_on_iter(epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
+                        self.net.train()
 
                         # Stop if we're past the time limit allocated for training
                         if (time.time() - started) > stop_training_after_seconds:
