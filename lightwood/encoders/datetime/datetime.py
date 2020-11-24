@@ -1,4 +1,5 @@
 import datetime
+import calendar
 import numpy as np
 import torch
 from lightwood.encoders.encoder_base import BaseEncoder
@@ -42,6 +43,10 @@ class DatetimeEncoder(BaseEncoder):
                 vector = [date.year / c['year'], date.month / c['month'], date.day / c['day'],
                           date.weekday() / c['weekday'], date.hour / c['hour'],
                           date.minute / c['minute'], date.second / c['second']]
+                # for i in vector:
+                #     if i < 0:
+                #         print('huh')
+                # vector = [min(1.0, max(0.0, x)) for x in vector]
                 if self.sinusoidal:
                     vector = np.array([(np.sin(n), np.cos(n)) for n in vector]).flatten()
 
@@ -60,9 +65,16 @@ class DatetimeEncoder(BaseEncoder):
                 if self.sinusoidal:
                     vector = list(map(lambda x: np.arcsin(x), vector))[::2]
                 c = self.constants
-                dt = datetime.datetime(year=round(vector[0] * c['year']), month=round(vector[1] * c['month']),
-                                       day=round(vector[2] * c['day']), hour=round(vector[4] * c['hour']),
-                                       minute=round(vector[5] * c['minute']), second=round(vector[6] * c['second']))
+
+                year = max(0, round(vector[0] * c['year']))
+                month = max(1, min(12, round(vector[1] * c['month'])))
+                day = max(1, min(round(vector[2] * c['day']), calendar.monthrange(year, month)[-1]))
+                hour = max(0, min(23, round(vector[4] * c['hour'])))
+                minute = max(0, min(59, round(vector[5] * c['minute'])))
+                second = max(0, min(59, round(vector[6] * c['second'])))
+
+                dt = datetime.datetime(year=year, month=month, day=day, hour=hour,
+                                       minute=minute, second=second)
 
                 if return_as_datetime is True:
                     ret.append(dt)
