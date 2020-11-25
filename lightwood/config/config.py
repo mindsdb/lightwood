@@ -14,7 +14,7 @@ class CONFIG:
     FORCE_HELPER_MIXERS = False
     HELPER_MIXERS = True
 
-    DEFNET_DROPOUT = 0.0
+    DEFNET_DROPOUT = 0.3
 
     MONITORING = {
         'epoch_loss': False
