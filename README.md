@@ -57,7 +57,16 @@ prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
 * You can also try Lightwood in Google Colab: [![Google Colab](https://colab.research.google.com/assets/colab-badge.svg "Lightwood")](https://colab.research.google.com/drive/10W43sur_uj28ROiGuAIF9X46_Xrx1e7K)
 
 ## Contributing
-Thanks for your interest.There are many ways to contribute to this project. Get started [here](https://github.com/mindsdb/lightwood/blob/master/CONTRIBUTING.md).
+
+Thanks for your interest. There are many ways to contribute to this project. Please, check out our [Contribution guide](https://github.com/mindsdb/lightwood/blob/master/CONTRIBUTING.md).
+
+### Current contributors 
+
+<a href="https://github.com/mindsdb/lightwood/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=mindsdb/lightwood" />
+</a>
+
+Made with [contributors-img](https://contributors-img.web.app).
 
 ## License ![PyPI - License](https://img.shields.io/pypi/l/lightwood)
 
