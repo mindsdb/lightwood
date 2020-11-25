@@ -155,7 +155,8 @@ class NnMixer(BaseMixer):
             input_size=len(input_sample),
             output_size=len(output_sample),
             nr_outputs=len(train_ds.out_types),
-            deterministic=self.deterministic
+            deterministic=self.deterministic,
+            dropout=CONFIG.DEFNET_DROPOUT if not self.deterministic else None
         )
         self.net = self.net.train()
 
