@@ -260,6 +260,12 @@ class DataSource(Dataset):
         if self.enable_cache:
             self.transformed_cache[idx] = sample
 
+        # Add offset in output_weights (output_features might be categorical _and_ numerical)
+        self.output_weights_offset = 0
+        for otype, oidxs in zip(self.out_types, self.out_indexes):
+            if otype != ColumnDataTypes.CATEGORICAL:
+                self.output_weights_offset += (oidxs[1] - oidxs[0])
+
         return sample
 
     def get_column_original_data(self, column_name):
