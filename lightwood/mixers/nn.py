@@ -185,8 +185,8 @@ class NnMixer(BaseMixer):
                         weights_slice = None
                     else:
                         # account for numerical features, not included in the output_weights
-                        s_idx = train_ds.out_indexes[k][0] - train_ds.output_weights_offset
-                        e_idx = train_ds.out_indexes[k][1] - train_ds.output_weights_offset
+                        s_idx = train_ds.out_indexes[k][0] - train_ds.output_weights_offset[k]
+                        e_idx = train_ds.out_indexes[k][1] - train_ds.output_weights_offset[k]
                         weights_slice = output_weights[s_idx:e_idx]
 
                     self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
