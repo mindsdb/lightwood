@@ -13,6 +13,7 @@ class NumericEncoder(BaseEncoder):
         super().__init__(is_target)
         self._type = data_type
         self._abs_mean = None
+        self.positive_domain = False
         self.decode_log = False
         self.extra_outputs = 0
 
@@ -56,8 +57,8 @@ class NumericEncoder(BaseEncoder):
             if self.is_target:
                 vector = [0] * (3 + 2 * self.extra_outputs)
                 if real is not None and self._abs_mean > 0:
-                    vector[0] = 1 if real < 0 else 0
-                    vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
+                    vector[0] = 1 if real < 0 and not self.positive_domain else 0
+                    vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                     vector[2] = real / self._abs_mean
                 else:
                     log.debug(f'Can\'t encode target value: {real}')
@@ -70,7 +71,7 @@ class NumericEncoder(BaseEncoder):
                     else:
                         vector[0] = 1
                         vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                        vector[2] = 1 if real < 0 else 0
+                        vector[2] = 1 if real < 0 and not self.positive_domain else 0
                         vector[3] = real/self._abs_mean
                 except Exception as e:
                     vector = [0] * 4
@@ -102,6 +103,9 @@ class NumericEncoder(BaseEncoder):
                         real_value = [math.exp(vector[i*2 + 1]) * sign for i in range(1 + self.extra_outputs)]
                     else:
                         real_value = [vector[2*i + 2] * self._abs_mean for i in range(1 + self.extra_outputs)]
+
+                    if self.positive_domain:
+                        real_value = [abs(i) for i in real_value]
 
                     if self._type == 'int':
                         real_value = [int(x) for x in real_value]

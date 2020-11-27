@@ -28,9 +28,6 @@ with open('requirements.txt') as req_file:
 with open('optional_requirements.txt') as req_file:
     optional_requirements = [req.strip() for req in req_file.read().splitlines()]
 
-if sys_platform in ['darwin']:
-    requirements = remove_requirements(requirements,'transformers', 'transformers == 2.4.1')
-
 # Windows specific requirements
 if sys_platform in ['win32','cygwin','windows']:
     requirements = remove_requirements(requirements,'torch')
