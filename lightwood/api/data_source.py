@@ -72,6 +72,7 @@ class DataSource(Dataset):
         self.config = config
         self.training = False  # Flip this flag if you are using the datasource while training
         self.output_weights = None
+        self.output_weights_offset = None
         self.dropout_dict = {}
         self.enable_dropout = False
         self.enable_cache = self.config['data_source']['cache_transformed_data']
@@ -260,11 +261,12 @@ class DataSource(Dataset):
         if self.enable_cache:
             self.transformed_cache[idx] = sample
 
-        # Add offset in output_weights (output_features might be categorical _and_ numerical)
-        self.output_weights_offset = 0
-        for otype, oidxs in zip(self.out_types, self.out_indexes):
-            if otype != ColumnDataTypes.CATEGORICAL:
-                self.output_weights_offset += (oidxs[1] - oidxs[0])
+        if self.output_weights_offset is None:
+            self.output_weights_offset = {}
+            for idx, (otype, oidxs) in enumerate(zip(self.out_types, self.out_indexes)):
+                self.output_weights_offset[idx] = self.output_weights_offset.get(idx-1, 0)
+                if otype != ColumnDataTypes.CATEGORICAL:
+                     self.output_weights_offset[idx] += (oidxs[1] - oidxs[0])
 
         return sample
 
