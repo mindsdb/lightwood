@@ -265,7 +265,7 @@ class DataSource(Dataset):
             self.output_weights_offset = {}
             for idx, (otype, oidxs) in enumerate(zip(self.out_types, self.out_indexes)):
                 self.output_weights_offset[idx] = self.output_weights_offset.get(idx-1, 0)
-                if otype != ColumnDataTypes.CATEGORICAL:
+                if otype not in (ColumnDataTypes.CATEGORICAL, ColumnDataTypes.MULTIPLE_CATEGORICAL):
                      self.output_weights_offset[idx] += (oidxs[1] - oidxs[0])
 
         return sample
