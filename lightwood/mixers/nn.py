@@ -180,7 +180,7 @@ class NnMixer(BaseMixer):
                 output_weights = None
 
             for k, output_type in enumerate(train_ds.out_types):
-                if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
+                if output_type in (COLUMN_DATA_TYPES.CATEGORICAL, COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL):
                     if output_weights is None:
                         weights_slice = None
                     else:
@@ -189,16 +189,12 @@ class NnMixer(BaseMixer):
                         e_idx = train_ds.out_indexes[k][1] - train_ds.output_weights_offset[k]
                         weights_slice = output_weights[s_idx:e_idx]
 
-                    self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
-                    self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
-                elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-                    if output_weights is None:
-                        weights_slice = None
-                    else:
-                        weights_slice = output_weights[train_ds.out_indexes[k][0]:train_ds.out_indexes[k][1]]
-
-                    self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
-                    self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
+                    if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
+                        self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
+                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
+                    elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                        self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
+                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
                 elif output_type == COLUMN_DATA_TYPES.NUMERIC:
                     self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
                     self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
