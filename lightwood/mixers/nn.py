@@ -22,15 +22,14 @@ class NnMixer(BaseMixer):
     
     def __init__(self,
                  selfaware=False,
-                 deterministic=False,
                  callback_on_iter=None,
                  eval_every_x_epochs=20,
+                 dropout_p=0.3,
                  stop_training_after_seconds=None,
                  stop_model_building_after_seconds=None,
                  param_optimizer=None):
         """
         :param selfaware: bool
-        :param deterministic: bool
         :param callback_on_iter: Callable[epoch, training_error, test_error, delta_mean, accuracy]
         :param eval_every_x_epochs: int
         :param stop_training_after_seconds: int
@@ -40,7 +39,6 @@ class NnMixer(BaseMixer):
         super().__init__()
 
         self.selfaware = selfaware
-        self.deterministic = deterministic
         self.eval_every_x_epochs = eval_every_x_epochs
         self.stop_training_after_seconds = stop_training_after_seconds
         self.stop_model_building_after_seconds = stop_model_building_after_seconds
@@ -59,6 +57,7 @@ class NnMixer(BaseMixer):
         self.batch_size = 200
 
         self.nn_class = DefaultNet
+        self.dropout_p = max(0.0, min(1.0, dropout_p))
         self.dynamic_parameters = {}
         self.awareness_criterion = None
         self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
@@ -78,9 +77,7 @@ class NnMixer(BaseMixer):
                 break
 
         self.total_iterations = 0
-
         self._nonpersistent = {'sampler': None, 'callback': callback_on_iter}
-
 
     def _default_on_iter(self, epoch, train_error, test_error, delta_mean, accuracy):
         test_error_rounded = round(test_error, 4)
@@ -155,8 +152,7 @@ class NnMixer(BaseMixer):
             input_size=len(input_sample),
             output_size=len(output_sample),
             nr_outputs=len(train_ds.out_types),
-            deterministic=self.deterministic,
-            dropout=CONFIG.DEFNET_DROPOUT if not self.deterministic else None
+            dropout=self.dropout_p
         )
         self.net = self.net.train()
 
