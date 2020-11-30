@@ -14,33 +14,16 @@ class DefaultNet(torch.nn.Module):
                      output_size=None,
                      nr_outputs=None,
                      shape=None,
-                     size_parameters={},
-                     pretrained_net=None,
-                     deterministic=False):
+                     dropout=None,
+                     pretrained_net=None):
         self.input_size = input_size
         self.output_size = output_size
         self.nr_outputs = nr_outputs
+        self.max_variance = None
         # How many devices we can train this network on
         self.available_devices = 1
-        self.max_variance = None
 
         self.device, _ = get_devices()
-
-        if deterministic:
-            '''
-                Seed that always has the same value on the same dataset plus setting the bellow CUDA options
-                In order to make sure pytorch randomly generate number will be the same every time
-                when training on the same dataset
-            '''
-            torch.manual_seed(66)
-
-            if 'cuda' in str(self.device):
-                torch.backends.cudnn.deterministic = True
-                torch.backends.cudnn.benchmark = False
-                self.available_devices = torch.cuda.device_count()
-            else:
-                self.available_devices = 1
-
         self.dynamic_parameters = dynamic_parameters
 
         """
@@ -58,8 +41,10 @@ class DefaultNet(torch.nn.Module):
 
             layers = []
             for ind in range(len(shape) - 1):
+                if (dropout is not None) and (0 < ind < len(shape)):
+                    layers.append(torch.nn.Dropout(p=dropout))
                 linear_function = PLinear if CONFIG.USE_PROBABILISTIC_LINEAR else torch.nn.Linear
-                layers.append(linear_function(shape[ind],shape[ind+1]))
+                layers.append(linear_function(shape[ind], shape[ind+1]))
                 if ind < len(shape) - 2:
                     layers.append(rectifier())
 
@@ -72,21 +57,13 @@ class DefaultNet(torch.nn.Module):
                         self.input_size = layer.in_features
                     self.output_size = layer.out_features
 
-        if deterministic and pretrained_net is None: # set initial weights based on a specific distribution if we have deterministic enabled
-            # lambda function so that we can do this for the internal layers of net
-            def reset_layer_params(layer):
-                if isinstance(layer, torch.nn.Linear):
-                    torch.nn.init.normal_(layer.weight, mean=0., std=1 / math.sqrt(layer.out_features))
-                    torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
-
-                elif isinstance(layer, PLinear):
-                    torch.nn.init.normal_(layer.mean, mean=0., std=1 / math.sqrt(layer.out_features))
-                    torch.nn.init.normal_(layer.bias, mean=0., std=0.1)
-
-            for layer in self.net:
-                reset_layer_params(layer)
-
         self.net = self.net.to(self.device)
+
+        if 'cuda' in str(self.device):
+            self.available_devices = torch.cuda.device_count()
+        else:
+            self.available_devices = 1
+
         if self.available_devices > 1:
             self._foward_net = torch.nn.DataParallel(self.net)
         else:
@@ -111,7 +88,6 @@ class DefaultNet(torch.nn.Module):
         self.available_devices = available_devices
 
         return self
-
 
     def calculate_overall_certainty(self):
         """
