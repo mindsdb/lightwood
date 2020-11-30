@@ -1,4 +1,5 @@
 import datetime
+import calendar
 import numpy as np
 import torch
 from lightwood.encoders.encoder_base import BaseEncoder
@@ -9,7 +10,7 @@ class DatetimeEncoder(BaseEncoder):
         super().__init__(is_target)
         self.sinusoidal = sinusoidal
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']
-        self.constants = {'year': 3000.0, 'month': 12.0, 'day': 31.0, 'weekday': 7.0,
+        self.constants = {'year': 3000.0, 'month': 12.0, 'weekday': 7.0,
                           'hour': 24.0, 'minute': 60.0, 'second': 60.0}
 
     def prepare(self, priming_data):
@@ -39,7 +40,8 @@ class DatetimeEncoder(BaseEncoder):
             else:
                 c = self.constants
                 date = datetime.datetime.fromtimestamp(unix_timestamp)
-                vector = [date.year / c['year'], date.month / c['month'], date.day / c['day'],
+                day_constant = calendar.monthrange(date.year, date.month)[1]
+                vector = [date.year / c['year'], date.month / c['month'], date.day / day_constant,
                           date.weekday() / c['weekday'], date.hour / c['hour'],
                           date.minute / c['minute'], date.second / c['second']]
                 if self.sinusoidal:
@@ -60,9 +62,17 @@ class DatetimeEncoder(BaseEncoder):
                 if self.sinusoidal:
                     vector = list(map(lambda x: np.arcsin(x), vector))[::2]
                 c = self.constants
-                dt = datetime.datetime(year=round(vector[0] * c['year']), month=round(vector[1] * c['month']),
-                                       day=round(vector[2] * c['day']), hour=round(vector[4] * c['hour']),
-                                       minute=round(vector[5] * c['minute']), second=round(vector[6] * c['second']))
+
+                year = max(0, round(vector[0] * c['year']))
+                month = max(1, min(12, round(vector[1] * c['month'])))
+                day_constant = calendar.monthrange(year, month)[-1]
+                day = max(1, min(round(vector[2] * day_constant), day_constant))
+                hour = max(0, min(23, round(vector[4] * c['hour'])))
+                minute = max(0, min(59, round(vector[5] * c['minute'])))
+                second = max(0, min(59, round(vector[6] * c['second'])))
+
+                dt = datetime.datetime(year=year, month=month, day=day, hour=hour,
+                                       minute=minute, second=second)
 
                 if return_as_datetime is True:
                     ret.append(dt)
