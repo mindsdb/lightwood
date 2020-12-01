@@ -1,5 +1,4 @@
 import torch
-import flair
 from transformers import DistilBertTokenizer
 
 from lightwood.encoders.encoder_base import BaseEncoder
@@ -14,7 +13,7 @@ class VocabularyEncoder(BaseEncoder):
         self._tokenizer = None
         self._pad_id = None
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         self._max_len = max([len(x) for x in priming_data])
         self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
         self._pad_id = self._tokenizer.convert_tokens_to_ids([self._tokenizer.pad_token])[0]

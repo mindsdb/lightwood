@@ -1,10 +1,10 @@
 import math
-import logging
 import sys
 
 import torch
 import numpy as np
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.logger import log
 
 
 class NumericEncoder(BaseEncoder):
@@ -13,12 +13,13 @@ class NumericEncoder(BaseEncoder):
         super().__init__(is_target)
         self._type = data_type
         self._abs_mean = None
+        self.positive_domain = False
         self.decode_log = False
         self.extra_outputs = 0
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         if self._prepared:
-            raise Exception('You can only call "prepare_encoder" once for a given encoder.')
+            raise Exception('You can only call "prepare" once for a given encoder.')
 
         value_type = 'int'
         for number in priming_data:
@@ -29,7 +30,7 @@ class NumericEncoder(BaseEncoder):
 
             if np.isnan(number):
                 err = 'Lightwood does not support working with NaN values !'
-                logging.error(err)
+                log.error(err)
                 raise Exception(err)
 
             if int(number) != number:
@@ -42,7 +43,7 @@ class NumericEncoder(BaseEncoder):
 
     def encode(self, data):
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []
         for real in data:
@@ -56,11 +57,11 @@ class NumericEncoder(BaseEncoder):
             if self.is_target:
                 vector = [0] * (3 + 2 * self.extra_outputs)
                 if real is not None and self._abs_mean > 0:
-                    vector[0] = 1 if real < 0 else 0
-                    vector[1] = math.log(abs(real)) if abs(real) > 0 else - 20
+                    vector[0] = 1 if real < 0 and not self.positive_domain else 0
+                    vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                     vector[2] = real / self._abs_mean
                 else:
-                    logging.debug(f'Can\'t encode target value: {real}')
+                    log.debug(f'Can\'t encode target value: {real}')
 
             else:
                 vector = [0] * 4
@@ -70,11 +71,11 @@ class NumericEncoder(BaseEncoder):
                     else:
                         vector[0] = 1
                         vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                        vector[2] = 1 if real < 0 else 0
+                        vector[2] = 1 if real < 0 and not self.positive_domain else 0
                         vector[3] = real/self._abs_mean
                 except Exception as e:
                     vector = [0] * 4
-                    logging.error(f'Can\'t encode input value: {real}, exception: {e}')
+                    log.error(f'Can\'t encode input value: {real}, exception: {e}')
 
             ret.append(vector)
 
@@ -82,7 +83,7 @@ class NumericEncoder(BaseEncoder):
 
     def decode(self, encoded_values, decode_log=None):
         if not self._prepared:
-            raise Exception('You need to call "prepare_encoder" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if decode_log is None:
             decode_log = self.decode_log
@@ -94,7 +95,7 @@ class NumericEncoder(BaseEncoder):
         for vector in encoded_values:
             if self.is_target:
                 if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
-                    logging.error(f'Got weird target value to decode: {vector}')
+                    log.error(f'Got weird target value to decode: {vector}')
                     real_value = pow(10,63)
                 else:
                     if decode_log:
@@ -102,6 +103,9 @@ class NumericEncoder(BaseEncoder):
                         real_value = [math.exp(vector[i*2 + 1]) * sign for i in range(1 + self.extra_outputs)]
                     else:
                         real_value = [vector[2*i + 2] * self._abs_mean for i in range(1 + self.extra_outputs)]
+
+                    if self.positive_domain:
+                        real_value = [abs(i) for i in real_value]
 
                     if self._type == 'int':
                         real_value = [int(x) for x in real_value]

@@ -5,10 +5,11 @@ class BaseEncoder:
 
     def __init__(self, is_target=False):
         self.is_target = is_target
+        self.secondary_type = None
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
 
-    def prepare_encoder(self, priming_data):
+    def prepare(self, priming_data):
         pass
 
     def encode(self, column_data):

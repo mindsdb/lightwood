@@ -2,6 +2,7 @@ import unittest
 import lightwood
 from lightwood import Predictor
 import pandas as pd
+from lightwood.mixers import NnMixer
 
 
 USE_CUDA = False
@@ -28,29 +29,20 @@ class TestDatasets(unittest.TestCase):
                 {'name': 'location', 'type': 'categorical'}
             ],
             'data_source': {'cache_transformed_data': CACHE_ENCODED_DATA},
-            'mixer': {'class': lightwood.BUILTIN_MIXERS.NnMixer, 'selfaware': SELFAWARE}
+            'mixer': {
+                'class': NnMixer,
+                'kwargs': {
+                    'selfaware': SELFAWARE,
+                    'eval_every_x_epochs': 4,
+                    'stop_training_after_seconds': 80
+                }
+            }
         }
 
-        df=pd.read_csv("https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv")
-
-        def iter_function(epoch, error, test_error, test_error_gradient, test_accuracy):
-            print('epoch: {iter}, error: {error}, test_error: {test_error}, test_error_gradient: {test_error_gradient}, test_accuracy: {test_accuracy}'.format(
-                iter=epoch,
-                error=error,
-                test_error=test_error,
-                test_error_gradient=test_error_gradient,
-                accuracy=predictor.train_accuracy,
-                test_accuracy=test_accuracy
-            ))
+        df = pd.read_csv('https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/home_rentals.csv')
 
         predictor = Predictor(config)
-        # stop_training_after_seconds given in order to not get timeouts in travis
-        predictor.learn(
-            from_data=df,
-            callback_on_iter=iter_function,
-            eval_every_x_epochs=4,
-            stop_training_after_seconds=80
-        )
+        predictor.learn(from_data=df)
 
         df = df.drop([x['name'] for x in config['output_features']], axis=1)
         predictor.predict(when_data=df)
@@ -60,4 +52,4 @@ class TestDatasets(unittest.TestCase):
 
         for j in range(100):
             pred = predictor.predict(when={'sqft': round(j * 10)})['number_of_rooms']['predictions'][0]
-            assert(isinstance(pred, str) or isinstance(pred, int))
+            assert isinstance(pred, (str, int))

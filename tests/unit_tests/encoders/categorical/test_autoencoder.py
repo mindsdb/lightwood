@@ -5,10 +5,12 @@ import random
 import logging
 from sklearn.metrics import accuracy_score
 
+from lightwood.logger import log
+
 
 class TestAutoencoder(unittest.TestCase):
     def test_autoencoder(self):
-        logging.getLogger().setLevel(logging.DEBUG)
+        log.setLevel(logging.DEBUG)
 
         random.seed(2)
         cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(7,8))) for x in range(500)]
@@ -31,7 +33,7 @@ class TestAutoencoder(unittest.TestCase):
         enc = CategoricalAutoEncoder()
         enc.desired_error = 3
 
-        enc.prepare_encoder(priming_data)
+        enc.prepare(priming_data)
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
 
