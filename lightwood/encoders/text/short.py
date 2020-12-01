@@ -33,15 +33,23 @@ class ShortTextEncoder(BaseEncoder):
             
             self._mode = mode
 
-        # Defined in self.prepare_encoder()
+        # Defined in self.prepare()
         self._combine_fn = None
+        self.max_words_per_sent = None
 
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
     
     def _unexpected_mode(self):
         raise ValueError('unexpected combine value (must be "mean" or "concat")')
-        
-    def prepare_encoder(self, column_data):
+
+    # defining both of these as normal functions because pickle can't deal with lambdas
+    def _combine_concat(self, vecs):
+        return concat_vectors_and_pad(vecs, self.max_words_per_sent)
+
+    def _combine_mean(self, vecs):
+        return average_vectors(vecs)
+
+    def prepare(self, column_data):
         no_null_sentences = (x if x is not None else '' for x in column_data)
         unique_tokens = set()
         max_words_per_sent = 0
@@ -51,12 +59,13 @@ class ShortTextEncoder(BaseEncoder):
             for tok in tokens:
                 unique_tokens.add(tok)
 
-        self.cae.prepare_encoder(unique_tokens)
+        self.cae.prepare(unique_tokens)
 
         if self._mode == 'concat':
-            self._combine_fn = lambda vecs: concat_vectors_and_pad(vecs, max_words_per_sent)
+            self.max_words_per_sent = max_words_per_sent
+            self._combine_fn = self._combine_concat
         elif self._mode == 'mean':
-            self._combine_fn = lambda vecs: average_vectors(vecs)
+            self._combine_fn = self._combine_mean
         else:
             self._unexpected_mode()
 

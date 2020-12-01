@@ -1,4 +1,3 @@
-import logging
 import os
 
 from pydub import AudioSegment
@@ -6,15 +5,16 @@ import requests
 import numpy as np
 import torch
 
-from lightwood.encoders.time_series.ts_fresh_ts import TsFreshTsEncoder
+from lightwood.encoders.time_series.rnn import RnnEncoder
 from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.logger import log
 
 
 class AmplitudeTsEncoder(BaseEncoder):
 
     def __init__(self, is_target=False):
         super().__init__(is_target)
-        self._ts_encoder = TsFreshTsEncoder()
+        self._ts_encoder = RnnEncoder()
         self._ts_encoder._pytorch_wrapper = list
         self._max_samples = 2000
 
@@ -41,7 +41,7 @@ class AmplitudeTsEncoder(BaseEncoder):
 
             if new_frame_rate < original_frame_rate:
                 audio = audio.set_frame_rate(new_frame_rate)
-                logging.info(f'Lowering audio frame rate from {original_frame_rate} to {new_frame_rate} for ease of processing !')
+                log.info(f'Lowering audio frame rate from {original_frame_rate} to {new_frame_rate} for ease of processing !')
 
             audio_arr = list(np.array(audio.get_array_of_samples()))
 

@@ -3,10 +3,10 @@ import random
 import pandas
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
-from lightwood.mixers import NnMixer
+from lightwood.mixers import SklearnMixer
 
 
-class TestNnMixer(unittest.TestCase):
+class TestSklearnMixer(unittest.TestCase):
     def test_fit_and_predict(self):
         config = {
             'input_features': [
@@ -43,10 +43,9 @@ class TestNnMixer(unittest.TestCase):
 
         data_frame = pandas.DataFrame(data)
         train_ds = DataSource(data_frame, config)
-        train_ds.create_subsets(1)
+        test_ds = train_ds.subset(0.25)
 
-        mixer = NnMixer(stop_training_after_seconds=50)
-        mixer.fit(train_ds, train_ds)
+        mixer = SklearnMixer()
+        mixer.fit(train_ds, test_ds)
 
-        test_ds = train_ds.make_child(data_frame[['x', 'y']])
-        predictions = mixer.predict(test_ds)
+        preds = mixer.predict(train_ds.make_child(data_frame[['x', 'y']]))

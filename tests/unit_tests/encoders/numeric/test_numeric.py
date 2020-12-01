@@ -9,7 +9,7 @@ class TestNumericEncoder(unittest.TestCase):
 
         encoder = NumericEncoder()
 
-        encoder.prepare_encoder(data)
+        encoder.prepare(data)
         encoded_vals = encoder.encode(data)
 
         self.assertTrue(encoded_vals[1][1] > 0)
@@ -27,3 +27,15 @@ class TestNumericEncoder(unittest.TestCase):
                 self.assertTrue(decoded_vals[i] == data[i])
             else:
                 np.testing.assert_almost_equal(round(decoded_vals[i],10), round(data[i],10))
+
+    def test_positive_domain(self):
+        data = [-1, -2, -100, 5, 10, 15]
+        encoder = NumericEncoder()
+
+        encoder.is_target = True        # only affects target values
+        encoder.positive_domain = True
+        encoder.prepare(data)
+        decoded_vals = encoder.decode(encoder.encode(data))
+
+        for val in decoded_vals:
+            self.assertTrue(val >= 0)

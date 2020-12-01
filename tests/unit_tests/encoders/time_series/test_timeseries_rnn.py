@@ -9,25 +9,48 @@ class TestRnnEncoder(unittest.TestCase):
 
     def test_padding(self):
         series = [[1, 2, 3], [2, 3], [3, 4, 5, 6], [4, 5, 6]]
-        target = [[1.0, 2.0, 3.0, 4.0, 0.0], [2.0, 3.0, 4.0, 5.0, 0.0], [3.0, 0.0, 5.0, 6.0, 0.0]]
-        result = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3).tolist()[0]
-        self.assertEqual(result, target)
+        target = [[1.0, 0.0, 3.0, 4.0, 0.0], [2.0, 2.0, 4.0, 5.0, 0.0], [3.0, 3.0, 5.0, 6.0, 0.0]]
+        result = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3)
+        self.assertEqual(result.tolist()[0], target)
 
-    def test_normalizer(self):
+        series = [[1, 2, 3], [2, 3], [3, 4, 5, 6], [4, 5, 6]]
+        normalizer = MinMaxNormalizer()
+        normalizer.prepare(series)
+        normalized = tensor_from_series(series, get_devices()[0], n_dims=5, pad_value=0.0, max_len=3, normalizer=normalizer)
+        self.assertEqual(normalized.shape, result.shape)
+
+    def test_minmax_normalizer(self):
         data = [[-100.0, -5.0, 0.0, 5.0, 100.0],
                 [-1000.0, -50.0, 0.0, 50.0, 1000.0],
                 [-500.0, -405.0, -400.0, -395.0, -300.0],
                 [300.0, 395.0, 400.0, 405.0, 500.0],
                 [0.0, 1e3, 1e6, 1e9, 1e12]]
         normalizer = MinMaxNormalizer()
-        reconstructed = normalizer.inverse_transform(normalizer.fit_transform(data))
+        normalizer.prepare(data)
+        reconstructed = normalizer.decode(normalizer.encode(data))
         self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
+
+    def test_cat_normalizer(self):
+        data = [['a', 'b', 'c'],
+                ['c', 'b', 'b'],
+                ['a', 'a', None]]
+        encoded_target = [[[0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+                          [[0, 0, 0, 1], [0, 0, 1, 0], [0, 0, 1, 0]],
+                          [[0, 1, 0, 0], [0, 1, 0, 0], [1, 0, 0, 0]]]
+        normalizer = CatNormalizer()
+        normalizer.prepare(data)
+        encoded = normalizer.encode(data)
+        self.assertTrue(encoded_target, encoded)
+        dec = normalizer.decode(encoded)
+        self.assertTrue(dec[-1][-1] == normalizer.unk)
+        dec[-1][-1] = None
+        self.assertTrue(data == dec)
 
     def test_overfit(self):
         single_dim_ts = [[[1, 2, 3, 4, 5]],
-                     [[2, 3, 4, 5, 6]],
-                     [[3, 4, 5, 6, 7]],
-                     [[4, 5, 6, 7, 8]]]
+                         [[2, 3, 4, 5, 6]],
+                         [[3, 4, 5, 6, 7]],
+                         [[4, 5, 6, 7, 8]]]
 
         multi_dim_ts = [[[1, 2, 3, 4, 5, 6],
                          [2, 3, 4, 5, 6, 7],
@@ -38,7 +61,7 @@ class TestRnnEncoder(unittest.TestCase):
                           [4, 5, 6, 7])                                          # answer
 
         multi_qry_ans = ([[[1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6]]],  # query
-                             [4, 5, 6, 7])                                # answer
+                         [4, 5, 6, 7])                                    # answer
 
         for series, example in zip([single_dim_ts, multi_dim_ts], [single_qry_ans, multi_qry_ans]):
 
@@ -48,7 +71,7 @@ class TestRnnEncoder(unittest.TestCase):
             batch_size = 1
 
             encoder = RnnEncoder(encoded_vector_size=15, train_iters=10, ts_n_dims=n_dims)
-            encoder.prepare_encoder(data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
+            encoder.prepare(data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
             encoded = encoder.encode(data)
             decoded = encoder.decode(encoded, steps=timesteps).tolist()
 
