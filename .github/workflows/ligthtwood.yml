@@ -2,7 +2,10 @@ name: Lightwood tests workflow
 
 on:
   push:
-
+  pull_request:
+    branches:
+      - stable
+      
 jobs:
   test:
     runs-on: ${{ matrix.os }}
