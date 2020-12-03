@@ -61,11 +61,6 @@ class BoostMixer(BaseMixer):
             elif self.targets[target_col_name]['type'] == COLUMN_DATA_TYPES.NUMERIC:
                 self.targets[target_col_name]['model'] = GradientBoostingRegressor(n_estimators=600)
                 self.targets[target_col_name]['model'].fit(X, Y)
-                if self.quantiles is not None:
-                    self.targets[target_col_name]['quantile_models'] = {}
-                    for i, quantile in enumerate(self.quantiles):
-                        self.targets[target_col_name]['quantile_models'][i] = GradientBoostingRegressor(n_estimators=600, loss='quantile', alpha=quantile)
-                        self.targets[target_col_name]['quantile_models'][i].fit(X, Y)
 
             else:
                 self.targets[target_col_name]['model'] = None
@@ -78,7 +73,7 @@ class BoostMixer(BaseMixer):
         X = []
         for row in when_data_source:
             X.append(np.array(row[0]))
-        
+
         predictions = {}
 
         for target_col_name in self.targets:
@@ -100,12 +95,4 @@ class BoostMixer(BaseMixer):
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
                 except Exception:
                     pass
-
-                if 'quantile_models' in self.targets[target_col_name]:
-                    lower_quantiles = self.targets[target_col_name]['quantile_models'][0].predict(X)
-                    upper_quantiles = self.targets[target_col_name]['quantile_models'][1].predict(X)
-
-                    predictions[target_col_name]['confidence_range'] = [[lower_quantiles[i],upper_quantiles[i]] for i in range(len(lower_quantiles))]
-                    predictions[target_col_name]['quantile_confidences'] = [self.quantiles[1] - self.quantiles[0] for i in range(len(lower_quantiles))]
-
         return predictions

@@ -60,7 +60,7 @@ class SklearnMixer(BaseMixer):
                         Y_train,
                         sample_weight=sample_weight
                     )
-                    
+
                     accuracy = balanced_accuracy_score(
                         Y_test,
                         model.predict(X_test)
@@ -70,7 +70,7 @@ class SklearnMixer(BaseMixer):
                         (model_class, model_kwargs),
                         accuracy
                     ))
-                
+
                 (best_model_class, best_model_kwargs), _ = max(
                     model_classes_and_accuracies,
                     key=lambda x: x[-1]
@@ -101,7 +101,7 @@ class SklearnMixer(BaseMixer):
                         self.binarizers[target_col_name].transform(Y_test),
                         model.predict(X_test)
                     )
-                    
+
                     model_classes_and_accuracies.append((
                         (model_class, model_kwargs),
                         accuracy
@@ -131,22 +131,16 @@ class SklearnMixer(BaseMixer):
                         (model_class, model_kwargs),
                         accuracy
                     ))
-                
+
                 (best_model_class, best_model_kwargs), best_accuracy = max(
                     model_classes_and_accuracies,
                     key=lambda x: x[-1]
                 )
 
                 self.targets[target_col_name]['model'] = best_model_class(**best_model_kwargs)
-
-                if self.quantiles is not None:
-                    self.targets[target_col_name]['quantile_models'] = {}
-                    for i, quantile in enumerate(self.quantiles):
-                        self.targets[target_col_name]['quantile_models'][i] = best_model_class(**best_model_kwargs)
-
             else:
                 self.targets[target_col_name]['model'] = None
-            
+
         # Fit best model of each column on [train_ds + test_ds]
         for target_col_name in self.targets:
             Y_train = train_ds.get_column_original_data(target_col_name)
@@ -162,10 +156,6 @@ class SklearnMixer(BaseMixer):
                 else:
                     self.targets[target_col_name]['model'].fit(X, Y)
 
-            if 'quantile_models' in self.targets[target_col_name]:
-                for model in self.targets[target_col_name]['quantile_models'].values():
-                    model.fit(X, Y)
-    
     def _predict(self, when_data_source, include_extra_data=False):
         """
         :param when_data_source: DataSource
@@ -174,7 +164,7 @@ class SklearnMixer(BaseMixer):
         X = []
         for row in when_data_source:
             X.append(np.array(row[0]))
-        
+
         predictions = {}
 
         for target_col_name in self.targets:
@@ -197,12 +187,5 @@ class SklearnMixer(BaseMixer):
                     predictions[target_col_name]['selfaware_confidences'] = [max(x) for x in self.targets[target_col_name]['model'].predict_proba(X)]
                 except Exception:
                     pass
-
-                if 'quantile_models' in self.targets[target_col_name]:
-                    lower_quantiles = self.targets[target_col_name]['quantile_models'][0].predict(X)
-                    upper_quantiles = self.targets[target_col_name]['quantile_models'][1].predict(X)
-
-                    predictions[target_col_name]['confidence_range'] = [[lower_quantiles[i],upper_quantiles[i]] for i in range(len(lower_quantiles))]
-                    predictions[target_col_name]['quantile_confidences'] = [self.quantiles[1] - self.quantiles[0] for i in range(len(lower_quantiles))]
 
         return predictions
