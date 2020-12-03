@@ -99,7 +99,7 @@ class NumericEncoder(BaseEncoder):
                 else:
                     if decode_log:
                         sign = -1 if vector[0] > 0.5 else 1
-                        real_value = math.exp[1] * sign
+                        real_value = math.exp(vector[1]) * sign
                     else:
                         real_value = vector[2] * self._abs_mean
 
