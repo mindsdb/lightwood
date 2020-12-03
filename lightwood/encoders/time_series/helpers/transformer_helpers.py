@@ -29,7 +29,10 @@ class PositionalEncoding(nn.Module):
             torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
         )
         pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
+        if not d_model % 2:
+            pe[:, 1::2] = torch.cos(position * div_term)
+        else:
+            pe[:, 1::2] = torch.cos(position * div_term)[:, :d_model//2]
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer("pe", pe)
 
@@ -38,16 +41,15 @@ class PositionalEncoding(nn.Module):
         return self.dropout(x)
 
 
-class TransformerModel(nn.Module):
+class TransformerEncoder(nn.Module):
     def __init__(self, ninp, nhead, nhid, nlayers, dropout=0.2):
-        super(TransformerModel, self).__init__()
+        super(TransformerEncoder, self).__init__()
         self.src_mask = None
         # Lezcano: This could be an embedding if the data is in a range [0, R-1]
         self.encoder = nn.Linear(1, ninp)
         self.pos_encoder = PositionalEncoding(ninp, dropout)
         encoder_layers = nn.TransformerEncoderLayer(ninp, nhead, nhid, dropout)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, nlayers)
-        self.decoder = nn.Linear(ninp, 1)
         self.init_weights()
 
     def _generate_square_subsequent_mask(self, sz):
@@ -64,8 +66,6 @@ class TransformerModel(nn.Module):
         initrange = 0.1
         self.encoder.weight.data.uniform_(-initrange, initrange)
         self.encoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
-        self.decoder.bias.data.zero_()
 
     def forward(self, src, lengths):
         device = src.device
@@ -81,5 +81,4 @@ class TransformerModel(nn.Module):
         output = self.transformer_encoder(
             src, mask=self.src_mask, src_key_padding_mask=lengths_mask
         )
-        output = self.decoder(output)
         return output

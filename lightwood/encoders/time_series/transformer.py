@@ -6,7 +6,7 @@ from torch.nn.utils.rnn import pad_sequence
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.encoders.time_series.helpers.transformer_helpers import (
-    TransformerModel,
+    TransformerEncoder,
     len_to_mask,
 )
 
@@ -22,7 +22,7 @@ class TransformerEncoder(BaseEncoder):
     ):
         super().__init__(is_target)
         # Model. We use encoded_vector_size for input and hidden
-        self._encoder = TransformerModel(
+        self._encoder = TransformerEncoder(
             ninp=encoded_vector_size, nhead=2, nhid=encoded_vector_size, nlayers=2
         )
 
