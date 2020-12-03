@@ -191,11 +191,11 @@ class NnMixer(BaseMixer):
                         self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
                         self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
                 elif output_type == COLUMN_DATA_TYPES.NUMERIC:
-                    self.criterion_arr.append(MSELoss())
-                    self.unreduced_criterion_arr.append(MSELoss(reduce=False))
-                else:
                     self.criterion_arr.append(torch.nn.MSELoss())
                     self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+                else:
+                    self.criterion_arr.append(torch.nn.torch.nn.MSELoss())
+                    self.unreduced_criterion_arr.append(torch.nn.torch.nn.MSELoss(reduce=False))
 
         self.optimizer_class = Ranger
         if self.optimizer_args is None:
