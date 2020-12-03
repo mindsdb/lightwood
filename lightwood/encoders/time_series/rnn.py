@@ -4,7 +4,6 @@ from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.encoders.datetime import DatetimeEncoder
 from lightwood.helpers.device import get_devices
 
-import numpy as np
 import torch
 import torch.nn as nn
 from torch import optim
@@ -13,7 +12,7 @@ from torch import optim
 class TimeSeriesEncoder(BaseEncoder):
 
     def __init__(self, encoded_vector_size=128, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical):#TransformerEncoder):
+                 is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical):  # TransformerEncoder):
         super().__init__(is_target)
         self.device, _ = get_devices()
         self.encoder_class = encoder_class
@@ -30,7 +29,6 @@ class TimeSeriesEncoder(BaseEncoder):
         self._n_dims = ts_n_dims
         self._normalizer = None
         self._target_ar_normalizers = []
-        self._criterion = nn.MSELoss()
 
     def setup_nn(self, additional_targets=None):
         """This method must be executed after initializing, else self.secondary_type is unassigned"""
@@ -53,14 +51,18 @@ class TimeSeriesEncoder(BaseEncoder):
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
-            self._encoder = EncoderRNNNumerical(input_size=total_dims,
-                                                hidden_size=self._encoded_vector_size).to(self.device)
-        else:
+            self._criterion = nn.MSELoss()
+            self._encoder = self.encoder_class(input_size=total_dims,
+                                               hidden_size=self._encoded_vector_size).to(self.device)
+
+        elif self.encoder_class == TransformerEncoder:
+            self._criterion = self._masked_criterion
             # ToDo set params (nhead, ndim) according to ninp
-            self._encoder = TransformerEncoder(ninp=total_dims,
+            self._encoder = self.encoder_class(ninp=total_dims,
                                                nhead=5,
                                                nhid=10*total_dims,
                                                nlayers=4).to(self.device)
+
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
         self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
@@ -72,6 +74,25 @@ class TimeSeriesEncoder(BaseEncoder):
             self._encoder = self._encoder.to(self.device)
             self._decoder = self._decoder.to(self.device)
         return self
+
+    def _prepare_raw_data(self, data):
+        # Convert to array and determine max length:
+        # priming_data is a list of len B with lists of length in [0, T]
+        # If the length of the series varies a lot, it would be worth it to order them and apply a few optimisations
+        # we do not do so now
+        out_data = [
+            torch.tensor(e, dtype=torch.float, device=self.device) for e in data
+        ]
+        lengths = torch.tensor(
+            [len(e) for e in data], dtype=torch.long, device=self.device
+        )
+        return out_data, lengths
+
+    def _get_batch(self, source, start, step):
+        # source is an iterable element, we want to get source[i+step] or source[i+end]
+        # If padding is not None, until size `source[i+step]`
+        end = min(start + step, len(source))
+        return source[start:end]
 
     def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
         """
@@ -88,6 +109,7 @@ class TimeSeriesEncoder(BaseEncoder):
             self.setup_nn(previous_target_data)
 
         # Convert to array and determine max length:
+        # _, lengths_data = self._prepare_raw_data(priming_data)
         for i in range(len(priming_data)):
             if not isinstance(priming_data[i][0], list):
                 priming_data[i] = [priming_data[i]]  # add dimension for 1D timeseries
@@ -136,10 +158,16 @@ class TimeSeriesEncoder(BaseEncoder):
                         # concatenate descriptors
                         batch = torch.cat((batch, target_tensor), dim=-1)
 
+
                 # setup loss and optimizer
                 self._optimizer.zero_grad()
                 data_idx += batch_size
                 loss = 0
+
+                # For transformers
+                if self.encoder_class == TransformerEncoder:
+                    len_batch = self._get_batch(lengths_data, data_idx, batch_size)
+                    batch = batch, len_batch
 
                 # encode and decode through time
                 next_tensor, hidden_state, enc_loss = self._encoder.encode(batch, self._criterion, self.device)
@@ -307,3 +335,21 @@ class TimeSeriesEncoder(BaseEncoder):
             ret.append(reconstruction)
 
         return self._pytorch_wrapper(ret)
+
+    def _masked_criterion(self, output, targets, lengths):
+        """ Computes the loss of the first `lengths` items in the chunk """
+        mask = len_to_mask(lengths, zeros=False)
+
+        # Put in (B, T) format and zero-out the unnecessary values
+        output = output.t() * mask
+        targets = targets.t() * mask
+
+        # compute the loss with respect to the appropriate lengths and average across the batch-size
+        # We compute for every output (x_i)_i=1^L and target (y_i)_i=1^L, loss = 1/L \sum (x_i - y_i)^2
+        # And average across the mini-batch
+        losses = self._criterion(output, targets).sum(dim=1)
+
+        # The TBPTT will compute a slightly different loss, but it is not problematic
+        loss = torch.dot((1.0 / lengths.float()), losses) / len(losses)
+
+        return loss

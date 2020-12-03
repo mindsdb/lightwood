@@ -39,7 +39,6 @@ class TransformerEncoder(BaseEncoder):
         self._criterion = nn.MSELoss(reduction="none")
 
         self._prepared = False
-        self.bptt = 35
         self.gradient_norm_clip = 0.5
 
         # Lezcano: These should be global constants of the library
@@ -135,24 +134,12 @@ class TransformerEncoder(BaseEncoder):
             for start_batch in range(0, npoints, batch_size):
                 self._optimizer.zero_grad()
 
-                train_batch = self._get_batch(priming_data, start_batch, batch_size)
+                train_batch = pad_sequence(self._get_batch(priming_data, start_batch, batch_size))
                 len_batch = self._get_batch(lengths_data, start_batch, batch_size)
-                train_batch = pad_sequence(train_batch)
 
-                # TBPTT
-                losses = []
-                for start_chunk in range(0, train_batch.size(0) - 1, self.bptt):
-                    data, targets, lengths_chunk = self._get_chunk(
-                        train_batch, len_batch, start_chunk, self.bptt
-                    )
-                    data = data.unsqueeze(-1)
-                    output = self._encoder(data, lengths_chunk)
-                    output = output.squeeze(-1)
-                    losses.append(
-                        self._masked_criterion(output, targets, lengths_chunk)
-                    )
-                loss = sum(losses)
+                output, loss = self.encoder.encode(train_batch, len_batch)
                 loss.backward()
+
                 torch.nn.utils.clip_grad_norm_(self._encoder.parameters(), self.gradient_norm_clip)
                 self._optimizer.step()
 
