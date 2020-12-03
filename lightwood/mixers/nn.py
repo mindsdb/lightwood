@@ -192,8 +192,8 @@ class NnMixer(BaseMixer):
                         self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
                 # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
-                    self.criterion_arr.append(torch.nn.torch.nn.MSELoss())
-                    self.unreduced_criterion_arr.append(torch.nn.torch.nn.MSELoss(reduce=False))
+                    self.criterion_arr.append(torch.nn.MSELoss())
+                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
 
         self.optimizer_class = Ranger
         if self.optimizer_args is None:
