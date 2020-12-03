@@ -18,6 +18,23 @@ def len_to_mask(lengths, zeros):
     return mask
 
 
+def get_chunk(source, source_lengths, start, step):
+    end = min(start + step, len(source) - 1)
+    # Compute the lenghts of the sequences
+    # The -1 comes from the fact that the last element is used as target but not as data!
+    lengths = torch.clamp((source_lengths - 1) - start, min=0, max=step)
+    # This is necessary for MultiHeadedAttention to work
+    non_empty = lengths != 0
+    data = source[start:end]
+    target = source[start + 1 : end + 1]
+    data, target, lengths = (
+        data[:, non_empty],
+        target[:, non_empty],
+        lengths[non_empty],
+    )
+    return data, target, lengths
+
+
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, dropout=0.2, max_len=5000):
         super(PositionalEncoding, self).__init__()
@@ -45,6 +62,7 @@ class TransformerEncoder(nn.Module):
     def __init__(self, ninp, nhead, nhid, nlayers, dropout=0.2):
         super(TransformerEncoder, self).__init__()
         self.src_mask = None
+        self.bptt = 35
         # Lezcano: This could be an embedding if the data is in a range [0, R-1]
         self.encoder = nn.Linear(1, ninp)
         self.pos_encoder = PositionalEncoding(ninp, dropout)
@@ -67,8 +85,7 @@ class TransformerEncoder(nn.Module):
         self.encoder.weight.data.uniform_(-initrange, initrange)
         self.encoder.bias.data.zero_()
 
-    def forward(self, src, lengths):
-        device = src.device
+    def forward(self, src, lengths, device):
         if self.src_mask is None or self.src_mask.size(0) != src.size(0):
             # Attention mask to avoid attending to upcoming parts of the sequence
             self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
@@ -82,3 +99,20 @@ class TransformerEncoder(nn.Module):
             src, mask=self.src_mask, src_key_padding_mask=lengths_mask
         )
         return output
+
+    def encode(self, batch, criterion, device):
+        """This method implements truncated backpropagation through time"""
+        loss = 0
+        train_batch, len_batch = batch
+
+        for start_chunk in range(0, train_batch.size(0) - 1, self.bptt):
+            data, targets, lengths_chunk = get_chunk(train_batch, len_batch, start_chunk, self.bptt)
+            data = data.unsqueeze(-1)
+            output = self._encoder(data, lengths_chunk, device)
+            output = output.squeeze(-1)
+            loss += criterion(output, targets, lengths_chunk)
+
+        return output, loss
+
+
+
