@@ -104,13 +104,11 @@ class NumericEncoder(BaseEncoder):
                         real_value = vector[2] * self._abs_mean
 
                     if self.positive_domain:
-                        real_value = [abs(i) for i in real_value]
+                        real_value = abs(real_value)
 
                     if self._type == 'int':
-                        real_value = [int(x) for x in real_value]
+                        real_value = int(real_value)
 
-                    if len(real_value) < 2:
-                        real_value = real_value[0]
             else:
                 if vector[0] < 0.5:
                     ret.append(None)
