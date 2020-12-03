@@ -19,7 +19,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self._stop_on_error = stop_on_error
         self._learning_rate = learning_rate
         self._encoded_vector_size = encoded_vector_size
-        self._train_iters = train_iters  # training epochs
+        self._epochs = train_iters  # training epochs
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self._is_setup = False
@@ -80,9 +80,11 @@ class TimeSeriesEncoder(BaseEncoder):
         # priming_data is a list of len B with lists of length in [0, T]
         # If the length of the series varies a lot, it would be worth it to order them and apply a few optimisations
         # we do not do so now
-        out_data = [
-            torch.tensor(e, dtype=torch.float, device=self.device) for e in data
-        ]
+        out_data = []
+        for e in data:
+            t = torch.tensor(e, dtype=torch.float, device=self.device)  # ToDo: add dimension for 1D timeseries?
+            t[torch.isnan(t)] = 0.0
+            out_data.append(t)
         lengths = torch.tensor(
             [len(e) for e in data], dtype=torch.long, device=self.device
         )
@@ -108,65 +110,53 @@ class TimeSeriesEncoder(BaseEncoder):
         else:
             self.setup_nn(previous_target_data)
 
-        # Convert to array and determine max length:
-        # _, lengths_data = self._prepare_raw_data(priming_data)
-        for i in range(len(priming_data)):
-            if not isinstance(priming_data[i][0], list):
-                priming_data[i] = [priming_data[i]]  # add dimension for 1D timeseries
-            self._max_ts_length = max(len(priming_data[i][0]), self._max_ts_length)  # TODO: this is set at Native... should we still check?
+        # Convert to array and determine max length
+        priming_data, lengths_data = self._prepare_raw_data(priming_data)
+        self._max_ts_length = int(lengths_data.max())
 
-        # normalize data
         if self._normalizer:
             self._normalizer.prepare(priming_data)
+            priming_data = torch.stack([self._normalizer.encode(d) for d in priming_data]).to(self.device)
 
+        # merge all normalized data into a training batch
         if previous_target_data is not None and len(previous_target_data) > 0:
+            normalized_tensors = []
             for target_dict in previous_target_data:
                 normalizer = target_dict['normalizer']
-                target_dict['encoded_data'] = normalizer.encode(target_dict['data'])
                 self._target_ar_normalizers.append(normalizer)
+
+                data = []
+                for t in target_dict['data']:
+                    datum, _ = self._prepare_raw_data(normalizer.encode(t))
+                    data.append(datum[0])
+
+                normalized_tensors.append(torch.stack(data).unsqueeze(-1))  # add feature dimension
+            normalized_data = torch.cat(normalized_tensors, dim=-1)
+        else:
+            normalized_data = None
+        priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
         # decrease batch_size for small datasets
         if batch_size >= len(priming_data):
             batch_size = len(priming_data) // 2
 
         self._encoder.train()
-        for i in range(self._train_iters):
+        for i in range(self._epochs):
             average_loss = 0
-            data_idx = 0
 
-            while data_idx < len(priming_data):
+            for batch_idx in range(0, len(priming_data), batch_size):
 
-                # batch building, shape: (batch_size, timesteps, n_dims)
-                data_points = priming_data[data_idx:min(data_idx + batch_size, len(priming_data))]
-                batch = []
-                for dp in data_points:
-                    data_tensor = tensor_from_series(dp, self.device, self._n_dims,
-                                                     self._eos, self._max_ts_length,
-                                                     self._normalizer)
-                    batch.append(data_tensor)
-                batch = torch.cat(batch, dim=0).to(self.device)
-
-                # include autoregressive target data
-                if previous_target_data is not None and len(previous_target_data) > 0:
-                    for target_dict in previous_target_data:
-                        t_dp = target_dict['encoded_data'][data_idx:min(data_idx + batch_size, len(priming_data))]
-                        target_tensor = torch.Tensor(t_dp).to(self.device)
-                        target_tensor[torch.isnan(target_tensor)] = 0.0
-                        if len(t_dp.shape) < 3:
-                            target_tensor = target_tensor.unsqueeze(2)
-
-                        # concatenate descriptors
-                        batch = torch.cat((batch, target_tensor), dim=-1)
-
+                # shape: (batch_size, timesteps, n_dims)
+                batch = self._get_batch(priming_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
 
                 # setup loss and optimizer
                 self._optimizer.zero_grad()
-                data_idx += batch_size
+                batch_idx += batch_size
                 loss = 0
 
                 # For transformers
                 if self.encoder_class == TransformerEncoder:
-                    len_batch = self._get_batch(lengths_data, data_idx, batch_size)
+                    len_batch = self._get_batch(lengths_data, batch_idx, batch_size)
                     batch = batch, len_batch
 
                 # encode and decode through time
@@ -190,7 +180,7 @@ class TimeSeriesEncoder(BaseEncoder):
             if feedback_hoop_function is not None:
                 feedback_hoop_function("epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
                     epoch_n=i + 1,
-                    total=self._train_iters,
+                    total=self._epochs,
                     average_loss=average_loss))
 
         self._prepared = True
