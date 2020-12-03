@@ -190,9 +190,7 @@ class NnMixer(BaseMixer):
                     elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
                         self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
                         self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
-                elif output_type == COLUMN_DATA_TYPES.NUMERIC:
-                    self.criterion_arr.append(torch.nn.MSELoss())
-                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+                # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
                     self.criterion_arr.append(torch.nn.torch.nn.MSELoss())
                     self.unreduced_criterion_arr.append(torch.nn.torch.nn.MSELoss(reduce=False))
@@ -437,11 +435,7 @@ class NnMixer(BaseMixer):
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
 
-            if when_data_source.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column] = {'predictions': [x[0] for x in decoded_predictions]}
-
-            else:
-                predictions[output_column] = {'predictions': decoded_predictions}
+            predictions[output_column] = {'predictions': decoded_predictions}
 
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
