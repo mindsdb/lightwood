@@ -12,7 +12,7 @@ from torch import optim
 class TimeSeriesEncoder(BaseEncoder):
 
     def __init__(self, encoded_vector_size=128, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical):  # TransformerEncoder):
+                 is_target=False, ts_n_dims=1, encoder_class=TransformerEncoder): # EncoderRNNNumerical):  #
         super().__init__(is_target)
         self.device, _ = get_devices()
         self.encoder_class = encoder_class
