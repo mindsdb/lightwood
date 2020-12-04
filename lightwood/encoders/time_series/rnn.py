@@ -56,11 +56,12 @@ class TimeSeriesEncoder(BaseEncoder):
                                                hidden_size=self._encoded_vector_size).to(self.device)
 
         elif self.encoder_class == TransformerEncoder:
+            self._base_criterion = nn.MSELoss(reduction="none")
             self._criterion = self._masked_criterion
             # ToDo set params (nhead, ndim) according to ninp
             self._encoder = self.encoder_class(ninp=total_dims,
                                                nhead=5,
-                                               nhid=10*total_dims,
+                                               nhid=total_dims,  # 10*
                                                nlayers=4).to(self.device)
 
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
@@ -328,18 +329,21 @@ class TimeSeriesEncoder(BaseEncoder):
 
     def _masked_criterion(self, output, targets, lengths):
         """ Computes the loss of the first `lengths` items in the chunk """
-        mask = len_to_mask(lengths, zeros=False)
-
         # Put in (B, T) format and zero-out the unnecessary values
-        output = output.t() * mask
-        targets = targets.t() * mask
+        mask = len_to_mask(lengths, zeros=False).t()
+
+        # Inflate to feature dimension
+        mask = mask.unsqueeze(-1).repeat(1, 1, output.shape[-1])
+        output = output * mask
+        targets = targets * mask
 
         # compute the loss with respect to the appropriate lengths and average across the batch-size
         # We compute for every output (x_i)_i=1^L and target (y_i)_i=1^L, loss = 1/L \sum (x_i - y_i)^2
         # And average across the mini-batch
-        losses = self._criterion(output, targets).sum(dim=1)
+        losses = self._base_criterion(output, targets).sum(dim=2).sum(dim=1)
 
         # The TBPTT will compute a slightly different loss, but it is not problematic
         loss = torch.dot((1.0 / lengths.float()), losses) / len(losses)
+        print(loss)
 
         return loss
