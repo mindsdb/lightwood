@@ -27,10 +27,10 @@ def get_chunk(source, source_lengths, start, step):
     # This is necessary for MultiHeadedAttention to work
     end = source.shape[1]
     non_empty = lengths != 0
-    data = source[:, start:end, :]
-    target = source[:, start+1:end+1, :]
+    data = source[:, :lengths, :]
+    target = source[:, lengths:, :]
     data, target, lengths = (
-        data[non_empty, :, ],
+        data[non_empty, :, :],
         target[non_empty, :, :],
         lengths[non_empty],
     )
