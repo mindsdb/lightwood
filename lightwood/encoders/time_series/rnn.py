@@ -51,13 +51,15 @@ class TimeSeriesEncoder(BaseEncoder):
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
-            self._criterion = nn.MSELoss()
+            self._enc_criterion = nn.MSELoss()
+            self._dec_criterion = self._enc_criterion
             self._encoder = self.encoder_class(input_size=total_dims,
                                                hidden_size=self._encoded_vector_size).to(self.device)
 
         elif self.encoder_class == TransformerEncoder:
+            self._enc_criterion = self._masked_criterion
+            self._dec_criterion = nn.MSELoss()
             self._base_criterion = nn.MSELoss(reduction="none")
-            self._criterion = self._masked_criterion
             # ToDo set params (nhead, ndim) according to ninp
             self._encoder = self.encoder_class(ninp=total_dims,
                                                nhead=5,
@@ -161,18 +163,18 @@ class TimeSeriesEncoder(BaseEncoder):
                     batch = batch, len_batch
 
                 # encode and decode through time
-                next_tensor, hidden_state, enc_loss = self._encoder.encode(batch, self._criterion, self.device)
+                next_tensor, hidden_state, enc_loss = self._encoder.encode(batch, self._enc_criterion, self.device)
                 loss += enc_loss
 
                 # decode
-                next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._criterion,
+                next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
                                                                            self.device,
                                                                            hidden_state=hidden_state)
                 loss += dec_loss
 
-                average_loss += loss.item()
                 loss.backward()
                 self._optimizer.step()
+                average_loss += loss.item()
 
             average_loss = average_loss / len(priming_data)
 
@@ -344,6 +346,6 @@ class TimeSeriesEncoder(BaseEncoder):
 
         # The TBPTT will compute a slightly different loss, but it is not problematic
         loss = torch.dot((1.0 / lengths.float()), losses) / len(losses)
-        print(loss)
+        print(loss.item())
 
         return loss

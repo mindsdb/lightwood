@@ -28,7 +28,7 @@ def get_chunk(source, source_lengths, start, step):
     lengths = torch.clamp((source_lengths - 1) - start, min=0, max=step)
 
     # This is necessary for MultiHeadedAttention to work
-    end = source.shape[1]
+    end = source.shape[1]  # ToDo this is faulty, fix with original implementation
     non_empty = lengths != 0
     data = source[:, :end-1, :]
     target = source[:, 1:, :]
@@ -102,19 +102,20 @@ class TransformerEncoder(nn.Module):
         return output
 
     def encode(self, batch, criterion, device):
-        """This method implements truncated backpropagation through time"""
+        """This method implements truncated backpropagation through time
+        Returns: output tensor, None as hidden_state, which does not apply in this case, and loss value"""
         loss = 0
         train_batch, len_batch = batch
         batch_size, timesteps, _ = train_batch.shape
 
-        for start_chunk in range(0, batch_size, timesteps):
+        for start_chunk in range(0, timesteps, timesteps):
             data, targets, lengths_chunk = get_chunk(train_batch, len_batch, start_chunk, timesteps)
             # data = data.unsqueeze(-1)
             output = self.forward(data, lengths_chunk, device)
             # output = output.squeeze(-1)
             loss += criterion(output, targets, lengths_chunk)
 
-        return output, loss
+        return output, None, loss
 
 
 
