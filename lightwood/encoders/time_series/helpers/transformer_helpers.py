@@ -12,10 +12,13 @@ def len_to_mask(lengths, zeros):
     """
     # Clean trick from:
     # https://stackoverflow.com/questions/53403306/how-to-batch-convert-sentence-lengths-to-masks-in-pytorch
-    mask = torch.arange(lengths.max())[None, :] < lengths[:, None]
+    try:
+        mask = torch.arange(lengths.max(), device=lengths.device)[None, :] < lengths[:, None]
+    except RuntimeError:
+        print("whoops")
     if zeros:
         mask = ~mask  # Logical not
-    return mask
+    return mask.transpose(0, 1)
 
 
 def get_chunk(source, source_lengths, start, step):
@@ -27,8 +30,8 @@ def get_chunk(source, source_lengths, start, step):
     # This is necessary for MultiHeadedAttention to work
     end = source.shape[1]
     non_empty = lengths != 0
-    data = source[:, :lengths, :]
-    target = source[:, lengths:, :]
+    data = source[:, :end-1, :]
+    target = source[:, 1:, :]
     data, target, lengths = (
         data[non_empty, :, :],
         target[non_empty, :, :],
@@ -64,8 +67,6 @@ class TransformerEncoder(nn.Module):
     def __init__(self, ninp, nhead, nhid, nlayers, dropout=0.2):
         super(TransformerEncoder, self).__init__()
         self.src_mask = None
-        # Lezcano: This could be an embedding if the data is in a range [0, R-1]
-        self.encoder = nn.Linear(1, ninp)
         self.pos_encoder = PositionalEncoding(ninp, dropout)
         encoder_layers = nn.TransformerEncoderLayer(ninp, nhead, nhid, dropout)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, nlayers)
@@ -82,9 +83,9 @@ class TransformerEncoder(nn.Module):
         return mask
 
     def init_weights(self):
-        initrange = 0.1
-        self.encoder.weight.data.uniform_(-initrange, initrange)
-        self.encoder.bias.data.zero_()
+        for p in self.parameters():
+            if p.dim() > 1:
+                torch.nn.init.xavier_uniform_(p)
 
     def forward(self, src, lengths, device):
         if self.src_mask is None or self.src_mask.size(0) != src.size(0):
@@ -92,7 +93,6 @@ class TransformerEncoder(nn.Module):
             self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
                 device
             )
-        src = self.encoder(src)
         src = self.pos_encoder(src)
         # The lengths_mask has to be of size [batch, lengths]
         lengths_mask = len_to_mask(lengths, zeros=True).to(device)
@@ -109,9 +109,9 @@ class TransformerEncoder(nn.Module):
 
         for start_chunk in range(0, batch_size, timesteps):
             data, targets, lengths_chunk = get_chunk(train_batch, len_batch, start_chunk, timesteps)
-            data = data.unsqueeze(-1)
+            # data = data.unsqueeze(-1)
             output = self.forward(data, lengths_chunk, device)
-            output = output.squeeze(-1)
+            # output = output.squeeze(-1)
             loss += criterion(output, targets, lengths_chunk)
 
         return output, loss
