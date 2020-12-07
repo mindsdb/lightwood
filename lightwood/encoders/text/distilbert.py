@@ -47,19 +47,16 @@ class DistilBertEncoder(BaseEncoder):
             self._embeddings_model_class = AlbertModel
             self._tokenizer_class = AlbertTokenizer
             self._pretrained_model_name = 'albert-base-v2'
-            self._model_max_len = 768
         if self.aim == ENCODER_AIM.BALANCE:
             self._classifier_model_class = DistilBertForSequenceClassification
             self._embeddings_model_class = DistilBertModel
             self._tokenizer_class = DistilBertTokenizer
             self._pretrained_model_name = 'distilbert-base-uncased'
-            self._model_max_len = 768
         if self.aim == ENCODER_AIM.ACCURACY:
             self._classifier_model_class = DistilBertForSequenceClassification
             self._embeddings_model_class = DistilBertModel
             self._tokenizer_class = DistilBertTokenizer
             self._pretrained_model_name = 'distilbert-base-uncased'
-            self._model_max_len = 768
 
         self.device, _ = get_devices()
 
@@ -118,7 +115,6 @@ class DistilBertEncoder(BaseEncoder):
 
         priming_data = [x if x is not None else '' for x in priming_data]
 
-        self._max_len = min(max([len(x) for x in priming_data]), self._model_max_len)
         self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
         self._pad_id = self._tokenizer.convert_tokens_to_ids([self._tokenizer.pad_token])[0]
         # @TODO: Support multiple targets if they are all categorical
@@ -131,6 +127,7 @@ class DistilBertEncoder(BaseEncoder):
             self._model_type = 'classifier'
             self._model = self._classifier_model_class.from_pretrained(self._pretrained_model_name, num_labels=len(
                 set(training_data['targets'][0]['unencoded_output'])) + 1).to(self.device)
+            self._max_len = min(max([len(x) for x in priming_data]), self._model.config.max_position_embeddings)
             batch_size = 10
 
             no_decay = ['bias', 'LayerNorm.weight']
@@ -184,6 +181,7 @@ class DistilBertEncoder(BaseEncoder):
             self._model_type = 'generic_target_predictor'
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
             batch_size = 10
+            self._max_len = min(max([len(x) for x in priming_data]), self._model.config.max_position_embeddings)
 
             self._head = DefaultNet(dynamic_parameters={}, shape=funnel(
                 768, sum([len(x['encoded_output'][0]) for x in training_data['targets']]), depth=5))
