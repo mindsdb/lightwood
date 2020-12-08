@@ -39,3 +39,17 @@ class TestNumericEncoder(unittest.TestCase):
 
         for val in decoded_vals:
             self.assertTrue(val >= 0)
+
+    def test_log_overflow_and_none(self):
+        data = list(range(-2000,2000,66))
+        data.extend([None] * 200)
+        encoder = NumericEncoder()
+
+        encoder.is_target = True
+        encoder.positive_domain = True
+        encoder.decode_log = True
+        encoder.prepare(data)
+        decoded_vals = encoder.decode(encoder.encode(data))
+
+        for i in range(0,70,10):
+            encoder.decode([[0, pow(2,i), 0]])
