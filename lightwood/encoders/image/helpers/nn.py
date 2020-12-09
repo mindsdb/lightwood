@@ -44,8 +44,9 @@ class autoencoder(nn.Module):
             nn.ReLU(True), nn.Linear(128, 128 * 128), nn.Tanh())
 
     def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
+        with torch.cuda.amp.autocast():
+            x = self.encoder(x)
+            x = self.decoder(x)
         return x
 
 
@@ -104,8 +105,9 @@ class NnEncoderHelper:
                 img = img.view(img.size(0), -1)
                 img = Variable(img).cpu()
                 # ===================forward=====================
-                output = self.model(img)
-                loss = criterion(output, img)
+                with torch.cuda.amp.autocast():
+                    output = self.model(img)
+                    loss = criterion(output, img)
                 # ===================backward====================
                 optimizer.zero_grad()
                 loss.backward()

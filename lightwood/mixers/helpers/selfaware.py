@@ -49,7 +49,8 @@ class SelfAware(torch.nn.Module):
         :param main_net_output: tensor with main NN prediction for true_input
         :return: predicted loss value over the tensor samples
         """
-        aware_in = torch.cat((true_input, main_net_output), 1)
-        output = self.net(aware_in)
-        return output
+        with torch.cuda.amp.autocast():
+            aware_in = torch.cat((true_input, main_net_output), 1)
+            output = self.net(aware_in)
+            return output
     

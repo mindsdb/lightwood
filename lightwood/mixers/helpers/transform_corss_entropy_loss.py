@@ -7,8 +7,9 @@ class TransformCrossEntropyLoss(torch.nn.Module):
         self.cross_entropy_loss = torch.nn.CrossEntropyLoss(**kwargs)
 
     def forward(self, preds, target):
-        cat_labels = target.max(1).indices
-        return self.cross_entropy_loss(preds, cat_labels)
+        with torch.cuda.amp.autocast():
+            cat_labels = target.max(1).indices
+            return self.cross_entropy_loss(preds, cat_labels)
 
     def estimate_confidence(self, preds, maximum_confidence=None):
         confidences = []

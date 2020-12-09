@@ -53,10 +53,11 @@ class DecoderRNNNumerical(nn.Module):
         self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, input, hidden):
-        output = self.in_activation(input.float())
-        output, hidden = self.gru(output, hidden)
-        output = self.dropout(output)
-        output = self.out(output)
+        with torch.cuda.amp.autocast():
+            output = self.in_activation(input.float())
+            output, hidden = self.gru(output, hidden)
+            output = self.dropout(output)
+            output = self.out(output)
         return output, hidden
 
     def initHidden(self, device, batch_size=1):
@@ -72,9 +73,10 @@ class EncoderRNNNumerical(nn.Module):
         self.out = nn.Linear(hidden_size, input_size)
 
     def forward(self, input, hidden):
-        output, hidden = self.gru(input, hidden)
-        output = self.dropout(output)
-        output = self.out(output)
+        with torch.cuda.amp.autocast():
+            output, hidden = self.gru(input, hidden)
+            output = self.dropout(output)
+            output = self.out(output)
         return output, hidden
 
     def initHidden(self, device, batch_size=1):
