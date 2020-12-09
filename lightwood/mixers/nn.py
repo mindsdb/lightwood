@@ -432,7 +432,7 @@ class NnMixer(BaseMixer):
         for k, output_column in enumerate(list(output_trasnformed_vectors.keys())):
             decoded_predictions = when_data_source.get_decoded_column_data(
                 output_column,
-                when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
+                torch.Tensor(output_trasnformed_vectors[output_column])
             )
 
             predictions[output_column] = {'predictions': decoded_predictions}

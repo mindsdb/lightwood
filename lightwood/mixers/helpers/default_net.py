@@ -120,7 +120,7 @@ class DefaultNet(torch.nn.Module):
         :param input: a pytorch tensor with the input data of a batch
         :return: output of the network
         """
-
-        output = self._foward_net(input)
+        with torch.cuda.amp.autocast():
+            output = self._foward_net(input)
 
         return output

@@ -12,7 +12,8 @@ def len_to_mask(lengths, zeros):
     """
     # Clean trick from:
     # https://stackoverflow.com/questions/53403306/how-to-batch-convert-sentence-lengths-to-masks-in-pytorch
-    mask = torch.arange(lengths.max())[None, :] < lengths[:, None]
+    device = lengths.device
+    mask = torch.arange(lengths.max()).to(device)[None, :] < lengths[:, None]
     if zeros:
         mask = ~mask  # Logical not
     return mask
@@ -34,8 +35,9 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe)
 
     def forward(self, x):
-        x = x + self.pe[: x.size(0), :]
-        return self.dropout(x)
+        with torch.cuda.amp.autocast():
+            x = x + self.pe[: x.size(0), :]
+            return self.dropout(x)
 
 
 class TransformerModel(nn.Module):
@@ -69,17 +71,18 @@ class TransformerModel(nn.Module):
 
     def forward(self, src, lengths):
         device = src.device
-        if self.src_mask is None or self.src_mask.size(0) != src.size(0):
-            # Attention mask to avoid attending to upcoming parts of the sequence
-            self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
-                device
+        with torch.cuda.amp.autocast():
+            if self.src_mask is None or self.src_mask.size(0) != src.size(0):
+                # Attention mask to avoid attending to upcoming parts of the sequence
+                self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
+                    device
+                )
+            src = self.encoder(src)
+            src = self.pos_encoder(src)
+            # The lengths_mask has to be of size [batch, lengths]
+            lengths_mask = len_to_mask(lengths, zeros=True).to(device)
+            output = self.transformer_encoder(
+                src, mask=self.src_mask, src_key_padding_mask=lengths_mask
             )
-        src = self.encoder(src)
-        src = self.pos_encoder(src)
-        # The lengths_mask has to be of size [batch, lengths]
-        lengths_mask = len_to_mask(lengths, zeros=True).to(device)
-        output = self.transformer_encoder(
-            src, mask=self.src_mask, src_key_padding_mask=lengths_mask
-        )
-        output = self.decoder(output)
+            output = self.decoder(output)
         return output

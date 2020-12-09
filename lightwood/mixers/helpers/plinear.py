@@ -107,8 +107,8 @@ class PLinear(nn.Module):
         The goal is to generate values such as if they weights of the linear operation are sampled
         from a normal distribution
         """
-
-        return F.linear(input, self.w_sampler(), self.bias)
+        with torch.cuda.amp.autocast():
+            return F.linear(input, self.w_sampler(), self.bias)
 
 
 if __name__ == "__main__":

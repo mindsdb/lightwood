@@ -104,7 +104,7 @@ class NnMixer:
 
         predictions = {}
         for output_column in output_trasnformed_vectors:
-            decoded_predictions = when_data_source.get_decoded_column_data(output_column, when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column]))
+            decoded_predictions = when_data_source.get_decoded_column_data(output_column, torch.Tensor(output_trasnformed_vectors[output_column]))
             predictions[output_column] = {'predictions': decoded_predictions}
             if awareness_arr is not None:
                 predictions[output_column]['confidences'] = confidence_trasnformed_vectors[output_column]

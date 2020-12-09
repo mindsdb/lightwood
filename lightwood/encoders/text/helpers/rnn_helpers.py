@@ -350,9 +350,10 @@ class EncoderRNN(nn.Module):
         self.gru = nn.GRU(hidden_size, hidden_size)
 
     def forward(self, input, hidden):
-        embedded = self.embedding(input).view(1, 1, -1)
-        output = embedded
-        output, hidden = self.gru(output, hidden)
+        with torch.cuda.amp.autocast():
+            embedded = self.embedding(input).view(1, 1, -1)
+            output = embedded
+            output, hidden = self.gru(output, hidden)
         return output, hidden
 
     def initHidden(self):
@@ -397,10 +398,11 @@ class DecoderRNN(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, input, hidden):
-        output = self.embedding(input).view(1, 1, -1)
-        output = F.relu(output)
-        output, hidden = self.gru(output, hidden)
-        output = self.softmax(self.out(output[0]))
+        with torch.cuda.amp.autocast():
+            output = self.embedding(input).view(1, 1, -1)
+            output = F.relu(output)
+            output, hidden = self.gru(output, hidden)
+            output = self.softmax(self.out(output[0]))
         return output, hidden
 
     def initHidden(self):
@@ -460,21 +462,22 @@ class AttnDecoderRNN(nn.Module):
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, input, hidden, encoder_outputs):
-        embedded = self.embedding(input).view(1, 1, -1)
-        embedded = self.dropout(embedded)
+        with torch.cuda.amp.autocast():
+            embedded = self.embedding(input).view(1, 1, -1)
+            embedded = self.dropout(embedded)
 
-        attn_weights = F.softmax(
-            self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
-        attn_applied = torch.bmm(attn_weights.unsqueeze(0),
-                                 encoder_outputs.unsqueeze(0))
+            attn_weights = F.softmax(
+                self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
+            attn_applied = torch.bmm(attn_weights.unsqueeze(0),
+                                     encoder_outputs.unsqueeze(0))
 
-        output = torch.cat((embedded[0], attn_applied[0]), 1)
-        output = self.attn_combine(output).unsqueeze(0)
+            output = torch.cat((embedded[0], attn_applied[0]), 1)
+            output = self.attn_combine(output).unsqueeze(0)
 
-        output = F.relu(output)
-        output, hidden = self.gru(output, hidden)
+            output = F.relu(output)
+            output, hidden = self.gru(output, hidden)
 
-        output = F.log_softmax(self.out(output[0]), dim=1)
+            output = F.log_softmax(self.out(output[0]), dim=1)
         return output, hidden, attn_weights
 
     def initHidden(self):
@@ -558,44 +561,45 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
 
     loss = 0
 
-    for ei in range(min(input_length, len(encoder_outputs))):
-        encoder_output, encoder_hidden = encoder(
-            input_tensor[ei], encoder_hidden)
-        encoder_outputs[ei] = encoder_output[0, 0]
+    with torch.cuda.amp.autocast():
+        for ei in range(min(input_length, len(encoder_outputs))):
+            encoder_output, encoder_hidden = encoder(
+                input_tensor[ei], encoder_hidden)
+            encoder_outputs[ei] = encoder_output[0, 0]
 
-    decoder_input = torch.tensor([[SOS_token]], device=device)
+        decoder_input = torch.tensor([[SOS_token]], device=device)
 
-    decoder_hidden = encoder_hidden
+        decoder_hidden = encoder_hidden
 
-    use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
+        use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
-    if use_teacher_forcing:
-        # Teacher forcing: Feed the target as the next input
-        for di in range(target_length):
-            if isinstance(decoder, AttnDecoderRNN):
-                decoder_output, decoder_hidden, decoder_attention = decoder(
-                    decoder_input, decoder_hidden, encoder_outputs)
-            else:
-                decoder_output, decoder_hidden = decoder(
-                    decoder_input, decoder_hidden)
-            loss += criterion(decoder_output, target_tensor[di])
-            decoder_input = target_tensor[di]  # Teacher forcing
+        if use_teacher_forcing:
+            # Teacher forcing: Feed the target as the next input
+            for di in range(target_length):
+                if isinstance(decoder, AttnDecoderRNN):
+                    decoder_output, decoder_hidden, decoder_attention = decoder(
+                        decoder_input, decoder_hidden, encoder_outputs)
+                else:
+                    decoder_output, decoder_hidden = decoder(
+                        decoder_input, decoder_hidden)
+                loss += criterion(decoder_output, target_tensor[di])
+                decoder_input = target_tensor[di]  # Teacher forcing
 
-    else:
-        # Without teacher forcing: use its own predictions as the next input
-        for di in range(target_length):
-            if isinstance(decoder, AttnDecoderRNN):
-                decoder_output, decoder_hidden, decoder_attention = decoder(
-                    decoder_input, decoder_hidden, encoder_outputs)
-            else:
-                decoder_output, decoder_hidden = decoder(
-                    decoder_input, decoder_hidden)
-            topv, topi = decoder_output.topk(1)
-            decoder_input = topi.squeeze().detach()  # detach from history as input
+        else:
+            # Without teacher forcing: use its own predictions as the next input
+            for di in range(target_length):
+                if isinstance(decoder, AttnDecoderRNN):
+                    decoder_output, decoder_hidden, decoder_attention = decoder(
+                        decoder_input, decoder_hidden, encoder_outputs)
+                else:
+                    decoder_output, decoder_hidden = decoder(
+                        decoder_input, decoder_hidden)
+                topv, topi = decoder_output.topk(1)
+                decoder_input = topi.squeeze().detach()  # detach from history as input
 
-            loss += criterion(decoder_output, target_tensor[di])
-            if decoder_input.item() == EOS_token:
-                break
+                loss += criterion(decoder_output, target_tensor[di])
+                if decoder_input.item() == EOS_token:
+                    break
 
     loss.backward()
 

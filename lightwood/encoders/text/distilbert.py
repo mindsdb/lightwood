@@ -29,7 +29,6 @@ class DistilBertEncoder(BaseEncoder):
         self._tokenizer = None
         self._model = None
         self._pad_id = None
-        self._pytorch_wrapper = torch.FloatTensor
         self._max_len = None
         self._max_ele = None
         self._model_type = None
@@ -69,8 +68,9 @@ class DistilBertEncoder(BaseEncoder):
         input = input.to(gym.device)
         labels = torch.tensor([torch.argmax(x) for x in real]).to(gym.device)
 
-        outputs = gym.model(input, labels=labels)
-        loss, logits = outputs[:2]
+        with torch.cuda.amp.autocast():
+            outputs = gym.model(input, labels=labels)
+            loss, logits = outputs[:2]
 
         if not test:
             loss.backward()
@@ -84,14 +84,16 @@ class DistilBertEncoder(BaseEncoder):
         input, real = data
 
         backbone = backbone.eval()
+
         with torch.no_grad():
             input = input.to(gym.device)
             real = real.to(gym.device)
 
             embeddings = backbone(input)[0][:, 0, :]
 
-        outputs = gym.model(embeddings)
-        loss = gym.loss_criterion(outputs, real)
+        with torch.cuda.amp.autocast():
+            outputs = gym.model(embeddings)
+            loss = gym.loss_criterion(outputs, real)
 
         if not test:
             loss.backward()
@@ -274,7 +276,7 @@ class DistilBertEncoder(BaseEncoder):
                     embeddings = output[0][:, 0, :].cpu().numpy()[0]
                     encoded_representation.append(embeddings)
 
-        return self._pytorch_wrapper(encoded_representation)
+        return torch.Tensor(encoded_representation)
 
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception('This encoder is not bi-directional')
