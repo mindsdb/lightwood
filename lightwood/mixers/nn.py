@@ -566,13 +566,17 @@ class NnMixer(BaseMixer):
                 self.selfaware_optimizer.zero_grad()
 
                 # forward + backward + optimize
-                outputs = self.net(inputs)
+                with torch.cuda.amp.autocast():
+                    outputs = self.net(inputs)
                 if self.is_selfaware:
-                    awareness = self.selfaware_net(inputs.detach(), outputs.detach())
+                    with torch.cuda.amp.autocast():
+                        awareness = self.selfaware_net(inputs.detach(), outputs.detach())
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
-                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                    with torch.cuda.amp.autocast():
+                        target_loss = criterion(outputs[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]],
+                                                labels[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
                     if loss is None:
                         loss = target_loss
