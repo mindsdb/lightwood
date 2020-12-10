@@ -1,6 +1,7 @@
 import math
 import torch
 import torch.nn as nn
+from lightwood.helpers.torch import LightwoodAutocast
 
 
 def len_to_mask(lengths, zeros):
@@ -35,7 +36,7 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe)
 
     def forward(self, x):
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             x = x + self.pe[: x.size(0), :]
             return self.dropout(x)
 
@@ -71,7 +72,7 @@ class TransformerModel(nn.Module):
 
     def forward(self, src, lengths):
         device = src.device
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             if self.src_mask is None or self.src_mask.size(0) != src.size(0):
                 # Attention mask to avoid attending to upcoming parts of the sequence
                 self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(

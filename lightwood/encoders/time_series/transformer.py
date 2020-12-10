@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch import optim
 from torch.nn.utils.rnn import pad_sequence
 
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.encoders.time_series.helpers.transformer_helpers import (
@@ -138,7 +139,7 @@ class TransformerEncoder(BaseEncoder):
 
                 # TBPTT
                 losses = []
-                with torch.cuda.amp.autocast():
+                with LightwoodAutocast():
                     for start_chunk in range(0, train_batch.size(0) - 1, self.bptt):
                         data, targets, lengths_chunk = self._get_chunk(
                             train_batch, len_batch, start_chunk, self.bptt

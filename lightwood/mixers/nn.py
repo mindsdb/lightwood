@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import operator
 
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.selfaware import SelfAware
 from lightwood.mixers.helpers.ranger import Ranger
@@ -566,15 +567,15 @@ class NnMixer(BaseMixer):
                 self.selfaware_optimizer.zero_grad()
 
                 # forward + backward + optimize
-                with torch.cuda.amp.autocast():
+                with LightwoodAutocast():
                     outputs = self.net(inputs)
                 if self.is_selfaware:
-                    with torch.cuda.amp.autocast():
+                    with LightwoodAutocast():
                         awareness = self.selfaware_net(inputs.detach(), outputs.detach())
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
-                    with torch.cuda.amp.autocast():
+                    with LightwoodAutocast():
                         target_loss = criterion(outputs[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]],
                                                 labels[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 

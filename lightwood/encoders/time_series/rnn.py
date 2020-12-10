@@ -1,6 +1,7 @@
 from __future__ import unicode_literals, print_function, division
 
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.encoders.datetime import DatetimeEncoder
 from lightwood.helpers.device import get_devices
@@ -133,7 +134,7 @@ class RnnEncoder(BaseEncoder):
                 steps = batch.shape[1]
                 loss = 0
 
-                with torch.cuda.amp.autocast():
+                with LightwoodAutocast():
                     # encode
                     encoder_hidden = self._encoder.initHidden(self.device, batch_size=batch.shape[0])
                     next_tensor = batch[:, 0, :].unsqueeze(dim=1)  # initial input
