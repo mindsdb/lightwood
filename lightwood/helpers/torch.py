@@ -30,29 +30,34 @@ class LightwoodAutocast:
     to activate the feature only when the GPU has tensor cores to leverage AMP.
     """
     def __init__(self, enabled=True):
+        self.major = 0  # GPU major version
+
         if enabled and not torch.cuda.is_available():
-            warnings.warn("torch.cuda.amp.autocast only affects CUDA ops, but CUDA is not available.  Disabling.")
             self._enabled = False
         else:
-            self._enabled = enabled
+            device, _ = get_devices()
+            if device.type == 'cuda':
+                self.major, _ = torch.cuda.get_device_capability(device)
+                self._enabled = enabled
+            else:
+                self._enabled = False  # gpu is available but cpu is forced
+
         self.prev = self._enabled
 
     def __enter__(self):
-        device, _ = get_devices()
-        major, minor = torch.cuda.get_device_capability(device)
-
         # tensor cores only exist from 7 onwards
         # if this is not the case, then AMP is unnecessary overhead
-        if major > 6:
+        if self.major > 6:
             self.prev = torch.is_autocast_enabled()
             torch.set_autocast_enabled(self._enabled)
             torch.autocast_increment_nesting()
 
     def __exit__(self, *args):
-        # Drop the cache when we exit to a nesting level that's outside any instance of autocast.
-        if torch.autocast_decrement_nesting() == 0:
-            torch.clear_autocast_cache()
-        torch.set_autocast_enabled(self.prev)
+        if self.major > 6:
+            # Drop the cache when we exit to a nesting level that's outside any instance of autocast.
+            if torch.autocast_decrement_nesting() == 0:
+                torch.clear_autocast_cache()
+            torch.set_autocast_enabled(self.prev)
         return False
 
     def __call__(self, func):
