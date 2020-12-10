@@ -44,7 +44,7 @@ class autoencoder(nn.Module):
             nn.ReLU(True), nn.Linear(128, 128 * 128), nn.Tanh())
 
     def forward(self, x):
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             x = self.encoder(x)
             x = self.decoder(x)
         return x
@@ -105,7 +105,7 @@ class NnEncoderHelper:
                 img = img.view(img.size(0), -1)
                 img = Variable(img).cpu()
                 # ===================forward=====================
-                with torch.cuda.amp.autocast():
+                with LightwoodAutocast():
                     output = self.model(img)
                     loss = criterion(output, img)
                 # ===================backward====================

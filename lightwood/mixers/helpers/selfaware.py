@@ -3,6 +3,7 @@ import math
 
 from lightwood.config.config import CONFIG
 from lightwood.helpers.device import get_devices
+from lightwood.helpers.torch import LightwoodAutocast
 
 
 class SelfAware(torch.nn.Module):
@@ -49,7 +50,7 @@ class SelfAware(torch.nn.Module):
         :param main_net_output: tensor with main NN prediction for true_input
         :return: predicted loss value over the tensor samples
         """
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             aware_in = torch.cat((true_input, main_net_output), 1)
             output = self.net(aware_in)
             return output

@@ -17,6 +17,7 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.shapes import *
 from lightwood.api.gym import Gym
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.logger import log
@@ -68,7 +69,7 @@ class DistilBertEncoder(BaseEncoder):
         input = input.to(gym.device)
         labels = torch.tensor([torch.argmax(x) for x in real]).to(gym.device)
 
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             outputs = gym.model(input, labels=labels)
             loss, logits = outputs[:2]
 
@@ -91,7 +92,7 @@ class DistilBertEncoder(BaseEncoder):
 
             embeddings = backbone(input)[0][:, 0, :]
 
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             outputs = gym.model(embeddings)
             loss = gym.loss_criterion(outputs, real)
 

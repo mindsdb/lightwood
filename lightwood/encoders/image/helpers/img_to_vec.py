@@ -7,7 +7,7 @@ from lightwood.config.config import CONFIG
 
 class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
     def forward(self, input):
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             n, c, _, _ = input.size()
             input = input.view(n,c,1).permute(0,2,1)
             pooled =  torch.nn.functional.adaptive_avg_pool1d(input, self.output_size)
@@ -36,7 +36,7 @@ class Img2Vec(nn.Module):
         return self
 
     def forward(self, image, batch=True):
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             embedding = self.model(image.to(self.device))
 
             if self.model_name in ('resnext-50-small'):

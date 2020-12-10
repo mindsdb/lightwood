@@ -3,6 +3,7 @@ import time
 import torch
 
 import numpy as np
+from lightwood.helpers.torch import LightwoodAutocast
 
 
 class Gym:
@@ -42,7 +43,7 @@ class Gym:
                 if custom_train_func is None:
                     input, real = data
 
-                    with torch.cuda.amp.autocast():
+                    with LightwoodAutocast():
                         if self.input_encoder is not None:
                             input = self.input_encoder(input)
                         if self.output_encoder is not None:

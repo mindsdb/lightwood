@@ -98,6 +98,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
+from lightwood.helpers.torch import LightwoodAutocast
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -350,7 +351,7 @@ class EncoderRNN(nn.Module):
         self.gru = nn.GRU(hidden_size, hidden_size)
 
     def forward(self, input, hidden):
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             embedded = self.embedding(input).view(1, 1, -1)
             output = embedded
             output, hidden = self.gru(output, hidden)
@@ -398,7 +399,7 @@ class DecoderRNN(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, input, hidden):
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             output = self.embedding(input).view(1, 1, -1)
             output = F.relu(output)
             output, hidden = self.gru(output, hidden)
@@ -462,7 +463,7 @@ class AttnDecoderRNN(nn.Module):
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, input, hidden, encoder_outputs):
-        with torch.cuda.amp.autocast():
+        with LightwoodAutocast():
             embedded = self.embedding(input).view(1, 1, -1)
             embedded = self.dropout(embedded)
 
@@ -561,7 +562,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
 
     loss = 0
 
-    with torch.cuda.amp.autocast():
+    with LightwoodAutocast():
         for ei in range(min(input_length, len(encoder_outputs))):
             encoder_output, encoder_hidden = encoder(
                 input_tensor[ei], encoder_hidden)
