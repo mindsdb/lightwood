@@ -68,6 +68,11 @@ class DecoderRNNNumerical(nn.Module):
             # when using transformer encoder, data contains a sequence length tensor
             data, len_data = data
 
+        if initial_tensor.shape[1] > 1:
+            # if tensor is a sequence (like the one yielded by the transformer),
+            # we select only the last timestep for decoding
+            initial_tensor = initial_tensor[:, -1:, :]
+
         loss = 0
         next_tensor = torch.full_like(initial_tensor, sos, dtype=torch.float32).to(device)
         tensor_target = torch.cat([next_tensor, data], dim=1)  # add SOS token at t=0 to true input
@@ -82,7 +87,6 @@ class DecoderRNNNumerical(nn.Module):
             else:
                 next_tensor, hidden_state = self.forward(next_tensor.detach(), hidden_state)
 
-            print(next_tensor.shape, tensor_target[:, tensor_i + 1, :].shape, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1).shape)
             loss += criterion(next_tensor, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1))
 
         return next_tensor, hidden_state, loss
