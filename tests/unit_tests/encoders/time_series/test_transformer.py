@@ -4,8 +4,8 @@ import torch
 import unittest
 
 from lightwood.helpers.device import get_devices
-from lightwood.encoders.time_series import TransformerEncoder
-from lightwood.encoders.time_series.helpers.transformer_helpers import len_to_mask
+from lightwood.encoders.time_series import TimeSeriesEncoder
+from lightwood.encoders.time_series.helpers.transformer_helpers import TransformerEncoder, len_to_mask
 
 
 class TestTransformerEncoder(unittest.TestCase):
@@ -28,13 +28,14 @@ class TestTransformerEncoder(unittest.TestCase):
 
     def test_overfit(self):
         logging.basicConfig(level=logging.DEBUG)
-        params = {"encoded_vector_size": 16, "train_iters": 10, "learning_rate": 0.001}
+        params = {"encoded_vector_size": 16, "train_iters": 10, "learning_rate": 0.001,
+                  "encoder_class": TransformerEncoder}
 
         # Test sequences of different length
         # We just test the nothrow condition, as the control flow for BPTT and the normal one is the same
         # and the flow is tested in the next test
         data = [[1, 2, 3, 4, 5], [2, 3, 4], [3, 4, 5, 6]]
-        encoder = TransformerEncoder(**params)
+        encoder = TimeSeriesEncoder(**params)
         encoder.prepare_encoder(data, feedback_hoop_function=print)
 
         # Test TBPTT. Training on this woudld require a better tuning of the lr and maybe a scheduler
