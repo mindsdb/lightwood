@@ -15,7 +15,6 @@ class NumericEncoder(BaseEncoder):
         self._abs_mean = None
         self.positive_domain = False
         self.decode_log = False
-        self.extra_outputs = 0
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -55,7 +54,7 @@ class NumericEncoder(BaseEncoder):
                 except:
                     real = None
             if self.is_target:
-                vector = [0] * (3 + 2 * self.extra_outputs)
+                vector = [0] * 3
                 if real is not None and self._abs_mean > 0:
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
@@ -100,18 +99,19 @@ class NumericEncoder(BaseEncoder):
                 else:
                     if decode_log:
                         sign = -1 if vector[0] > 0.5 else 1
-                        real_value = [math.exp(vector[i*2 + 1]) * sign for i in range(1 + self.extra_outputs)]
+                        try:
+                            real_value = math.exp(vector[1]) * sign
+                        except OverflowError as e:
+                            real_value = pow(10,63) * sign
                     else:
-                        real_value = [vector[2*i + 2] * self._abs_mean for i in range(1 + self.extra_outputs)]
+                        real_value = vector[2] * self._abs_mean
 
                     if self.positive_domain:
-                        real_value = [abs(i) for i in real_value]
+                        real_value = abs(real_value)
 
                     if self._type == 'int':
-                        real_value = [int(x) for x in real_value]
+                        real_value = int(real_value)
 
-                    if len(real_value) < 2:
-                        real_value = real_value[0]
             else:
                 if vector[0] < 0.5:
                     ret.append(None)

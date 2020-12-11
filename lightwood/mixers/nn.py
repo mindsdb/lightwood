@@ -10,7 +10,6 @@ import operator
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.selfaware import SelfAware
 from lightwood.mixers.helpers.ranger import Ranger
-from lightwood.mixers.helpers.quantile_loss import QuantileLoss
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
@@ -19,18 +18,17 @@ from lightwood.logger import log
 
 
 class NnMixer(BaseMixer):
-    
+
     def __init__(self,
                  selfaware=False,
-                 deterministic=False,
                  callback_on_iter=None,
                  eval_every_x_epochs=20,
+                 dropout_p=0.3,
                  stop_training_after_seconds=None,
                  stop_model_building_after_seconds=None,
                  param_optimizer=None):
         """
         :param selfaware: bool
-        :param deterministic: bool
         :param callback_on_iter: Callable[epoch, training_error, test_error, delta_mean, accuracy]
         :param eval_every_x_epochs: int
         :param stop_training_after_seconds: int
@@ -40,7 +38,6 @@ class NnMixer(BaseMixer):
         super().__init__()
 
         self.selfaware = selfaware
-        self.deterministic = deterministic
         self.eval_every_x_epochs = eval_every_x_epochs
         self.stop_training_after_seconds = stop_training_after_seconds
         self.stop_model_building_after_seconds = stop_model_building_after_seconds
@@ -59,6 +56,7 @@ class NnMixer(BaseMixer):
         self.batch_size = 200
 
         self.nn_class = DefaultNet
+        self.dropout_p = max(0.0, min(1.0, dropout_p))
         self.dynamic_parameters = {}
         self.awareness_criterion = None
         self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
@@ -69,7 +67,6 @@ class NnMixer(BaseMixer):
 
         self.max_confidence_per_output = []
         self.monitor = None
-        self.map_mean_sc_qi = None
 
         for k in CONFIG.MONITORING:
             if CONFIG.MONITORING[k]:
@@ -78,9 +75,7 @@ class NnMixer(BaseMixer):
                 break
 
         self.total_iterations = 0
-
         self._nonpersistent = {'sampler': None, 'callback': callback_on_iter}
-
 
     def _default_on_iter(self, epoch, train_error, test_error, delta_mean, accuracy):
         test_error_rounded = round(test_error, 4)
@@ -155,7 +150,7 @@ class NnMixer(BaseMixer):
             input_size=len(input_sample),
             output_size=len(output_sample),
             nr_outputs=len(train_ds.out_types),
-            deterministic=self.deterministic
+            dropout=self.dropout_p
         )
         self.net = self.net.train()
 
@@ -180,25 +175,22 @@ class NnMixer(BaseMixer):
                 output_weights = None
 
             for k, output_type in enumerate(train_ds.out_types):
-                if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
+                if output_type in (COLUMN_DATA_TYPES.CATEGORICAL, COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL):
                     if output_weights is None:
                         weights_slice = None
                     else:
-                        weights_slice = output_weights[train_ds.out_indexes[k][0]:train_ds.out_indexes[k][1]]
+                        # account for numerical features, not included in the output_weights
+                        s_idx = train_ds.out_indexes[k][0] - train_ds.output_weights_offset[k]
+                        e_idx = train_ds.out_indexes[k][1] - train_ds.output_weights_offset[k]
+                        weights_slice = output_weights[s_idx:e_idx]
 
-                    self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
-                    self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
-                elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
-                    if output_weights is None:
-                        weights_slice = None
-                    else:
-                        weights_slice = output_weights[train_ds.out_indexes[k][0]:train_ds.out_indexes[k][1]]
-
-                    self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
-                    self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
-                elif output_type == COLUMN_DATA_TYPES.NUMERIC:
-                    self.criterion_arr.append(QuantileLoss(quantiles=self.quantiles))
-                    self.unreduced_criterion_arr.append(QuantileLoss(quantiles=self.quantiles, reduce=False))
+                    if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
+                        self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
+                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
+                    elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
+                        self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
+                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
+                # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
                     self.criterion_arr.append(torch.nn.MSELoss())
                     self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
@@ -379,53 +371,6 @@ class NnMixer(BaseMixer):
                             log.info('Finished training model !')
                             break
 
-    def _adjust(self, test_ds):
-        predictions = self.predict(test_ds, include_extra_data=True)
-
-        narrowest_correct_qi_arr = []
-        corr_conf_correct_qi_arr = []
-        selfaware_confidence_arr = []
-
-        for col in predictions:
-            p = predictions[col]
-            if 'every_confidence_range' in p:
-                for i in range(len(p['predictions'])):
-                    set_qi = None
-                    set_qi_conf = None
-                    for qi in range(int((len(self.quantiles) - 1)/2)):
-                        a = p['every_confidence_range'][i][qi*2]
-                        if p['every_confidence_range'][i][qi*2] < p['predictions'][i] < p['every_confidence_range'][i][qi*2 + 1]:
-                            set_qi = qi
-                            break
-
-                    narrowest_correct_qi_arr.append(set_qi)
-                    selfaware_confidence_arr.append(p['selfaware_confidences'][i])
-
-        map_qi_mean_sc = {}
-        for i in range(len(narrowest_correct_qi_arr)):
-            qi = narrowest_correct_qi_arr[i]
-            if qi not in map_qi_mean_sc:
-                map_qi_mean_sc[qi] = []
-            map_qi_mean_sc[qi].append(selfaware_confidence_arr[i])
-
-        for qi in map_qi_mean_sc:
-            map_qi_mean_sc[qi] = np.mean(map_qi_mean_sc[qi])
-
-        self.map_mean_sc_qi = {}
-        for qi in map_qi_mean_sc:
-            self.map_mean_sc_qi[map_qi_mean_sc[qi]] = qi
-
-    def _select_quantile(self, selfaware_confidence):
-        if self.map_mean_sc_qi is None:
-            return self.quantiles_pair
-
-        for k in sorted(list(self.map_mean_sc_qi.keys())):
-            if selfaware_confidence <= k:
-                if self.map_mean_sc_qi[k] is not None:
-                    return [self.map_mean_sc_qi[k]*2+1,self.map_mean_sc_qi[k]*2+2]
-
-        return self.quantiles_pair
-
     def _predict(self, when_data_source, include_extra_data=False):
         data_loader = DataLoader(
             when_data_source,
@@ -490,31 +435,10 @@ class NnMixer(BaseMixer):
                 when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
             )
 
-            if when_data_source.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column] = {'predictions': [x[0] for x in decoded_predictions]}
-
-                if include_extra_data:
-                    predictions[output_column]['every_confidence_range'] = [x[1:] for x in decoded_predictions]
-
-            else:
-                predictions[output_column] = {'predictions': decoded_predictions}
+            predictions[output_column] = {'predictions': decoded_predictions}
 
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
-
-            if when_data_source.out_types[k] in (COLUMN_DATA_TYPES.NUMERIC):
-                predictions[output_column]['confidence_range'] = []
-                predictions[output_column]['quantile_confidences'] = []
-
-                for i, pred in enumerate(decoded_predictions):
-                    if 'selfaware_confidences' in predictions[output_column]:
-                        sc = predictions[output_column]['selfaware_confidences'][i]
-                    else:
-                        sc = pow(10,3)
-
-                    qp = self._select_quantile(sc)
-                    predictions[output_column]['confidence_range'].append([pred[qp[0]],pred[qp[1]]])
-                    predictions[output_column]['quantile_confidences'].append(self.quantiles[qp[1]] - self.quantiles[qp[0]])
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
