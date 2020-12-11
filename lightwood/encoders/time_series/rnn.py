@@ -120,6 +120,8 @@ class TimeSeriesEncoder(BaseEncoder):
         if self._normalizer:
             self._normalizer.prepare(priming_data)
             priming_data = torch.stack([self._normalizer.encode(d) for d in priming_data]).to(self.device)
+        else:
+            priming_data = torch.stack([d for d in priming_data]).unsqueeze(-1).to(self.device)
 
         # merge all normalized data into a training batch
         if previous_target_data is not None and len(previous_target_data) > 0:
@@ -135,9 +137,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
                 normalized_tensors.append(torch.stack(data).unsqueeze(-1))  # add feature dimension
             normalized_data = torch.cat(normalized_tensors, dim=-1)
-        else:
-            normalized_data = None
-        priming_data = torch.cat([priming_data, normalized_data], dim=-1)
+            priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
         # decrease batch_size for small datasets
         if batch_size >= len(priming_data):
@@ -163,6 +163,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
                 # encode and decode through time
                 next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
+                loss += enc_loss
 
                 next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
                                                                            self.device,
@@ -203,6 +204,8 @@ class TimeSeriesEncoder(BaseEncoder):
 
             if self._normalizer:
                 data = torch.stack([self._normalizer.encode(d) for d in data]).to(self.device)
+            else:
+                data = torch.stack([d for d in data]).unsqueeze(-1).to(self.device)
 
             if previous is not None:
                 target_tensor = torch.Tensor(previous).to(self.device)
@@ -210,6 +213,8 @@ class TimeSeriesEncoder(BaseEncoder):
                 if len(target_tensor.shape) < 3:
                     target_tensor = target_tensor.transpose(0, 1).unsqueeze(0)
                 data_tensor = torch.cat((data, target_tensor), dim=-1)
+            else:
+                data_tensor = data
 
             steps = data_tensor.shape[1]
 
