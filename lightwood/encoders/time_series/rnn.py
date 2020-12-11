@@ -12,7 +12,7 @@ from torch import optim
 class TimeSeriesEncoder(BaseEncoder):
 
     def __init__(self, encoded_vector_size=128, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, encoder_class=TransformerEncoder): # EncoderRNNNumerical):  #
+                 is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical):  #TransformerEncoder): #
         super().__init__(is_target)
         self.device, _ = get_devices()
         self.encoder_class = encoder_class
@@ -147,32 +147,29 @@ class TimeSeriesEncoder(BaseEncoder):
         for i in range(self._epochs):
             average_loss = 0
 
-            for batch_idx in range(0, len(priming_data), batch_size):
-
-                # shape: (batch_size, timesteps, n_dims)
-                batch = self._get_batch(priming_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
-
+            for batch_idx in range(0, len(priming_data)-1, batch_size):
                 # setup loss and optimizer
                 self._optimizer.zero_grad()
                 batch_idx += batch_size
                 loss = 0
 
-                # For transformers
+                # shape: (batch_size, timesteps, n_dims)
+                batch = self._get_batch(priming_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
+
                 if self.encoder_class == TransformerEncoder:
-                    len_batch = self._get_batch(lengths_data, batch_idx, batch_size)
+                    # pack batch length info tensor
+                    len_batch = self._get_batch(lengths_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
                     batch = batch, len_batch
 
                 # encode and decode through time
-                next_tensor, hidden_state, enc_loss = self._encoder.encode(batch, self._enc_criterion, self.device)
-                loss += enc_loss
+                next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
 
-                # decode
                 next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
                                                                            self.device,
                                                                            hidden_state=hidden_state)
                 loss += dec_loss
-
                 loss.backward()
+
                 self._optimizer.step()
                 average_loss += loss.item()
 
@@ -200,25 +197,38 @@ class TimeSeriesEncoder(BaseEncoder):
         """
         self._encoder.eval()
         with torch.no_grad():
-            # n_timesteps inferred from query
-            data_tensor = tensor_from_series(data, self.device, self._n_dims,
-                                             self._eos, normalizer=self._normalizer)
+            # Convert to array and determine max length
+            data, lengths_data = self._prepare_raw_data(data)
+            _max_ts_length = int(lengths_data.max())
+
+            if self._normalizer:
+                data = torch.stack([self._normalizer.encode(d) for d in data]).to(self.device)
 
             if previous is not None:
                 target_tensor = torch.Tensor(previous).to(self.device)
                 target_tensor[torch.isnan(target_tensor)] = 0.0
                 if len(target_tensor.shape) < 3:
                     target_tensor = target_tensor.transpose(0, 1).unsqueeze(0)
-                data_tensor = torch.cat((data_tensor, target_tensor), dim=-1)
+                data_tensor = torch.cat((data, target_tensor), dim=-1)
 
             steps = data_tensor.shape[1]
-            encoder_hidden = self._encoder.init_hidden(self.device)
-            encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
 
-            next_tensor = None
-            for tensor_i in range(steps):
-                next_tensor, encoder_hidden = self._encoder.forward(data_tensor[:, tensor_i, :].unsqueeze(dim=0),
-                                                                    encoder_hidden)
+            if self.encoder_class == EncoderRNNNumerical:
+                encoder_hidden = self._encoder.init_hidden(self.device)
+                encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
+
+                next_tensor = None
+                for tensor_i in range(steps):
+                    next_tensor, encoder_hidden = self._encoder.forward(data_tensor[:, tensor_i, :].unsqueeze(dim=0),
+                                                                        encoder_hidden)
+            else:
+                next_tensor = None
+                len_batch = self._get_batch(lengths_data, 0, len(data))
+                batch_size, timesteps, _ = data_tensor.shape
+
+                for start_chunk in range(0, timesteps, timesteps):
+                    data, targets, lengths_chunk = get_chunk(data_tensor, len_batch, start_chunk, timesteps)
+                    encoder_hidden = self._encoder.forward(data, lengths_chunk, self.device)
 
         if return_next_value:
             return encoder_hidden, next_tensor
@@ -346,6 +356,5 @@ class TimeSeriesEncoder(BaseEncoder):
 
         # The TBPTT will compute a slightly different loss, but it is not problematic
         loss = torch.dot((1.0 / lengths.float()), losses) / len(losses)
-        print(loss.item())
 
         return loss

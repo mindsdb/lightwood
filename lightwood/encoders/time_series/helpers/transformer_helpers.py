@@ -12,10 +12,7 @@ def len_to_mask(lengths, zeros):
     """
     # Clean trick from:
     # https://stackoverflow.com/questions/53403306/how-to-batch-convert-sentence-lengths-to-masks-in-pytorch
-    try:
-        mask = torch.arange(lengths.max(), device=lengths.device)[None, :] < lengths[:, None]
-    except RuntimeError:
-        print("whoops")
+    mask = torch.arange(lengths.max(), device=lengths.device)[None, :] < lengths[:, None]
     if zeros:
         mask = ~mask  # Logical not
     return mask.transpose(0, 1)
@@ -28,15 +25,10 @@ def get_chunk(source, source_lengths, start, step):
     lengths = torch.clamp((source_lengths - 1) - start, min=0, max=step)
 
     # This is necessary for MultiHeadedAttention to work
-    end = source.shape[1]  # ToDo this is faulty, fix with original implementation
-    non_empty = lengths != 0
+    end = source.shape[1]  # min(start + step, source.shape[1]) ?
     data = source[:, :end-1, :]
     target = source[:, 1:, :]
-    data, target, lengths = (
-        data[non_empty, :, :],
-        target[non_empty, :, :],
-        lengths[non_empty],
-    )
+
     return data, target, lengths
 
 
@@ -101,7 +93,7 @@ class TransformerEncoder(nn.Module):
         )
         return output
 
-    def encode(self, batch, criterion, device):
+    def bptt(self, batch, criterion, device):
         """This method implements truncated backpropagation through time
         Returns: output tensor, None as hidden_state, which does not apply in this case, and loss value"""
         loss = 0
@@ -110,12 +102,7 @@ class TransformerEncoder(nn.Module):
 
         for start_chunk in range(0, timesteps, timesteps):
             data, targets, lengths_chunk = get_chunk(train_batch, len_batch, start_chunk, timesteps)
-            # data = data.unsqueeze(-1)
             output = self.forward(data, lengths_chunk, device)
-            # output = output.squeeze(-1)
             loss += criterion(output, targets, lengths_chunk)
 
         return output, None, loss
-
-
-

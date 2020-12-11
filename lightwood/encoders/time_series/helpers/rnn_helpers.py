@@ -64,6 +64,10 @@ class DecoderRNNNumerical(nn.Module):
 
     def decode(self, data, initial_tensor, criterion, device, hidden_state=None, sos=0):
         """This method decodes an input unrolled through time, given an initial hidden state"""
+        if isinstance(data, tuple):
+            # when using transformer encoder, data contains a sequence length tensor
+            data, len_data = data
+
         loss = 0
         next_tensor = torch.full_like(initial_tensor, sos, dtype=torch.float32).to(device)
         tensor_target = torch.cat([next_tensor, data], dim=1)  # add SOS token at t=0 to true input
@@ -78,6 +82,7 @@ class DecoderRNNNumerical(nn.Module):
             else:
                 next_tensor, hidden_state = self.forward(next_tensor.detach(), hidden_state)
 
+            print(next_tensor.shape, tensor_target[:, tensor_i + 1, :].shape, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1).shape)
             loss += criterion(next_tensor, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1))
 
         return next_tensor, hidden_state, loss
@@ -100,7 +105,7 @@ class EncoderRNNNumerical(nn.Module):
     def init_hidden(self, device, batch_size=1):
         return torch.zeros(1, batch_size, self.hidden_size, device=device)
 
-    def encode(self, data, criterion, device):
+    def bptt(self, data, criterion, device):
         """This method encodes an input unrolled through time"""
         loss = 0
         hidden_state = self.init_hidden(device, batch_size=data.shape[0])
