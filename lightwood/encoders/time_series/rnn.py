@@ -7,6 +7,7 @@ from lightwood.helpers.device import get_devices
 import torch
 import torch.nn as nn
 from torch import optim
+from math import gcd
 
 
 class TimeSeriesEncoder(BaseEncoder):
@@ -39,6 +40,8 @@ class TimeSeriesEncoder(BaseEncoder):
             self._normalizer = MinMaxNormalizer()
 
         total_dims = self._n_dims
+        dec_hsize = self._encoded_vector_size
+
         if additional_targets:
             for t in additional_targets:
                 if t['original_type'] == 'categorical':
@@ -59,14 +62,15 @@ class TimeSeriesEncoder(BaseEncoder):
         elif self.encoder_class == TransformerEncoder:
             self._enc_criterion = self._masked_criterion
             self._dec_criterion = nn.MSELoss()
+            dec_hsize = total_dims
+            nhead = gcd(dec_hsize, total_dims)
             self._base_criterion = nn.MSELoss(reduction="none")
-            # ToDo set params (nhead, ndim) according to ninp
             self._encoder = self.encoder_class(ninp=total_dims,
-                                               nhead=5,
-                                               nhid=total_dims,  # 10*
+                                               nhead=nhead,
+                                               nhid=total_dims,
                                                nlayers=4).to(self.device)
 
-        self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=self._encoded_vector_size).to(self.device)
+        self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
         self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
         self._is_setup = True
@@ -139,18 +143,13 @@ class TimeSeriesEncoder(BaseEncoder):
             normalized_data = torch.cat(normalized_tensors, dim=-1)
             priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
-        # decrease batch_size for small datasets
-        if batch_size >= len(priming_data):
-            batch_size = len(priming_data) // 2
-
         self._encoder.train()
         for i in range(self._epochs):
             average_loss = 0
 
-            for batch_idx in range(0, len(priming_data)-1, batch_size):
+            for batch_idx in range(0, len(priming_data), batch_size):
                 # setup loss and optimizer
                 self._optimizer.zero_grad()
-                batch_idx += batch_size
                 loss = 0
 
                 # shape: (batch_size, timesteps, n_dims)
@@ -175,6 +174,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 average_loss += loss.item()
 
             average_loss = average_loss / len(priming_data)
+            batch_idx += batch_size
 
             if average_loss < self._stop_on_error:
                 break
