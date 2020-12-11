@@ -11,15 +11,6 @@ class BaseMixer:
     """
     def __init__(self):
         self.dynamic_parameters = {}
-        self.quantiles = [
-            0.5,
-            0.2, 0.8,
-            0.1, 0.9,
-            0.05, 0.95,
-            0.02, 0.98,
-            0.005, 0.995
-        ]
-        self.quantiles_pair = [9, 10]
         self.targets = None
         self.transformer = None
         self.encoders = None
@@ -31,11 +22,6 @@ class BaseMixer:
         """
         assert train_ds.transformer is test_ds.transformer
         assert train_ds.encoders is test_ds.encoders
-
-        for ds in [train_ds, test_ds]:
-            for n, out_type in enumerate(ds.out_types):
-                if out_type == COLUMN_DATA_TYPES.NUMERIC:
-                    ds.encoders[ds.output_feature_names[n]].extra_outputs = len(self.quantiles) - 1
 
         self.targets = {}
         for output_feature in train_ds.output_features:
@@ -157,7 +143,7 @@ class BaseMixer:
             )
 
         return accuracies
-    
+
     @staticmethod
     def _apply_accuracy_function(col_type, reals, preds, weight_map=None, encoder=None):
         if col_type == COLUMN_DATA_TYPES.CATEGORICAL:
