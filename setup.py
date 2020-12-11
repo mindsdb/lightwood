@@ -40,12 +40,12 @@ if sys_platform in ['win32','cygwin','windows']:
     print('Trying to install pytorch and torchvision!')
     code = 1
     try:
-        code = subprocess.call(['pip', 'install', 'torch===1.7.0+cpu', 'torchvision===0.8.1+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+        code = subprocess.call(['pip', 'install', 'torch===1.7.1+cpu', 'torchvision===0.8.2+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
         if code != 0:
             raise Exception('Torch and torchvsion instalation failed !')
     except:
         try:
-            code = subprocess.call(['pip3', 'install', 'torch===1.7.0+cpu', 'torchvision===0.8.1+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+            code = subprocess.call(['pip3', 'install', 'torch===1.7.1+cpu', 'torchvision===0.8.2+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
             if code != 0:
                 raise Exception('Torch and torchvision installation failed !')
         except:
