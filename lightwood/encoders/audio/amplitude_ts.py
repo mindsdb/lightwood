@@ -15,7 +15,6 @@ class AmplitudeTsEncoder(BaseEncoder):
     def __init__(self, is_target=False):
         super().__init__(is_target)
         self._ts_encoder = RnnEncoder()
-        self._ts_encoder._pytorch_wrapper = list
         self._max_samples = 2000
 
     def encode(self, column_data):
@@ -49,7 +48,7 @@ class AmplitudeTsEncoder(BaseEncoder):
 
             encoded_audio_arr.append(encoded_audio[0])
 
-        return self._pytorch_wrapper(encoded_audio_arr)
+        return torch.Tensor(encoded_audio_arr)
 
     def decode(self, encoded_values_tensor):
         raise Exception('This encoder is not bi-directional')

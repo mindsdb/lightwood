@@ -27,7 +27,7 @@ class MultiHotEncoder(BaseEncoder):
     def encode(self, column_data):
         column_data = self._clean_col_data(column_data)
         data_array = self._binarizer.transform(column_data)
-        return self._pytorch_wrapper(data_array)
+        return torch.Tensor(data_array)
 
     def decode(self, vectors):
         # It these are logits output by the neural network, we need to treshold them to binary vectors

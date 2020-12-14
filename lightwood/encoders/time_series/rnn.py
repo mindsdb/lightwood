@@ -1,6 +1,7 @@
 from __future__ import unicode_literals, print_function, division
 
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.encoders.datetime import DatetimeEncoder
 from lightwood.helpers.device import get_devices
@@ -21,7 +22,6 @@ class RnnEncoder(BaseEncoder):
         self._learning_rate = learning_rate
         self._encoded_vector_size = encoded_vector_size
         self._train_iters = train_iters  # training epochs
-        self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self._is_setup = False
         self._max_ts_length = 0
@@ -134,38 +134,39 @@ class RnnEncoder(BaseEncoder):
                 steps = batch.shape[1]
                 loss = 0
 
-                # encode
-                encoder_hidden = self._encoder.initHidden(self.device, batch_size=batch.shape[0])
-                next_tensor = batch[:, 0, :].unsqueeze(dim=1)  # initial input
+                with LightwoodAutocast():
+                    # encode
+                    encoder_hidden = self._encoder.initHidden(self.device, batch_size=batch.shape[0])
+                    next_tensor = batch[:, 0, :].unsqueeze(dim=1)  # initial input
 
-                for tensor_i in range(steps - 1):
-                    rand = np.random.randint(2)
-                    # teach from forward as well as from known tensor alternatively
-                    if rand == 1:
-                        next_tensor, encoder_hidden = self._encoder.forward(
-                            batch[:, tensor_i, :].unsqueeze(dim=1),
-                            encoder_hidden)
-                    else:
-                        next_tensor, encoder_hidden = self._encoder.forward(next_tensor.detach(), encoder_hidden)
+                    for tensor_i in range(steps - 1):
+                        rand = np.random.randint(2)
+                        # teach from forward as well as from known tensor alternatively
+                        if rand == 1:
+                            next_tensor, encoder_hidden = self._encoder.forward(
+                                batch[:, tensor_i, :].unsqueeze(dim=1),
+                                encoder_hidden)
+                        else:
+                            next_tensor, encoder_hidden = self._encoder.forward(next_tensor.detach(), encoder_hidden)
 
-                    loss += self._criterion(next_tensor, batch[:, tensor_i + 1, :].unsqueeze(dim=1))
+                        loss += self._criterion(next_tensor, batch[:, tensor_i + 1, :].unsqueeze(dim=1))
 
-                # decode
-                decoder_hidden = encoder_hidden
-                next_tensor = torch.full_like(next_tensor, self._sos, dtype=torch.float32).to(self.device)
-                tensor_target = torch.cat([next_tensor, batch], dim=1)  # add SOS token at t=0 to true input
+                    # decode
+                    decoder_hidden = encoder_hidden
+                    next_tensor = torch.full_like(next_tensor, self._sos, dtype=torch.float32).to(self.device)
+                    tensor_target = torch.cat([next_tensor, batch], dim=1)  # add SOS token at t=0 to true input
 
-                for tensor_i in range(steps - 1):
-                    rand = np.random.randint(2)
-                    # teach from forward as well as from known tensor alternatively
-                    if rand == 1:
-                        next_tensor, decoder_hidden = self._decoder.forward(
-                            tensor_target[:, tensor_i, :].unsqueeze(dim=1),
-                            decoder_hidden)
-                    else:
-                        next_tensor, decoder_hidden = self._decoder.forward(next_tensor.detach(), decoder_hidden)
+                    for tensor_i in range(steps - 1):
+                        rand = np.random.randint(2)
+                        # teach from forward as well as from known tensor alternatively
+                        if rand == 1:
+                            next_tensor, decoder_hidden = self._decoder.forward(
+                                tensor_target[:, tensor_i, :].unsqueeze(dim=1),
+                                decoder_hidden)
+                        else:
+                            next_tensor, decoder_hidden = self._decoder.forward(next_tensor.detach(), decoder_hidden)
 
-                    loss += self._criterion(next_tensor, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1))
+                        loss += self._criterion(next_tensor, tensor_target[:, tensor_i + 1, :].unsqueeze(dim=1))
 
                 average_loss += loss.item()
                 loss.backward()
@@ -277,9 +278,9 @@ class RnnEncoder(BaseEncoder):
             ret.append(encoded[0][0].cpu())
 
         if get_next_count is None:
-            return self._pytorch_wrapper(torch.stack(ret))
+            return torch.stack(ret)
         else:
-            return self._pytorch_wrapper(torch.stack(ret)), self._pytorch_wrapper(torch.stack(next))
+            return torch.stack(ret), torch.stack(next)
 
     def _decode_one(self, hidden, steps):
         """
@@ -322,4 +323,4 @@ class RnnEncoder(BaseEncoder):
 
             ret.append(reconstruction)
 
-        return self._pytorch_wrapper(ret)
+        return torch.Tensor(ret)

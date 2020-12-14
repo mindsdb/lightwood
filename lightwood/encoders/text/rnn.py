@@ -72,7 +72,7 @@ class RnnEncoder(BaseEncoder):
                 # use the last hidden state as the encoded vector
                 ret.append(encoder_hidden.tolist()[0][0])
 
-        return self._pytorch_wrapper(ret)
+        return torch.Tensor(ret)
 
     def decode(self, encoded_values_tensor, max_length=100):
 

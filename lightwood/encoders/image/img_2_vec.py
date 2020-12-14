@@ -19,7 +19,6 @@ class Img2VecEncoder(BaseEncoder):
         self.model = None
         # I think we should make this an enum, something like: speed, balance, accuracy
         self.aim = aim
-        self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
 
         self._scaler = transforms.Scale((224, 224))
