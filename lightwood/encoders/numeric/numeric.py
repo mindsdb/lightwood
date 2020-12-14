@@ -78,7 +78,7 @@ class NumericEncoder(BaseEncoder):
 
             ret.append(vector)
 
-        return self._pytorch_wrapper(ret)
+        return torch.Tensor(ret)
 
     def decode(self, encoded_values, decode_log=None):
         if not self._prepared:

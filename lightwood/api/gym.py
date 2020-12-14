@@ -3,6 +3,7 @@ import time
 import torch
 
 import numpy as np
+from lightwood.helpers.torch import LightwoodAutocast
 
 
 class Gym:
@@ -42,16 +43,17 @@ class Gym:
                 if custom_train_func is None:
                     input, real = data
 
-                    if self.input_encoder is not None:
-                        input = self.input_encoder(input)
-                    if self.output_encoder is not None:
-                        real = self.output_encoder(real)
+                    with LightwoodAutocast():
+                        if self.input_encoder is not None:
+                            input = self.input_encoder(input)
+                        if self.output_encoder is not None:
+                            real = self.output_encoder(real)
 
-                    input = input.to(self.device)
-                    real = real.to(self.device)
+                        input = input.to(self.device)
+                        real = real.to(self.device)
 
-                    predicted = self.model(input)
-                    loss = self.loss_criterion(predicted, real)
+                        predicted = self.model(input)
+                        loss = self.loss_criterion(predicted, real)
                     loss.backward()
                     self.optimizer.step()
 

@@ -49,7 +49,7 @@ class DatetimeEncoder(BaseEncoder):
 
             ret.append(vector)
 
-        return self._pytorch_wrapper(ret)
+        return torch.Tensor(ret)
 
     def decode(self, encoded_data, return_as_datetime=False):
         ret = []

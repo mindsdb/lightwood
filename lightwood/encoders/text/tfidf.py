@@ -10,7 +10,6 @@ class TfidfEncoder(BaseEncoder):
     def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
         super().__init__(is_target)
         self.aim = aim
-        self._pytorch_wrapper = torch.FloatTensor
         if self.aim == ENCODER_AIM.SPEED:
             self.ngram_range = (1,3)
             self.max_features = 200
@@ -28,7 +27,7 @@ class TfidfEncoder(BaseEncoder):
     def encode(self, column_data):
         transformed_data = self.tfidf_vectorizer.transform([str(x) for x in column_data])
         dense_transformed_data = [np.array(x.todense())[0] for x in transformed_data]
-        return self._pytorch_wrapper(dense_transformed_data)
+        return torch.Tensor(dense_transformed_data)
 
     def decode(self, encoded_values_tensor):
         raise Exception('This encoder is not bi-directional')

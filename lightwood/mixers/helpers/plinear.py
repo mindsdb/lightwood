@@ -8,6 +8,7 @@ import numpy as np
 
 from lightwood.config.config import CONFIG
 from lightwood.helpers.device import get_devices
+from lightwood.helpers.torch import LightwoodAutocast
 
 
 class PLinear(nn.Module):
@@ -107,8 +108,8 @@ class PLinear(nn.Module):
         The goal is to generate values such as if they weights of the linear operation are sampled
         from a normal distribution
         """
-
-        return F.linear(input, self.w_sampler(), self.bias)
+        with LightwoodAutocast():
+            return F.linear(input, self.w_sampler(), self.bias)
 
 
 if __name__ == "__main__":
