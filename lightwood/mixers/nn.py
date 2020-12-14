@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import operator
 
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.selfaware import SelfAware
 from lightwood.mixers.helpers.ranger import Ranger
@@ -432,7 +433,7 @@ class NnMixer(BaseMixer):
         for k, output_column in enumerate(list(output_trasnformed_vectors.keys())):
             decoded_predictions = when_data_source.get_decoded_column_data(
                 output_column,
-                when_data_source.encoders[output_column]._pytorch_wrapper(output_trasnformed_vectors[output_column])
+                torch.Tensor(output_trasnformed_vectors[output_column])
             )
 
             predictions[output_column] = {'predictions': decoded_predictions}
@@ -566,13 +567,17 @@ class NnMixer(BaseMixer):
                 self.selfaware_optimizer.zero_grad()
 
                 # forward + backward + optimize
-                outputs = self.net(inputs)
+                with LightwoodAutocast():
+                    outputs = self.net(inputs)
                 if self.is_selfaware:
-                    awareness = self.selfaware_net(inputs.detach(), outputs.detach())
+                    with LightwoodAutocast():
+                        awareness = self.selfaware_net(inputs.detach(), outputs.detach())
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
-                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+                    with LightwoodAutocast():
+                        target_loss = criterion(outputs[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]],
+                                                labels[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
                     if loss is None:
                         loss = target_loss

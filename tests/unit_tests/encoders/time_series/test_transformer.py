@@ -59,7 +59,7 @@ class TestTransformerEncoder(unittest.TestCase):
         # Decoder overfit, discard last element as it doesn't correspond to answer
         answer = torch.tensor(encoder.encode(example))[:, :-1]
         # Round answer
-        answer = answer.round()
+        answer = answer.float().round()
         n = correct_answer.numel()
         correct = (correct_answer == answer).sum()
         print(

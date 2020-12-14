@@ -55,7 +55,7 @@ class OneHotEncoder(BaseEncoder):
 
             ret.append(encoded_word)
 
-        return self._pytorch_wrapper(ret)
+        return torch.Tensor(ret)
 
     def decode(self, encoded_data):
         encoded_data_list = encoded_data.tolist()
