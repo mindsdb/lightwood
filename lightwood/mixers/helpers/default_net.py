@@ -123,6 +123,5 @@ class DefaultNet(torch.nn.Module):
         """
         with LightwoodAutocast():
             output = self._foward_net(input)
-            print(output.dtype)
 
         return output
