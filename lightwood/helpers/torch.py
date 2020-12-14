@@ -45,9 +45,12 @@ class LightwoodAutocast:
             else:
                 self._enabled = False  # gpu is available but cpu is forced
 
+        self.prev = self._enabled  # necessary reference to exit
+
     def __enter__(self):
         if self._enabled:
-            torch.set_autocast_enabled(True)
+            self.prev = torch.is_autocast_enabled()
+            torch.set_autocast_enabled(self._enabled)
             torch.autocast_increment_nesting()
 
     def __exit__(self, *args):
@@ -55,7 +58,7 @@ class LightwoodAutocast:
             # Drop the cache when we exit to a nesting level that's outside any instance of autocast
             if torch.autocast_decrement_nesting() == 0:
                 torch.clear_autocast_cache()
-            torch.set_autocast_enabled(False)
+            torch.set_autocast_enabled(self.prev)
         return False
 
     def __call__(self, func):
