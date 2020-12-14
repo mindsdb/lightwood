@@ -11,6 +11,8 @@ from torchvision.utils import save_image
 import requests
 from io import BytesIO
 
+from lightwood.helpers.torch import LightwoodAutocast
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
