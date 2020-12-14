@@ -31,8 +31,9 @@ class LightwoodAutocast:
     """
     def __init__(self, enabled=True):
         self.major = 0  # GPU major version
+        torch_version = [int(i) for i in torch.__version__.split('.')[:-1]]
 
-        if enabled and not torch.cuda.is_available():
+        if not enabled or not torch.cuda.is_available() or torch_version[0] < 1 or torch_version[1] < 6:
             self._enabled = False
         else:
             device, _ = get_devices()
@@ -54,7 +55,7 @@ class LightwoodAutocast:
 
     def __exit__(self, *args):
         if self.major > 6:
-            # Drop the cache when we exit to a nesting level that's outside any instance of autocast.
+            # Drop the cache when we exit to a nesting level that's outside any instance of autocast
             if torch.autocast_decrement_nesting() == 0:
                 torch.clear_autocast_cache()
             torch.set_autocast_enabled(self.prev)
