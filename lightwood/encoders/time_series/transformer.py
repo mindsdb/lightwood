@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch import optim
 from torch.nn.utils.rnn import pad_sequence
 
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.encoders.time_series.helpers.transformer_helpers import (
@@ -21,13 +22,14 @@ class TransformerEncoder(BaseEncoder):
         is_target=False,
     ):
         super().__init__(is_target)
+        self.device, _ = get_devices()
+
         # Model. We use encoded_vector_size for input and hidden
         self._encoder = TransformerEncoder(
             ninp=encoded_vector_size, nhead=2, nhid=encoded_vector_size, nlayers=2
-        )
+        ).to(self.device)
 
         # Training params
-        self.device, _ = get_devices()
         self._train_iters = train_iters  # epochs
         self._stop_on_error = stop_on_error
         self._learning_rate = learning_rate
@@ -44,10 +46,6 @@ class TransformerEncoder(BaseEncoder):
         # Lezcano: These should be global constants of the library
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
-
-        # Lezcano: I believe that a more scalable way would be to use the functions `float()` or `half()` from PyTorch
-        # after calling `to()`
-        self._pytorch_wrapper = torch.FloatTensor
 
     def _append_eos(self, data):
         for i in range(len(data)):
@@ -138,6 +136,7 @@ class TransformerEncoder(BaseEncoder):
                 len_batch = self._get_batch(lengths_data, start_batch, batch_size)
 
                 output, loss = self.encoder.encode(train_batch, len_batch)
+
                 loss.backward()
 
                 torch.nn.utils.clip_grad_norm_(self._encoder.parameters(), self.gradient_norm_clip)

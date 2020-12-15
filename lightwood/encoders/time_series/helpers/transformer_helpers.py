@@ -1,6 +1,7 @@
 import math
 import torch
 import torch.nn as nn
+from lightwood.helpers.torch import LightwoodAutocast
 
 
 def len_to_mask(lengths, zeros):
@@ -51,8 +52,9 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe)
 
     def forward(self, x):
-        x = x + self.pe[: x.size(0), :]
-        return self.dropout(x)
+        with LightwoodAutocast():
+            x = x + self.pe[: x.size(0), :]
+            return self.dropout(x)
 
 
 class TransformerEncoder(nn.Module):
@@ -82,20 +84,21 @@ class TransformerEncoder(nn.Module):
                 torch.nn.init.xavier_uniform_(p)
 
     def forward(self, src, lengths, device):
-        if self.src_mask is None or self.src_mask.size(0) != src.size(0):
-            # Attention mask to avoid attending to upcoming parts of the sequence
-            self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
-                device
+        with LightwoodAutocast():
+            if self.src_mask is None or self.src_mask.size(0) != src.size(0):
+                # Attention mask to avoid attending to upcoming parts of the sequence
+                self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
+                    device
+                )
+            src = self.src_linear(src)
+            # src = self.pos_encoder(src) # not sure if this is helpful in time series
+            # The lengths_mask has to be of size [batch, lengths]
+            lengths_mask = len_to_mask(lengths, zeros=True).to(device)
+            hidden = self.transformer_encoder(
+                src, mask=self.src_mask, src_key_padding_mask=lengths_mask
             )
-        src = self.src_linear(src)
-        # src = self.pos_encoder(src) # not sure if this is helpful in time series
-        # The lengths_mask has to be of size [batch, lengths]
-        lengths_mask = len_to_mask(lengths, zeros=True).to(device)
-        hidden = self.transformer_encoder(
-            src, mask=self.src_mask, src_key_padding_mask=lengths_mask
-        )
-        output = self.src_decoder(hidden)
-        return output, hidden
+            output = self.src_decoder(hidden)
+            return output, hidden
 
     def bptt(self, batch, criterion, device):
         """This method implements truncated backpropagation through time

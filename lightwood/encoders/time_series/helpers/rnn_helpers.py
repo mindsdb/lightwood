@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+from lightwood.helpers.torch import LightwoodAutocast
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 
@@ -14,10 +15,11 @@ class DecoderRNNNumerical(nn.Module):
         self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, input, hidden):
-        output = self.in_activation(input.float())
-        output, hidden = self.gru(output, hidden)
-        output = self.dropout(output)
-        output = self.out(output)
+        with LightwoodAutocast():
+            output = self.in_activation(input.float())
+            output, hidden = self.gru(output, hidden)
+            output = self.dropout(output)
+            output = self.out(output)
         return output, hidden
 
     def init_hidden(self, device, batch_size=1):
@@ -62,9 +64,10 @@ class EncoderRNNNumerical(nn.Module):
         self.out = nn.Linear(hidden_size, input_size)
 
     def forward(self, input, hidden):
-        output, hidden = self.gru(input, hidden)
-        output = self.dropout(output)
-        output = self.out(output)
+        with LightwoodAutocast():
+            output, hidden = self.gru(input, hidden)
+            output = self.dropout(output)
+            output = self.out(output)
         return output, hidden
 
     def init_hidden(self, device, batch_size=1):
