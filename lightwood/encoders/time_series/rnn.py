@@ -68,7 +68,7 @@ class TimeSeriesEncoder(BaseEncoder):
             self._encoder = self.encoder_class(ninp=total_dims,
                                                nhead=nhead,
                                                nhid=total_dims,
-                                               nlayers=4).to(self.device)
+                                               nlayers=2).to(self.device)
 
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
