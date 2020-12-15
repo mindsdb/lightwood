@@ -57,34 +57,19 @@ class TestTransformerEncoder(unittest.TestCase):
         params = {"encoded_vector_size": 16, "train_iters": 10, "learning_rate": 0.001,
                   "encoder_class": TransformerEncoder}
 
-        # Test sequences of different length
-        # We just test the nothrow condition, as the control flow for BPTT and the normal one is the same
-        # and the flow is tested in the next test
-        data = [[1, 2, 3, 4, 5], [2, 3, 4], [3, 4, 5, 6]]
-        encoder = TimeSeriesEncoder(**params)
-        encoder.prepare_encoder(data, feedback_hoop_function=print)
-
-        # Test TBPTT. Training on this woudld require a better tuning of the lr and maybe a scheduler
-        # Again, just test nothrow
-        data = [
-            torch.rand(torch.randint(low=5, high=120, size=(1,)).item()).tolist()
-            for _ in range(87)
-        ]
-        encoder = TransformerEncoder(**params)
-        encoder.prepare_encoder(data, feedback_hoop_function=print)
-
         # Test Overfit
-        data = [[1, 2, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9]]
+        data = [[1, 2, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9]] * 1000
         example = copy.deepcopy(data)
-        params["train_iters"] = 1000
-        encoder = TransformerEncoder(**params)
-        encoder.prepare_encoder(data, feedback_hoop_function=print)
+        params["train_iters"] = 10
+        encoder = TimeSeriesEncoder(**params)
+        encoder.prepare(data, feedback_hoop_function=print)
 
         # Test data
-        example = torch.tensor(example)
-        correct_answer = example[:, 1:]
+        correct_answer = torch.tensor(example)[:, 1:]
+        print(correct_answer)
         # Decoder overfit, discard last element as it doesn't correspond to answer
-        answer = torch.tensor(encoder.encode(example))[:, :-1]
+        answer = torch.tensor(encoder.encode(example))
+        print(answer)
         # Round answer
         answer = answer.round()
         n = correct_answer.numel()
