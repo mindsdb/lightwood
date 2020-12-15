@@ -92,11 +92,14 @@ class TimeSeriesEncoder(BaseEncoder):
         # we do not do so now
         out_data = []
         for e in data:
-            t = torch.tensor(e, dtype=torch.float, device=self.device)  # ToDo: add dimension for 1D timeseries?
+            if not isinstance(e, torch.Tensor):
+                t = torch.tensor(e, dtype=torch.float, device=self.device)
+            else:
+                t = e.float()
             t[torch.isnan(t)] = 0.0
             out_data.append(t)
         lengths = torch.tensor(
-            [len(e) for e in data], dtype=torch.long, device=self.device
+            [len(e) for e in data], dtype=torch.float, device=self.device
         )
         return out_data, lengths
 
