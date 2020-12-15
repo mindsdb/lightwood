@@ -19,15 +19,15 @@ def len_to_mask(lengths, zeros):
 
 
 def get_chunk(source, source_lengths, start, step):
-    """Source is 3D tensor, shaped (batch_size, timesteps, n_dimensions)"""
-    # Compute the lengths of the sequences
-    # The -1 comes from the fact that the last element is used as target but not as data!
-    lengths = torch.clamp((source_lengths - 1) - start, min=0, max=step)
+    """Source is 3D tensor, shaped (batch_size, timesteps, n_dimensions), assuming static sequence length"""
+    # Compute the lengths of the sequences (-1 due to the last element being used as target but not as data!
+    trunc_seq_len = int(source_lengths[0].item() - 1)
+    lengths = torch.zeros(source.shape[0]).fill_(trunc_seq_len).to(source.device)
 
     # This is necessary for MultiHeadedAttention to work
-    end = source.shape[1]  # min(start + step, source.shape[1]) ?
-    data = source[:, :end-1, :]
-    target = source[:, 1:, :]
+    end = min(start + step, trunc_seq_len)
+    data = source[:, start:end, :]
+    target = source[:, start+1:end+1, :]
 
     return data, target, lengths
 
