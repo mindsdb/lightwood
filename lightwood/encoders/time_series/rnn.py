@@ -233,6 +233,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
                 for start_chunk in range(0, timesteps, timesteps):
                     data, targets, lengths_chunk = get_chunk(data_tensor, len_batch, start_chunk, timesteps)
+                    data = data.transpose(0, 1)
                     encoder_hidden = self._encoder.forward(data, lengths_chunk, self.device)
 
         if return_next_value:
@@ -357,7 +358,7 @@ class TimeSeriesEncoder(BaseEncoder):
         # compute the loss with respect to the appropriate lengths and average across the batch-size
         # We compute for every output (x_i)_i=1^L and target (y_i)_i=1^L, loss = 1/L \sum (x_i - y_i)^2
         # And average across the mini-batch
-        losses = self._base_criterion(output, targets).sum(dim=2).sum(dim=1)
+        losses = self._base_criterion(output, targets).sum(dim=2).sum(dim=0)
 
         # The TBPTT will compute a slightly different loss, but it is not problematic
         loss = torch.dot((1.0 / lengths.float()), losses) / len(losses)

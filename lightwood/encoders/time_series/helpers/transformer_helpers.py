@@ -15,7 +15,7 @@ def len_to_mask(lengths, zeros):
     mask = torch.arange(lengths.max(), device=lengths.device)[None, :] < lengths[:, None]
     if zeros:
         mask = ~mask  # Logical not
-    return mask.transpose(0, 1)
+    return mask
 
 
 def get_chunk(source, source_lengths, start, step):
@@ -102,7 +102,10 @@ class TransformerEncoder(nn.Module):
 
         for start_chunk in range(0, timesteps, timesteps):
             data, targets, lengths_chunk = get_chunk(train_batch, len_batch, start_chunk, timesteps)
+            # Transformer expects seq_length in first dimension, so we transpose
+            data = data.transpose(0, 1)
+            targets = targets.transpose(0, 1)
             output = self.forward(data, lengths_chunk, device)
             loss += criterion(output, targets, lengths_chunk)
 
-        return output, None, loss
+        return output.transpose(0, 1), None, loss
