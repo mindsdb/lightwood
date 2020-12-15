@@ -5,7 +5,11 @@ class CONFIG:
     """General"""
     USE_CUDA = False
     if torch.cuda.device_count() > 0:
-        USE_CUDA = True
+        try:
+            torch.ones(1).cuda()
+            USE_CUDA = True
+        except Exception as e:
+            USE_CUDA = False
     USE_DEVICE = None
 
     # Development flags (maybe move to somewhere else later)

@@ -150,7 +150,7 @@ class BayesianNnMixer:
 
                 decoded_predictions = when_data_source.get_decoded_column_data(
                     output_column,
-                    when_data_source.encoders[output_column]._pytorch_wrapper(
+                    torch.Tensor(
                         output_trasnformed_vectors[output_column]
                     ))
 

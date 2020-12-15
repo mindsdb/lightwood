@@ -3,6 +3,7 @@ import torch
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
 from lightwood.mixers.helpers.plinear import PLinear
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.logger import log
 
@@ -120,7 +121,7 @@ class DefaultNet(torch.nn.Module):
         :param input: a pytorch tensor with the input data of a batch
         :return: output of the network
         """
-
-        output = self._foward_net(input)
+        with LightwoodAutocast():
+            output = self._foward_net(input)
 
         return output

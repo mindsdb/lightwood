@@ -1,5 +1,6 @@
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
 from lightwood.encoders.time_series.helpers.transformer_helpers import *
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.encoders.datetime import DatetimeEncoder
 from lightwood.helpers.device import get_devices
@@ -158,22 +159,23 @@ class TimeSeriesEncoder(BaseEncoder):
                 batch = self._get_batch(priming_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
 
                 # encode and decode through time
-                if self.encoder_class == TransformerEncoder:
-                    # pack batch length info tensor
-                    len_batch = self._get_batch(lengths_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
-                    batch = batch, len_batch
+                with LightwoodAutocast():
+                    if self.encoder_class == TransformerEncoder:
+                        # pack batch length info tensor
+                        len_batch = self._get_batch(lengths_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
+                        batch = batch, len_batch
 
-                    next_tensor, hidden_state, dec_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
-                    loss += dec_loss
+                        next_tensor, hidden_state, dec_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
+                        loss += dec_loss
 
-                else:
-                    next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
-                    loss += enc_loss
+                    else:
+                        next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
+                        loss += enc_loss
 
-                    next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
-                                                                               self.device,
-                                                                               hidden_state=hidden_state)
-                    loss += dec_loss
+                        next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
+                                                                                   self.device,
+                                                                                   hidden_state=hidden_state)
+                        loss += dec_loss
 
                 loss.backward()
 
@@ -305,9 +307,9 @@ class TimeSeriesEncoder(BaseEncoder):
             ret.append(encoded[0][0].cpu())
 
         if get_next_count is None:
-            return self._pytorch_wrapper(torch.stack(ret))
+            return torch.stack(ret)
         else:
-            return self._pytorch_wrapper(torch.stack(ret)), self._pytorch_wrapper(torch.stack(next))
+            return torch.stack(ret), torch.stack(next)
 
     def _decode_one(self, hidden, steps):
         """
@@ -350,7 +352,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
             ret.append(reconstruction)
 
-        return self._pytorch_wrapper(ret)
+        return torch.Tensor(ret)
 
     def _masked_criterion(self, output, targets, lengths):
         """ Computes the loss of the first `lengths` items in the chunk """
