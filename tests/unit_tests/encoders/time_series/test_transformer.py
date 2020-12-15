@@ -46,10 +46,10 @@ class TestTransformerEncoder(unittest.TestCase):
 
         target = torch.tensor(target, dtype=torch.bool)
         series = torch.tensor(series)
-        result = len_to_mask(series, zeros=False).t()
+        result = len_to_mask(series, zeros=False)
         self.assertTrue((result == target).all())
         target = ~target
-        result = len_to_mask(series, zeros=True).t()
+        result = len_to_mask(series, zeros=True)
         self.assertTrue((result == target).all())
 
     def test_overfit(self):
