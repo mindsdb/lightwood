@@ -57,7 +57,7 @@ class TestTransformerEncoder(unittest.TestCase):
         params = {"encoded_vector_size": 16, "train_iters": 10, "learning_rate": 0.001,
                   "encoder_class": TransformerEncoder}
 
-        data = [[1, 2, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9]] * 1000
+        data = [[1, 2, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9]] * 10000
         timesteps = len(data[0])
         example = copy.deepcopy(data)
         params["train_iters"] = 10
@@ -81,4 +81,6 @@ class TestTransformerEncoder(unittest.TestCase):
         # check reconstruction
         results = torch.isclose(answer, correct_answer.to(answer.device), atol=1)
         acc = (results.sum() / results.numel()).item()
+
+        print(f'Transformer correctly reconstructed {round(100*acc, 2)}%')
         assert acc >= 0.5
