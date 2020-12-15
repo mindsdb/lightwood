@@ -20,6 +20,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self._stop_on_error = stop_on_error
         self._learning_rate = learning_rate
         self._encoded_vector_size = encoded_vector_size
+        self._transformer_hidden_size = None
         self._epochs = train_iters  # training epochs
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
@@ -62,11 +63,13 @@ class TimeSeriesEncoder(BaseEncoder):
         elif self.encoder_class == TransformerEncoder:
             self._enc_criterion = self._masked_criterion
             self._dec_criterion = nn.MSELoss()
-            nhead = gcd(dec_hsize, total_dims)
             self._base_criterion = nn.MSELoss(reduction="none")
+            if self._transformer_hidden_size is None:
+                self._transformer_hidden_size = total_dims*2  # arbitrary
+
             self._encoder = self.encoder_class(ninp=total_dims,
-                                               nhead=nhead,
-                                               nhid=total_dims*2,  # arbitrary
+                                               nhead=gcd(dec_hsize, total_dims),
+                                               nhid=self._transformer_hidden_size,
                                                nlayers=1).to(self.device)
 
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
