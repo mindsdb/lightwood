@@ -62,12 +62,11 @@ class TimeSeriesEncoder(BaseEncoder):
         elif self.encoder_class == TransformerEncoder:
             self._enc_criterion = self._masked_criterion
             self._dec_criterion = nn.MSELoss()
-            dec_hsize = total_dims
             nhead = gcd(dec_hsize, total_dims)
             self._base_criterion = nn.MSELoss(reduction="none")
             self._encoder = self.encoder_class(ninp=total_dims,
                                                nhead=nhead,
-                                               nhid=total_dims,
+                                               nhid=total_dims*2,  # arbitrary
                                                nlayers=1).to(self.device)
 
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
@@ -155,19 +154,24 @@ class TimeSeriesEncoder(BaseEncoder):
                 # shape: (batch_size, timesteps, n_dims)
                 batch = self._get_batch(priming_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
 
+                # encode and decode through time
                 if self.encoder_class == TransformerEncoder:
                     # pack batch length info tensor
                     len_batch = self._get_batch(lengths_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
                     batch = batch, len_batch
 
-                # encode and decode through time
-                next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
-                loss += enc_loss
+                    next_tensor, hidden_state, dec_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
+                    loss += dec_loss
 
-                next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
-                                                                           self.device,
-                                                                           hidden_state=hidden_state)
-                loss += dec_loss
+                else:
+                    next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
+                    loss += enc_loss
+
+                    next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
+                                                                               self.device,
+                                                                               hidden_state=hidden_state)
+                    loss += dec_loss
+
                 loss.backward()
 
                 self._optimizer.step()
@@ -234,7 +238,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 for start_chunk in range(0, timesteps, timesteps):
                     data, targets, lengths_chunk = get_chunk(data_tensor, len_batch, start_chunk, timesteps)
                     data = data.transpose(0, 1)
-                    encoder_hidden = self._encoder.forward(data, lengths_chunk, self.device)
+                    next_tensor, encoder_hidden = self._encoder.forward(data, lengths_chunk, self.device)
 
         if return_next_value:
             return encoder_hidden, next_tensor

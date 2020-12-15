@@ -59,9 +59,11 @@ class TransformerEncoder(nn.Module):
     def __init__(self, ninp, nhead, nhid, nlayers, dropout=0.2):
         super(TransformerEncoder, self).__init__()
         self.src_mask = None
-        self.pos_encoder = PositionalEncoding(ninp, dropout)
-        encoder_layers = nn.TransformerEncoderLayer(d_model=ninp, nhead=nhead, dim_feedforward=nhid, dropout=dropout)
+        self.src_linear = nn.Linear(ninp, nhid)
+        self.pos_encoder = PositionalEncoding(nhid, dropout)
+        encoder_layers = nn.TransformerEncoderLayer(d_model=nhid, nhead=nhead, dim_feedforward=nhid, dropout=dropout)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, nlayers)
+        self.src_decoder = nn.Linear(nhid, ninp)
         self.init_weights()
 
     def _generate_square_subsequent_mask(self, sz):
@@ -85,13 +87,15 @@ class TransformerEncoder(nn.Module):
             self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
                 device
             )
+        src = self.src_linear(src)
         src = self.pos_encoder(src)
         # The lengths_mask has to be of size [batch, lengths]
         lengths_mask = len_to_mask(lengths, zeros=True).to(device)
-        output = self.transformer_encoder(
+        hidden = self.transformer_encoder(
             src, mask=self.src_mask, src_key_padding_mask=lengths_mask
         )
-        return output
+        output = self.src_decoder(hidden)
+        return output, hidden
 
     def bptt(self, batch, criterion, device):
         """This method implements truncated backpropagation through time
@@ -105,7 +109,7 @@ class TransformerEncoder(nn.Module):
             # Transformer expects seq_length in first dimension, so we transpose
             data = data.transpose(0, 1)
             targets = targets.transpose(0, 1)
-            output = self.forward(data, lengths_chunk, device)
+            output, hidden = self.forward(data, lengths_chunk, device)
             loss += criterion(output, targets, lengths_chunk)
 
-        return output.transpose(0, 1), None, loss
+        return output.transpose(0, 1), hidden, loss
