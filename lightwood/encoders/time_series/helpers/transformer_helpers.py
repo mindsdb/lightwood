@@ -88,7 +88,7 @@ class TransformerEncoder(nn.Module):
                 device
             )
         src = self.src_linear(src)
-        src = self.pos_encoder(src)
+        # src = self.pos_encoder(src) # not sure if this is helpful in time series
         # The lengths_mask has to be of size [batch, lengths]
         lengths_mask = len_to_mask(lengths, zeros=True).to(device)
         hidden = self.transformer_encoder(
