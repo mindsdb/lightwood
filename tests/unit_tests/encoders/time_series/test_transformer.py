@@ -65,7 +65,7 @@ class TestTransformerEncoder(unittest.TestCase):
         encoder._transformer_hidden_size = 32
         encoder.prepare(data, feedback_hoop_function=print)
 
-        correct_answer = torch.tensor(example, dtype=torch.half)[:, 1:]
+        correct_answer = torch.tensor(example, dtype=torch.float)[:, 1:]
 
         # discard last element as it doesn't correspond to answer
         data, lens = encoder._prepare_raw_data(torch.tensor(example)[:, :-1])
