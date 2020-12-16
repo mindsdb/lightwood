@@ -111,7 +111,7 @@ class MinMaxNormalizer:
 
 
 class CatNormalizer:
-    def __init__(self, factor=1):
+    def __init__(self):
         self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
         self.unk = "<UNK>"
 

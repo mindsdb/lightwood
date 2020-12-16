@@ -139,13 +139,12 @@ class TimeSeriesEncoder(BaseEncoder):
             for target_dict in previous_target_data:
                 normalizer = target_dict['normalizer']
                 self._target_ar_normalizers.append(normalizer)
+                data = torch.Tensor(normalizer.encode(target_dict['data'])).to(self.device)
+                data[torch.isnan(data)] = 0.0
+                if len(data.shape) < 3:
+                    data = data.unsqueeze(-1)  # add feature dimension
+                normalized_tensors.append(data)
 
-                data = []
-                for t in target_dict['data']:
-                    datum, _ = self._prepare_raw_data(normalizer.encode(t))
-                    data.append(datum[0])
-
-                normalized_tensors.append(torch.stack(data).unsqueeze(-1))  # add feature dimension
             normalized_data = torch.cat(normalized_tensors, dim=-1)
             priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
