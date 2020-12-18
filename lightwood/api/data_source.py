@@ -270,12 +270,14 @@ class DataSource(Dataset):
 
         return sample
 
-    def get_column_original_data(self, column_name):
+    def get_column_original_data(self, column_name, is_array=False):
         if column_name not in self.data_frame:
             nr_rows = self.data_frame.shape[0]
             return [None] * nr_rows
-
-        return self.data_frame[column_name].tolist()
+        if is_array:
+            return [row[-1] for row in self.data_frame[column_name]]
+        else:
+            return self.data_frame[column_name].tolist()
 
     def _lookup_encoder_class(self, column_type, is_target):
         default_encoder_classes = {
@@ -310,11 +312,16 @@ class DataSource(Dataset):
         return encoder_instance
 
     def _prepare_column_encoder(self, config, is_target=False, training_data=None):
-        column_data = self.get_column_original_data(config['name'])
-        encoder_class = config.get(
-            'encoder_class',
-            self._lookup_encoder_class(config['type'], is_target)
-        )
+        column_data = self.get_column_original_data(config['name'], is_array=config.get('historical') or config.get('previous'))
+        if config.get('encoder_class'):
+            encoder_class = config['encoder_class']
+        elif config.get('historical') or config.get('previous'):
+            # these contain arrays of values that should be encoded
+            # prior to any time series encoder that depends on them
+            encoder_class = self._lookup_encoder_class(config['original_type'], is_target)
+        else:
+            encoder_class = self._lookup_encoder_class(config['type'], is_target)
+
         encoder_attrs = config.get('encoder_attrs', {})
         encoder_attrs['secondary_type'] = config.get('secondary_type', None)
 
@@ -330,10 +337,12 @@ class DataSource(Dataset):
                 training_data=training_data
             )
         else:
-            # joint column data augmentation for time series
-            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target:
-                encoder_instance.prepare(column_data, previous_target_data=training_data['previous'])
-
+            if config['type'] == ColumnDataTypes.TIME_SERIES and not (is_target
+                                                                      or config.get('historical')
+                                                                      or config.get('previous')):
+                context = {'historical': training_data['historical'],
+                           'previous': training_data['previous']}
+                encoder_instance.prepare(column_data, context=context)
             else:
                 encoder_instance.prepare(column_data)
 
@@ -341,12 +350,14 @@ class DataSource(Dataset):
 
     def _prepare_encoders(self):
         """
-        Get the encoder for all the output and input column and prepare them
+        Get the encoder for all the input and output columns and prepare them
         with all available data for that column.
         """
         encoders = {}
     
-        input_encoder_training_data = {'targets': [], 'previous': []}
+        input_encoder_training_data = {'targets': {}, 'previous': {}, 'historical': {}}
+        previous_cols = []
+        historical_cols = []
 
         for config in self.config['output_features']:
             column_name = config['name']
@@ -354,44 +365,69 @@ class DataSource(Dataset):
 
             encoder_instance = self._prepare_column_encoder(config, is_target=True)
 
-            input_encoder_training_data['targets'].append({
+            input_encoder_training_data['targets'][column_name] = {
                 'encoded_output': encoder_instance.encode(column_data),
                 'unencoded_output': column_data,
                 'output_encoder': encoder_instance,
                 'output_type': config['type']
-            })
-
+            }
             encoders[column_name] = encoder_instance
 
-        previous_cols = []
+        # preparation step
         for config in self.config['input_features']:
             column_name = config['name']
-            if column_name.startswith('__mdb_ts_previous_'):
-                column_data = self.get_column_original_data(column_name)
-                previous_cols.append(column_name)
-                input_encoder_training_data['previous'].append({'data': column_data,
-                                                                'name': column_name,
-                                                                'original_type': config['original_type'],
-                                                                'output_type': config['type']
-                                                                })
+            column_data = self.get_column_original_data(column_name)
+            values = {'data': column_data,
+                      'name': column_name,
+                      'original_type': config.get('original_type'),
+                      'output_type': config['type']
+                      }
 
+            if config.get('previous'):
+                previous_cols.append(column_name)
+                input_encoder_training_data['previous'][column_name] = values
+
+            elif config.get('historical'):
+                historical_cols.append(column_name)
+                input_encoder_training_data['historical'][column_name] = values
+
+            # add dependency on previous and historical columns
+            if config['type'] == ColumnDataTypes.TIME_SERIES and not (config.get('historical') or config.get('previous')):
+                for dependency_type in ('previous', 'historical'):
+                    for k, v in input_encoder_training_data[dependency_type].items():
+                        try:
+                            if not v['name'] in config['depends_on_column']:
+                                config['depends_on_column'].append(v['name'])
+                        except KeyError:
+                            config['depends_on_column'] = [v['name']]
+
+        # all encoders except those for time series are encoded
         for config in self.config['input_features']:
             column_name = config['name']
-            if column_name not in previous_cols:
+
+            encoder_instance = self._prepare_column_encoder(config,
+                                                            is_target=False,
+                                                            training_data=input_encoder_training_data)
+            encoders[column_name] = encoder_instance
+
+            # we train the embedder for the previous and historical columns
+            # and save the transformation to train the time series encoder
+            if config.get('historical') or config.get('previous'):
+                column_data = self.get_column_original_data(config['name'], is_array=True)
+                if config.get('previous'):
+                    input_encoder_training_data['previous']['encoded_data'] = encoder_instance.encode(column_data)
+                else:
+                    input_encoder_training_data['historical']['encoded_data'] = encoder_instance.encode(column_data)
+
+        # train time series encoders with encoded context
+        for config in self.config['input_features']:
+            column_name = config['name']
+
+            if config['type'] == ColumnDataTypes.TIME_SERIES and not (config.get('historical') or config.get('previous')):
                 encoder_instance = self._prepare_column_encoder(config,
                                                                 is_target=False,
                                                                 training_data=input_encoder_training_data)
-
                 encoders[column_name] = encoder_instance
-
-                # add dependency on '__mdb_ts_previous_' column (for now singular, plural later on)
-                if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
-                    for d in input_encoder_training_data['previous']:
-                        try:
-                            if not d['name'] in config['depends_on_column']:
-                                config['depends_on_column'].append(d['name'])
-                        except KeyError:
-                            config['depends_on_column'] = [d['name']]
 
         return encoders
 

@@ -109,15 +109,19 @@ class TimeSeriesEncoder(BaseEncoder):
         end = min(start + step, len(source))
         return source[start:end]
 
-    def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
+    def prepare(self, priming_data, context=None, feedback_hoop_function=None, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
-        :param previous_target_data: tensor with encoded previous target values for autoregressive tasks
+        :param context: dictionary with previous target values for autoregressive tasks and encoded
+                        representations for columns that are considered historically relevant
         :param feedback_hoop_function: [if you want to get feedback on the training process]
         :param batch_size
         :return:
         """
+        previous_target_data = context['previous']
+        historical = context['historical']
+
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
         else:
