@@ -119,8 +119,9 @@ class TimeSeriesEncoder(BaseEncoder):
         :param batch_size
         :return:
         """
-        previous_target_data = context['previous'].values()
-        historical = context['historical']
+        context = {} if context is None else context
+        previous_target_data = context.get('previous', {}).values()
+        historical = context.get('historical', {}).values()
 
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
@@ -274,11 +275,14 @@ class TimeSeriesEncoder(BaseEncoder):
             if not isinstance(column_data[i][0], list):
                 column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
 
-        # include autoregressive target data
+        # context handling
+        context = {} if context is None else context
         previous_target_data = []
         for k, v in context.items():
             if '__mdb_ts_previous' in k:
                 previous_target_data.append(v)
+
+        # include autoregressive target data
         ptd = []
         if previous_target_data is not None and len(previous_target_data) > 0:
             for i, col in enumerate(previous_target_data):
