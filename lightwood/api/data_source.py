@@ -391,8 +391,29 @@ class DataSource(Dataset):
                 historical_cols.append(column_name)
                 input_encoder_training_data['historical'][column_name] = values
 
+        # all encoders except those for time series are encoded
+        for config in self.config['input_features']:
+            column_name = config['name']
+
+            if config['type'] != ColumnDataTypes.TIME_SERIES or config.get('historical') or config.get('previous'):
+                encoder_instance = self._prepare_column_encoder(config,
+                                                                is_target=False,
+                                                                training_data=input_encoder_training_data)
+                encoders[column_name] = encoder_instance
+
+                # we train the embedder for the previous and historical columns
+                # and save the transformation to train the time series encoder
+                if config.get('historical') or config.get('previous'):
+                    column_data = self.get_column_original_data(config['name'], is_array=True)
+                    if config.get('previous'):
+                        input_encoder_training_data['previous'][column_name]['encoded_data'] = \
+                            encoder_instance.encode(column_data)
+                    else:
+                        input_encoder_training_data['historical'][column_name]['encoded_data'] = \
+                            encoder_instance.encode(column_data)
+
             # add dependency on previous and historical columns
-            if config['type'] == ColumnDataTypes.TIME_SERIES and not (config.get('historical') or config.get('previous')):
+            else:
                 for dependency_type in ('previous', 'historical'):
                     for k, v in input_encoder_training_data[dependency_type].items():
                         try:
@@ -400,24 +421,6 @@ class DataSource(Dataset):
                                 config['depends_on_column'].append(v['name'])
                         except KeyError:
                             config['depends_on_column'] = [v['name']]
-
-        # all encoders except those for time series are encoded
-        for config in self.config['input_features']:
-            column_name = config['name']
-
-            encoder_instance = self._prepare_column_encoder(config,
-                                                            is_target=False,
-                                                            training_data=input_encoder_training_data)
-            encoders[column_name] = encoder_instance
-
-            # we train the embedder for the previous and historical columns
-            # and save the transformation to train the time series encoder
-            if config.get('historical') or config.get('previous'):
-                column_data = self.get_column_original_data(config['name'], is_array=True)
-                if config.get('previous'):
-                    input_encoder_training_data['previous']['encoded_data'] = encoder_instance.encode(column_data)
-                else:
-                    input_encoder_training_data['historical']['encoded_data'] = encoder_instance.encode(column_data)
 
         # train time series encoders with encoded context
         for config in self.config['input_features']:
@@ -461,15 +464,19 @@ class DataSource(Dataset):
 
         config = self.get_column_config(column_name)
 
-        # See if the feature has dependencies in other columns
+        # See if the feature has dependencies in other columns (time series)
         if 'depends_on_column' in config:
-            arg2 = []
+            arg2 = {}
             for col in config['depends_on_column']:
                 if custom_data is not None:
-                    sublist = custom_data[col]
+                    dep = custom_data[col]
                 else:
-                    sublist = self.get_column_original_data(col)
-                arg2.append(sublist)
+                    if '__mdb_ts_previous' in col:
+                        # autoregressiveness encoding is handled insider the TS encoder
+                        arg2[col] = self.get_column_original_data(col)
+                    else:
+                        dep = self.get_column_original_data(col, is_array=True)
+                        arg2[col] = self.encoders[col].encode(dep)
             args.append(arg2)
 
         encoded_vals = self.encoders[column_name].encode(*args)

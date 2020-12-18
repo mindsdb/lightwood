@@ -10,6 +10,8 @@ feature_schema = Schema({
     Optional('depends_on_column'): list,
     Optional('dropout'): float,
     Optional('weights'): dict,
+    Optional('historical'): bool,  # flag for historical context for time series encoders
+    Optional('previous'): bool,    # flag for previous target value for time series encoders
     Optional('secondary_type'): And(str, Use(str.lower), lambda s: s in COLUMN_DATA_TYPES.get_attributes().values()),
     Optional('original_type'): And(str, Use(str.lower), lambda s: s in COLUMN_DATA_TYPES.get_attributes().values()),
     Optional('additional_info'): dict

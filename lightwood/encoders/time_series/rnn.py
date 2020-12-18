@@ -119,7 +119,7 @@ class TimeSeriesEncoder(BaseEncoder):
         :param batch_size
         :return:
         """
-        previous_target_data = context['previous']
+        previous_target_data = context['previous'].values()
         historical = context['historical']
 
         if self._prepared:
@@ -256,10 +256,12 @@ class TimeSeriesEncoder(BaseEncoder):
         else:
             return encoder_hidden
 
-    def encode(self, column_data, previous_target_data=None, get_next_count=None):
+    def encode(self, column_data, context=None, get_next_count=None):
         """
         Encode a list of time series data
         :param column_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...] to encode
+        :param context: dictionary with additional data (either from other encoders or raw, in the case of previous
+                        target values) that are necessary for the encoder to work.
         :param get_next_count: default None, but you can pass a number X and it will return the X following predictions
                                on the series for each ts_data_point in column_data
         :return: a list of encoded time series or if get_next_count !=0 two lists (encoded_values, projected_numbers)
@@ -273,6 +275,10 @@ class TimeSeriesEncoder(BaseEncoder):
                 column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
 
         # include autoregressive target data
+        previous_target_data = []
+        for k, v in context.items():
+            if '__mdb_ts_previous' in k:
+                previous_target_data.append(v)
         ptd = []
         if previous_target_data is not None and len(previous_target_data) > 0:
             for i, col in enumerate(previous_target_data):
