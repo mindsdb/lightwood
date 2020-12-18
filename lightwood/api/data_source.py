@@ -271,6 +271,10 @@ class DataSource(Dataset):
         return sample
 
     def get_column_original_data(self, column_name, is_array=False):
+        """
+        :param is_array: used for time series columns that come as (n_rows, window_size)-shaped arrays,
+        where we need to encode the column in its non-windowed form of (n_rows, 1) shape
+        """
         if column_name not in self.data_frame:
             nr_rows = self.data_frame.shape[0]
             return [None] * nr_rows
