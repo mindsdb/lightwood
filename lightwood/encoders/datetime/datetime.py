@@ -21,7 +21,7 @@ class DatetimeEncoder(BaseEncoder):
 
     def encode(self, data):
         """
-        Encodes a list of unix_timestamps
+        Encodes a list of unix_timestamps, or a list of tensors with unix_timestamps
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
         :return: a list of vectors
         """
@@ -39,6 +39,8 @@ class DatetimeEncoder(BaseEncoder):
                     vector = [0] * len(self.fields)
             else:
                 c = self.constants
+                if isinstance(unix_timestamp, torch.Tensor):
+                    unix_timestamp = unix_timestamp.item()
                 date = datetime.datetime.fromtimestamp(unix_timestamp)
                 day_constant = calendar.monthrange(date.year, date.month)[1]
                 vector = [date.year / c['year'], date.month / c['month'], date.day / day_constant,
