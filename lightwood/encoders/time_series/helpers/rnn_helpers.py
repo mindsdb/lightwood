@@ -103,8 +103,8 @@ class MinMaxNormalizer:
 
     def encode(self, y):
         if not isinstance(y[0], list):
-            y = np.array(y).reshape(1, -1)
-        return self.scaler.transform(y)
+            y = y.reshape(-1, 1)
+        return torch.Tensor(self.scaler.transform(y))
 
     def decode(self, y):
         return self.scaler.inverse_transform(y)
@@ -127,7 +127,7 @@ class CatNormalizer:
         out = []
         for i in y:
             out.append(self.scaler.transform(i.reshape(-1, 1)))
-        return np.array(out)
+        return torch.Tensor(out)
 
     def decode(self, y):
         return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
