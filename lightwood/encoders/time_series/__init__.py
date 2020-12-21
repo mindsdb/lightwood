@@ -1,1 +1,1 @@
-from lightwood.encoders.time_series.rnn import TimeSeriesEncoder
+from lightwood.encoders.time_series.time_series import TimeSeriesEncoder
