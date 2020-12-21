@@ -13,11 +13,24 @@ def len_to_mask(lengths, zeros):
     """
     # Clean trick from:
     # https://stackoverflow.com/questions/53403306/how-to-batch-convert-sentence-lengths-to-masks-in-pytorch
-    device = lengths.device
-    mask = torch.arange(lengths.max()).to(device)[None, :] < lengths[:, None]
+    mask = torch.arange(lengths.max(), device=lengths.device)[None, :] < lengths[:, None]
     if zeros:
         mask = ~mask  # Logical not
     return mask
+
+
+def get_chunk(source, source_lengths, start, step):
+    """Source is 3D tensor, shaped (batch_size, timesteps, n_dimensions), assuming static sequence length"""
+    # Compute the lengths of the sequences (-1 due to the last element being used as target but not as data!
+    trunc_seq_len = int(source_lengths[0].item() - 1)
+    lengths = torch.zeros(source.shape[0]).fill_(trunc_seq_len).to(source.device)
+
+    # This is necessary for MultiHeadedAttention to work
+    end = min(start + step, trunc_seq_len)
+    data = source[:, start:end, :]
+    target = source[:, start+1:end+1, :]
+
+    return data, target, lengths
 
 
 class PositionalEncoding(nn.Module):
@@ -31,7 +44,10 @@ class PositionalEncoding(nn.Module):
             torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
         )
         pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
+        if not d_model % 2:
+            pe[:, 1::2] = torch.cos(position * div_term)
+        else:
+            pe[:, 1::2] = torch.cos(position * div_term)[:, :d_model//2]
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer("pe", pe)
 
@@ -41,16 +57,15 @@ class PositionalEncoding(nn.Module):
             return self.dropout(x)
 
 
-class TransformerModel(nn.Module):
+class TransformerEncoder(nn.Module):
     def __init__(self, ninp, nhead, nhid, nlayers, dropout=0.2):
-        super(TransformerModel, self).__init__()
+        super(TransformerEncoder, self).__init__()
         self.src_mask = None
-        # Lezcano: This could be an embedding if the data is in a range [0, R-1]
-        self.encoder = nn.Linear(1, ninp)
-        self.pos_encoder = PositionalEncoding(ninp, dropout)
-        encoder_layers = nn.TransformerEncoderLayer(ninp, nhead, nhid, dropout)
+        self.src_linear = nn.Linear(ninp, nhid)
+        self.pos_encoder = PositionalEncoding(nhid, dropout)
+        encoder_layers = nn.TransformerEncoderLayer(d_model=nhid, nhead=nhead, dim_feedforward=nhid, dropout=dropout)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, nlayers)
-        self.decoder = nn.Linear(ninp, 1)
+        self.src_decoder = nn.Linear(nhid, ninp)
         self.init_weights()
 
     def _generate_square_subsequent_mask(self, sz):
@@ -64,26 +79,40 @@ class TransformerModel(nn.Module):
         return mask
 
     def init_weights(self):
-        initrange = 0.1
-        self.encoder.weight.data.uniform_(-initrange, initrange)
-        self.encoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
-        self.decoder.bias.data.zero_()
+        for p in self.parameters():
+            if p.dim() > 1:
+                torch.nn.init.xavier_uniform_(p)
 
-    def forward(self, src, lengths):
-        device = src.device
+    def forward(self, src, lengths, device):
         with LightwoodAutocast():
             if self.src_mask is None or self.src_mask.size(0) != src.size(0):
                 # Attention mask to avoid attending to upcoming parts of the sequence
                 self.src_mask = self._generate_square_subsequent_mask(src.size(0)).to(
                     device
                 )
-            src = self.encoder(src)
-            src = self.pos_encoder(src)
+            src = self.src_linear(src)
+            # src = self.pos_encoder(src) # not sure if this is helpful in time series
             # The lengths_mask has to be of size [batch, lengths]
             lengths_mask = len_to_mask(lengths, zeros=True).to(device)
-            output = self.transformer_encoder(
+            hidden = self.transformer_encoder(
                 src, mask=self.src_mask, src_key_padding_mask=lengths_mask
             )
-            output = self.decoder(output)
-        return output
+            output = self.src_decoder(hidden)
+            return output, hidden
+
+    def bptt(self, batch, criterion, device):
+        """This method implements truncated backpropagation through time
+        Returns: output tensor, None as hidden_state, which does not apply in this case, and loss value"""
+        loss = 0
+        train_batch, len_batch = batch
+        batch_size, timesteps, _ = train_batch.shape
+
+        for start_chunk in range(0, timesteps, timesteps):
+            data, targets, lengths_chunk = get_chunk(train_batch, len_batch, start_chunk, timesteps)
+            # Transformer expects seq_length in first dimension, so we transpose
+            data = data.transpose(0, 1)
+            targets = targets.transpose(0, 1)
+            output, hidden = self.forward(data, lengths_chunk, device)
+            loss += criterion(output, targets, lengths_chunk)
+
+        return output.transpose(0, 1), hidden, loss
