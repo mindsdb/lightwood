@@ -219,7 +219,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 data = torch.stack([d for d in data]).unsqueeze(-1).to(self.device)
 
             if previous is not None:
-                target_tensor = torch.Tensor(previous).to(self.device)
+                target_tensor = torch.stack(previous).to(self.device)
                 target_tensor[torch.isnan(target_tensor)] = 0.0
                 if len(target_tensor.shape) < 3:
                     target_tensor = target_tensor.transpose(0, 1).unsqueeze(0)
