@@ -2,35 +2,7 @@ import math
 import torch
 import torch.nn as nn
 from lightwood.helpers.torch import LightwoodAutocast
-
-
-def len_to_mask(lengths, zeros):
-    """
-    :param lengths: list of ints with the lengths of the sequences
-    :param zeros: bool. If false, the first lengths[i] values will be True and the rest will be false.
-            If true, the first values will be False and the rest True
-    :return: Boolean tensor of dimension (L, T) with L = len(lenghts) and T = lengths.max(), where with rows with lengths[i] True values followed by lengths.max()-lengths[i] False values. The True and False values are inverted if `zeros == True`
-    """
-    # Clean trick from:
-    # https://stackoverflow.com/questions/53403306/how-to-batch-convert-sentence-lengths-to-masks-in-pytorch
-    mask = torch.arange(lengths.max(), device=lengths.device)[None, :] < lengths[:, None]
-    if zeros:
-        mask = ~mask  # Logical not
-    return mask
-
-
-def get_chunk(source, source_lengths, start, step):
-    """Source is 3D tensor, shaped (batch_size, timesteps, n_dimensions), assuming static sequence length"""
-    # Compute the lengths of the sequences (-1 due to the last element being used as target but not as data!
-    trunc_seq_len = int(source_lengths[0].item() - 1)
-    lengths = torch.zeros(source.shape[0]).fill_(trunc_seq_len).to(source.device)
-
-    # This is necessary for MultiHeadedAttention to work
-    end = min(start + step, trunc_seq_len)
-    data = source[:, start:end, :]
-    target = source[:, start+1:end+1, :]
-
-    return data, target, lengths
+from lightwood.encoders.time_series.helpers.common import len_to_mask, get_chunk
 
 
 class PositionalEncoding(nn.Module):
