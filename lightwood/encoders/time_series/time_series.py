@@ -34,8 +34,11 @@ class TimeSeriesEncoder(BaseEncoder):
         self._normalizer = None
         self._target_ar_normalizers = []
 
-    def setup_nn(self, additional_targets=None):
-        """This method must be executed after initializing, else self.secondary_type is unassigned"""
+    def setup_nn(self, context=None):
+        """This method must be executed after initializing, else self.secondary_type is unassigned.
+        It retrieves the size of every input descriptor and build a NN with the corresponding dimensions.
+        """
+        # set target normalizer type
         if self.secondary_type == 'datetime':
             self._normalizer = DatetimeEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields)*2  # sinusoidal datetime components
@@ -45,8 +48,9 @@ class TimeSeriesEncoder(BaseEncoder):
         total_dims = self._n_dims
         dec_hsize = self._encoded_vector_size
 
-        if additional_targets:
-            for t in additional_targets:
+        # add previous and historical embedding size to total
+        if context:
+            for t in context.get('previous', {}).values():
                 if t['original_type'] == 'categorical':
                     t['normalizer'] = CatNormalizer()
                     t['normalizer'].prepare(t['data'])
@@ -55,7 +59,10 @@ class TimeSeriesEncoder(BaseEncoder):
                     t['normalizer'] = MinMaxNormalizer()
                     t['normalizer'].prepare(t['data'])
                     total_dims += 1
+            for t in context.get('historical', {}).values():
+                total_dims += t['encoded_data'].shape[-1]
 
+        # create neural networks
         if self.encoder_class == EncoderRNNNumerical:
             self._enc_criterion = nn.MSELoss()
             self._dec_criterion = self._enc_criterion
@@ -121,38 +128,50 @@ class TimeSeriesEncoder(BaseEncoder):
         :return:
         """
         context = {} if context is None else context
-        previous_target_data = context.get('previous', {}).values()
-        historical = context.get('historical', {}).values()
 
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
         else:
-            self.setup_nn(previous_target_data)
+            self.setup_nn(context)
 
         # Convert to array and determine max length
         priming_data, lengths_data = self._prepare_raw_data(priming_data)
         self._max_ts_length = int(lengths_data.max())
 
+        # Normalize data
         if self._normalizer:
             self._normalizer.prepare(priming_data)
             priming_data = torch.stack([self._normalizer.encode(d) for d in priming_data]).to(self.device)
         else:
             priming_data = torch.stack([d for d in priming_data]).unsqueeze(-1).to(self.device)
 
-        # merge all normalized data into a training batch
-        if previous_target_data is not None and len(previous_target_data) > 0:
-            normalized_tensors = []
+        # Merge all normalized and contextual data into a training batch
+        previous_target_data = context.get('previous', {}).values()
+        historical_data = context.get('historical', {}).values()
+
+        # autoregressive context
+        if previous_target_data:  # TODO:  and len(previous_target_data) > 0?
+            ar_tensors = []
             for target_dict in previous_target_data:
                 normalizer = target_dict['normalizer']
                 self._target_ar_normalizers.append(normalizer)
                 data = torch.Tensor(normalizer.encode(target_dict['data'])).to(self.device)
                 data[torch.isnan(data)] = 0.0
-                if len(data.shape) < 3:
-                    data = data.unsqueeze(-1)  # add feature dimension
-                normalized_tensors.append(data)
+                ar_tensors.append(data)
+            ar_tensors = torch.cat(ar_tensors, dim=-1)
+            if len(ar_tensors.shape) < 3:
+                ar_tensors = ar_tensors.unsqueeze(-1)
+            priming_data = torch.cat([priming_data, ar_tensors], dim=-1)
 
-            normalized_data = torch.cat(normalized_tensors, dim=-1)
-            priming_data = torch.cat([priming_data, normalized_data], dim=-1)
+        if historical_data:
+            ctx_tensors = []
+            for context_dict in historical_data:
+                ctx_tensors.append(context_dict['encoded_data'].to(priming_data.device))
+
+            ctx_tensors = torch.cat(ctx_tensors, dim=-1)
+            if len(ctx_tensors.shape) < 3:
+                ctx_tensors = ctx_tensors.unsqueeze(-1)  # add feature dimension when d=1
+            priming_data = torch.cat([priming_data, ctx_tensors], dim=-1)
 
         self._encoder.train()
         for i in range(self._epochs):
@@ -203,11 +222,13 @@ class TimeSeriesEncoder(BaseEncoder):
 
         self._prepared = True
 
-    def _encode_one(self, data, previous=None, initial_hidden=None, return_next_value=False):
+    def _encode_one(self, data, previous=None, historical=None, initial_hidden=None, return_next_value=False):
         """
         This method encodes one single row of serial data
         :param data: multidimensional time series as list of lists [[dim1_data], [dim2_data], ...]
                      (dim_data: string with format "x11, x12, ... x1n")
+        :param previous: tensor with previous target data for autoregressive encoders
+        :param historical: tensors with additional information
         :param initial_hidden: if you want to encode from an initial hidden state other than 0s
         :param return_next_value:  if you want to return the next value in the time series too
 
@@ -216,24 +237,24 @@ class TimeSeriesEncoder(BaseEncoder):
         self._encoder.eval()
         with torch.no_grad():
             # Convert to array and determine max length
+            len_data = len(data)
             data, lengths_data = self._prepare_raw_data(data)
-            _max_ts_length = int(lengths_data.max())
 
             if self._normalizer:
                 data = torch.stack([self._normalizer.encode(d) for d in data]).to(self.device)
             else:
                 data = torch.stack([d for d in data]).unsqueeze(-1).to(self.device)
 
+            # include previous and historical data#
             if previous is not None:
-                target_tensor = torch.stack(previous).to(self.device)
-                target_tensor[torch.isnan(target_tensor)] = 0.0
-                if len(target_tensor.shape) < 3:
-                    target_tensor = target_tensor.transpose(0, 1).unsqueeze(0)
-                data_tensor = torch.cat((data, target_tensor), dim=-1)
-            else:
-                data_tensor = data
+                previous = torch.stack(previous).to(self.device)
+                previous[torch.isnan(previous)] = 0.0
+                if len(previous.shape) < 3:
+                    previous = previous.transpose(0, 1).unsqueeze(0)
+                data = torch.cat((data, previous), dim=-1)
 
-            steps = data_tensor.shape[1]
+            data = torch.cat((data, historical), dim=-1) if historical is not None else data
+            steps = data.shape[1]
 
             if self.encoder_class == EncoderRNNNumerical:
                 encoder_hidden = self._encoder.init_hidden(self.device)
@@ -241,15 +262,15 @@ class TimeSeriesEncoder(BaseEncoder):
 
                 next_tensor = None
                 for tensor_i in range(steps):
-                    next_tensor, encoder_hidden = self._encoder.forward(data_tensor[:, tensor_i, :].unsqueeze(dim=0),
+                    next_tensor, encoder_hidden = self._encoder.forward(data[:, tensor_i, :].unsqueeze(dim=0),
                                                                         encoder_hidden)
             else:
                 next_tensor = None
-                len_batch = self._get_batch(lengths_data, 0, len(data))
-                batch_size, timesteps, _ = data_tensor.shape
+                len_batch = self._get_batch(lengths_data, 0, len_data)
+                batch_size, timesteps, _ = data.shape
 
                 for start_chunk in range(0, timesteps, timesteps):
-                    data, targets, lengths_chunk = get_chunk(data_tensor, len_batch, start_chunk, timesteps)
+                    data, targets, lengths_chunk = get_chunk(data, len_batch, start_chunk, timesteps)
                     data = data.transpose(0, 1)
                     next_tensor, encoder_hidden = self._encoder.forward(data, lengths_chunk, self.device)
 
@@ -279,9 +300,12 @@ class TimeSeriesEncoder(BaseEncoder):
         # context handling
         context = {} if context is None else context
         previous_target_data = []
+        historical_data = []
         for k, v in context.items():
             if '__mdb_ts_previous' in k:
                 previous_target_data.append(v)
+            else:
+                historical_data.append(v)
 
         # include autoregressive target data
         ptd = []
@@ -290,15 +314,28 @@ class TimeSeriesEncoder(BaseEncoder):
                 normalizer = self._target_ar_normalizers[i]
                 ptd.append(normalizer.encode(col))
 
+        # abstract into method, ugly
+        if historical_data:
+            ctx_tensors = []
+            for ctx_tensor in historical_data:
+                ctx_tensors.append(ctx_tensor.to(self.device))
+
+            ctx_tensors = torch.cat(ctx_tensors, dim=-1)
+            if len(ctx_tensors.shape) < 3:
+                ctx_tensors = ctx_tensors.unsqueeze(-1)  # add feature dimension when d=1
+
         ret = []
         next = []
 
         for i, val in enumerate(column_data):
             if get_next_count is None:
+                kwargs = {}
                 if previous_target_data is not None and len(previous_target_data) > 0:
-                    encoded = self._encode_one(val, previous=[values[i] for values in ptd])
-                else:
-                    encoded = self._encode_one(val)
+                    kwargs['previous'] = [values[i] for values in ptd]
+                if historical_data:
+                    kwargs['historical'] = ctx_tensors[i:i+1, :, :]
+
+                encoded = self._encode_one(val, **kwargs)
             else:
                 if get_next_count <= 0:
                     raise Exception('get_next_count must be greater than 0')

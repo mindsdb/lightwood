@@ -409,12 +409,18 @@ class DataSource(Dataset):
                 # and save the transformation to train the time series encoder
                 if config.get('historical') or config.get('previous'):
                     column_data = self.get_column_original_data(config['name'], is_array=True)
+                    encoded_data = encoder_instance.encode(column_data)
+
                     if config.get('previous'):
-                        input_encoder_training_data['previous'][column_name]['encoded_data'] = \
-                            encoder_instance.encode(column_data)
+                        input_encoder_training_data['previous'][column_name]['encoded_data'] = encoded_data
                     else:
-                        input_encoder_training_data['historical'][column_name]['encoded_data'] = \
-                            encoder_instance.encode(column_data)
+                        # we recreate historical displacement using .roll() and adequate masking
+                        timesteps = len(self.data_frame[config['name']].iloc[0])
+                        #mask = torch.ones_like(encoded_data).triu().fliplr().flipud().unsqueeze(1)
+                        # mask = torch.repeat_interleave(mask, timesteps, dim=1)
+                        displaced = torch.stack([encoded_data.roll(-i) for i in range(timesteps)])  # only -i
+                        # displaced *= ~mask
+                        input_encoder_training_data['historical'][column_name]['encoded_data'] = displaced.transpose(0, 1)
 
             # add dependency on previous and historical columns
             else:
@@ -480,7 +486,11 @@ class DataSource(Dataset):
                         arg2[col] = self.get_column_original_data(col)
                     else:
                         dep = self.get_column_original_data(col, is_array=True)
-                        arg2[col] = self.encoders[col].encode(dep)
+                        dep = self.encoders[col].encode(dep)
+                        timesteps = len(self.data_frame[col].iloc[0])
+                        displaced = torch.stack([dep.roll(-i) for i in range(timesteps)]).transpose(0, 1)
+                        # displaced *= ~mask  # This one is pending because it is still not correct
+                        arg2[col] = displaced
             args.append(arg2)
 
         encoded_vals = self.encoders[column_name].encode(*args)
