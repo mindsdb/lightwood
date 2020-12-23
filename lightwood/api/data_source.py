@@ -418,11 +418,8 @@ class DataSource(Dataset):
                         displaced = torch.stack([encoded_data.roll(-i, dims=0) for i in range(timesteps)]).transpose(0, 1)
 
                         # we recreate historical displacement using adequate masking
-                        mask = torch.ones((encoded_data.shape[0]+1, timesteps)).to(torch.bool)
-                        mask = ~mask.triu().flipud().unsqueeze(2)[:-1, :]
-                        mask = torch.repeat_interleave(mask, encoded_data.shape[1], dim=2)
-
-                        # result: (B, timesteps, enc_n_feats); for timestep i, last i rows are null
+                        # end result: (B, timesteps, enc_n_feats); for timestep i, last i rows are null
+                        mask = self._get_historical_mask(encoded_data, timesteps)
                         displaced *= mask
                         input_encoder_training_data['historical'][column_name]['encoded_data'] = displaced
 
@@ -465,6 +462,17 @@ class DataSource(Dataset):
         child.output_weights = self.output_weights
         return child
 
+    def _get_historical_mask(self, encoded_data, timesteps):
+        """
+        :param encoded_data: tensor with shape (batch_size, timesteps, n_features)
+        :return: a mask of the same shape, where for the i-th timestep the last i
+        rows are valued False, because we have no information for them
+        """
+        mask = torch.ones((encoded_data.shape[0]+1, timesteps)).to(torch.bool)
+        mask = ~mask.triu().flipud().unsqueeze(2)[:-1, :]
+        mask = torch.repeat_interleave(mask, encoded_data.shape[1], dim=2)
+        return mask
+
     def get_encoded_column_data(self, column_name, custom_data=None):
         if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
@@ -492,8 +500,9 @@ class DataSource(Dataset):
                         dep = self.get_column_original_data(col, is_array=True)
                         dep = self.encoders[col].encode(dep)
                         timesteps = len(self.data_frame[col].iloc[0])
-                        displaced = torch.stack([dep.roll(-i) for i in range(timesteps)]).transpose(0, 1)
-                        # displaced *= ~mask  # This one is pending because it is still not correct
+                        mask = self._get_historical_mask(dep, timesteps)
+                        displaced = torch.stack([dep.roll(-i, dims=0) for i in range(timesteps)]).transpose(0, 1)
+                        displaced *= mask
                         arg2[col] = displaced
             args.append(arg2)
 
