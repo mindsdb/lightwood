@@ -117,6 +117,18 @@ class TimeSeriesEncoder(BaseEncoder):
         end = min(start + step, len(source))
         return source[start:end]
 
+    def _prepare_historical_tensors(self, historical_data):
+        """Shapes a list of (batch, timesteps, n_feats)-shaped tensors
+        into a single (batch, timesteps, sum(n_feats))-shaped tensor"""
+        ctx_tensors = []
+        for ctx_tensor in historical_data:
+            ctx_tensors.append(ctx_tensor.to(self.device))
+
+        ctx_tensors = torch.cat(ctx_tensors, dim=-1)
+        if len(ctx_tensors.shape) < 3:
+            ctx_tensors = ctx_tensors.unsqueeze(-1)  # add feature dimension when d=1
+        return ctx_tensors
+
     def prepare(self, priming_data, context=None, feedback_hoop_function=None, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
@@ -150,7 +162,7 @@ class TimeSeriesEncoder(BaseEncoder):
         historical_data = context.get('historical', {}).values()
 
         # autoregressive context
-        if previous_target_data:  # TODO:  and len(previous_target_data) > 0?
+        if previous_target_data:
             ar_tensors = []
             for target_dict in previous_target_data:
                 normalizer = target_dict['normalizer']
@@ -164,13 +176,7 @@ class TimeSeriesEncoder(BaseEncoder):
             priming_data = torch.cat([priming_data, ar_tensors], dim=-1)
 
         if historical_data:
-            ctx_tensors = []
-            for context_dict in historical_data:
-                ctx_tensors.append(context_dict['encoded_data'].to(priming_data.device))
-
-            ctx_tensors = torch.cat(ctx_tensors, dim=-1)
-            if len(ctx_tensors.shape) < 3:
-                ctx_tensors = ctx_tensors.unsqueeze(-1)  # add feature dimension when d=1
+            ctx_tensors = self._prepare_historical_tensors([d['encoded_data'] for d in historical_data])
             priming_data = torch.cat([priming_data, ctx_tensors], dim=-1)
 
         self._encoder.train()
@@ -245,7 +251,7 @@ class TimeSeriesEncoder(BaseEncoder):
             else:
                 data = torch.stack([d for d in data]).unsqueeze(-1).to(self.device)
 
-            # include previous and historical data#
+            # include previous and historical data
             if previous is not None:
                 previous = torch.stack(previous).to(self.device)
                 previous[torch.isnan(previous)] = 0.0
@@ -314,15 +320,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 normalizer = self._target_ar_normalizers[i]
                 ptd.append(normalizer.encode(col))
 
-        # abstract into method, ugly
-        if historical_data:
-            ctx_tensors = []
-            for ctx_tensor in historical_data:
-                ctx_tensors.append(ctx_tensor.to(self.device))
-
-            ctx_tensors = torch.cat(ctx_tensors, dim=-1)
-            if len(ctx_tensors.shape) < 3:
-                ctx_tensors = ctx_tensors.unsqueeze(-1)  # add feature dimension when d=1
+        ctx_tensors = self._prepare_historical_tensors(historical_data) if historical_data else None
 
         ret = []
         next = []
@@ -332,7 +330,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 kwargs = {}
                 if previous_target_data is not None and len(previous_target_data) > 0:
                     kwargs['previous'] = [values[i] for values in ptd]
-                if historical_data:
+                if ctx_tensors is not None:
                     kwargs['historical'] = ctx_tensors[i:i+1, :, :]
 
                 encoded = self._encode_one(val, **kwargs)

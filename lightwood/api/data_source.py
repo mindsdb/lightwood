@@ -419,7 +419,7 @@ class DataSource(Dataset):
 
                         # we recreate historical displacement using adequate masking
                         mask = torch.ones((encoded_data.shape[0]+1, timesteps)).to(torch.bool)
-                        mask = ~mask.triu().flipud().unsqueeze(2)[:-1, :]  # fliplr()
+                        mask = ~mask.triu().flipud().unsqueeze(2)[:-1, :]
                         mask = torch.repeat_interleave(mask, encoded_data.shape[1], dim=2)
 
                         # result: (B, timesteps, enc_n_feats); for timestep i, last i rows are null
