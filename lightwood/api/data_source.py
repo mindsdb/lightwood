@@ -414,13 +414,17 @@ class DataSource(Dataset):
                     if config.get('previous'):
                         input_encoder_training_data['previous'][column_name]['encoded_data'] = encoded_data
                     else:
-                        # we recreate historical displacement using .roll() and adequate masking
                         timesteps = len(self.data_frame[config['name']].iloc[0])
-                        #mask = torch.ones_like(encoded_data).triu().fliplr().flipud().unsqueeze(1)
-                        # mask = torch.repeat_interleave(mask, timesteps, dim=1)
-                        displaced = torch.stack([encoded_data.roll(-i) for i in range(timesteps)])  # only -i
-                        # displaced *= ~mask
-                        input_encoder_training_data['historical'][column_name]['encoded_data'] = displaced.transpose(0, 1)
+                        displaced = torch.stack([encoded_data.roll(-i, dims=0) for i in range(timesteps)]).transpose(0, 1)
+
+                        # we recreate historical displacement using adequate masking
+                        mask = torch.ones((encoded_data.shape[0]+1, timesteps)).to(torch.bool)
+                        mask = ~mask.triu().flipud().unsqueeze(2)[:-1, :]  # fliplr()
+                        mask = torch.repeat_interleave(mask, encoded_data.shape[1], dim=2)
+
+                        # result: (B, timesteps, enc_n_feats); for timestep i, last i rows are null
+                        displaced *= mask
+                        input_encoder_training_data['historical'][column_name]['encoded_data'] = displaced
 
             # add dependency on previous and historical columns
             else:
