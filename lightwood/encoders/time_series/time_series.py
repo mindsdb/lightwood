@@ -111,12 +111,6 @@ class TimeSeriesEncoder(BaseEncoder):
         )
         return out_data, lengths
 
-    def _get_batch(self, source, start, step):
-        # source is an iterable element, we want to get source[i+step] or source[i+end]
-        # If padding is not None, until size `source[i+step]`
-        end = min(start + step, len(source))
-        return source[start:end]
-
     def _prepare_historical_tensors(self, historical_data):
         """Shapes a list of (batch, timesteps, n_feats)-shaped tensors
         into a single (batch, timesteps, sum(n_feats))-shaped tensor"""
@@ -189,13 +183,13 @@ class TimeSeriesEncoder(BaseEncoder):
                 loss = 0
 
                 # shape: (batch_size, timesteps, n_dims)
-                batch = self._get_batch(priming_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
+                batch = priming_data[batch_idx:min(batch_idx + batch_size, len(priming_data))]
 
                 # encode and decode through time
                 with LightwoodAutocast():
                     if self.encoder_class == TransformerEncoder:
                         # pack batch length info tensor
-                        len_batch = self._get_batch(lengths_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
+                        len_batch = lengths_data[batch_idx:min(batch_idx + batch_size, len(priming_data))]
                         batch = batch, len_batch
 
                         next_tensor, hidden_state, dec_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
@@ -272,7 +266,7 @@ class TimeSeriesEncoder(BaseEncoder):
                                                                         encoder_hidden)
             else:
                 next_tensor = None
-                len_batch = self._get_batch(lengths_data, 0, len_data)
+                len_batch = lengths_data[0:len_data]
                 batch_size, timesteps, _ = data.shape
 
                 for start_chunk in range(0, timesteps, timesteps):
