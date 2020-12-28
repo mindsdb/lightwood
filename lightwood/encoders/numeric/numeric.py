@@ -58,7 +58,7 @@ class NumericEncoder(BaseEncoder):
                 if real is not None and self._abs_mean > 0:
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                    vector[2] = real / self._abs_mean
+                    vector[2] = real / self._abs_mean if self._abs_mean else real
                 else:
                     log.debug(f'Can\'t encode target value: {real}')
 
