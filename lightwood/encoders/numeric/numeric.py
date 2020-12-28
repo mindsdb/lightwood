@@ -71,7 +71,7 @@ class NumericEncoder(BaseEncoder):
                         vector[0] = 1
                         vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                         vector[2] = 1 if real < 0 and not self.positive_domain else 0
-                        vector[3] = real/self._abs_mean
+                        vector[3] = real/self._abs_mean if self._abs_mean else real
                 except Exception as e:
                     vector = [0] * 4
                     log.error(f'Can\'t encode input value: {real}, exception: {e}')
