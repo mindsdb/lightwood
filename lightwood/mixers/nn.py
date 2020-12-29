@@ -4,6 +4,7 @@ import time
 
 import torch
 from torch.utils.data import DataLoader
+from torch.cuda.amp import GradScaler
 import numpy as np
 import operator
 
@@ -59,6 +60,7 @@ class NnMixer(BaseMixer):
         self.nn_class = DefaultNet
         self.dropout_p = max(0.0, min(1.0, dropout_p))
         self.dynamic_parameters = {}
+        self.gradient_norm_clip = 0.5
         self.awareness_criterion = None
         self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
         self.selfaware_lr_factor = 1/2      # scales self-aware learning rate compared to mixer
@@ -273,7 +275,6 @@ class NnMixer(BaseMixer):
                     if (int(time.time()) - log_reasure) > 30:
                         log_reasure = time.time()
                         log.info(f'Lightwood training, iteration {epoch}, training error {training_error}')
-
 
                     # Prime the model on each subset for a bit
                     if subset_iteration == 1:
@@ -543,6 +544,8 @@ class NnMixer(BaseMixer):
                 sampler=self._nonpersistent['sampler']
             )
 
+        scaler = GradScaler()
+
         for epoch in range(max_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
@@ -584,6 +587,11 @@ class NnMixer(BaseMixer):
                     else:
                         loss += target_loss
 
+                    #print('out')
+                    #print(outputs[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]]) # <= culprit, has NaNs after a certain point in time
+                    #print('labels')
+                    #print(labels[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+
                 awareness_loss = None
                 if self.is_selfaware:
                     unreduced_losses = []
@@ -615,7 +623,13 @@ class NnMixer(BaseMixer):
                     awareness_loss.backward(retain_graph=True)
 
                 running_loss += loss.item()
-                loss.backward()
+                # loss = loss.clamp(max=0.8)  # possible workaround
+                # torch.nn.utils.clip_grad_norm_(self.net.parameters(), self.gradient_norm_clip)
+                scaler.scale(loss).backward()
+                scaler.step(self.optimizer)
+                scaler.update()
+
+                #loss.backward()
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
                 if CONFIG.MONITORING['network_heatmap'] and random.randint(0, 1000) > 900:
@@ -644,7 +658,7 @@ class NnMixer(BaseMixer):
 
                 # now that we have run backward in both losses, optimize()
                 # (review: we may need to optimize for each step)
-                self.optimizer.step()
+                #self.optimizer.step()
 
                 if self.is_selfaware and self.start_selfaware_training:
                     self.selfaware_optimizer.step()

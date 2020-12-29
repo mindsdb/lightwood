@@ -25,6 +25,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self._transformer_hidden_size = None
         self._epochs = train_iters  # training epochs
         self._pytorch_wrapper = torch.FloatTensor
+        self.gradient_norm_clip = 0.5
         self._prepared = False
         self._is_setup = False
         self._max_ts_length = 0
