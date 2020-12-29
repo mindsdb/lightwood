@@ -36,7 +36,7 @@ class TestRnnEncoder(unittest.TestCase):
                     unequal += 1
 
         print(f'Decoder got {equal} correct and {unequal} incorrect')
-        self.assertGreaterEqual(equal*2, unequal)
+        self.assertGreaterEqual(equal*3, unequal)
 
         error_margin = 10 # 3
         query, answer = example
