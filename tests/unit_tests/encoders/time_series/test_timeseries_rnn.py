@@ -18,7 +18,7 @@ class TestRnnEncoder(unittest.TestCase):
         timesteps = 6
         batch_size = 1
 
-        encoder = TimeSeriesEncoder(encoded_vector_size=15, train_iters=10, encoder_class=EncoderRNNNumerical)
+        encoder = TimeSeriesEncoder(encoded_vector_size=15, train_iters=3, encoder_class=EncoderRNNNumerical)
         encoder.prepare(data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         encoded = encoder.encode(data)
         decoded = encoder.decode(encoded, steps=timesteps).tolist()
@@ -36,7 +36,7 @@ class TestRnnEncoder(unittest.TestCase):
                     unequal += 1
 
         print(f'Decoder got {equal} correct and {unequal} incorrect')
-        self.assertGreaterEqual(equal*3, unequal)
+        self.assertGreaterEqual(equal*2, unequal)
 
         error_margin = 10 # 3
         query, answer = example
