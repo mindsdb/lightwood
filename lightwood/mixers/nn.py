@@ -60,7 +60,6 @@ class NnMixer(BaseMixer):
         self.nn_class = DefaultNet
         self.dropout_p = max(0.0, min(1.0, dropout_p))
         self.dynamic_parameters = {}
-        self.gradient_norm_clip = 0.5
         self.awareness_criterion = None
         self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
         self.selfaware_lr_factor = 1/2      # scales self-aware learning rate compared to mixer
@@ -587,11 +586,6 @@ class NnMixer(BaseMixer):
                     else:
                         loss += target_loss
 
-                    #print('out')
-                    #print(outputs[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]]) # <= culprit, has NaNs after a certain point in time
-                    #print('labels')
-                    #print(labels[:, ds.out_indexes[k][0]:ds.out_indexes[k][1]])
-
                 awareness_loss = None
                 if self.is_selfaware:
                     unreduced_losses = []
@@ -623,13 +617,15 @@ class NnMixer(BaseMixer):
                     awareness_loss.backward(retain_graph=True)
 
                 running_loss += loss.item()
-                # loss = loss.clamp(max=0.8)  # possible workaround
-                # torch.nn.utils.clip_grad_norm_(self.net.parameters(), self.gradient_norm_clip)
                 scaler.scale(loss).backward()
+
+                # now that we have run backward in both losses, optimize()
                 scaler.step(self.optimizer)
                 scaler.update()
 
-                #loss.backward()
+                # (review: we probably need another scaler for the selfaware, specially if NaNs pop up)
+                if self.is_selfaware and self.start_selfaware_training:
+                    self.selfaware_optimizer.step()
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
                 if CONFIG.MONITORING['network_heatmap'] and random.randint(0, 1000) > 900:
@@ -656,12 +652,7 @@ class NnMixer(BaseMixer):
                         self.monitor.weight_map(layer_name, weights, 'Awareness network weights')
                         self.monitor.weight_map(layer_name, weights, 'Awareness network gradients')
 
-                # now that we have run backward in both losses, optimize()
-                # (review: we may need to optimize for each step)
-                #self.optimizer.step()
 
-                if self.is_selfaware and self.start_selfaware_training:
-                    self.selfaware_optimizer.step()
 
                 error = running_loss / (i + 1)
 

@@ -123,19 +123,4 @@ class DefaultNet(torch.nn.Module):
         """
         with LightwoodAutocast():
             output = self._foward_net(input)
-            """
-            output = input
-            for layer in self._foward_net:
-                print(output)
-                print(output[torch.isnan(output)].to(torch.bool).any())
-                print(layer)
-                try:
-                    print(layer.weight)
-                    print(layer.bias)
-                except:
-                    pass
-                output = layer.forward(output)
-            print(output)
-            print(output[torch.isnan(output)].to(torch.bool).any())
-            """
         return output
