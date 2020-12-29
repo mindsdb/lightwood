@@ -47,6 +47,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
         total_dims = self._n_dims
         dec_hsize = self._encoded_vector_size
+        norm = False  # layer norm when historical columns are passed
 
         # add previous and historical embedding size to total
         if context:
@@ -60,6 +61,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     t['normalizer'].prepare(t['data'])
                     total_dims += 1
             for t in context.get('historical', {}).values():
+                norm = True
                 total_dims += t['encoded_data'].shape[-1]
 
         # create neural networks
@@ -67,7 +69,8 @@ class TimeSeriesEncoder(BaseEncoder):
             self._enc_criterion = nn.MSELoss()
             self._dec_criterion = self._enc_criterion
             self._encoder = self.encoder_class(input_size=total_dims,
-                                               hidden_size=self._encoded_vector_size).to(self.device)
+                                               hidden_size=self._encoded_vector_size,
+                                               norm=norm).to(self.device)
 
         elif self.encoder_class == TransformerEncoder:
             self._enc_criterion = self._masked_criterion
@@ -79,7 +82,8 @@ class TimeSeriesEncoder(BaseEncoder):
             self._encoder = self.encoder_class(ninp=total_dims,
                                                nhead=gcd(dec_hsize, total_dims),
                                                nhid=self._transformer_hidden_size,
-                                               nlayers=1).to(self.device)
+                                               nlayers=1,
+                                               norm=norm).to(self.device)
 
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())

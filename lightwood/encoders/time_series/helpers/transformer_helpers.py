@@ -30,7 +30,7 @@ class PositionalEncoding(nn.Module):
 
 
 class TransformerEncoder(nn.Module):
-    def __init__(self, ninp, nhead, nhid, nlayers, dropout=0.2):
+    def __init__(self, ninp, nhead, nhid, nlayers, dropout=0.2, norm=False):
         super(TransformerEncoder, self).__init__()
         self.src_mask = None
         self.src_linear = nn.Linear(ninp, nhid)

@@ -55,17 +55,17 @@ class DecoderRNNNumerical(nn.Module):
 
 
 class EncoderRNNNumerical(nn.Module):
-    def __init__(self,  input_size, hidden_size):
+    def __init__(self,  input_size, hidden_size, norm=False):
         super(EncoderRNNNumerical, self).__init__()
         self.hidden_size = hidden_size
-        self.ln = nn.LayerNorm([input_size])
+        self.norm = nn.LayerNorm([input_size]) if norm else nn.Identity()
         self.dropout = nn.Dropout(0.2)
         self.gru = nn.GRU(input_size, hidden_size, batch_first=True)
         self.out = nn.Linear(hidden_size, input_size)
 
     def forward(self, input, hidden):
         with LightwoodAutocast():
-            norm_inp = self.ln(input)
+            norm_inp = self.norm(input)
             output, hidden = self.gru(norm_inp, hidden)
             output = self.dropout(output)
             output = self.out(output)
