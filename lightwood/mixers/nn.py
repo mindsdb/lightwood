@@ -194,7 +194,7 @@ class NnMixer(BaseMixer):
                 # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
                     self.criterion_arr.append(torch.nn.MSELoss())
-                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduce=False))
+                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduction='none'))
 
         self.optimizer_class = Ranger
         if self.optimizer_args is None:
@@ -336,8 +336,8 @@ class NnMixer(BaseMixer):
 
                         last_test_error = test_error
 
-                        delta_mean = np.mean(test_error_delta_buff[-5:])
-                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:])
+                        delta_mean = np.mean(test_error_delta_buff[-5:]) if test_error_delta_buff else 0
+                        subset_delta_mean = np.mean(subset_test_error_delta_buff[-5:]) if subset_test_error_delta_buff else 0
 
                         if self._nonpersistent['callback'] is not None:
                             self._nonpersistent['callback'](epoch, training_error, test_error, delta_mean, self.calculate_accuracy(test_ds))
