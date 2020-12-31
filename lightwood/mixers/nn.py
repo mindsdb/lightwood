@@ -187,10 +187,10 @@ class NnMixer(BaseMixer):
 
                     if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
                         self.criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice))
-                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduce=False))
+                        self.unreduced_criterion_arr.append(TransformCrossEntropyLoss(weight=weights_slice, reduction='none'))
                     elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
                         self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
-                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduce=False))
+                        self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduction='none'))
                 # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
                     self.criterion_arr.append(torch.nn.MSELoss())
