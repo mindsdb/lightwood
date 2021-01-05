@@ -684,6 +684,12 @@ class NnMixer(BaseMixer):
 
             if 'weights' in ds.get_column_config(output_column):
                 weight_map = ds.get_column_config(output_column)['weights']
+                # omit points for which there's no target info in timeseries forecasting
+                if '_timestep_' in ds.get_column_config(output_column)['name']:
+                    classes = set(weight_map.keys())
+                    observed_classes = set(reals)
+                    for unrecognized_class in observed_classes.difference(classes):
+                        weight_map[unrecognized_class] = 0
             else:
                 weight_map = None
 
