@@ -83,9 +83,9 @@ class Ranger(Optimizer):
                 beta1, beta2 = group['betas']
 
                 # compute variance mov avg
-                exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
+                exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1-beta2)
                 # compute mean moving avg
-                exp_avg.mul_(beta1).add_(1 - beta1, grad)
+                exp_avg.mul_(beta1).add_(grad, alpha=1-beta1)
 
                 state['step'] += 1
 
@@ -111,9 +111,9 @@ class Ranger(Optimizer):
 
                 if N_sma > self.N_sma_threshold:
                     denom = exp_avg_sq.sqrt().add_(group['eps'])
-                    p_data_fp32.addcdiv_(-step_size * group['lr'], exp_avg, denom)
+                    p_data_fp32.addcdiv_(exp_avg, denom, value=-step_size*group['lr'])
                 else:
-                    p_data_fp32.add_(-step_size * group['lr'], exp_avg)
+                    p_data_fp32.add_(exp_avg, alpha=-step_size*group['lr'])
 
                 p.data.copy_(p_data_fp32)
 
@@ -123,7 +123,7 @@ class Ranger(Optimizer):
                     slow_p = state['slow_buffer']
                     # Find the interpolated weight between the slower buffer (the weight `k` steps ago)
                     # and the current weight, set that as the state for RAdam
-                    slow_p.add_(self.alpha, p.data - slow_p)
+                    slow_p.add_(p.data - slow_p, alpha=self.alpha)
                     p.data.copy_(slow_p)
 
         return loss

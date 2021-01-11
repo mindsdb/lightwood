@@ -324,7 +324,7 @@ class DataSource(Dataset):
             is_target=is_target
         )
 
-        if training_data and 'training_data' in inspect.getargspec(encoder_instance.prepare).args:
+        if training_data and 'training_data' in inspect.getfullargspec(encoder_instance.prepare).args:
             encoder_instance.prepare(
                 column_data,
                 training_data=training_data
