@@ -1,3 +1,5 @@
+import time
+import numpy as np
 from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
@@ -152,10 +154,17 @@ class BaseMixer:
             else:
                 sample_weight = [weight_map[val] for val in reals]
 
-            accuracy = {
-                'function': 'accuracy_score',
-                'value': accuracy_score(reals, preds, sample_weight=sample_weight)
-            }
+            try:
+                accuracy = {
+                    'function': 'accuracy_score',
+                    'value': accuracy_score(reals, preds, sample_weight=sample_weight)
+                }
+            # happens for timeseries predictors if test_ds doesn't have enough rows to evaluate for some timesteps
+            except ZeroDivisionError:
+                accuracy = {
+                    'function': 'accuracy_score',
+                    'value': np.nan
+                }
         elif col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
             if weight_map is None:
                 sample_weight = [1] * len(reals)
