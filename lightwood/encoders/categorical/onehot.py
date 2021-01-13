@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from copy import deepcopy
 from scipy.special import softmax
 from lightwood.encoders.text.helpers.rnn_helpers import Lang
 from lightwood.encoders.encoder_base import BaseEncoder
@@ -60,6 +61,7 @@ class OneHotEncoder(BaseEncoder):
         return torch.Tensor(ret)
 
     def decode(self, encoded_data):
+        unk_idx = self._lang.word2index['<UNCOMMON>']
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -69,9 +71,12 @@ class OneHotEncoder(BaseEncoder):
             ret.append(self._lang.index2word[ohe_index])
 
             if self.predict_proba:
+                del(vector[unk_idx])
                 probs.append(softmax(vector).tolist())
 
         if self.predict_proba:
+            class_map = deepcopy(self._lang.index2word)
+            del(class_map[unk_idx])
             return ret, probs, self._lang.index2word
         else:
             return ret
