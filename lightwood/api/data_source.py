@@ -459,8 +459,8 @@ class DataSource(Dataset):
             decoder_instance = self.encoders[column_name]
 
         decoded_data = {}
-        if hasattr(decoder_instance, 'predict_proba'):
-            # used for encoders with onehot decoding
+        if hasattr(decoder_instance, 'predict_proba') and decoder_instance.predict_proba:
+            # return complete belief distribution
             preds, pred_probs, labels = decoder_instance.decode(encoded_data)
             decoded_data['predictions'] = preds
             decoded_data['predict_proba'] = pred_probs

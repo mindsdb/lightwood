@@ -71,4 +71,7 @@ class OneHotEncoder(BaseEncoder):
             if self.predict_proba:
                 probs.append(softmax(vector).tolist())
 
-        return ret, probs, self._lang.index2word
+        if self.predict_proba:
+            return ret, probs, self._lang.index2word
+        else:
+            return ret
