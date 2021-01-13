@@ -61,7 +61,6 @@ class OneHotEncoder(BaseEncoder):
         return torch.Tensor(ret)
 
     def decode(self, encoded_data):
-        unk_idx = self._lang.word2index['<UNCOMMON>']
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -71,12 +70,15 @@ class OneHotEncoder(BaseEncoder):
             ret.append(self._lang.index2word[ohe_index])
 
             if self.predict_proba:
-                del(vector[unk_idx])
+                del(vector[UNCOMMON_TOKEN])
                 probs.append(softmax(vector).tolist())
 
         if self.predict_proba:
+            # UNK not included in class_map nor belief distribution
+            if UNCOMMON_TOKEN != 0:
+                raise Exception("Uncommon token should be the first assigned token in the vocabulary, aborting.")
             class_map = deepcopy(self._lang.index2word)
-            del(class_map[unk_idx])
-            return ret, probs, self._lang.index2word
+            del(class_map[UNCOMMON_TOKEN])
+            return ret, probs, {k-1: v for k, v in class_map.items()}
         else:
             return ret
