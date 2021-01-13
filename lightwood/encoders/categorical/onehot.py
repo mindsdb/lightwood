@@ -1,6 +1,7 @@
 import torch
-from lightwood.encoders.text.helpers.rnn_helpers import Lang
 import numpy as np
+from scipy.special import softmax
+from lightwood.encoders.text.helpers.rnn_helpers import Lang
 from lightwood.encoders.encoder_base import BaseEncoder
 
 UNCOMMON_WORD = '<UNCOMMON>'
@@ -11,6 +12,7 @@ class OneHotEncoder(BaseEncoder):
 
     def __init__(self, is_target=False):
         super().__init__(is_target)
+        self.predict_proba = False  # if True, we return the belief distribution
         self._lang = None
 
     def prepare(self, priming_data, max_dimensions=20000):
@@ -60,9 +62,13 @@ class OneHotEncoder(BaseEncoder):
     def decode(self, encoded_data):
         encoded_data_list = encoded_data.tolist()
         ret = []
+        probs = []
 
         for vector in encoded_data_list:
             ohe_index = np.argmax(vector)
-
             ret.append(self._lang.index2word[ohe_index])
-        return ret
+
+            if self.predict_proba:
+                probs.append(softmax(vector).tolist())
+
+        return ret, probs, self._lang.index2word
