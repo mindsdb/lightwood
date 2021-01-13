@@ -710,7 +710,7 @@ class NnMixer(BaseMixer):
                 preds = ds.get_decoded_column_data(
                     output_column,
                     predictions[output_column]['encoded_predictions']
-                )
+                )['predictions']
 
                 alternative_accuracy = BaseMixer._apply_accuracy_function(
                     ds.get_column_config(output_column)['type'],
