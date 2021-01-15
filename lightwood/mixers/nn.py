@@ -447,8 +447,8 @@ class NnMixer(BaseMixer):
             if include_extra_data:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
 
-            if 'predict_proba' in decoded_predictions:
-                predictions[output_column]['class_distribution'] = decoded_predictions['predict_proba']
+            if 'class_distribution' in decoded_predictions:
+                predictions[output_column]['class_distribution'] = decoded_predictions['class_distribution']
                 predictions[output_column]['class_labels'] = decoded_predictions['class_labels']
 
         log.info('Model predictions and decoding completed')

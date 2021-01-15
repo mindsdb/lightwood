@@ -1,6 +1,5 @@
 import torch
 import numpy as np
-from copy import deepcopy
 from scipy.special import softmax
 from lightwood.encoders.text.helpers.rnn_helpers import Lang
 from lightwood.encoders.encoder_base import BaseEncoder
@@ -77,8 +76,6 @@ class OneHotEncoder(BaseEncoder):
             # UNK not included in class_map nor belief distribution
             if UNCOMMON_TOKEN != 0:
                 raise Exception("Uncommon token should be the first assigned token in the vocabulary, aborting.")
-            class_map = deepcopy(self._lang.index2word)
-            del(class_map[UNCOMMON_TOKEN])
-            return ret, probs, {k-1: v for k, v in class_map.items()}
+            return ret, probs, {k-1: v for k, v in self._lang.index2word.items() if k != UNCOMMON_TOKEN}
         else:
             return ret
