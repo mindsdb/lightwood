@@ -183,9 +183,8 @@ class SklearnMixer(BaseMixer):
                         self.targets[target_col_name]['model'].predict(X)
                     )
 
-
                     # add distribution belief if the flag was set in the target encoder
-                    if hasattr(self.encoders[target_col_name], 'predict_proba') and self.encoders[target_col_name].predict_proba:
+                    if getattr(self.encoders[target_col_name], 'predict_proba', False):
                         predictions[target_col_name]['class_distribution'] = self.targets[target_col_name]['model'].decision_function(X)
                         predictions[target_col_name]['class_labels'] = {i:cls for i, cls in enumerate(self.targets[target_col_name]['model'].classes_)}
 
