@@ -457,7 +457,16 @@ class DataSource(Dataset):
                     You should not decode before having encoding at least once
                     """)
             decoder_instance = self.encoders[column_name]
-        decoded_data = decoder_instance.decode(encoded_data)
+
+        decoded_data = {}
+        if getattr(decoder_instance, 'predict_proba', False):
+            # return complete belief distribution
+            preds, pred_probs, labels = decoder_instance.decode(encoded_data)
+            decoded_data['predictions'] = preds
+            decoded_data['class_distribution'] = pred_probs
+            decoded_data['class_labels'] = labels
+        else:
+            decoded_data['predictions'] = decoder_instance.decode(encoded_data)
 
         return decoded_data
 
