@@ -24,7 +24,7 @@ class NnMixer(BaseMixer):
                  selfaware=False,
                  callback_on_iter=None,
                  eval_every_x_epochs=20,
-                 dropout_p=0.3,
+                 dropout_p=0.0,
                  stop_training_after_seconds=None,
                  stop_model_building_after_seconds=None,
                  param_optimizer=None):
@@ -436,7 +436,7 @@ class NnMixer(BaseMixer):
                 torch.Tensor(output_trasnformed_vectors[output_column])
             )
 
-            predictions[output_column] = {'predictions': decoded_predictions}
+            predictions[output_column] = {'predictions': decoded_predictions['predictions']}
 
             if awareness_arr is not None:
                 predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
@@ -446,6 +446,10 @@ class NnMixer(BaseMixer):
 
             if include_extra_data:
                 predictions[output_column]['encoded_predictions'] = output_trasnformed_vectors[output_column]
+
+            if 'class_distribution' in decoded_predictions:
+                predictions[output_column]['class_distribution'] = decoded_predictions['class_distribution']
+                predictions[output_column]['class_labels'] = decoded_predictions['class_labels']
 
         log.info('Model predictions and decoding completed')
 
@@ -706,7 +710,7 @@ class NnMixer(BaseMixer):
                 preds = ds.get_decoded_column_data(
                     output_column,
                     predictions[output_column]['encoded_predictions']
-                )
+                )['predictions']
 
                 alternative_accuracy = BaseMixer._apply_accuracy_function(
                     ds.get_column_config(output_column)['type'],
