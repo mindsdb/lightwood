@@ -7,7 +7,12 @@ class CONFIG:
     if torch.cuda.device_count() > 0:
         try:
             torch.ones(1).cuda()
-            USE_CUDA = True
+            # pytorch wheels support compute capability >= 3.7
+            major, minor = torch.cuda.get_device_capability()
+            if major + minor/10 >= 3.7:
+                USE_CUDA = True
+            else:
+                USE_CUDA = False
         except Exception as e:
             USE_CUDA = False
     USE_DEVICE = None
