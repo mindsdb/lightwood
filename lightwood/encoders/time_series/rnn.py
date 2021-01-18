@@ -302,7 +302,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 next_value = next_i[0][0].cpu()
 
                 if self._normalizer:
-                    next_value = torch.Tensor(self._normalizer.inverse_transform(next_value))
+                    next_value = torch.Tensor(self._normalizer.decode(next_value))
 
                 next.append(next_value)
 
@@ -350,7 +350,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 reconstruction = reconstruction.reshape(1, -1)
 
             if self._normalizer:
-                reconstruction = self._normalizer.inverse_transform(reconstruction)
+                reconstruction = self._normalizer.decode(reconstruction)
 
             ret.append(reconstruction)
 
