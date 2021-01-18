@@ -333,10 +333,7 @@ class DataSource(Dataset):
         else:
             # joint column data augmentation for time series
             if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target:
-                encoder_instance.prepare(column_data,
-                                         feedback_hoop_function=lambda x: print(x),
-                                         previous_target_data=training_data['previous'])
-
+                encoder_instance.prepare(column_data, previous_target_data=training_data['previous'])
             else:
                 encoder_instance.prepare(column_data)
 
