@@ -316,6 +316,7 @@ class DataSource(Dataset):
             self._lookup_encoder_class(config['type'], is_target)
         )
         encoder_attrs = config.get('encoder_attrs', {})
+        encoder_attrs['original_type'] = config.get('original_type', None)
         encoder_attrs['secondary_type'] = config.get('secondary_type', None)
 
         encoder_instance = self._make_column_encoder(
@@ -333,7 +334,6 @@ class DataSource(Dataset):
             # joint column data augmentation for time series
             if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target:
                 encoder_instance.prepare(column_data, previous_target_data=training_data['previous'])
-
             else:
                 encoder_instance.prepare(column_data)
 
@@ -457,7 +457,16 @@ class DataSource(Dataset):
                     You should not decode before having encoding at least once
                     """)
             decoder_instance = self.encoders[column_name]
-        decoded_data = decoder_instance.decode(encoded_data)
+
+        decoded_data = {}
+        if getattr(decoder_instance, 'predict_proba', False):
+            # return complete belief distribution
+            preds, pred_probs, labels = decoder_instance.decode(encoded_data)
+            decoded_data['predictions'] = preds
+            decoded_data['class_distribution'] = pred_probs
+            decoded_data['class_labels'] = labels
+        else:
+            decoded_data['predictions'] = decoder_instance.decode(encoded_data)
 
         return decoded_data
 
