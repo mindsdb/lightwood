@@ -140,13 +140,15 @@ def get_group_matches(data, combination, keys):
     data: dict with data to filter and group-by columns info.
     combination: tuple with values to filter by
     keys: which column does each combination value belong to
+
+    return: indexes for rows to normalize, data to normalize
     """
     all_sets = []
     for val, key in zip(combination, keys):
         all_sets.append(set([i for i, elt in enumerate(data['group_info'][key]) if elt == val]))
     if all_sets:
         idxs = list(set.intersection(*all_sets))
-        return np.array(data['data'])[idxs, :]
+        return idxs, np.array(data['data'])[idxs, :]
     else:
-        return np.array([])
+        return [], np.array([])
 

@@ -32,7 +32,8 @@ class TimeSeriesEncoder(BaseEncoder):
         self._eos = 0.0  # end of input sequence -- padding value for batches
         self._n_dims = ts_n_dims
         self._normalizer = None
-        self._target_ar_normalizers = []
+        self._target_ar_normalizers = {}  # dict of normalizers for each grouped-by column per previous_target column
+        self._group_combinations = ['__default']
 
     def setup_nn(self, additional_targets=None):
         """This method must be executed after initializing, else types are unassigned"""
@@ -48,23 +49,30 @@ class TimeSeriesEncoder(BaseEncoder):
         if additional_targets:
             for t in additional_targets:
                 t['normalizers'] = {}
+                self._target_ar_normalizers[t['name']] = {}
+
                 # categorical normalizers
                 if t['original_type'] == 'categorical':
                     t['normalizers']['__default'] = CatNormalizer()
                     t['normalizers']['__default'].prepare(t['data'])
                     total_dims += len(t['normalizers']['__default'].scaler.categories_[0])
+
                 # numerical normalizers
                 else:
                     # spawn one normalizer per each group combination
-                    for combination in list(product(*[set(x) for x in t['group_info'].values()])):
-                        key = '_'.join(combination)
-                        subset = get_group_matches(t, combination, t['group_info'].keys())
+                    self._group_combinations.extend(list(product(*[set(x) for x in t['group_info'].values()])))
+                    for combination in self._group_combinations:
+                        _, subset = get_group_matches(t, combination, t['group_info'].keys())
                         if subset.size > 0:
-                            t['normalizers'][key] = MinMaxNormalizer(combination=combination, keys=t['group_info'].keys())
-                            t['normalizers'][key].prepare(subset)
+                            t['normalizers'][combination] = MinMaxNormalizer(combination=combination,
+                                                                             keys=t['group_info'].keys())
+                            t['normalizers'][combination].prepare(subset)
+                            self._target_ar_normalizers[t['name']][combination] = t['normalizers'][combination]
 
-                    t['normalizers']['__default'] = MinMaxNormalizer()  # used at inference time
+                    # ...plus a default one, used at inference time and fitted with all training data
+                    t['normalizers']['__default'] = MinMaxNormalizer()
                     t['normalizers']['__default'].prepare(t['data'])
+                    self._target_ar_normalizers[t['name']]['__default'] = t['normalizers']['__default']
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
@@ -144,17 +152,19 @@ class TimeSeriesEncoder(BaseEncoder):
         if previous_target_data is not None and len(previous_target_data) > 0:
             normalized_tensors = []
             for target_dict in previous_target_data:
-                for normalizer in target_dict['normalizers'].values():
+                data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1)).to(self.device)
+                for group_name, normalizer in target_dict['normalizers'].items():
                     if normalizer.combination:
-                        subset = get_group_matches(target_dict, normalizer.combination, normalizer.keys)
+                        idxs, subset = get_group_matches(target_dict, normalizer.combination, normalizer.keys)
+                        normalized = torch.Tensor(normalizer.encode(subset)).unsqueeze(-1).to(self.device)
+                        normalized[torch.isnan(normalized)] = 0.0
+                        data[idxs, :, :] = normalized
 
-                        # TODO caution: are there any order issues here?
-                        self._target_ar_normalizers.append(normalizer)
-                        data = torch.Tensor(normalizer.encode(subset)).to(self.device)
-                        data[torch.isnan(data)] = 0.0
-                        if len(data.shape) < 3:
-                            data = data.unsqueeze(-1)  # add feature dimension
-                        normalized_tensors.append(data)
+                        # TODO: check categorical case here
+                        # if len(data.shape) < 3:
+                        #     data = data  # add feature dimension
+                normalized_tensors.append(data)
+
             normalized_data = torch.cat(normalized_tensors, dim=0)
             priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
@@ -281,9 +291,24 @@ class TimeSeriesEncoder(BaseEncoder):
         # include autoregressive target data
         ptd = []
         if previous_target_data is not None and len(previous_target_data) > 0:
-            for i, col in enumerate(previous_target_data):
-                normalizer = self._target_ar_normalizers[i]
-                ptd.append(normalizer.encode(col))
+            for i, prev_col_data in enumerate(previous_target_data):
+                tensor = torch.zeros((len(prev_col_data['data']), len(prev_col_data['data'][0]), 1)).to(self.device)
+                all_idxs = set(range(len(prev_col_data['data'])))
+                for combination in [c for c in self._group_combinations if c != '__default']:
+                    normalizer = self._target_ar_normalizers[prev_col_data['name']][combination]
+                    idxs, subset = get_group_matches(prev_col_data, normalizer.combination, normalizer.keys)
+                    if idxs:
+                        tensor[idxs, :, :] = torch.Tensor(normalizer.encode(subset)).unsqueeze(-1).to(self.device)
+                        all_idxs -= set(idxs)
+
+                # encode all remaining rows (not belonging to any grouped combination) with default normalizer
+                if all_idxs:
+                    default_norm = self._target_ar_normalizers[prev_col_data['name']]['__default']
+                    subset = [prev_col_data['data'][idx] for idx in all_idxs]
+                    tensor[all_idxs, :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
+                    tensor[torch.isnan(tensor)] = 0.0
+
+                ptd.append(tensor)
 
         ret = []
         next = []
