@@ -93,16 +93,18 @@ class EncoderRNNNumerical(nn.Module):
 
 
 class MinMaxNormalizer:
-    def __init__(self, factor=1):
+    def __init__(self, combination=[], keys=[], factor=1):
         self.scaler = MinMaxScaler()
         self.factor = factor
+        self.keys = list(keys)  # columns involved in grouped-by subset dataset to normalize
+        self.combination = combination  # tuple with values in those columns
 
     def prepare(self, x):
-        X = np.array([j for i in x for j in i]).reshape(-1, 1)
+        X = np.array([j for i in x for j in i]).reshape(-1, 1) if isinstance(x, list) else x
         self.scaler.fit(X)
 
     def encode(self, y):
-        if not isinstance(y[0], list):
+        if not isinstance(y, np.ndarray) and not isinstance(y[0], list):
             y = y.reshape(-1, 1)
         return torch.Tensor(self.scaler.transform(y))
 
@@ -131,3 +133,20 @@ class CatNormalizer:
 
     def decode(self, y):
         return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
+
+
+def get_group_matches(data, combination, keys):
+    """Given a grouped-by combination, return rows of the data that match belong to it. Params:
+    data: dict with data to filter and group-by columns info.
+    combination: tuple with values to filter by
+    keys: which column does each combination value belong to
+    """
+    all_sets = []
+    for val, key in zip(combination, keys):
+        all_sets.append(set([i for i, elt in enumerate(data['group_info'][key]) if elt == val]))
+    if all_sets:
+        idxs = list(set.intersection(*all_sets))
+        return np.array(data['data'])[idxs, :]
+    else:
+        return np.array([])
+

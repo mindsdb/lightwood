@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 from math import gcd
+from itertools import product
 
 
 class TimeSeriesEncoder(BaseEncoder):
@@ -46,13 +47,24 @@ class TimeSeriesEncoder(BaseEncoder):
 
         if additional_targets:
             for t in additional_targets:
+                t['normalizers'] = {}
+                # categorical normalizers
                 if t['original_type'] == 'categorical':
-                    t['normalizer'] = CatNormalizer()
-                    t['normalizer'].prepare(t['data'])
-                    total_dims += len(t['normalizer'].scaler.categories_[0])
+                    t['normalizers']['__default'] = CatNormalizer()
+                    t['normalizers']['__default'].prepare(t['data'])
+                    total_dims += len(t['normalizers']['__default'].scaler.categories_[0])
+                # numerical normalizers
                 else:
-                    t['normalizer'] = MinMaxNormalizer()
-                    t['normalizer'].prepare(t['data'])
+                    # spawn one normalizer per each group combination
+                    for combination in list(product(*[set(x) for x in t['group_info'].values()])):
+                        key = '_'.join(combination)
+                        subset = get_group_matches(t, combination, t['group_info'].keys())
+                        if subset.size > 0:
+                            t['normalizers'][key] = MinMaxNormalizer(combination=combination, keys=t['group_info'].keys())
+                            t['normalizers'][key].prepare(subset)
+
+                    t['normalizers']['__default'] = MinMaxNormalizer()  # used at inference time
+                    t['normalizers']['__default'].prepare(t['data'])
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
@@ -132,15 +144,18 @@ class TimeSeriesEncoder(BaseEncoder):
         if previous_target_data is not None and len(previous_target_data) > 0:
             normalized_tensors = []
             for target_dict in previous_target_data:
-                normalizer = target_dict['normalizer']
-                self._target_ar_normalizers.append(normalizer)
-                data = torch.Tensor(normalizer.encode(target_dict['data'])).to(self.device)
-                data[torch.isnan(data)] = 0.0
-                if len(data.shape) < 3:
-                    data = data.unsqueeze(-1)  # add feature dimension
-                normalized_tensors.append(data)
+                for normalizer in target_dict['normalizers'].values():
+                    if normalizer.combination:
+                        subset = get_group_matches(target_dict, normalizer.combination, normalizer.keys)
 
-            normalized_data = torch.cat(normalized_tensors, dim=-1)
+                        # TODO caution: are there any order issues here?
+                        self._target_ar_normalizers.append(normalizer)
+                        data = torch.Tensor(normalizer.encode(subset)).to(self.device)
+                        data[torch.isnan(data)] = 0.0
+                        if len(data.shape) < 3:
+                            data = data.unsqueeze(-1)  # add feature dimension
+                        normalized_tensors.append(data)
+            normalized_data = torch.cat(normalized_tensors, dim=0)
             priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
         self._encoder.train()
