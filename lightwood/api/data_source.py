@@ -434,7 +434,11 @@ class DataSource(Dataset):
                 if custom_data is not None:
                     sublist = custom_data[col]
                 else:
-                    sublist = self.get_column_original_data(col)
+                    sublist = {'data': self.get_column_original_data(col),
+                               'name': col,
+                               'group_info': {conf['name']: self.get_column_original_data(conf['name'])
+                                              for conf in self.config['input_features'] if conf['grouped_by']}
+                               }
                 arg2.append(sublist)
             args.append(arg2)
 
