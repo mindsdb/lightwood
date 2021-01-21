@@ -5,6 +5,7 @@ class BaseEncoder:
 
     def __init__(self, is_target=False):
         self.is_target = is_target
+        self.original_type = None
         self.secondary_type = None
         self._prepared = False
 

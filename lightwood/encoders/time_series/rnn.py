@@ -34,11 +34,11 @@ class TimeSeriesEncoder(BaseEncoder):
         self._target_ar_normalizers = []
 
     def setup_nn(self, additional_targets=None):
-        """This method must be executed after initializing, else self.secondary_type is unassigned"""
-        if self.secondary_type == 'datetime':
+        """This method must be executed after initializing, else types are unassigned"""
+        if 'datetime' in (self.original_type, self.secondary_type):
             self._normalizer = DatetimeEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields)*2  # sinusoidal datetime components
-        elif self.secondary_type == 'numeric':
+        elif 'numeric' in (self.original_type, self.secondary_type):
             self._normalizer = MinMaxNormalizer()
 
         total_dims = self._n_dims
@@ -86,21 +86,16 @@ class TimeSeriesEncoder(BaseEncoder):
         return self
 
     def _prepare_raw_data(self, data):
-        # Convert to array and determine max length:
-        # priming_data is a list of len B with lists of length in [0, T]
-        # If the length of the series varies a lot, it would be worth it to order them and apply a few optimisations
-        # we do not do so now
+        """Convert to array and determine max length"""
         out_data = []
         for e in data:
             if not isinstance(e, torch.Tensor):
-                t = torch.tensor(e, dtype=torch.float, device=self.device)
+                t = torch.tensor(e, dtype=torch.float)
             else:
                 t = e.float()
             t[torch.isnan(t)] = 0.0
             out_data.append(t)
-        lengths = torch.tensor(
-            [len(e) for e in data], dtype=torch.float, device=self.device
-        )
+        lengths = torch.tensor([len(e) for e in data], dtype=torch.float)
         return out_data, lengths
 
     def _get_batch(self, source, start, step):
@@ -302,7 +297,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 next_value = next_i[0][0].cpu()
 
                 if self._normalizer:
-                    next_value = torch.Tensor(self._normalizer.inverse_transform(next_value))
+                    next_value = torch.Tensor(self._normalizer.decode(next_value))
 
                 next.append(next_value)
 
@@ -350,7 +345,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 reconstruction = reconstruction.reshape(1, -1)
 
             if self._normalizer:
-                reconstruction = self._normalizer.inverse_transform(reconstruction)
+                reconstruction = self._normalizer.decode(reconstruction)
 
             ret.append(reconstruction)
 
