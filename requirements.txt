@@ -10,3 +10,4 @@ xlrd >= 1.0.0
 requests >= 2.0.0
 transformers >= 2.10.0, <= 4.0.0
 lightgbm >= 3.1.1
+optuna >= 2.4.0

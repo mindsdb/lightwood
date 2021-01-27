@@ -1,5 +1,7 @@
 import numpy as np
+import optuna.integration.lightgbm as lgb
 import lightgbm
+import optuna
 import torch
 import logging
 import time
@@ -10,6 +12,9 @@ from lightwood.mixers import BaseMixer
 from sklearn.preprocessing import OrdinalEncoder
 
 
+optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+
+
 class LightGBMMixer(BaseMixer):
     def __init__(self, stop_training_after_seconds=None):
         super().__init__()
@@ -17,17 +22,16 @@ class LightGBMMixer(BaseMixer):
         self.ord_encs = {}
         self.stop_training_after_seconds = stop_training_after_seconds
 
-
         # GPU Only available via custom compiled version: https://lightgbm.readthedocs.io/en/latest/Installation-Guide.html#build-gpu-version
         self.device, _ = get_devices()
-        #self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
+        # self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
 
         self.device = torch.device('cpu')
         self.device_str = 'cpu'
 
-        self.max_bin = 255 # Default value
+        self.max_bin = 255  # Default value
         if self.device_str == 'gpu':
-            self.max_bin = 63 # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
+            self.max_bin = 63  # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
 
     def _fit(self, train_ds, test_ds=None):
         """
@@ -70,10 +74,12 @@ class LightGBMMixer(BaseMixer):
                 continue
             else:
                 objective = 'regression' if dtype == COLUMN_DATA_TYPES.NUMERIC else 'multiclass'
+                metric = 'l2' if dtype == COLUMN_DATA_TYPES.NUMERIC else 'multi_logloss'
 
             params = {'objective': objective,
-                      'boosting': 'goss',
-                      'verbosity': 0,
+                      'metric': metric,
+                      #'boosting': 'goss',
+                      'verbosity': -1,
                       'lambda_l1': 0.1,
                       'lambda_l2': 0.1,
                       'device_type': self.device_str,
@@ -87,7 +93,7 @@ class LightGBMMixer(BaseMixer):
             if self.stop_training_after_seconds is not None:
                 start = time.time()
                 params['num_iterations'] = 1
-                bst = lightgbm.train(params, train_data, valid_sets=validate_data)
+                bst = lgb.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
                 end = time.time()
                 seconds_for_one_iteration = end - start
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
@@ -95,7 +101,7 @@ class LightGBMMixer(BaseMixer):
 
             logging.info(f'Training GBM with {num_iterations} iterations')
             params['num_iterations'] = num_iterations
-            bst = lightgbm.train(params, train_data, valid_sets=validate_data)
+            bst = lgb.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
 
             self.models[col_name] = bst
 
