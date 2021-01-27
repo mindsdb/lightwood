@@ -38,15 +38,17 @@ class LightGBMMixer(BaseMixer):
 
         out_cols = train_ds.output_feature_names
         for col_name in out_cols:
-            train_data = lightgbm.Dataset(data['train']['data'], label = data['train']['data'][col_name])
-            validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['data'][col_name])
+            train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
+            validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
             dtype = next(item for item in train_ds.output_features if item["name"] == col_name)['type']
-            if dtype not in ['numeric', 'categorical']:
+            if dtype not in [COLUMN_DATA_TYPES.NUMERIC, COLUMN_DATA_TYPES.CATEGORICAL]:
                 logging.info('cannot support {dtype} in lightgbm'.format(dtype=dtype))
                 continue
             else:
-                objective =  'regression' if dtype == 'numeric' else 'multiclass'
+                objective = 'regression' if dtype == 'numeric' else 'multiclass
             param = {'objective': objective}
+            if objective == 'multiclass':
+                param['num_class'] = len(set(data['train']['label_data'][col_name]))
 
             num_round = 10
             bst = lightgbm.train(param, train_data, num_round, valid_sets=validate_data)
