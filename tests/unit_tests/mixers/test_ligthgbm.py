@@ -6,7 +6,7 @@ from lightwood.data_schemas.predictor_config import predictor_config_schema
 from lightwood.mixers.lightgbm import LightGBMMixer
 
 
-class TestBoostMixer(unittest.TestCase):
+class TestLightGBMMixer(unittest.TestCase):
     def test_fit_and_predict(self):
         config = {
             'input_features': [
