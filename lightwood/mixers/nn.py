@@ -223,7 +223,7 @@ class NnMixer(BaseMixer):
             input_size = len(train_ds[0][0])
             training_data_length = len(train_ds)
             while True:
-                training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
+                training_time_per_iteration = self.stop_model_building_after_seconds / self.param_optimizer.total_trials
 
                 # Some heuristics...
                 if training_time_per_iteration > input_size:
@@ -235,7 +235,7 @@ class NnMixer(BaseMixer):
                     self.param_optimizer.total_trials = 8
                     break
 
-            training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
+            training_time_per_iteration = self.stop_model_building_after_seconds / self.param_optimizer.total_trials
 
             self.dynamic_parameters = self.param_optimizer.evaluate(lambda dynamic_parameters: self.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
 
