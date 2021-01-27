@@ -60,21 +60,14 @@ class LightGBMMixer(BaseMixer):
         :param when_data_source: DataSource
         :param include_extra_data: bool
         """
-
-
-        cols = when_data_source.input_feature_names
-        out_cols = when_data_source.output_feature_names
         data = None
-        for col_name in cols:
+        for col_name in when_data_source.input_feature_names:
             if data is None:
                 data = when_data_source.get_encoded_column_data(col_name)
             else:
                 data = torch.cat((data, when_data_source.get_encoded_column_data(col_name)), 1)
-        data = data.tolist()
 
-        train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
-        data = lightgbm.Dataset(data)
 
-        ypred = {col_name: self.models[col_name].predict(data) for col_name in out_cols}
+        ypred = {col_name: self.models[col_name].predict(data) for col_name in when_data_source.output_feature_names}
 
         return ypred
