@@ -123,7 +123,6 @@ class BaseMixer:
         for output_column in [feature['name'] for feature in ds.config['output_features']]:
 
             col_type = ds.get_column_config(output_column)['type']
-            print('\n\n\n', predictions, '\n\n\n')
             if col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
                 reals = [tuple(x) for x in ds.get_column_original_data(output_column)]
                 preds = [tuple(x) for x in predictions[output_column]['predictions']]
