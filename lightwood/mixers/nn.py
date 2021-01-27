@@ -237,9 +237,9 @@ class NnMixer(BaseMixer):
 
             training_time_per_iteration = self.stop_model_building_after_seconds / self.param_optimizer.total_trials
 
-            self.dynamic_parameters = self.param_optimizer.evaluate(lambda dynamic_parameters: self.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
+            self.dynamic_parameters = self.param_optimizer.evaluate(lambda dynamic_parameters: self.evaluate(train_ds, test_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
 
-            log.info('Using hyperparameter set: ', best_parameters)
+            log.info('Using hyperparameter set: ', self.dynamic_parameters)
         else:
             self.dynamic_parameters = {}
 
