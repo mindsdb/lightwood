@@ -23,6 +23,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir -e .
+    - name: Install dependencies OSX
+      run: |
+        if [ "$RUNNER_OS" == "macOS" ]; then
+          pip install -r optional_requirements_snowflake.txt;
+          brew install libomp;
+        fi
     - name: Lint with flake8
       run: |
         # IMPLEMENT THIS AFTER WE HAVE ALL PEP8 styles
