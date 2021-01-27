@@ -11,10 +11,11 @@ from sklearn.preprocessing import OrdinalEncoder
 
 
 class LightGBMMixer(BaseMixer):
-    def __init__(self):
+    def __init__(self, stop_training_after_seconds=None):
         super().__init__()
         self.models = {}
         self.ord_encs = {}
+        self.stop_training_after_seconds = stop_training_after_seconds
 
 
         # GPU Only available via custom compiled version: https://lightgbm.readthedocs.io/en/latest/Installation-Guide.html#build-gpu-version
@@ -28,7 +29,7 @@ class LightGBMMixer(BaseMixer):
         if self.device_str == 'gpu':
             self.max_bin = 63 # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
 
-    def _fit(self, train_ds, test_ds=None, stop_training_after_seconds=None):
+    def _fit(self, train_ds, test_ds=None):
         """
         :param train_ds: DataSource
         :param test_ds: DataSource
@@ -82,14 +83,14 @@ class LightGBMMixer(BaseMixer):
                 all_classes = self.ord_encs[col_name].categories_[0]
                 params['num_class'] = all_classes.size
 
-            if stop_training_after_seconds is not None:
+            if self.stop_training_after_seconds is not None:
                 start = time.time()
                 params['num_iterations'] = 1
                 bst = lightgbm.train(params, train_data, valid_sets=validate_data)
                 end = time.time()
                 seconds_for_one_iteration = int(end - start)
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
-                num_iterations = max(200,int(stop_training_after_seconds/seconds_for_one_iteration))
+                num_iterations = max(200,int(self.stop_training_after_seconds/seconds_for_one_iteration))
             else:
                 num_iterations = 200
 
