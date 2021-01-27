@@ -73,7 +73,7 @@ class LightGBMMixer(BaseMixer):
 
             params = {'objective': objective,
                       'boosting': 'goss',
-                      'verbosity': -1,
+                      'verbosity': 0,
                       'lambda_l1': 0.1,
                       'lambda_l2': 0.1,
                       'device_type': self.device_str,
