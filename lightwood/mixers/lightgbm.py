@@ -45,7 +45,7 @@ class LightGBMMixer(BaseMixer):
                 logging.info('cannot support {dtype} in lightgbm'.format(dtype=dtype))
                 continue
             else:
-                objective = 'regression' if dtype == 'numeric' else 'multiclass'
+                objective = 'regression' if dtype == COLUMN_DATA_TYPES.NUMERIC else 'multiclass'
             param = {'objective': objective}
             if objective == 'multiclass':
                 param['num_class'] = len(set(data['train']['label_data'][col_name]))
