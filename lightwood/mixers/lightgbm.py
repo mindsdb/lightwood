@@ -5,12 +5,14 @@ import logging
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.mixers import BaseMixer
+from sklearn.preprocessing import OrdinalEncoder
 
 
 class LightGBMMixer(BaseMixer):
     def __init__(self):
         super().__init__()
         self.models = {}
+        self.ord_encs = {}
 
     def _fit(self, train_ds, test_ds=None):
         """
@@ -23,7 +25,6 @@ class LightGBMMixer(BaseMixer):
             'test': {'ds': test_ds, 'data': None, 'label_data': {}}
         }
 
-
         for subset_name in data:
             cols = data[subset_name]['ds'].input_feature_names
             out_cols = data[subset_name]['ds'].output_feature_names
@@ -34,7 +35,13 @@ class LightGBMMixer(BaseMixer):
                     data[subset_name]['data'] = torch.cat((data[subset_name]['data'], data[subset_name]['ds'].get_encoded_column_data(col_name)), 1)
             data[subset_name]['data'] = data[subset_name]['data'].tolist()
             for col_name in out_cols:
-                data[subset_name]['label_data'][col_name] = data[subset_name]['ds'].get_column_original_data(col_name)
+                label_data = data[subset_name]['ds'].get_column_original_data(col_name)
+                if next(item for item in train_ds.output_features if item["name"] == col_name)['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
+                    self.ord_encs[col_name] = OrdinalEncoder()
+                    self.ord_encs[col_name].fit(np.array(list(set(label_data))).reshape(-1, 1))
+                    label_data = self.ord_encs[col_name].transform(np.array(label_data).reshape(-1, 1)).flatten()
+
+                data[subset_name]['label_data'][col_name] = label_data
 
         out_cols = train_ds.output_feature_names
         for col_name in out_cols:
@@ -46,14 +53,15 @@ class LightGBMMixer(BaseMixer):
                 continue
             else:
                 objective = 'regression' if dtype == COLUMN_DATA_TYPES.NUMERIC else 'multiclass'
+
             param = {'objective': objective}
             if objective == 'multiclass':
-                param['num_class'] = len(set(data['train']['label_data'][col_name]))
+                all_classes = self.ord_encs[col_name].categories_[0]
+                param['num_class'] = all_classes.size
 
             num_round = 10
             bst = lightgbm.train(param, train_data, num_round, valid_sets=validate_data)
             self.models[col_name] = bst
-
 
     def _predict(self, when_data_source, include_extra_data=False):
         """
@@ -66,7 +74,6 @@ class LightGBMMixer(BaseMixer):
                 data = when_data_source.get_encoded_column_data(col_name)
             else:
                 data = torch.cat((data, when_data_source.get_encoded_column_data(col_name)), 1)
-
 
         ypred = {col_name: {'predictions': self.models[col_name].predict(data)} for col_name in when_data_source.output_feature_names}
 
