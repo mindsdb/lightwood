@@ -83,16 +83,15 @@ class LightGBMMixer(BaseMixer):
                 all_classes = self.ord_encs[col_name].categories_[0]
                 params['num_class'] = all_classes.size
 
+            num_iterations = 100
             if self.stop_training_after_seconds is not None:
                 start = time.time()
                 params['num_iterations'] = 1
                 bst = lightgbm.train(params, train_data, valid_sets=validate_data)
                 end = time.time()
-                seconds_for_one_iteration = int(end - start)
+                seconds_for_one_iteration = end - start
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
-                num_iterations = max(200,int(self.stop_training_after_seconds/seconds_for_one_iteration))
-            else:
-                num_iterations = 200
+                num_iterations = min(num_iterations,int(self.stop_training_after_seconds/seconds_for_one_iteration))
 
             logging.info(f'Training GBM with {num_iterations} iterations')
             params['num_iterations'] = num_iterations
