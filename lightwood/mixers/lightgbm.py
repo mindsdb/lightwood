@@ -68,6 +68,6 @@ class LightGBMMixer(BaseMixer):
                 data = torch.cat((data, when_data_source.get_encoded_column_data(col_name)), 1)
 
 
-        ypred = {col_name: self.models[col_name].predict(data) for col_name in when_data_source.output_feature_names}
+        ypred = {col_name: {'predictions': self.models[col_name].predict(data)} for col_name in when_data_source.output_feature_names}
 
         return ypred
