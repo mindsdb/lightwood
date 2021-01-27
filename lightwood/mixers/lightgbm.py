@@ -2,6 +2,7 @@ import numpy as np
 import lightgbm
 import torch
 import logging
+import time
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
@@ -15,8 +16,13 @@ class LightGBMMixer(BaseMixer):
         self.models = {}
         self.ord_encs = {}
         self.device, _ = get_devices()
+        self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
 
-    def _fit(self, train_ds, test_ds=None):
+        self.max_bin = 255 # Default value
+        if self.device_str == 'gpu':
+            self.max_bin = 63 # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
+
+    def _fit(self, train_ds, test_ds=None, stop_training_after_seconds=None):
         """
         :param train_ds: DataSource
         :param test_ds: DataSource
@@ -68,7 +74,19 @@ class LightGBMMixer(BaseMixer):
                 all_classes = self.ord_encs[col_name].categories_[0]
                 params['num_class'] = all_classes.size
 
-            bst = lightgbm.train(params, train_data, valid_sets=validate_data)
+            if stop_training_after_seconds is not None:
+                start = time.time()
+                bst = lightgbm.train(params, train_data, valid_sets=validate_data, num_iterations=1, device_type=self.device_str, max_bin=self.max_bin)
+                end = time.time()
+                seconds_for_one_iteration = int(end - start)
+                logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
+                num_iterations = max(200,int(stop_training_after_seconds/seconds_for_one_iteration))
+            else:
+                num_iterations = 200
+
+            logging.info(f'Training GBM with {num_iterations} iterations')
+            bst = lightgbm.train(params, train_data, valid_sets=validate_data, num_iterations=num_iterations, device_type=self.device_str, max_bin=self.max_bin)
+
             self.models[col_name] = bst
 
     def _predict(self, when_data_source, include_extra_data=False):

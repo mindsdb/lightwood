@@ -26,7 +26,6 @@ class NnMixer(BaseMixer):
                  eval_every_x_epochs=20,
                  dropout_p=0.0,
                  stop_training_after_seconds=None,
-                 stop_model_building_after_seconds=None,
                  param_optimizer=None):
         """
         :param selfaware: bool
