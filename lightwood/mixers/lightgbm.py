@@ -4,6 +4,7 @@ import torch
 import logging
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.helpers.device import get_devices
 from lightwood.mixers import BaseMixer
 from sklearn.preprocessing import OrdinalEncoder
 
@@ -13,6 +14,7 @@ class LightGBMMixer(BaseMixer):
         super().__init__()
         self.models = {}
         self.ord_encs = {}
+        self.device, _ = get_devices()
 
     def _fit(self, train_ds, test_ds=None):
         """
@@ -32,7 +34,9 @@ class LightGBMMixer(BaseMixer):
                 if data[subset_name]['data'] is None:
                     data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(col_name)
                 else:
-                    data[subset_name]['data'] = torch.cat((data[subset_name]['data'], data[subset_name]['ds'].get_encoded_column_data(col_name)), 1)
+                    data[subset_name]['data'] = torch.cat((data[subset_name]['data'].to(self.device),
+                                                           data[subset_name]['ds'].get_encoded_column_data(
+                                                               col_name).to(self.device)), 1)
             data[subset_name]['data'] = data[subset_name]['data'].tolist()
             for col_name in out_cols:
                 label_data = data[subset_name]['ds'].get_column_original_data(col_name)
@@ -54,13 +58,17 @@ class LightGBMMixer(BaseMixer):
             else:
                 objective = 'regression' if dtype == COLUMN_DATA_TYPES.NUMERIC else 'multiclass'
 
-            param = {'objective': objective}
+            params = {'objective': objective,
+                      'boosting': 'goss',
+                      'verbosity': -1,
+                      'lambda_l1': 0.1,
+                      'lambda_l2': 0.1
+                      }
             if objective == 'multiclass':
                 all_classes = self.ord_encs[col_name].categories_[0]
-                param['num_class'] = all_classes.size
+                params['num_class'] = all_classes.size
 
-            num_round = 10
-            bst = lightgbm.train(param, train_data, num_round, valid_sets=validate_data)
+            bst = lightgbm.train(params, train_data, valid_sets=validate_data)
             self.models[col_name] = bst
 
     def _predict(self, when_data_source, include_extra_data=False):
@@ -73,8 +81,15 @@ class LightGBMMixer(BaseMixer):
             if data is None:
                 data = when_data_source.get_encoded_column_data(col_name)
             else:
-                data = torch.cat((data, when_data_source.get_encoded_column_data(col_name)), 1)
+                data = torch.cat((torch.Tensor(data).to(self.device),
+                                  when_data_source.get_encoded_column_data(col_name).to(self.device)), 1)
+        data = data.tolist()
 
-        ypred = {col_name: {'predictions': self.models[col_name].predict(data)} for col_name in when_data_source.output_feature_names}
+        ypred = {}
+        for col_name in when_data_source.output_feature_names:
+            col_preds = self.models[col_name].predict(data)
+            if col_name in self.ord_encs:
+                col_preds = self.ord_encs[col_name].inverse_transform(np.argmax(col_preds, axis=1).reshape(-1, 1)).flatten()
+            ypred[col_name] = {'predictions':  list(col_preds)}
 
         return ypred
