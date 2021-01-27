@@ -77,7 +77,7 @@ class LightGBMMixer(BaseMixer):
                       'lambda_l1': 0.1,
                       'lambda_l2': 0.1,
                       'device_type': self.device_str,
-                      'max_bin': self.max_bin
+                      'force_row_wise': True
                       }
             if objective == 'multiclass':
                 all_classes = self.ord_encs[col_name].categories_[0]
