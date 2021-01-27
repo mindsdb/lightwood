@@ -24,17 +24,17 @@ class LightGBMMixer(BaseMixer):
         }
 
 
-        for dtype in data:
-            cols = data[dtype]['ds'].input_feature_names
-            out_cols = data[dtype]['ds'].output_feature_names
+        for subset_name in data:
+            cols = data[subset_name]['ds'].input_feature_names
+            out_cols = data[subset_name]['ds'].output_feature_names
             for col_name in cols:
-                if data[dtype]['data'] is None:
-                    data[dtype]['data'] = data[dtype]['ds'].get_encoded_column_data(col_name)
+                if data[subset_name]['data'] is None:
+                    data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(col_name)
                 else:
-                    data[dtype]['data'] = torch.cat((data[dtype]['data'], data[dtype]['ds'].get_encoded_column_data(col_name)), 1)
-            data[dtype]['data'] = data[dtype]['data'].tolist()
+                    data[subset_name]['data'] = torch.cat((data[subset_name]['data'], data[subset_name]['ds'].get_encoded_column_data(col_name)), 1)
+            data[subset_name]['data'] = data[subset_name]['data'].tolist()
             for col_name in out_cols:
-                data[dtype]['label_data'][col_name] = data[dtype]['ds'].get_column_original_data(col_name)
+                data[subset_name]['label_data'][col_name] = data[subset_name]['ds'].get_column_original_data(col_name)
 
         out_cols = train_ds.output_feature_names
         for col_name in out_cols:
@@ -45,7 +45,7 @@ class LightGBMMixer(BaseMixer):
                 logging.info('cannot support {dtype} in lightgbm'.format(dtype=dtype))
                 continue
             else:
-                objective = 'regression' if dtype == 'numeric' else 'multiclass
+                objective = 'regression' if dtype == 'numeric' else 'multiclass'
             param = {'objective': objective}
             if objective == 'multiclass':
                 param['num_class'] = len(set(data['train']['label_data'][col_name]))
@@ -72,7 +72,7 @@ class LightGBMMixer(BaseMixer):
                 data = torch.cat((data, when_data_source.get_encoded_column_data(col_name)), 1)
         data = data.tolist()
 
-
+        train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
         data = lightgbm.Dataset(data)
 
         ypred = {col_name: self.models[col_name].predict(data) for col_name in out_cols}
