@@ -16,8 +16,12 @@ class LightGBMMixer(BaseMixer):
         self.models = {}
         self.ord_encs = {}
         self.device, _ = get_devices()
-        self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
 
+        # GPU Only available via custom compiled version: https://lightgbm.readthedocs.io/en/latest/Installation-Guide.html#build-gpu-version
+        #self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
+
+        self.device_str = 'cpu'
+        
         self.max_bin = 255 # Default value
         if self.device_str == 'gpu':
             self.max_bin = 63 # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
@@ -68,7 +72,9 @@ class LightGBMMixer(BaseMixer):
                       'boosting': 'goss',
                       'verbosity': -1,
                       'lambda_l1': 0.1,
-                      'lambda_l2': 0.1
+                      'lambda_l2': 0.1,
+                      'device_type': self.device_str,
+                      'max_bin': self.max_bin
                       }
             if objective == 'multiclass':
                 all_classes = self.ord_encs[col_name].categories_[0]
@@ -76,7 +82,8 @@ class LightGBMMixer(BaseMixer):
 
             if stop_training_after_seconds is not None:
                 start = time.time()
-                bst = lightgbm.train(params, train_data, valid_sets=validate_data, num_round=1, device_type=self.device_str, max_bin=self.max_bin)
+                params['num_iterations'] = 1
+                bst = lightgbm.train(params, train_data, valid_sets=validate_data)
                 end = time.time()
                 seconds_for_one_iteration = int(end - start)
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
@@ -85,7 +92,8 @@ class LightGBMMixer(BaseMixer):
                 num_iterations = 200
 
             logging.info(f'Training GBM with {num_iterations} iterations')
-            bst = lightgbm.train(params, train_data, valid_sets=validate_data, num_round=num_iterations, device_type=self.device_str, max_bin=self.max_bin)
+            params['num_iterations'] = num_iterations
+            bst = lightgbm.train(params, train_data, valid_sets=validate_data)
 
             self.models[col_name] = bst
 
