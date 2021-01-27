@@ -15,13 +15,15 @@ class LightGBMMixer(BaseMixer):
         super().__init__()
         self.models = {}
         self.ord_encs = {}
-        self.device, _ = get_devices()
+
 
         # GPU Only available via custom compiled version: https://lightgbm.readthedocs.io/en/latest/Installation-Guide.html#build-gpu-version
+        self.device, _ = get_devices()
         #self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
 
+        self.device = torch.device('cpu')
         self.device_str = 'cpu'
-        
+
         self.max_bin = 255 # Default value
         if self.device_str == 'gpu':
             self.max_bin = 63 # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
