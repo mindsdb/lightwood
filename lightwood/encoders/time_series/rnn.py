@@ -9,7 +9,6 @@ import torch
 import torch.nn as nn
 from torch import optim
 from math import gcd
-from itertools import product
 
 
 class TimeSeriesEncoder(BaseEncoder):
@@ -33,7 +32,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self._n_dims = ts_n_dims
         self._normalizer = None
         self._target_ar_normalizers = {}  # dict of normalizers for each grouped-by column per previous_target column
-        self._group_combinations = ['__default']
+        self._group_combinations = None
 
     def setup_nn(self, additional_targets=None):
         """This method must be executed after initializing, else types are unassigned"""
@@ -48,31 +47,15 @@ class TimeSeriesEncoder(BaseEncoder):
 
         if additional_targets:
             for t in additional_targets:
-                t['normalizers'] = {}
-                self._target_ar_normalizers[t['name']] = {}
+                self._target_ar_normalizers[t['name']] = t['normalizers']
+                self._group_combinations = t['group_combinations']
 
                 # categorical normalizers
                 if t['original_type'] == 'categorical':
-                    t['normalizers']['__default'] = CatNormalizer()
-                    t['normalizers']['__default'].prepare(t['data'])
                     total_dims += len(t['normalizers']['__default'].scaler.categories_[0])
 
                 # numerical normalizers
                 else:
-                    # spawn one normalizer per each group combination
-                    self._group_combinations.extend(list(product(*[set(x) for x in t['group_info'].values()])))
-                    for combination in self._group_combinations:
-                        _, subset = get_group_matches(t, combination, t['group_info'].keys())
-                        if subset.size > 0:
-                            t['normalizers'][combination] = MinMaxNormalizer(combination=combination,
-                                                                             keys=t['group_info'].keys())
-                            t['normalizers'][combination].prepare(subset)
-                            self._target_ar_normalizers[t['name']][combination] = t['normalizers'][combination]
-
-                    # ...plus a default one, used at inference time and fitted with all training data
-                    t['normalizers']['__default'] = MinMaxNormalizer()
-                    t['normalizers']['__default'].prepare(t['data'])
-                    self._target_ar_normalizers[t['name']]['__default'] = t['normalizers']['__default']
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
