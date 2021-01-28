@@ -51,9 +51,9 @@ class LightGBMMixer(BaseMixer):
                 if data[subset_name]['data'] is None:
                     data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(col_name)
                 else:
+                    enc_col = data[subset_name]['ds'].get_encoded_column_data(col_name)
                     data[subset_name]['data'] = torch.cat((data[subset_name]['data'].to(self.device),
-                                                           data[subset_name]['ds'].get_encoded_column_data(
-                                                               col_name).to(self.device)), 1)
+                                                           enc_col.to(self.device)), 1)
             data[subset_name]['data'] = data[subset_name]['data'].tolist()
             for col_name in out_cols:
                 label_data = data[subset_name]['ds'].get_column_original_data(col_name)
@@ -78,8 +78,7 @@ class LightGBMMixer(BaseMixer):
 
             params = {'objective': objective,
                       'metric': metric,
-                      #'boosting': 'goss',
-                      'verbosity': -1,
+                      'verbose': -1,
                       'lambda_l1': 0.1,
                       'lambda_l2': 0.1,
                       'device_type': self.device_str,
@@ -97,7 +96,7 @@ class LightGBMMixer(BaseMixer):
                 end = time.time()
                 seconds_for_one_iteration = end - start
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
-                num_iterations = min(num_iterations,int(self.stop_training_after_seconds/seconds_for_one_iteration))
+                num_iterations = min(num_iterations, int(self.stop_training_after_seconds/seconds_for_one_iteration))
 
             logging.info(f'Training GBM with {num_iterations} iterations')
             params['num_iterations'] = num_iterations

@@ -437,6 +437,9 @@ class DataSource(Dataset):
             args.append(arg2)
 
         encoded_vals = self.encoders[column_name].encode(*args)
+        if isinstance(encoded_vals, list) and isinstance(encoded_vals[0], torch.Tensor):
+            encoded_vals = torch.stack(encoded_vals)
+
         # Cache the encoded data so we don't have to run the encoding,
         # Don't cache custom_data
         # (custom_data is usually used when running without cache or dropping out a feature for a certain pass)
