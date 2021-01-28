@@ -68,8 +68,6 @@ class LightGBMMixer(BaseMixer):
                 data[subset_name]['label_data'][col_name] = label_data
 
         for col_name in train_ds.output_feature_names:
-            train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
-            validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
             dtype = next(item for item in train_ds.output_features if item["name"] == col_name)['type']
             if dtype not in [COLUMN_DATA_TYPES.NUMERIC, COLUMN_DATA_TYPES.CATEGORICAL]:
                 logging.info('cannot support {dtype} in lightgbm'.format(dtype=dtype))
@@ -93,6 +91,8 @@ class LightGBMMixer(BaseMixer):
             num_iterations = 100
 
             if self.stop_training_after_seconds is not None:
+                train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
+                validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
                 start = time.time()
                 params['num_iterations'] = 1
                 bst = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
@@ -105,6 +105,8 @@ class LightGBMMixer(BaseMixer):
                 if max_itt > 10*num_iterations and seconds_for_one_iteration < 10:
                     self.grid_search = True
 
+            train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
+            validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
             model = lgb if self.grid_search else lightgbm
             logging.info(f'Training GBM ({model}) with {num_iterations} iterations')
             params['num_iterations'] = num_iterations
