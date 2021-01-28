@@ -47,6 +47,4 @@ class TestLightGBMMixer(unittest.TestCase):
 
         mixer = LightGBMMixer()
         mixer.fit(train_ds, test_ds )
-
-        predictions = mixer.predict(train_ds.make_child(data_frame[['x', 'y']]))
-        print(predictions)
+        _ = mixer.predict(train_ds.make_child(data_frame[['x', 'y']]))
