@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+from itertools import product
 from lightwood.helpers.torch import LightwoodAutocast
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
@@ -152,3 +153,35 @@ def get_group_matches(data, combination, keys):
     else:
         return [], np.array([])
 
+
+def generate_target_group_normalizers(data):
+    """
+    Helper function called from data_source. It generates and fits all needed normalizers for a target variable
+    based on its grouped entities.
+    :param data:
+    :return: dictionary with normalizers for said target variable based on some grouped-by columns
+    """
+    normalizers = {}
+    group_combinations = ['__default']
+
+    # todo in rnn self._target_ar_normalizers[data['name']] = {}
+
+    # categorical normalizers
+    if data['original_type'] == 'categorical':
+        normalizers['__default'] = CatNormalizer()
+        normalizers['__default'].prepare(data['data'])
+
+    # numerical normalizers, here we spawn one per each group combination
+    else:
+        group_combinations.extend(list(product(*[set(x) for x in data['group_info'].values()])))
+        for combination in group_combinations:
+            _, subset = get_group_matches(data, combination, data['group_info'].keys())
+            if subset.size > 0:
+                normalizers[combination] = MinMaxNormalizer(combination=combination, keys=data['group_info'].keys())
+                normalizers[combination].prepare(subset)
+
+        # ...plus a default one, used at inference time and fitted with all training data
+        normalizers['__default'] = MinMaxNormalizer()
+        normalizers['__default'].prepare(data['data'])
+
+    return normalizers, group_combinations

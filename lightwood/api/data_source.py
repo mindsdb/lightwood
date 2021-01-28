@@ -10,6 +10,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 from lightwood.mixers.helpers.transformer import Transformer
+from lightwood.encoders.time_series.helpers.rnn_helpers import generate_target_group_normalizers
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
 from lightwood.encoders import (
@@ -345,23 +346,7 @@ class DataSource(Dataset):
         with all available data for that column.
         """
         encoders = {}
-    
         input_encoder_training_data = {'targets': [], 'previous': []}
-
-        for config in self.config['output_features']:
-            column_name = config['name']
-            column_data = self.get_column_original_data(column_name)
-
-            encoder_instance = self._prepare_column_encoder(config, is_target=True)
-
-            input_encoder_training_data['targets'].append({
-                'encoded_output': encoder_instance.encode(column_data),
-                'unencoded_output': column_data,
-                'output_encoder': encoder_instance,
-                'output_type': config['type']
-            })
-
-            encoders[column_name] = encoder_instance
 
         previous_cols = []
         for config in self.config['input_features']:
@@ -369,13 +354,17 @@ class DataSource(Dataset):
             if column_name.startswith('__mdb_ts_previous_'):
                 column_data = self.get_column_original_data(column_name)
                 previous_cols.append(column_name)
-                input_encoder_training_data['previous'].append({'data': column_data,
-                                                                'name': column_name,
-                                                                'original_type': config['original_type'],
-                                                                'group_info': {conf['name']: self.get_column_original_data(conf['name'])
-                                                                               for conf in self.config['input_features'] if conf['grouped_by']},
-                                                                'output_type': config['type']
-                                                                })
+                col_info = {'data': column_data,
+                            'name': column_name,
+                            'original_type': config['original_type'],
+                            'group_info': {conf['name']: self.get_column_original_data(conf['name'])
+                                           for conf in self.config['input_features'] if conf['grouped_by']},
+                            'output_type': config['type']
+                            }
+                normalizers, group_combinations = generate_target_group_normalizers(col_info)
+                col_info['normalizers'] = normalizers
+                col_info['group_combinations'] = group_combinations
+                input_encoder_training_data['previous'].append(col_info)
 
         for config in self.config['input_features']:
             column_name = config['name']
@@ -394,6 +383,21 @@ class DataSource(Dataset):
                                 config['depends_on_column'].append(d['name'])
                         except KeyError:
                             config['depends_on_column'] = [d['name']]
+
+        for config in self.config['output_features']:
+            column_name = config['name']
+            column_data = self.get_column_original_data(column_name)
+
+            encoder_instance = self._prepare_column_encoder(config, is_target=True)
+
+            input_encoder_training_data['targets'].append({
+                'encoded_output': encoder_instance.encode(column_data),
+                'unencoded_output': column_data,
+                'output_encoder': encoder_instance,
+                'output_type': config['type']
+            })
+
+            encoders[column_name] = encoder_instance
 
         return encoders
 
