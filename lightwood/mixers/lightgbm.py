@@ -16,11 +16,12 @@ optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
 
 class LightGBMMixer(BaseMixer):
-    def __init__(self, stop_training_after_seconds=None):
+    def __init__(self, stop_training_after_seconds=None, grid_search=False):
         super().__init__()
         self.models = {}
         self.ord_encs = {}
         self.stop_training_after_seconds = stop_training_after_seconds
+        self.grid_search = grid_search  # using Optuna
 
         # GPU Only available via custom compiled version: https://lightgbm.readthedocs.io/en/latest/Installation-Guide.html#build-gpu-version
         self.device, _ = get_devices()
@@ -89,10 +90,12 @@ class LightGBMMixer(BaseMixer):
                 params['num_class'] = all_classes.size
 
             num_iterations = 20
+            model = lgb if self.grid_search else lightgbm
+
             if self.stop_training_after_seconds is not None:
                 start = time.time()
                 params['num_iterations'] = 1
-                bst = lgb.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
+                bst = model.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
                 end = time.time()
                 seconds_for_one_iteration = end - start
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
@@ -100,7 +103,7 @@ class LightGBMMixer(BaseMixer):
 
             logging.info(f'Training GBM with {num_iterations} iterations')
             params['num_iterations'] = num_iterations
-            bst = lgb.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
+            bst = model.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
 
             self.models[col_name] = bst
 
