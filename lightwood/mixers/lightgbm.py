@@ -81,7 +81,6 @@ class LightGBMMixer(BaseMixer):
                       'verbose': -1,
                       'lambda_l1': 0.1,
                       'lambda_l2': 0.1,
-                      #'device_type': self.device_str,
                       'force_row_wise': True,
                       'device_type': self.device_str
                       }
