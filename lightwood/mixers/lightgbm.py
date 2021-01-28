@@ -23,7 +23,7 @@ class LightGBMMixer(BaseMixer):
         self.stop_training_after_seconds = stop_training_after_seconds
         self.grid_search = grid_search  # using Optuna
 
-        # GPU Only available via custom compiled version: https://lightgbm.readthedocs.io/en/latest/Installation-Guide.html#build-gpu-version
+        # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         self.device, _ = get_devices()
         # self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
 
@@ -89,19 +89,23 @@ class LightGBMMixer(BaseMixer):
                 all_classes = self.ord_encs[col_name].categories_[0]
                 params['num_class'] = all_classes.size
 
-            num_iterations = 20
-            model = lgb if self.grid_search else lightgbm
+            num_iterations = 100
 
             if self.stop_training_after_seconds is not None:
                 start = time.time()
                 params['num_iterations'] = 1
-                bst = model.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
+                bst = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
                 end = time.time()
                 seconds_for_one_iteration = end - start
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
-                num_iterations = min(num_iterations, int(self.stop_training_after_seconds/seconds_for_one_iteration))
+                max_itt = int(self.stop_training_after_seconds/seconds_for_one_iteration)
+                num_iterations = min(num_iterations, max_itt)
+                # Turn on grid search if training doesn't take too long using it
+                if max_itt > 10*num_iterations and seconds_for_one_iteration < 10:
+                    self.grid_search = True
 
-            logging.info(f'Training GBM with {num_iterations} iterations')
+            model = lgb if self.grid_search else lightgbm
+            logging.info(f'Training GBM ({model}) with {num_iterations} iterations')
             params['num_iterations'] = num_iterations
             bst = model.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
 
