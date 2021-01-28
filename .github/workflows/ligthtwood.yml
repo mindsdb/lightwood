@@ -43,11 +43,6 @@ jobs:
         cd tests/unit_tests
         python -m unittest
         cd ../..
-    - name: CI tests
-      run: |
-        cd tests/ci_tests
-        python -m unittest
-        cd ../..
 
   deploy:
     runs-on: ubuntu-latest
