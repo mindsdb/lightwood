@@ -49,4 +49,4 @@ class TestNnMixer(unittest.TestCase):
         mixer.fit(train_ds, train_ds)
 
         test_ds = train_ds.make_child(data_frame[['x', 'y']])
-        predictions = mixer.predict(test_ds)
+        _ = mixer.predict(test_ds)
