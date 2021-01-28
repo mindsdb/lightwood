@@ -26,7 +26,6 @@ jobs:
     - name: Install dependencies OSX
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
-          pip install -r optional_requirements_snowflake.txt;
           brew install libomp;
         fi
     - name: Lint with flake8
