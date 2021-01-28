@@ -45,7 +45,8 @@ class LightGBMMixer(BaseMixer):
             'test': {'ds': test_ds, 'data': None, 'label_data': {}}
         }
 
-        for subset_name in data:
+        # Order is important here
+        for subset_name in ['train','test']:
             cols = data[subset_name]['ds'].input_feature_names
             out_cols = data[subset_name]['ds'].output_feature_names
             for col_name in cols:
@@ -59,14 +60,14 @@ class LightGBMMixer(BaseMixer):
             for col_name in out_cols:
                 label_data = data[subset_name]['ds'].get_column_original_data(col_name)
                 if next(item for item in train_ds.output_features if item["name"] == col_name)['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
-                    self.ord_encs[col_name] = OrdinalEncoder()
-                    self.ord_encs[col_name].fit(np.array(list(set(label_data))).reshape(-1, 1))
+                    if subset_name == 'train':
+                        self.ord_encs[col_name] = OrdinalEncoder()
+                        self.ord_encs[col_name].fit(np.array(list(set(label_data))).reshape(-1, 1))
                     label_data = self.ord_encs[col_name].transform(np.array(label_data).reshape(-1, 1)).flatten()
 
                 data[subset_name]['label_data'][col_name] = label_data
 
-        out_cols = train_ds.output_feature_names
-        for col_name in out_cols:
+        for col_name in train_ds.output_feature_names:
             train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
             validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
             dtype = next(item for item in train_ds.output_features if item["name"] == col_name)['type']
