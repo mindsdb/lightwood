@@ -45,7 +45,8 @@ class LightGBMMixer(BaseMixer):
             'test': {'ds': test_ds, 'data': None, 'label_data': {}}
         }
 
-        for subset_name in data:
+        # Order is important here
+        for subset_name in ['train','test']:
             cols = data[subset_name]['ds'].input_feature_names
             out_cols = data[subset_name]['ds'].output_feature_names
             for col_name in cols:
@@ -59,16 +60,14 @@ class LightGBMMixer(BaseMixer):
             for col_name in out_cols:
                 label_data = data[subset_name]['ds'].get_column_original_data(col_name)
                 if next(item for item in train_ds.output_features if item["name"] == col_name)['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
-                    self.ord_encs[col_name] = OrdinalEncoder()
-                    self.ord_encs[col_name].fit(np.array(list(set(label_data))).reshape(-1, 1))
+                    if subset_name == 'train':
+                        self.ord_encs[col_name] = OrdinalEncoder()
+                        self.ord_encs[col_name].fit(np.array(list(set(label_data))).reshape(-1, 1))
                     label_data = self.ord_encs[col_name].transform(np.array(label_data).reshape(-1, 1)).flatten()
 
                 data[subset_name]['label_data'][col_name] = label_data
 
-        out_cols = train_ds.output_feature_names
-        for col_name in out_cols:
-            train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
-            validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
+        for col_name in train_ds.output_feature_names:
             dtype = next(item for item in train_ds.output_features if item["name"] == col_name)['type']
             if dtype not in [COLUMN_DATA_TYPES.NUMERIC, COLUMN_DATA_TYPES.CATEGORICAL]:
                 logging.info('cannot support {dtype} in lightgbm'.format(dtype=dtype))
@@ -92,6 +91,8 @@ class LightGBMMixer(BaseMixer):
             num_iterations = 100
 
             if self.stop_training_after_seconds is not None:
+                train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
+                validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
                 start = time.time()
                 params['num_iterations'] = 1
                 bst = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
@@ -104,6 +105,8 @@ class LightGBMMixer(BaseMixer):
                 if max_itt > 10*num_iterations and seconds_for_one_iteration < 10:
                     self.grid_search = True
 
+            train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
+            validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
             model = lgb if self.grid_search else lightgbm
             logging.info(f'Training GBM ({model}) with {num_iterations} iterations')
             params['num_iterations'] = num_iterations
