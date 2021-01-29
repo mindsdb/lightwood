@@ -16,6 +16,7 @@ class NumericEncoder(BaseEncoder):
         self.positive_domain = False
         self.decode_log = False
         # time series normalization params
+        self.normalize_by_group = False
         self.normalizers = None
         self.group_combinations = None
 
@@ -43,13 +44,13 @@ class NumericEncoder(BaseEncoder):
         self._abs_mean = np.mean(np.abs(non_null_priming_data))
         self._prepared = True
 
-    def encode(self, data, group_info=None):
-        """group_info: used for time series, indicates which normalizer applies to which datum"""
+    def encode(self, data, extra_data=None):
+        """extra_data[0]['group_info']: for time series, indicates which normalizer applies to which datum"""
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []
-        group_info = group_info if group_info else [None] * len(data)
+        group_info = extra_data[0]['group_info'] if extra_data else [None] * len(data)
 
         for real, group in zip(data, list(zip(*group_info.values()))):
             try:
@@ -62,8 +63,14 @@ class NumericEncoder(BaseEncoder):
             if self.is_target:
                 vector = [0] * 3
                 if group:
-                    real = self.normalizers[frozenset(group)].encode([[real]])
-                    mean = self.normalizers[frozenset(group)].abs_mean
+                    # mean = self._abs_mean
+                    try:
+                        real = self.normalizers[frozenset(group)].single_encode([[real]])
+                        mean = self.normalizers[frozenset(group)].abs_mean
+                    except KeyError:
+                        # novel group-by, we use default normalizer
+                        real = self.normalizers['__default'].single_encode([[real]])
+                        mean = self.normalizers['__default'].abs_mean
                 else:
                     mean = self._abs_mean
                 if real is not None and mean > 0:
@@ -103,7 +110,7 @@ class NumericEncoder(BaseEncoder):
         if type(encoded_values) != type([]):
             encoded_values = encoded_values.tolist()
 
-        for vector, group in zip(encoded_values, group_info):
+        for vector, group in zip(encoded_values, list(zip(*group_info.values()))):
             if self.is_target:
                 if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
                     log.error(f'Got weird target value to decode: {vector}')
@@ -117,7 +124,11 @@ class NumericEncoder(BaseEncoder):
                             real_value = pow(10,63) * sign
                     else:
                         if group:
-                            mean = self.normalizers[group].abs_mean
+                            try:
+                                mean = self.normalizers[frozenset(group)].abs_mean
+                            except KeyError:
+                                # decode new group with default normalizer
+                                mean = self.normalizers['__default'].abs_mean
                         else:
                             mean = self._abs_mean
                         real_value = vector[2] * mean
@@ -129,8 +140,11 @@ class NumericEncoder(BaseEncoder):
                         real_value = int(real_value)
 
                     if group:
-                        real_value = self.normalizers[group].decode([[real_value]])
-
+                        try:
+                            real_value = self.normalizers[frozenset(group)].single_decode([[real_value]])
+                        except KeyError:
+                            # decode new group with default normalizer
+                            real_value = self.normalizers['__default'].single_decode([[real_value]])
             else:
                 if vector[0] < 0.5:
                     ret.append(None)
