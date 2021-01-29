@@ -272,7 +272,6 @@ class DataSource(Dataset):
         return sample
 
     def get_column_original_data(self, column_name):
-        # todo add here: group column message passed that col is grouped target
         if column_name not in self.data_frame:
             nr_rows = self.data_frame.shape[0]
             return [None] * nr_rows
@@ -388,15 +387,22 @@ class DataSource(Dataset):
         for config in self.config['output_features']:
             column_name = config['name']
             column_data = self.get_column_original_data(column_name)
+
             prev_col = [c for c in self.config['input_features'] if c['name'] == f'__mdb_ts_previous_{column_name}']
-            prev_col = prev_col[0] if prev_col else []  # at most one
-            config['encoder_attrs']['normalizers'] = prev_col['normalizers']
-            config['encoder_attrs']['group_combinations'] = prev_col['group_combinations']
+            if prev_col:
+                # 0-indexed as we know it can only be one
+                config['depends_on_column'] = [prev_col[0]['name']]
+                config['encoder_attrs']['normalizers'] = prev_col[0]['normalizers']
+                config['encoder_attrs']['group_combinations'] = prev_col[0]['group_combinations']
+                group_info = {col['name']: self.get_column_original_data(col['name'])
+                              for col in self.config['input_features'] if col['grouped_by']}
+            else:
+                group_info = None
 
             encoder_instance = self._prepare_column_encoder(config, is_target=True)
 
             input_encoder_training_data['targets'].append({
-                'encoded_output': encoder_instance.encode(column_data),
+                'encoded_output': encoder_instance.encode(column_data, group_info=group_info),
                 'unencoded_output': column_data,
                 'output_encoder': encoder_instance,
                 'output_type': config['type']
@@ -426,6 +432,12 @@ class DataSource(Dataset):
     def get_encoded_column_data(self, column_name, custom_data=None):
         if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
+
+        # todo here pass group data if is_grouped_target
+        # if is_grouped_target:
+        #     group_info = self.get_column_original_data(config['depends_on_column'][0])
+        #     elif is_grouped_target:
+        # encoder_instance.prepare(column_data, group_info=group_info)
 
         # The first argument of encoder is the data, if no custom data is specified,
         # use all the datasource's data for this column

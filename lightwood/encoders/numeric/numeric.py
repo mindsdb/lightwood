@@ -50,7 +50,8 @@ class NumericEncoder(BaseEncoder):
 
         ret = []
         group_info = group_info if group_info else [None] * len(data)
-        for real, group in zip(data, group_info):
+
+        for real, group in zip(data, list(zip(*group_info.values()))):
             try:
                 real = float(real)
             except:
@@ -61,8 +62,8 @@ class NumericEncoder(BaseEncoder):
             if self.is_target:
                 vector = [0] * 3
                 if group:
-                    real = self.normalizers.encode([real])
-                    mean = self.normalizers[group].abs_mean
+                    real = self.normalizers[frozenset(group)].encode([[real]])
+                    mean = self.normalizers[frozenset(group)].abs_mean
                 else:
                     mean = self._abs_mean
                 if real is not None and mean > 0:
@@ -128,7 +129,7 @@ class NumericEncoder(BaseEncoder):
                         real_value = int(real_value)
 
                     if group:
-                        real_value = self.normalizers[group].decode(real_value)
+                        real_value = self.normalizers[group].decode([[real_value]])
 
             else:
                 if vector[0] < 0.5:
