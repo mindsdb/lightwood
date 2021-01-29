@@ -99,9 +99,12 @@ class MinMaxNormalizer:
         self.factor = factor
         self.keys = list(keys)  # columns involved in grouped-by subset dataset to normalize
         self.combination = combination  # tuple with values in those columns
+        self.abs_mean = None
 
     def prepare(self, x):
         X = np.array([j for i in x for j in i]).reshape(-1, 1) if isinstance(x, list) else x
+        X[X == None] = 0
+        self.abs_mean = np.mean(np.abs(X))
         self.scaler.fit(X)
 
     def encode(self, y):
@@ -159,7 +162,7 @@ def generate_target_group_normalizers(data):
     Helper function called from data_source. It generates and fits all needed normalizers for a target variable
     based on its grouped entities.
     :param data:
-    :return: dictionary with normalizers for said target variable based on some grouped-by columns
+    :return: modified data with dictionary with normalizers for said target variable based on some grouped-by columns
     """
     normalizers = {}
     group_combinations = ['__default']
@@ -184,4 +187,7 @@ def generate_target_group_normalizers(data):
         normalizers['__default'] = MinMaxNormalizer()
         normalizers['__default'].prepare(data['data'])
 
-    return normalizers, group_combinations
+    data['normalizers'] = normalizers
+    data['group_combinations'] = group_combinations
+
+    return data
