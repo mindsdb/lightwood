@@ -15,6 +15,9 @@ class NumericEncoder(BaseEncoder):
         self._abs_mean = None
         self.positive_domain = False
         self.decode_log = False
+        # time series normalization params
+        self.normalizers = None
+        self.group_combinations = None
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -40,12 +43,14 @@ class NumericEncoder(BaseEncoder):
         self._abs_mean = np.mean(np.abs(non_null_priming_data))
         self._prepared = True
 
-    def encode(self, data):
+    def encode(self, data, group_info=None):
+        """group_info: used for time series, indicates which normalizer applies to which datum"""
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []
-        for real in data:
+        group_info = group_info if group_info else [None] * len(data)
+        for real, group in zip(data, group_info):
             try:
                 real = float(real)
             except:
@@ -55,10 +60,15 @@ class NumericEncoder(BaseEncoder):
                     real = None
             if self.is_target:
                 vector = [0] * 3
-                if real is not None and self._abs_mean > 0:
+                if group:
+                    real = self.normalizers.encode([real])
+                    mean = self.normalizers[group].abs_mean
+                else:
+                    mean = self._abs_mean
+                if real is not None and mean > 0:
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                    vector[2] = real / self._abs_mean
+                    vector[2] = real / mean
                 else:
                     log.debug(f'Can\'t encode target value: {real}')
 
@@ -80,7 +90,7 @@ class NumericEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_values, decode_log=None):
+    def decode(self, encoded_values, decode_log=None, group_info=None):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
@@ -88,10 +98,11 @@ class NumericEncoder(BaseEncoder):
             decode_log = self.decode_log
 
         ret = []
+        group_info = group_info if group_info else [None] * len(encoded_values)
         if type(encoded_values) != type([]):
             encoded_values = encoded_values.tolist()
 
-        for vector in encoded_values:
+        for vector, group in zip(encoded_values, group_info):
             if self.is_target:
                 if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
                     log.error(f'Got weird target value to decode: {vector}')
@@ -104,13 +115,20 @@ class NumericEncoder(BaseEncoder):
                         except OverflowError as e:
                             real_value = pow(10,63) * sign
                     else:
-                        real_value = vector[2] * self._abs_mean
+                        if group:
+                            mean = self.normalizers[group].abs_mean
+                        else:
+                            mean = self._abs_mean
+                        real_value = vector[2] * mean
 
                     if self.positive_domain:
                         real_value = abs(real_value)
 
                     if self._type == 'int':
                         real_value = int(real_value)
+
+                    if group:
+                        real_value = self.normalizers[group].decode(real_value)
 
             else:
                 if vector[0] < 0.5:
