@@ -394,6 +394,7 @@ class DataSource(Dataset):
                 config['depends_on_column'] = [prev_col[0]['name']]
                 config['encoder_attrs']['normalizers'] = prev_col[0]['normalizers']
                 config['encoder_attrs']['group_combinations'] = prev_col[0]['group_combinations']
+                config['encoder_attrs']['normalize_by_group'] = True
                 group_info = {col['name']: self.get_column_original_data(col['name'])
                               for col in self.config['input_features'] if col['grouped_by']}
             else:
@@ -401,8 +402,13 @@ class DataSource(Dataset):
 
             encoder_instance = self._prepare_column_encoder(config, is_target=True)
 
+            if 'extra_data' not in inspect.signature(encoder_instance.encode).parameters:
+                encoded_output = encoder_instance.encode(column_data)
+            else:
+                encoded_output = encoder_instance.encode(column_data, extra_data=[{'group_info': group_info}])
+
             input_encoder_training_data['targets'].append({
-                'encoded_output': encoder_instance.encode(column_data, group_info=group_info),
+                'encoded_output': encoded_output,
                 'unencoded_output': column_data,
                 'output_encoder': encoder_instance,
                 'output_type': config['type']
@@ -492,6 +498,10 @@ class DataSource(Dataset):
             decoded_data['predictions'] = preds
             decoded_data['class_distribution'] = pred_probs
             decoded_data['class_labels'] = labels
+        elif getattr(decoder_instance, 'normalize_by_group', True):
+            group_info = {conf['name']: self.get_column_original_data(conf['name'])
+                          for conf in self.config['input_features'] if conf['grouped_by']}
+            decoded_data['predictions'] = decoder_instance.decode(encoded_data, group_info=group_info)
         else:
             decoded_data['predictions'] = decoder_instance.decode(encoded_data)
 
