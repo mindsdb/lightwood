@@ -96,6 +96,7 @@ class EncoderRNNNumerical(nn.Module):
 class MinMaxNormalizer:
     def __init__(self, combination=[], keys=[], factor=1):
         self.scaler = MinMaxScaler()
+        self.single_scaler = MinMaxScaler()  # for non-windowed arrays (when using numerical encoder)
         self.factor = factor
         self.keys = list(keys)  # columns involved in grouped-by subset dataset to normalize
         self.combination = combination  # tuple with values in those columns
@@ -106,6 +107,7 @@ class MinMaxNormalizer:
         X[X == None] = 0
         self.abs_mean = np.mean(np.abs(X))
         self.scaler.fit(X)
+        self.single_scaler.fit(X[:, -1:])  # fit using non-windowed column data
 
     def encode(self, y):
         if not isinstance(y, np.ndarray) and not isinstance(y[0], list):
@@ -114,6 +116,14 @@ class MinMaxNormalizer:
 
     def decode(self, y):
         return self.scaler.inverse_transform(y)
+
+    def single_encode(self, y):
+        """Variant designed for encoding a single scalar"""
+        return self.single_scaler.transform(y)
+
+    def single_decode(self, y):
+        """Variant designed for decoding a single scalar"""
+        return self.single_scaler.inverse_transform(y)[0][0]
 
 
 class CatNormalizer:
