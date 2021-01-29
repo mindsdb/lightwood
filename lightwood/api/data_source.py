@@ -272,6 +272,7 @@ class DataSource(Dataset):
         return sample
 
     def get_column_original_data(self, column_name):
+        # todo add here: group column message passed that col is grouped target
         if column_name not in self.data_frame:
             nr_rows = self.data_frame.shape[0]
             return [None] * nr_rows
@@ -361,10 +362,10 @@ class DataSource(Dataset):
                                            for conf in self.config['input_features'] if conf['grouped_by']},
                             'output_type': config['type']
                             }
-                normalizers, group_combinations = generate_target_group_normalizers(col_info)
-                col_info['normalizers'] = normalizers
-                col_info['group_combinations'] = group_combinations
+                col_info = generate_target_group_normalizers(col_info)
                 input_encoder_training_data['previous'].append(col_info)
+                config['normalizers'] = col_info['normalizers']
+                config['group_combinations'] = col_info['group_combinations']
 
         for config in self.config['input_features']:
             column_name = config['name']
@@ -387,6 +388,10 @@ class DataSource(Dataset):
         for config in self.config['output_features']:
             column_name = config['name']
             column_data = self.get_column_original_data(column_name)
+            prev_col = [c for c in self.config['input_features'] if c['name'] == f'__mdb_ts_previous_{column_name}']
+            prev_col = prev_col[0] if prev_col else []  # at most one
+            config['encoder_attrs']['normalizers'] = prev_col['normalizers']
+            config['encoder_attrs']['group_combinations'] = prev_col['group_combinations']
 
             encoder_instance = self._prepare_column_encoder(config, is_target=True)
 
