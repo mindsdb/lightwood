@@ -178,6 +178,7 @@ def generate_target_group_normalizers(data):
     else:
         group_combinations.extend(list(product(*[set(x) for x in data['group_info'].values()])))
         for combination in group_combinations:
+            combination = frozenset(combination)  # freeze so that we can hash with it
             _, subset = get_group_matches(data, combination, data['group_info'].keys())
             if subset.size > 0:
                 normalizers[combination] = MinMaxNormalizer(combination=combination, keys=data['group_info'].keys())
