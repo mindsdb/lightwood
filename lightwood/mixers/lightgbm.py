@@ -131,8 +131,10 @@ class LightGBMMixer(BaseMixer):
         ypred = {}
         for col_name in when_data_source.output_feature_names:
             col_preds = self.models[col_name].predict(data)
+            ypred[col_name] = {}
             if col_name in self.ord_encs:
+                ypred[col_name]['class_distribution'] = list(col_preds)
                 col_preds = self.ord_encs[col_name].inverse_transform(np.argmax(col_preds, axis=1).reshape(-1, 1)).flatten()
-            ypred[col_name] = {'predictions':  list(col_preds)}
+            ypred[col_name]['predictions'] = list(col_preds)
 
         return ypred
