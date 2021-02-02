@@ -63,13 +63,10 @@ class NumericEncoder(BaseEncoder):
             if self.is_target:
                 vector = [0] * 3
                 if group:
-                    # mean = self._abs_mean
                     try:
-                        # real = self.normalizers[frozenset(group)].single_encode([[real]])
                         mean = self.normalizers[frozenset(group)].abs_mean
                     except KeyError:
-                        # novel group-by, we use default normalizer
-                        # real = self.normalizers['__default'].single_encode([[real]])
+                        # novel group-by, we use default normalizer mean
                         mean = self.normalizers['__default'].abs_mean
                 else:
                     mean = self._abs_mean
@@ -139,12 +136,6 @@ class NumericEncoder(BaseEncoder):
                     if self._type == 'int':
                         real_value = int(real_value)
 
-                    if False:  # group
-                        try:
-                            real_value = self.normalizers[frozenset(group)].single_decode([[real_value]])
-                        except KeyError:
-                            # decode new group with default normalizer
-                            real_value = self.normalizers['__default'].single_decode([[real_value]])
             else:
                 if vector[0] < 0.5:
                     ret.append(None)
