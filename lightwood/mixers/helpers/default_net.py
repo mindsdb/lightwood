@@ -1,3 +1,4 @@
+import math
 import torch
 from functools import reduce
 
@@ -16,7 +17,7 @@ class DefaultNet(torch.nn.Module):
                      output_size=None,
                      nr_outputs=None,
                      shape=None,
-                     target_params=3e5,
+                     max_params=3e5,
                      dropout=None,
                      pretrained_net=None):
         self.input_size = input_size
@@ -39,9 +40,9 @@ class DefaultNet(torch.nn.Module):
             # default shape, inflated, yields 240k params if input has 200 components
             shape = [self.input_size, max([self.input_size*2, self.output_size*2, 400]), self.output_size]
 
-            # if NN is too big, we do not inflate and aim for max target_params
-            if reduce(lambda x, y: x*y, shape) > target_params:
-                hidden_size = int(target_params//(self.input_size*self.output_size))
+            # if NN is too big, we do not inflate and aim for max_params instead
+            if reduce(lambda x, y: x*y, shape) > max_params:
+                hidden_size = math.floor(max_params/(self.input_size*self.output_size))
 
                 if hidden_size > self.output_size:
                     shape = [self.input_size, hidden_size, self.output_size]
