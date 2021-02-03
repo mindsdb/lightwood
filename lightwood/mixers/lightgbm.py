@@ -100,7 +100,7 @@ class LightGBMMixer(BaseMixer):
                 seconds_for_one_iteration = end - start
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
                 max_itt = int(self.stop_training_after_seconds/seconds_for_one_iteration)
-                num_iterations = min(num_iterations, max_itt)
+                num_iterations = max(1, min(num_iterations, max_itt))
                 # Turn on grid search if training doesn't take too long using it
                 if max_itt > 10*num_iterations and seconds_for_one_iteration < 10:
                     self.grid_search = True
