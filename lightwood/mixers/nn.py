@@ -1,21 +1,22 @@
+import time
 import copy
 import random
-import time
-
-import torch
-from torch.utils.data import DataLoader
-import numpy as np
 import operator
 
+import torch
+import numpy as np
+from torch.utils.data import DataLoader
+from torch.cuda.amp import GradScaler
+
+from lightwood.logger import log
+from lightwood.mixers import BaseMixer
+from lightwood.config.config import CONFIG
 from lightwood.helpers.torch import LightwoodAutocast
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.selfaware import SelfAware
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
-from lightwood.config.config import CONFIG
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-from lightwood.mixers import BaseMixer
-from lightwood.logger import log
 
 
 class NnMixer(BaseMixer):
@@ -223,7 +224,7 @@ class NnMixer(BaseMixer):
             input_size = len(train_ds[0][0])
             training_data_length = len(train_ds)
             while True:
-                training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
+                training_time_per_iteration = self.stop_model_building_after_seconds / self.param_optimizer.total_trials
 
                 # Some heuristics...
                 if training_time_per_iteration > input_size:
@@ -235,11 +236,11 @@ class NnMixer(BaseMixer):
                     self.param_optimizer.total_trials = 8
                     break
 
-            training_time_per_iteration = stop_model_building_after_seconds / self.param_optimizer.total_trials
+            training_time_per_iteration = self.stop_model_building_after_seconds / self.param_optimizer.total_trials
 
-            self.dynamic_parameters = self.param_optimizer.evaluate(lambda dynamic_parameters: self.evaluate(from_data_ds, test_data_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
+            self.dynamic_parameters = self.param_optimizer.evaluate(lambda dynamic_parameters: self.evaluate(train_ds, test_ds, dynamic_parameters, max_training_time=training_time_per_iteration, max_epochs=None))
 
-            log.info('Using hyperparameter set: ', best_parameters)
+            log.info('Using hyperparameter set: ', self.dynamic_parameters)
         else:
             self.dynamic_parameters = {}
 
@@ -547,6 +548,9 @@ class NnMixer(BaseMixer):
                 sampler=self._nonpersistent['sampler']
             )
 
+        scaler = GradScaler()
+        selfaware_scaler = GradScaler()
+
         for epoch in range(max_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
             error = 0
@@ -600,10 +604,10 @@ class NnMixer(BaseMixer):
                         target_loss = target_loss.tolist()
                         if type(target_loss[0]) == type([]):
                             target_loss = [np.mean(x) for x in target_loss]
-                        for i, value in enumerate(target_loss):
-                            if len(unreduced_losses) <= i:
+                        for j, value in enumerate(target_loss):
+                            if len(unreduced_losses) <= j:
                                 unreduced_losses.append([])
-                            unreduced_losses[i].append(value)
+                            unreduced_losses[j].append(value)
 
                     unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
 
@@ -615,11 +619,24 @@ class NnMixer(BaseMixer):
                 if CONFIG.MONITORING['batch_loss']:
                     self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
-                if awareness_loss is not None:
-                    awareness_loss.backward(retain_graph=True)
-
                 running_loss += loss.item()
-                loss.backward()
+
+                if LightwoodAutocast.active:
+                    scaler.scale(loss).backward()
+                    scaler.step(self.optimizer)
+                    scaler.update()
+                    if self.is_selfaware and self.start_selfaware_training and awareness_loss is not None:
+                        selfaware_scaler.scale(awareness_loss).backward()
+                        selfaware_scaler.step(self.selfaware_optimizer)
+                        selfaware_scaler.update()
+                else:
+                    loss.backward()
+                    self.optimizer.step()
+                    if self.is_selfaware and self.start_selfaware_training and awareness_loss is not None:
+                        awareness_loss.backward(retain_graph=True)
+                        self.selfaware_optimizer.step()
+
+                error = running_loss / (i + 1)
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
                 if CONFIG.MONITORING['network_heatmap'] and random.randint(0, 1000) > 900:
@@ -645,15 +662,6 @@ class NnMixer(BaseMixer):
                                 layer_name.append(f'Layer {index}-{index+1}')
                         self.monitor.weight_map(layer_name, weights, 'Awareness network weights')
                         self.monitor.weight_map(layer_name, weights, 'Awareness network gradients')
-
-                # now that we have run backward in both losses, optimize()
-                # (review: we may need to optimize for each step)
-                self.optimizer.step()
-
-                if self.is_selfaware and self.start_selfaware_training:
-                    self.selfaware_optimizer.step()
-
-                error = running_loss / (i + 1)
 
                 if CONFIG.MONITORING['batch_loss']:
                     #self.monitor.plot_loss(total_loss.item(), self.total_iterations, 'Total Batch Loss')
