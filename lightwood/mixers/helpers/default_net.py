@@ -1,4 +1,6 @@
+import math
 import torch
+from functools import reduce
 
 from lightwood.config.config import CONFIG
 from lightwood.mixers.helpers.shapes import *
@@ -15,6 +17,7 @@ class DefaultNet(torch.nn.Module):
                      output_size=None,
                      nr_outputs=None,
                      shape=None,
+                     max_params=3e5,
                      dropout=None,
                      pretrained_net=None):
         self.input_size = input_size
@@ -34,11 +37,21 @@ class DefaultNet(torch.nn.Module):
         super(DefaultNet, self).__init__()
 
         if shape is None and pretrained_net is None:
-            shape = [self.input_size, max([self.input_size*2,self.output_size*2,400]), self.output_size]
+            # default shape, inflated, yields 240k params if input has 200 components
+            shape = [self.input_size, max([self.input_size*2, self.output_size*2, 400]), self.output_size]
+
+            # if NN is too big, we do not inflate and aim for max_params instead
+            if reduce(lambda x, y: x*y, shape) > max_params:
+                hidden_size = math.floor(max_params/(self.input_size*self.output_size))
+
+                if hidden_size > self.output_size:
+                    shape = [self.input_size, hidden_size, self.output_size]
+                else:
+                    shape = [self.input_size, self.output_size]
 
         if pretrained_net is None:
             log.info(f'Building network of shape: {shape}')
-            rectifier = torch.nn.SELU  #alternative: torch.nn.ReLU
+            rectifier = torch.nn.SELU  # alternative: torch.nn.ReLU
 
             layers = []
             for ind in range(len(shape) - 1):
