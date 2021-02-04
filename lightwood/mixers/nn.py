@@ -634,7 +634,7 @@ class NnMixer(BaseMixer):
                     self.optimizer.step()
                     if self.is_selfaware and self.start_selfaware_training and awareness_loss is not None:
                         awareness_loss.backward(retain_graph=True)
-                        self.selfaware_optimizer.st ep()
+                        self.selfaware_optimizer.step()
 
                 error = running_loss / (i + 1)
 
