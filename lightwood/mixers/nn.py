@@ -549,6 +549,7 @@ class NnMixer(BaseMixer):
             )
 
         scaler = GradScaler()
+        selfaware_scaler = GradScaler()
 
         for epoch in range(max_epochs):  # loop over the dataset multiple times
             running_loss = 0.0
@@ -618,24 +619,24 @@ class NnMixer(BaseMixer):
                 if CONFIG.MONITORING['batch_loss']:
                     self.monitor.plot_loss(loss.item(), self.total_iterations, 'Targets Batch Loss')
 
-                if awareness_loss is not None:
-                    awareness_loss.backward(retain_graph=True)
-
                 running_loss += loss.item()
 
                 if LightwoodAutocast.active:
                     scaler.scale(loss).backward()
                     scaler.step(self.optimizer)
                     scaler.update()
+                    if self.is_selfaware and self.start_selfaware_training and awareness_loss is not None:
+                        selfaware_scaler.scale(awareness_loss).backward()
+                        selfaware_scaler.step(self.selfaware_optimizer)
+                        selfaware_scaler.update()
                 else:
                     loss.backward()
                     self.optimizer.step()
+                    if self.is_selfaware and self.start_selfaware_training and awareness_loss is not None:
+                        awareness_loss.backward(retain_graph=True)
+                        self.selfaware_optimizer.st ep()
 
                 error = running_loss / (i + 1)
-
-                # we'll need a GradScaler for the selfaware if any NaNs pop up in it
-                if self.is_selfaware and self.start_selfaware_training:
-                    self.selfaware_optimizer.step()
 
                 # @NOTE: Decrease 900 if you want to plot gradients more often, I find it's too expensive to do so
                 if CONFIG.MONITORING['network_heatmap'] and random.randint(0, 1000) > 900:
