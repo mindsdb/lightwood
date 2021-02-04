@@ -622,9 +622,15 @@ class NnMixer(BaseMixer):
                     awareness_loss.backward(retain_graph=True)
 
                 running_loss += loss.item()
-                scaler.scale(loss).backward()
-                scaler.step(self.optimizer)
-                scaler.update()
+
+                if LightwoodAutocast.active:
+                    scaler.scale(loss).backward()
+                    scaler.step(self.optimizer)
+                    scaler.update()
+                else:
+                    loss.backward()
+                    self.optimizer.step()
+
                 error = running_loss / (i + 1)
 
                 # we'll need a GradScaler for the selfaware if any NaNs pop up in it
