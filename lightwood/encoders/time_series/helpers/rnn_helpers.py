@@ -94,7 +94,7 @@ class EncoderRNNNumerical(nn.Module):
 
 
 class MinMaxNormalizer:
-    def __init__(self, combination=[], keys=[], factor=1):
+    def __init__(self, combination=(), keys=(), factor=1):
         self.scaler = MinMaxScaler()
         self.single_scaler = MinMaxScaler()  # for non-windowed arrays (when using numerical encoder)
         self.factor = factor
