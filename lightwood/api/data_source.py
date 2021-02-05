@@ -302,8 +302,9 @@ class DataSource(Dataset):
         else:
             encoder_class = default_encoder_classes[column_type]
 
-        # special handling
-        if is_target and column_config.get('additional_info', {}).get('time_series_target', False):
+        # specialized dispatches
+        if is_target and column_config.get('additional_info', {}).get('time_series_target', False) and \
+                column_type == ColumnDataTypes.NUMERIC:
             encoder_class = TsNumericEncoder
 
         return encoder_class
