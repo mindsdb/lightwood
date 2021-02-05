@@ -3,48 +3,20 @@ import sys
 
 import torch
 import numpy as np
-from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.encoders.numeric import NumericEncoder
 from lightwood.logger import log
 
 
-class TsNumericEncoder(BaseEncoder):
+class TsNumericEncoder(NumericEncoder):
     """
     Variant of vanilla numerical encoder, supports dynamic mean re-scaling
     """
     def __init__(self, data_type=None, is_target=False):
         super().__init__(is_target)
-        self._type = data_type
-        self._abs_mean = None
-        self.positive_domain = False
-        self.decode_log = False
         # time series normalization params
         self.normalize_by_group = False
         self.normalizers = None
         self.group_combinations = None
-
-    def prepare(self, priming_data):
-        if self._prepared:
-            raise Exception('You can only call "prepare" once for a given encoder.')
-
-        value_type = 'int'
-        for number in priming_data:
-            try:
-                number = float(number)
-            except:
-                continue
-
-            if np.isnan(number):
-                err = 'Lightwood does not support working with NaN values !'
-                log.error(err)
-                raise Exception(err)
-
-            if int(number) != number:
-                value_type = 'float'
-
-        self._type = value_type if self._type is None else self._type
-        non_null_priming_data = [float(str(x).replace(',', '.')) for x in priming_data if x is not None]
-        self._abs_mean = np.mean(np.abs(non_null_priming_data))
-        self._prepared = True
 
     def encode(self, data, extra_data=None):
         """extra_data[0]['group_info']: dict with all grouped_by column info,
