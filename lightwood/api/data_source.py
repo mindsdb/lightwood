@@ -20,6 +20,7 @@ from lightwood.encoders import (
     DatetimeEncoder,
     Img2VecEncoder,
     TsRnnEncoder,
+    TsPlainEncoder,
     ShortTextEncoder,
     VocabularyEncoder
 )
@@ -286,7 +287,7 @@ class DataSource(Dataset):
             ColumnDataTypes.IMAGE: Img2VecEncoder,
             ColumnDataTypes.TEXT: DistilBertEncoder,
             ColumnDataTypes.SHORT_TEXT: ShortTextEncoder,
-            ColumnDataTypes.TIME_SERIES: TsRnnEncoder,
+            ColumnDataTypes.TIME_SERIES: TsPlainEncoder, # TsRnnEncoder,
             # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
         }
 
