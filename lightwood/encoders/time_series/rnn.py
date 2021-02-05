@@ -157,7 +157,7 @@ class TimeSeriesEncoder(BaseEncoder):
                         data = data.unsqueeze(-1)  # add feature dimension
                 normalized_tensors.append(data)
 
-            normalized_data = torch.cat(normalized_tensors, dim=0)
+            normalized_data = torch.cat(normalized_tensors, dim=-1)
             priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
         self._encoder.train()
