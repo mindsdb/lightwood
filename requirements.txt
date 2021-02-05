@@ -11,4 +11,3 @@ requests >= 2.0.0
 transformers >= 2.10.0, <= 4.0.0
 lightgbm >= 3.1.1
 optuna >= 2.4.0
-pmdarima >= 1.8.0
