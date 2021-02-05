@@ -10,7 +10,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 from lightwood.mixers.helpers.transformer import Transformer
-from lightwood.encoders.time_series.helpers.rnn_helpers import generate_target_group_normalizers
+from lightwood.encoders.time_series.helpers.common import generate_target_group_normalizers
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
 from lightwood.encoders import (
