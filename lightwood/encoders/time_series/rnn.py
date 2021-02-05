@@ -279,7 +279,9 @@ class TimeSeriesEncoder(BaseEncoder):
                 tensor = torch.zeros((len(prev_col_data['data']), len(prev_col_data['data'][0]), 1)).to(self.device)
                 all_idxs = set(range(len(prev_col_data['data'])))
                 for combination in [c for c in self._group_combinations if c != '__default']:
-                    normalizer = self._target_ar_normalizers[prev_col_data['name']][frozenset(combination)]
+                    normalizer = self._target_ar_normalizers[prev_col_data['name']].get(frozenset(combination), None)
+                    if normalizer is None:
+                        normalizer = self._target_ar_normalizers[prev_col_data['name']]['__default']
                     idxs, subset = get_group_matches(prev_col_data, normalizer.combination, normalizer.keys)
                     if idxs:
                         tensor[idxs, :, :] = torch.Tensor(normalizer.encode(subset)).unsqueeze(-1).to(self.device)
@@ -289,7 +291,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 if all_idxs:
                     default_norm = self._target_ar_normalizers[prev_col_data['name']]['__default']
                     subset = [prev_col_data['data'][idx] for idx in all_idxs]
-                    tensor[all_idxs, :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
+                    tensor[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
                     tensor[torch.isnan(tensor)] = 0.0
 
                 ptd.append(tensor)
