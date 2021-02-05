@@ -84,6 +84,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
         self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
+        self._n_dims = total_dims
         self._is_setup = True
 
     def to(self, device, available_devices):

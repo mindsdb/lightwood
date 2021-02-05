@@ -457,18 +457,18 @@ class DataSource(Dataset):
 
         config = self.get_column_config(column_name)
 
-        # See if the feature has dependencies in other columns
-        if 'depends_on_column' in config:
+        # Pass dependency info when applicable
+        encoder_arity = len(inspect.signature(self.encoders[column_name].encode).parameters)
+        if encoder_arity > 2 and 'depends_on_column' in config:
             arg2 = []
             for col in config['depends_on_column']:
-                if custom_data is not None:
-                    sublist = custom_data[col]
+                sublist = {'group_info': {conf['name']: self.get_column_original_data(conf['name'])
+                                          for conf in self.config['input_features'] if conf['grouped_by']},
+                           'name': col}
+                if custom_data is None:
+                    sublist['data'] = self.get_column_original_data(col)
                 else:
-                    sublist = {'data': self.get_column_original_data(col),
-                               'name': col,
-                               'group_info': {conf['name']: self.get_column_original_data(conf['name'])
-                                              for conf in self.config['input_features'] if conf['grouped_by']}
-                               }
+                    sublist['data'] = custom_data.get(col, None)
                 arg2.append(sublist)
             args.append(arg2)
 
