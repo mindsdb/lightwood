@@ -40,18 +40,19 @@ class NumericEncoder(BaseEncoder):
                 value_type = 'float'
 
         self._type = value_type if self._type is None else self._type
-        non_null_priming_data = [float(str(x).replace(',','.')) for x in priming_data if x is not None]
+        non_null_priming_data = [float(str(x).replace(',', '.')) for x in priming_data if x is not None]
         self._abs_mean = np.mean(np.abs(non_null_priming_data))
         self._prepared = True
 
-    def encode(self, data, extra_data=None):
-        """extra_data[0]['group_info']: for time series, indicates which normalizer applies to which datum"""
+    def encode(self, data, group_info=None):
+        """group_info: dict with all grouped_by column info,
+        to retrieve the correct normalizer for each datum"""
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
+        if group_info is None:
+            group_info = {'__default': [set()] * len(data)}
 
         ret = []
-        group_info = extra_data[0]['group_info'] if extra_data else [None] * len(data)
-
         for real, group in zip(data, list(zip(*group_info.values()))):
             try:
                 real = float(real)
@@ -62,7 +63,7 @@ class NumericEncoder(BaseEncoder):
                     real = None
             if self.is_target:
                 vector = [0] * 3
-                if group:
+                if not group:
                     try:
                         mean = self.normalizers[frozenset(group)].abs_mean
                     except KeyError:
@@ -103,7 +104,8 @@ class NumericEncoder(BaseEncoder):
             decode_log = self.decode_log
 
         ret = []
-        group_info = group_info if group_info else [None] * len(encoded_values)
+        if group_info is None:
+            group_info = {'__default': [set()] * len(encoded_values)}
         if type(encoded_values) != type([]):
             encoded_values = encoded_values.tolist()
 
@@ -120,7 +122,7 @@ class NumericEncoder(BaseEncoder):
                         except OverflowError as e:
                             real_value = pow(10,63) * sign
                     else:
-                        if group:
+                        if not group:
                             try:
                                 mean = self.normalizers[frozenset(group)].abs_mean
                             except KeyError:

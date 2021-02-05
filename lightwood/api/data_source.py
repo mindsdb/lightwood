@@ -402,10 +402,10 @@ class DataSource(Dataset):
 
             encoder_instance = self._prepare_column_encoder(config, is_target=True)
 
-            if 'extra_data' not in inspect.signature(encoder_instance.encode).parameters:
+            if 'group_info' not in inspect.signature(encoder_instance.encode).parameters:
                 encoded_output = encoder_instance.encode(column_data)
             else:
-                encoded_output = encoder_instance.encode(column_data, extra_data=[{'group_info': group_info}])
+                encoded_output = encoder_instance.encode(column_data, group_info=group_info)
 
             input_encoder_training_data['targets'].append({
                 'encoded_output': encoded_output,
@@ -501,9 +501,9 @@ class DataSource(Dataset):
             decoded_data['predictions'] = preds
             decoded_data['class_distribution'] = pred_probs
             decoded_data['class_labels'] = labels
-        elif getattr(decoder_instance, 'normalize_by_group', True):
+        elif getattr(decoder_instance, 'normalize_by_group', False):
             group_info = {conf['name']: self.get_column_original_data(conf['name'])
-                          for conf in self.config['input_features'] if conf['grouped_by']}
+                          for conf in self.config['input_features'] if conf.get('grouped_by', False)}
             decoded_data['predictions'] = decoder_instance.decode(encoded_data, group_info=group_info)
         else:
             decoded_data['predictions'] = decoder_instance.decode(encoded_data)
