@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 from lightwood.helpers.torch import LightwoodAutocast
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 
 class DecoderRNNNumerical(nn.Module):
@@ -90,44 +89,3 @@ class EncoderRNNNumerical(nn.Module):
             loss += criterion(next_tensor, data[:, tensor_i + 1, :].unsqueeze(dim=1))
 
         return next_tensor, hidden_state, loss
-
-
-class MinMaxNormalizer:
-    def __init__(self, factor=1):
-        self.scaler = MinMaxScaler()
-        self.factor = factor
-
-    def prepare(self, x):
-        X = np.array([j for i in x for j in i]).reshape(-1, 1)
-        self.scaler.fit(X)
-
-    def encode(self, y):
-        if not isinstance(y[0], list):
-            y = y.reshape(-1, 1)
-        return torch.Tensor(self.scaler.transform(y))
-
-    def decode(self, y):
-        return self.scaler.inverse_transform(y)
-
-
-class CatNormalizer:
-    def __init__(self):
-        self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
-        self.unk = "<UNK>"
-
-    def prepare(self, x):
-        X = []
-        for i in x:
-            for j in i:
-                X.append(j if j is not None else self.unk)
-        self.scaler.fit(np.array(X).reshape(-1, 1))
-
-    def encode(self, Y):
-        y = np.array([[j if j is not None else self.unk for j in i] for i in Y])
-        out = []
-        for i in y:
-            out.append(self.scaler.transform(i.reshape(-1, 1)))
-        return torch.Tensor(out)
-
-    def decode(self, y):
-        return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
