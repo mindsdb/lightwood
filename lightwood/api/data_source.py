@@ -206,9 +206,7 @@ class DataSource(Dataset):
                 col_config = self.get_column_config(col_name)
 
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
-                    if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache or
-                            (col_name.startswith('__mdb_ts_previous_') and feature_set == 'input_features')):
-
+                    if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache):
                         self.get_encoded_column_data(col_name)
 
                 # if we are dropping this feature, get the encoded value of None
@@ -226,8 +224,6 @@ class DataSource(Dataset):
                         custom_data = {col_name: [None]}
 
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
-                elif col_name.startswith('__mdb_ts_previous_') and feature_set == 'input_features':
-                    sample[feature_set][col_name] = torch.Tensor([])
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
@@ -289,7 +285,7 @@ class DataSource(Dataset):
             ColumnDataTypes.IMAGE: Img2VecEncoder,
             ColumnDataTypes.TEXT: DistilBertEncoder,
             ColumnDataTypes.SHORT_TEXT: ShortTextEncoder,
-            ColumnDataTypes.TIME_SERIES: TsPlainEncoder, # TsRnnEncoder,
+            ColumnDataTypes.TIME_SERIES: TsRnnEncoder,
             # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
         }
 
@@ -307,6 +303,8 @@ class DataSource(Dataset):
         if is_target and column_config.get('additional_info', {}).get('time_series_target', False) and \
                 column_type == ColumnDataTypes.NUMERIC:
             encoder_class = TsNumericEncoder
+        if column_type == ColumnDataTypes.TIME_SERIES and '__mdb_ts_previous' in column_config['name']:
+            encoder_class = TsPlainEncoder
 
         return encoder_class
 
@@ -341,7 +339,7 @@ class DataSource(Dataset):
             )
         else:
             # joint column data augmentation for time series
-            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target:
+            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target and '__mdb_ts_previous' not in config['name']:
                 encoder_instance.prepare(column_data, previous_target_data=training_data['previous'])
             else:
                 encoder_instance.prepare(column_data)
@@ -376,13 +374,13 @@ class DataSource(Dataset):
 
         for config in self.config['input_features']:
             column_name = config['name']
+            encoder_instance = self._prepare_column_encoder(config,
+                                                            is_target=False,
+                                                            training_data=input_encoder_training_data)
+
+            encoders[column_name] = encoder_instance
+
             if column_name not in previous_cols:
-                encoder_instance = self._prepare_column_encoder(config,
-                                                                is_target=False,
-                                                                training_data=input_encoder_training_data)
-
-                encoders[column_name] = encoder_instance
-
                 # add dependency on '__mdb_ts_previous_' column (for now singular, plural later on)
                 if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
                     for d in input_encoder_training_data['previous']:
