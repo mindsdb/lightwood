@@ -88,8 +88,6 @@ def generate_target_group_normalizers(data):
     normalizers = {}
     group_combinations = ['__default']
 
-    # todo in rnn self._target_ar_normalizers[data['name']] = {}
-
     # categorical normalizers
     if data['original_type'] == 'categorical':
         normalizers['__default'] = CatNormalizer()

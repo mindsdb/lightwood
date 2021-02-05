@@ -52,7 +52,7 @@ class TsNumericEncoder(BaseEncoder):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         if not extra_data[0]['group_info']:
-            group_info = {'__default': [set()] * len(data)}  # TODO: this should be None instead of set()
+            group_info = {'__default': [set()] * len(data)}
         else:
             group_info = extra_data[0]['group_info']
 
