@@ -15,6 +15,7 @@ from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
 from lightwood.encoders import (
     NumericEncoder,
+    TsNumericEncoder,
     CategoricalAutoEncoder,
     MultiHotEncoder,
     DistilBertEncoder,
@@ -278,7 +279,7 @@ class DataSource(Dataset):
 
         return self.data_frame[column_name].tolist()
 
-    def _lookup_encoder_class(self, column_type, is_target):
+    def _lookup_encoder_class(self, column_config, is_target):
         default_encoder_classes = {
             ColumnDataTypes.NUMERIC: NumericEncoder,
             ColumnDataTypes.CATEGORICAL: CategoricalAutoEncoder,
@@ -291,14 +292,22 @@ class DataSource(Dataset):
             # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
         }
 
+        # TODO add call here to TsNumericEncoder
+
         target_encoder_classes = {
             ColumnDataTypes.TEXT: VocabularyEncoder
         }
+
+        column_type = column_config['type']
 
         if is_target and column_type in target_encoder_classes:
             encoder_class = target_encoder_classes[column_type]
         else:
             encoder_class = default_encoder_classes[column_type]
+
+        # special handling
+        if is_target and column_config.get('additional_info', {}).get('time_series_target', False):
+            encoder_class = TsNumericEncoder
 
         return encoder_class
 
@@ -314,7 +323,7 @@ class DataSource(Dataset):
         column_data = self.get_column_original_data(config['name'])
         encoder_class = config.get(
             'encoder_class',
-            self._lookup_encoder_class(config['type'], is_target)
+            self._lookup_encoder_class(config, is_target)
         )
         encoder_attrs = config.get('encoder_attrs', {})
         encoder_attrs['original_type'] = config.get('original_type', None)
@@ -402,10 +411,12 @@ class DataSource(Dataset):
 
             encoder_instance = self._prepare_column_encoder(config, is_target=True)
 
-            if 'group_info' not in inspect.signature(encoder_instance.encode).parameters:
+            if 'extra_data' not in inspect.signature(encoder_instance.encode).parameters:
                 encoded_output = encoder_instance.encode(column_data)
             else:
-                encoded_output = encoder_instance.encode(column_data, group_info=group_info)
+                # wrap group_info in a list of dicts to conform to get_encoded_column_data call convention
+                extra_data = [{'group_info': group_info}]
+                encoded_output = encoder_instance.encode(column_data, extra_data=extra_data)
 
             input_encoder_training_data['targets'].append({
                 'encoded_output': encoded_output,
@@ -438,12 +449,6 @@ class DataSource(Dataset):
     def get_encoded_column_data(self, column_name, custom_data=None):
         if column_name in self.encoded_cache and custom_data is None:
             return self.encoded_cache[column_name]
-
-        # todo here pass group data if is_grouped_target
-        # if is_grouped_target:
-        #     group_info = self.get_column_original_data(config['depends_on_column'][0])
-        #     elif is_grouped_target:
-        # encoder_instance.prepare(column_data, group_info=group_info)
 
         # The first argument of encoder is the data, if no custom data is specified,
         # use all the datasource's data for this column
