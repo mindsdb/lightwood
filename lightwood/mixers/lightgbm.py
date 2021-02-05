@@ -100,7 +100,7 @@ class LightGBMMixer(BaseMixer):
                 seconds_for_one_iteration = end - start
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
                 max_itt = int(self.stop_training_after_seconds/seconds_for_one_iteration)
-                num_iterations = min(num_iterations, max_itt)
+                num_iterations = max(1, min(num_iterations, max_itt))
                 # Turn on grid search if training doesn't take too long using it
                 if max_itt > 10*num_iterations and seconds_for_one_iteration < 10:
                     self.grid_search = True
@@ -134,7 +134,7 @@ class LightGBMMixer(BaseMixer):
             ypred[col_name] = {}
             if col_name in self.ord_encs:
                 ypred[col_name]['class_distribution'] = list(col_preds)
-                ypred[col_name]['class_labels'] = self.all_classes
+                ypred[col_name]['class_labels'] = {i: cls for i, cls in enumerate(self.all_classes)}
                 col_preds = self.ord_encs[col_name].inverse_transform(np.argmax(col_preds, axis=1).reshape(-1, 1)).flatten()
             ypred[col_name]['predictions'] = list(col_preds)
 
