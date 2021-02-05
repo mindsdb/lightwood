@@ -51,7 +51,7 @@ class TsNumericEncoder(BaseEncoder):
         to retrieve the correct normalizer for each datum"""
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
-        if not extra_data[0]['group_info']:
+        if extra_data is None or not extra_data[0]['group_info']:
             group_info = {'__default': [set()] * len(data)}
         else:
             group_info = extra_data[0]['group_info']
