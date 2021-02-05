@@ -292,14 +292,11 @@ class DataSource(Dataset):
             # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
         }
 
-        # TODO add call here to TsNumericEncoder
-
         target_encoder_classes = {
             ColumnDataTypes.TEXT: VocabularyEncoder
         }
 
         column_type = column_config['type']
-
         if is_target and column_type in target_encoder_classes:
             encoder_class = target_encoder_classes[column_type]
         else:
@@ -372,8 +369,8 @@ class DataSource(Dataset):
                             }
                 col_info = generate_target_group_normalizers(col_info)
                 input_encoder_training_data['previous'].append(col_info)
-                config['normalizers'] = col_info['normalizers']
-                config['group_combinations'] = col_info['group_combinations']
+                config['additional_info']['normalizers'] = col_info['normalizers']
+                config['additional_info']['group_combinations'] = col_info['group_combinations']
 
         for config in self.config['input_features']:
             column_name = config['name']
@@ -401,8 +398,8 @@ class DataSource(Dataset):
             if prev_col:
                 # 0-indexed as we know it can only be one
                 config['depends_on_column'] = [prev_col[0]['name']]
-                config['encoder_attrs']['normalizers'] = prev_col[0]['normalizers']
-                config['encoder_attrs']['group_combinations'] = prev_col[0]['group_combinations']
+                config['encoder_attrs']['normalizers'] = prev_col[0]['additional_info']['normalizers']
+                config['encoder_attrs']['group_combinations'] = prev_col[0]['additional_info']['group_combinations']
                 config['encoder_attrs']['normalize_by_group'] = True
                 group_info = {col['name']: self.get_column_original_data(col['name'])
                               for col in self.config['input_features'] if col['grouped_by']}
