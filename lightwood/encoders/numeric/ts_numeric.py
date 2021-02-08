@@ -11,8 +11,8 @@ class TsNumericEncoder(NumericEncoder):
     """
     Variant of vanilla numerical encoder, supports dynamic mean re-scaling
     """
-    def __init__(self, data_type=None, is_target=False):
-        super().__init__(is_target)
+    def __init__(self, is_target=False):
+        super(TsNumericEncoder, self).__init__(is_target=is_target)
         # time series normalization params
         self.normalize_by_group = False
         self.normalizers = None
@@ -24,7 +24,7 @@ class TsNumericEncoder(NumericEncoder):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         if extra_data is None or not extra_data[0]['group_info']:
-            group_info = {'__default': [set()] * len(data)}
+            group_info = {'__default': [None] * len(data)}
         else:
             group_info = extra_data[0]['group_info']
 
@@ -39,7 +39,7 @@ class TsNumericEncoder(NumericEncoder):
                     real = None
             if self.is_target:
                 vector = [0] * 3
-                if not group:
+                if group is not None:
                     try:
                         mean = self.normalizers[frozenset(group)].abs_mean
                     except KeyError:
@@ -81,7 +81,7 @@ class TsNumericEncoder(NumericEncoder):
 
         ret = []
         if not group_info:
-            group_info = {'__default': [set()] * len(encoded_values)}
+            group_info = {'__default': [None] * len(encoded_values)}
         if type(encoded_values) != type([]):
             encoded_values = encoded_values.tolist()
 
@@ -98,7 +98,7 @@ class TsNumericEncoder(NumericEncoder):
                         except OverflowError as e:
                             real_value = pow(10,63) * sign
                     else:
-                        if not group:
+                        if group is not None:
                             try:
                                 mean = self.normalizers[frozenset(group)].abs_mean
                             except KeyError:
