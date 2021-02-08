@@ -53,6 +53,7 @@ class TsNumericEncoder(NumericEncoder):
                     vector[2] = real / mean
                 else:
                     log.debug(f'Can\'t encode target value: {real}')
+                    
             else:
                 vector = [0] * 4
                 try:
@@ -75,6 +76,9 @@ class TsNumericEncoder(NumericEncoder):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
+        if decode_log is None:
+            decode_log = self.decode_log
+
         ret = []
         if not group_info:
             group_info = {'__default': [None] * len(encoded_values)}
@@ -85,18 +89,25 @@ class TsNumericEncoder(NumericEncoder):
             if self.is_target:
                 if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
                     log.error(f'Got weird target value to decode: {vector}')
-                    real_value = pow(10,63)
+                    real_value = pow(10, 63)
                 else:
-                    if group is not None:
+                    if decode_log:
+                        sign = -1 if vector[0] > 0.5 else 1
                         try:
-                            mean = self.normalizers[frozenset(group)].abs_mean
-                        except KeyError:
-                            # decode new group with default normalizer
-                            mean = self.normalizers['__default'].abs_mean
+                            real_value = math.exp(vector[1]) * sign
+                        except OverflowError as e:
+                            real_value = pow(10,63) * sign
                     else:
-                        mean = self._abs_mean
+                        if group is not None:
+                            try:
+                                mean = self.normalizers[frozenset(group)].abs_mean
+                            except KeyError:
+                                # decode new group with default normalizer
+                                mean = self.normalizers['__default'].abs_mean
+                        else:
+                            mean = self._abs_mean
 
-                    real_value = vector[2] * mean
+                        real_value = vector[2] * mean
 
                     if self.positive_domain:
                         real_value = abs(real_value)
