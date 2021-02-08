@@ -459,7 +459,7 @@ class DataSource(Dataset):
 
         # Pass dependency info when applicable
         encoder_arity = len(inspect.signature(self.encoders[column_name].encode).parameters)
-        if encoder_arity > 2 and 'depends_on_column' in config:
+        if encoder_arity >= 2 and 'depends_on_column' in config:
             arg2 = []
             for col in config['depends_on_column']:
                 sublist = {'group_info': {conf['name']: self.get_column_original_data(conf['name'])
