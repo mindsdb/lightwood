@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from torch.cuda.amp import GradScaler
 
 from lightwood.logger import log
+from lightwood.encoders import *
 from lightwood.mixers import BaseMixer
 from lightwood.config.config import CONFIG
 from lightwood.helpers.torch import LightwoodAutocast
@@ -714,7 +715,10 @@ class NnMixer(BaseMixer):
             )
 
             if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
-                ds.encoders[output_column].decode_log = True
+                if isinstance(ds.encoders[output_column], NumericEncoder):
+                    ds.encoders[output_column].decode_log = True
+                else:
+                    ds.encoders[output_column].decode_log = False  # TsNumericEncoder
                 preds = ds.get_decoded_column_data(
                     output_column,
                     predictions[output_column]['encoded_predictions']
