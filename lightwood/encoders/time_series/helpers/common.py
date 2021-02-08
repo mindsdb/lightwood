@@ -100,7 +100,7 @@ def generate_target_group_normalizers(data):
     # numerical normalizers, here we spawn one per each group combination
     else:
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
-        for combination in group_combinations:
+        for combination in all_group_combinations:
             if combination != ():
                 combination = frozenset(combination)  # freeze so that we can hash with it
                 _, subset = get_group_matches(data, combination, data['group_info'].keys())
