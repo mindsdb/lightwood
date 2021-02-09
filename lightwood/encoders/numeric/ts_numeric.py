@@ -39,7 +39,7 @@ class TsNumericEncoder(NumericEncoder):
                     real = None
             if self.is_target:
                 vector = [0] * 3
-                if group is not None:
+                if group is not None and self.normalizers is not None:
                     try:
                         mean = self.normalizers[frozenset(group)].abs_mean
                     except KeyError:
@@ -98,7 +98,7 @@ class TsNumericEncoder(NumericEncoder):
                         except OverflowError as e:
                             real_value = pow(10,63) * sign
                     else:
-                        if group is not None:
+                        if group is not None and self.normalizers is not None:
                             try:
                                 mean = self.normalizers[frozenset(group)].abs_mean
                             except KeyError:
