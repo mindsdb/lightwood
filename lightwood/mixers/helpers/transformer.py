@@ -14,10 +14,12 @@ class Transformer:
         output_vector = []
 
         for input_feature in self.input_features:
-            sub_vector = sample['input_features'][input_feature].tolist()
-            input_vector.extend(sub_vector)
-            if input_feature not in self.feature_len_map:
-                self.feature_len_map[input_feature] = len(sub_vector)
+            # omit PlainTsEncoder, its information is encoded in the normal TsEncoder already
+            if '__mdb_ts_previous' not in input_feature:
+                sub_vector = sample['input_features'][input_feature].tolist()
+                input_vector.extend(sub_vector)
+                if input_feature not in self.feature_len_map:
+                    self.feature_len_map[input_feature] = len(sub_vector)
 
         for output_feature in self.output_features:
             sub_vector = sample['output_features'][output_feature].tolist()
@@ -33,8 +35,8 @@ class Transformer:
                         self.out_indexes[-1][1],
                         self.out_indexes[-1][1] + len(sub_vector)
                     ])
-
         return torch.FloatTensor(input_vector), torch.FloatTensor(output_vector)
+
 
     def revert(self, vector, feature_set='output_features'):
         start = 0
