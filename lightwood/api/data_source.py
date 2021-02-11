@@ -245,8 +245,8 @@ class DataSource(Dataset):
                         )
 
                         if new_weights is None:
-                            mean = np.mean(list(weights.values()))]
-                            new_weights = [mean * len(encoded_val[0])
+                            mean = np.mean(list(weights.values()))
+                            new_weights = [mean * len(encoded_val[0])]
 
                         for value_index, hot in enumerate(encoded_val[0]):
                             if hot:
