@@ -15,6 +15,17 @@ from sklearn.preprocessing import OrdinalEncoder
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
 
+def check_gpu_support():
+    try:
+        data = np.random.rand(50, 2)
+        label = np.random.randint(2, size=50)
+        train_data = lightgbm.Dataset(data, label=label)
+        params = {'num_iterations': 1, 'device': 'gpu'}
+        gbm = lightgbm.train(params, train_set=train_data)
+        return True
+    except Exception as e:
+        return False
+
 class LightGBMMixer(BaseMixer):
     def __init__(self, stop_training_after_seconds=None, grid_search=False):
         super().__init__()
@@ -25,10 +36,12 @@ class LightGBMMixer(BaseMixer):
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         self.device, _ = get_devices()
-        # self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
-
-        self.device = torch.device('cpu')
-        self.device_str = 'cpu'
+        self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
+        if self.device_str == 'gpu':
+            gpu_works = check_gpu_support()
+            if not gpu_works:
+                self.device = torch.device('cpu')
+                self.device_str = 'cpu'
 
         self.max_bin = 255  # Default value
         if self.device_str == 'gpu':
