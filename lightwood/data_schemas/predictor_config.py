@@ -14,6 +14,7 @@ feature_schema = Schema({
     Optional('secondary_type'): And(str, Use(str.lower), lambda s: s in COLUMN_DATA_TYPES.get_attributes().values()),
     Optional('original_type'): And(str, Use(str.lower), lambda s: s in COLUMN_DATA_TYPES.get_attributes().values()),
     Optional('additional_info'): dict,
+    Optional('group_info'): dict,
 })
 
 mixer_schema = Schema({
