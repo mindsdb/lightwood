@@ -261,7 +261,7 @@ class DataSource(Dataset):
 
                         for value_index, hot in enumerate(encoded_val[0]):
                             if hot:
-                                new_weights[value_index] = weights[val] / sum(encoded_val[0])
+                                new_weights[value_index] = weights[val] / sum(encoded_val[0]).item()
 
                     if self.output_weights is None or self.output_weights == False:
                         self.output_weights = new_weights
