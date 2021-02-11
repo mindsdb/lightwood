@@ -14,7 +14,6 @@ class TsNumericEncoder(NumericEncoder):
     def __init__(self, is_target=False):
         super(TsNumericEncoder, self).__init__(is_target=is_target)
         # time series normalization params
-        self.normalize_by_group = False
         self.normalizers = None
         self.group_combinations = None
 
