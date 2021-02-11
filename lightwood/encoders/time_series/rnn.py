@@ -140,22 +140,21 @@ class TimeSeriesEncoder(BaseEncoder):
             normalized_tensors = []
             for target_dict in previous_target_data:
                 if target_dict['original_type'] == COLUMN_DATA_TYPES.NUMERIC:
-                    data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1)).to(self.device)
+                    data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
                     for group_name, normalizer in target_dict['normalizers'].items():
                         idxs, subset = get_group_matches(target_dict, normalizer.combination, normalizer.keys)
-                        normalized = torch.Tensor(normalizer.encode(subset)).unsqueeze(-1).to(self.device)
-                        normalized[torch.isnan(normalized)] = 0.0
+                        normalized = normalizer.encode(subset).unsqueeze(-1)
                         data[idxs, :, :] = normalized
                 else:
                     # categorical has only one normalizer at all times
                     normalizer = target_dict['normalizers']['__default']
-                    data = torch.Tensor(normalizer.encode(target_dict['data'])).to(self.device)
-                    data[torch.isnan(data)] = 0.0
+                    data = normalizer.encode(target_dict['data'])
                     if len(data.shape) < 3:
                         data = data.unsqueeze(-1)  # add feature dimension
+                data[torch.isnan(data)] = 0.0
                 normalized_tensors.append(data)
 
-            normalized_data = torch.cat(normalized_tensors, dim=-1)
+            normalized_data = torch.cat(normalized_tensors, dim=-1).to(self.device)
             priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
         self._encoder.train()

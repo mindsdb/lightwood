@@ -97,6 +97,15 @@ class DataSource(Dataset):
                 dropout = col['dropout']
 
             self.dropout_dict[col['name']] = dropout
+
+        for col in self.config['output_features']:
+            prev_col = [c for c in self.config['input_features'] if c['name'] == f'__mdb_ts_previous_{col["name"]}']
+            # len(prev_col) <= 1 always holds
+            if prev_col:
+                col['group_info'] = {
+                    prev_col['name']: self.get_column_original_data(prev_col['name'])
+                    for prev_col in self.config['input_features'] if prev_col['grouped_by']
+                }
         
         if initialize_transformer:
             self.transformer = Transformer(self.input_feature_names, self.output_feature_names)
@@ -400,9 +409,7 @@ class DataSource(Dataset):
                 config['depends_on_column'] = [prev_col[0]['name']]
                 config['encoder_attrs']['normalizers'] = prev_col[0]['additional_info']['normalizers']
                 config['encoder_attrs']['group_combinations'] = prev_col[0]['additional_info']['group_combinations']
-                config['encoder_attrs']['normalize_by_group'] = True
-                group_info = {col['name']: self.get_column_original_data(col['name'])
-                              for col in self.config['input_features'] if col['grouped_by']}
+                group_info = config['group_info']
             else:
                 group_info = None
 
@@ -503,7 +510,7 @@ class DataSource(Dataset):
             decoded_data['predictions'] = preds
             decoded_data['class_distribution'] = pred_probs
             decoded_data['class_labels'] = labels
-        elif getattr(decoder_instance, 'normalize_by_group', False):
+        elif isinstance(decoder_instance, TsNumericEncoder):
             group_info = {conf['name']: self.get_column_original_data(conf['name'])
                           for conf in self.config['input_features'] if conf.get('grouped_by', False)}
             decoded_data['predictions'] = decoder_instance.decode(encoded_data, group_info=group_info)
