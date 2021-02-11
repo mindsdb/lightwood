@@ -107,10 +107,8 @@ class TimeSeriesEncoder(BaseEncoder):
         lengths = torch.tensor([len(e) for e in data], dtype=torch.float)
         return out_data, lengths
 
-    def _get_batch(self, source, start, step):
-        # source is an iterable element, we want to get source[i+step] or source[i+end]
-        # If padding is not None, until size `source[i+step]`
-        end = min(start + step, len(source))
+    def _get_batch(self, source, start, end):
+        end = min(end, len(source))
         return source[start:end]
 
     def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
