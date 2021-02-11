@@ -12,6 +12,7 @@ from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 from lightwood.logger import log
+from lightwood.encoders import *
 
 
 class Predictor:
@@ -199,7 +200,10 @@ class Predictor:
                                                     encoder=ds.encoders[output_column])
 
             if ds.get_column_config(output_column)['type'] == COLUMN_DATA_TYPES.NUMERIC:
-                ds.encoders[output_column].decode_log = True
+                if isinstance(ds.encoders[output_column], NumericEncoder):
+                    ds.encoders[output_column].decode_log = True
+                else:
+                    ds.encoders[output_column].decode_log = False  # TsNumericEncoder
                 predicted = ds.get_decoded_column_data(output_column, predictions[output_column]['encoded_predictions'])
 
                 alternative_accuracy = self.apply_accuracy_function(ds.get_column_config(output_column)['type'], real, predicted,weight_map=weight_map)
