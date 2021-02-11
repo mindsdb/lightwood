@@ -249,14 +249,19 @@ class DataSource(Dataset):
 
                     for val in weights:
                         encoded_val = self.get_encoded_column_data(
-                            col_config['name'], custom_data={col_config['name']: [val]})
-                        # @Note: This assumes one-hot encoding for the encoded_value
-                        value_index = np.argmax(encoded_val[0])
+                            col_config['name'],
+                            custom_data={
+                                col_config['name']: [val]
+                            }
+                        )
 
                         if new_weights is None:
-                            new_weights = [np.mean(list(weights.values()))] * len(encoded_val[0])
+                            mean = np.mean(list(weights.values()))
+                            new_weights = [mean] * len(encoded_val[0])
 
-                        new_weights[value_index] = weights[val]
+                        for value_index, hot in enumerate(encoded_val[0]):
+                            if hot:
+                                new_weights[value_index] = weights[val] / sum(encoded_val[0]).item()
 
                     if self.output_weights is None or self.output_weights == False:
                         self.output_weights = new_weights
