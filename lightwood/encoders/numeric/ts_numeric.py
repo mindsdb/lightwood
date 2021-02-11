@@ -52,7 +52,7 @@ class TsNumericEncoder(NumericEncoder):
                     vector[2] = real / mean
                 else:
                     log.debug(f'Can\'t encode target value: {real}')
-                    
+
             else:
                 vector = [0] * 4
                 try:
