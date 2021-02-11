@@ -145,12 +145,12 @@ class TimeSeriesEncoder(BaseEncoder):
                     data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
                     for group_name, normalizer in target_dict['normalizers'].items():
                         idxs, subset = get_group_matches(target_dict, normalizer.combination, normalizer.keys)
-                        normalized = normalizer.encode(subset).unsqueeze(-1)  # .to(self.device)
+                        normalized = normalizer.encode(subset).unsqueeze(-1)
                         data[idxs, :, :] = normalized
                 else:
                     # categorical has only one normalizer at all times
                     normalizer = target_dict['normalizers']['__default']
-                    data = torch.Tensor(normalizer.encode(target_dict['data']))
+                    data = normalizer.encode(target_dict['data'])
                     if len(data.shape) < 3:
                         data = data.unsqueeze(-1)  # add feature dimension
                 data[torch.isnan(data)] = 0.0
