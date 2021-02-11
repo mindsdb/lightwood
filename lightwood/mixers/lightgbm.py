@@ -64,11 +64,10 @@ class LightGBMMixer(BaseMixer):
             out_cols = data[subset_name]['ds'].output_feature_names
             for col_name in cols:
                 if data[subset_name]['data'] is None:
-                    data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(col_name)
+                    data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(col_name).to(self.device)
                 else:
                     enc_col = data[subset_name]['ds'].get_encoded_column_data(col_name)
-                    data[subset_name]['data'] = torch.cat((data[subset_name]['data'].to(self.device),
-                                                           enc_col.to(self.device)), 1)
+                    data[subset_name]['data'] = torch.cat((data[subset_name]['data'], enc_col.to(self.device)), 1)
             data[subset_name]['data'] = data[subset_name]['data'].tolist()
             for col_name in out_cols:
                 label_data = data[subset_name]['ds'].get_column_original_data(col_name)
@@ -135,10 +134,9 @@ class LightGBMMixer(BaseMixer):
         data = None
         for col_name in when_data_source.input_feature_names:
             if data is None:
-                data = when_data_source.get_encoded_column_data(col_name)
+                data = when_data_source.get_encoded_column_data(col_name).to(self.device)
             else:
-                data = torch.cat((torch.Tensor(data).to(self.device),
-                                  when_data_source.get_encoded_column_data(col_name).to(self.device)), 1)
+                data = torch.cat((data, when_data_source.get_encoded_column_data(col_name).to(self.device)), 1)
         data = data.tolist()
 
         ypred = {}
