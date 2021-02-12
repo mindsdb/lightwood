@@ -18,12 +18,13 @@ class TimeSeriesPlainEncoder(BaseEncoder):
     def prepare(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
+        
+        if self.original_type == COLUMN_DATA_TYPES.CATEGORICAL:
+            self._normalizer = CatNormalizer()
         else:
-            if self.original_type == COLUMN_DATA_TYPES.CATEGORICAL:
-                self._normalizer = CatNormalizer()
-            else:
-                self._normalizer = MinMaxNormalizer()
-            self._normalizer.prepare(priming_data)
+            self._normalizer = MinMaxNormalizer()
+
+        self._normalizer.prepare(priming_data)
         self._prepared = True
 
     def encode(self, column_data):
@@ -31,4 +32,5 @@ class TimeSeriesPlainEncoder(BaseEncoder):
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         data = torch.cat([self._normalizer.encode(column_data)], dim=-1)
         data[torch.isnan(data)] = 0.0
+        data[torch.isinf(data)] = 0.0
         return data
