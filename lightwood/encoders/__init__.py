@@ -11,7 +11,7 @@ from lightwood.encoders.text.rnn import RnnEncoder as TextRnnEncoder
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
 from lightwood.encoders.time_series.rnn import TimeSeriesEncoder as TsRnnEncoder
-from lightwood.encoders.time_series.plain import TimeSeriesPlainEncoder as TsPlainEncoder
+from lightwood.encoders.time_series.plain import TimeSeriesPlainEncoder
 # from lightwood.encoders.audio.amplitude_ts import AmplitudeTsEncoder
 from lightwood.encoders.categorical.multihot import MultiHotEncoder
 
@@ -42,7 +42,7 @@ class Categorical:
 
 class TimeSeries:
     TsRnnEncoder = TsRnnEncoder
-    TsPlainEncoder = TsPlainEncoder
+    TimeSeriesPlainEncoder = TimeSeriesPlainEncoder
 
 class BuiltinEncoders:
     DateTime = DateTime
