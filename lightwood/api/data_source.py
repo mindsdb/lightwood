@@ -22,7 +22,7 @@ from lightwood.encoders import (
     DatetimeEncoder,
     Img2VecEncoder,
     TsRnnEncoder,
-    TsPlainEncoder,
+    TimeSeriesPlainEncoder,
     ShortTextEncoder,
     VocabularyEncoder
 )
@@ -313,7 +313,7 @@ class DataSource(Dataset):
                 column_type == ColumnDataTypes.NUMERIC:
             encoder_class = TsNumericEncoder
         if column_type == ColumnDataTypes.TIME_SERIES and '__mdb_ts_previous' in column_config['name']:
-            encoder_class = TsPlainEncoder
+            encoder_class = TimeSeriesPlainEncoder
 
         return encoder_class
 
