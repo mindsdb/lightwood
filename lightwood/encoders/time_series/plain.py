@@ -18,9 +18,9 @@ class TimeSeriesPlainEncoder(BaseEncoder):
     def prepare(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
-        
+
         if self.original_type == COLUMN_DATA_TYPES.CATEGORICAL:
-            self._normalizer = CatNormalizer()
+            self._normalizer = CatNormalizer(encoder_class='ordinal')
         else:
             self._normalizer = MinMaxNormalizer()
 
