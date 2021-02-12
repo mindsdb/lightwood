@@ -109,7 +109,7 @@ class LightGBMMixer(BaseMixer):
                 params['num_iterations'] = 1
                 bst = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
                 end = time.time()
-                seconds_for_one_iteration = end - start
+                seconds_for_one_iteration = min(0.1, end - start)
                 logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
                 max_itt = int(self.stop_training_after_seconds/seconds_for_one_iteration)
                 num_iterations = max(1, min(num_iterations, max_itt))
