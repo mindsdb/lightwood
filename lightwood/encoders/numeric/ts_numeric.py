@@ -88,7 +88,7 @@ class TsNumericEncoder(NumericEncoder):
             if self.is_target:
                 if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
                     log.error(f'Got weird target value to decode: {vector}')
-                    real_value = pow(10,63)
+                    real_value = pow(10, 63)
                 else:
                     if decode_log:
                         sign = -1 if vector[0] > 0.5 else 1
@@ -105,6 +105,7 @@ class TsNumericEncoder(NumericEncoder):
                                 mean = self.normalizers['__default'].abs_mean
                         else:
                             mean = self._abs_mean
+
                         real_value = vector[2] * mean
 
                     if self.positive_domain:
