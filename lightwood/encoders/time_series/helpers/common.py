@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from itertools import product
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
 
 
 class MinMaxNormalizer:
@@ -38,8 +38,11 @@ class MinMaxNormalizer:
 
 
 class CatNormalizer:
-    def __init__(self):
-        self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
+    def __init__(self, encoder_class='one_hot'):
+        if encoder_class == 'one_hot':
+            self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
+        else:
+            self.scaler = OrdinalEncoder()
         self.unk = "<UNK>"
 
     def prepare(self, x):
@@ -53,7 +56,11 @@ class CatNormalizer:
         y = np.array([[j if j is not None else self.unk for j in i] for i in Y])
         out = []
         for i in y:
-            out.append(self.scaler.transform(i.reshape(-1, 1)))
+            transformed = self.scaler.transform(i.reshape(-1, 1))
+            if isinstance(self.scaler, OrdinalEncoder):
+                transformed = transformed.flatten()
+            out.append(transformed)
+
         return torch.Tensor(out)
 
     def decode(self, y):
