@@ -1,20 +1,19 @@
-from lightwood.encoders.encoder_base import BaseEncoder
-from lightwood.encoders.time_series.helpers.common import *
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 import torch
+
+from lightwood.encoders.encoder_base import BaseEncoder
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.encoders.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
 
 
 class TimeSeriesPlainEncoder(BaseEncoder):
     def __init__(self, is_target=False):
         """
-        This simple encoder fits a normalizer using previous historical data,
-        and when encoding it simply return the normalized window of previous data.
+        Fits a normalizer for a time series previous historical data.
+        When encoding, it returns a normalized window of previous data.
         """
         super().__init__(is_target)
         self.original_type = None
-        self.secondary_type = None
         self._normalizer = None
-        self.window_size = None
 
     def prepare(self, priming_data):
         if self._prepared:
