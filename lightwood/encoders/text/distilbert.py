@@ -17,6 +17,7 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.shapes import *
 from lightwood.api.gym import Gym
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.logger import log
@@ -29,7 +30,6 @@ class DistilBertEncoder(BaseEncoder):
         self._tokenizer = None
         self._model = None
         self._pad_id = None
-        self._pytorch_wrapper = torch.FloatTensor
         self._max_len = None
         self._max_ele = None
         self._model_type = None
@@ -47,19 +47,16 @@ class DistilBertEncoder(BaseEncoder):
             self._embeddings_model_class = AlbertModel
             self._tokenizer_class = AlbertTokenizer
             self._pretrained_model_name = 'albert-base-v2'
-            self._model_max_len = 768
         if self.aim == ENCODER_AIM.BALANCE:
             self._classifier_model_class = DistilBertForSequenceClassification
             self._embeddings_model_class = DistilBertModel
             self._tokenizer_class = DistilBertTokenizer
             self._pretrained_model_name = 'distilbert-base-uncased'
-            self._model_max_len = 768
         if self.aim == ENCODER_AIM.ACCURACY:
             self._classifier_model_class = DistilBertForSequenceClassification
             self._embeddings_model_class = DistilBertModel
             self._tokenizer_class = DistilBertTokenizer
             self._pretrained_model_name = 'distilbert-base-uncased'
-            self._model_max_len = 768
 
         self.device, _ = get_devices()
 
@@ -72,8 +69,9 @@ class DistilBertEncoder(BaseEncoder):
         input = input.to(gym.device)
         labels = torch.tensor([torch.argmax(x) for x in real]).to(gym.device)
 
-        outputs = gym.model(input, labels=labels)
-        loss, logits = outputs[:2]
+        with LightwoodAutocast():
+            outputs = gym.model(input, labels=labels)
+            loss, logits = outputs[:2]
 
         if not test:
             loss.backward()
@@ -87,14 +85,16 @@ class DistilBertEncoder(BaseEncoder):
         input, real = data
 
         backbone = backbone.eval()
+
         with torch.no_grad():
             input = input.to(gym.device)
             real = real.to(gym.device)
 
             embeddings = backbone(input)[0][:, 0, :]
 
-        outputs = gym.model(embeddings)
-        loss = gym.loss_criterion(outputs, real)
+        with LightwoodAutocast():
+            outputs = gym.model(embeddings)
+            loss = gym.loss_criterion(outputs, real)
 
         if not test:
             loss.backward()
@@ -118,7 +118,6 @@ class DistilBertEncoder(BaseEncoder):
 
         priming_data = [x if x is not None else '' for x in priming_data]
 
-        self._max_len = min(max([len(x) for x in priming_data]), self._model_max_len)
         self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
         self._pad_id = self._tokenizer.convert_tokens_to_ids([self._tokenizer.pad_token])[0]
         # @TODO: Support multiple targets if they are all categorical
@@ -131,6 +130,7 @@ class DistilBertEncoder(BaseEncoder):
             self._model_type = 'classifier'
             self._model = self._classifier_model_class.from_pretrained(self._pretrained_model_name, num_labels=len(
                 set(training_data['targets'][0]['unencoded_output'])) + 1).to(self.device)
+            self._max_len = min(max([len(x) for x in priming_data]), self._model.config.max_position_embeddings)
             batch_size = 10
 
             no_decay = ['bias', 'LayerNorm.weight']
@@ -184,6 +184,7 @@ class DistilBertEncoder(BaseEncoder):
             self._model_type = 'generic_target_predictor'
             self._model = self._embeddings_model_class.from_pretrained(self._pretrained_model_name).to(self.device)
             batch_size = 10
+            self._max_len = min(max([len(x) for x in priming_data]), self._model.config.max_position_embeddings)
 
             self._head = DefaultNet(dynamic_parameters={}, shape=funnel(
                 768, sum([len(x['encoded_output'][0]) for x in training_data['targets']]), depth=5))
@@ -276,7 +277,7 @@ class DistilBertEncoder(BaseEncoder):
                     embeddings = output[0][:, 0, :].cpu().numpy()[0]
                     encoded_representation.append(embeddings)
 
-        return self._pytorch_wrapper(encoded_representation)
+        return torch.Tensor(encoded_representation)
 
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception('This encoder is not bi-directional')

@@ -28,9 +28,6 @@ with open('requirements.txt') as req_file:
 with open('optional_requirements.txt') as req_file:
     optional_requirements = [req.strip() for req in req_file.read().splitlines()]
 
-if sys_platform in ['darwin']:
-    requirements = remove_requirements(requirements,'transformers', 'transformers == 2.4.1')
-
 # Windows specific requirements
 if sys_platform in ['win32','cygwin','windows']:
     requirements = remove_requirements(requirements,'torch')
@@ -43,18 +40,18 @@ if sys_platform in ['win32','cygwin','windows']:
     print('Trying to install pytorch and torchvision!')
     code = 1
     try:
-        code = subprocess.call(['pip', 'install', 'torch===1.4.0+cpu', 'torchvision===0.5.0+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+        code = subprocess.call(['pip', 'install', 'torch===1.7.0+cpu', 'torchvision===0.8.1+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
         if code != 0:
-            raise Exception('Torch and trochvsion instalation failed !')
+            raise Exception('Torch and torchvsion instalation failed !')
     except:
         try:
-            code = subprocess.call(['pip3', 'install', 'torch===1.4.0+cpu', 'torchvision===0.5.0+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
+            code = subprocess.call(['pip3', 'install', 'torch===1.7.0+cpu', 'torchvision===0.8.1+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
             if code != 0:
-                raise Exception('Torch and trochvsion instalation failed !')
+                raise Exception('Torch and torchvision installation failed !')
         except:
-            print('Failed to install pytroch, please install pytroch and torchvision manually be following the simple instructions over at: https://pytorch.org/get-started/locally/')
+            print('Failed to install pytorch, please install pytorch and torchvision manually by following the simple instructions over at: https://pytorch.org/get-started/locally/')
     if code == 0:
-        print('Successfully installed pytorch and torchvision CPU version! (If you need the GPU version, please install it manually, checkout the mindsdb docs and the pytroch docs if you need help)')
+        print('Successfully installed pytorch and torchvision CPU version! (If you need the GPU version, please install it manually, checkout the mindsdb docs and the pytorch docs if you need help)')
 
 
 setuptools.setup(

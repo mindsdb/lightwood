@@ -11,6 +11,8 @@ from torchvision.utils import save_image
 import requests
 from io import BytesIO
 
+from lightwood.helpers.torch import LightwoodAutocast
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -44,8 +46,9 @@ class autoencoder(nn.Module):
             nn.ReLU(True), nn.Linear(128, 128 * 128), nn.Tanh())
 
     def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
+        with LightwoodAutocast():
+            x = self.encoder(x)
+            x = self.decoder(x)
         return x
 
 
@@ -104,8 +107,9 @@ class NnEncoderHelper:
                 img = img.view(img.size(0), -1)
                 img = Variable(img).cpu()
                 # ===================forward=====================
-                output = self.model(img)
-                loss = criterion(output, img)
+                with LightwoodAutocast():
+                    output = self.model(img)
+                    loss = criterion(output, img)
                 # ===================backward====================
                 optimizer.zero_grad()
                 loss.backward()

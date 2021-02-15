@@ -1,3 +1,5 @@
+import time
+import numpy as np
 from sklearn.metrics import accuracy_score, r2_score, f1_score
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 
@@ -11,15 +13,6 @@ class BaseMixer:
     """
     def __init__(self):
         self.dynamic_parameters = {}
-        self.quantiles = [
-            0.5,
-            0.2, 0.8,
-            0.1, 0.9,
-            0.05, 0.95,
-            0.02, 0.98,
-            0.005, 0.995
-        ]
-        self.quantiles_pair = [9, 10]
         self.targets = None
         self.transformer = None
         self.encoders = None
@@ -31,11 +24,6 @@ class BaseMixer:
         """
         assert train_ds.transformer is test_ds.transformer
         assert train_ds.encoders is test_ds.encoders
-
-        for ds in [train_ds, test_ds]:
-            for n, out_type in enumerate(ds.out_types):
-                if out_type == COLUMN_DATA_TYPES.NUMERIC:
-                    ds.encoders[ds.output_feature_names[n]].extra_outputs = len(self.quantiles) - 1
 
         self.targets = {}
         for output_feature in train_ds.output_features:
@@ -135,7 +123,6 @@ class BaseMixer:
         for output_column in [feature['name'] for feature in ds.config['output_features']]:
 
             col_type = ds.get_column_config(output_column)['type']
-
             if col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
                 reals = [tuple(x) for x in ds.get_column_original_data(output_column)]
                 preds = [tuple(x) for x in predictions[output_column]['predictions']]
@@ -157,7 +144,7 @@ class BaseMixer:
             )
 
         return accuracies
-    
+
     @staticmethod
     def _apply_accuracy_function(col_type, reals, preds, weight_map=None, encoder=None):
         if col_type == COLUMN_DATA_TYPES.CATEGORICAL:
@@ -166,10 +153,17 @@ class BaseMixer:
             else:
                 sample_weight = [weight_map[val] for val in reals]
 
-            accuracy = {
-                'function': 'accuracy_score',
-                'value': accuracy_score(reals, preds, sample_weight=sample_weight)
-            }
+            try:
+                accuracy = {
+                    'function': 'accuracy_score',
+                    'value': accuracy_score(reals, preds, sample_weight=sample_weight)
+                }
+            # happens for timeseries predictors if test_ds doesn't have enough rows to evaluate for some timesteps
+            except ZeroDivisionError:
+                accuracy = {
+                    'function': 'accuracy_score',
+                    'value': np.nan
+                }
         elif col_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
             if weight_map is None:
                 sample_weight = [1] * len(reals)

@@ -10,16 +10,19 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 from lightwood.mixers.helpers.transformer import Transformer
+from lightwood.encoders.time_series.helpers.common import generate_target_group_normalizers
 from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import ColumnDataTypes
 from lightwood.encoders import (
     NumericEncoder,
+    TsNumericEncoder,
     CategoricalAutoEncoder,
     MultiHotEncoder,
     DistilBertEncoder,
     DatetimeEncoder,
     Img2VecEncoder,
     TsRnnEncoder,
+    TimeSeriesPlainEncoder,
     ShortTextEncoder,
     VocabularyEncoder
 )
@@ -72,6 +75,7 @@ class DataSource(Dataset):
         self.config = config
         self.training = False  # Flip this flag if you are using the datasource while training
         self.output_weights = None
+        self.output_weights_offset = None
         self.dropout_dict = {}
         self.enable_dropout = False
         self.enable_cache = self.config['data_source']['cache_transformed_data']
@@ -93,6 +97,15 @@ class DataSource(Dataset):
                 dropout = col['dropout']
 
             self.dropout_dict[col['name']] = dropout
+
+        for col in self.config['output_features']:
+            prev_col = [c for c in self.config['input_features'] if c['name'] == f'__mdb_ts_previous_{col["name"]}']
+            # len(prev_col) <= 1 always holds
+            if prev_col:
+                col['group_info'] = {
+                    prev_col['name']: self.get_column_original_data(prev_col['name'])
+                    for prev_col in self.config['input_features'] if prev_col['grouped_by']
+                }
         
         if initialize_transformer:
             self.transformer = Transformer(self.input_feature_names, self.output_feature_names)
@@ -202,9 +215,7 @@ class DataSource(Dataset):
                 col_config = self.get_column_config(col_name)
 
                 if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
-                    if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache or
-                            (col_name.startswith('previous_') and feature_set == 'input_features')):
-
+                    if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache):
                         self.get_encoded_column_data(col_name)
 
                 # if we are dropping this feature, get the encoded value of None
@@ -222,8 +233,6 @@ class DataSource(Dataset):
                         custom_data = {col_name: [None]}
 
                     sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
-                elif col_name.startswith('previous_') and feature_set == 'input_features':
-                    sample[feature_set][col_name] = torch.Tensor([])
                 else:
                     sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
@@ -237,14 +246,19 @@ class DataSource(Dataset):
 
                     for val in weights:
                         encoded_val = self.get_encoded_column_data(
-                            col_config['name'], custom_data={col_config['name']: [val]})
-                        # @Note: This assumes one-hot encoding for the encoded_value
-                        value_index = np.argmax(encoded_val[0])
+                            col_config['name'],
+                            custom_data={
+                                col_config['name']: [val]
+                            }
+                        )
 
                         if new_weights is None:
-                            new_weights = [np.mean(list(weights.values()))] * len(encoded_val[0])
+                            mean = np.mean(list(weights.values()))
+                            new_weights = [mean] * len(encoded_val[0])
 
-                        new_weights[value_index] = weights[val]
+                        for value_index, hot in enumerate(encoded_val[0]):
+                            if hot:
+                                new_weights[value_index] = weights[val] / sum(encoded_val[0]).item()
 
                     if self.output_weights is None or self.output_weights == False:
                         self.output_weights = new_weights
@@ -260,6 +274,13 @@ class DataSource(Dataset):
         if self.enable_cache:
             self.transformed_cache[idx] = sample
 
+        if self.output_weights_offset is None:
+            self.output_weights_offset = {}
+            for idx, (otype, oidxs) in enumerate(zip(self.out_types, self.out_indexes)):
+                self.output_weights_offset[idx] = self.output_weights_offset.get(idx-1, 0)
+                if otype not in (ColumnDataTypes.CATEGORICAL, ColumnDataTypes.MULTIPLE_CATEGORICAL):
+                     self.output_weights_offset[idx] += (oidxs[1] - oidxs[0])
+
         return sample
 
     def get_column_original_data(self, column_name):
@@ -269,7 +290,7 @@ class DataSource(Dataset):
 
         return self.data_frame[column_name].tolist()
 
-    def _lookup_encoder_class(self, column_type, is_target):
+    def _lookup_encoder_class(self, column_config, is_target):
         default_encoder_classes = {
             ColumnDataTypes.NUMERIC: NumericEncoder,
             ColumnDataTypes.CATEGORICAL: CategoricalAutoEncoder,
@@ -286,10 +307,18 @@ class DataSource(Dataset):
             ColumnDataTypes.TEXT: VocabularyEncoder
         }
 
+        column_type = column_config['type']
         if is_target and column_type in target_encoder_classes:
             encoder_class = target_encoder_classes[column_type]
         else:
             encoder_class = default_encoder_classes[column_type]
+
+        # specialized dispatches
+        if is_target and column_config.get('additional_info', {}).get('time_series_target', False) and \
+                column_type == ColumnDataTypes.NUMERIC:
+            encoder_class = TsNumericEncoder
+        if column_type == ColumnDataTypes.TIME_SERIES and '__mdb_ts_previous' in column_config['name']:
+            encoder_class = TimeSeriesPlainEncoder
 
         return encoder_class
 
@@ -305,9 +334,10 @@ class DataSource(Dataset):
         column_data = self.get_column_original_data(config['name'])
         encoder_class = config.get(
             'encoder_class',
-            self._lookup_encoder_class(config['type'], is_target)
+            self._lookup_encoder_class(config, is_target)
         )
         encoder_attrs = config.get('encoder_attrs', {})
+        encoder_attrs['original_type'] = config.get('original_type', None)
         encoder_attrs['secondary_type'] = config.get('secondary_type', None)
 
         encoder_instance = self._make_column_encoder(
@@ -316,16 +346,15 @@ class DataSource(Dataset):
             is_target=is_target
         )
 
-        if training_data and 'training_data' in inspect.getargspec(encoder_instance.prepare).args:
+        if training_data and 'training_data' in inspect.getfullargspec(encoder_instance.prepare).args:
             encoder_instance.prepare(
                 column_data,
                 training_data=training_data
             )
         else:
             # joint column data augmentation for time series
-            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target:
+            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target and '__mdb_ts_previous' not in config['name']:
                 encoder_instance.prepare(column_data, previous_target_data=training_data['previous'])
-
             else:
                 encoder_instance.prepare(column_data)
 
@@ -337,46 +366,36 @@ class DataSource(Dataset):
         with all available data for that column.
         """
         encoders = {}
-    
         input_encoder_training_data = {'targets': [], 'previous': []}
-
-        for config in self.config['output_features']:
-            column_name = config['name']
-            column_data = self.get_column_original_data(column_name)
-
-            encoder_instance = self._prepare_column_encoder(config, is_target=True)
-
-            input_encoder_training_data['targets'].append({
-                'encoded_output': encoder_instance.encode(column_data),
-                'unencoded_output': column_data,
-                'output_encoder': encoder_instance,
-                'output_type': config['type']
-            })
-
-            encoders[column_name] = encoder_instance
 
         previous_cols = []
         for config in self.config['input_features']:
             column_name = config['name']
-            if column_name.startswith('previous_'):
+            if column_name.startswith('__mdb_ts_previous_'):
                 column_data = self.get_column_original_data(column_name)
                 previous_cols.append(column_name)
-                input_encoder_training_data['previous'].append({'data': column_data,
-                                                                'name': column_name,
-                                                                'original_type': config['original_type'],
-                                                                'output_type': config['type']
-                                                                })
+                col_info = {'data': column_data,
+                            'name': column_name,
+                            'original_type': config['original_type'],
+                            'group_info': {conf['name']: self.get_column_original_data(conf['name'])
+                                           for conf in self.config['input_features'] if conf['grouped_by']},
+                            'output_type': config['type']
+                            }
+                col_info = generate_target_group_normalizers(col_info)
+                input_encoder_training_data['previous'].append(col_info)
+                config['additional_info']['normalizers'] = col_info['normalizers']
+                config['additional_info']['group_combinations'] = col_info['group_combinations']
 
         for config in self.config['input_features']:
             column_name = config['name']
+            encoder_instance = self._prepare_column_encoder(config,
+                                                            is_target=False,
+                                                            training_data=input_encoder_training_data)
+
+            encoders[column_name] = encoder_instance
+
             if column_name not in previous_cols:
-                encoder_instance = self._prepare_column_encoder(config,
-                                                                is_target=False,
-                                                                training_data=input_encoder_training_data)
-
-                encoders[column_name] = encoder_instance
-
-                # add dependency on 'previous_' column (for now singular, plural later on)
+                # add dependency on '__mdb_ts_previous_' column (for now singular, plural later on)
                 if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
                     for d in input_encoder_training_data['previous']:
                         try:
@@ -384,6 +403,38 @@ class DataSource(Dataset):
                                 config['depends_on_column'].append(d['name'])
                         except KeyError:
                             config['depends_on_column'] = [d['name']]
+
+        for config in self.config['output_features']:
+            column_name = config['name']
+            column_data = self.get_column_original_data(column_name)
+
+            prev_col = [c for c in self.config['input_features'] if c['name'] == f'__mdb_ts_previous_{column_name}']
+            if prev_col:
+                # 0-indexed as we know it can only be one
+                config['depends_on_column'] = [prev_col[0]['name']]
+                config['encoder_attrs']['normalizers'] = prev_col[0]['additional_info']['normalizers']
+                config['encoder_attrs']['group_combinations'] = prev_col[0]['additional_info']['group_combinations']
+                group_info = config['group_info']
+            else:
+                group_info = None
+
+            encoder_instance = self._prepare_column_encoder(config, is_target=True)
+
+            if 'extra_data' not in inspect.signature(encoder_instance.encode).parameters:
+                encoded_output = encoder_instance.encode(column_data)
+            else:
+                # wrap group_info in a list of dicts to conform to get_encoded_column_data call convention
+                extra_data = [{'group_info': group_info}]
+                encoded_output = encoder_instance.encode(column_data, extra_data=extra_data)
+
+            input_encoder_training_data['targets'].append({
+                'encoded_output': encoded_output,
+                'unencoded_output': column_data,
+                'output_encoder': encoder_instance,
+                'output_type': config['type']
+            })
+
+            encoders[column_name] = encoder_instance
 
         return encoders
 
@@ -417,18 +468,25 @@ class DataSource(Dataset):
 
         config = self.get_column_config(column_name)
 
-        # See if the feature has dependencies in other columns
-        if 'depends_on_column' in config:
+        # Pass dependency info when applicable
+        encoder_arity = len(inspect.signature(self.encoders[column_name].encode).parameters)
+        if encoder_arity >= 2 and 'depends_on_column' in config:
             arg2 = []
             for col in config['depends_on_column']:
-                if custom_data is not None:
-                    sublist = custom_data[col]
+                sublist = {'group_info': {conf['name']: self.get_column_original_data(conf['name'])
+                                          for conf in self.config['input_features'] if conf['grouped_by']},
+                           'name': col}
+                if custom_data is None:
+                    sublist['data'] = self.get_column_original_data(col)
                 else:
-                    sublist = self.get_column_original_data(col)
+                    sublist['data'] = custom_data.get(col, None)
                 arg2.append(sublist)
             args.append(arg2)
 
         encoded_vals = self.encoders[column_name].encode(*args)
+        if isinstance(encoded_vals, list) and isinstance(encoded_vals[0], torch.Tensor):
+            encoded_vals = torch.stack(encoded_vals)
+
         # Cache the encoded data so we don't have to run the encoding,
         # Don't cache custom_data
         # (custom_data is usually used when running without cache or dropping out a feature for a certain pass)
@@ -449,7 +507,20 @@ class DataSource(Dataset):
                     You should not decode before having encoding at least once
                     """)
             decoder_instance = self.encoders[column_name]
-        decoded_data = decoder_instance.decode(encoded_data)
+
+        decoded_data = {}
+        if getattr(decoder_instance, 'predict_proba', False):
+            # return complete belief distribution
+            preds, pred_probs, labels = decoder_instance.decode(encoded_data)
+            decoded_data['predictions'] = preds
+            decoded_data['class_distribution'] = pred_probs
+            decoded_data['class_labels'] = labels
+        elif isinstance(decoder_instance, TsNumericEncoder):
+            group_info = {conf['name']: self.get_column_original_data(conf['name'])
+                          for conf in self.config['input_features'] if conf.get('grouped_by', False)}
+            decoded_data['predictions'] = decoder_instance.decode(encoded_data, group_info=group_info)
+        else:
+            decoded_data['predictions'] = decoder_instance.decode(encoded_data)
 
         return decoded_data
 

@@ -27,3 +27,29 @@ class TestNumericEncoder(unittest.TestCase):
                 self.assertTrue(decoded_vals[i] == data[i])
             else:
                 np.testing.assert_almost_equal(round(decoded_vals[i],10), round(data[i],10))
+
+    def test_positive_domain(self):
+        data = [-1, -2, -100, 5, 10, 15]
+        encoder = NumericEncoder()
+
+        encoder.is_target = True        # only affects target values
+        encoder.positive_domain = True
+        encoder.prepare(data)
+        decoded_vals = encoder.decode(encoder.encode(data))
+
+        for val in decoded_vals:
+            self.assertTrue(val >= 0)
+
+    def test_log_overflow_and_none(self):
+        data = list(range(-2000,2000,66))
+        data.extend([None] * 200)
+        encoder = NumericEncoder()
+
+        encoder.is_target = True
+        encoder.positive_domain = True
+        encoder.decode_log = True
+        encoder.prepare(data)
+        decoded_vals = encoder.decode(encoder.encode(data))
+
+        for i in range(0,70,10):
+            encoder.decode([[0, pow(2,i), 0]])
