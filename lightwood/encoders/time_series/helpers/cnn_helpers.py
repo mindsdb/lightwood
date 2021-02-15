@@ -44,6 +44,7 @@ class EncoderCNNts(nn.Module):
                                         dilation=dilation, padding=padding)]
 
         self.network = nn.Sequential(*layers)
+        print(self.network)
 
     def forward(self, x):
         return self.network(x)
@@ -109,72 +110,7 @@ class DecoderCNNts(nn.Module):
     def forward(self, x):
         return self.network(x)
 
-
-def tensor_from_series(series, device, n_dims, pad_value, max_len):
-    """
-    :param series: list of lists, corresponds to time series: [[x1_1, ..., x1_n], [x2_1, ..., x2_n], ...]
-                   the series is zero-padded on each axis so that all dimensions have equal length
-    :param device: computing device that PyTorch backend uses
-    :param n_dims: will zero-pad dimensions until series_dimensions == n_dims
-    :param pad_value: value to pad each dimension in the time series, if needed
-    :param max_len: length to pad or truncate each time_series
-    :return: series as a tensor ready for model consumption, shape (1, ts_length, n_dims)
-    """
-    # edge case for when series == "dim 1 data", outputs shape (1, ts_length)
-    if type(series) != type([]):
-        series = [str(series).split(' ')]
-
-    # conversion to float
-    float_series = []
-    for dimn in series:
-        dimn_series = []
-        for ele in dimn:
-            try:
-                dimn_series.append(float(ele))
-            except Exception as _:
-                logging.warning(f'Weird element encountered in timeseries: {ele} !')
-                dimn_series.append(0)
-        float_series.append(dimn_series)
-
-    # timestep padding and truncating
-    for i in range(len(float_series)):
-        for _ in range(max(0, max_len - len(float_series[i]))):
-            float_series[i].append(pad_value)
-        float_series[i] = float_series[i][:max_len]
-
-    # dimension padding
-    for _ in range(max(0, n_dims - len(float_series))):
-        float_series.append([pad_value] * max_len)
-
-    tensor = torch.transpose(torch.tensor(float_series, dtype=torch.float, device=device), 0, 1)
-
-    # add batch dimension
-    return tensor.view(-1, max_len, n_dims)
-
-
-def simple_data_generator(length, dims):
-    data = [[0 for x in range(length)] for x in range(dims)]
-    for i in range(dims):
-        for j in range(length):
-            data[i][j] = '%s' % (20*i+j)
-
-    return [data]
-
-
-def nonlin_data_generator(length, dims):
-    data = [[0 for x in range(length)] for x in range(dims)]
-    for i in range(dims):
-        for j in range(length):
-            data[i][j] = '%s' % (j**3+j**2+i)
-
-    return [data]
-
-
-def random_data_generator(length, dims):
-    data = [[0 for x in range(length)] for x in range(dims)]
-    for i in range(dims):
-        for j in range(length):
-            data[i][j] = '%s' % (np.random.randint(0, 100))
-
-    return [data]
-
+    def decode(self, data, criterion, device):
+        out = self.forward(data).to(device)
+        target = torch.roll(data, -1, dims=1)
+        return out, criterion(out[:, 0:-1, :], target[:, 0:-1, :])

@@ -64,6 +64,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     self._target_type = COLUMN_DATA_TYPES.NUMERIC
                     total_dims += 1
 
+        # set encoder class
         if self.encoder_class == EncoderRNNNumerical:
             self._enc_criterion = nn.MSELoss()
             self._dec_criterion = self._enc_criterion
@@ -89,7 +90,12 @@ class TimeSeriesEncoder(BaseEncoder):
                                                blocks=[32, 16, 8, total_dims],
                                                kernel_size=5)
 
-        self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
+        # set decoder class
+        if self.encoder_class == EncoderCNNts:
+            self._decoder = DecoderCNNts(kernel_size=5, output_dims=total_dims, blocks=[32, 16, 8, total_dims])
+        else:
+            self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
+
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
         self._optimizer = optim.AdamW(self._parameters, lr=self._learning_rate, weight_decay=1e-4)
         self._n_dims = total_dims
@@ -190,19 +196,16 @@ class TimeSeriesEncoder(BaseEncoder):
                     elif self.encoder_class == EncoderCNNts:
                         next_tensor, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
                         loss += enc_loss
-                        #
-                        # next_tensor, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
-                        #                                                            self.device,
-                        #                                                            hidden_state=hidden_state)
-                        # loss += dec_loss
+
+                        next_tensor, dec_loss = self._decoder.decode(next_tensor, self._dec_criterion, self.device)
+                        loss += dec_loss
 
                     else:
                         next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
                         loss += enc_loss
 
                         next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
-                                                                                   self.device,
-                                                                                   hidden_state=hidden_state)
+                                                                                   self.device, hidden_state=hidden_state)
                         loss += dec_loss
 
                 loss.backward()

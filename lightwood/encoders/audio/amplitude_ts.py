@@ -5,7 +5,7 @@ import requests
 import numpy as np
 import torch
 
-from lightwood.encoders.time_series.rnn import RnnEncoder
+from lightwood.encoders.time_series.time_series import RnnEncoder
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.logger import log
 

@@ -1,17 +1,33 @@
-import os
-import sys
 import unittest
-
-import numpy as np
-import torch
-
-from lightwood.helpers.device import get_devices
 from lightwood.encoders.time_series.cnn import *
-from lightwood.encoders.time_series.helpers.cnn_helpers import (
-            tensor_from_series, 
-            simple_data_generator,
-            nonlin_data_generator, 
-            random_data_generator)
+
+
+def simple_data_generator(length, dims):
+    data = [[0 for x in range(length)] for x in range(dims)]
+    for i in range(dims):
+        for j in range(length):
+            data[i][j] = '%s' % (20*i+j)
+
+    return [data]
+
+
+def nonlin_data_generator(length, dims):
+    data = [[0 for x in range(length)] for x in range(dims)]
+    for i in range(dims):
+        for j in range(length):
+            data[i][j] = '%s' % (j**3+j**2+i)
+
+    return [data]
+
+
+def random_data_generator(length, dims):
+    data = [[0 for x in range(length)] for x in range(dims)]
+    for i in range(dims):
+        for j in range(length):
+            data[i][j] = '%s' % (np.random.randint(0, 100))
+
+    return [data]
+
  
 class TestCnnEncoder(unittest.TestCase):
     def __init__(self, blocks=[1], kernel_size=3, train_epochs=100, learning_rate=0.001):
