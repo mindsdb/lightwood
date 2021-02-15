@@ -1,5 +1,6 @@
 from lightwood.encoders.time_series.helpers.common import *
 from lightwood.encoders.time_series.helpers.rnn_helpers import *
+from lightwood.encoders.time_series.helpers.cnn_helpers import *
 from lightwood.encoders.time_series.helpers.transformer_helpers import *
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.torch import LightwoodAutocast
@@ -16,7 +17,7 @@ from math import gcd
 class TimeSeriesEncoder(BaseEncoder):
 
     def __init__(self, encoded_vector_size=128, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical):
+                 is_target=False, ts_n_dims=1, encoder_class=EncoderCNNts): # EncoderRNNNumerical):
         super().__init__(is_target)
         self.device, _ = get_devices()
         self.encoder_class = encoder_class
@@ -80,6 +81,13 @@ class TimeSeriesEncoder(BaseEncoder):
                                                nhead=gcd(dec_hsize, total_dims),
                                                nhid=self._transformer_hidden_size,
                                                nlayers=1).to(self.device)
+
+        elif self.encoder_class == EncoderCNNts:
+            self._enc_criterion = nn.MSELoss()
+            self._dec_criterion = self._enc_criterion
+            self._encoder = self.encoder_class(input_dims=total_dims,
+                                               blocks=[32, 16, 8, total_dims],
+                                               kernel_size=5)
 
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
@@ -179,6 +187,15 @@ class TimeSeriesEncoder(BaseEncoder):
                         next_tensor, hidden_state, dec_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
                         loss += dec_loss
 
+                    elif self.encoder_class == EncoderCNNts:
+                        next_tensor, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
+                        loss += enc_loss
+                        #
+                        # next_tensor, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
+                        #                                                            self.device,
+                        #                                                            hidden_state=hidden_state)
+                        # loss += dec_loss
+
                     else:
                         next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
                         loss += enc_loss
@@ -246,6 +263,12 @@ class TimeSeriesEncoder(BaseEncoder):
                 for tensor_i in range(steps):
                     next_tensor, encoder_hidden = self._encoder.forward(data_tensor[:, tensor_i, :].unsqueeze(dim=0),
                                                                         encoder_hidden)
+
+            elif self.encoder_class == EncoderCNNts:
+                next_tensor = None
+                for tensor_i in range(steps):
+                    encoder_hidden = self._encoder.forward(data_tensor[:, tensor_i, :].unsqueeze(dim=0).transpose(1, 2))
+
             else:
                 next_tensor = None
                 len_batch = self._get_batch(lengths_data, 0, len(data))

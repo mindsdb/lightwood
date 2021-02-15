@@ -95,8 +95,8 @@ class TestCnnEncoder(unittest.TestCase):
 
 ### Initial test, time series is of form [[0,1,2,3,...n],[20,21,22,..n+20]]
 # Very easy task, linear relationship, performs well, especially with many samples
-test = TestCnnEncoder()
-result = test.initial() 
+# test = TestCnnEncoder()
+# result = test.initial()
 
 ### 2nd test, random sequence of numbers in range (0,100), each sample is the identical
 # Aimed to test long term memory of model
@@ -107,8 +107,8 @@ result = test.initial()
 ### 3rd test, non-linear function y = x^3 + x^2 + c
 # Where, x is value in dimension, c is dimension
 # Performs very poorly, more complex model required
-# test = TestCnnEncoder()
-# result = test.nonlinear()
+test = TestCnnEncoder()
+result = test.nonlinear()
 
 
 
