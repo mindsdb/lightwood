@@ -97,7 +97,7 @@ class TestPredictor(unittest.TestCase):
             "output_features": [
                 {"name": "output", "type": "numeric"},
             ],
-            "mixer": {"class": BoostMixer},
+            "mixer": {"class": LightGBMMixer},
         }
 
         inpx = ["this is a test case of text", "lightwood is awesome!"] *100
