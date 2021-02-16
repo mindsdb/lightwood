@@ -368,6 +368,7 @@ class DataSource(Dataset):
         encoders = {}
         input_encoder_training_data = {'targets': [], 'previous': []}
 
+        # handle time series previous target columns
         previous_cols = []
         for config in self.config['input_features']:
             column_name = config['name']
@@ -386,16 +387,31 @@ class DataSource(Dataset):
                 config['additional_info']['normalizers'] = col_info['normalizers']
                 config['additional_info']['group_combinations'] = col_info['group_combinations']
 
+        # train output encoders (except for time-series related)
+        for config in self.config['output_features']:
+            if config['type'] not in ColumnDataTypes.TIME_SERIES:
+                column_name = config['name']
+                column_data = self.get_column_original_data(column_name)
+                encoder_instance = self._prepare_column_encoder(config, is_target=True)
+
+                input_encoder_training_data['targets'].append({
+                    'encoded_output': encoder_instance.encode(column_data),
+                    'unencoded_output': column_data,
+                    'output_encoder': encoder_instance,
+                    'output_type': config['type']
+                })
+
+                encoders[column_name] = encoder_instance
+
+        # train input encoders
         for config in self.config['input_features']:
             column_name = config['name']
             encoder_instance = self._prepare_column_encoder(config,
                                                             is_target=False,
                                                             training_data=input_encoder_training_data)
-
             encoders[column_name] = encoder_instance
 
             if column_name not in previous_cols:
-                # add dependency on '__mdb_ts_previous_' column (for now singular, plural later on)
                 if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
                     for d in input_encoder_training_data['previous']:
                         try:
@@ -404,36 +420,20 @@ class DataSource(Dataset):
                         except KeyError:
                             config['depends_on_column'] = [d['name']]
 
+        # train time series output encoder
         for config in self.config['output_features']:
             column_name = config['name']
-            column_data = self.get_column_original_data(column_name)
 
-            prev_col = [c for c in self.config['input_features'] if c['name'] == f'__mdb_ts_previous_{column_name}']
+            prev_col = [c for c in self.config['input_features'] if
+                        c['name'] == f'__mdb_ts_previous_{column_name}']
             if prev_col:
                 # 0-indexed as we know it can only be one
                 config['depends_on_column'] = [prev_col[0]['name']]
                 config['encoder_attrs']['normalizers'] = prev_col[0]['additional_info']['normalizers']
-                config['encoder_attrs']['group_combinations'] = prev_col[0]['additional_info']['group_combinations']
-                group_info = config['group_info']
-            else:
-                group_info = None
+                config['encoder_attrs']['group_combinations'] = prev_col[0]['additional_info'][
+                    'group_combinations']
 
             encoder_instance = self._prepare_column_encoder(config, is_target=True)
-
-            if 'extra_data' not in inspect.signature(encoder_instance.encode).parameters:
-                encoded_output = encoder_instance.encode(column_data)
-            else:
-                # wrap group_info in a list of dicts to conform to get_encoded_column_data call convention
-                extra_data = [{'group_info': group_info}]
-                encoded_output = encoder_instance.encode(column_data, extra_data=extra_data)
-
-            input_encoder_training_data['targets'].append({
-                'encoded_output': encoded_output,
-                'unencoded_output': column_data,
-                'output_encoder': encoder_instance,
-                'output_type': config['type']
-            })
-
             encoders[column_name] = encoder_instance
 
         return encoders
