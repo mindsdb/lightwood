@@ -104,13 +104,13 @@ class DistilBertEncoder(BaseEncoder):
 
         return loss
 
-    def to(self, device, available_devices):
-        self._model = self._model.to(self.device)
-
-        if self._head is not None:
-            self._head = self._head.to(self.device)
-
-        return self
+    # def to(self, device, available_devices):
+    #     self._model = self._model.to(self.device)
+    #
+    #     if self._head is not None:
+    #         self._head = self._head.to(self.device)
+    #
+    #     return self
 
     def prepare(self, priming_data, training_data=None):
         if self._prepared:
