@@ -41,15 +41,6 @@ class CategoricalAutoEncoder(BaseEncoder):
         labels = targets_c.to(self.net.device)
         return labels
 
-    #def to(self, device, available_devices):
-        #if self.use_autoencoder:
-        #    self.net = self.net.to(device, available_devices)
-        #for v in vars(self):
-        #    attr = getattr(self, v)
-        #    if isinstance(attr, torch.nn.Module):
-        #        attr.to(device)
-        #return self
-
     def prepare(self, priming_data):
         random.seed(len(priming_data))
 
