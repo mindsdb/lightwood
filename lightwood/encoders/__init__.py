@@ -14,6 +14,7 @@ from lightwood.encoders.time_series.rnn import TimeSeriesEncoder as TsRnnEncoder
 from lightwood.encoders.time_series.plain import TimeSeriesPlainEncoder
 # from lightwood.encoders.audio.amplitude_ts import AmplitudeTsEncoder
 from lightwood.encoders.categorical.multihot import MultiHotEncoder
+from lightwood.encoders.text.pretrained import PretrainedLang
 
 
 class DateTime:
@@ -35,6 +36,7 @@ class Text:
     ShortTextEncoder = ShortTextEncoder
     TextRnnEncoder = TextRnnEncoder
     VocabularyEncoder = VocabularyEncoder
+    PretrainedLang = PretrainedLang
 
 class Categorical:
     OneHotEncoder = OneHotEncoder
