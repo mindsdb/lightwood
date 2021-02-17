@@ -45,11 +45,6 @@ class autoencoder(nn.Module):
             nn.Linear(64, 128),
             nn.ReLU(True), nn.Linear(128, 128 * 128), nn.Tanh())
 
-    def to(self, device, available_devices):
-        self.encoder = self.encoder.to(device)
-        self.decoder = self.decoder.to(device)
-        return self
-
     def forward(self, x):
         with LightwoodAutocast():
             x = self.encoder(x)
@@ -58,6 +53,7 @@ class autoencoder(nn.Module):
 
 
 class NnEncoderHelper:
+
     def __init__(self, images):
         """
 
