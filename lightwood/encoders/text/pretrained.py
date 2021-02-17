@@ -176,25 +176,27 @@ class PretrainedLang(BaseEncoder):
         encoded_representation:: [torch.Tensor] N_sentences x Nembed_dim
         """
         encoded_representation = []
+        self._model = self._model.eval()
 
-        # Set the weights; this is GPT-2
-        if self._model_type == "embeddings_generator":
-            for text in column_data:
+        with torch.no_grad():
+            # Set the weights; this is GPT-2
+            if self._model_type == "embeddings_generator":
+                for text in column_data:
 
-                # Omit NaNs
-                if text == None:
-                    text = ''
+                    # Omit NaNs
+                    if text == None:
+                        text = ''
 
-                # Tokenize the text with the built-in tokenizer.
-                inp = self._tokenizer.encode(text)
+                    # Tokenize the text with the built-in tokenizer.
+                    inp = self._tokenizer.encode(text, return_tensors="pt").to(self.device)
 
-                # TODO - try different accumulation techniques?
-                output = self._model(inp).last_hidden_state
-                output = self._sent_embedder(output)
+                    # TODO - try different accumulation techniques?
+                    output = self._model(inp).last_hidden_state
+                    output = self._sent_embedder(output.to(self.device))
 
-                encoded_representation.append(output)
+                    encoded_representation.append(output)
 
-        return torch.stack(encoded_representation)
+        return torch.Tensor(encoded_representation).squeeze(1)
 
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception("Decoder not implemented yet.")
@@ -211,7 +213,7 @@ class PretrainedLang(BaseEncoder):
         xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
         dim ::int; dimension to average on
         """
-        return torch.mean(xinp, dim=dim).detach().numpy()
+        return torch.mean(xinp, dim=dim).cpu().numpy()
 
     @staticmethod
     def _last_state(xinp):
@@ -221,6 +223,6 @@ class PretrainedLang(BaseEncoder):
         Args:
             xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
         """
-        return xinp[:, -1, :].detach().numpy()
+        return xinp[:, -1, :].cpu().numpy()
 
 
