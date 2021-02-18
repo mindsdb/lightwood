@@ -11,7 +11,10 @@ NOTEs:
 -- using fast tokenizers;
 -- T5 is a good for particular targets possibly
 
+Fine tuning: https://github.com/huggingface/transformers/issues/4749
 
+I'm probably going to need a superlongform text cutter...
+Line 216 is temporary hack.
 """
 
 from functools import partial
@@ -33,15 +36,19 @@ from transformers import (
     DistilBertModel,
     DistilBertForSequenceClassification,
     DistilBertTokenizerFast,
+    #DistilBertConfig,
     AlbertModel,
     AlbertForSequenceClassification,
     AlbertTokenizerFast,
+    #AlbertConfig,
     GPT2Model,
     GPT2ForSequenceClassification,
     GPT2TokenizerFast,
+    #GPT2Config,
     BartModel,
     BartForSequenceClassification,
     BartTokenizerFast,
+    #BartConfig,
     AdamW,
     get_linear_schedule_with_warmup,
 )
@@ -64,6 +71,7 @@ class PretrainedLang(BaseEncoder):
     custom_tokenizer ::function; custom tokenizing function
     sent_embedder ::str; make a sentence embedding from seq of word embeddings
                          default, sum all tokens and average
+    max_position_embeddings ::int; max sequence length
     """
 
     def __init__(
@@ -75,6 +83,7 @@ class PretrainedLang(BaseEncoder):
         custom_train=False,
         custom_tokenizer=None,
         sent_embedder='mean_norm',
+        #max_position_embeddings=512,
     ):
         super().__init__(is_target)
 
@@ -82,7 +91,7 @@ class PretrainedLang(BaseEncoder):
 
         # Token/sequence treatment
         self._pad_id = None
-        self._max_len = None
+        #self._max_len = max_position_embeddings
         self._max_ele = None
         self._custom_train = custom_train
 
@@ -101,21 +110,25 @@ class PretrainedLang(BaseEncoder):
             self._embeddings_model_class = DistilBertModel
             self._tokenizer_class = DistilBertTokenizerFast
             self._pretrained_model_name = "distilbert-base-uncased"
+            #self._enc_config = DistilBertConfig(max_position_embedding=self._max_len )
         elif model_name == "albert":
             self._classifier_model_class = AlbertForSequenceClassification
             self._embeddings_model_class = AlbertModel
             self._tokenizer_class = AlbertTokenizerFast
             self._pretrained_model_name = "albert-base-v2"
+            #self._enc_config = AlbertConfig(max_position_embeddings=self._max_len )
         elif model_name == "bart":
             self._classifier_model_class = BartForSequenceClassification
             self._embeddings_model_class = BartModel
             self._tokenizer_class = BartTokenizerFast
             self._pretrained_model_name = "facebook/bart-large"
+            #self._enc_config = BartConfig(max_position_embeddings=self._max_len )
         else:
             self._classifier_model_class = GPT2ForSequenceClassification
             self._embeddings_model_class = GPT2Model
             self._tokenizer_class = GPT2TokenizerFast
             self._pretrained_model_name = "gpt2"
+            #self._enc_config = GPT2Config(n_positions=self._max_len)
 
         # Type of sentence embedding
         if sent_embedder == 'last_token':
@@ -160,6 +173,10 @@ class PretrainedLang(BaseEncoder):
             self._model = self._embeddings_model_class.from_pretrained(
                 self._pretrained_model_name
             ).to(self.device)
+            if "gpt2" in self._pretrained_model_name:
+                self._max_len = self._model.config.n_positions
+            else:
+                self._max_len = self._model.config.max_position_embeddings
 
         # Depending on model type, get forward pass
 
@@ -167,7 +184,9 @@ class PretrainedLang(BaseEncoder):
 
     def encode(self, column_data):
         """
+        TODO: Maybe batch the text up; may take too long
         Given column data, encode the dataset
+        Tokenizer should have a length cap!!
 
         Args:
         column_data:: [list[str]] list of text data in str form
@@ -176,7 +195,9 @@ class PretrainedLang(BaseEncoder):
         encoded_representation:: [torch.Tensor] N_sentences x Nembed_dim
         """
         encoded_representation = []
-        self._model = self._model.eval()
+
+        # Freeze training mode while encoding
+        self._model.eval()
 
         with torch.no_grad():
             # Set the weights; this is GPT-2
@@ -191,6 +212,9 @@ class PretrainedLang(BaseEncoder):
                     inp = self._tokenizer.encode(text, return_tensors="pt").to(self.device)
 
                     # TODO - try different accumulation techniques?
+                    # TODO: Current hack is to keep the first max len
+                    inp = inp[:, :self._max_len]
+
                     output = self._model(inp).last_hidden_state
                     output = self._sent_embedder(output.to(self.device))
 
