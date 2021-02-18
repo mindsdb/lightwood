@@ -147,7 +147,7 @@ class PretrainedLang(BaseEncoder):
 
         return self
 
-    def prepare(self):
+    def prepare(self, priming_data, training_data=None):
         """
         Prepare the text encoder to convert text -> feature vector
 
