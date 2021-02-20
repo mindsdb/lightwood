@@ -22,6 +22,7 @@ def get_devices():
                 os.envrion['ROUND_ROBIN_GPU_CURRENT'] = (str(current_gpu+1))
     else:
         device_str = "cpu"
+        available_devices = 1
 
     if CONFIG.USE_DEVICE is not None:
         device_str = CONFIG.USE_DEVICE
