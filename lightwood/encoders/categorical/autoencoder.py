@@ -7,7 +7,6 @@ from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.encoders.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym
-from lightwood.config.config import CONFIG
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.logger import log
 
@@ -41,11 +40,6 @@ class CategoricalAutoEncoder(BaseEncoder):
         targets_c = torch.LongTensor(target_indexes)
         labels = targets_c.to(self.net.device)
         return labels
-
-    def to(self, device, available_devices):
-        if self.use_autoencoder:
-            self.net = self.net.to(device, available_devices)
-        return self
 
     def prepare(self, priming_data):
         random.seed(len(priming_data))

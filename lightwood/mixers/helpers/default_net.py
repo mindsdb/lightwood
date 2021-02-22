@@ -24,10 +24,7 @@ class DefaultNet(torch.nn.Module):
         self.output_size = output_size
         self.nr_outputs = nr_outputs
         self.max_variance = None
-        # How many devices we can train this network on
-        self.available_devices = 1
-
-        self.device, _ = get_devices()
+        self.device, self.available_devices = get_devices()
         self.dynamic_parameters = dynamic_parameters
 
         """
@@ -72,11 +69,6 @@ class DefaultNet(torch.nn.Module):
                     self.output_size = layer.out_features
 
         self.net = self.net.to(self.device)
-
-        if 'cuda' in str(self.device):
-            self.available_devices = torch.cuda.device_count()
-        else:
-            self.available_devices = 1
 
         if self.available_devices > 1:
             self._foward_net = torch.nn.DataParallel(self.net)

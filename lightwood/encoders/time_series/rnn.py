@@ -90,8 +90,7 @@ class TimeSeriesEncoder(BaseEncoder):
     def to(self, device, available_devices):
         if self._is_setup:
             self.device = device
-            self._encoder = self._encoder.to(self.device)
-            self._decoder = self._decoder.to(self.device)
+            return super().to(device, available_devices)
         return self
 
     def _prepare_raw_data(self, data):
