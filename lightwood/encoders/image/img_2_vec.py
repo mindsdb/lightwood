@@ -29,10 +29,6 @@ class Img2VecEncoder(BaseEncoder):
         pil_logger = logging.getLogger('PIL')
         pil_logger.setLevel(logging.ERROR)
 
-    def to(self, device, available_devices):
-        self.model.to(device, available_devices)
-        return self
-
     def prepare(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
