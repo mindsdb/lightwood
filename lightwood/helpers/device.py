@@ -10,20 +10,15 @@ def get_devices():
         device_str = "cuda"
         available_devices = torch.cuda.device_count()
 
-        print(available_devices)
-        print(os.environ.get('ROUND_ROBIN_GPU', False))
         if available_devices > 1:
-            round_robin = os.environ.get('ROUND_ROBIN_GPU', False)
-            if round_robin in ['1', 'true', 'True', True, 1]:
+            if os.environ.get('ROUND_ROBIN_GPU', False) in ['1', 'true', 'True', True, 1]:
                 device_str = 'cuda:' + str(randint(0,available_devices-1))
-                print(0,available_devices-1)
-                print('\nUsing random device string: {device_str}\n')
                 available_devices = 1
     else:
         device_str = "cpu"
         available_devices = 1
 
-    if CONFIG.USE_DEVICE is not None:
+    if CONFIG.USE_DEVICE is not None and if os.environ.get('ROUND_ROBIN_GPU', False) not in ['1', 'true', 'True', True, 1]:
         device_str = CONFIG.USE_DEVICE
         if device_str != 'cuda':
             available_devices = 1
