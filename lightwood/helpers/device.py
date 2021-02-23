@@ -1,5 +1,6 @@
 import os
 import torch
+from random import randint
 
 from lightwood.config.config import CONFIG
 
@@ -12,14 +13,8 @@ def get_devices():
         if available_devices > 1:
             round_robin = os.environ.get('ROUND_ROBIN_GPU', False)
             if round_robin in ['1', 'true', 'True', True]:
-                round_robin = True
-            else:
-                round_robin = False
-
-            if round_robin:
-                current_gpu = int(os.environ.get('ROUND_ROBIN_GPU_CURRENT', '0'))
-                device_str = 'cuda:' + str(current_gpu % available_devices)
-                os.envrion['ROUND_ROBIN_GPU_CURRENT'] = (str(current_gpu+1))
+                device_str = 'cuda:' randint(0,available_devices-1)
+                available_devices = 1
     else:
         device_str = "cpu"
         available_devices = 1
