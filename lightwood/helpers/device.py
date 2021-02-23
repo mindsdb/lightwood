@@ -15,7 +15,7 @@ def get_devices():
         if available_devices > 1:
             round_robin = os.environ.get('ROUND_ROBIN_GPU', False)
             if round_robin in ['1', 'true', 'True', True, 1]:
-                device_str = 'cuda:' randint(0,available_devices-1)
+                device_str = 'cuda:' + str(randint(0,available_devices-1))
                 print(0,available_devices-1)
                 print('\nUsing random device string: {device_str}\n')
                 available_devices = 1
