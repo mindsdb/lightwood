@@ -18,7 +18,7 @@ def get_devices():
         device_str = "cpu"
         available_devices = 1
 
-    if CONFIG.USE_DEVICE is not None and if os.environ.get('ROUND_ROBIN_GPU', False) not in ['1', 'true', 'True', True, 1]:
+    if CONFIG.USE_DEVICE is not None and os.environ.get('ROUND_ROBIN_GPU', False) not in ['1', 'true', 'True', True, 1]:
         device_str = CONFIG.USE_DEVICE
         if device_str != 'cuda':
             available_devices = 1
