@@ -132,7 +132,7 @@ class PretrainedLang(BaseEncoder):
 
         # Type of sentence embedding
         if sent_embedder == 'last_token':
-            self._sent_embedder = self._mean_norm
+            self._sent_embedder = self._last_state
         else:
             self._sent_embedder = self._mean_norm
 
