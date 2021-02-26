@@ -48,3 +48,38 @@ class TestLightGBMMixer(unittest.TestCase):
         mixer = LightGBMMixer()
         mixer.fit(train_ds, test_ds )
         _ = mixer.predict(train_ds.make_child(data_frame[['x', 'y']]))
+
+    def test_fit_and_predict_posdom(self):
+        config = {
+            'input_features': [
+                {
+                    'name': 'x',
+                    'type': 'numeric'
+                }
+            ],
+            'output_features': [
+                {
+                    'name': 'y',
+                    'type': 'numeric',
+                    'encoder_attrs': {
+                        'positive_domain': True
+                    }
+                }
+            ]
+        }
+
+        config = predictor_config_schema.validate(config)
+        N = 100
+
+        data = {'x': [i for i in range(N)], 'y': [-i for i in range(N)]}
+        data_frame = pandas.DataFrame(data)
+        train_ds = DataSource(data_frame, config)
+        test_ds = train_ds.subset(0.25)
+
+        mixer = LightGBMMixer()
+        mixer.fit(train_ds, test_ds)
+        preds = mixer.predict(train_ds.make_child(data_frame[['x', 'y']]))
+        print(preds)
+
+        for p in preds['y']['predictions']:
+            assert p >= 0
