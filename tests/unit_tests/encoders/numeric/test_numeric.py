@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 from lightwood.encoders.numeric import NumericEncoder
+from lightwood.encoders.numeric import TsNumericEncoder
 
 
 class TestNumericEncoder(unittest.TestCase):
@@ -30,15 +31,14 @@ class TestNumericEncoder(unittest.TestCase):
 
     def test_positive_domain(self):
         data = [-1, -2, -100, 5, 10, 15]
-        encoder = NumericEncoder()
+        for encoder in [NumericEncoder(), TsNumericEncoder()]:
+            encoder.is_target = True        # only affects target values
+            encoder.positive_domain = True
+            encoder.prepare(data)
+            decoded_vals = encoder.decode(encoder.encode(data))
 
-        encoder.is_target = True        # only affects target values
-        encoder.positive_domain = True
-        encoder.prepare(data)
-        decoded_vals = encoder.decode(encoder.encode(data))
-
-        for val in decoded_vals:
-            self.assertTrue(val >= 0)
+            for val in decoded_vals:
+                self.assertTrue(val >= 0)
 
     def test_log_overflow_and_none(self):
         data = list(range(-2000,2000,66))
