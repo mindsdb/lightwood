@@ -79,7 +79,7 @@ class LightGBMMixer(BaseMixer):
                         self.label_sets[col_name].add(None)
                         self.ord_encs[col_name].fit(np.array(list(self.label_sets[col_name])).reshape(-1, 1))
 
-                    label_data = [x for x in label_data if x in self.label_sets[col_name] else None]
+                    label_data = [x if x in self.label_sets[col_name] else None for x in label_data]
                     label_data = self.ord_encs[col_name].transform(np.array(label_data).reshape(-1, 1)).flatten()
 
                 data[subset_name]['label_data'][col_name] = label_data
