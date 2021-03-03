@@ -146,12 +146,16 @@ class LightGBMMixer(BaseMixer):
 
         ypred = {}
         for col_name in when_data_source.output_feature_names:
+            col_config = [conf for conf in when_data_source.config['output_features'] if conf['name'] == col_name][0]
             col_preds = self.models[col_name].predict(data)
             ypred[col_name] = {}
             if col_name in self.ord_encs:
                 ypred[col_name]['class_distribution'] = list(col_preds)
                 ypred[col_name]['class_labels'] = {i: cls for i, cls in enumerate(self.all_classes)}
                 col_preds = self.ord_encs[col_name].inverse_transform(np.argmax(col_preds, axis=1).reshape(-1, 1)).flatten()
+            if col_config.get('encoder_attrs', False):
+                if col_config['encoder_attrs'].get('positive_domain', False):
+                    col_preds = col_preds.clip(0)
             ypred[col_name]['predictions'] = list(col_preds)
 
         return ypred
