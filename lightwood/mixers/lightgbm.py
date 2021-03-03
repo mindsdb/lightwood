@@ -31,6 +31,7 @@ class LightGBMMixer(BaseMixer):
         super().__init__()
         self.models = {}
         self.ord_encs = {}
+        self.label_sets = {}
         self.stop_training_after_seconds = stop_training_after_seconds
         self.grid_search = grid_search  # using Optuna
 
@@ -74,7 +75,11 @@ class LightGBMMixer(BaseMixer):
                 if next(item for item in train_ds.output_features if item["name"] == col_name)['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                     if subset_name == 'train':
                         self.ord_encs[col_name] = OrdinalEncoder()
-                        self.ord_encs[col_name].fit(np.array(list(set(label_data))).reshape(-1, 1))
+                        self.label_sets[col_name] = set(label_data)
+                        self.label_sets[col_name].add('__mdb_unknown_cat')
+                        self.ord_encs[col_name].fit(np.array(list(self.label_sets[col_name])).reshape(-1, 1))
+
+                    label_data = [x if x in self.label_sets[col_name] else '__mdb_unknown_cat' for x in label_data]
                     label_data = self.ord_encs[col_name].transform(np.array(label_data).reshape(-1, 1)).flatten()
 
                 data[subset_name]['label_data'][col_name] = label_data
