@@ -1,5 +1,8 @@
 """
-2021.03.05
+2021.03.07
+TODO:
+Freeze base_model in DistilBertModel
+add more complicated layer and then build a model.
 
 Pre-trained embedding model.
 
@@ -19,7 +22,7 @@ from functools import partial
 import torch
 from torch.utils.data import DataLoader
 
-from lightwood.encoders.text.helpers.transformer_helpers import train_model, TextEmbed
+from lightwood.encoders.text.helpers.transformer_helpers import TextEmbed
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
@@ -61,12 +64,13 @@ class PretrainedLang(BaseEncoder):
     model_name ::str; name of pre-trained model
     desired_error ::float
     max_training_time ::int; seconds to train
-    custom_train ::Bool; whether to train text on target or not.
     custom_tokenizer ::function; custom tokenizing function
     sent_embedder ::str; make a sentence embedding from seq of word embeddings
                          default, sum all tokens and average
     batch_size  ::int; size of batfch
     max_position_embeddings ::int; max sequence length
+    custom_train ::Bool; whether to train text on target or not.
+    frozen ::Bool; whether to freeze tranformer and train a linear layer head
     """
 
     def __init__(
@@ -75,11 +79,12 @@ class PretrainedLang(BaseEncoder):
         model_name="distilbert",
         desired_error=0.01,
         max_training_time=7200,
-        custom_train=True,
         custom_tokenizer=None,
         sent_embedder="mean_norm",
         batch_size=10,
         max_position_embeddings=None,
+        custom_train=True,
+        frozen=False,
     ):
         super().__init__(is_target)
 
@@ -89,6 +94,7 @@ class PretrainedLang(BaseEncoder):
         self._pad_id = None
         self._max_len = max_position_embeddings
         self._custom_train = custom_train
+        self._frozen = frozen
         self._batch_size = batch_size
 
         # Model details
@@ -150,23 +156,18 @@ class PretrainedLang(BaseEncoder):
         # Replace empty strings with ''
         priming_data = [x if x is not None else "" for x in priming_data]
 
-        if self._custom_train and (
+        # Check style of output
+
+        # Case 1: Categorical, 1 output
+        output_type = (
             training_data is not None
             and "targets" in training_data
             and len(training_data["targets"]) == 1
             and training_data["targets"][0]["output_type"]
             == COLUMN_DATA_TYPES.CATEGORICAL
-        ):
+        )
 
-            self._model = self._classifier_model_class.from_pretrained(
-                self._pretrained_model_name,
-                num_labels=len(set(training_data["targets"][0]["unencoded_output"]))
-                + 1,
-            ).to(self.device)
-
-            # If max length not set, adjust
-            if self._max_len is None:
-                self._max_len = self._model.config.max_position_embeddings
+        if self._custom_train and output_type:
 
             # Prepare the priming data inputs with attention masks etc.
             text = self._tokenizer(priming_data, truncation=True, padding=True)
@@ -176,8 +177,46 @@ class PretrainedLang(BaseEncoder):
             # Pad the text tokens on the left
             dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
 
+            # Construct the model
+            self._model = self._classifier_model_class.from_pretrained(
+                self._pretrained_model_name,
+                num_labels=len(set(training_data["targets"][0]["unencoded_output"]))
+                + 1,
+            ).to(self.device)
+
+            # If max length not set, adjust
+            if self._max_len is None:
+                if "gpt2" in self._pretrained_model_name:
+                    self._max_len = self._model.config.n_positions
+                else:
+                    self._max_len = self._model.config.max_position_embeddings
+
+            if self._frozen:
+                """
+                Freeze the base transformer model and train
+                a linear layer on top
+                """
+                #Freeze all the parameters
+                for param in self._model.base_model.parameters():
+                    param.requires_grad = False
+
+                optimizer_grouped_parameters = self._model.parameters()
+
+            else:
+                """
+                Fine-tuning parameters with weight decay
+                """
+                # Fine-tuning weight-decay (https://huggingface.co/transformers/training.html)
+                no_decay = ['bias', 'LayerNorm.weight'] # no decay on the classifier terms.
+                optimizer_grouped_parameters = [
+                    {'params': [p for n, p in self._model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
+                    {'params': [p for n, p in self._model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+                ]
+
+            optimizer = AdamW(optimizer_grouped_parameters, lr=1e-5)
+
             # Train model; declare optimizer earlier if desired.
-            self.train_model(dataset, n_epochs=2)
+            self._train_model(dataset, optim=optimizer, n_epochs=2)
 
             self.prepared = True
 
@@ -188,14 +227,8 @@ class PretrainedLang(BaseEncoder):
             self._model = self._embeddings_model_class.from_pretrained(
                 self._pretrained_model_name
             ).to(self.device)
-            if "gpt2" in self._pretrained_model_name:
-                self._max_len = self._model.config.n_positions
-            else:
-                self._max_len = self._model.config.max_position_embeddings
 
-        return dataset
-
-    def train_model(self, dataset, optim=None, n_epochs=4):
+    def _train_model(self, dataset, optim=None, n_epochs=4):
         """
         Given a model, train for n_epochs.
 
@@ -210,6 +243,7 @@ class PretrainedLang(BaseEncoder):
         self._model.train()
 
         if optim is None:
+            print("Model Params")
             optim = AdamW(self._model.parameters(), lr=5e-5)
 
         for epoch in range(n_epochs):
