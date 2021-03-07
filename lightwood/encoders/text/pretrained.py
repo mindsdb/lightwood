@@ -71,6 +71,7 @@ class PretrainedLang(BaseEncoder):
     max_position_embeddings ::int; max sequence length
     custom_train ::Bool; whether to train text on target or not.
     frozen ::Bool; whether to freeze tranformer and train a linear layer head
+    epochs ::int; number of epochs to train model with
     """
 
     def __init__(
@@ -78,13 +79,13 @@ class PretrainedLang(BaseEncoder):
         is_target=False,
         model_name="distilbert",
         desired_error=0.01,
-        max_training_time=7200,
         custom_tokenizer=None,
         sent_embedder="mean_norm",
         batch_size=10,
         max_position_embeddings=None,
         custom_train=True,
         frozen=False,
+        epochs=2,
     ):
         super().__init__(is_target)
 
@@ -96,11 +97,7 @@ class PretrainedLang(BaseEncoder):
         self._custom_train = custom_train
         self._frozen = frozen
         self._batch_size = batch_size
-
-        # Model details
-        self.desired_error = desired_error
-        self.max_training_time = max_training_time
-        self._head = None
+        self._epochs = epochs
 
         # Model setup
         self._tokenizer = custom_tokenizer
@@ -216,7 +213,7 @@ class PretrainedLang(BaseEncoder):
             optimizer = AdamW(optimizer_grouped_parameters, lr=1e-5)
 
             # Train model; declare optimizer earlier if desired.
-            self._train_model(dataset, optim=optimizer, n_epochs=2)
+            self._train_model(dataset, optim=optimizer, n_epochs=self._epochs)
 
             self.prepared = True
 
@@ -300,7 +297,7 @@ class PretrainedLang(BaseEncoder):
                     # TODO: Current hack is to keep the first max len
                     # inp = inp[:, : self._max_len]
 
-                    output = self._model(inp).last_hidden_state
+                    output = self._model.base_model(inp).last_hidden_state
                     output = self._sent_embedder(output.to(self.device))
 
                     encoded_representation.append(output)
