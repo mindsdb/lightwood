@@ -1,20 +1,17 @@
 """
-2021.02.16
+2021.03.05
 
-The current implementation will try out different text models.
+Pre-trained embedding model.
 
-Similar to DistilBERT; DOES not train by default.
-Using pre-trained models from huggingface.
+This deploys a hugging face transformer
+and trains for a few epochs onto the target.
 
-NOTEs:
--- Albert needs to be padded
--- using fast tokenizers;
--- T5 is a good for particular targets possibly
+Once this has been completed, it provides embedding
+using the updated transformer embedding.
 
-Fine tuning: https://github.com/huggingface/transformers/issues/4749
+NOTE - GPT2 does NOT have a padding token!!
 
-I'm probably going to need a superlongform text cutter...
-Line 216 is temporary hack.
+Currently max_len doesn't do anything.
 """
 
 from functools import partial
@@ -22,12 +19,9 @@ from functools import partial
 import torch
 from torch.utils.data import DataLoader
 
-from lightwood.config.config import CONFIG
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES, ENCODER_AIM
-from lightwood.mixers.helpers.default_net import DefaultNet
-from lightwood.mixers.helpers.shapes import *
-from lightwood.api.gym import Gym
-from lightwood.helpers.torch import LightwoodAutocast
+from transformer_helpers import train_model, TextEmbed
+
+from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.logger import log
@@ -36,19 +30,19 @@ from transformers import (
     DistilBertModel,
     DistilBertForSequenceClassification,
     DistilBertTokenizerFast,
-    #DistilBertConfig,
+    # DistilBertConfig,
     AlbertModel,
     AlbertForSequenceClassification,
     AlbertTokenizerFast,
-    #AlbertConfig,
+    # AlbertConfig,
     GPT2Model,
     GPT2ForSequenceClassification,
     GPT2TokenizerFast,
-    #GPT2Config,
+    # GPT2Config,
     BartModel,
     BartForSequenceClassification,
     BartTokenizerFast,
-    #BartConfig,
+    # BartConfig,
     AdamW,
     get_linear_schedule_with_warmup,
 )
@@ -71,19 +65,21 @@ class PretrainedLang(BaseEncoder):
     custom_tokenizer ::function; custom tokenizing function
     sent_embedder ::str; make a sentence embedding from seq of word embeddings
                          default, sum all tokens and average
+    batch_size  ::int; size of batfch
     max_position_embeddings ::int; max sequence length
     """
 
     def __init__(
         self,
         is_target=False,
-        model_name="gpt2",
+        model_name="distilbert",
         desired_error=0.01,
         max_training_time=7200,
-        custom_train=False,
+        custom_train=True,
         custom_tokenizer=None,
-        sent_embedder='mean_norm',
-        #max_position_embeddings=512,
+        sent_embedder="mean_norm",
+        batch_size=10,
+        max_position_embeddings=None,
     ):
         super().__init__(is_target)
 
@@ -91,9 +87,9 @@ class PretrainedLang(BaseEncoder):
 
         # Token/sequence treatment
         self._pad_id = None
-        #self._max_len = max_position_embeddings
-        self._max_ele = None
+        self._max_len = max_position_embeddings
         self._custom_train = custom_train
+        self._batch_size = batch_size
 
         # Model details
         self.desired_error = desired_error
@@ -103,73 +99,92 @@ class PretrainedLang(BaseEncoder):
         # Model setup
         self._tokenizer = custom_tokenizer
         self._model = None
-        self._model_type = None
+        self.model_type = None
 
         if model_name == "distilbert":
             self._classifier_model_class = DistilBertForSequenceClassification
             self._embeddings_model_class = DistilBertModel
             self._tokenizer_class = DistilBertTokenizerFast
             self._pretrained_model_name = "distilbert-base-uncased"
-            #self._enc_config = DistilBertConfig(max_position_embedding=self._max_len )
+
         elif model_name == "albert":
             self._classifier_model_class = AlbertForSequenceClassification
             self._embeddings_model_class = AlbertModel
             self._tokenizer_class = AlbertTokenizerFast
             self._pretrained_model_name = "albert-base-v2"
-            #self._enc_config = AlbertConfig(max_position_embeddings=self._max_len )
+
         elif model_name == "bart":
             self._classifier_model_class = BartForSequenceClassification
             self._embeddings_model_class = BartModel
             self._tokenizer_class = BartTokenizerFast
             self._pretrained_model_name = "facebook/bart-large"
-            #self._enc_config = BartConfig(max_position_embeddings=self._max_len )
+
         else:
             self._classifier_model_class = GPT2ForSequenceClassification
             self._embeddings_model_class = GPT2Model
             self._tokenizer_class = GPT2TokenizerFast
             self._pretrained_model_name = "gpt2"
-            #self._enc_config = GPT2Config(n_positions=self._max_len)
 
         # Type of sentence embedding
-        if sent_embedder == 'last_token':
+        if sent_embedder == "last_token":
             self._sent_embedder = self._last_state
         else:
             self._sent_embedder = self._mean_norm
 
         self.device, _ = get_devices()
 
-    def to(self, device, available_devices):
-        """ Set torch device to CPU/CUDA """
-        self._model = self._model.to(self.device)
-
-        if self._head is not None:
-            self._head = self._head.to(self.device)
-
-        return self
-
     def prepare(self, priming_data, training_data=None):
         """
-        Prepare the text encoder to convert text -> feature vector
-
-        Args:
-        custom_tok ::Bool; whether to tokenize prior to passing to language model tokenizer.
-
+        Prepare the encoder by training on the target.
         """
         if self._prepared:
             raise Exception("Encoder is already prepared.")
 
+        # TODO: Make tokenizer custom with partial function; feed custom->model
         if self._tokenizer is None:
-            # Set the tokenizer
+            # Set the default tokenizer
             self._tokenizer = self._tokenizer_class.from_pretrained(
                 self._pretrained_model_name
             )
-        # TODO: add else; create a partial function to map LANG_TOK(CUSTOM_TOK(x))
 
-        if self._custom_train is True:
-            # TODO: Custom train on the target
-            raise NotImplementedError("TODO; train fxn not implemented")
+        # Replace empty strings with ''
+        priming_data = [x if x is not None else "" for x in priming_data]
+
+        if self._custom_train and (
+            training_data is not None
+            and "targets" in training_data
+            and len(training_data["targets"]) == 1
+            and training_data["targets"][0]["output_type"]
+            == COLUMN_DATA_TYPES.CATEGORICAL
+        ):
+
+            self._model = self._classifier_model_class.from_pretrained(
+                self._pretrained_model_name,
+                num_labels=len(set(training_data["targets"][0]["unencoded_output"]))
+                + 1,
+            ).to(self.device)
+
+            # If max length not set, adjust
+            if self._max_len is None:
+                self._max_len = self._model.config.max_position_embeddings
+
+            # Prepare the priming data inputs with attention masks etc.
+            text = self._tokenizer(priming_data, truncation=True, padding=True)
+
+            xinp = TextEmbed(text, training_data["targets"][0]["unencoded_output"])
+
+            # Pad the text tokens on the left
+            dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
+
+            # Train model; declare optimizer earlier if desired.
+            self.train_model(dataset, n_epochs=2)
+
+            self.prepared = True
+
         else:
-            self._model_type = "embeddings_generator"
+            print("Embeddings Generator only")
+
+            self.model_type = "embeddings_generator"
             self._model = self._embeddings_model_class.from_pretrained(
                 self._pretrained_model_name
             ).to(self.device)
@@ -178,9 +193,43 @@ class PretrainedLang(BaseEncoder):
             else:
                 self._max_len = self._model.config.max_position_embeddings
 
-        # Depending on model type, get forward pass
+        return dataset
 
-        self._prepared = True
+    def train_model(self, dataset, optim=None, n_epochs=4):
+        """
+        Given a model, train for n_epochs.
+
+        model - torch.nn model;
+        dataset - torch.DataLoader; dataset to train
+        device - torch.device; cuda/cpu
+        log - lightwood.logger.log; print output
+        optim - transformers.optimization.AdamW; optimizer
+        n_epochs - number of epochs to train
+
+        """
+        self._model.train()
+
+        if optim is None:
+            optim = AdamW(self._model.parameters(), lr=5e-5)
+
+        for epoch in range(n_epochs):
+            for batch in dataset:
+                optim.zero_grad()
+
+                inpids = batch["input_ids"].to(self.device)
+                attn = batch["attention_mask"].to(self.device)
+                labels = batch["labels"].to(self.device)
+                outputs = self._model(inpids, attention_mask=attn, labels=labels)
+                loss = outputs[0]
+
+                loss.backward()
+                optim.step()
+
+            self._train_callback(epoch, loss.item())
+            print("Epoch=", epoch + 1, "Loss=", loss.item())
+
+    def _train_callback(self, epoch, loss):
+        log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
 
     def encode(self, column_data):
         """
@@ -206,14 +255,16 @@ class PretrainedLang(BaseEncoder):
 
                     # Omit NaNs
                     if text == None:
-                        text = ''
+                        text = ""
 
                     # Tokenize the text with the built-in tokenizer.
-                    inp = self._tokenizer.encode(text, return_tensors="pt").to(self.device)
+                    inp = self._tokenizer.encode(
+                        text, truncation=True, return_tensors="pt"
+                    ).to(self.device)
 
                     # TODO - try different accumulation techniques?
                     # TODO: Current hack is to keep the first max len
-                    inp = inp[:, :self._max_len]
+                    # inp = inp[:, : self._max_len]
 
                     output = self._model(inp).last_hidden_state
                     output = self._sent_embedder(output.to(self.device))
@@ -224,9 +275,6 @@ class PretrainedLang(BaseEncoder):
 
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception("Decoder not implemented yet.")
-
-    def _train_callback(self, error, real_buff, predicted_buff):
-        log.info(f"{self.name} reached a loss of {error} while training !")
 
     @staticmethod
     def _mean_norm(xinp, dim=1):
@@ -248,5 +296,3 @@ class PretrainedLang(BaseEncoder):
             xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
         """
         return xinp[:, -1, :].cpu().numpy()
-
-
