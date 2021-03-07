@@ -193,7 +193,7 @@ class PretrainedLang(BaseEncoder):
                 Freeze the base transformer model and train
                 a linear layer on top
                 """
-                #Freeze all the parameters
+                # Freeze all the parameters
                 for param in self._model.base_model.parameters():
                     param.requires_grad = False
 
@@ -204,10 +204,27 @@ class PretrainedLang(BaseEncoder):
                 Fine-tuning parameters with weight decay
                 """
                 # Fine-tuning weight-decay (https://huggingface.co/transformers/training.html)
-                no_decay = ['bias', 'LayerNorm.weight'] # no decay on the classifier terms.
+                no_decay = [
+                    "bias",
+                    "LayerNorm.weight",
+                ]  # no decay on the classifier terms.
                 optimizer_grouped_parameters = [
-                    {'params': [p for n, p in self._model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-                    {'params': [p for n, p in self._model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+                    {
+                        "params": [
+                            p
+                            for n, p in self._model.named_parameters()
+                            if not any(nd in n for nd in no_decay)
+                        ],
+                        "weight_decay": 0.01,
+                    },
+                    {
+                        "params": [
+                            p
+                            for n, p in self._model.named_parameters()
+                            if any(nd in n for nd in no_decay)
+                        ],
+                        "weight_decay": 0.0,
+                    },
                 ]
 
             optimizer = AdamW(optimizer_grouped_parameters, lr=1e-5)
