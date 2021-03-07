@@ -19,7 +19,7 @@ from functools import partial
 import torch
 from torch.utils.data import DataLoader
 
-from transformer_helpers import train_model, TextEmbed
+from lightwood.encoders.text.helpers.transformer_helpers import train_model, TextEmbed
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
