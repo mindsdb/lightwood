@@ -16,9 +16,6 @@ NOTE - GPT2 does NOT have a padding token!!
 
 Currently max_len doesn't do anything.
 """
-
-from functools import partial
-
 import torch
 from torch.utils.data import DataLoader
 
