@@ -162,6 +162,7 @@ class PretrainedLang(BaseEncoder):
         )
 
         if self._custom_train and output_type:
+            print("Training model.")
 
             # Prepare the priming data inputs with attention masks etc.
             text = self._tokenizer(priming_data, truncation=True, padding=True)
@@ -186,6 +187,7 @@ class PretrainedLang(BaseEncoder):
                     self._max_len = self._model.config.max_position_embeddings
 
             if self._frozen:
+                print("\tFrozen Model + Training Classifier Layers")
                 """
                 Freeze the base transformer model and train
                 a linear layer on top
@@ -197,6 +199,7 @@ class PretrainedLang(BaseEncoder):
                 optimizer_grouped_parameters = self._model.parameters()
 
             else:
+                print("\tFine-tuning model")
                 """
                 Fine-tuning parameters with weight decay
                 """
