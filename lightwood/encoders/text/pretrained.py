@@ -315,6 +315,11 @@ class PretrainedLang(BaseEncoder):
                     # inp = inp[:, : self._max_len]
 
                     output = self._model.base_model(inp).last_hidden_state
+
+                    # If frozen model, you want the output of the pre_classifier or classifier
+                    if self._frozen:
+                        output = self._model.pre_classifier(output).last_hidden_state
+
                     output = self._sent_embedder(output.to(self.device))
 
                     encoded_representation.append(output)
