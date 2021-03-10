@@ -301,7 +301,7 @@ class PretrainedLang(BaseEncoder):
 
         with torch.no_grad():
             # Set the weights; this is GPT-2
-            if self._model_type == "embeddings_generator":
+            if self.model_type == "embeddings_generator":
                 for text in column_data:
 
                     # Omit NaNs
