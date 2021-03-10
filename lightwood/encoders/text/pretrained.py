@@ -1,4 +1,7 @@
 """
+2021.03.10
+"CLS" token instead of sent embedder in encode.
+
 2021.03.07
 TODO:
 Freeze base_model in DistilBertModel
@@ -77,7 +80,7 @@ class PretrainedLang(BaseEncoder):
         model_name="distilbert",
         desired_error=0.01,
         custom_tokenizer=None,
-        sent_embedder="mean_norm",
+        sent_embedder="cls",
         batch_size=10,
         max_position_embeddings=None,
         custom_train=True,
@@ -126,8 +129,8 @@ class PretrainedLang(BaseEncoder):
             self._pretrained_model_name = "gpt2"
 
         # Type of sentence embedding
-        if sent_embedder == "last_token":
-            self._sent_embedder = self._last_state
+        if sent_embedder == "cls":
+            self._sent_embedder = self._cls_state
         else:
             self._sent_embedder = self._mean_norm
 
@@ -338,14 +341,16 @@ class PretrainedLang(BaseEncoder):
         xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
         dim ::int; dimension to average on
         """
+        xinp = xinp[:, 1:-1, :] # Only consider word tokens and not CLS
         return torch.mean(xinp, dim=dim).cpu().numpy()
 
     @staticmethod
-    def _last_state(xinp):
+    def _cls_state(xinp):
         """
-        Returns the last token in the sentence only
+        Returns the CLS token out of the embedding.
+        CLS is used in classification.
 
         Args:
             xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
         """
-        return xinp[:, -1, :].cpu().numpy()
+        return xinp[:, 0, :].cpu().numpy()
