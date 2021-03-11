@@ -1,4 +1,8 @@
 """
+2021.03.11: TODO; remove print statements
+Removing the sent_embedder and opting for
+the CLS token only.
+
 2021.03.10
 "CLS" token instead of sent embedder in encode.
 
@@ -65,8 +69,6 @@ class PretrainedLang(BaseEncoder):
     desired_error ::float
     max_training_time ::int; seconds to train
     custom_tokenizer ::function; custom tokenizing function
-    sent_embedder ::str; make a sentence embedding from seq of word embeddings
-                         default, sum all tokens and average
     batch_size  ::int; size of batfch
     max_position_embeddings ::int; max sequence length
     custom_train ::Bool; whether to train text on target or not.
@@ -80,7 +82,6 @@ class PretrainedLang(BaseEncoder):
         model_name="distilbert",
         desired_error=0.01,
         custom_tokenizer=None,
-        sent_embedder="cls",
         batch_size=10,
         max_position_embeddings=None,
         custom_train=True,
@@ -128,12 +129,6 @@ class PretrainedLang(BaseEncoder):
             self._tokenizer_class = GPT2TokenizerFast
             self._pretrained_model_name = "gpt2"
 
-        # Type of sentence embedding
-        if sent_embedder == "cls":
-            self._sent_embedder = self._cls_state
-        else:
-            self._sent_embedder = self._mean_norm
-
         self.device, _ = get_devices()
 
     def prepare(self, priming_data, training_data=None):
@@ -172,7 +167,7 @@ class PretrainedLang(BaseEncoder):
 
             xinp = TextEmbed(text, training_data["targets"][0]["unencoded_output"])
 
-            # Pad the text tokens on the left
+            # Pad the text tokens on the left (if padding allowed)
             dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
 
             # Construct the model
@@ -313,17 +308,11 @@ class PretrainedLang(BaseEncoder):
                         text, truncation=True, return_tensors="pt"
                     ).to(self.device)
 
-                    # TODO - try different accumulation techniques?
-                    # TODO: Current hack is to keep the first max len
-                    # inp = inp[:, : self._max_len]
-
-                    output = self._model.base_model(inp).last_hidden_state
+                    output = self._model.base_model(inp).last_hidden_state[:, 0]
 
                     # If frozen model, you want the output of the pre_classifier or classifier
                     if self._frozen:
-                        output = self._model.pre_classifier(output).last_hidden_state
-
-                    output = self._sent_embedder(output.to(self.device))
+                        output = self._model.pre_classifier(output)
 
                     encoded_representation.append(output)
 
@@ -332,25 +321,25 @@ class PretrainedLang(BaseEncoder):
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception("Decoder not implemented yet.")
 
-    @staticmethod
-    def _mean_norm(xinp, dim=1):
-        """
-        Calculates a 1 x N_embed vector by averaging all token embeddings
+    #@staticmethod
+    #def _mean_norm(xinp, dim=1):
+    #    """
+    #    Calculates a 1 x N_embed vector by averaging all token embeddings
 
-        Args:
-        xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
-        dim ::int; dimension to average on
-        """
-        xinp = xinp[:, 1:-1, :] # Only consider word tokens and not CLS
-        return torch.mean(xinp, dim=dim).cpu().numpy()
+    #    Args:
+    #    xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
+    #    dim ::int; dimension to average on
+    #    """
+    #    xinp = xinp[:, 1:-1, :] # Only consider word tokens and not CLS
+    #    return torch.mean(xinp, dim=dim).cpu().numpy()
 
-    @staticmethod
-    def _cls_state(xinp):
-        """
-        Returns the CLS token out of the embedding.
-        CLS is used in classification.
+    #@staticmethod
+    #def _cls_state(xinp):
+    #    """
+    #    Returns the CLS token out of the embedding.
+    #    CLS is used in classification.
 
-        Args:
-            xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
-        """
-        return xinp[:, 0, :].cpu().numpy()
+    #    Args:
+    #        xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
+    #    """
+    #    return xinp[:, 0, :].detach().cpu().numpy()
