@@ -91,7 +91,7 @@ class PretrainedLang(BaseEncoder):
         super().__init__(is_target)
 
         self.name = model_name + " text encoder"
-        print(self.name)
+        print(self.name, flush=True)
 
         # Token/sequence treatment
         self._pad_id = None
@@ -161,12 +161,14 @@ class PretrainedLang(BaseEncoder):
         )
 
         if self._custom_train and output_type:
-            print("Training model.")
+            print("Training model.", flush=True)
 
             # Prepare the priming data inputs with attention masks etc.
             text = self._tokenizer(priming_data, truncation=True, padding=True)
 
-            xinp = TextEmbed(text, training_data["targets"][0]["encoded_output"])
+            # To train in the space, use labels as argmax.
+            labels = training_data["targets"][0]["encoded_output"].argmax(dim=1) # Nbatch x N_classes
+            xinp = TextEmbed(text, labels)
 
             # Pad the text tokens on the left (if padding allowed)
             dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
@@ -186,19 +188,19 @@ class PretrainedLang(BaseEncoder):
                     self._max_len = self._model.config.max_position_embeddings
 
             if self._frozen:
-                print("\tFrozen Model + Training Classifier Layers")
+                print("\tFrozen Model + Training Classifier Layers", flush=True)
                 """
                 Freeze the base transformer model and train
                 a linear layer on top
                 """
-                # Freeze all the parameters
+                # Freeze all the transformer parameters
                 for param in self._model.base_model.parameters():
                     param.requires_grad = False
 
                 optimizer_grouped_parameters = self._model.parameters()
 
             else:
-                print("\tFine-tuning model")
+                print("\tFine-tuning model", flush=True)
                 """
                 Fine-tuning parameters with weight decay
                 """
@@ -234,7 +236,7 @@ class PretrainedLang(BaseEncoder):
             self.prepared = True
 
         else:
-            print("Embeddings Generator only")
+            print("Embeddings Generator only", flush=True)
 
             self.model_type = "embeddings_generator"
             self._model = self._embeddings_model_class.from_pretrained(
@@ -256,7 +258,7 @@ class PretrainedLang(BaseEncoder):
         self._model.train()
 
         if optim is None:
-            print("Model Params")
+            print("Setting all model params to AdamW", flush=True)
             optim = AdamW(self._model.parameters(), lr=5e-5)
 
         for epoch in range(n_epochs):
@@ -272,8 +274,8 @@ class PretrainedLang(BaseEncoder):
                 loss.backward()
                 optim.step()
 
-            self._train_callback(epoch, loss.item())
-            print("Epoch=", epoch + 1, "Loss=", loss.item())
+            #self._train_callback(epoch, loss.item())
+            print("Epoch=", epoch + 1, "Loss=", loss.item(), flush=True)
 
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
