@@ -166,7 +166,7 @@ class PretrainedLang(BaseEncoder):
             # Prepare the priming data inputs with attention masks etc.
             text = self._tokenizer(priming_data, truncation=True, padding=True)
 
-            xinp = TextEmbed(text, training_data["targets"][0]["unencoded_output"])
+            xinp = TextEmbed(text, training_data["targets"][0]["encoded_output"])
 
             # Pad the text tokens on the left (if padding allowed)
             dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
