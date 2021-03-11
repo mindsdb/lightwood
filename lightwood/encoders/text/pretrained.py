@@ -85,8 +85,8 @@ class PretrainedLang(BaseEncoder):
         batch_size=10,
         max_position_embeddings=None,
         custom_train=True,
-        frozen=False,
-        epochs=2,
+        frozen=True,
+        epochs=3,
     ):
         super().__init__(is_target)
 
@@ -233,8 +233,6 @@ class PretrainedLang(BaseEncoder):
             # Train model; declare optimizer earlier if desired.
             self._train_model(dataset, optim=optimizer, n_epochs=self._epochs)
 
-            self.prepared = True
-
         else:
             print("Embeddings Generator only")
 
@@ -242,6 +240,8 @@ class PretrainedLang(BaseEncoder):
             self._model = self._embeddings_model_class.from_pretrained(
                 self._pretrained_model_name
             ).to(self.device)
+
+        self._prepared = True
 
     def _train_model(self, dataset, optim=None, n_epochs=4):
         """
