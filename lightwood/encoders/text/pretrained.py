@@ -91,7 +91,7 @@ class PretrainedLang(BaseEncoder):
         super().__init__(is_target)
 
         self.name = model_name + " text encoder"
-        print(self.name, flush=True)
+        print(self.name)
 
         # Token/sequence treatment
         self._pad_id = None
@@ -161,7 +161,7 @@ class PretrainedLang(BaseEncoder):
         )
 
         if self._custom_train and output_type:
-            print("Training model.", flush=True)
+            print("Training model.")
 
             # Prepare the priming data inputs with attention masks etc.
             text = self._tokenizer(priming_data, truncation=True, padding=True)
@@ -188,7 +188,7 @@ class PretrainedLang(BaseEncoder):
                     self._max_len = self._model.config.max_position_embeddings
 
             if self._frozen:
-                print("\tFrozen Model + Training Classifier Layers", flush=True)
+                print("\tFrozen Model + Training Classifier Layers")
                 """
                 Freeze the base transformer model and train
                 a linear layer on top
@@ -200,7 +200,7 @@ class PretrainedLang(BaseEncoder):
                 optimizer_grouped_parameters = self._model.parameters()
 
             else:
-                print("\tFine-tuning model", flush=True)
+                print("\tFine-tuning model")
                 """
                 Fine-tuning parameters with weight decay
                 """
@@ -236,7 +236,7 @@ class PretrainedLang(BaseEncoder):
             self.prepared = True
 
         else:
-            print("Embeddings Generator only", flush=True)
+            print("Embeddings Generator only")
 
             self.model_type = "embeddings_generator"
             self._model = self._embeddings_model_class.from_pretrained(
@@ -258,7 +258,7 @@ class PretrainedLang(BaseEncoder):
         self._model.train()
 
         if optim is None:
-            print("Setting all model params to AdamW", flush=True)
+            print("Setting all model params to AdamW")
             optim = AdamW(self._model.parameters(), lr=5e-5)
 
         for epoch in range(n_epochs):
@@ -275,7 +275,7 @@ class PretrainedLang(BaseEncoder):
                 optim.step()
 
             #self._train_callback(epoch, loss.item())
-            print("Epoch=", epoch + 1, "Loss=", loss.item(), flush=True)
+            print("Epoch=", epoch + 1, "Loss=", loss.item())
 
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
