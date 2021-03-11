@@ -91,6 +91,7 @@ class PretrainedLang(BaseEncoder):
         super().__init__(is_target)
 
         self.name = model_name + " text encoder"
+        print(self.name)
 
         # Token/sequence treatment
         self._pad_id = None
