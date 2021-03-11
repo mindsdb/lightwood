@@ -296,27 +296,26 @@ class PretrainedLang(BaseEncoder):
 
         with torch.no_grad():
             # Set the weights; this is GPT-2
-            if self.model_type == "embeddings_generator":
-                for text in column_data:
+            for text in column_data:
 
-                    # Omit NaNs
-                    if text == None:
-                        text = ""
+                # Omit NaNs
+                if text == None:
+                    text = ""
 
-                    # Tokenize the text with the built-in tokenizer.
-                    inp = self._tokenizer.encode(
-                        text, truncation=True, return_tensors="pt"
-                    ).to(self.device)
+                # Tokenize the text with the built-in tokenizer.
+                inp = self._tokenizer.encode(
+                    text, truncation=True, return_tensors="pt"
+                ).to(self.device)
 
-                    output = self._model.base_model(inp).last_hidden_state[:, 0]
+                output = self._model.base_model(inp).last_hidden_state[:, 0]
 
-                    # If frozen model, you want the output of the pre_classifier or classifier
-                    if self._frozen:
-                        output = self._model.pre_classifier(output)
+                # If the model has a pre-classifier layer, use this embedding.
+                if hasattr(self._model, 'pre_classifier'):
+                    output = self._model.pre_classifier(output)
 
-                    encoded_representation.append(output)
+                encoded_representation.append(output.detach())
 
-        return torch.Tensor(encoded_representation).squeeze(1)
+        return torch.stack(encoded_representation).squeeze(1)
 
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception("Decoder not implemented yet.")
