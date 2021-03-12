@@ -167,7 +167,9 @@ class PretrainedLang(BaseEncoder):
             text = self._tokenizer(priming_data, truncation=True, padding=True)
 
             # To train in the space, use labels as argmax.
-            labels = training_data["targets"][0]["encoded_output"].argmax(dim=1) # Nbatch x N_classes
+            labels = training_data["targets"][0]["encoded_output"].argmax(
+                dim=1
+            )  # Nbatch x N_classes
             xinp = TextEmbed(text, labels)
 
             # Pad the text tokens on the left (if padding allowed)
@@ -229,9 +231,16 @@ class PretrainedLang(BaseEncoder):
                 ]
 
             optimizer = AdamW(optimizer_grouped_parameters, lr=1e-5)
+            scheduler = get_linear_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=0,  # default value for GLUE
+                num_training_steps=len(dataset) * self._epochs,
+            )
 
             # Train model; declare optimizer earlier if desired.
-            self._train_model(dataset, optim=optimizer, n_epochs=self._epochs)
+            self._train_model(
+                dataset, optim=optimizer, scheduler=scheduler, n_epochs=self._epochs
+            )
 
         else:
             print("Embeddings Generator only")
@@ -243,7 +252,7 @@ class PretrainedLang(BaseEncoder):
 
         self._prepared = True
 
-    def _train_model(self, dataset, optim=None, n_epochs=4):
+    def _train_model(self, dataset, optim=None, scheduler=None, n_epochs=4):
         """
         Given a model, train for n_epochs.
 
@@ -262,6 +271,8 @@ class PretrainedLang(BaseEncoder):
             optim = AdamW(self._model.parameters(), lr=5e-5)
 
         for epoch in range(n_epochs):
+            total_loss = 0
+
             for batch in dataset:
                 optim.zero_grad()
 
@@ -271,11 +282,15 @@ class PretrainedLang(BaseEncoder):
                 outputs = self._model(inpids, attention_mask=attn, labels=labels)
                 loss = outputs[0]
 
+                total_loss += loss.item()
+
                 loss.backward()
                 optim.step()
+                if scheduler is not None:
+                    scheduler.step()
 
-            #self._train_callback(epoch, loss.item())
-            print("Epoch=", epoch + 1, "Loss=", loss.item())
+            # self._train_callback(epoch, loss.item())
+            print("Epoch=", epoch + 1, "Loss=", total_loss/len(dataset))
 
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
@@ -313,7 +328,7 @@ class PretrainedLang(BaseEncoder):
                 output = self._model.base_model(inp).last_hidden_state[:, 0]
 
                 # If the model has a pre-classifier layer, use this embedding.
-                if hasattr(self._model, 'pre_classifier'):
+                if hasattr(self._model, "pre_classifier"):
                     output = self._model.pre_classifier(output)
 
                 encoded_representation.append(output.detach())
@@ -323,8 +338,8 @@ class PretrainedLang(BaseEncoder):
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception("Decoder not implemented yet.")
 
-    #@staticmethod
-    #def _mean_norm(xinp, dim=1):
+    # @staticmethod
+    # def _mean_norm(xinp, dim=1):
     #    """
     #    Calculates a 1 x N_embed vector by averaging all token embeddings
 
@@ -335,8 +350,8 @@ class PretrainedLang(BaseEncoder):
     #    xinp = xinp[:, 1:-1, :] # Only consider word tokens and not CLS
     #    return torch.mean(xinp, dim=dim).cpu().numpy()
 
-    #@staticmethod
-    #def _cls_state(xinp):
+    # @staticmethod
+    # def _cls_state(xinp):
     #    """
     #    Returns the CLS token out of the embedding.
     #    CLS is used in classification.
