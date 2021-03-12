@@ -98,6 +98,8 @@ class TimeSeriesEncoder(BaseEncoder):
         out_data = []
         for e in data:
             if not isinstance(e, torch.Tensor):
+                e = np.array(e, dtype=float)
+                e[np.isnan(e)] = 0.0
                 t = torch.tensor(e, dtype=torch.float)
             else:
                 t = e.float()
