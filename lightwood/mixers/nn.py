@@ -15,6 +15,7 @@ from lightwood.config.config import CONFIG
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.mixers.helpers.default_net import DefaultNet
+from lightwood.mixers.helpers.ar_net import ArNet
 from lightwood.mixers.helpers.selfaware import SelfAware
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
@@ -58,7 +59,7 @@ class NnMixer(BaseMixer):
 
         self.batch_size = 200
 
-        self.nn_class = DefaultNet
+        self.nn_class = ArNet  # DefaultNet
         self.dropout_p = max(0.0, min(1.0, dropout_p))
         self.dynamic_parameters = {}
         self.awareness_criterion = None
@@ -148,13 +149,23 @@ class NnMixer(BaseMixer):
 
         input_sample, output_sample = train_ds[0]
 
-        self.net = self.nn_class(
-            self.dynamic_parameters,
-            input_size=len(input_sample),
-            output_size=len(output_sample),
-            nr_outputs=len(train_ds.out_types),
-            dropout=self.dropout_p
-        )
+        if self.nn_class == DefaultNet:
+            self.net = self.nn_class(
+                self.dynamic_parameters,
+                input_size=len(input_sample),
+                output_size=len(output_sample),
+                nr_outputs=len(train_ds.out_types),
+                dropout=self.dropout_p
+            )
+        elif self.nn_class == ArNet:
+            self.net = self.nn_class(
+                self.dynamic_parameters,
+                train_ds.transformer,
+                input_size=len(input_sample),
+                output_size=len(output_sample),
+                nr_outputs=len(train_ds.out_types),
+                dropout=self.dropout_p
+            )
         self.net = self.net.train()
 
         self.selfaware_net = SelfAware(
@@ -209,7 +220,8 @@ class NnMixer(BaseMixer):
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
-        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
+        self.optimizer = self.optimizer_class(self.net.parameters(),
+                                              **self.optimizer_args)
 
         self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
         self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
@@ -420,7 +432,6 @@ class NnMixer(BaseMixer):
             outputs.extend(output)
 
         output_trasnformed_vectors = {}
-        confidence_trasnformed_vectors = {}
 
         for i in range(len(outputs)):
             output_vector = outputs[i]
