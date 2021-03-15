@@ -54,4 +54,4 @@ class ArNet(DefaultNet):
             residual_output = self._foward_net(input)
             ar_output = self.ar_net(input[:, self.ar_idxs])
 
-        return ar_output + (residual_output*0.01)
+        return ar_output + residual_output
