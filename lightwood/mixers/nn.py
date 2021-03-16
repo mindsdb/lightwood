@@ -220,7 +220,8 @@ class NnMixer(BaseMixer):
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
-        self.optimizer = self.optimizer_class(self.net.parameters(),
+        params = [param for param in self.net.parameters() if param.requires_grad]
+        self.optimizer = self.optimizer_class(params,
                                               **self.optimizer_args)
 
         self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
@@ -510,6 +511,13 @@ class NnMixer(BaseMixer):
                     loss = target_loss
                 else:
                     loss += target_loss
+
+            # L2 norm over residual for AR Net
+            # if self.nn_class == ArNet:
+            #     for name, param in self.net.ar_net.named_parameters():
+            #         if 'weight' in name:
+            #             loss += torch.norm(param)
+
 
             running_loss += loss.item()
             error = running_loss / (i + 1)
