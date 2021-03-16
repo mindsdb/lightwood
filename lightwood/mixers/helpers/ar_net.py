@@ -53,5 +53,6 @@ class ArNet(DefaultNet):
         with LightwoodAutocast():
             residual_output = self._foward_net(input)
             ar_output = self.ar_net(input[:, self.ar_idxs])
+            ar_output = ar_output.clamp(0, 1)
 
         return ar_output + residual_output
