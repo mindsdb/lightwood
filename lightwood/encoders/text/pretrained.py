@@ -1,4 +1,5 @@
 """
+2021.03.16: fine tune + 1 epoch is best model to use:
 2021.03.11: TODO; remove print statements
 Removing the sent_embedder and opting for
 the CLS token only.
@@ -85,8 +86,8 @@ class PretrainedLang(BaseEncoder):
         batch_size=10,
         max_position_embeddings=None,
         custom_train=True,
-        frozen=True,
-        epochs=3,
+        frozen=False,
+        epochs=1,
     ):
         super().__init__(is_target)
 
@@ -137,7 +138,7 @@ class PretrainedLang(BaseEncoder):
         Prepare the encoder by training on the target.
         """
         if self._prepared:
-            raise Exception("Encoder is already prepared.")
+            raise Exception("Encoder is already prepared.", flush=True)
 
         # TODO: Make tokenizer custom with partial function; feed custom->model
         if self._tokenizer is None:
@@ -161,15 +162,19 @@ class PretrainedLang(BaseEncoder):
         )
 
         if self._custom_train and output_type:
-            print("Training model.")
+            print("Training model.", flush=True)
 
             # Prepare the priming data inputs with attention masks etc.
             text = self._tokenizer(priming_data, truncation=True, padding=True)
 
             # To train in the space, use labels as argmax.
-            labels = training_data["targets"][0]["encoded_output"].argmax(
-                dim=1
-            )  # Nbatch x N_classes
+            if training_data["targets"][0]["encoded_output"].shape[1] > 1:
+                labels = training_data["targets"][0]["encoded_output"].argmax(
+                    dim=1
+                )  # Nbatch x N_classes
+            else:
+                labels = training_data["targets"][0]["encoded_output"]
+
             xinp = TextEmbed(text, labels)
 
             # Pad the text tokens on the left (if padding allowed)
@@ -190,7 +195,7 @@ class PretrainedLang(BaseEncoder):
                     self._max_len = self._model.config.max_position_embeddings
 
             if self._frozen:
-                print("\tFrozen Model + Training Classifier Layers")
+                print("\tFrozen Model + Training Classifier Layers", flush=True)
                 """
                 Freeze the base transformer model and train
                 a linear layer on top
@@ -202,7 +207,7 @@ class PretrainedLang(BaseEncoder):
                 optimizer_grouped_parameters = self._model.parameters()
 
             else:
-                print("\tFine-tuning model")
+                print("\tFine-tuning model", flush=True)
                 """
                 Fine-tuning parameters with weight decay
                 """
@@ -210,7 +215,7 @@ class PretrainedLang(BaseEncoder):
                 no_decay = [
                     "bias",
                     "LayerNorm.weight",
-                ]  # no decay on the classifier terms.
+                ]  # decay on all terms EXCLUDING bias/layernorms
                 optimizer_grouped_parameters = [
                     {
                         "params": [
@@ -243,7 +248,7 @@ class PretrainedLang(BaseEncoder):
             )
 
         else:
-            print("Embeddings Generator only")
+            print("Embeddings Generator only", flush=True)
 
             self.model_type = "embeddings_generator"
             self._model = self._embeddings_model_class.from_pretrained(
@@ -252,7 +257,7 @@ class PretrainedLang(BaseEncoder):
 
         self._prepared = True
 
-    def _train_model(self, dataset, optim=None, scheduler=None, n_epochs=4):
+    def _train_model(self, dataset, optim=None, scheduler=None, n_epochs=1):
         """
         Given a model, train for n_epochs.
 
@@ -267,8 +272,15 @@ class PretrainedLang(BaseEncoder):
         self._model.train()
 
         if optim is None:
-            print("Setting all model params to AdamW")
+            print("No opt. provided, setting all params with AdamW.", flush=True)
             optim = AdamW(self._model.parameters(), lr=5e-5)
+        else:
+            print("Optimizer provided", flush=True)
+
+        if scheduler is None:
+            print("No scheduler provided.", flush=True)
+        else:
+            print("Scheduler provided.", flush=True)
 
         for epoch in range(n_epochs):
             total_loss = 0
@@ -290,7 +302,7 @@ class PretrainedLang(BaseEncoder):
                     scheduler.step()
 
             # self._train_callback(epoch, loss.item())
-            print("Epoch=", epoch + 1, "Loss=", total_loss/len(dataset))
+            print("Epoch=", epoch + 1, "Loss=", total_loss / len(dataset), flush=True)
 
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
@@ -336,7 +348,7 @@ class PretrainedLang(BaseEncoder):
         return torch.stack(encoded_representation).squeeze(1)
 
     def decode(self, encoded_values_tensor, max_length=100):
-        raise Exception("Decoder not implemented yet.")
+        raise Exception("Decoder not implemented yet.", flush=True)
 
     # @staticmethod
     # def _mean_norm(xinp, dim=1):
