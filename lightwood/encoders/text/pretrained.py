@@ -13,18 +13,26 @@ Currently the model supports only distilbert; this can be adapted later.
 When instantiating the DistilBertForSeq.Class object,
 num_labels indicates whether you use classification or regression.
 
+
+See: https://huggingface.co/transformers/model_doc/distilbert.html#distilbertforsequenceclassification
+under the 'labels' command
+
 For regression - use num_labels = 1
 For classification - use num_labels = 1 + num_classes ***
 
+If you do num_classes + 1, we reserve the LAST label
+as the "unknown" label; this is different from the original
+distilbert model. (prior to 2021.03)
 
 TODOs:
-    -> categorical logic versus regression
-    -> 
++ Batch encodes() tokenization step
++ Look into auto-encoding lower dimensional representations 
+of the output embedding
 """
 import torch
 from torch.utils.data import DataLoader
 
-from lightwood.encoders.text.helpers.transformer_helpers import TextEmbed
+from lightwood.encoders.text.helpers.pretrained_helpers import TextEmbed
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
@@ -54,7 +62,7 @@ class PretrainedLang(BaseEncoder):
     batch_size  ::int; size of batch
     max_position_embeddings ::int; max sequence length of input text
     custom_train ::Bool; If true, trains model on target procided
-    frozen ::Bool; If true, freezes transformer layers during training. 
+    frozen ::Bool; If true, freezes transformer layers during training.
     epochs ::int; number of epochs to train model with
     """
 
@@ -96,6 +104,9 @@ class PretrainedLang(BaseEncoder):
     def prepare(self, priming_data, training_data=None):
         """
         Prepare the encoder by training on the target.
+
+        Training data must be a dict with "targets" avail.
+        Automatically assumes this.
         """
         if self._prepared:
             raise Exception("Encoder is already prepared.", flush=True)
@@ -110,39 +121,61 @@ class PretrainedLang(BaseEncoder):
         priming_data = [x if x is not None else "" for x in priming_data]
 
         # Checks training data details
-        # TODO: This should be streamlined.
-        output_type = (
-            training_data is not None
-            and "targets" in training_data
-            and len(training_data["targets"]) == 1
-            and training_data["targets"][0]["output_type"]
-            == COLUMN_DATA_TYPES.CATEGORICAL
+        # TODO: The dict should be streamlined
+        output_avail = training_data is not None and len(training_data["targets"]) == 1
+
+        output_type = training_data["targets"][0]["output_type"]
+
+        type_flag = (output_type == COLUMN_DATA_TYPES.CATEGORICAL) or (
+            output_type == COLUMN_DATA_TYPES.NUMERIC
         )
 
-        if self._custom_train and output_type:
+        if self._custom_train and output_avail and type_flag:
             print("Training model.", flush=True)
 
             # Prepare priming data into tokenized form + attention masks
             text = self._tokenizer(priming_data, truncation=True, padding=True)
 
-            # If categorical, use argmax label since input is 1D. 
-            if training_data["targets"][0]["encoded_output"].shape[1] > 1:
-                labels = training_data["targets"][0]["encoded_output"].argmax(
-                    dim=1
-                )  # Nbatch x N_classes
-            else:
-                labels = training_data["targets"][0]["encoded_output"]
+            if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
+                """
+                Categorical preparation.
+                """
+                print("\tOutput trained is categorical", flush=True)
 
-            # Construct the dataset for training
-            xinp = TextEmbed(text, labels)
-            dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
+                if training_data["targets"][0]["encoded_output"].shape[1] > 1:
+                    labels = training_data["targets"][0]["encoded_output"].argmax(
+                        dim=1
+                    )  # Nbatch x N_classes
+                else:
+                    labels = training_data["targets"][0]["encoded_output"]
+
+                label_size = (
+                    len(set(training_data["targets"][0]["unencoded_output"])) + 1
+                )
+
+            else:
+                """
+                Assumes numeric encoder
+                """
+                print("\tOutput trained is regression", flush=True)
+
+                labels = training_data["targets"][0]["unencoded_output"]
+
+                if isinstance(labels, torch.Tensor) is False:
+                    labels = torch.tensor(labels)
+
+                labels = labels.float()  # Set to float for regression
+                label_size = 1  # If label_size == 1, defaults to regression
 
             # Construct the model
             self._model = self._classifier_model_class.from_pretrained(
                 self._pretrained_model_name,
-                num_labels=len(set(training_data["targets"][0]["unencoded_output"]))
-                + 1,
+                num_labels=label_size,
             ).to(self.device)
+
+            # Construct the dataset for training
+            xinp = TextEmbed(text, labels)
+            dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
 
             # If max length not set, adjust
             if self._max_len is None:
@@ -235,6 +268,7 @@ class PretrainedLang(BaseEncoder):
         else:
             print("Scheduler provided.", flush=True)
 
+        print("Beginning training.")
         for epoch in range(n_epochs):
             total_loss = 0
 
@@ -264,8 +298,9 @@ class PretrainedLang(BaseEncoder):
     def encode(self, column_data):
         """
         TODO: Maybe batch the text up; may take too long
-        Given column data, encode the dataset
-        Tokenizer should have a length cap!!
+        Given column data, encode the dataset.
+
+        Currently, returns the embedding of the pre-classifier layer.
 
         Args:
         column_data:: [list[str]] list of text data in str form
