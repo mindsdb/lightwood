@@ -11,8 +11,7 @@ class TextEmbed(torch.utils.data.Dataset):
     Dataset class for quick embedding/label retrieval.
     Labels should be in the index space.
 
-    If the labels are in the categorical space,
-    will retrieve the argmax of the position.
+    If the labels provided are not in torch form, will convert them.
     """
     def __init__(self, encodings, labels):
         self.encodings = encodings
