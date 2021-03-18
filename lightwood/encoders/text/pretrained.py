@@ -1,28 +1,25 @@
 """
-2021.03.16: fine tune + 1 epoch is best model to use:
-2021.03.11: TODO; remove print statements
-Removing the sent_embedder and opting for
-the CLS token only.
+2021.03.18
 
-2021.03.10
-"CLS" token instead of sent embedder in encode.
+The following text encoder uses huggingface's
+Distilbert. Internal benchmarks suggest
+1 epoch of fine tuning is ideal.
 
-2021.03.07
-TODO:
-Freeze base_model in DistilBertModel
-add more complicated layer and then build a model.
+See: https://huggingface.co/transformers/training.html
+for further details.
 
-Pre-trained embedding model.
+Currently the model supports only distilbert; this can be adapted later. 
 
-This deploys a hugging face transformer
-and trains for a few epochs onto the target.
+When instantiating the DistilBertForSeq.Class object,
+num_labels indicates whether you use classification or regression.
 
-Once this has been completed, it provides embedding
-using the updated transformer embedding.
+For regression - use num_labels = 1
+For classification - use num_labels = 1 + num_classes ***
 
-NOTE - GPT2 does NOT have a padding token!!
 
-Currently max_len doesn't do anything.
+TODOs:
+    -> categorical logic versus regression
+    -> 
 """
 import torch
 from torch.utils.data import DataLoader
@@ -33,24 +30,12 @@ from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 from lightwood.encoders.encoder_base import BaseEncoder
 from lightwood.logger import log
+from lightwood.helpers.torch import LightwoodAutocast
 
 from transformers import (
     DistilBertModel,
     DistilBertForSequenceClassification,
     DistilBertTokenizerFast,
-    # DistilBertConfig,
-    AlbertModel,
-    AlbertForSequenceClassification,
-    AlbertTokenizerFast,
-    # AlbertConfig,
-    GPT2Model,
-    GPT2ForSequenceClassification,
-    GPT2TokenizerFast,
-    # GPT2Config,
-    BartModel,
-    BartForSequenceClassification,
-    BartTokenizerFast,
-    # BartConfig,
     AdamW,
     get_linear_schedule_with_warmup,
 )
@@ -61,19 +46,15 @@ class PretrainedLang(BaseEncoder):
     Pretrained language models.
     Option to train on a target encoding of choice.
 
-    The "sent_embedder" parameter refers to a function to make
-    sentence embeddings, given a 1 x N_tokens x N_embed input
-
     Args:
     is_target ::Bool; data column is the target of ML.
     model_name ::str; name of pre-trained model
-    desired_error ::float
     max_training_time ::int; seconds to train
     custom_tokenizer ::function; custom tokenizing function
-    batch_size  ::int; size of batfch
-    max_position_embeddings ::int; max sequence length
-    custom_train ::Bool; whether to train text on target or not.
-    frozen ::Bool; whether to freeze tranformer and train a linear layer head
+    batch_size  ::int; size of batch
+    max_position_embeddings ::int; max sequence length of input text
+    custom_train ::Bool; If true, trains model on target procided
+    frozen ::Bool; If true, freezes transformer layers during training. 
     epochs ::int; number of epochs to train model with
     """
 
@@ -81,7 +62,6 @@ class PretrainedLang(BaseEncoder):
         self,
         is_target=False,
         model_name="distilbert",
-        desired_error=0.01,
         custom_tokenizer=None,
         batch_size=10,
         max_position_embeddings=None,
@@ -92,10 +72,8 @@ class PretrainedLang(BaseEncoder):
         super().__init__(is_target)
 
         self.name = model_name + " text encoder"
-        print(self.name)
+        print(self.name, flush=True)
 
-        # Token/sequence treatment
-        self._pad_id = None
         self._max_len = max_position_embeddings
         self._custom_train = custom_train
         self._frozen = frozen
@@ -107,29 +85,11 @@ class PretrainedLang(BaseEncoder):
         self._model = None
         self.model_type = None
 
-        if model_name == "distilbert":
-            self._classifier_model_class = DistilBertForSequenceClassification
-            self._embeddings_model_class = DistilBertModel
-            self._tokenizer_class = DistilBertTokenizerFast
-            self._pretrained_model_name = "distilbert-base-uncased"
-
-        elif model_name == "albert":
-            self._classifier_model_class = AlbertForSequenceClassification
-            self._embeddings_model_class = AlbertModel
-            self._tokenizer_class = AlbertTokenizerFast
-            self._pretrained_model_name = "albert-base-v2"
-
-        elif model_name == "bart":
-            self._classifier_model_class = BartForSequenceClassification
-            self._embeddings_model_class = BartModel
-            self._tokenizer_class = BartTokenizerFast
-            self._pretrained_model_name = "facebook/bart-large"
-
-        else:
-            self._classifier_model_class = GPT2ForSequenceClassification
-            self._embeddings_model_class = GPT2Model
-            self._tokenizer_class = GPT2TokenizerFast
-            self._pretrained_model_name = "gpt2"
+        # TODO: Other LMs; Distilbert is a good balance of speed/performance
+        self._classifier_model_class = DistilBertForSequenceClassification
+        self._embeddings_model_class = DistilBertModel
+        self._tokenizer_class = DistilBertTokenizerFast
+        self._pretrained_model_name = "distilbert-base-uncased"
 
         self.device, _ = get_devices()
 
@@ -142,17 +102,15 @@ class PretrainedLang(BaseEncoder):
 
         # TODO: Make tokenizer custom with partial function; feed custom->model
         if self._tokenizer is None:
-            # Set the default tokenizer
             self._tokenizer = self._tokenizer_class.from_pretrained(
                 self._pretrained_model_name
             )
 
-        # Replace empty strings with ''
+        # Replaces empty strings with ''
         priming_data = [x if x is not None else "" for x in priming_data]
 
-        # Check style of output
-
-        # Case 1: Categorical, 1 output
+        # Checks training data details
+        # TODO: This should be streamlined.
         output_type = (
             training_data is not None
             and "targets" in training_data
@@ -164,10 +122,10 @@ class PretrainedLang(BaseEncoder):
         if self._custom_train and output_type:
             print("Training model.", flush=True)
 
-            # Prepare the priming data inputs with attention masks etc.
+            # Prepare priming data into tokenized form + attention masks
             text = self._tokenizer(priming_data, truncation=True, padding=True)
 
-            # To train in the space, use labels as argmax.
+            # If categorical, use argmax label since input is 1D. 
             if training_data["targets"][0]["encoded_output"].shape[1] > 1:
                 labels = training_data["targets"][0]["encoded_output"].argmax(
                     dim=1
@@ -175,9 +133,8 @@ class PretrainedLang(BaseEncoder):
             else:
                 labels = training_data["targets"][0]["encoded_output"]
 
+            # Construct the dataset for training
             xinp = TextEmbed(text, labels)
-
-            # Pad the text tokens on the left (if padding allowed)
             dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
 
             # Construct the model
@@ -189,10 +146,7 @@ class PretrainedLang(BaseEncoder):
 
             # If max length not set, adjust
             if self._max_len is None:
-                if "gpt2" in self._pretrained_model_name:
-                    self._max_len = self._model.config.n_positions
-                else:
-                    self._max_len = self._model.config.max_position_embeddings
+                self._max_len = self._model.config.max_position_embeddings
 
             if self._frozen:
                 print("\tFrozen Model + Training Classifier Layers", flush=True)
@@ -211,7 +165,6 @@ class PretrainedLang(BaseEncoder):
                 """
                 Fine-tuning parameters with weight decay
                 """
-                # Fine-tuning weight-decay (https://huggingface.co/transformers/training.html)
                 no_decay = [
                     "bias",
                     "LayerNorm.weight",
@@ -288,11 +241,12 @@ class PretrainedLang(BaseEncoder):
             for batch in dataset:
                 optim.zero_grad()
 
-                inpids = batch["input_ids"].to(self.device)
-                attn = batch["attention_mask"].to(self.device)
-                labels = batch["labels"].to(self.device)
-                outputs = self._model(inpids, attention_mask=attn, labels=labels)
-                loss = outputs[0]
+                with LightwoodAutocast():
+                    inpids = batch["input_ids"].to(self.device)
+                    attn = batch["attention_mask"].to(self.device)
+                    labels = batch["labels"].to(self.device)
+                    outputs = self._model(inpids, attention_mask=attn, labels=labels)
+                    loss = outputs[0]
 
                 total_loss += loss.item()
 
@@ -319,10 +273,13 @@ class PretrainedLang(BaseEncoder):
         Returns:
         encoded_representation:: [torch.Tensor] N_sentences x Nembed_dim
         """
-        encoded_representation = []
+        if self._prepared is False:
+            raise Exception("You need to first prepare the encoder.")
 
         # Freeze training mode while encoding
         self._model.eval()
+
+        encoded_representation = []
 
         with torch.no_grad():
             # Set the weights; this is GPT-2
@@ -348,27 +305,4 @@ class PretrainedLang(BaseEncoder):
         return torch.stack(encoded_representation).squeeze(1)
 
     def decode(self, encoded_values_tensor, max_length=100):
-        raise Exception("Decoder not implemented yet.", flush=True)
-
-    # @staticmethod
-    # def _mean_norm(xinp, dim=1):
-    #    """
-    #    Calculates a 1 x N_embed vector by averaging all token embeddings
-
-    #    Args:
-    #    xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
-    #    dim ::int; dimension to average on
-    #    """
-    #    xinp = xinp[:, 1:-1, :] # Only consider word tokens and not CLS
-    #    return torch.mean(xinp, dim=dim).cpu().numpy()
-
-    # @staticmethod
-    # def _cls_state(xinp):
-    #    """
-    #    Returns the CLS token out of the embedding.
-    #    CLS is used in classification.
-
-    #    Args:
-    #        xinp ::torch.Tensor; Assumes order Nbatch x Ntokens x Nembedding
-    #    """
-    #    return xinp[:, 0, :].detach().cpu().numpy()
+        raise Exception("Decoder not implemented.")
