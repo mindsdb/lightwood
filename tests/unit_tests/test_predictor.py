@@ -82,3 +82,27 @@ class TestPredictor(unittest.TestCase):
 
         df = df.drop([x['name'] for x in config['output_features']], axis=1)
         predictor.predict(when_data=df)
+
+    def test_text_encoder(self):
+        """
+        2021.02.15
+        Check if the text encoder is properly deployed; NOT performance.
+
+        Config ensures "input" is treated as text.
+        """
+        config = {
+            "input_features": [
+                {"name": "input", "type": "text"},
+            ],
+            "output_features": [
+                {"name": "output", "type": "numeric"},
+            ],
+            "mixer": {"class": LightGBMMixer},
+        }
+
+        inpx = ["this is a test case of text", "lightwood is awesome!"] *100
+        outx = [0,1] * 100
+        df = pd.DataFrame({"input": inpx, "output": outx})
+
+        predictor = Predictor(config)
+        predictor.learn(from_data=df)
