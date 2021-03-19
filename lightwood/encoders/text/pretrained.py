@@ -13,11 +13,11 @@ Currently the model supports only distilbert; this can be adapted later.
 When instantiating the DistilBertForSeq.Class object,
 num_labels indicates whether you use classification or regression.
 
+For regression, it outputs the embeddings without training. 
 
 See: https://huggingface.co/transformers/model_doc/distilbert.html#distilbertforsequenceclassification
 under the 'labels' command
 
-For regression - use num_labels = 1
 For classification - use num_labels = 1 + num_classes ***
 
 If you do num_classes + 1, we reserve the LAST label
@@ -126,9 +126,7 @@ class PretrainedLang(BaseEncoder):
 
         output_type = training_data["targets"][0]["output_type"]
 
-        type_flag = (output_type == COLUMN_DATA_TYPES.CATEGORICAL) or (
-            output_type == COLUMN_DATA_TYPES.NUMERIC
-        )
+        type_flag = output_type == COLUMN_DATA_TYPES.CATEGORICAL
 
         if self._custom_train and output_avail and type_flag:
             print("Training model.", flush=True)
@@ -136,36 +134,18 @@ class PretrainedLang(BaseEncoder):
             # Prepare priming data into tokenized form + attention masks
             text = self._tokenizer(priming_data, truncation=True, padding=True)
 
-            if output_type == COLUMN_DATA_TYPES.CATEGORICAL:
-                """
-                Categorical preparation.
-                """
-                print("\tOutput trained is categorical", flush=True)
+            print("\tOutput trained is categorical", flush=True)
 
-                if training_data["targets"][0]["encoded_output"].shape[1] > 1:
-                    labels = training_data["targets"][0]["encoded_output"].argmax(
-                        dim=1
-                    )  # Nbatch x N_classes
-                else:
-                    labels = training_data["targets"][0]["encoded_output"]
-
-                label_size = (
-                    len(set(training_data["targets"][0]["unencoded_output"])) + 1
-                )
-
+            if training_data["targets"][0]["encoded_output"].shape[1] > 1:
+                labels = training_data["targets"][0]["encoded_output"].argmax(
+                    dim=1
+                )  # Nbatch x N_classes
             else:
-                """
-                Assumes numeric encoder
-                """
-                print("\tOutput trained is regression", flush=True)
+                labels = training_data["targets"][0]["encoded_output"]
 
-                labels = training_data["targets"][0]["unencoded_output"]
-
-                if isinstance(labels, torch.Tensor) is False:
-                    labels = torch.tensor(labels)
-
-                labels = labels.float()  # Set to float for regression
-                label_size = 1  # If label_size == 1, defaults to regression
+            label_size = (
+                len(set(training_data["targets"][0]["unencoded_output"])) + 1
+            )
 
             # Construct the model
             self._model = self._classifier_model_class.from_pretrained(
