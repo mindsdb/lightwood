@@ -18,7 +18,6 @@ from lightwood.encoders import (
     TsNumericEncoder,
     CategoricalAutoEncoder,
     MultiHotEncoder,
-    #DistilBertEncoder,
     DatetimeEncoder,
     Img2VecEncoder,
     TsRnnEncoder,
@@ -298,11 +297,9 @@ class DataSource(Dataset):
             ColumnDataTypes.MULTIPLE_CATEGORICAL: MultiHotEncoder,
             ColumnDataTypes.DATETIME: DatetimeEncoder,
             ColumnDataTypes.IMAGE: Img2VecEncoder,
-            # ColumnDataTypes.TEXT: DistilBertEncoder,
             ColumnDataTypes.TEXT: PretrainedLang,
             ColumnDataTypes.SHORT_TEXT: ShortTextEncoder,
             ColumnDataTypes.TIME_SERIES: TsRnnEncoder,
-            # ColumnDataTypes.AUDIO: AmplitudeTsEncoder
         }
 
         target_encoder_classes = {
