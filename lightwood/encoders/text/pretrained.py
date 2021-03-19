@@ -3,22 +3,22 @@
 
 The following text encoder uses huggingface's
 Distilbert. Internal benchmarks suggest
-1 epoch of fine tuning is ideal.
+1 epoch of fine tuning is ideal [classification].
+Training ONLY occurs for classification. Regression problems
+are not trained, embeddings are directly generated.
 
 See: https://huggingface.co/transformers/training.html
 for further details.
 
-Currently the model supports only distilbert; this can be adapted later. 
+Currently the model supports only distilbert.
 
 When instantiating the DistilBertForSeq.Class object,
 num_labels indicates whether you use classification or regression.
 
-For regression, it outputs the embeddings without training. 
-
 See: https://huggingface.co/transformers/model_doc/distilbert.html#distilbertforsequenceclassification
 under the 'labels' command
 
-For classification - use num_labels = 1 + num_classes ***
+For classification - we use num_labels = 1 + num_classes ***
 
 If you do num_classes + 1, we reserve the LAST label
 as the "unknown" label; this is different from the original
@@ -28,6 +28,8 @@ TODOs:
 + Batch encodes() tokenization step
 + Look into auto-encoding lower dimensional representations 
 of the output embedding
++ Look into regression tuning (will require grad. clipping)
++ Look into tuning to the encoded space of output.
 """
 import torch
 from torch.utils.data import DataLoader
@@ -143,9 +145,7 @@ class PretrainedLang(BaseEncoder):
             else:
                 labels = training_data["targets"][0]["encoded_output"]
 
-            label_size = (
-                len(set(training_data["targets"][0]["unencoded_output"])) + 1
-            )
+            label_size = len(set(training_data["targets"][0]["unencoded_output"])) + 1
 
             # Construct the model
             self._model = self._classifier_model_class.from_pretrained(
