@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 from lightwood.mixers.helpers.default_net import DefaultNet
 from lightwood.helpers.torch import LightwoodAutocast
@@ -36,10 +37,11 @@ class ArNet(DefaultNet):
                               if col == self.ar_column])
 
         # TODO: custom initialization, exponential between 0 and 1 to favour most recent value
-        dims = [(len(self.ar_idxs), len(self.ar_idxs)),
-                (len(self.ar_idxs), len(self.ar_idxs)),
-                (len(self.ar_idxs), len(self.ar_idxs)),
-                (len(self.ar_idxs), transformer.feature_len_map[target])]
+        dims = [# (len(self.ar_idxs), len(self.ar_idxs)),
+                # (len(self.ar_idxs), len(self.ar_idxs)),
+                # (len(self.ar_idxs), len(self.ar_idxs)),
+                (len(self.ar_idxs), transformer.feature_len_map[target])
+                ]
         linears = [nn.Linear(in_features=inf, out_features=outf) for inf, outf in dims]
         self.ar_net = nn.Sequential(*linears)  # nn.Linear(in_features=len(self.ar_idxs),
                                                # out_features=transformer.feature_len_map[target])
@@ -58,5 +60,13 @@ class ArNet(DefaultNet):
         with LightwoodAutocast():
             residual_output = self._foward_net(input)
             ar_output = self.ar_net(input[:, self.ar_idxs])
+            # vector[0] = 1 if real < 0 and not self.positive_domain else 0
+            # vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
+            # vector[2] = real / mean
+            # force unit root
+            if self.ar_net.training:
+                self.ar_net._modules['0'].weight = nn.Parameter(torch.clamp(self.ar_net._modules['0'].weight,
+                                                                            0.0,
+                                                                            0.999))
 
-        return ar_output + residual_output
+        return ar_output + residual_output# 0.0*
