@@ -206,12 +206,12 @@ class NnMixer(BaseMixer):
                         self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduction='none'))
                 # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
-                    self.criterion_arr.append(torch.nn.MSELoss())
-                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduction='none'))
+                    self.criterion_arr.append(torch.nn.L1Loss())
+                    self.unreduced_criterion_arr.append(torch.nn.L1Loss(reduction='none'))
 
         self.optimizer_class = Ranger
         if self.optimizer_args is None:
-            self.optimizer_args = {'lr': 0.0005}
+            self.optimizer_args = {'lr': 0.0005, 'weight_decay': 0.1}
 
         if 'beta1' in self.dynamic_parameters:
             self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'], 0.999)
@@ -281,7 +281,7 @@ class NnMixer(BaseMixer):
                 subset_test_error_delta_buff = []
                 best_model = None
 
-                #iterate over the iter_fit and see what the epoch and mixer error is
+                # iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(self._iter_fit(subset_train_ds, subset_id=subset_id)):
 
                     # Log this every now and then so that the user knows it's running
