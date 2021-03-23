@@ -30,28 +30,9 @@ with open('optional_requirements.txt') as req_file:
 
 # Windows specific requirements
 if sys_platform in ['win32','cygwin','windows']:
+    # These have to be installed manually or via the installers in windows
     requirements = remove_requirements(requirements,'torch')
     requirements = remove_requirements(requirements,'torchvision')
-    requirements = remove_requirements(requirements,'torchvision')
-
-    requirements = remove_requirements(requirements,'dask')
-    requirements = remove_requirements(requirements,'pydub')
-
-    print('Trying to install pytorch and torchvision!')
-    code = 1
-    try:
-        code = subprocess.call(['pip', 'install', 'torch===1.7.0+cpu', 'torchvision===0.8.1+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
-        if code != 0:
-            raise Exception('Torch and torchvsion instalation failed !')
-    except:
-        try:
-            code = subprocess.call(['pip3', 'install', 'torch===1.7.0+cpu', 'torchvision===0.8.1+cpu', '-f', 'https://download.pytorch.org/whl/torch_stable.html'])
-            if code != 0:
-                raise Exception('Torch and torchvision installation failed !')
-        except:
-            print('Failed to install pytorch, please install pytorch and torchvision manually by following the simple instructions over at: https://pytorch.org/get-started/locally/')
-    if code == 0:
-        print('Successfully installed pytorch and torchvision CPU version! (If you need the GPU version, please install it manually, checkout the mindsdb docs and the pytorch docs if you need help)')
 
 
 setuptools.setup(

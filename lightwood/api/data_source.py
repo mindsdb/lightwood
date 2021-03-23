@@ -229,6 +229,9 @@ class DataSource(Dataset):
                 elif not self.enable_cache:
                     if col_name in self.data_frame:
                         custom_data = {col_name: [self.data_frame[col_name].iloc[idx]]}
+                        if 'depends_on_column' in col_config:
+                            for col in col_config['depends_on_column']:
+                                custom_data[col] = [self.data_frame[col].iloc[idx]]
                     else:
                         custom_data = {col_name: [None]}
 
