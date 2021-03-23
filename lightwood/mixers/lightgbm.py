@@ -31,6 +31,7 @@ class LightGBMMixer(BaseMixer):
         super().__init__()
         self.models = {}
         self.ord_encs = {}
+        self.label_sets = {}
         self.stop_training_after_seconds = stop_training_after_seconds
         self.grid_search = grid_search  # using Optuna
 
@@ -74,7 +75,11 @@ class LightGBMMixer(BaseMixer):
                 if next(item for item in train_ds.output_features if item["name"] == col_name)['type'] == COLUMN_DATA_TYPES.CATEGORICAL:
                     if subset_name == 'train':
                         self.ord_encs[col_name] = OrdinalEncoder()
-                        self.ord_encs[col_name].fit(np.array(list(set(label_data))).reshape(-1, 1))
+                        self.label_sets[col_name] = set(label_data)
+                        self.label_sets[col_name].add('__mdb_unknown_cat')
+                        self.ord_encs[col_name].fit(np.array(list(self.label_sets[col_name])).reshape(-1, 1))
+
+                    label_data = [x if x in self.label_sets[col_name] else '__mdb_unknown_cat' for x in label_data]
                     label_data = self.ord_encs[col_name].transform(np.array(label_data).reshape(-1, 1)).flatten()
 
                 data[subset_name]['label_data'][col_name] = label_data
@@ -141,12 +146,16 @@ class LightGBMMixer(BaseMixer):
 
         ypred = {}
         for col_name in when_data_source.output_feature_names:
+            col_config = [conf for conf in when_data_source.config['output_features'] if conf['name'] == col_name][0]
             col_preds = self.models[col_name].predict(data)
             ypred[col_name] = {}
             if col_name in self.ord_encs:
                 ypred[col_name]['class_distribution'] = list(col_preds)
                 ypred[col_name]['class_labels'] = {i: cls for i, cls in enumerate(self.all_classes)}
                 col_preds = self.ord_encs[col_name].inverse_transform(np.argmax(col_preds, axis=1).reshape(-1, 1)).flatten()
+            if col_config.get('encoder_attrs', False):
+                if col_config['encoder_attrs'].get('positive_domain', False):
+                    col_preds = col_preds.clip(0)
             ypred[col_name]['predictions'] = list(col_preds)
 
         return ypred

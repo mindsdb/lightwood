@@ -1,5 +1,6 @@
 import torch
 
+
 class BaseEncoder:
     """Base class for all encoders"""
 
@@ -19,4 +20,8 @@ class BaseEncoder:
         raise NotImplementedError
 
     def to(self, device, available_devices):
+        for v in vars(self):
+            attr = getattr(self, v)
+            if isinstance(attr, torch.nn.Module):
+                attr.to(device)
         return self

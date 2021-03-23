@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 from lightwood.helpers.device import get_devices
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.config.config import CONFIG
 
 
@@ -15,8 +16,8 @@ class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
             pooled = pooled.permute(0,2,1)
             return pooled.view(n,c)
 
-class Img2Vec(nn.Module):
 
+class Img2Vec(nn.Module):
     def __init__(self, model):
         """ Img2Vec
         :param model: name of the model to use
@@ -28,7 +29,6 @@ class Img2Vec(nn.Module):
 
         self.model = self._get_model()
         self.model = self.model.to(self.device)
-
 
     def to(self, device, available_devices):
         self.device = device
@@ -47,7 +47,6 @@ class Img2Vec(nn.Module):
                 if batch:
                     return embedding[:, :, 0, 0]
                 return embedding[0, :, 0, 0]
-
 
     def _get_model(self):
         if self.model_name == 'resnet-18':
