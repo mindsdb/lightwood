@@ -305,7 +305,7 @@ class PretrainedLang(BaseEncoder):
         encoded_representation = []
 
         # Tokenize all data at once;
-        inp = self._tokenizer.encode(
+        inp = self._tokenizer(
             column_data, truncation=True, padding=True, return_tensors="pt"
         ).to(self.device)
 
