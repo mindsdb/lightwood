@@ -124,12 +124,17 @@ class PretrainedLang(BaseEncoder):
         priming_data = [x if x is not None else "" for x in priming_data]
 
         # Checks training data details
-        # TODO: The dict should be streamlined
+        # TODO: Regression flag; currently training supported for categorical only
         output_avail = training_data is not None and len(training_data["targets"]) == 1
 
-        output_type = training_data["targets"][0]["output_type"]
-
-        if self._custom_train and output_avail and (output_type == COLUMN_DATA_TYPES.CATEGORICAL):
+        if (
+            self._custom_train
+            and output_avail
+            and (
+                training_data["targets"][0]["output_type"]
+                == COLUMN_DATA_TYPES.CATEGORICAL
+            )
+        ):
             log.info("Training model.")
 
             # Prepare priming data into tokenized form + attention masks
