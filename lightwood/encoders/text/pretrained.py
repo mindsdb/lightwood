@@ -268,8 +268,7 @@ class PretrainedLang(BaseEncoder):
                 if scheduler is not None:
                     scheduler.step()
 
-            # self._train_callback(epoch, loss.item())
-            log.info("Epoch=", epoch + 1, "Loss=", total_loss / len(dataset))
+            self._train_callback(epoch, total_loss / len(dataset))
 
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
