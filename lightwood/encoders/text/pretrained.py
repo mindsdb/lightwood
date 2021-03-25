@@ -230,6 +230,8 @@ class PretrainedLang(BaseEncoder):
     def _tune_model(self, dataset, optim, scheduler, n_epochs=1):
         """
         Given a model, train for n_epochs.
+        Specifically intended for tuning; it does NOT use loss/
+        stopping criterion.
 
         model - torch.nn model;
         dataset - torch.DataLoader; dataset to train
