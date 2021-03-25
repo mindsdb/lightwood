@@ -25,6 +25,7 @@ as the "unknown" label; this is different from the original
 distilbert model. (prior to 2021.03)
 
 TODOs:
++ Regression 
 + Batch encodes() tokenization step
 + Look into auto-encoding lower dimensional representations 
 of the output embedding
@@ -82,7 +83,7 @@ class PretrainedLang(BaseEncoder):
         super().__init__(is_target)
 
         self.name = model_name + " text encoder"
-        print(self.name, flush=True)
+        log.info(self.name)
 
         self._max_len = max_position_embeddings
         self._custom_train = custom_train
@@ -111,7 +112,7 @@ class PretrainedLang(BaseEncoder):
         Automatically assumes this.
         """
         if self._prepared:
-            raise Exception("Encoder is already prepared.", flush=True)
+            raise Exception("Encoder is already prepared.")
 
         # TODO: Make tokenizer custom with partial function; feed custom->model
         if self._tokenizer is None:
@@ -128,15 +129,13 @@ class PretrainedLang(BaseEncoder):
 
         output_type = training_data["targets"][0]["output_type"]
 
-        type_flag = output_type == COLUMN_DATA_TYPES.CATEGORICAL
-
-        if self._custom_train and output_avail and type_flag:
-            print("Training model.", flush=True)
+        if self._custom_train and output_avail and (output_type == COLUMN_DATA_TYPES.CATEGORICAL):
+            log.info("Training model.")
 
             # Prepare priming data into tokenized form + attention masks
             text = self._tokenizer(priming_data, truncation=True, padding=True)
 
-            print("\tOutput trained is categorical", flush=True)
+            log.info("\tOutput trained is categorical")
 
             if training_data["targets"][0]["encoded_output"].shape[1] > 1:
                 labels = training_data["targets"][0]["encoded_output"].argmax(
@@ -162,7 +161,7 @@ class PretrainedLang(BaseEncoder):
                 self._max_len = self._model.config.max_position_embeddings
 
             if self._frozen:
-                print("\tFrozen Model + Training Classifier Layers", flush=True)
+                log.info("\tFrozen Model + Training Classifier Layers")
                 """
                 Freeze the base transformer model and train
                 a linear layer on top
@@ -174,7 +173,7 @@ class PretrainedLang(BaseEncoder):
                 optimizer_grouped_parameters = self._model.parameters()
 
             else:
-                print("\tFine-tuning model", flush=True)
+                log.info("\tFine-tuning model")
                 """
                 Fine-tuning parameters with weight decay
                 """
@@ -214,7 +213,7 @@ class PretrainedLang(BaseEncoder):
             )
 
         else:
-            print("Embeddings Generator only", flush=True)
+            log.info("Embeddings Generator only")
 
             self.model_type = "embeddings_generator"
             self._model = self._embeddings_model_class.from_pretrained(
@@ -230,7 +229,7 @@ class PretrainedLang(BaseEncoder):
         model - torch.nn model;
         dataset - torch.DataLoader; dataset to train
         device - torch.device; cuda/cpu
-        log - lightwood.logger.log; print output
+        log - lightwood.logger.log; log.info output
         optim - transformers.optimization.AdamW; optimizer
         n_epochs - number of epochs to train
 
@@ -238,17 +237,17 @@ class PretrainedLang(BaseEncoder):
         self._model.train()
 
         if optim is None:
-            print("No opt. provided, setting all params with AdamW.", flush=True)
+            log.info("No opt. provided, setting all params with AdamW.")
             optim = AdamW(self._model.parameters(), lr=5e-5)
         else:
-            print("Optimizer provided", flush=True)
+            log.info("Optimizer provided")
 
         if scheduler is None:
-            print("No scheduler provided.", flush=True)
+            log.info("No scheduler provided.")
         else:
-            print("Scheduler provided.", flush=True)
+            log.info("Scheduler provided.")
 
-        print("Beginning training.")
+        log.info("Beginning training.")
         for epoch in range(n_epochs):
             total_loss = 0
 
@@ -270,7 +269,7 @@ class PretrainedLang(BaseEncoder):
                     scheduler.step()
 
             # self._train_callback(epoch, loss.item())
-            print("Epoch=", epoch + 1, "Loss=", total_loss / len(dataset), flush=True)
+            log.info("Epoch=", epoch + 1, "Loss=", total_loss / len(dataset))
 
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
