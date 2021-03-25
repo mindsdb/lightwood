@@ -1,6 +1,8 @@
 """
 2021.03.18
 
+## Padding changes the answer slightly in the model.
+
 The following text encoder uses huggingface's
 Distilbert. Internal benchmarks suggest
 1 epoch of fine tuning is ideal [classification].
@@ -280,15 +282,16 @@ class PretrainedLang(BaseEncoder):
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
 
-    def encode(self, column_data):
+    def encode(self, column_data, batchsize=5000):
         """
-        TODO: Maybe batch the text up; may take too long
         Given column data, encode the dataset.
+        Will do a forward pass to generate embeddings via batchsize.
 
         Currently, returns the embedding of the pre-classifier layer.
 
         Args:
         column_data:: [list[str]] list of text data in str form
+        batchsize:: int; size of batch dimension
 
         Returns:
         encoded_representation:: [torch.Tensor] N_sentences x Nembed_dim
@@ -301,20 +304,21 @@ class PretrainedLang(BaseEncoder):
 
         encoded_representation = []
 
+        # Tokenize all data at once;
+        inp = self._tokenizer.encode(
+            column_data, truncation=True, padding=True, return_tensors="pt"
+        ).to(self.device)
+
         with torch.no_grad():
             # Set the weights; this is GPT-2
-            for text in column_data:
+            for tidx in range(0, len(column_data), batchsize):
 
-                # Omit NaNs
-                if text == None:
-                    text = ""
+                batch_inputs = inp["input_ids"][tidx : tidx + batchsize]
+                batch_masks = inp["attention_mask"][tidx : tidx + batchsize]
 
-                # Tokenize the text with the built-in tokenizer.
-                inp = self._tokenizer.encode(
-                    text, truncation=True, return_tensors="pt"
-                ).to(self.device)
-
-                output = self._model.base_model(inp).last_hidden_state[:, 0]
+                output = self._model.base_model(
+                    batch_inputs, attention_mask=batch_masks
+                ).last_hidden_state[:, 0]
 
                 # If the model has a pre-classifier layer, use this embedding.
                 if hasattr(self._model, "pre_classifier"):
