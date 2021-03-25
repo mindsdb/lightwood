@@ -213,7 +213,7 @@ class PretrainedLang(BaseEncoder):
             )
 
             # Train model; declare optimizer earlier if desired.
-            self._train_model(
+            self._tune_model(
                 dataset, optim=optimizer, scheduler=scheduler, n_epochs=self._epochs
             )
 
@@ -227,7 +227,7 @@ class PretrainedLang(BaseEncoder):
 
         self._prepared = True
 
-    def _train_model(self, dataset, optim, scheduler, n_epochs=1):
+    def _tune_model(self, dataset, optim, scheduler, n_epochs=1):
         """
         Given a model, train for n_epochs.
 
