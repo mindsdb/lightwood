@@ -308,7 +308,7 @@ class PretrainedLang(BaseEncoder):
             for text in column_data:
 
                 # Omit NaNs
-                if text == None:
+                if text is None:
                     text = ""
 
                 # Tokenize the text with the built-in tokenizer.
