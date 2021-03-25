@@ -222,7 +222,7 @@ class PretrainedLang(BaseEncoder):
 
         self._prepared = True
 
-    def _train_model(self, dataset, optim=None, scheduler=None, n_epochs=1):
+    def _train_model(self, dataset, optim, scheduler, n_epochs=1):
         """
         Given a model, train for n_epochs.
 
@@ -231,6 +231,7 @@ class PretrainedLang(BaseEncoder):
         device - torch.device; cuda/cpu
         log - lightwood.logger.log; log.info output
         optim - transformers.optimization.AdamW; optimizer
+        scheduler - scheduling params
         n_epochs - number of epochs to train
 
         """
@@ -247,7 +248,6 @@ class PretrainedLang(BaseEncoder):
         else:
             log.info("Scheduler provided.")
 
-        log.info("Beginning training.")
         for epoch in range(n_epochs):
             total_loss = 0
 
@@ -290,7 +290,7 @@ class PretrainedLang(BaseEncoder):
         if self._prepared is False:
             raise Exception("You need to first prepare the encoder.")
 
-        # Freeze training mode while encoding
+        # Set model to testing/eval mode.
         self._model.eval()
 
         encoded_representation = []
