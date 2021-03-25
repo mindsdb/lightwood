@@ -1,6 +1,8 @@
 """
 2021.03.18
 
+## Padding changes the answer slightly in the model.
+
 The following text encoder uses huggingface's
 Distilbert. Internal benchmarks suggest
 1 epoch of fine tuning is ideal [classification].
@@ -300,7 +302,7 @@ class PretrainedLang(BaseEncoder):
         self._model.eval()
 
         encoded_representation = []
-
+        
         with torch.no_grad():
             # Set the weights; this is GPT-2
             for text in column_data:
