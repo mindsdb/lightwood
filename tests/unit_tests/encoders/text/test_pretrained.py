@@ -3,11 +3,11 @@ import random
 import torch
 from sklearn.metrics import r2_score
 from lightwood.encoders.numeric import NumericEncoder
-from lightwood.encoders.text import DistilBertEncoder
+from lightwood.encoders.text import PretrainedLang
 from lightwood import COLUMN_DATA_TYPES
 
 
-class TestDistilBERT(unittest.TestCase):
+class TestPretrainedLang(unittest.TestCase):
     def test_encode_and_decode(self):
         random.seed(2)
         priming_data = []
@@ -30,20 +30,18 @@ class TestDistilBERT(unittest.TestCase):
         encoded_data_1 = output_1_encoder.encode(primting_target)
         encoded_data_1 = encoded_data_1.tolist()
 
-        enc = DistilBertEncoder()
+        enc = PretrainedLang()
 
         enc.prepare(priming_data,
                             training_data={'targets': [
                                 {'output_type': COLUMN_DATA_TYPES.NUMERIC,'encoded_output': encoded_data_1},
-                                {'output_type': COLUMN_DATA_TYPES.NUMERIC, 'encoded_output': encoded_data_1}
                             ]})#
 
         encoded_predicted_target = enc.encode(test_data).tolist()
 
         predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:3] for x in encoded_predicted_target]))
-        predicted_targets_2 = output_1_encoder.decode(torch.tensor([x[3:] for x in encoded_predicted_target]))
 
-        for predicted_targets in [predicted_targets_1, predicted_targets_2]:
+        for predicted_targets in [predicted_targets_1]:
             real = list(test_target)
             pred = list(predicted_targets)
 
