@@ -148,7 +148,7 @@ class NnMixer(BaseMixer):
             stop_training_after_seconds = self.stop_training_after_seconds
 
         input_sample, output_sample = train_ds[0]
-        is_ts_target = train_ds.output_features[0].get('additional_info', False).get('time_series_target', False)
+        is_ts_target = train_ds.output_features[0].get('additional_info', {}).get('time_series_target', False)
 
         if len(train_ds.out_types) == 1 and is_ts_target:
             self.nn_class = ArNet
