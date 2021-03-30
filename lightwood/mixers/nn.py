@@ -59,7 +59,7 @@ class NnMixer(BaseMixer):
 
         self.batch_size = 200
 
-        self.nn_class = ArNet  # DefaultNet
+        self.nn_class = DefaultNet
         self.dropout_p = max(0.0, min(1.0, dropout_p))
         self.dynamic_parameters = {}
         self.awareness_criterion = None
@@ -148,19 +148,22 @@ class NnMixer(BaseMixer):
             stop_training_after_seconds = self.stop_training_after_seconds
 
         input_sample, output_sample = train_ds[0]
+        is_ts_target = train_ds.output_features[0].get('additional_info', False).get('time_series_target', False)
 
-        if self.nn_class == DefaultNet:
+        if len(train_ds.out_types) == 1 and is_ts_target:
+            self.nn_class = ArNet
             self.net = self.nn_class(
                 self.dynamic_parameters,
+                train_ds.transformer,
                 input_size=len(input_sample),
                 output_size=len(output_sample),
                 nr_outputs=len(train_ds.out_types),
                 dropout=self.dropout_p
             )
-        elif self.nn_class == ArNet:
+        else:
+            self.nn_class = DefaultNet
             self.net = self.nn_class(
                 self.dynamic_parameters,
-                train_ds.transformer,
                 input_size=len(input_sample),
                 output_size=len(output_sample),
                 nr_outputs=len(train_ds.out_types),
@@ -204,14 +207,20 @@ class NnMixer(BaseMixer):
                     elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
                         self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
                         self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduction='none'))
-                # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
-                else:
+                elif is_ts_target:
                     self.criterion_arr.append(torch.nn.L1Loss())
                     self.unreduced_criterion_arr.append(torch.nn.L1Loss(reduction='none'))
+                # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
+                else:
+                    self.criterion_arr.append(torch.nn.MSELoss())
+                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduction='none'))
 
         self.optimizer_class = Ranger
         if self.optimizer_args is None:
-            self.optimizer_args = {'lr': 0.0005, 'weight_decay': 0.1}
+            self.optimizer_args = {'lr': 0.0005}
+
+        if is_ts_target:
+            self.optimizer_args['weight_decay'] = 2e-2
 
         if 'beta1' in self.dynamic_parameters:
             self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'], 0.999)
@@ -220,9 +229,7 @@ class NnMixer(BaseMixer):
             if optimizer_arg_name in self.dynamic_parameters:
                 self.optimizer_args[optimizer_arg_name] = self.dynamic_parameters[optimizer_arg_name]
 
-        params = [param for param in self.net.parameters() if param.requires_grad]
-        self.optimizer = self.optimizer_class(params,
-                                              **self.optimizer_args)
+        self.optimizer = self.optimizer_class(self.net.parameters(), **self.optimizer_args)
 
         self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
         self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
@@ -281,7 +288,7 @@ class NnMixer(BaseMixer):
                 subset_test_error_delta_buff = []
                 best_model = None
 
-                # iterate over the iter_fit and see what the epoch and mixer error is
+                #iterate over the iter_fit and see what the epoch and mixer error is
                 for epoch, training_error in enumerate(self._iter_fit(subset_train_ds, subset_id=subset_id)):
 
                     # Log this every now and then so that the user knows it's running
@@ -511,13 +518,6 @@ class NnMixer(BaseMixer):
                     loss = target_loss
                 else:
                     loss += target_loss
-
-            # L2 norm over residual for AR Net
-            # if self.nn_class == ArNet:
-            #     for name, param in self.net.ar_net.named_parameters():
-            #         if 'weight' in name:
-            #             loss += torch.norm(param)
-
 
             running_loss += loss.item()
             error = running_loss / (i + 1)
