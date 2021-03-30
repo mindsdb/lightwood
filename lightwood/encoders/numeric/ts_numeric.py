@@ -48,7 +48,6 @@ class TsNumericEncoder(NumericEncoder):
                     mean = self._abs_mean
                 if real is not None and mean > 0:
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
-                    # vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                     vector[1] = real / mean
                 else:
                     log.debug(f'Can\'t encode target value: {real}')
@@ -56,15 +55,11 @@ class TsNumericEncoder(NumericEncoder):
             else:
                 vector = [0] * 3
                 try:
-                    if real is None:
-                        vector[0] = 0
-                    else:
+                    if real is not None:
                         vector[0] = 1
-                        # vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                         vector[1] = 1 if real < 0 and not self.positive_domain else 0
                         vector[2] = real/self._abs_mean
                 except Exception as e:
-                    vector = [0] * 3
                     log.error(f'Can\'t encode input value: {real}, exception: {e}')
 
             ret.append(vector)
