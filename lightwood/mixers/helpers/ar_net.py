@@ -6,6 +6,10 @@ from itertools import chain
 
 
 class ArNet(DefaultNet):
+    """
+    DefaultNet variant that adds a secondary stream (simple linear layer) with constrained
+    weigths to learn autoregressive coefficients for numerical time series targets
+    """
     def __init__(self, dynamic_parameters,
                  transformer,
                  input_size=None,
@@ -16,8 +20,8 @@ class ArNet(DefaultNet):
                  dropout=None,
                  pretrained_net=None):
         """
-        :param data_info: lightwood.mixers.helpers.transformer.Transformer; used to save the indexes for which we learn
-        the autoregressive branch of the network.
+        :param data_info: lightwood.mixers.helpers.transformer.Transformer;
+        used to save the indexes for which we learn the autoregressive branch of the network
         """
         assert len(transformer.output_features) == 1  # ArNet supports single target prediction only
         super().__init__(dynamic_parameters,
@@ -36,15 +40,9 @@ class ArNet(DefaultNet):
                               for col in transformer.input_idxs
                               if col == self.ar_column])
 
-        # TODO: custom initialization, exponential between 0 and 1 to favour most recent value
-        dims = [# (len(self.ar_idxs), len(self.ar_idxs)),
-                # (len(self.ar_idxs), len(self.ar_idxs)),
-                # (len(self.ar_idxs), len(self.ar_idxs)),
-                (len(self.ar_idxs), transformer.feature_len_map[target])
-                ]
+        dims = [(len(self.ar_idxs), transformer.feature_len_map[target])]
         linears = [nn.Linear(in_features=inf, out_features=outf) for inf, outf in dims]
-        self.ar_net = nn.Sequential(*linears)  # nn.Linear(in_features=len(self.ar_idxs),
-                                               # out_features=transformer.feature_len_map[target])
+        self.ar_net = nn.Sequential(*linears)
         self.ar_net.to(self.device)
 
     def to(self, device=None, available_devices=None):
@@ -52,21 +50,13 @@ class ArNet(DefaultNet):
         return super().to(device, available_devices)
 
     def forward(self, input):
-        """
-        In this particular model, we just need to forward the network defined in setup, with our input
-        :param input: a pytorch tensor with the input data of a batch
-        :return: output of the network
-        """
         with LightwoodAutocast():
             residual_output = self._foward_net(input)
             ar_output = self.ar_net(input[:, self.ar_idxs])
-            # vector[0] = 1 if real < 0 and not self.positive_domain else 0
-            # vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-            # vector[2] = real / mean
             # force unit root
             if self.ar_net.training:
                 self.ar_net._modules['0'].weight = nn.Parameter(torch.clamp(self.ar_net._modules['0'].weight,
                                                                             0.0,
                                                                             0.999))
 
-        return ar_output + residual_output# 0.0*
+        return ar_output + residual_output
