@@ -367,7 +367,6 @@ class NnMixer(BaseMixer):
                             self._update_model(best_model)
                             if self.is_selfaware:
                                 self._build_confidence_normalization_data(train_ds)
-                                self._adjust(test_ds)
 
                             self._iter_fit(test_ds, max_epochs=1)
                             self.encoders = train_ds.encoders
@@ -595,24 +594,25 @@ class NnMixer(BaseMixer):
 
                 awareness_loss = None
                 if self.is_selfaware:
-                    unreduced_losses = []
-                    for k, criterion in enumerate(self.unreduced_criterion_arr):
-                        target_loss = criterion(
-                            outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]],
-                            labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
-                        )
+                    with LightwoodAutocast():
+                        unreduced_losses = []
+                        for k, criterion in enumerate(self.unreduced_criterion_arr):
+                            target_loss = criterion(
+                                outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]],
+                                labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
+                            )
 
-                        target_loss = target_loss.tolist()
-                        if type(target_loss[0]) == type([]):
-                            target_loss = [np.mean(x) for x in target_loss]
-                        for j, value in enumerate(target_loss):
-                            if len(unreduced_losses) <= j:
-                                unreduced_losses.append([])
-                            unreduced_losses[j].append(value)
+                            target_loss = target_loss.tolist()
+                            if type(target_loss[0]) == type([]):
+                                target_loss = [np.mean(x) for x in target_loss]
+                            for j, value in enumerate(target_loss):
+                                if len(unreduced_losses) <= j:
+                                    unreduced_losses.append([])
+                                unreduced_losses[j].append(value)
 
-                    unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
+                        unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
 
-                    awareness_loss = self.awareness_criterion(awareness, unreduced_losses) * self.awareness_scale_factor
+                        awareness_loss = self.awareness_criterion(awareness, unreduced_losses) * self.awareness_scale_factor
 
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')
