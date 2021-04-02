@@ -23,7 +23,7 @@ from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCross
 class NnMixer(BaseMixer):
 
     def __init__(self,
-                 selfaware=False,
+                 selfaware=True,
                  callback_on_iter=None,
                  eval_every_x_epochs=20,
                  dropout_p=0.0,
@@ -62,11 +62,11 @@ class NnMixer(BaseMixer):
         self.dropout_p = max(0.0, min(1.0, dropout_p))
         self.dynamic_parameters = {}
         self.awareness_criterion = None
-        self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
-        self.selfaware_lr_factor = 1/2      # scales self-aware learning rate compared to mixer
-        self.start_selfaware_training = False
+        self.awareness_scale_factor = 1/6  # scales self-aware total loss contribution
+        self.selfaware_lr_factor = 2/3      # scales self-aware learning rate compared to mixer
+        self.start_selfaware_training = True
         self.stop_selfaware_training = False
-        self.is_selfaware = False
+        self.is_selfaware = True
 
         self.max_confidence_per_output = []
         self.monitor = None
