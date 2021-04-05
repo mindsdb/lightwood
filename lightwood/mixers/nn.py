@@ -213,6 +213,7 @@ class NnMixer(BaseMixer):
 
         self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
         self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
+        self.selfaware_optimizer_args['weight_decay'] = 0.5
         self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
         if stop_training_after_seconds is None:
@@ -440,7 +441,10 @@ class NnMixer(BaseMixer):
             predictions[output_column] = {'predictions': decoded_predictions['predictions']}
 
             if awareness_arr is not None:
-                predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
+                scores = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
+                scores = torch.sigmoid(torch.Tensor(scores)).tolist()
+                predictions[output_column]['selfaware_confidences'] = scores
+                # print(predictions[output_column]['selfaware_confidences'])
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]

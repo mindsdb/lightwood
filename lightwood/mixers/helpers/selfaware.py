@@ -15,8 +15,10 @@ class SelfAware(torch.nn.Module):
         self.nr_outputs = nr_outputs
 
         awareness_layers = []
-        awareness_net_shape = [(self.input_size + self.output_size),
-                               max([int((self.input_size + self.output_size) * 1.5), 300]),
+        awareness_net_shape = [self.input_size,  # ( + self.output_size),
+                               # max([int((self.input_size + self.output_size) * 1.5), 300]),
+                               min(self.input_size * 2, 100),
+                               # max([int(self.input_size * 1.5), 300]),
                                self.nr_outputs]
 
         for ind in range(len(awareness_net_shape) - 1):
@@ -51,7 +53,7 @@ class SelfAware(torch.nn.Module):
         :return: predicted loss value over the tensor samples
         """
         with LightwoodAutocast():
-            aware_in = torch.cat((true_input, main_net_output), 1)
+            aware_in = true_input  # torch.cat((true_input, main_net_output), 1)
             output = self.net(aware_in)
             return output
     
