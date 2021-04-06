@@ -23,7 +23,7 @@ from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCross
 class NnMixer(BaseMixer):
 
     def __init__(self,
-                 selfaware=True,
+                 selfaware=False,
                  callback_on_iter=None,
                  eval_every_x_epochs=20,
                  dropout_p=0.0,
@@ -64,9 +64,9 @@ class NnMixer(BaseMixer):
         self.awareness_criterion = None
         self.awareness_scale_factor = 1/6  # scales self-aware total loss contribution
         self.selfaware_lr_factor = 2/3      # scales self-aware learning rate compared to mixer
-        self.start_selfaware_training = True
+        self.start_selfaware_training = False
         self.stop_selfaware_training = False
-        self.is_selfaware = True
+        self.is_selfaware = False
 
         self.max_confidence_per_output = []
         self.monitor = None
@@ -213,7 +213,7 @@ class NnMixer(BaseMixer):
 
         self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
         self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
-        self.selfaware_optimizer_args['weight_decay'] = 0.5
+        self.selfaware_optimizer_args['weight_decay'] = 2e-5
         self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
         if stop_training_after_seconds is None:
@@ -444,7 +444,6 @@ class NnMixer(BaseMixer):
                 scores = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
                 scores = (0.0+torch.sigmoid(torch.log(torch.Tensor(scores)))).tolist()
                 predictions[output_column]['selfaware_confidences'] = scores
-                # print(predictions[output_column]['selfaware_confidences'])
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
