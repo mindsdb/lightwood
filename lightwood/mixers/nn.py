@@ -220,7 +220,7 @@ class NnMixer(BaseMixer):
             self.optimizer_args = {'lr': 0.0005}
 
         if is_ts_target:
-            self.optimizer_args['weight_decay'] = 2e-2
+            self.optimizer_args['weight_decay'] = 2e-2  # empirical, might change later
 
         if 'beta1' in self.dynamic_parameters:
             self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'], 0.999)
