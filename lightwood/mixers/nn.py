@@ -442,7 +442,7 @@ class NnMixer(BaseMixer):
 
             if awareness_arr is not None:
                 scores = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
-                scores = torch.sigmoid(torch.Tensor(scores)).tolist()
+                scores = (0.0+torch.sigmoid(torch.log(torch.Tensor(scores)))).tolist()
                 predictions[output_column]['selfaware_confidences'] = scores
                 # print(predictions[output_column]['selfaware_confidences'])
 
