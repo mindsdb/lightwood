@@ -7,17 +7,21 @@ class Transformer:
         self.output_features = output_features
 
         self.feature_len_map = {}
+        self.input_idxs = {}
         self.out_indexes = []
 
     def transform(self, sample):
         input_vector = []
         output_vector = []
+        total_idxs_counted = 0
 
         for input_feature in self.input_features:
             sub_vector = sample['input_features'][input_feature].tolist()
             input_vector.extend(sub_vector)
             if input_feature not in self.feature_len_map:
                 self.feature_len_map[input_feature] = len(sub_vector)
+                self.input_idxs[input_feature] = list(range(total_idxs_counted, total_idxs_counted+len(sub_vector)))
+                total_idxs_counted += len(sub_vector)
 
         for output_feature in self.output_features:
             sub_vector = sample['output_features'][output_feature].tolist()
