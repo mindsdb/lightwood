@@ -13,6 +13,7 @@ class SelfAware(torch.nn.Module):
         self.input_size = input_size
         self.output_size = output_size
         self.nr_outputs = nr_outputs
+        self.base_loss = 1.0
 
         awareness_layers = []
         awareness_net_shape = [self.input_size,
@@ -44,7 +45,7 @@ class SelfAware(torch.nn.Module):
 
         return self
 
-    def forward(self, true_input, main_net_output):
+    def forward(self, true_input):
         """
         :param true_input: tensor with data point features
         :param main_net_output: tensor with main NN prediction for true_input

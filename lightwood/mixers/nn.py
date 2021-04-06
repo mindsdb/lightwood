@@ -100,6 +100,7 @@ class NnMixer(BaseMixer):
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         loss_confidence_arr = []
+        aware_losses = []
 
         for i, data in enumerate(data_loader, 0):
             inputs, labels = data
@@ -110,7 +111,8 @@ class NnMixer(BaseMixer):
                 if self.is_selfaware:
                     self.selfaware_net.eval()
                     outputs = self.net(inputs)
-                    awareness = self.selfaware_net(inputs, outputs)
+                    awareness = self.selfaware_net(inputs)
+                    aware_losses.append(awareness)
                 else:
                     outputs = self.net(inputs)
 
@@ -136,6 +138,9 @@ class NnMixer(BaseMixer):
                     losses_bellow_95th_percentile = loss_confidence_arr[k]
 
                 self.max_confidence_per_output[k] = max(losses_bellow_95th_percentile)
+
+        # save self aware baseline response
+        self.selfaware_net.base_loss = torch.cat(aware_losses).abs().mean()
 
         return True
 
@@ -397,7 +402,7 @@ class NnMixer(BaseMixer):
                 if self.is_selfaware:
                     self.selfaware_net.eval()
                     output = self.net(inputs)
-                    awareness = self.selfaware_net(inputs, output)
+                    awareness = self.selfaware_net(inputs)
                     awareness = awareness.to('cpu')
                     awareness_arr.extend(awareness.tolist())
                 else:
@@ -441,8 +446,12 @@ class NnMixer(BaseMixer):
             predictions[output_column] = {'predictions': decoded_predictions['predictions']}
 
             if awareness_arr is not None:
-                scores = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
-                scores = (0.0+torch.sigmoid(torch.log(torch.Tensor(scores)))).tolist()
+                # scores: relative magnitude to last seen self-aware loss during training
+                # sum 1 to keep in R+, then log2 to rescale the scores accordingly
+                # ICP bounds linearly scale with scores (if < 1, tighter, else wider)
+                scaler = self.selfaware_net.base_loss
+                scores = [abs(x[k])/scaler if x[k] != 0 else 1e-5 for x in awareness_arr]
+                scores = torch.log2(1+torch.Tensor(scores)).tolist()
                 predictions[output_column]['selfaware_confidences'] = scores
 
             if loss_confidence_arr[k] is not None:
@@ -582,7 +591,7 @@ class NnMixer(BaseMixer):
                     outputs = self.net(inputs)
                 if self.is_selfaware:
                     with LightwoodAutocast():
-                        awareness = self.selfaware_net(inputs.detach(), outputs.detach())
+                        awareness = self.selfaware_net(inputs.detach())
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
