@@ -8,7 +8,7 @@ from itertools import chain
 class ArNet(DefaultNet):
     """
     DefaultNet variant that adds a secondary stream (simple linear layer) with constrained
-    weigths to learn autoregressive coefficients for numerical time series targets
+    weights to learn autoregressive coefficients for numerical time series targets
     """
     def __init__(self, dynamic_parameters,
                  transformer,
