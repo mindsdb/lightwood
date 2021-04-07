@@ -47,7 +47,7 @@ class LightwoodAutocast:
                 self._enabled = False  # gpu is available but cpu is forced
 
         self.prev = self._enabled  # necessary reference to exit
-        active = self._enabled
+        LightwoodAutocast.active = self._enabled
 
     def __enter__(self):
         if self._enabled:
