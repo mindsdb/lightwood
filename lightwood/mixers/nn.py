@@ -15,6 +15,7 @@ from lightwood.config.config import CONFIG
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.mixers.helpers.default_net import DefaultNet
+from lightwood.mixers.helpers.ar_net import ArNet
 from lightwood.mixers.helpers.selfaware import SelfAware
 from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
@@ -147,14 +148,27 @@ class NnMixer(BaseMixer):
             stop_training_after_seconds = self.stop_training_after_seconds
 
         input_sample, output_sample = train_ds[0]
+        is_ts_target = train_ds.output_features[0].get('additional_info', {}).get('time_series_target', False)
 
-        self.net = self.nn_class(
-            self.dynamic_parameters,
-            input_size=len(input_sample),
-            output_size=len(output_sample),
-            nr_outputs=len(train_ds.out_types),
-            dropout=self.dropout_p
-        )
+        if len(train_ds.out_types) == 1 and is_ts_target:
+            self.nn_class = ArNet
+            self.net = self.nn_class(
+                self.dynamic_parameters,
+                train_ds.transformer,
+                input_size=len(input_sample),
+                output_size=len(output_sample),
+                nr_outputs=len(train_ds.out_types),
+                dropout=self.dropout_p
+            )
+        else:
+            self.nn_class = DefaultNet
+            self.net = self.nn_class(
+                self.dynamic_parameters,
+                input_size=len(input_sample),
+                output_size=len(output_sample),
+                nr_outputs=len(train_ds.out_types),
+                dropout=self.dropout_p
+            )
         self.net = self.net.train()
 
         self.selfaware_net = SelfAware(
@@ -193,6 +207,9 @@ class NnMixer(BaseMixer):
                     elif output_type == COLUMN_DATA_TYPES.MULTIPLE_CATEGORICAL:
                         self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
                         self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduction='none'))
+                elif is_ts_target:
+                    self.criterion_arr.append(torch.nn.L1Loss())
+                    self.unreduced_criterion_arr.append(torch.nn.L1Loss(reduction='none'))
                 # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
                     self.criterion_arr.append(torch.nn.MSELoss())
@@ -201,6 +218,9 @@ class NnMixer(BaseMixer):
         self.optimizer_class = Ranger
         if self.optimizer_args is None:
             self.optimizer_args = {'lr': 0.0005}
+
+        if is_ts_target:
+            self.optimizer_args['weight_decay'] = 2e-2  # empirical, might change later
 
         if 'beta1' in self.dynamic_parameters:
             self.optimizer_args['betas'] = (self.dynamic_parameters['beta1'], 0.999)
@@ -367,7 +387,6 @@ class NnMixer(BaseMixer):
                             self._update_model(best_model)
                             if self.is_selfaware:
                                 self._build_confidence_normalization_data(train_ds)
-                                self._adjust(test_ds)
 
                             self._iter_fit(test_ds, max_epochs=1)
                             self.encoders = train_ds.encoders
@@ -420,7 +439,6 @@ class NnMixer(BaseMixer):
             outputs.extend(output)
 
         output_trasnformed_vectors = {}
-        confidence_trasnformed_vectors = {}
 
         for i in range(len(outputs)):
             output_vector = outputs[i]
@@ -595,24 +613,25 @@ class NnMixer(BaseMixer):
 
                 awareness_loss = None
                 if self.is_selfaware:
-                    unreduced_losses = []
-                    for k, criterion in enumerate(self.unreduced_criterion_arr):
-                        target_loss = criterion(
-                            outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]],
-                            labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
-                        )
+                    with LightwoodAutocast():
+                        unreduced_losses = []
+                        for k, criterion in enumerate(self.unreduced_criterion_arr):
+                            target_loss = criterion(
+                                outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]],
+                                labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]]
+                            )
 
-                        target_loss = target_loss.tolist()
-                        if type(target_loss[0]) == type([]):
-                            target_loss = [np.mean(x) for x in target_loss]
-                        for j, value in enumerate(target_loss):
-                            if len(unreduced_losses) <= j:
-                                unreduced_losses.append([])
-                            unreduced_losses[j].append(value)
+                            target_loss = target_loss.tolist()
+                            if type(target_loss[0]) == type([]):
+                                target_loss = [np.mean(x) for x in target_loss]
+                            for j, value in enumerate(target_loss):
+                                if len(unreduced_losses) <= j:
+                                    unreduced_losses.append([])
+                                unreduced_losses[j].append(value)
 
-                    unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
+                        unreduced_losses = torch.Tensor(unreduced_losses).to(self.net.device)
 
-                    awareness_loss = self.awareness_criterion(awareness, unreduced_losses) * self.awareness_scale_factor
+                        awareness_loss = self.awareness_criterion(awareness, unreduced_losses) * self.awareness_scale_factor
 
                     if CONFIG.MONITORING['batch_loss']:
                         self.monitor.plot_loss(awareness_loss.item(), self.total_iterations, 'Awreness Batch Loss')

@@ -37,7 +37,7 @@ class TsNumericEncoder(NumericEncoder):
                 except:
                     real = None
             if self.is_target:
-                vector = [0] * 3
+                vector = [0] * 2
                 if group is not None and self.normalizers is not None:
                     try:
                         mean = self.normalizers[frozenset(group)].abs_mean
@@ -48,23 +48,18 @@ class TsNumericEncoder(NumericEncoder):
                     mean = self._abs_mean
                 if real is not None and mean > 0:
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
-                    vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                    vector[2] = real / mean
+                    vector[1] = real / mean
                 else:
                     log.debug(f'Can\'t encode target value: {real}')
 
             else:
-                vector = [0] * 4
+                vector = [0] * 3
                 try:
-                    if real is None:
-                        vector[0] = 0
-                    else:
+                    if real is not None:
                         vector[0] = 1
-                        vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                        vector[2] = 1 if real < 0 and not self.positive_domain else 0
-                        vector[3] = real/self._abs_mean
+                        vector[1] = 1 if real < 0 and not self.positive_domain else 0
+                        vector[2] = real/self._abs_mean
                 except Exception as e:
-                    vector = [0] * 4
                     log.error(f'Can\'t encode input value: {real}, exception: {e}')
 
             ret.append(vector)
@@ -86,7 +81,7 @@ class TsNumericEncoder(NumericEncoder):
 
         for vector, group in zip(encoded_values, list(zip(*group_info.values()))):
             if self.is_target:
-                if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf') or np.isnan(vector[2]) or vector[2] == float('inf'):
+                if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf'):
                     log.error(f'Got weird target value to decode: {vector}')
                     real_value = pow(10, 63)
                 else:
@@ -106,7 +101,7 @@ class TsNumericEncoder(NumericEncoder):
                         else:
                             mean = self._abs_mean
 
-                        real_value = vector[2] * mean
+                        real_value = vector[1] * mean
 
                     if self.positive_domain:
                         real_value = abs(real_value)
@@ -119,7 +114,7 @@ class TsNumericEncoder(NumericEncoder):
                     ret.append(None)
                     continue
 
-                real_value = vector[3] * self._abs_mean
+                real_value = vector[2] * self._abs_mean
 
                 if self._type == 'int':
                     real_value = round(real_value)
