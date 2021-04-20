@@ -61,7 +61,7 @@ class CategoricalAutoEncoder(BaseEncoder):
                                   input_len, embeddings_layer_len, input_len])
 
             criterion = torch.nn.CrossEntropyLoss()
-            optimizer = Ranger(self.net.parameters())
+            optimizer = Ranger(self.net.parameters(), lr=0.2)
 
             gym = Gym(model=self.net, optimizer=optimizer, scheduler=None, loss_criterion=criterion,
                       device=self.net.device, name=self.name, input_encoder=self.onehot_encoder.encode,
