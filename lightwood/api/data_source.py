@@ -104,7 +104,7 @@ class DataSource(Dataset):
             if prev_col:
                 col['group_info'] = {
                     prev_col['name']: self.get_column_original_data(prev_col['name'])
-                    for prev_col in self.config['input_features'] if prev_col['grouped_by']
+                    for prev_col in self.config['input_features'] if prev_col.get('grouped_by', False)
                 }
         
         if initialize_transformer:
@@ -381,7 +381,7 @@ class DataSource(Dataset):
                             'name': column_name,
                             'original_type': config['original_type'],
                             'group_info': {conf['name']: self.get_column_original_data(conf['name'])
-                                           for conf in self.config['input_features'] if conf['grouped_by']},
+                                           for conf in self.config['input_features'] if conf.get('grouped_by', False)},
                             'output_type': config['type']
                             }
                 col_info = generate_target_group_normalizers(col_info)
@@ -476,7 +476,7 @@ class DataSource(Dataset):
             arg2 = []
             for col in config['depends_on_column']:
                 sublist = {'group_info': {conf['name']: self.get_column_original_data(conf['name'])
-                                          for conf in self.config['input_features'] if conf['grouped_by']},
+                                          for conf in self.config['input_features'] if conf.get('grouped_by', False)},
                            'name': col}
                 if custom_data is None:
                     sublist['data'] = self.get_column_original_data(col)
