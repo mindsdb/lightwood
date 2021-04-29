@@ -33,6 +33,7 @@ class LightGBMMixer(BaseMixer):
         self.ord_encs = {}
         self.label_sets = {}
         self.stop_training_after_seconds = stop_training_after_seconds
+        self.grid_search = grid_search  # using Optuna
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         self.device, _ = get_devices()
@@ -107,11 +108,28 @@ class LightGBMMixer(BaseMixer):
                 params['num_class'] = self.all_classes.size
 
             num_iterations = 100
+
+            if self.stop_training_after_seconds is not None:
+                train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
+                validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
+                start = time.time()
+                params['num_iterations'] = 1
+                bst = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
+                end = time.time()
+                seconds_for_one_iteration = min(0.1, end - start)
+                logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
+                max_itt = int(self.stop_training_after_seconds / seconds_for_one_iteration)
+                num_iterations = max(1, min(num_iterations, max_itt))
+                # Turn on grid search if training doesn't take too long using it
+                if max_itt > 10 * num_iterations and seconds_for_one_iteration < 10:
+                    self.grid_search = True
+
             train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
             validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
-            logging.info(f'Training GBM ({lgb}) with {num_iterations} iterations')
+            model = lgb if self.grid_search else lightgbm
+            logging.info(f'Training GBM ({model}) with {num_iterations} iterations')
             params['num_iterations'] = num_iterations
-            bst = lgb.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
+            bst = model.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
 
             self.models[col_name] = bst
 
