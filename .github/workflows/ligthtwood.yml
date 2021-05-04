@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies OSX
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
-          brew install libomp;
+          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/679923b4eb48a8dc7ecc1f05d06063cd79b3fc00/Formula/libomp.rb;
         fi
       shell: bash
       env:
