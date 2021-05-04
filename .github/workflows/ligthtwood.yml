@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies OSX
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
-          brew install libomp@11.1.0;
+          brew install libomp;
         fi
       shell: bash
       env:
