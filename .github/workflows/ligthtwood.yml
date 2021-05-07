@@ -42,11 +42,7 @@ jobs:
         CHECK_FOR_UPDATES: False
     - name: Lint with flake8
       run: |
-        # IMPLEMENT THIS AFTER WE HAVE ALL PEP8 styles
-        # stop the build if there are Python syntax errors or undefined names
-        #flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        #flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 . --statistics
     - name: Test with unittest
       run: |
         cd tests/unit_tests
