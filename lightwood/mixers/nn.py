@@ -208,8 +208,8 @@ class NnMixer(BaseMixer):
                         self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
                         self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduction='none'))
                 elif is_ts_target:
-                    self.criterion_arr.append(torch.nn.MSELoss())
-                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduction='none'))
+                    self.criterion_arr.append(torch.nn.L1Loss())
+                    self.unreduced_criterion_arr.append(torch.nn.L1Loss(reduction='none'))
                 # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
                     self.criterion_arr.append(torch.nn.MSELoss())
