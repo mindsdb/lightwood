@@ -208,8 +208,8 @@ class NnMixer(BaseMixer):
                         self.criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice))
                         self.unreduced_criterion_arr.append(torch.nn.BCEWithLogitsLoss(weight=weights_slice, reduction='none'))
                 elif is_ts_target:
-                    self.criterion_arr.append(torch.nn.L1Loss())
-                    self.unreduced_criterion_arr.append(torch.nn.L1Loss(reduction='none'))
+                    self.criterion_arr.append(torch.nn.MSELoss())
+                    self.unreduced_criterion_arr.append(torch.nn.MSELoss(reduction='none'))
                 # Note: MSELoss works great for numeric, for the other types it's more of a placeholder
                 else:
                     self.criterion_arr.append(torch.nn.MSELoss())
@@ -372,7 +372,7 @@ class NnMixer(BaseMixer):
                             stop_training = True
 
                         # If the trauining subset is overfitting on it's associated testing subset
-                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()) or subset_test_error < 0.001:
+                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()):
                             log.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
 
                             self._update_model(best_model)
@@ -505,6 +505,11 @@ class NnMixer(BaseMixer):
             inputs, labels = data
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
+
+            if i==0 and isinstance(self.net, ArNet):
+                # for time series, we only consider loss of rows w/full historical context
+                inputs = inputs[len(self.net.ar_idxs):, :]
+                labels = labels[len(self.net.ar_idxs):, :]
 
             with torch.no_grad():
                 outputs = self.net(inputs)
@@ -714,6 +719,11 @@ class NnMixer(BaseMixer):
                 reals = [str(x) for x in ds.get_column_original_data(output_column)]
                 preds = [str(x) for x in predictions[output_column]['predictions']]
 
+            if isinstance(self.net, ArNet):
+                # for time series, we only consider loss of rows w/full historical context
+                reals = reals[len(self.net.ar_idxs):]
+                preds = preds[len(self.net.ar_idxs):]
+
             if 'weights' in ds.get_column_config(output_column):
                 weight_map = ds.get_column_config(output_column)['weights']
                 # omit points for which there's no target info in timeseries forecasting
@@ -742,6 +752,10 @@ class NnMixer(BaseMixer):
                     output_column,
                     predictions[output_column]['encoded_predictions']
                 )['predictions']
+
+                if isinstance(self.net, ArNet):
+                    # for time series, we only consider loss of rows w/full historical context
+                    preds = preds[len(self.net.ar_idxs):]
 
                 alternative_accuracy = BaseMixer._apply_accuracy_function(
                     ds.get_column_config(output_column)['type'],
