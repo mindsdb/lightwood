@@ -371,8 +371,10 @@ class NnMixer(BaseMixer):
                         if (time.time() - started) > stop_training_after_seconds:
                             stop_training = True
 
-                        # If the trauining subset is overfitting on it's associated testing subset
-                        if (subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()):
+                        # If the training subset is overfitting on it's associated testing subset
+                        if (delta_mean <= 0 and len(test_error_delta_buff) > 4 and
+                            subset_delta_mean <= 0 and len(subset_test_error_delta_buff) > 4) or \
+                                (time.time() - started_subset) > stop_training_after_seconds/len(train_ds.subsets.keys()):
                             log.info('Finished fitting on {subset_id} of {no_subsets} subset'.format(subset_id=subset_id, no_subsets=len(train_ds.subsets.keys())))
 
                             self._update_model(best_model)
@@ -510,6 +512,9 @@ class NnMixer(BaseMixer):
                 # for time series, we only consider loss of rows w/full historical context
                 inputs = inputs[len(self.net.ar_idxs):, :]
                 labels = labels[len(self.net.ar_idxs):, :]
+
+                if len(inputs) == 0:
+                    break  # if subset has < window rows, we break to avoid NaNs
 
             with torch.no_grad():
                 outputs = self.net(inputs)
