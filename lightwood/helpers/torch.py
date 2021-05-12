@@ -3,7 +3,6 @@ import itertools
 import warnings
 import torch
 from torch.nn.functional import pad
-from torch.utils.data import SequentialSampler
 from lightwood.helpers.device import get_devices
 
 
@@ -25,23 +24,6 @@ def average_vectors(vec_list):
     assert len(vec_list) > 0
     return torch.cat([emb[None] for emb in vec_list], dim=0).mean(0)
 
-
-class NotNullSampler(SequentialSampler):
-    def __init__(self, ds):
-        super().__init__(self)
-        self.incomplete_rows = self.get_incomplete_rows(ds)
-
-    def get_incomplete_rows(self, ds):
-        temporal_features = [feat for feat in ds.input_features if feat['type'] == 'time_series']
-        incomplete_rows = set()
-        for tf in temporal_features:
-            incomplete_rows.add([idx for idx, row in ds.data_frame.iterrows() if not all(row['T'])])
-        return incomplete_rows
-
-    def __iter__(self):
-        for idx in range(len(self.data_source)):
-            if idx not in self.incomplete_rows:
-                yield idx
 
 class LightwoodAutocast:
     """
