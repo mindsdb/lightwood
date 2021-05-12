@@ -1,5 +1,4 @@
 import functools
-import itertools
 import warnings
 import torch
 from torch.nn.functional import pad
