@@ -45,14 +45,14 @@ class SubSet(Dataset):
         return self.data_source.get_feature_names(where)
 
     def __getattribute__(self, name):
-        if name in ['config', 'encoders', 'transformer', 'training',
+        if name in ['config', 'encoders', 'transformer', 'training', 'filter_incomplete_rows', 'ts_incomplete_rows',
                     'output_weights', 'dropout_dict', 'disable_cache', 'out_types', 'out_indexes']:
             return self.data_source.__getattribute__(name)
         else:
             return object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
-        if name in ['config', 'encoders', 'transformer', 'training',
+        if name in ['config', 'encoders', 'transformer', 'training', 'filter_incomplete_rows',
                     'output_weights', 'dropout_dict', 'disable_cache']:
             return dict.__setattr__(self.data_source, name, value)
         else:
@@ -79,6 +79,8 @@ class DataSource(Dataset):
         self.dropout_dict = {}
         self.enable_dropout = False
         self.enable_cache = self.config['data_source']['cache_transformed_data']
+        self.ts_incomplete_rows = None
+        self.filter_incomplete_rows = False
         self.out_indexes = None
 
         self.out_types = [feature['type'] for feature in self.config['output_features']]
@@ -116,7 +118,8 @@ class DataSource(Dataset):
             self.encoders = self._prepare_encoders()
         else:
             self.encoders = None
-        
+
+        self._set_ts_incomplete_rows()
         self._clear_cache()
 
     def extend(self, df):
@@ -190,6 +193,9 @@ class DataSource(Dataset):
         sample = {}
 
         dropout_features = None
+
+        if self.filter_incomplete_rows and idx in self.ts_incomplete_rows:
+            return (None, None)
 
         if self.training and random.randint(0, 3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
             dropout_features = [feature['name'] for feature in self.config['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
@@ -546,3 +552,10 @@ class DataSource(Dataset):
     
     def eval(self):
         self.training = False
+
+    def _set_ts_incomplete_rows(self):
+        temporal_features = [feat for feat in self.input_features if feat['type'] == 'time_series']
+        incomplete_rows = []
+        for tf in temporal_features:
+            incomplete_rows.extend([idx for idx, row in self.data_frame.iterrows() if not all(row[tf['name']])])
+        self.ts_incomplete_rows = set(incomplete_rows)

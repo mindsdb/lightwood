@@ -494,6 +494,9 @@ class NnMixer(BaseMixer):
 
         ds.encoders = self.encoders
         ds.transformer = self.transformer
+        if isinstance(self.net, ArNet):
+            # For time series, we only consider loss of rows w/full historical context
+            ds.filter_incomplete_rows = True  # With this, DS will yield (None, None) tuples that are ignored
 
         if self._nonpersistent['sampler'] is None:
             data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
@@ -508,25 +511,18 @@ class NnMixer(BaseMixer):
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
-            if i==0 and isinstance(self.net, ArNet):
-                # for time series, we only consider loss of rows w/full historical context
-                inputs = inputs[len(self.net.ar_idxs):, :]
-                labels = labels[len(self.net.ar_idxs):, :]
+            if inputs is not None:
+                with torch.no_grad():
+                    outputs = self.net(inputs)
 
-                if len(inputs) == 0:
-                    break  # if subset has < window rows, we break to avoid NaNs
+                loss = None
+                for k, criterion in enumerate(self.criterion_arr):
+                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
-            with torch.no_grad():
-                outputs = self.net(inputs)
-
-            loss = None
-            for k, criterion in enumerate(self.criterion_arr):
-                target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
-
-                if loss is None:
-                    loss = target_loss
-                else:
-                    loss += target_loss
+                    if loss is None:
+                        loss = target_loss
+                    else:
+                        loss += target_loss
 
             running_loss += loss.item()
             error = running_loss / (i + 1)
@@ -536,6 +532,10 @@ class NnMixer(BaseMixer):
             self.monitor.plot_loss(error, self.total_iterations, f'Test Epoch Error - Subset {subset_id}')
 
         self.net = self.net.train()
+
+        # restore flag
+        if ds.filter_incomplete_rows:
+            ds.filter_incomplete_rows = False
 
         return error
 
@@ -576,7 +576,6 @@ class NnMixer(BaseMixer):
                 num_workers=0,
                 sampler=self._nonpersistent['sampler']
             )
-
         scaler = GradScaler()
         selfaware_scaler = GradScaler()
 
