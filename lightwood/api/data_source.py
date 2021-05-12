@@ -190,107 +190,108 @@ class DataSource(Dataset):
         return int(self.data_frame.shape[0])
 
     def __getitem__(self, idx):
-        sample = {}
 
-        dropout_features = None
+        skip = self.filter_incomplete_rows and idx in self.ts_incomplete_rows
 
-        if self.filter_incomplete_rows and idx in self.ts_incomplete_rows:
-            return (None, None)
+        if not skip:
+            sample = {}
 
-        if self.training and random.randint(0, 3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
-            dropout_features = [feature['name'] for feature in self.config['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
+            dropout_features = None
 
-            # Make sure we never drop all the features, since this would make the row meaningless
-            if len(dropout_features) > len(self.config['input_features']):
-                dropout_features = dropout_features[:-1]
-            #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
+            if self.training and random.randint(0, 3) == 1 and self.enable_dropout and CONFIG.ENABLE_DROPOUT:
+                dropout_features = [feature['name'] for feature in self.config['input_features'] if random.random() > (1 - self.dropout_dict[feature['name']])]
 
-        if self.enable_cache:
-            if self.transformed_cache is None:
-                self.transformed_cache = [None] * len(self)
+                # Make sure we never drop all the features, since this would make the row meaningless
+                if len(dropout_features) > len(self.config['input_features']):
+                    dropout_features = dropout_features[:-1]
+                #logging.debug(f'\n-------------\nDroping out features: {dropout_features}\n-------------\n')
 
-            if dropout_features is None or len(dropout_features) == 0:
-                cached_sample = self.transformed_cache[idx]
-                if cached_sample is not None:
-                    return cached_sample
+            if self.enable_cache:
+                if self.transformed_cache is None:
+                    self.transformed_cache = [None] * len(self)
 
-        for feature_set in ['input_features', 'output_features']:
-            sample[feature_set] = {}
-            for feature in self.config[feature_set]:
-                col_name = feature['name']
-                col_config = self.get_column_config(col_name)
+                if dropout_features is None or len(dropout_features) == 0:
+                    cached_sample = self.transformed_cache[idx]
+                    if cached_sample is not None:
+                        return cached_sample
 
-                if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
-                    if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache):
-                        self.get_encoded_column_data(col_name)
+            for feature_set in ['input_features', 'output_features']:
+                sample[feature_set] = {}
+                for feature in self.config[feature_set]:
+                    col_name = feature['name']
+                    col_config = self.get_column_config(col_name)
 
-                # if we are dropping this feature, get the encoded value of None
-                if (dropout_features is not None and col_name in dropout_features):
-                    custom_data = {col_name: [None]}
-                    # if the dropout feature depends on another column, also pass a None array as the dependant column
-                    if 'depends_on_column' in col_config:
-                        for col in col_config['depends_on_column']:
-                            custom_data[col] = [None]
-                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
-                elif not self.enable_cache:
-                    if col_name in self.data_frame:
-                        custom_data = {col_name: [self.data_frame[col_name].iloc[idx]]}
+                    if col_name not in self.encoded_cache:  # if data is not encoded yet, encode values
+                        if not ((dropout_features is not None and col_name in dropout_features) or not self.enable_cache):
+                            self.get_encoded_column_data(col_name)
+
+                    # if we are dropping this feature, get the encoded value of None
+                    if (dropout_features is not None and col_name in dropout_features):
+                        custom_data = {col_name: [None]}
+                        # if the dropout feature depends on another column, also pass a None array as the dependant column
                         if 'depends_on_column' in col_config:
                             for col in col_config['depends_on_column']:
-                                custom_data[col] = [self.data_frame[col].iloc[idx]]
+                                custom_data[col] = [None]
+                        sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
+                    elif not self.enable_cache:
+                        if col_name in self.data_frame:
+                            custom_data = {col_name: [self.data_frame[col_name].iloc[idx]]}
+                            if 'depends_on_column' in col_config:
+                                for col in col_config['depends_on_column']:
+                                    custom_data[col] = [self.data_frame[col].iloc[idx]]
+                        else:
+                            custom_data = {col_name: [None]}
+
+                        sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
                     else:
-                        custom_data = {col_name: [None]}
+                        sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
 
-                    sample[feature_set][col_name] = self.get_encoded_column_data(col_name, custom_data=custom_data)[0]
-                else:
-                    sample[feature_set][col_name] = self.encoded_cache[col_name][idx]
+            # Create weights if not already created
+            if self.output_weights is None:
+                for col_config in self.config['output_features']:
+                    if 'weights' in col_config:
 
-        # Create weights if not already created
-        if self.output_weights is None:
-            for col_config in self.config['output_features']:
-                if 'weights' in col_config:
+                        weights = col_config['weights']
+                        new_weights = None
 
-                    weights = col_config['weights']
-                    new_weights = None
+                        for val in weights:
+                            encoded_val = self.get_encoded_column_data(
+                                col_config['name'],
+                                custom_data={
+                                    col_config['name']: [val]
+                                }
+                            )
 
-                    for val in weights:
-                        encoded_val = self.get_encoded_column_data(
-                            col_config['name'],
-                            custom_data={
-                                col_config['name']: [val]
-                            }
-                        )
+                            if new_weights is None:
+                                mean = np.mean(list(weights.values()))
+                                new_weights = [mean] * len(encoded_val[0])
 
-                        if new_weights is None:
-                            mean = np.mean(list(weights.values()))
-                            new_weights = [mean] * len(encoded_val[0])
+                            for value_index, hot in enumerate(encoded_val[0]):
+                                if hot:
+                                    new_weights[value_index] = weights[val] / sum(encoded_val[0]).item()
 
-                        for value_index, hot in enumerate(encoded_val[0]):
-                            if hot:
-                                new_weights[value_index] = weights[val] / sum(encoded_val[0]).item()
-
-                    if self.output_weights is None or self.output_weights == False:
-                        self.output_weights = new_weights
+                        if self.output_weights is None or self.output_weights == False:
+                            self.output_weights = new_weights
+                        else:
+                            self.output_weights.extend(new_weights)
                     else:
-                        self.output_weights.extend(new_weights)
-                else:
-                    self.output_weights = False
+                        self.output_weights = False
 
-        sample = self.transformer.transform(sample)
-        if self.out_indexes is None:
-            self.out_indexes = self.transformer.out_indexes
+            sample = self.transformer.transform(sample)
+            if self.out_indexes is None:
+                self.out_indexes = self.transformer.out_indexes
 
-        if self.enable_cache:
-            self.transformed_cache[idx] = sample
+            if self.enable_cache:
+                self.transformed_cache[idx] = sample
 
-        if self.output_weights_offset is None:
-            self.output_weights_offset = {}
-            for idx, (otype, oidxs) in enumerate(zip(self.out_types, self.out_indexes)):
-                self.output_weights_offset[idx] = self.output_weights_offset.get(idx-1, 0)
-                if otype not in (ColumnDataTypes.CATEGORICAL, ColumnDataTypes.MULTIPLE_CATEGORICAL):
-                     self.output_weights_offset[idx] += (oidxs[1] - oidxs[0])
+            if self.output_weights_offset is None:
+                self.output_weights_offset = {}
+                for idx, (otype, oidxs) in enumerate(zip(self.out_types, self.out_indexes)):
+                    self.output_weights_offset[idx] = self.output_weights_offset.get(idx-1, 0)
+                    if otype not in (ColumnDataTypes.CATEGORICAL, ColumnDataTypes.MULTIPLE_CATEGORICAL):
+                         self.output_weights_offset[idx] += (oidxs[1] - oidxs[0])
 
-        return sample
+            return sample
 
     def get_column_original_data(self, column_name):
         if column_name not in self.data_frame:
@@ -557,5 +558,5 @@ class DataSource(Dataset):
         temporal_features = [feat for feat in self.input_features if feat['type'] == 'time_series']
         incomplete_rows = []
         for tf in temporal_features:
-            incomplete_rows.extend([idx for idx, row in self.data_frame.iterrows() if not all(row[tf['name']])])
-        self.ts_incomplete_rows = set(incomplete_rows)
+            incomplete_rows.extend([idx for idx, (_, row) in enumerate(self.data_frame.iterrows()) if not all(row[tf['name']])])
+        self.ts_incomplete_rows = list(set(incomplete_rows))

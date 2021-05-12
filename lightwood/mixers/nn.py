@@ -6,6 +6,7 @@ import operator
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
+from torch.utils.data._utils.collate import default_collate
 from torch.cuda.amp import GradScaler
 
 from lightwood.logger import log
@@ -396,10 +397,15 @@ class NnMixer(BaseMixer):
                             break
 
     def _predict(self, when_data_source, include_extra_data=False):
+        if when_data_source.filter_incomplete_rows:
+            collate_fn = lambda batch: default_collate([x for x in batch if x is not None])
+        else:
+            collate_fn = None
         data_loader = DataLoader(
             when_data_source,
             batch_size=self.batch_size,
             shuffle=False,
+            collate_fn=collate_fn,
             num_workers=0
         )
 
@@ -497,11 +503,18 @@ class NnMixer(BaseMixer):
         if isinstance(self.net, ArNet):
             # For time series, we only consider loss of rows w/full historical context
             ds.filter_incomplete_rows = True  # With this, DS will yield (None, None) tuples that are ignored
+            collate_fn = lambda batch: default_collate([x for x in batch if x is not None])
+        else:
+            collate_fn = None
 
         if self._nonpersistent['sampler'] is None:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'], num_workers=0)
+            data_loader = DataLoader(ds, batch_size=self.batch_size, sampler=self._nonpersistent['sampler'],
+                                     collate_fn=collate_fn,
+                                     num_workers=0)
         else:
-            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
+            data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True,
+                                     collate_fn=collate_fn,
+                                     num_workers=0)
 
         running_loss = 0.0
         error = 0
@@ -511,18 +524,18 @@ class NnMixer(BaseMixer):
             inputs = inputs.to(self.net.device)
             labels = labels.to(self.net.device)
 
-            if inputs is not None:
-                with torch.no_grad():
-                    outputs = self.net(inputs)
+            # if any(inputs.shape): # check input is valid (could be invalid if idx is skipped by DataLoader)
+            with torch.no_grad():
+                outputs = self.net(inputs)
 
-                loss = None
-                for k, criterion in enumerate(self.criterion_arr):
-                    target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
+            loss = None
+            for k, criterion in enumerate(self.criterion_arr):
+                target_loss = criterion(outputs[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]], labels[:,ds.out_indexes[k][0]:ds.out_indexes[k][1]])
 
-                    if loss is None:
-                        loss = target_loss
-                    else:
-                        loss += target_loss
+                if loss is None:
+                    loss = target_loss
+                else:
+                    loss += target_loss
 
             running_loss += loss.item()
             error = running_loss / (i + 1)
@@ -709,6 +722,9 @@ class NnMixer(BaseMixer):
         return self
 
     def calculate_accuracy(self, ds):
+        if isinstance(self.net, ArNet):
+            ds.filter_incomplete_rows = True  # Same as in ._error()
+
         predictions = self.predict(ds, include_extra_data=True)
         accuracies = {}
 
@@ -724,9 +740,8 @@ class NnMixer(BaseMixer):
                 preds = [str(x) for x in predictions[output_column]['predictions']]
 
             if isinstance(self.net, ArNet):
-                # for time series, we only consider loss of rows w/full historical context
-                reals = reals[len(self.net.ar_idxs):]
-                preds = preds[len(self.net.ar_idxs):]
+                # for time series, only consider rows w/full historical context
+                reals = np.delete(reals, ds.ts_incomplete_rows) # [len(self.net.ar_idxs):]
 
             if 'weights' in ds.get_column_config(output_column):
                 weight_map = ds.get_column_config(output_column)['weights']
@@ -758,8 +773,8 @@ class NnMixer(BaseMixer):
                 )['predictions']
 
                 if isinstance(self.net, ArNet):
-                    # for time series, we only consider loss of rows w/full historical context
-                    preds = preds[len(self.net.ar_idxs):]
+                    # for time series, only consider rows w/full historical context
+                    preds = np.delete(preds, ds.ts_incomplete_rows)
 
                 alternative_accuracy = BaseMixer._apply_accuracy_function(
                     ds.get_column_config(output_column)['type'],
@@ -775,4 +790,6 @@ class NnMixer(BaseMixer):
 
             accuracies[output_column] = accuracy
 
+        if isinstance(self.net, ArNet):
+            ds.filter_incomplete_rows = False
         return accuracies

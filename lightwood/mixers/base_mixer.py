@@ -55,7 +55,7 @@ class BaseMixer:
 
         # why is this done? I assume it's a first-iter initialization of
         # something and we can move it to DataSource.__iter__
-        _, _ = when_data_source[0]
+        _ = when_data_source[0]
 
         return self._predict(when_data_source, **kwargs)
 
