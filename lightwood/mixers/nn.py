@@ -772,10 +772,6 @@ class NnMixer(BaseMixer):
                     predictions[output_column]['encoded_predictions']
                 )['predictions']
 
-                if isinstance(self.net, ArNet):
-                    # for time series, only consider rows w/full historical context
-                    preds = np.delete(preds, ds.ts_incomplete_rows)
-
                 alternative_accuracy = BaseMixer._apply_accuracy_function(
                     ds.get_column_config(output_column)['type'],
                     reals,
