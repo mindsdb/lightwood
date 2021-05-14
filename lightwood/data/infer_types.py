@@ -1,5 +1,5 @@
 from mindsdb_datasources import DataSource
-from lightwood import TypeInformation
+from lightwood.api import TypeInformation
 
 
 def infer_types(data: DataSource) -> TypeInformation:
