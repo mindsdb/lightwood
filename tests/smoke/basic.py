@@ -7,8 +7,8 @@ class TestBasic(unittest.TestCase):
 
         datasource = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/adult_income/adult.csv')
         predictor = generate_predictor(datasource,'income')
-        predictor.prepare()
-        predictor.learn()
+        predictor.prepare(datasource)
+        predictor.learn(datasource)
 
         predictions = predictor.predict(datasource)
         print(predictions[0:100])
