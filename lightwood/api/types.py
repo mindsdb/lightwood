@@ -20,3 +20,12 @@ class Output:
 class LightwoodConfig:
     features: Dict[str, Feature] = None
     output: Output = None
+    cleaner: object
+    splitter: object
+    analyzer: object
+
+class TypeInformation:
+    pass
+
+class StatisticalAnalysis:
+    pass
