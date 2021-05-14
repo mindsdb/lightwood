@@ -1,0 +1,1 @@
+from lightwood.api.generate_predictor import generate_predictor
