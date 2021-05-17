@@ -25,7 +25,12 @@ class LightwoodConfig:
     analyzer: object
 
 class TypeInformation:
-    pass
+    dtypes: Dict[str,str] = None
+    additional_info: Dict[str,Dict[str,object]] = None
+
+    def __int__(self):
+        self.dtypes = dict()
+        self.additional_info = dict()
 
 class StatisticalAnalysis:
     pass
