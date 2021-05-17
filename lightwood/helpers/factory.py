@@ -7,6 +7,9 @@ class Factory:
     def __init__(self, **kwargs):
         pass
 
+    def generate(self) -> self.generate_class:
+        return self.generate_class(**kwargs)
+
 
 def gen_factory_func(func: Callable, **kwargs) -> Callable:
     return partial(func, **kwargs)
