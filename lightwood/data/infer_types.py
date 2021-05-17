@@ -39,9 +39,9 @@ def get_numeric_type(element: object) -> str:
     else:
         return None
 
-
 def type_check_sequence(element: object) -> str:
     dtype_guess = None
+    additional_info = {}
 
     for sep_char in [',', '\t', '|', ' ']:
         all_nr = True
@@ -56,7 +56,6 @@ def type_check_sequence(element: object) -> str:
                 break
 
         if len(ele_arr) > 1 and all_nr:
-            additional_info['separator'] = sep_char
             dtype_guess = dtype.array
 
     return dtype_guess
@@ -74,34 +73,29 @@ def type_check_date(element: object) -> str:
         else:
             dtype_guess = dtype.datetime
 
+    except ValueError:
+        pass
+    return dtype_guess
 
-def count_data_types_in_column(data, lmd, col_name):
+def count_data_types_in_column(data):
     dtype_counts = Counter()
-    additional_info = {}
-
-        except ValueError:
-            pass
-        return dtype_guess
 
     type_checkers = [get_numeric_type,
                      type_check_sequence,
                      get_binary_type,
                      type_check_date]
+
     for element in data:
         for type_checker in type_checkers:
-            type_guess, subtype_guess = type_checker(element)
-            if type_guess is not None:
+            dtype_guess = type_checker(element)
+            if dtype_guess is not None:
+                dtype_counts[dtype_guess] += 1
                 break
-        else:
-            type_guess, subtype_guess = 'Unknown', 'Unknown'
 
-        type_counts[type_guess] += 1
-        subtype_counts[subtype_guess] += 1
-
-    return type_counts, subtype_counts, additional_info
+    return dtype_counts
 
 
-def get_column_data_type(arg_tup, lmd):
+def get_column_data_type(arg_tup):
     """
     Provided the column data, define its data type and data subtype.
 
@@ -112,45 +106,23 @@ def get_column_data_type(arg_tup, lmd):
     NOTE: type distribution is the count that this column has for belonging cells to each DATA_TYPE
     """
     data, full_data, col_name = arg_tup
-    additional_info = {'other_potential_subtypes': [], 'other_potential_types': []}
+    additional_info = {'other_potential_dtypes': []}
 
     warn = []
     info = []
     if len(data) == 0:
         warn.append(f'Column {col_name} has no data in it. ')
         warn.append(f'Please remove {col_name} from the training file or fill in some of the values !')
-        return None, None, None, None, additional_info, warn, info
+        return None, None, additional_info, warn, info
 
-    type_dist, subtype_dist = {}, {}
-
-    # User-provided dtype
-    if col_name in lmd['data_subtypes']:
-        curr_data_type = lmd['data_types'][col_name]
-        curr_data_subtype = lmd['data_subtypes'][col_name]
-        type_dist[curr_data_type] = len(data)
-        subtype_dist[curr_data_subtype] = len(data)
-        info.append(f'Manually setting the types for column {col_name} to {curr_data_type}->{curr_data_subtype}')
-        return curr_data_type, curr_data_subtype, type_dist, subtype_dist, additional_info, warn, info
-
-    # Forced categorical dtype
-    if col_name in lmd['force_categorical_encoding']:
-        curr_data_type = DATA_TYPES.CATEGORICAL
-        curr_data_subtype = DATA_SUBTYPES.MULTIPLE
-        type_dist[DATA_TYPES.CATEGORICAL] = len(data)
-        subtype_dist[DATA_SUBTYPES.MULTIPLE] = len(data)
-        return curr_data_type, curr_data_subtype, type_dist, subtype_dist, additional_info, warn, info
-
-    type_dist, subtype_dist, new_additional_info = count_data_types_in_column(data, lmd, col_name)
-
-    if new_additional_info:
-        additional_info.update(new_additional_info)
+    dtype_counts = count_data_types_in_column(data)
 
     # @TODO consider removing or flagging rows where data type is unknown in the future, might just be corrupt data...
-    known_type_dist = {k: v for k, v in type_dist.items() if k != 'Unknown'}
+    known_dtype_dist = {k: v for k, v in dtype_counts.items() if k != 'Unknown'}
 
-    if known_type_dist:
+    if known_dtype_dist:
         max_known_dtype, max_known_dtype_count = max(
-            known_type_dist.items(),
+            known_dtype_dist.items(),
             key=lambda kv: kv[1]
         )
     else:
@@ -160,27 +132,20 @@ def get_column_data_type(arg_tup, lmd):
     nr_distinct_vals = len(set(full_data))
 
     # Data is mostly not unknown, go with type counting results
-    if max_known_dtype and max_known_dtype_count > type_dist['Unknown']:
-        curr_data_type = max_known_dtype
-
-        possible_subtype_counts = [(k, v) for k, v in subtype_dist.items()
-                                if k in DATA_TYPES_SUBTYPES[curr_data_type]]
-        curr_data_subtype, _ = max(
-            possible_subtype_counts,
-            key=lambda pair: pair[1]
-        )
+    if max_known_dtype and max_known_dtype_count > dtype_counts['Unknown']:
+        curr_dtype = max_known_dtype
     else:
-        curr_data_type, curr_data_subtype = None, None
+        curr_dtype = None
 
     # Check for Tags subtype
-    if curr_data_subtype != DATA_SUBTYPES.ARRAY:
+    if curr_dtype != dtype.array:
         lengths = []
         unique_tokens = set()
 
         can_be_tags = False
         if all(isinstance(x, str) for x in data):
             can_be_tags = True
-            delimiter = lmd.get('tags_delimiter', ',')
+            delimiter = ','
             for item in data:
                 item_tags = [t.strip() for t in item.split(delimiter)]
                 lengths.append(len(item_tags))
@@ -188,20 +153,18 @@ def get_column_data_type(arg_tup, lmd):
 
         # If more than 30% of the samples contain more than 1 category and there's more than 6 of them and they are shared between the various cells
         if can_be_tags and np.mean(lengths) > 1.3 and len(unique_tokens) >= 6 and len(unique_tokens)/np.mean(lengths) < (len(data)/4):
-            curr_data_type = DATA_TYPES.CATEGORICAL
-            curr_data_subtype = DATA_SUBTYPES.TAGS
+            curr_dtype = dtype.tags
 
     # Categorical based on unique values
-    if curr_data_type != DATA_TYPES.DATE and curr_data_subtype != DATA_SUBTYPES.TAGS:
+    if curr_dtype != dtype.date and curr_dtype != dtype.datetime and curr_dtype != dtype.tags:
         if nr_distinct_vals < (nr_vals / 20) or nr_distinct_vals < 6:
-            if (curr_data_type != DATA_TYPES.NUMERIC) or (nr_distinct_vals < 20):
-                if curr_data_type is not None:
-                    additional_info['other_potential_types'].append(curr_data_type)
-                    additional_info['other_potential_subtypes'].append(curr_data_subtype)
-                curr_data_type = DATA_TYPES.CATEGORICAL
+            if (curr_dtype != dtype.integer and curr_dtype != dtype.float) or (nr_distinct_vals < 20):
+                if curr_dtype is not None:
+                    additional_info['other_potential_dtypes'].append(curr_dtype)
+                curr_dtype = dtype.categorical
 
     # If curr_data_type is still None, then it's text or category
-    if curr_data_type is None:
+    if curr_dtype is None:
         lang_dist = get_language_dist(data)
 
         # Normalize lang probabilities
@@ -210,40 +173,31 @@ def get_column_data_type(arg_tup, lmd):
 
         # If most cells are unknown language then it's categorical
         if lang_dist['Unknown'] > 0.5:
-            curr_data_type = DATA_TYPES.CATEGORICAL
+            curr_dtype = dtype.categorical
         else:
             nr_words, word_dist, nr_words_dist = analyze_sentences(data)
 
             if 1 in nr_words_dist and nr_words_dist[1] == nr_words:
-                curr_data_type = DATA_TYPES.CATEGORICAL
+                curr_dtype = dtype.categorical
             else:
-                curr_data_type = DATA_TYPES.TEXT
-
                 if len(word_dist) > 500 and nr_words / len(data) > 5:
-                    curr_data_subtype = DATA_SUBTYPES.RICH
+                    curr_dtype = dtype.rich
                 else:
-                    curr_data_subtype = DATA_SUBTYPES.SHORT
+                    curr_dtype = curr_dtype.short
 
-                type_dist = {curr_data_type: len(data)}
-                subtype_dist = {curr_data_subtype: len(data)}
+                dtype_counts = {curr_dtype: len(data)}
 
-                return curr_data_type, curr_data_subtype, type_dist, subtype_dist, additional_info, warn, info
+                return curr_dtype, dtype_counts, additional_info, warn, info
 
-    if curr_data_type == DATA_TYPES.CATEGORICAL and curr_data_subtype != DATA_SUBTYPES.TAGS:
-        if nr_distinct_vals > 2:
-            curr_data_subtype = DATA_SUBTYPES.MULTIPLE
-        else:
-            curr_data_subtype = DATA_SUBTYPES.SINGLE
 
-    if curr_data_type in [DATA_TYPES.CATEGORICAL, DATA_TYPES.TEXT]:
-        type_dist = {curr_data_type: len(data)}
-        subtype_dist = {curr_data_subtype: len(data)}
+    if curr_dtype in [dtype.categorical, dtype.rich, dtype.short]:
+        dtype_counts = {curr_dtype: len(data)}
 
-    return curr_data_type, curr_data_subtype, type_dist, subtype_dist, additional_info, warn, info
+    return curr_dtype, dtype_counts, additional_info, warn, info
 
 def infer_types(data: DataSource) -> TypeInformation:
     stats_v2 = TypeInformation()
-
+    # @TODO REFACOTR HERE
     sample_settings = self.transaction.lmd['sample_settings']
     if sample_settings['sample_for_analysis']:
         sample_margin_of_error = sample_settings['sample_margin_of_error']
@@ -271,7 +225,7 @@ def infer_types(data: DataSource) -> TypeInformation:
         self.transaction.log.info(f'Using {nr_procs} processes to deduct types.')
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
-        answer_arr = pool.map(partial(get_column_data_type, lmd=self.transaction.lmd), [
+        answer_arr = pool.map(get_column_data_type, [
             (sample_df[x].dropna(), data.data_frame[x], x) for x in sample_df.columns.values
         ])
         pool.close()
@@ -279,7 +233,7 @@ def infer_types(data: DataSource) -> TypeInformation:
     else:
         answer_arr = []
         for x in sample_df.columns.values:
-            answer_arr.append(get_column_data_type([sample_df[x].dropna(), data.data_frame[x], x], lmd=self.transaction.lmd))
+            answer_arr.append(get_column_data_type(sample_df[x].dropna(), data.data_frame[x], x))
 
     for i, col_name in enumerate(sample_df.columns.values):
         (data_type, data_subtype, data_type_dist, data_subtype_dist, additional_info, warn, info) = answer_arr[i]
