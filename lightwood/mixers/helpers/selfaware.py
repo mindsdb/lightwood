@@ -13,10 +13,11 @@ class SelfAware(torch.nn.Module):
         self.input_size = input_size
         self.output_size = output_size
         self.nr_outputs = nr_outputs
+        self.base_loss = 1.0
 
         awareness_layers = []
-        awareness_net_shape = [(self.input_size + self.output_size),
-                               max([int((self.input_size + self.output_size) * 1.5), 300]),
+        awareness_net_shape = [self.input_size,
+                               min(self.input_size * 2, 100),
                                self.nr_outputs]
 
         for ind in range(len(awareness_net_shape) - 1):
@@ -44,14 +45,13 @@ class SelfAware(torch.nn.Module):
 
         return self
 
-    def forward(self, true_input, main_net_output):
+    def forward(self, true_input):
         """
         :param true_input: tensor with data point features
         :param main_net_output: tensor with main NN prediction for true_input
         :return: predicted loss value over the tensor samples
         """
         with LightwoodAutocast():
-            aware_in = torch.cat((true_input, main_net_output), 1)
+            aware_in = true_input
             output = self.net(aware_in)
             return output
-    
