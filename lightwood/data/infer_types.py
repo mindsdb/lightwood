@@ -1,6 +1,7 @@
 import random
 import dateutil
 import string
+import pandas as pd
 import numpy as np
 import imghdr
 import sndhdr
@@ -12,7 +13,9 @@ import datetime
 from mindsdb_datasources import DataSource
 from lightwood.api import TypeInformation
 from lightwood.api import dtype
-
+from lightwood.helpers.parallelism import get_nr_procs
+from lightwood.helpers.text import get_identifier_description_mp
+from lightwood.helpers.log import log
 
 def get_binary_type(element: object) -> str:
     try:
@@ -195,129 +198,141 @@ def get_column_data_type(arg_tup):
 
     return curr_dtype, dtype_counts, additional_info, warn, info
 
-def infer_types(data: DataSource) -> TypeInformation:
-    stats_v2 = TypeInformation()
-    # @TODO REFACOTR HERE
-    sample_settings = self.transaction.lmd['sample_settings']
-    if sample_settings['sample_for_analysis']:
-        sample_margin_of_error = sample_settings['sample_margin_of_error']
-        sample_confidence_level = sample_settings['sample_confidence_level']
-        sample_percentage = sample_settings['sample_percentage']
-        sample_function = self.transaction.hmd['sample_function']
-
-        sample_df = data.sample_df(sample_function,
-                                         sample_margin_of_error,
-                                         sample_confidence_level,
-                                         sample_percentage)
-
-        sample_size = len(sample_df)
-        population_size = len(data.data_frame)
-        self.transaction.log.info(f'Analyzing a sample of {sample_size} '
-                                  f'from a total population of {population_size},'
-                                  f' this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.')
+def calculate_sample_size(
+    population_size,
+    margin_error=.05,
+    confidence_level=.99,
+    sigma=1/2
+):
+    """
+    Calculate the minimal sample size to use to achieve a certain
+    margin of error and confidence level for a sample estimate
+    of the population mean.
+    Inputs
+    -------
+    population_size: integer
+        Total size of the population that the sample is to be drawn from.
+    margin_error: number
+        Maximum expected difference between the true population parameter,
+        such as the mean, and the sample estimate.
+    confidence_level: number in the interval (0, 1)
+        If we were to draw a large number of equal-size samples
+        from the population, the true population parameter
+        should lie within this percentage
+        of the intervals (sample_parameter - e, sample_parameter + e)
+        where e is the margin_error.
+    sigma: number
+        The standard deviation of the population.  For the case
+        of estimating a parameter in the interval [0, 1], sigma=1/2
+        should be sufficient.
+    """
+    alpha = 1 - (confidence_level)
+    # dictionary of confidence levels and corresponding z-scores
+    # computed via norm.ppf(1 - (alpha/2)), where norm is
+    # a normal distribution object in scipy.stats.
+    # Here, ppf is the percentile point function.
+    zdict = {
+        .90: 1.645,
+        .91: 1.695,
+        .99: 2.576,
+        .97: 2.17,
+        .94: 1.881,
+        .93: 1.812,
+        .95: 1.96,
+        .98: 2.326,
+        .96: 2.054,
+        .92: 1.751
+    }
+    if confidence_level in zdict:
+        z = zdict[confidence_level]
     else:
-        sample_df = data.data_frame
+        #Inf fix
+        if alpha == 0.0:
+            alpha += 0.001
+        z = norm.ppf(1 - (alpha/2))
+    N = population_size
+    M = margin_error
+    numerator = z**2 * sigma**2 * (N / (N-1))
+    denom = M**2 + ((z**2 * sigma**2)/(N-1))
+    return numerator/denom
 
-    nr_procs = get_nr_procs(self.transaction.lmd.get('max_processes', None),
-                            self.transaction.lmd.get('max_per_proc_usage', None),
-                            sample_df)
+def sample_data(df: pd.DataFrame):
+    population_size = len(df)
+    if population_size <= 50:
+        sample_size = population_size
+    elif sample_percentage:
+        assert sample_percentage > 0 and sample_percentage <= 100
+        sample_size = int(round(len(df) * sample_percentage/100))
+    else:
+        sample_size = int(round(calculate_sample_size(population_size,
+                                                  0.01,
+                                                  1 - 0.005)))
+
+    population_size = len(df)
+    input_data_sample_indexes = random.sample(range(population_size), sample_size)
+    return df.iloc[input_data_sample_indexes]
+
+def infer_types(data: DataSource) -> TypeInformation:
+    type_information = TypeInformation()
+    data = data.df
+
+    sample_df = sample_data(data)
+    sample_size = len(sample_df)
+    population_size = len(data.data_frame)
+    log.info(f'Analyzing a sample of {sample_size} '
+                              f'from a total population of {population_size},'
+                              f' this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.')
+
+    nr_procs = get_nr_procs(data)
     if nr_procs > 1 and False:
-        self.transaction.log.info(f'Using {nr_procs} processes to deduct types.')
+        log.info(f'Using {nr_procs} processes to deduct types.')
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
         answer_arr = pool.map(get_column_data_type, [
-            (sample_df[x].dropna(), data.data_frame[x], x) for x in sample_df.columns.values
+            (sample_df[x].dropna(), data[x], x) for x in sample_df.columns.values
         ])
         pool.close()
         pool.join()
     else:
         answer_arr = []
         for x in sample_df.columns.values:
-            answer_arr.append(get_column_data_type(sample_df[x].dropna(), data.data_frame[x], x))
+            answer_arr.append(get_column_data_type(sample_df[x].dropna(), data[x], x))
 
     for i, col_name in enumerate(sample_df.columns.values):
-        (data_type, data_subtype, data_type_dist, data_subtype_dist, additional_info, warn, info) = answer_arr[i]
+        (data_dtype, data_dtype_dist, additional_info, warn, info) = answer_arr[i]
 
         for msg in warn:
-            self.log.warning(msg)
+            log.warning(msg)
         for msg in info:
-            self.log.info(msg)
+            log.info(msg)
 
-        typing = {
-            'data_type': data_type,
-            'data_subtype': data_subtype,
-            'data_type_dist': data_type_dist,
-            'data_subtype_dist': data_subtype_dist,
-            'description': """A data type, in programming, is a classification that specifies which type of value a variable has and what type of mathematical, relational or logical operations can be applied to it without causing an error. A string, for example, is a data type that is used to classify text and an integer is a data type used to classify whole numbers."""
+        if data_dtype is None:
+            data_dtype = dtype.invalid
+
+        type_information.dtypes[col_name] = data_dtype
+        type_information.additional_info[col_name] = {
+            'dtype_dist': data_dtype_dist
         }
-
-        stats_v2[col_name]['typing'] = typing
-
-        stats_v2[col_name]['additional_info'] = additional_info
 
     if nr_procs > 1:
         pool = mp.Pool(processes=nr_procs)
         answer_arr = pool.map(get_identifier_description_mp, [
             (data.data_frame[x],
-                x,
-                stats_v2[x]['typing']['data_type'],
-                stats_v2[x]['typing']['data_subtype'],
-                stats_v2[x]['additional_info']) for x in sample_df.columns.values
+            x,
+            type_information.dtypes[x]
         ])
         pool.close()
         pool.join()
     else:
         answer_arr = []
         for x in sample_df.columns.values:
-            answer = get_identifier_description_mp([data.data_frame[x], x, stats_v2[x]['typing']['data_type'], stats_v2[x]['typing']['data_subtype'], stats_v2[x]['additional_info']])
+            answer = get_identifier_description_mp([data.data_frame[x], x,type_information.dtypes[x]])
             answer_arr.append(answer)
 
     for i, col_name in enumerate(sample_df.columns.values):
         # work with the full data
-        stats_v2[col_name]['identifier'] = answer_arr[i]
+        type_information.identifiers[col_name] = answer_arr[i]
 
-        if stats_v2[col_name]['identifier'] is not None:
-            if col_name not in self.transaction.lmd['force_column_usage']:
-                if col_name not in self.transaction.lmd['predict_columns']:
-                    if (self.transaction.lmd.get('tss', None) and
-                            self.transaction.lmd['tss']['is_timeseries'] and
-                            (col_name in self.transaction.lmd['tss']['order_by'] or
-                            col_name in (self.transaction.lmd['tss']['group_by'] or []))):
-                        pass
-                    else:
-                        self.transaction.lmd['columns_to_ignore'].append(col_name)
-                        self.transaction.data.data_frame.drop(columns=[col_name], inplace=True)
+        # @TODO Column removal logic was here, if the column was an identifier, move it elsewhere
 
-        stats_v2[col_name]['broken'] = None
-        if data_type is None or data_subtype is None:
-            if col_name in self.transaction.lmd['force_column_usage'] or col_name in self.transaction.lmd['predict_columns']:
-                err_msg = f'Failed to deduce type for critical column: {col_name}'
-                log.error(err_msg)
-                raise Exception(err_msg)
-
-            self.transaction.lmd['columns_to_ignore'].append(col_name)
-            stats_v2[col_name]['broken'] = {
-                'failed_at': 'Type detection'
-                ,'reason': 'Unable to detect type for unknown reasons.'
-            }
-
-            if len(col_data) < 1:
-                stats_v2[col_name]['broken']['reason'] = 'Unable to detect type due to too many empty, null, None or nan values.'
-
-
-        if data_subtype_dist:
-            self.log.info(f'Data distribution for column "{col_name}" '
-                          f'of type "{data_type}" '
-                          f'and subtype "{data_subtype}"')
-            try:
-                self.log.infoChart(data_subtype_dist,
-                                   type='list',
-                                   uid=f'Data Type Distribution for column "{col_name}"')
-            except Exception:
-                # Functionality is specific to mindsdb logger
-                pass
-
-    self.transaction.lmd['useable_input_columns'] = []
-    for col_name in self.transaction.lmd['columns']:
-        if col_name not in self.transaction.lmd['columns_to_ignore'] and col_name not in self.transaction.lmd['predict_columns'] and stats_v2[col_name]['broken'] is None and stats_v2[col_name]['identifier'] is None:
-                self.transaction.lmd['useable_input_columns'].append(col_name)
+    return type_information
