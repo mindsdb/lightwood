@@ -466,13 +466,9 @@ class NnMixer(BaseMixer):
 
             if awareness_arr is not None:
                 # scores: relative magnitude to last seen self-aware loss during training
-                # sum 1 to keep in R+, then log2 to rescale the scores accordingly
-                # ICP bounds linearly scale with scores (if < 1, tighter, else wider)
-                # We clamp > 1 (cases where normalizer is unsure, default to vanilla ICP bound width)
                 scaler = self.selfaware_net.base_loss
-                scores = [abs(x[k])/scaler if x[k] != 0 else 1e-5 for x in awareness_arr]
-                scores = torch.clamp(torch.log2(1+torch.Tensor(scores)), min=0.1, max=1).tolist()
-                predictions[output_column]['selfaware_confidences'] = scores
+                scores = torch.Tensor([1+(abs(x[k])/scaler) if x[k] != 0 else 1 for x in awareness_arr])
+                predictions[output_column]['selfaware_confidences'] = scores.tolist()
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
