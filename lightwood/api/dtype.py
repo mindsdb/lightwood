@@ -14,3 +14,5 @@ class dtype(Enum):
     array = 'array'
     short_text = 'short_text'
     rich_text = 'rich_text'
+    empty = 'empty'
+    invalid = 'invalid'

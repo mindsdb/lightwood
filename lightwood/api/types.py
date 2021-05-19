@@ -26,8 +26,9 @@ class LightwoodConfig:
 
 class TypeInformation:
     dtypes: Dict[str,str] = None
-    additional_info: Dict[str,Dict[str,object]] = None
-
+    additional_info: Dict[str, object] = None
+    identifiers: Dict[str,object]
+     
     def __int__(self):
         self.dtypes = dict()
         self.additional_info = dict()
