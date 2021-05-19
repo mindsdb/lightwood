@@ -63,8 +63,8 @@ class NnMixer(BaseMixer):
         self.dropout_p = max(0.0, min(1.0, dropout_p))
         self.dynamic_parameters = {}
         self.awareness_criterion = None
-        self.awareness_scale_factor = 1/10  # scales self-aware total loss contribution
-        self.selfaware_lr_factor = 1/2      # scales self-aware learning rate compared to mixer
+        self.awareness_scale_factor = 1/6  # scales self-aware total loss contribution
+        self.selfaware_lr_factor = 2/3      # scales self-aware learning rate compared to mixer
         self.start_selfaware_training = False
         self.stop_selfaware_training = False
         self.is_selfaware = False
@@ -101,6 +101,7 @@ class NnMixer(BaseMixer):
         data_loader = DataLoader(ds, batch_size=self.batch_size, shuffle=True, num_workers=0)
 
         loss_confidence_arr = []
+        aware_losses = []
 
         for i, data in enumerate(data_loader, 0):
             inputs, labels = data
@@ -111,7 +112,8 @@ class NnMixer(BaseMixer):
                 if self.is_selfaware:
                     self.selfaware_net.eval()
                     outputs = self.net(inputs)
-                    awareness = self.selfaware_net(inputs, outputs)
+                    awareness = self.selfaware_net(inputs)
+                    aware_losses.append(awareness)
                 else:
                     outputs = self.net(inputs)
 
@@ -137,6 +139,9 @@ class NnMixer(BaseMixer):
                     losses_bellow_95th_percentile = loss_confidence_arr[k]
 
                 self.max_confidence_per_output[k] = max(losses_bellow_95th_percentile)
+
+        # save self aware baseline response
+        self.selfaware_net.base_loss = torch.cat(aware_losses).abs().mean()
 
         return True
 
@@ -233,6 +238,7 @@ class NnMixer(BaseMixer):
 
         self.selfaware_optimizer_args = copy.deepcopy(self.optimizer_args)
         self.selfaware_optimizer_args['lr'] = self.selfaware_optimizer_args['lr'] * self.selfaware_lr_factor
+        self.selfaware_optimizer_args['weight_decay'] = 2e-5
         self.selfaware_optimizer = self.optimizer_class(self.selfaware_net.parameters(), **self.optimizer_args)
 
         if stop_training_after_seconds is None:
@@ -416,7 +422,7 @@ class NnMixer(BaseMixer):
                 if self.is_selfaware:
                     self.selfaware_net.eval()
                     output = self.net(inputs)
-                    awareness = self.selfaware_net(inputs, output)
+                    awareness = self.selfaware_net(inputs)
                     awareness = awareness.to('cpu')
                     awareness_arr.extend(awareness.tolist())
                 else:
@@ -459,7 +465,10 @@ class NnMixer(BaseMixer):
             predictions[output_column] = {'predictions': decoded_predictions['predictions']}
 
             if awareness_arr is not None:
-                predictions[output_column]['selfaware_confidences'] = [1/abs(x[k]) if x[k] != 0 else 1/0.000001 for x in awareness_arr]
+                # scores: relative magnitude to last seen self-aware loss during training
+                scaler = self.selfaware_net.base_loss
+                scores = torch.Tensor([1+(abs(x[k])/scaler) if x[k] != 0 else 1 for x in awareness_arr])
+                predictions[output_column]['selfaware_confidences'] = scores.tolist()
 
             if loss_confidence_arr[k] is not None:
                 predictions[output_column]['loss_confidences'] = loss_confidence_arr[k]
@@ -598,7 +607,7 @@ class NnMixer(BaseMixer):
                     outputs = self.net(inputs)
                 if self.is_selfaware:
                     with LightwoodAutocast():
-                        awareness = self.selfaware_net(inputs.detach(), outputs.detach())
+                        awareness = self.selfaware_net(inputs.detach())
 
                 loss = None
                 for k, criterion in enumerate(self.criterion_arr):
