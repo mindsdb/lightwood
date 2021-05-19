@@ -24,7 +24,7 @@ from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCross
 class NnMixer(BaseMixer):
 
     def __init__(self,
-                 selfaware=False,
+                 selfaware=True,
                  callback_on_iter=None,
                  eval_every_x_epochs=20,
                  dropout_p=0.0,
@@ -65,9 +65,9 @@ class NnMixer(BaseMixer):
         self.awareness_criterion = None
         self.awareness_scale_factor = 1/6  # scales self-aware total loss contribution
         self.selfaware_lr_factor = 2/3      # scales self-aware learning rate compared to mixer
-        self.start_selfaware_training = False
+        self.start_selfaware_training = True
         self.stop_selfaware_training = False
-        self.is_selfaware = False
+        self.is_selfaware = True
 
         self.max_confidence_per_output = []
         self.monitor = None
@@ -468,9 +468,10 @@ class NnMixer(BaseMixer):
                 # scores: relative magnitude to last seen self-aware loss during training
                 # sum 1 to keep in R+, then log2 to rescale the scores accordingly
                 # ICP bounds linearly scale with scores (if < 1, tighter, else wider)
+                # We clamp > 1 (cases where normalizer is unsure, default to vanilla ICP bound width)
                 scaler = self.selfaware_net.base_loss
                 scores = [abs(x[k])/scaler if x[k] != 0 else 1e-5 for x in awareness_arr]
-                scores = torch.log2(1+torch.Tensor(scores)).tolist()
+                scores = torch.clamp(torch.log2(1+torch.Tensor(scores)), min=0.1, max=1).tolist()
                 predictions[output_column]['selfaware_confidences'] = scores
 
             if loss_confidence_arr[k] is not None:
