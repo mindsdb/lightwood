@@ -15,7 +15,7 @@ from mindsdb_datasources import DataSource
 from lightwood.api import TypeInformation
 from lightwood.api import dtype
 from lightwood.helpers.parallelism import get_nr_procs
-from lightwood.helpers.text import get_identifier_description_mp
+from lightwood.helpers.text import get_identifier_description_mp, cast_string_to_python_type
 from lightwood.helpers.log import log
 
 def get_binary_type(element: object) -> str:
@@ -67,7 +67,7 @@ def type_check_sequence(element: object) -> str:
 def type_check_date(element: object) -> str:
     dtype_guess = None
     try:
-        dt = dateutil.parser.parse(element, **lmd.get('dateutil_parser_kwargs_per_column', {}).get(col_name, {}))
+        dt = dateutil.parser.parse(element)
 
         # Not accurate 100% for a single datetime str,
         # but should work in aggregate
@@ -185,19 +185,19 @@ def get_column_data_type(arg_tup):
                 curr_dtype = dtype.categorical
             else:
                 if len(word_dist) > 500 and nr_words / len(data) > 5:
-                    curr_dtype = dtype.rich
+                    curr_dtype = dtype.rich_text
                 else:
-                    curr_dtype = curr_dtype.short
+                    curr_dtype = curr_dtype.short_text
 
                 dtype_counts = {curr_dtype: len(data)}
 
                 return curr_dtype, dtype_counts, additional_info, warn, info
 
 
-    if curr_dtype in [dtype.categorical, dtype.rich, dtype.short]:
+    if curr_dtype in [dtype.categorical, dtype.rich_text, dtype.short_text]:
         dtype_counts = {curr_dtype: len(data)}
 
-    return curr_dtype, dtype_counts, additional_info, warn, info
+    return curr_dtype, dict(dtype_counts), additional_info, warn, info
 
 def calculate_sample_size(
     population_size,
@@ -294,7 +294,7 @@ def infer_types(data: DataSource) -> TypeInformation:
     else:
         answer_arr = []
         for x in sample_df.columns.values:
-            answer_arr.append(get_column_data_type(sample_df[x].dropna(), data[x], x))
+            answer_arr.append(get_column_data_type([sample_df[x].dropna(), data[x], x]))
 
     for i, col_name in enumerate(sample_df.columns.values):
         (data_dtype, data_dtype_dist, additional_info, warn, info) = answer_arr[i]
@@ -315,9 +315,10 @@ def infer_types(data: DataSource) -> TypeInformation:
     if nr_procs > 1:
         pool = mp.Pool(processes=nr_procs)
         answer_arr = pool.map(get_identifier_description_mp, [
-            data[x],
+            (data[x],
             x,
-            type_information.dtypes[x]
+            type_information.dtypes[x])
+            for x in sample_df.columns.values
         ])
         pool.close()
         pool.join()
