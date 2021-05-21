@@ -20,9 +20,9 @@ class Output:
 class LightwoodConfig:
     features: Dict[str, Feature] = None
     output: Output = None
-    cleaner: object
-    splitter: object
-    analyzer: object
+    cleaner: object = None
+    splitter: object = None
+    analyzer: object = None
 
 class TypeInformation:
     dtypes: Dict[str,str] = None
@@ -35,4 +35,5 @@ class TypeInformation:
         self.identifiers = dict()
 
 class StatisticalAnalysis:
+    # Addition of stuff here pending discussion with Jorge
     pass
