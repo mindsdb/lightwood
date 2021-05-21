@@ -27,11 +27,12 @@ class LightwoodConfig:
 class TypeInformation:
     dtypes: Dict[str,str] = None
     additional_info: Dict[str, object] = None
-    identifiers: Dict[str,object]
-     
-    def __int__(self):
+    identifiers: Dict[str,object] = None
+
+    def __init__(self):
         self.dtypes = dict()
         self.additional_info = dict()
+        self.identifiers = dict()
 
 class StatisticalAnalysis:
     pass
