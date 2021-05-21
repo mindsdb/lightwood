@@ -260,9 +260,6 @@ def sample_data(df: pd.DataFrame):
     population_size = len(df)
     if population_size <= 50:
         sample_size = population_size
-    elif sample_percentage:
-        assert sample_percentage > 0 and sample_percentage <= 100
-        sample_size = int(round(len(df) * sample_percentage/100))
     else:
         sample_size = int(round(calculate_sample_size(population_size,
                                                   0.01,
@@ -317,7 +314,7 @@ def infer_types(data: DataSource) -> TypeInformation:
     if nr_procs > 1:
         pool = mp.Pool(processes=nr_procs)
         answer_arr = pool.map(get_identifier_description_mp, [
-            (data.data_frame[x],
+            data.data_frame[x],
             x,
             type_information.dtypes[x]
         ])

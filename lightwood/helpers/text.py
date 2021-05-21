@@ -9,7 +9,6 @@
  *******************************************************
 """
 
-from mindsdb_native.libs.constants.mindsdb import *
 from collections import Counter, defaultdict
 import string
 import json
@@ -17,10 +16,9 @@ import hashlib
 import numpy as np
 import scipy.stats as st
 import langdetect
-from lightwood.helpers.text import tokenize_text
 import nltk
 from nltk.corpus import stopwords
-from lightwood.api import dtype
+from lightwood.api.dtype import dtype
 
 
 langdetect.DetectorFactory.seed = 0
@@ -285,3 +283,40 @@ def get_identifier_description(data, column_name, data_dtype):
         return 'Unknown identifier'
 
     return None
+
+import nltk
+import re
+
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
+
+def contains_alnum(text):
+    for c in text:
+        if c.isalnum():
+            return True
+    return False
+
+
+def decontracted(phrase):
+    # specific
+    phrase = re.sub(r"won\'t", "will not", phrase)
+    phrase = re.sub(r"can\'t", "can not", phrase)
+
+    # general
+    phrase = re.sub(r"n\'t", " not", phrase)
+    phrase = re.sub(r"\'re", " are", phrase)
+    phrase = re.sub(r"\'s", " is", phrase)
+    phrase = re.sub(r"\'d", " would", phrase)
+    phrase = re.sub(r"\'ll", " will", phrase)
+    phrase = re.sub(r"\'t", " not", phrase)
+    phrase = re.sub(r"\'ve", " have", phrase)
+    phrase = re.sub(r"\'m", " am", phrase)
+    return phrase
+
+
+def tokenize_text(text):
+    return [t.lower() for t in nltk.word_tokenize(decontracted(text)) if contains_alnum(t)]
