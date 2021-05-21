@@ -1,6 +1,7 @@
 import random
 import dateutil
 import string
+from scipy.stats import norm
 import pandas as pd
 import numpy as np
 import imghdr
@@ -275,7 +276,7 @@ def infer_types(data: DataSource) -> TypeInformation:
 
     sample_df = sample_data(data)
     sample_size = len(sample_df)
-    population_size = len(data.data_frame)
+    population_size = len(data)
     log.info(f'Analyzing a sample of {sample_size} '
                               f'from a total population of {population_size},'
                               f' this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.')
@@ -314,7 +315,7 @@ def infer_types(data: DataSource) -> TypeInformation:
     if nr_procs > 1:
         pool = mp.Pool(processes=nr_procs)
         answer_arr = pool.map(get_identifier_description_mp, [
-            data.data_frame[x],
+            data[x],
             x,
             type_information.dtypes[x]
         ])
@@ -323,7 +324,7 @@ def infer_types(data: DataSource) -> TypeInformation:
     else:
         answer_arr = []
         for x in sample_df.columns.values:
-            answer = get_identifier_description_mp([data.data_frame[x], x,type_information.dtypes[x]])
+            answer = get_identifier_description_mp([data[x], x,type_information.dtypes[x]])
             answer_arr.append(answer)
 
     for i, col_name in enumerate(sample_df.columns.values):
