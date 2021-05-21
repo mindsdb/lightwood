@@ -25,8 +25,8 @@ class Predictor():
 
 	def prepare(self, data: DataSource, config_override: dict=None) -> None:
 		type_information = lightwood.data.infer_types(data)
-		stat_analysis = lightwood.data.statistical_analysis(data, type_information)
-		lightwood_config = lightwood.generate_config(self.target, type_information=type_information, stat_analysis=stat_analysis)
+		statistical_analysis = lightwood.data.statistical_analysis(data, type_information)
+		lightwood_config = lightwood.generate_config(self.target, type_information=type_information, statistical_analysis=statistical_analysis)
 		self.lightwood_config = self.override_config(config, lightwood_config)
 
 	def learn(self, data: DataSource) -> None:

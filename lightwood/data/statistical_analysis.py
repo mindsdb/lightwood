@@ -347,4 +347,6 @@ class DataAnalyzer():
 
 
 def statistical_analysis(data: DataSource, type_information: TypeInformation) -> StatisticalAnalysis:
-    pass
+    stats = StatisticalAnalysis()
+
+    return stats
