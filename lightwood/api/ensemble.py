@@ -1,5 +1,6 @@
 from .predictor import Predictor
 from lightwood.constants.lightwood import ColumnDataTypes
+from collections import Counter
 import numpy as np
 import pickle
 import torch
@@ -39,8 +40,9 @@ class LightwoodEnsemble:
             if target['type'] == ColumnDataTypes.NUMERIC:
                 final_preds = np.mean(pred_arr, axis=0).tolist()
             elif target['type'] == ColumnDataTypes.CATEGORICAL:
-                # TODO: pending
-                final_preds = np.zeros(1, pred_arr.shape[1])
+                final_preds = []
+                for idx in range(pred_arr.shape[1]):
+                    final_preds.append(max(Counter(pred_arr[:, idx])))
 
             formatted_predictions[target_name]['predictions'] = final_preds
 
