@@ -12,6 +12,7 @@ from lightwood.api.predictor import Predictor
 import lightwood.model_building
 import lightwood.constants.lightwood as CONST
 from lightwood.helpers.device import get_devices
+from lightwood.config.config import CONFIG
 
 
 COLUMN_DATA_TYPES = CONST.COLUMN_DATA_TYPES
@@ -20,6 +21,6 @@ COLUMN_DATA_TYPES = CONST.COLUMN_DATA_TYPES
 seed = 42
 np.random.seed(seed)
 torch.manual_seed(seed)
-if 'cuda' in str(get_devices()[0]):
+if CONFIG.USE_CUDA:
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
