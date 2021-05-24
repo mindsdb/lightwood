@@ -6,7 +6,17 @@ from lightwood.config.config import CONFIG
 
 
 def get_devices():
+    # Note: this initializes cuda (i.e. eats 2GB + of RAM)
     if CONFIG.USE_CUDA and torch.cuda.is_available():
+        try:
+            torch.ones(1).cuda().__repr__()
+            cuda_certainly_works = True
+        except:
+            cuda_certainly_works = False
+    else:
+        cuda_certainly_works = False
+
+    if CONFIG.USE_CUDA and torch.cuda.is_available() and cuda_certainly_works:
         device_str = "cuda"
         available_devices = torch.cuda.device_count()
 
