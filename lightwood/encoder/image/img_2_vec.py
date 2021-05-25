@@ -8,13 +8,12 @@ from PIL import Image, TiffImagePlugin, PngImagePlugin
 import requests
 
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
-from lightwood.constants.lightwood import ENCODER_AIM
 from lightwood.encoder.base import BaseEncoder
 
 
 class Img2VecEncoder(BaseEncoder):
 
-    def __init__(self, is_target=False, aim=ENCODER_AIM.SPEED):
+    def __init__(self, is_target=False):
         super().__init__(is_target)
         self.model = None
         # I think we should make this an enum, something like: speed, balance, accuracy
@@ -34,14 +33,7 @@ class Img2VecEncoder(BaseEncoder):
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         if self.model is None:
-            if self.aim == ENCODER_AIM.SPEED:
-                self.model = Img2Vec(model='resnet-18')
-            elif self.aim == ENCODER_AIM.BALANCE:
-                self.model = Img2Vec(model='resnext-50-small')
-            elif self.aim == ENCODER_AIM.ACCURACY:
-                self.model = Img2Vec(model='resnext-50')
-            else:
-                self.model = Img2Vec()
+            self.model = Img2Vec(model='resnext-50-small')
         self._prepared = True
 
     def prepare(self, images):
