@@ -40,11 +40,11 @@ class Predictor():
 		folds = {lightwood_config.splitter}(data, 10)
 		nfolds = len(data)
 
-		for encoder in self.encoders.values():
+		for col_name, encoder in self.encoders.items():
 			if encoder.uses_folds:
-				encoder.prepare(folds[0:nfolds])
+				encoder.prepare([x[col_name] for x in folds[0:nfolds]])
 			else:
-				encoder.prepare(pd.concat(folds[0:nfolds]))
+				encoder.prepare(pd.concat(folds[0:nfolds])[col_name])
 
 		encoded_folds = lightwood.encode(self.encoders, folds)
 

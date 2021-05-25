@@ -8,28 +8,9 @@ import torch
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
-from lightwood.encoders.time_series.helpers.common import generate_target_group_normalizers
+from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 from lightwood.encoder.base import BaseEncoder
 
-
-# Abstract over multiple encoded datasources as if they were a single entitiy
-class ConcatedEncodedDs(EncodedDs):
-    def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
-        self.encoded_ds_arr = encoded_ds_arr
-    
-    def __len__(self):
-        return np.sum([len(x) for x in encoded_ds_arr])
-
-    def __getitem__(self, idx):
-        self.encoded_ds_arr[idx//len(self.encoded_ds_arr)][idx%self.encoded_ds_arr]
-
-    def get_column_original_data(self, column_name):
-        encoded_df_arr = [x.get_column_original_data(column_name) for x in self.encoded_ds_arr]
-        return pd.concat(encoded_df_arr)
-
-    def get_encoded_column_data(self, column_name):
-        encoded_df_arr = [x.get_encoded_column_data(column_name) for x in self.encoded_ds_arr]
-        return torch.stack(encoded_df_arr)
 
 class EncodedDs(Dataset):
     def __init__(self, encoders: List[BaseEncoder], data_frame: pd.DataFrame, target: str) -> None:
@@ -79,3 +60,22 @@ class EncodedDs(Dataset):
         for i in range(len(self)):
             encoded_vals.append(self.encoders[col_name].encode(self.data_frame[col_name]))
         return torch.stack(encoded_vals)
+
+# Abstract over multiple encoded datasources as if they were a single entitiy
+class ConcatedEncodedDs(EncodedDs):
+    def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
+        self.encoded_ds_arr = encoded_ds_arr
+    
+    def __len__(self):
+        return np.sum([len(x) for x in encoded_ds_arr])
+
+    def __getitem__(self, idx):
+        self.encoded_ds_arr[idx//len(self.encoded_ds_arr)][idx%self.encoded_ds_arr]
+
+    def get_column_original_data(self, column_name):
+        encoded_df_arr = [x.get_column_original_data(column_name) for x in self.encoded_ds_arr]
+        return pd.concat(encoded_df_arr)
+
+    def get_encoded_column_data(self, column_name):
+        encoded_df_arr = [x.get_encoded_column_data(column_name) for x in self.encoded_ds_arr]
+        return torch.stack(encoded_df_arr)
