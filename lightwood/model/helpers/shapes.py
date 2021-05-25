@@ -1,6 +1,6 @@
 import math
 
-from lightwood.logger import log
+from lightwood.helpers.log import log
 
 
 def funnel(in_size, out_size, depth):
