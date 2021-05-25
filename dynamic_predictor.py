@@ -1,11 +1,11 @@
 
 from lightwood.data import splitter
-from lightwood.data import cleaner
 from lightwood.model import LightGBMMixer
+from lightwood.data import cleaner
 from lightwood.encoder import NumericEncoder
+from lightwood.encoder import CategoricalAutoEncoder
 from lightwood.encoder import DatetimeEncoder
 from lightwood.model import Nn
-from lightwood.encoder import CategoricalAutoEncoder
 from lightwood.ensemble import BestOf
 import pandas as pd
 from mindsdb_datasources import DataSource
@@ -51,7 +51,7 @@ class Predictor():
 			else:
 				encoder.prepare(pd.concat(folds[0:nfolds])[col_name])
 
-		encoded_folds = lightwood.encode(self.encoders, folds)
+		encoded_folds = lightwood.encode(self.encoders, folds, self.target)
 
 		self.models = [Nn(), LightGBMMixer()]
 		for model in self.models:
