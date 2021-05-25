@@ -24,8 +24,6 @@ class EncodedDs(Dataset):
         self.target = target
         self.cache_encoded = True
         self.cache = [None] * len(self.data_frame)
-        
-        return ds
 
     def __len__(self):
         """
