@@ -1,3 +1,4 @@
+from mindsdb_datasources import DataSource
 import pandas as pd
 
 
