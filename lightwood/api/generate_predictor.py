@@ -47,9 +47,9 @@ class Predictor():
 
 		for encoder in self.encoders.values():
 			if encoder.uses_folds:
-				encoder.fit(data[0:nfolds])
+				encoder.prepare(data[0:nfolds])
 			else:
-				encoder.fit(pd.concat(data[0:nfolds]))
+				encoder.prepare(pd.concat(data[0:nfolds]))
 
 		encoded_data = lightwood.encode(self.encoders, data)
 
@@ -57,7 +57,7 @@ class Predictor():
 		for model in self.models:
 			model.fit(encoded_data[0:nfolds], data[0:nfolds])
 
-		self.ensemble = {lightwood_config.output.ensemble}(self.models)
+		self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_data[nfolds], data[nfolds])
 
 		self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_data[nfolds], data[nfolds])
 
