@@ -7,27 +7,27 @@ import random
 import pandas as pd
 
 
+def override_config(lightwood_config: LightwoodConfig, config_override: dict):
+	# TODO: Impl later
+	return lightwood_config
+
+def seed(self):
+	torch.manual_seed(66)
+	torch.backends.cudnn.deterministic = True
+	torch.backends.cudnn.benchmark = False
+	np.random.seed(66)
+	random.seed(66)
+
 class Predictor():
 	def __init__(self, datasource, target):
-		self._seed()
+		seed()
 		self.target = target
-
-	def _seed(self):
-		torch.manual_seed(66)
-		torch.backends.cudnn.deterministic = True
-		torch.backends.cudnn.benchmark = False
-		np.random.seed(66)
-		random.seed(66)
-
-	def override_config(self, config: dict, lightwood_config: LightwoodConfig):
-		# TODO: Impl later
-		return lightwood_config
-
+		
 	def prepare(self, data: DataSource, config_override: dict=None) -> None:
 		type_information = lightwood.data.infer_types(data)
 		statistical_analysis = lightwood.data.statistical_analysis(data, type_information)
 		lightwood_config = lightwood.generate_config(self.target, type_information=type_information, statistical_analysis=statistical_analysis)
-		self.lightwood_config = self.override_config(config, lightwood_config)
+		self.lightwood_config = self.override_config(lightwood_config, config_override)
 
 	def learn(self, data: DataSource) -> None:
 		# Build a Graph from the JSON
