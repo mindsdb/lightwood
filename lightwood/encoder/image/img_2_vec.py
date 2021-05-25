@@ -7,9 +7,9 @@ import torchvision.transforms as transforms
 from PIL import Image, TiffImagePlugin, PngImagePlugin
 import requests
 
-from lightwood.encoders.image.helpers.img_to_vec import Img2Vec
+from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
 from lightwood.constants.lightwood import ENCODER_AIM
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.base import BaseEncoder
 
 
 class Img2VecEncoder(BaseEncoder):

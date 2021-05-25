@@ -1,1 +1,1 @@
-from lightwood.encoders.datetime.datetime import DatetimeEncoder
+from lightwood.encoder.datetime.datetime import DatetimeEncoder

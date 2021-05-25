@@ -4,8 +4,8 @@ import torch
 import unittest
 
 from lightwood.helpers.device import get_devices
-from lightwood.encoders.time_series import TimeSeriesEncoder
-from lightwood.encoders.time_series.helpers.transformer_helpers import TransformerEncoder, len_to_mask, get_chunk
+from lightwood.encoder.time_series import TimeSeriesEncoder
+from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, len_to_mask, get_chunk
 
 
 class TestTransformerEncoder(unittest.TestCase):

@@ -5,7 +5,7 @@ import string
 
 from sklearn.metrics import accuracy_score
 
-from lightwood.encoders.categorical.multihot import MultiHotEncoder
+from lightwood.encoder.categorical.multihot import MultiHotEncoder
 
 
 class TestMultiHotEncoder(unittest.TestCase):

@@ -1,6 +1,6 @@
 import unittest
 
-from lightwood.encoders.image.img_2_vec import Img2VecEncoder
+from lightwood.encoder.image.img_2_vec import Img2VecEncoder
 
 class TestDataSource(unittest.TestCase):
 

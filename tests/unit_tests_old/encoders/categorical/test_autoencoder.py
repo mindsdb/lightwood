@@ -1,5 +1,5 @@
 import unittest
-from lightwood.encoders.categorical import CategoricalAutoEncoder
+from lightwood.encoder.categorical import CategoricalAutoEncoder
 import string
 import random
 import logging

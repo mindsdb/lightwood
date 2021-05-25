@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torch.cuda.amp import GradScaler
 
 from lightwood.logger import log
-from lightwood.encoders import NumericEncoder
+from lightwood.encoder import NumericEncoder
 from lightwood.mixers import BaseMixer
 from lightwood.config.config import CONFIG
 from lightwood.helpers.torch import LightwoodAutocast

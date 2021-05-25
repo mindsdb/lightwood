@@ -3,7 +3,7 @@ import sys
 
 import torch
 import numpy as np
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.base import BaseEncoder
 from lightwood.logger import log
 
 

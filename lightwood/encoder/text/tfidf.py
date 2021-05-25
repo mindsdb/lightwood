@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
 from lightwood.constants.lightwood import ENCODER_AIM
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.base import BaseEncoder
 
 
 class TfidfEncoder(BaseEncoder):

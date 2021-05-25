@@ -1,8 +1,8 @@
 import torch
 import numpy as np
 from scipy.special import softmax
-from lightwood.encoders.text.helpers.rnn_helpers import Lang
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.text.helpers.rnn_helpers import Lang
+from lightwood.encoder.base import BaseEncoder
 
 UNCOMMON_WORD = '<UNCOMMON>'
 UNCOMMON_TOKEN = 0

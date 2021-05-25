@@ -1,3 +1,3 @@
-from lightwood.encoders.categorical.onehot import OneHotEncoder
-from lightwood.encoders.categorical.multihot import MultiHotEncoder
-from lightwood.encoders.categorical.autoencoder import CategoricalAutoEncoder
+from lightwood.encoder.categorical.onehot import OneHotEncoder
+from lightwood.encoder.categorical.multihot import MultiHotEncoder
+from lightwood.encoder.categorical.autoencoder import CategoricalAutoEncoder

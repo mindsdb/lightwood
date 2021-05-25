@@ -1,10 +1,10 @@
-from lightwood.encoders.time_series.helpers.common import *
-from lightwood.encoders.time_series.helpers.rnn_helpers import *
-from lightwood.encoders.time_series.helpers.transformer_helpers import *
+from lightwood.encoder.time_series.helpers.common import *
+from lightwood.encoder.time_series.helpers.rnn_helpers import *
+from lightwood.encoder.time_series.helpers.transformer_helpers import *
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.encoders.base import BaseEncoder
-from lightwood.encoders.datetime import DatetimeEncoder
+from lightwood.encoder.base import BaseEncoder
+from lightwood.encoder.datetime import DatetimeEncoder
 from lightwood.helpers.device import get_devices
 
 import torch

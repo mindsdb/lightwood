@@ -1,8 +1,8 @@
 import unittest
 
-from lightwood.encoders.time_series import TimeSeriesEncoder
-from lightwood.encoders.time_series.helpers.common import *
-from lightwood.encoders.time_series.helpers.rnn_helpers import *
+from lightwood.encoder.time_series import TimeSeriesEncoder
+from lightwood.encoder.time_series.helpers.common import *
+from lightwood.encoder.time_series.helpers.rnn_helpers import *
 
 
 class TestRnnEncoder(unittest.TestCase):

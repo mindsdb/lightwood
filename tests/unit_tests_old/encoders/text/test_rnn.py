@@ -1,5 +1,5 @@
 import unittest
-from lightwood.encoders.text import RnnEncoder
+from lightwood.encoder.text import RnnEncoder
 
 
 

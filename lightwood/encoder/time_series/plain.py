@@ -1,8 +1,8 @@
 import torch
 
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.base import BaseEncoder
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-from lightwood.encoders.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
+from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
 
 
 class TimeSeriesPlainEncoder(BaseEncoder):

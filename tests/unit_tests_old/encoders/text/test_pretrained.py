@@ -2,8 +2,8 @@ import unittest
 import random
 import torch
 from sklearn.metrics import r2_score
-from lightwood.encoders.numeric import NumericEncoder
-from lightwood.encoders.text import PretrainedLang
+from lightwood.encoder.numeric import NumericEncoder
+from lightwood.encoder.text import PretrainedLang
 from lightwood import COLUMN_DATA_TYPES
 
 

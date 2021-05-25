@@ -12,7 +12,7 @@ from lightwood.config.config import CONFIG
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 from lightwood.logger import log
-from lightwood.encoders import *
+from lightwood.encoder import *
 
 
 class Predictor:
