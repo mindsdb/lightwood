@@ -371,12 +371,10 @@ class DataSource(Dataset):
         input_encoder_training_data = {'targets': [], 'previous': []}
 
         # handle time series previous target columns
-        previous_cols = []
         for config in self.config['input_features']:
             column_name = config['name']
             if column_name.startswith('__mdb_ts_previous_'):
                 column_data = self.get_column_original_data(column_name)
-                previous_cols.append(column_name)
                 col_info = {'data': column_data,
                             'name': column_name,
                             'original_type': config['original_type'],
