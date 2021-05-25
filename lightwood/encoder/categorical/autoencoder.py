@@ -3,8 +3,8 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from lightwood.mixers.helpers.default_net import DefaultNet
-from lightwood.mixers.helpers.ranger import Ranger
+from lightwood.model.nn import Nn
+from lightwood.model.helpers.ranger import Ranger
 from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym
 from lightwood.encoder.base import BaseEncoder

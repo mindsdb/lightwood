@@ -21,11 +21,20 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
         dtype.rich_text: 'VocabularyEncoder'
     }
 
-    encoder_class = encoder_lookup[col_dtype]
+    encoder_initialization = encoder_lookup[col_dtype]
     if is_target:
         if col_dtype in target_encoder_lookup_override:
-            encoder_class = target_encoder_lookup_override[col_dtype]
-    return encoder_class
+            encoder_initialization = target_encoder_lookup_override[col_dtype]
+
+    encoder_initialization += '('
+
+    # Set arguments for the encoder
+    if 'PretrainedLangEncoder' in encoder_initialization and not is_target:
+        encoder_initialization += f"""output_type={output.dtype}"""
+
+    encoder_initialization += ')'
+
+    return encoder_initialization
 
 def generate_config(target: str, type_information: TypeInformation, statistical_analysis: StatisticalAnalysis) -> LightwoodConfig:
 
@@ -41,7 +50,7 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
     for col_name, col_dtype in type_information.dtypes.items():
         if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
                 feature = Feature()
-                feature.name = name
+                feature.name = col_name
                 feature.dtype = dtype
                 feature.encoder = lookup_encoder(col_dtype, False, output)
                 lightwood_config.features[col_name] = feature
@@ -63,8 +72,8 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
     ]
 
     for feature in lightwood_config.features.values():
-        encoder_class = feature.encoder.split('(')[0]
-        lightwood_config.imports.append(f'from lightwood.encoder import {encoder_class}')
+        encoder_initialization = feature.encoder.split('(')[0]
+        lightwood_config.imports.append(f'from lightwood.encoder import {encoder_initialization}')
 
     lightwood_config.imports = list(set(lightwood_config.imports))
     return lightwood_config
