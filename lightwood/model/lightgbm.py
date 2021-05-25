@@ -3,14 +3,13 @@ import optuna.integration.lightgbm as lgb
 import lightgbm
 import optuna
 import torch
-import logging
 import time
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
-from lightwood.model import BaseMixer
 from sklearn.preprocessing import OrdinalEncoder
-
+from lightwood.helpers.log import log
+from lightwood.model.base import BaseModel
 
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
@@ -26,7 +25,7 @@ def check_gpu_support():
     except Exception as e:
         return False
 
-class LightGBMMixer(BaseMixer):
+class LightGBMMixer(BaseModel):
     def __init__(self, stop_training_after_seconds=None, grid_search=False):
         super().__init__()
         self.models = {}
@@ -87,7 +86,7 @@ class LightGBMMixer(BaseMixer):
         for col_name in train_ds.output_feature_names:
             dtype = next(item for item in train_ds.output_features if item["name"] == col_name)['type']
             if dtype not in [COLUMN_DATA_TYPES.NUMERIC, COLUMN_DATA_TYPES.CATEGORICAL]:
-                logging.info('cannot support {dtype} in lightgbm'.format(dtype=dtype))
+                log.info('cannot support {dtype} in lightgbm'.format(dtype=dtype))
                 continue
             else:
                 objective = 'regression' if dtype == COLUMN_DATA_TYPES.NUMERIC else 'multiclass'
@@ -116,7 +115,7 @@ class LightGBMMixer(BaseMixer):
                 bst = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
                 end = time.time()
                 seconds_for_one_iteration = max(0.1, end - start)
-                logging.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
+                log.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
                 max_itt = int(self.stop_training_after_seconds / seconds_for_one_iteration)
                 num_iterations = max(1, min(num_iterations, max_itt))
                 # Turn on grid search if training doesn't take too long using it
@@ -127,7 +126,7 @@ class LightGBMMixer(BaseMixer):
             train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
             validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
             model = lgb if self.grid_search else lightgbm
-            logging.info(f'Training GBM ({model}) with {num_iterations} iterations given {self.stop_training_after_seconds} seconds constraint')
+            log.info(f'Training GBM ({model}) with {num_iterations} iterations given {self.stop_training_after_seconds} seconds constraint')
             params['num_iterations'] = num_iterations
             bst = model.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
 

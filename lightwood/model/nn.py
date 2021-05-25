@@ -8,9 +8,9 @@ import numpy as np
 from torch.utils.data import DataLoader
 from torch.cuda.amp import GradScaler
 
-from lightwood.logger import log
-from lightwood.encoders import NumericEncoder
-from lightwood.model import BaseMixer
+from lightwood.helpers.log import log
+from lightwood.encoder import NumericEncoder
+from lightwood.model.base import BaseModel
 from lightwood.config.config import CONFIG
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
@@ -21,7 +21,7 @@ from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 
 
-class Nn(BaseMixer):
+class Nn(BaseModel):
 
     def __init__(self,
                  selfaware=False,
