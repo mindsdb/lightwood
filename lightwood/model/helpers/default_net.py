@@ -6,7 +6,7 @@ from lightwood.model.helpers.shapes import *
 from lightwood.model.helpers.plinear import PLinear
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
-from lightwood.logger import log
+from lightwood.helpers.log import log
 
 
 class DefaultNet(torch.nn.Module):
