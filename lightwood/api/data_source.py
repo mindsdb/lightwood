@@ -413,7 +413,6 @@ class DataSource(Dataset):
                                                             training_data=input_encoder_training_data)
             encoders[column_name] = encoder_instance
 
-            # if column_name not in previous_cols:
             if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
                 for d in input_encoder_training_data['previous']:
                     try:
