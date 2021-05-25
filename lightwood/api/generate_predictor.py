@@ -11,7 +11,7 @@ def override_config(lightwood_config: LightwoodConfig, config_override: dict):
 	# TODO: Impl later
 	return lightwood_config
 
-def seed(self):
+def seed():
 	torch.manual_seed(66)
 	torch.backends.cudnn.deterministic = True
 	torch.backends.cudnn.benchmark = False
@@ -22,12 +22,12 @@ class Predictor():
 	def __init__(self, datasource, target):
 		seed()
 		self.target = target
-		
+
 	def prepare(self, data: DataSource, config_override: dict=None) -> None:
 		type_information = lightwood.data.infer_types(data)
 		statistical_analysis = lightwood.data.statistical_analysis(data, type_information)
 		lightwood_config = lightwood.generate_config(self.target, type_information=type_information, statistical_analysis=statistical_analysis)
-		self.lightwood_config = self.override_config(lightwood_config, config_override)
+		self.lightwood_config = override_config(lightwood_config, config_override)
 
 	def learn(self, data: DataSource) -> None:
 		# Build a Graph from the JSON
