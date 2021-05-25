@@ -19,7 +19,10 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
 	return f"""
 {import_code}
 import pandas as pd
-
+from mindsdb_datasources import DataSource
+import torch
+import numpy as np
+import random
 
 class Predictor():
 	def __init__(self):
@@ -27,11 +30,11 @@ class Predictor():
 		self.target = {lightwood_config.output.name}
 
 	def seed(self):
-		torch.manual_seed(66)
+		torch.manual_seed(420)
 		torch.backends.cudnn.deterministic = True
 		torch.backends.cudnn.benchmark = False
-		np.random.seed(66)
-		random.seed(66)
+		np.random.seed(420)
+		random.seed(420)
 
 	def learn(self, data: DataSource) -> None:
 		# Build a Graph from the JSON
@@ -59,7 +62,8 @@ class Predictor():
 
 		self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_data[nfolds], data[nfolds])
 
-		self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_data[nfolds], data[nfolds])
+		# Add back when analysis works
+		#self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_data[nfolds], data[nfolds])
 
 	def predict(self, data: DataSource) -> pd.DataFrame:
 		encoded_data = lightwood.encode(self.encoders, data)

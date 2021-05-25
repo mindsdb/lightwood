@@ -1,13 +1,17 @@
 
-from lightwood.encoder import DatetimeEncoder
-from lightwood.model import LightGBM
-from lightwood.data import cleaner
-from lightwood.encoder import NumericEncoder
-from lightwood.analysis import model_analyzer
-from lightwood.data import splitter
-from lightwood.model import Nn
-from lightwood.encoder import CategoricalAutoEncoder
 from lightwood.ensemble import BestOf
+from lightwood.model import Nn
+from lightwood.encoder import DatetimeEncoder
+from lightwood.data import cleaner
+from lightwood.encoder import CategoricalAutoEncoder
+from lightwood.data import splitter
+from lightwood.encoder import NumericEncoder
+from lightwood.model import LightGBM
+import pandas as pd
+from mindsdb_datasources import DataSource
+import torch
+import numpy as np
+
 
 class Predictor():
 	def __init__(self):
@@ -49,7 +53,10 @@ class Predictor():
 		nfolds = len(data)
 
 		for encoder in self.encoders.values():
-			self.encoders.fit(data[0:nfolds])
+			if encoder.uses_folds:
+				encoder.prepare(data[0:nfolds])
+			else:
+				encoder.prepare(pd.concat(data[0:nfolds]))
 
 		encoded_data = lightwood.encode(self.encoders, data)
 
@@ -57,9 +64,10 @@ class Predictor():
 		for model in self.models:
 			model.fit(encoded_data[0:nfolds], data[0:nfolds])
 
-		self.ensemble = BestOf(self.models)
+		self.ensemble = BestOf(self.models, encoded_data[nfolds], data[nfolds])
 
-		self.confidence_model, self.predictor_analysis = model_analyzer(self.ensemble, encoded_data[nfolds], data[nfolds])
+		# Add back when analysis works
+		#self.confidence_model, self.predictor_analysis = model_analyzer(self.ensemble, encoded_data[nfolds], data[nfolds])
 
 	def predict(self, data: DataSource) -> pd.DataFrame:
 		encoded_data = lightwood.encode(self.encoders, data)

@@ -17,7 +17,7 @@ class TestBasic(unittest.TestCase):
             with open('dynamic_predictor.py', 'w') as fp:
                 fp.write(predictor_class_str)
 
-            predictor_class = importlib.import_module('dynamic_predictor.Predictor')
+            predictor_class = importlib.import_module('dynamic_predictor').Predictor
             print('Class was evaluated successfully')
 
             predictor = predictor_class()

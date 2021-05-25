@@ -68,7 +68,8 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
         ,'from lightwood.ensemble import BestOf'
         ,'from lightwood.data import cleaner'
         ,'from lightwood.data import splitter'
-        ,'from lightwood.analysis import model_analyzer'
+        # Add back when analysis works
+        #,'from lightwood.analysis import model_analyzer'
     ]
 
     for feature in lightwood_config.features.values():
