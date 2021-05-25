@@ -23,6 +23,7 @@ from mindsdb_datasources import DataSource
 import torch
 import numpy as np
 from lightwood.helpers.seed import seed
+import lightwood
 
 class Predictor():
 	def __init__(self):
