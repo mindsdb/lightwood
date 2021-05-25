@@ -44,7 +44,7 @@ class Predictor():
 
 		# Do all the trainining and the data cleaning/processing
 		data = {lightwood_config.cleaner}(data)
-		data = {lightwood_config.splitter}(data)
+		data = {lightwood_config.splitter}(data, 10)
 		nfolds = len(data)
 
 		for encoder in self.encoders.values():
