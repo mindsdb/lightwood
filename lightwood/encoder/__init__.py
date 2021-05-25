@@ -14,6 +14,10 @@ from lightwood.encoder.time_series.rnn import TimeSeriesEncoder as TsRnnEncoder
 from lightwood.encoder.time_series.plain import TimeSeriesPlainEncoder
 from lightwood.encoder.categorical.multihot import MultiHotEncoder
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
+from lightwood.helpers.log import log
 
 # Encoders that depend on optiona dependencies
-from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
+try:
+    from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
+except Exception as e:
+    log.info('Unable to import AmplitudeTsEncoder, if you wish to encode audio data please install pydub and initialize lightwood again')
