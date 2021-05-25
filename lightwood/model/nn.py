@@ -11,9 +11,7 @@ from torch.cuda.amp import GradScaler
 from lightwood.helpers.log import log
 from lightwood.encoder import NumericEncoder
 from lightwood.model.base import BaseModel
-from lightwood.config.config import CONFIG
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.model.helpers.default_net import DefaultNet
 from lightwood.model.helpers.ar_net import ArNet
 from lightwood.model.helpers.selfaware import SelfAware
@@ -29,7 +27,7 @@ class Nn(BaseModel):
                  eval_every_x_epochs=20,
                  dropout_p=0.0,
                  stop_training_after_seconds=None,
-                 stop_model_building_after_seconds=None,
+                 stop_model_bencodersuilding_after_seconds=None,
                  param_optimizer=None):
         """
         :param selfaware: bool

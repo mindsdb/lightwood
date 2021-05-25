@@ -2,9 +2,8 @@ import math
 import torch
 from functools import reduce
 
-from lightwood.config.config import CONFIG
-from lightwood.mixers.helpers.shapes import *
-from lightwood.mixers.helpers.plinear import PLinear
+from lightwood.model.helpers.shapes import *
+from lightwood.model.helpers.plinear import PLinear
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.logger import log

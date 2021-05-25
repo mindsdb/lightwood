@@ -5,7 +5,6 @@ import optuna
 import torch
 import time
 
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 from sklearn.preprocessing import OrdinalEncoder
 from lightwood.helpers.log import log
