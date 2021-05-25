@@ -18,7 +18,7 @@ def lookup_encoder(col_dtype: dtype, is_target: bool):
     }
 
     target_encoder_lookup_override = {
-        ColumnDataTypes.rich_text: 'VocabularyEncoder()'
+        dtype.rich_text: 'VocabularyEncoder()'
     }
 
     encoder_class = encoder_lookup[col_dtype]
@@ -38,7 +38,7 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
 
     lightwood_config = LightwoodConfig()
     for col_name, col_dtype in type_information.dtypes.items():
-        if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, invalid.empty) and col_name != target:
+        if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
             lightwood_config.features[col_name] = create_feature(col_name, col_dtype)
 
     output = Output()
@@ -53,24 +53,25 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
     lightwood_config.splitter = 'splitter'
     lightwood_config.analyzer = 'model_analyzer'
 
-    lightwood_config.imports = """
-        from lightwood.encoders import (
-            NumericEncoder,
-            CategoricalAutoEncoder,
-            MultiHotEncoder,
-            DatetimeEncoder,
-            Img2VecEncoder,
-            TsRnnEncoder,
-            ShortTextEncoder,
-            VocabularyEncoder,
-            PretrainedLang,
-            OneHotEncoder,
-            BaseEncoder
-        )
-        from lightwood.model import LightGBM, Nn, BaseModel
-        from lightwood.ensemble import BestOf, BaseEnsemble
-        from lightwood.data import cleaner, splitter
-        from lightwood.analysis import model_analyzer
-    """
-
+    # @TODO: Only import the minimal amount of things we need
+    lightwood_config.imports = [
+        'from lightwood.encoders import NumericEncoder'
+        ,'from lightwood.encoders import CategoricalAutoEncoder'
+        ,'from lightwood.encoders import MultiHotEncoder'
+        ,'from lightwood.encoders import DatetimeEncoder'
+        ,'from lightwood.encoders import Img2VecEncoder'
+        ,'from lightwood.encoders import TsRnnEncoder'
+        ,'from lightwood.encoders import ShortTextEncoder'
+        ,'from lightwood.encoders import VocabularyEncoder'
+        ,'from lightwood.encoders import PretrainedLang'
+        ,'from lightwood.encoders import OneHotEncoder'
+        ,'from lightwood.encoders import BaseEncoder'
+        ,'from lightwood.model import LightGBM'
+        ,'from lightwood.model import Nn'
+        ,'from lightwood.model import BaseModel'
+        ,'from lightwood.ensemble import BestOf'
+        ,'from lightwood.data import cleaner'
+        ,'from lightwood.data import splitter'
+        ,'from lightwood.analysis import model_analyzer'
+    ]
     return lightwood_config
