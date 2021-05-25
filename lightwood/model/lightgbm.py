@@ -8,7 +8,7 @@ import time
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
-from lightwood.mixers import BaseMixer
+from lightwood.model import BaseMixer
 from sklearn.preprocessing import OrdinalEncoder
 
 
