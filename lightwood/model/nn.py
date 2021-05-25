@@ -10,15 +10,15 @@ from torch.cuda.amp import GradScaler
 
 from lightwood.logger import log
 from lightwood.encoders import NumericEncoder
-from lightwood.mixers import BaseMixer
+from lightwood.model import BaseMixer
 from lightwood.config.config import CONFIG
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
-from lightwood.mixers.helpers.default_net import DefaultNet
-from lightwood.mixers.helpers.ar_net import ArNet
-from lightwood.mixers.helpers.selfaware import SelfAware
-from lightwood.mixers.helpers.ranger import Ranger
-from lightwood.mixers.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
+from lightwood.model.helpers.default_net import DefaultNet
+from lightwood.model.helpers.ar_net import ArNet
+from lightwood.model.helpers.selfaware import SelfAware
+from lightwood.model.helpers.ranger import Ranger
+from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 
 
 class Nn(BaseMixer):
