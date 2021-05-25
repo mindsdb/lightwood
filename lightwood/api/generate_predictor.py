@@ -27,7 +27,7 @@ import random
 class Predictor():
 	def __init__(self):
 		self.seed()
-		self.target = {lightwood_config.output.name}
+		self.target = '{lightwood_config.output.name}'
 
 	def seed(self):
 		torch.manual_seed(420)
@@ -41,7 +41,6 @@ class Predictor():
 		# Using eval is a bit ugly and we could replace it with factories, personally I'm against this, as it ads pointless complexity
 		self.encoders = {encoder_code}
 
-		self.model = self.lightwood_config['output']['model']
 
 		# Do all the trainining and the data cleaning/processing
 		data = {lightwood_config.cleaner}(data)
