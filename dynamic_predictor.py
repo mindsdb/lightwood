@@ -1,17 +1,18 @@
 
-from lightwood.encoder import DatetimeEncoder
-from lightwood.data import cleaner
 from lightwood.data import splitter
+from lightwood.data import cleaner
 from lightwood.model import LightGBMMixer
-from lightwood.encoder import CategoricalAutoEncoder
-from lightwood.model import Nn
 from lightwood.encoder import NumericEncoder
+from lightwood.encoder import DatetimeEncoder
+from lightwood.model import Nn
+from lightwood.encoder import CategoricalAutoEncoder
 from lightwood.ensemble import BestOf
 import pandas as pd
 from mindsdb_datasources import DataSource
 import torch
 import numpy as np
 from lightwood.helpers.seed import seed
+import lightwood
 
 class Predictor():
 	def __init__(self):

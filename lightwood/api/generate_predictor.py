@@ -47,7 +47,7 @@ class Predictor():
 			else:
 				encoder.prepare(pd.concat(folds[0:nfolds])[col_name])
 
-		encoded_folds = lightwood.encode(self.encoders, folds)
+		encoded_folds = lightwood.encode(self.encoders, folds, self.target)
 
 		self.models = {lightwood_config.output.models}
 		for model in self.models:
