@@ -1,7 +1,6 @@
 import torch
 import math
 
-from lightwood.config.config import CONFIG
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
 

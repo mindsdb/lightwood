@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from lightwood.mixers.helpers.default_net import DefaultNet
+from lightwood.model.helpers.default_net import DefaultNet
 from lightwood.helpers.torch import LightwoodAutocast
 from itertools import chain
 
