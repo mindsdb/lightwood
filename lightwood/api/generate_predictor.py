@@ -22,19 +22,12 @@ import pandas as pd
 from mindsdb_datasources import DataSource
 import torch
 import numpy as np
-import random
+from lightwood.helpers.seed import seed
 
 class Predictor():
 	def __init__(self):
-		self.seed()
+		seed()
 		self.target = '{lightwood_config.output.name}'
-
-	def seed(self):
-		torch.manual_seed(420)
-		torch.backends.cudnn.deterministic = True
-		torch.backends.cudnn.benchmark = False
-		np.random.seed(420)
-		random.seed(420)
 
 	def learn(self, data: DataSource) -> None:
 		# Build a Graph from the JSON

@@ -1,29 +1,22 @@
 
-from lightwood.data import splitter
-from lightwood.model import LightGBM
-from lightwood.encoder import NumericEncoder
-from lightwood.encoder import DatetimeEncoder
 from lightwood.encoder import CategoricalAutoEncoder
 from lightwood.model import Nn
-from lightwood.data import cleaner
+from lightwood.encoder import NumericEncoder
+from lightwood.data import splitter
+from lightwood.encoder import DatetimeEncoder
 from lightwood.ensemble import BestOf
+from lightwood.model import LightGBM
+from lightwood.data import cleaner
 import pandas as pd
 from mindsdb_datasources import DataSource
 import torch
 import numpy as np
-import random
+from lightwood.helpers.seed import seed
 
 class Predictor():
 	def __init__(self):
-		self.seed()
+		seed()
 		self.target = 'income'
-
-	def seed(self):
-		torch.manual_seed(420)
-		torch.backends.cudnn.deterministic = True
-		torch.backends.cudnn.benchmark = False
-		np.random.seed(420)
-		random.seed(420)
 
 	def learn(self, data: DataSource) -> None:
 		# Build a Graph from the JSON
