@@ -1,4 +1,4 @@
-from lightwood.model import Model
+from lightwood.model.base import BaseModel
 
 class LightGBM(Model):
     pass

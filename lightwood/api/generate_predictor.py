@@ -35,16 +35,16 @@ class Predictor():
 		self.encoders = {
 			(
 				col_name,
-				eval(col_config['encoder'])
+				col_config['encoder']
 			)
 			for col_name, col_config in
 			self.lightwood_config['features'].items()
 		}
 
-		self.model = eval(self.lightwood_config['output']['model'])
-		self.cleaner = eval(self.lightwood_config['cleaner'])
-		self.splitter = eval(self.lightwood_config['splitter'])
-		self.analyzer = eval(self.lightwood_config['analyzer'])
+		self.model = self.lightwood_config['output']['model']
+		self.cleaner = self.lightwood_config['cleaner']
+		self.splitter = self.lightwood_config['splitter']
+		self.analyzer = self.lightwood_config['analyzer']
 
 		# Do all the trainining and the data cleaning/processing
 		data = self.cleaner(data)
