@@ -1,5 +1,5 @@
 import unittest
-from lightwood.encoders.categorical.onehot import (
+from lightwood.encoder.categorical.onehot import (
     OneHotEncoder,
     UNCOMMON_TOKEN,
     UNCOMMON_WORD

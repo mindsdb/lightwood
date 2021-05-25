@@ -9,7 +9,7 @@ from torch import Tensor
 from lightwood.api.data_source import DataSource
 
 from lightwood.data_schemas.predictor_config import predictor_config_schema
-from lightwood.encoders import NumericEncoder, CategoricalAutoEncoder
+from lightwood.encoder import NumericEncoder, CategoricalAutoEncoder
 
 
 class TestDataSource(TestCase):

@@ -1,6 +1,6 @@
 import unittest
 
-from lightwood.encoders.text.vocab import VocabularyEncoder
+from lightwood.encoder.text.vocab import VocabularyEncoder
 
 
 class TestVocabularyEncoder(unittest.TestCase):

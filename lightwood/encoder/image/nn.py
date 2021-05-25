@@ -2,8 +2,8 @@ import os
 
 import torch
 
-from lightwood.encoders.image.helpers.nn import NnEncoderHelper
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.image.helpers.nn import NnEncoderHelper
+from lightwood.encoder.base import BaseEncoder
 from lightwood.logger import log
 
 

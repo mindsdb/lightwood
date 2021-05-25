@@ -2,7 +2,7 @@ import datetime
 import calendar
 import numpy as np
 import torch
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.base import BaseEncoder
 
 
 class DatetimeEncoder(BaseEncoder):

@@ -1,12 +1,12 @@
 
-from lightwood.encoders import DatetimeEncoder
+from lightwood.encoder import DatetimeEncoder
 from lightwood.model import LightGBM
 from lightwood.data import cleaner
-from lightwood.encoders import NumericEncoder
+from lightwood.encoder import NumericEncoder
 from lightwood.analysis import model_analyzer
 from lightwood.data import splitter
 from lightwood.model import Nn
-from lightwood.encoders import CategoricalAutoEncoder
+from lightwood.encoder import CategoricalAutoEncoder
 from lightwood.ensemble import BestOf
 
 class Predictor():

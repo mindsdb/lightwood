@@ -1,1 +1,1 @@
-from lightwood.encoders.audio.amplitude_ts import AmplitudeTsEncoder
+from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder

@@ -65,7 +65,7 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
 
     for feature in lightwood_config.features.values():
         encoder_class = feature.encoder.split('(')[0]
-        lightwood_config.imports.append(f'from lightwood.encoders import {encoder_class}')
+        lightwood_config.imports.append(f'from lightwood.encoder import {encoder_class}')
 
     lightwood_config.imports = list(set(lightwood_config.imports))
     return lightwood_config

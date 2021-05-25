@@ -37,11 +37,11 @@ of the output embedding
 import torch
 from torch.utils.data import DataLoader
 
-from lightwood.encoders.text.helpers.pretrained_helpers import TextEmbed
+from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
 
 from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.base import BaseEncoder
 from lightwood.logger import log
 from lightwood.helpers.torch import LightwoodAutocast
 

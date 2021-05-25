@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from lightwood.encoders.numeric import NumericEncoder
-from lightwood.encoders.numeric import TsNumericEncoder
+from lightwood.encoder.numeric import NumericEncoder
+from lightwood.encoder.numeric import TsNumericEncoder
 
 
 class TestNumericEncoder(unittest.TestCase):

@@ -3,7 +3,7 @@ import sys
 
 import torch
 import numpy as np
-from lightwood.encoders.numeric import NumericEncoder
+from lightwood.encoder.numeric import NumericEncoder
 from lightwood.logger import log
 
 

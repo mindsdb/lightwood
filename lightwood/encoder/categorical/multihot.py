@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from lightwood.encoders import BaseEncoder
+from lightwood.encoder import BaseEncoder
 from sklearn.preprocessing import MultiLabelBinarizer
 
 

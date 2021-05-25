@@ -1,7 +1,7 @@
 import unittest
 import random
 import string
-from lightwood.encoders.text import TfidfEncoder
+from lightwood.encoder.text import TfidfEncoder
 
 
 class TestTfidfEncoder(unittest.TestCase):

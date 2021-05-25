@@ -1,7 +1,7 @@
 import torch
 from transformers import DistilBertTokenizer
 
-from lightwood.encoders.base import BaseEncoder
+from lightwood.encoder.base import BaseEncoder
 
 
 class VocabularyEncoder(BaseEncoder):

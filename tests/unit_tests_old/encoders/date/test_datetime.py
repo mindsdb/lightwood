@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 import numpy as np
 from dateutil.parser import parse as parse_datetime
-from lightwood.encoders.datetime.datetime import DatetimeEncoder
+from lightwood.encoder.datetime.datetime import DatetimeEncoder
 
 
 class TestDatetimeEncoder(unittest.TestCase):
