@@ -12,8 +12,26 @@ from lightwood.encoders.time_series.helpers.common import generate_target_group_
 from lightwood.encoder.base import BaseEncoder
 
 
+class ConcatedEncodedDs(EncodedDs):
+    def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
+        self.encoded_ds_arr = encoded_ds_arr
+    
+    def __len__(self):
+        return np.sum([len(x) for x in encoded_ds_arr])
+
+    def __getitem__(self, idx):
+        self.encoded_ds_arr[idx//len(self.encoded_ds_arr)][idx%self.encoded_ds_arr]
+
+    def get_column_original_data(self, column_name):
+        encoded_df_arr = [x.get_column_original_data(column_name) for x in self.encoded_ds_arr]
+        return pd.concat(encoded_df_arr)
+
+    def get_encoded_column_data(self, column_name):
+        encoded_df_arr = [x.get_encoded_column_data(column_name) for x in self.encoded_ds_arr]
+        return torch.stack(encoded_df_arr)
+
 class EncodedDs(Dataset):
-    def __init__(self, encoders: List[BaseEncoder], data_frame: pd.DataFrame, target: str):
+    def __init__(self, encoders: List[BaseEncoder], data_frame: pd.DataFrame, target: str) -> None:
         """
         Create a lightwood datasource from the data frame
         :param data_frame:
