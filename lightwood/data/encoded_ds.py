@@ -12,6 +12,7 @@ from lightwood.encoders.time_series.helpers.common import generate_target_group_
 from lightwood.encoder.base import BaseEncoder
 
 
+# Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
         self.encoded_ds_arr = encoded_ds_arr
