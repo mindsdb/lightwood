@@ -1,12 +1,12 @@
 
-from lightwood.encoder import CategoricalAutoEncoder
-from lightwood.model import Nn
-from lightwood.encoder import NumericEncoder
 from lightwood.data import splitter
 from lightwood.encoder import DatetimeEncoder
-from lightwood.ensemble import BestOf
 from lightwood.model import LightGBM
+from lightwood.encoder import NumericEncoder
 from lightwood.data import cleaner
+from lightwood.encoder import CategoricalAutoEncoder
+from lightwood.model import Nn
+from lightwood.ensemble import BestOf
 import pandas as pd
 from mindsdb_datasources import DataSource
 import torch
