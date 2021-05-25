@@ -1,7 +1,7 @@
 from lightwood.encoder.time_series.helpers.common import *
 from lightwood.encoder.time_series.helpers.rnn_helpers import *
 from lightwood.encoder.time_series.helpers.transformer_helpers import *
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.api import dtype
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoder.base import BaseEncoder
 from lightwood.encoder.datetime import DatetimeEncoder
@@ -54,13 +54,13 @@ class TimeSeriesEncoder(BaseEncoder):
                 self._group_combinations = t['group_combinations']
 
                 # categorical normalizers
-                if t['original_type'] == COLUMN_DATA_TYPES.CATEGORICAL:
-                    self._target_type = COLUMN_DATA_TYPES.CATEGORICAL
+                if t['original_type'] == dtype.categorical:
+                    self._target_type = dtype.categorical
                     total_dims += len(t['normalizers']['__default'].scaler.categories_[0])
 
                 # numerical normalizers
                 else:
-                    self._target_type = COLUMN_DATA_TYPES.NUMERIC
+                    self._target_type in (dtype.integer, dtype.float)
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
@@ -140,7 +140,7 @@ class TimeSeriesEncoder(BaseEncoder):
         if previous_target_data is not None and len(previous_target_data) > 0:
             normalized_tensors = []
             for target_dict in previous_target_data:
-                if target_dict['original_type'] == COLUMN_DATA_TYPES.NUMERIC:
+                if target_dict['original_type'] in (dtype.integer, dtype.float):
                     data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
                     for group_name, normalizer in target_dict['normalizers'].items():
                         idxs, subset = get_group_matches(target_dict, normalizer.combination, normalizer.keys)
@@ -283,7 +283,7 @@ class TimeSeriesEncoder(BaseEncoder):
         if previous_target_data is not None and len(previous_target_data) > 0:
             for i, prev_col_data in enumerate(previous_target_data):
                 # normalize numerical target per group-by
-                if self._target_type == COLUMN_DATA_TYPES.NUMERIC:
+                if self._target_type in (dtype.integer, dtype.float):
                     tensor = torch.zeros((len(prev_col_data['data']), len(prev_col_data['data'][0]), 1)).to(self.device)
                     all_idxs = set(range(len(prev_col_data['data'])))
                     for combination in [c for c in self._group_combinations if c != '__default']:

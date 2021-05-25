@@ -1,7 +1,7 @@
 """
 2021.03.05
 
-Basic helper functions for PretrainedLang
+Basic helper functions for PretrainedLangEncoder
 """
 import torch
 from transformers import AdamW

@@ -4,7 +4,7 @@ import sys
 import torch
 import numpy as np
 from lightwood.encoder.numeric import NumericEncoder
-from lightwood.logger import log
+from lightwood.helpers.log import log
 
 
 class TsNumericEncoder(NumericEncoder):

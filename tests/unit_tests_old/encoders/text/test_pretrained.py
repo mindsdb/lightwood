@@ -3,11 +3,11 @@ import random
 import torch
 from sklearn.metrics import r2_score
 from lightwood.encoder.numeric import NumericEncoder
-from lightwood.encoder.text import PretrainedLang
+from lightwood.encoder.text import PretrainedLangEncoder
 from lightwood import COLUMN_DATA_TYPES
 
 
-class TestPretrainedLang(unittest.TestCase):
+class TestPretrainedLangEncoder(unittest.TestCase):
     def test_encode_and_decode(self):
         random.seed(2)
         priming_data = []
@@ -30,7 +30,7 @@ class TestPretrainedLang(unittest.TestCase):
         encoded_data_1 = output_1_encoder.encode(primting_target)
         encoded_data_1 = encoded_data_1.tolist()
 
-        enc = PretrainedLang()
+        enc = PretrainedLangEncoder()
 
         enc.prepare(priming_data,
                             training_data={'targets': [

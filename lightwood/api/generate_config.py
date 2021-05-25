@@ -2,23 +2,23 @@ from lightwood.api import LightwoodConfig, TypeInformation, StatisticalAnalysis,
 from lightwood.api import dtype
 
 
-def lookup_encoder(col_dtype: dtype, is_target: bool):
+def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
     encoder_lookup = {
-        dtype.integer: 'NumericEncoder()',
-        dtype.float: 'NumericEncoder()',
-        dtype.binary: 'OneHotEncoder()',
-        dtype.categorical: 'CategoricalAutoEncoder()',
-        dtype.tags: 'MultiHotEncoder()',
-        dtype.date: 'DatetimeEncoder()',
-        dtype.datetime: 'DatetimeEncoder()',
-        dtype.image: 'Img2VecEncoder()',
-        dtype.rich_text: 'PretrainedLang()',
-        dtype.short_text: 'ShortTextEncoder()',
-        dtype.array: 'TsRnnEncoder()',
+        dtype.integer: 'NumericEncoder',
+        dtype.float: 'NumericEncoder',
+        dtype.binary: 'OneHotEncoder',
+        dtype.categorical: 'CategoricalAutoEncoder',
+        dtype.tags: 'MultiHotEncoder',
+        dtype.date: 'DatetimeEncoder',
+        dtype.datetime: 'DatetimeEncoder',
+        dtype.image: 'Img2VecEncoder',
+        dtype.rich_text: f'PretrainedLangEncoder',
+        dtype.short_text: 'ShortTextEncoder',
+        dtype.array: 'TsRnnEncoder',
     }
 
     target_encoder_lookup_override = {
-        dtype.rich_text: 'VocabularyEncoder()'
+        dtype.rich_text: 'VocabularyEncoder'
     }
 
     encoder_class = encoder_lookup[col_dtype]
@@ -27,27 +27,26 @@ def lookup_encoder(col_dtype: dtype, is_target: bool):
             encoder_class = target_encoder_lookup_override[col_dtype]
     return encoder_class
 
-def create_feature(name: str, col_dtype: dtype) -> Feature:
-    feature = Feature()
-    feature.name = name
-    feature.dtype = dtype
-    feature.encoder = lookup_encoder(col_dtype, False)
-    return feature
-
 def generate_config(target: str, type_information: TypeInformation, statistical_analysis: StatisticalAnalysis) -> LightwoodConfig:
 
     lightwood_config = LightwoodConfig()
-    for col_name, col_dtype in type_information.dtypes.items():
-        if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
-            lightwood_config.features[col_name] = create_feature(col_name, col_dtype)
-
     output = Output()
     output.name = target
     output.dtype = type_information.dtypes[target]
-    output.encoder = lookup_encoder(type_information.dtypes[target], True)
+    output.encoder = lookup_encoder(type_information.dtypes[target], True, output)
     output.models = '[Nn(), LightGBM()]'
     output.ensemble = 'BestOf'
     lightwood_config.output = output
+
+    for col_name, col_dtype in type_information.dtypes.items():
+        if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
+                feature = Feature()
+                feature.name = name
+                feature.dtype = dtype
+                feature.encoder = lookup_encoder(col_dtype, False, output)
+                lightwood_config.features[col_name] = feature
+
+
 
     lightwood_config.cleaner = 'cleaner'
     lightwood_config.splitter = 'splitter'

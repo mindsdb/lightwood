@@ -4,7 +4,7 @@ import torch
 
 from lightwood.encoder.image.helpers.nn import NnEncoderHelper
 from lightwood.encoder.base import BaseEncoder
-from lightwood.logger import log
+from lightwood.helpers.log import log
 
 
 class NnAutoEncoder(BaseEncoder):

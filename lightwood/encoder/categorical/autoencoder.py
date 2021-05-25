@@ -8,7 +8,7 @@ from lightwood.mixers.helpers.ranger import Ranger
 from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym
 from lightwood.encoder.base import BaseEncoder
-from lightwood.logger import log
+from lightwood.helpers.log import log
 
 
 class CategoricalAutoEncoder(BaseEncoder):
