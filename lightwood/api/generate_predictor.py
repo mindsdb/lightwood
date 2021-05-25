@@ -37,20 +37,20 @@ class Predictor():
 
 		# Do all the trainining and the data cleaning/processing
 		data = {lightwood_config.cleaner}(data)
-		data = {lightwood_config.splitter}(data, 10)
+		folds = {lightwood_config.splitter}(data, 10)
 		nfolds = len(data)
 
 		for encoder in self.encoders.values():
 			if encoder.uses_folds:
-				encoder.prepare(data[0:nfolds])
+				encoder.prepare(folds[0:nfolds])
 			else:
-				encoder.prepare(pd.concat(data[0:nfolds]))
+				encoder.prepare(pd.concat(folds[0:nfolds]))
 
-		encoded_data = lightwood.encode(self.encoders, data)
+		encoded_folds = lightwood.encode(self.encoders, folds)
 
 		self.models = {lightwood_config.output.models}
 		for model in self.models:
-			model.fit(encoded_data[0:nfolds], data[0:nfolds])
+			model.fit(encoded_data[0:nfolds], folds[0:nfolds])
 
 		self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_data[nfolds], data[nfolds])
 
@@ -58,8 +58,8 @@ class Predictor():
 		#self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_data[nfolds], data[nfolds])
 
 	def predict(self, data: DataSource) -> pd.DataFrame:
-		encoded_data = lightwood.encode(self.encoders, data)
-		df = self.ensemble(encoded_data)
+		encoded_data = lightwood.encode(self.encoders, [data])[0]
+		df = self.ensemble.predict(encoded_data)
 		return df
 	"""
 
