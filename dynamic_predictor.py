@@ -1,22 +1,13 @@
 
-from lightwood.encoders import NumericEncoder
-from lightwood.encoders import CategoricalAutoEncoder
-from lightwood.encoders import MultiHotEncoder
 from lightwood.encoders import DatetimeEncoder
-from lightwood.encoders import Img2VecEncoder
-from lightwood.encoders import TsRnnEncoder
-from lightwood.encoders import ShortTextEncoder
-from lightwood.encoders import VocabularyEncoder
-from lightwood.encoders import PretrainedLang
-from lightwood.encoders import OneHotEncoder
-from lightwood.encoders import BaseEncoder
 from lightwood.model import LightGBM
-from lightwood.model import Nn
-from lightwood.model import BaseModel
-from lightwood.ensemble import BestOf
 from lightwood.data import cleaner
-from lightwood.data import splitter
+from lightwood.encoders import NumericEncoder
 from lightwood.analysis import model_analyzer
+from lightwood.data import splitter
+from lightwood.model import Nn
+from lightwood.encoders import CategoricalAutoEncoder
+from lightwood.ensemble import BestOf
 
 class Predictor():
 	def __init__(self):

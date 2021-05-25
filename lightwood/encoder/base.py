@@ -8,6 +8,7 @@ class BaseEncoder:
     def __init__(self, is_target=False):
         self.is_target = is_target
         self.prepared = False
+        self.uses_folds = False
 
     # Not all encoders need to be prepared
     def prepare(self, priming_data):
