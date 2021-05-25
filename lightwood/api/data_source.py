@@ -355,7 +355,7 @@ class DataSource(Dataset):
             )
         else:
             # joint column data augmentation for time series
-            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target and '__mdb_ts_previous' not in config['name']:
+            if config['type'] == ColumnDataTypes.TIME_SERIES and not is_target:
                 encoder_instance.prepare(column_data, previous_target_data=training_data['previous'])
             else:
                 encoder_instance.prepare(column_data)
@@ -413,14 +413,14 @@ class DataSource(Dataset):
                                                             training_data=input_encoder_training_data)
             encoders[column_name] = encoder_instance
 
-            if column_name not in previous_cols:
-                if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
-                    for d in input_encoder_training_data['previous']:
-                        try:
-                            if not d['name'] in config['depends_on_column']:
-                                config['depends_on_column'].append(d['name'])
-                        except KeyError:
-                            config['depends_on_column'] = [d['name']]
+            # if column_name not in previous_cols:
+            if config['type'] == ColumnDataTypes.TIME_SERIES and len(input_encoder_training_data['previous']) > 0:
+                for d in input_encoder_training_data['previous']:
+                    try:
+                        if not d['name'] in config['depends_on_column']:
+                            config['depends_on_column'].append(d['name'])
+                    except KeyError:
+                        config['depends_on_column'] = [d['name']]
 
         # train time series output encoder
         for config in self.config['output_features']:
