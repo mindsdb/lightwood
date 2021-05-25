@@ -2,23 +2,14 @@ import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
-from lightwood.constants.lightwood import ENCODER_AIM
 from lightwood.encoder.base import BaseEncoder
 
 
 class TfidfEncoder(BaseEncoder):
-    def __init__(self, is_target=False, aim=ENCODER_AIM.BALANCE):
+    def __init__(self, is_target=False):
         super().__init__(is_target)
-        self.aim = aim
-        if self.aim == ENCODER_AIM.SPEED:
-            self.ngram_range = (1,3)
-            self.max_features = 200
-        elif self.aim == ENCODER_AIM.BALANCE:
-            self.ngram_range = (1,5)
-            self.max_features = 500
-        elif self.aim == ENCODER_AIM.ACCURACY:
-            self.ngram_range = (1,8)
-            self.max_features = None
+        self.ngram_range = (1,5)
+        self.max_features = 500
 
     def prepare(self, priming_data, training_data=None):
         self.tfidf_vectorizer = TfidfVectorizer(ngram_range=self.ngram_range, max_features=self.max_features)
