@@ -3,7 +3,6 @@ import torch.nn as nn
 import torchvision.models as models
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.config.config import CONFIG
 
 
 class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
