@@ -7,7 +7,7 @@ import torch
 
 from lightwood.encoder.time_series.rnn import RnnEncoder
 from lightwood.encoder.base import BaseEncoder
-from lightwood.logger import log
+from lightwood.helpers.log import log
 
 
 class AmplitudeTsEncoder(BaseEncoder):

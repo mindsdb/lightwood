@@ -27,9 +27,9 @@ as the "unknown" label; this is different from the original
 distilbert model. (prior to 2021.03)
 
 TODOs:
-+ Regression 
++ Regression
 + Batch encodes() tokenization step
-+ Look into auto-encoding lower dimensional representations 
++ Look into auto-encoding lower dimensional representations
 of the output embedding
 + Look into regression tuning (will require grad. clipping)
 + Look into tuning to the encoded space of output.
@@ -39,11 +39,11 @@ from torch.utils.data import DataLoader
 
 from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
 
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
 from lightwood.helpers.device import get_devices
 from lightwood.encoder.base import BaseEncoder
-from lightwood.logger import log
+from lightwood.helpers.log import log
 from lightwood.helpers.torch import LightwoodAutocast
+from lightwood.api import dtype
 
 from transformers import (
     DistilBertModel,
@@ -54,7 +54,7 @@ from transformers import (
 )
 
 
-class PretrainedLang(BaseEncoder):
+class PretrainedLangEncoder(BaseEncoder):
     """
     Pretrained language models.
     Option to train on a target encoding of choice.
@@ -81,9 +81,11 @@ class PretrainedLang(BaseEncoder):
         custom_train=True,
         frozen=False,
         epochs=1,
+        output_type=None
     ):
         super().__init__(is_target)
 
+        self.output_type = output_type
         self.name = model_name + " text encoder"
         log.info(self.name)
 
@@ -105,6 +107,7 @@ class PretrainedLang(BaseEncoder):
         self._pretrained_model_name = "distilbert-base-uncased"
 
         self.device, _ = get_devices()
+
 
     def prepare(self, priming_data, training_data=None):
         """
@@ -133,8 +136,8 @@ class PretrainedLang(BaseEncoder):
             self._custom_train
             and output_avail
             and (
-                training_data["targets"][0]["output_type"]
-                == COLUMN_DATA_TYPES.CATEGORICAL
+                self.output_type
+                == dtype.categorical
             )
         ):
             log.info("Training model.")
@@ -302,7 +305,7 @@ class PretrainedLang(BaseEncoder):
         self._model.eval()
 
         encoded_representation = []
-        
+
         with torch.no_grad():
             # Set the weights; this is GPT-2
             for text in column_data:

@@ -13,7 +13,7 @@ from lightwood.encoder.categorical.autoencoder import CategoricalAutoEncoder
 from lightwood.encoder.time_series.rnn import TimeSeriesEncoder as TsRnnEncoder
 from lightwood.encoder.time_series.plain import TimeSeriesPlainEncoder
 from lightwood.encoder.categorical.multihot import MultiHotEncoder
-from lightwood.encoder.text.pretrained import PretrainedLang
+from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 
 # Encoders that depend on optiona dependencies
 from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder

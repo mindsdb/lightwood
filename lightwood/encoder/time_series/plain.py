@@ -1,7 +1,7 @@
 import torch
 
 from lightwood.encoder.base import BaseEncoder
-from lightwood.constants.lightwood import COLUMN_DATA_TYPES
+from lightwood.api import dtype
 from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
 
 
@@ -19,7 +19,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        if self.original_type == COLUMN_DATA_TYPES.CATEGORICAL:
+        if self.original_type == dtype.categorical:
             self._normalizer = CatNormalizer(encoder_class='ordinal')
         else:
             self._normalizer = MinMaxNormalizer()

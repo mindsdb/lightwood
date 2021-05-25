@@ -5,7 +5,7 @@ import random
 import logging
 from sklearn.metrics import accuracy_score
 
-from lightwood.logger import log
+from lightwood.helpers.log import log
 
 
 class TestAutoencoder(unittest.TestCase):
