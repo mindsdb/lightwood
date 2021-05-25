@@ -8,6 +8,7 @@ import pandas as pd
 
 
 def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
+	print(f'\n\n{repr(lightwood_config)}\n\n')
 	feature_code_arr = []
 	for feature in lightwood_config.features.values():
 		feature_code_arr.append(f"""'{feature.name}':{feature.encoder}""")
@@ -17,6 +18,8 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
 
 	return f"""
 {import_code}
+import pandas as pd
+
 
 class Predictor():
 	def __init__(self):
@@ -43,7 +46,10 @@ class Predictor():
 		nfolds = len(data)
 
 		for encoder in self.encoders.values():
-			self.encoders.fit(data[0:nfolds])
+			if encoder.uses_folds:
+				encoder.fit(data[0:nfolds])
+			else:
+				encoder.fit(pd.concat(data[0:nfolds]))
 
 		encoded_data = lightwood.encode(self.encoders, data)
 

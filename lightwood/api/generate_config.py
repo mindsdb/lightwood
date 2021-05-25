@@ -55,23 +55,17 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
 
     # @TODO: Only import the minimal amount of things we need
     lightwood_config.imports = [
-        'from lightwood.encoders import NumericEncoder'
-        ,'from lightwood.encoders import CategoricalAutoEncoder'
-        ,'from lightwood.encoders import MultiHotEncoder'
-        ,'from lightwood.encoders import DatetimeEncoder'
-        ,'from lightwood.encoders import Img2VecEncoder'
-        ,'from lightwood.encoders import TsRnnEncoder'
-        ,'from lightwood.encoders import ShortTextEncoder'
-        ,'from lightwood.encoders import VocabularyEncoder'
-        ,'from lightwood.encoders import PretrainedLang'
-        ,'from lightwood.encoders import OneHotEncoder'
-        ,'from lightwood.encoders import BaseEncoder'
-        ,'from lightwood.model import LightGBM'
+        'from lightwood.model import LightGBM'
         ,'from lightwood.model import Nn'
-        ,'from lightwood.model import BaseModel'
         ,'from lightwood.ensemble import BestOf'
         ,'from lightwood.data import cleaner'
         ,'from lightwood.data import splitter'
         ,'from lightwood.analysis import model_analyzer'
     ]
+
+    for feature in lightwood_config.features.values():
+        encoder_class = feature.encoder.split('(')[0]
+        lightwood_config.imports.append(f'from lightwood.encoders import {encoder_class}')
+
+    lightwood_config.imports = list(set(lightwood_config.imports))
     return lightwood_config
