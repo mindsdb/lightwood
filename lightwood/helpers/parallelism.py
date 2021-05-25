@@ -12,7 +12,7 @@ def get_nr_procs(df=None):
             import mindsdb_worker
             max_per_proc_usage = 0.2 * pow(10,9)
         except:
-            max_per_proc_usage = 2.6 * pow(10, 9)
+            max_per_proc_usage = 0.5 * pow(10, 9)
 
         if df is not None:
             max_per_proc_usage += df.memory_usage(index=True, deep=True).sum()

@@ -1,4 +1,7 @@
 import unittest
+import os
+import importlib
+
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
@@ -10,13 +13,20 @@ class TestBasic(unittest.TestCase):
         predictor_class_str = generate_predictor('income', datasource)
         print(f'Generated following predictor class: {predictor_class_str}')
 
-        predictor_class = eval(predictor_class_str)
-        print('Class was evaluated successfully')
+        try:
+            with open('dynamic_predictor.py', 'w') as fp:
+                fp.write(predictor_class_str)
 
-        predictor = predictor_class()
-        print('Class initialized successfully')
+            predictor_class = importlib.import_module('dynamic_predictor.Predictor')
+            print('Class was evaluated successfully')
 
-        predictor.learn(datasource)
+            predictor = predictor_class()
+            print('Class initialized successfully')
 
-        predictions = predictor.predict(datasource)
-        print(predictions[0:100])
+            predictor.learn(datasource)
+
+            predictions = predictor.predict(datasource)
+            print(predictions[0:100])
+        finally:
+            #os.remove('dynamic_predictor.py')
+            pass

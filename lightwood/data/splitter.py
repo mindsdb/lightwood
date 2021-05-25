@@ -3,7 +3,7 @@ import numpy as np
 from typing import List
 
 
-def cleaner(data: pd.DataFrame, k: int) -> List[pd.DataFrame]:
+def splitter(data: pd.DataFrame, k: int) -> List[pd.DataFrame]:
     # shuffle
     data = data.sample(frac=1).reset_index(drop=True)
     # split

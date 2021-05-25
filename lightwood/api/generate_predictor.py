@@ -10,12 +10,13 @@ import pandas as pd
 def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
 	feature_code_arr = []
 	for feature in lightwood_config.features.values():
-		feature_code_arr.append(f"""'{feature.name}':'{feature.encoder}'""")
+		feature_code_arr.append(f"""'{feature.name}':{feature.encoder}""")
 
 	encoder_code = '{\n' + '\n,'.join(feature_code_arr) + '\n}'
+	import_code = '\n'.join(lightwood_config.imports)
 
 	return f"""
-{lightwood_config.imports}
+{import_code}
 
 class Predictor():
 	def __init__(self):
@@ -63,7 +64,8 @@ class Predictor():
 def config_from_data(target: str, data: DataSource) -> None:
 	type_information = lightwood.data.infer_types(data)
 	statistical_analysis = lightwood.data.statistical_analysis(data, type_information)
-	lightwood_config = lightwood.generate_config(self.target, type_information=type_information, statistical_analysis=statistical_analysis)
+	lightwood_config = lightwood.generate_config(target, type_information=type_information, statistical_analysis=statistical_analysis)
+	return lightwood_config
 
 def generate_predictor(target: str=None, datasource: DataSource=None, lightwood_config: LightwoodConfig=None) -> str:
 	if lightwood_config is None:
