@@ -44,7 +44,7 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
     output.name = target
     output.data_dtype = type_information.dtypes[target]
     output.encoder = lookup_encoder(type_information.dtypes[target], True, output)
-    output.models = '[Nn(), LightGBM()]'
+    output.models = '[Nn(), LightGBMMixer()]'
     output.ensemble = 'BestOf'
     lightwood_config.output = output
 
@@ -62,7 +62,7 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
 
     # @TODO: Only import the minimal amount of things we need
     lightwood_config.imports = [
-        'from lightwood.model import LightGBM',
+        'from lightwood.model import LightGBMMixer',
         'from lightwood.model import Nn',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',

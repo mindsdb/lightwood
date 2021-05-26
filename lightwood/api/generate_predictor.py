@@ -19,6 +19,7 @@ from mindsdb_datasources import DataSource
 import torch
 import numpy as np
 from lightwood.helpers.seed import seed
+import lightwood
 
 class Predictor():
     def __init__(self):
@@ -33,20 +34,20 @@ class Predictor():
 
         # Do all the trainining and the data cleaning/processing
         data = {lightwood_config.cleaner}(data)
-        data = {lightwood_config.splitter}(data, 10)
+        folds = {lightwood_config.splitter}(data, 10)
         nfolds = len(data)
 
-        for encoder in self.encoders.values():
+        for col_name, encoder in self.encoders.items():
             if encoder.uses_folds:
-                encoder.prepare(data[0:nfolds])
+                encoder.prepare([x[col_name] for x in folds[0:nfolds]])
             else:
-                encoder.prepare(pd.concat(data[0:nfolds]))
+                encoder.prepare(pd.concat(folds[0:nfolds])[col_name])
 
-        encoded_data = lightwood.encode(self.encoders, data)
+        encoded_folds = lightwood.encode(self.encoders, folds, self.target)
 
         self.models = {lightwood_config.output.models}
         for model in self.models:
-            model.fit(encoded_data[0:nfolds], data[0:nfolds])
+            model.fit(encoded_data[0:nfolds], folds[0:nfolds])
 
         self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_data[nfolds], data[nfolds])
 
@@ -56,6 +57,10 @@ class Predictor():
     def predict(self, data: DataSource) -> pd.DataFrame:
         encoded_data = lightwood.encode(self.encoders, data)
         df = self.ensemble(encoded_data)
+        return df
+    def predict(self, data: DataSource) -> pd.DataFrame:
+        encoded_data = lightwood.encode(self.encoders, [data])[0]
+        df = self.ensemble.predict(encoded_data)
         return df
     """
 
