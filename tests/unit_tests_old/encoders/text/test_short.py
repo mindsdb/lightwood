@@ -7,146 +7,146 @@ VOCAB = ['do', 'not', 'remember', 'men', 'pretty', 'break', 'know', 'an', 'forwa
 
 
 def generate_sentences(min_, max_, vocab_size):
-    vocab_sample = random.sample(VOCAB, vocab_size)
-    return [' '.join(random.sample(vocab_sample, random.randint(min_, max_))) for _ in range(200)]
+	vocab_sample = random.sample(VOCAB, vocab_size)
+	return [' '.join(random.sample(vocab_sample, random.randint(min_, max_))) for _ in range(200)]
 
 
 class TestShortTextEncoder(unittest.TestCase):
-    def test_get_tokens(self):
-        sentences = ['hello, world!', ' !hello! world!!,..#', '#hello!world']
-        for sent in sentences:
-            assert tokenize_text(sent) == ['hello', 'world']
+	def test_get_tokens(self):
+	    sentences = ['hello, world!', ' !hello! world!!,..#', '#hello!world']
+	    for sent in sentences:
+	        assert tokenize_text(sent) == ['hello', 'world']
 
-        assert tokenize_text("don't wouldn't") == ['do', 'not', 'would', 'not']
+	    assert tokenize_text("don't wouldn't") == ['do', 'not', 'would', 'not']
 
-    def test_smallvocab_target_auto_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=99)
-        test_data = random.sample(priming_data, len(priming_data) // 5)
+	def test_smallvocab_target_auto_mode(self):
+	    priming_data = generate_sentences(2, 6, vocab_size=99)
+	    test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(is_target=True)
-        enc.prepare(priming_data)
+	    enc = ShortTextEncoder(is_target=True)
+	    enc.prepare(priming_data)
 
-        assert not enc.cae.use_autoencoder
-        assert enc.is_target is True
+	    assert not enc.cae.use_autoencoder
+	    assert enc.is_target is True
 
-        # _combine is expected to be 'concat' when is_target is True
-        assert enc._mode == 'concat'
+	    # _combine is expected to be 'concat' when is_target is True
+	    assert enc._mode == 'concat'
 
-        encoded_data = enc.encode(test_data)
-        decoded_data = enc.decode(encoded_data)
+	    encoded_data = enc.encode(test_data)
+	    decoded_data = enc.decode(encoded_data)
 
-        assert len(test_data) == len(encoded_data) == len(decoded_data)
+	    assert len(test_data) == len(encoded_data) == len(decoded_data)
 
-        for x_sent, y_sent in zip(
-            [' '.join(tokenize_text(x)) for x in test_data],
-            [' '.join(x) for x in decoded_data]
-        ):
-            assert x_sent == y_sent
+	    for x_sent, y_sent in zip(
+	        [' '.join(tokenize_text(x)) for x in test_data],
+	        [' '.join(x) for x in decoded_data]
+	    ):
+	        assert x_sent == y_sent
 
-    def test_non_smallvocab_target_auto_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=800)
-        test_data = random.sample(priming_data, len(priming_data) // 5)
+	def test_non_smallvocab_target_auto_mode(self):
+	    priming_data = generate_sentences(2, 6, vocab_size=800)
+	    test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(is_target=True)
-        enc.prepare(priming_data)
+	    enc = ShortTextEncoder(is_target=True)
+	    enc.prepare(priming_data)
 
-        assert not enc.cae.use_autoencoder
-        assert enc.is_target is True
+	    assert not enc.cae.use_autoencoder
+	    assert enc.is_target is True
 
-        # _combine is expected to be 'concat' when is_target is True
-        assert enc._mode == 'concat'
+	    # _combine is expected to be 'concat' when is_target is True
+	    assert enc._mode == 'concat'
 
-        encoded_data = enc.encode(test_data)
-        decoded_data = enc.decode(encoded_data)
+	    encoded_data = enc.encode(test_data)
+	    decoded_data = enc.decode(encoded_data)
 
-        assert len(test_data) == len(encoded_data) == len(decoded_data)
+	    assert len(test_data) == len(encoded_data) == len(decoded_data)
 
-        for x_sent, y_sent in zip(
-            [' '.join(tokenize_text(x)) for x in test_data],
-            [' '.join(x) for x in decoded_data]
-        ):
-            assert x_sent == y_sent
+	    for x_sent, y_sent in zip(
+	        [' '.join(tokenize_text(x)) for x in test_data],
+	        [' '.join(x) for x in decoded_data]
+	    ):
+	        assert x_sent == y_sent
 
-    def test_smallvocab_non_target_auto_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=50)
-        test_data = random.sample(priming_data, len(priming_data) // 5)
+	def test_smallvocab_non_target_auto_mode(self):
+	    priming_data = generate_sentences(2, 6, vocab_size=50)
+	    test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(is_target=False)
-        enc.prepare(priming_data)
+	    enc = ShortTextEncoder(is_target=False)
+	    enc.prepare(priming_data)
 
-        assert not enc.cae.use_autoencoder
-        assert enc.is_target is False
+	    assert not enc.cae.use_autoencoder
+	    assert enc.is_target is False
 
-        # _combine is expected to be 'mean' when is_target is False
-        assert enc._mode == 'mean'
+	    # _combine is expected to be 'mean' when is_target is False
+	    assert enc._mode == 'mean'
 
-        encoded_data = enc.encode(test_data)
+	    encoded_data = enc.encode(test_data)
 
-        assert len(test_data) == len(encoded_data)
+	    assert len(test_data) == len(encoded_data)
 
-        with self.assertRaises(ValueError):
-            enc.decode(encoded_data)
+	    with self.assertRaises(ValueError):
+	        enc.decode(encoded_data)
 
-    def test_non_smallvocab_non_target_auto_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=800)
-        test_data = random.sample(priming_data, len(priming_data) // 5)
+	def test_non_smallvocab_non_target_auto_mode(self):
+	    priming_data = generate_sentences(2, 6, vocab_size=800)
+	    test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(is_target=False)
-        enc.prepare(priming_data)
+	    enc = ShortTextEncoder(is_target=False)
+	    enc.prepare(priming_data)
 
-        assert enc.cae.use_autoencoder
-        assert enc.is_target is False
+	    assert enc.cae.use_autoencoder
+	    assert enc.is_target is False
 
-        # _combine is expected to be 'mean' when is_target is False
-        assert enc._mode == 'mean'
+	    # _combine is expected to be 'mean' when is_target is False
+	    assert enc._mode == 'mean'
 
-        encoded_data = enc.encode(test_data)
+	    encoded_data = enc.encode(test_data)
 
-        assert len(test_data) == len(encoded_data)
+	    assert len(test_data) == len(encoded_data)
 
-        with self.assertRaises(ValueError):
-            enc.decode(encoded_data)
+	    with self.assertRaises(ValueError):
+	        enc.decode(encoded_data)
 
-    def test_smallvocab_non_target_manual_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=99)
-        test_data = random.sample(priming_data, len(priming_data) // 5)
+	def test_smallvocab_non_target_manual_mode(self):
+	    priming_data = generate_sentences(2, 6, vocab_size=99)
+	    test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(is_target=False, mode='concat')
-        enc.prepare(priming_data)
+	    enc = ShortTextEncoder(is_target=False, mode='concat')
+	    enc.prepare(priming_data)
 
-        assert not enc.cae.use_autoencoder
-        assert enc.is_target is False
-        assert enc._mode == 'concat'
+	    assert not enc.cae.use_autoencoder
+	    assert enc.is_target is False
+	    assert enc._mode == 'concat'
 
-        encoded_data = enc.encode(test_data)
-        decoded_data = enc.decode(encoded_data)
+	    encoded_data = enc.encode(test_data)
+	    decoded_data = enc.decode(encoded_data)
 
-        assert len(test_data) == len(encoded_data) == len(decoded_data)
+	    assert len(test_data) == len(encoded_data) == len(decoded_data)
 
-        for x_sent, y_sent in zip(
-            [' '.join(tokenize_text(x)) for x in test_data],
-            [' '.join(x) for x in decoded_data]
-        ):
-            assert x_sent == y_sent
+	    for x_sent, y_sent in zip(
+	        [' '.join(tokenize_text(x)) for x in test_data],
+	        [' '.join(x) for x in decoded_data]
+	    ):
+	        assert x_sent == y_sent
 
-    def test_non_smallvocab_non_target_manual_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=800)
-        test_data = random.sample(priming_data, len(priming_data) // 5)
+	def test_non_smallvocab_non_target_manual_mode(self):
+	    priming_data = generate_sentences(2, 6, vocab_size=800)
+	    test_data = random.sample(priming_data, len(priming_data) // 5)
 
-        enc = ShortTextEncoder(is_target=False, mode='concat')
-        enc.prepare(priming_data)
+	    enc = ShortTextEncoder(is_target=False, mode='concat')
+	    enc.prepare(priming_data)
 
-        assert enc.cae.use_autoencoder
-        assert enc.is_target is False
-        assert enc._mode == 'concat'
+	    assert enc.cae.use_autoencoder
+	    assert enc.is_target is False
+	    assert enc._mode == 'concat'
 
-        encoded_data = enc.encode(test_data)
-        decoded_data = enc.decode(encoded_data)
+	    encoded_data = enc.encode(test_data)
+	    decoded_data = enc.decode(encoded_data)
 
-        assert len(test_data) == len(encoded_data) == len(decoded_data)
+	    assert len(test_data) == len(encoded_data) == len(decoded_data)
 
-        for x_sent, y_sent in zip(
-            [' '.join(tokenize_text(x)) for x in test_data],
-            [' '.join(x) for x in decoded_data]
-        ):
-            assert x_sent == y_sent
+	    for x_sent, y_sent in zip(
+	        [' '.join(tokenize_text(x)) for x in test_data],
+	        [' '.join(x) for x in decoded_data]
+	    ):
+	        assert x_sent == y_sent
