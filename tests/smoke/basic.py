@@ -11,7 +11,6 @@ class TestBasic(unittest.TestCase):
         datasource = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/adult_income/adult.csv')
 
         predictor_class_str = generate_predictor('income', datasource)
-        print(f'Generated following predictor class: {predictor_class_str}')
 
         try:
             with open('dynamic_predictor.py', 'w') as fp:
@@ -28,4 +27,5 @@ class TestBasic(unittest.TestCase):
             predictions = predictor.predict(datasource)
             print(predictions[0:100])
         finally:
-            os.remove('dynamic_predictor.py')
+            print('Not removing predictor for debugging purposes')
+            #os.remove('dynamic_predictor.py')
