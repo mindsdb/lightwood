@@ -1,4 +1,5 @@
-from lightwood.api import LightwoodConfig, TypeInformation, StatisticalAnalysis, Feature, Output
+from typing import Dict
+from lightwood.api.types import LightwoodConfig, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition
 from lightwood.api import dtype
 
 
@@ -37,31 +38,30 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
     return encoder_initialization
 
 
-def generate_config(target: str, type_information: TypeInformation, statistical_analysis: StatisticalAnalysis) -> LightwoodConfig:
+def generate_config(target: str, type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> LightwoodConfig:
 
-    lightwood_config = LightwoodConfig()
-    output = Output()
-    output.name = target
-    output.data_dtype = type_information.dtypes[target]
+    output = Output(
+        name=target,
+        data_dtype=type_information.dtypes[target],
+        encoder=None,
+        models='[Nn(self.lightwood_config), LightGBM(self.lightwood_config)]',
+        ensemble='BestOf'
+    )
     output.encoder = lookup_encoder(type_information.dtypes[target], True, output)
-    output.models = '[Nn(lightwood_config), LightGBM(lightwood_config)]'
-    output.ensemble = 'BestOf'
-    lightwood_config.output = output
 
+    features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
         if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
-            feature = Feature()
-            feature.name = col_name
-            feature.data_dtype = col_dtype
-            feature.encoder = lookup_encoder(col_dtype, False, output)
-            lightwood_config.features[col_name] = feature
-
-    lightwood_config.cleaner = 'cleaner'
-    lightwood_config.splitter = 'splitter'
-    lightwood_config.analyzer = 'model_analyzer'
+            feature = Feature(
+                name=col_name,
+                data_dtype=col_dtype,
+                encoder=lookup_encoder(col_dtype, False, output),
+                dependency=[]
+            )
+            features[col_name] = feature
 
     # @TODO: Only import the minimal amount of things we need
-    lightwood_config.imports = [
+    imports = [
         'from lightwood.model import LightGBM',
         'from lightwood.model import Nn',
         'from lightwood.ensemble import BestOf',
@@ -69,9 +69,17 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
         'from lightwood.data import splitter'
     ]
 
-    for feature in lightwood_config.features.values():
+    for feature in features.values():
         encoder_initialization = feature.encoder.split('(')[0]
-        lightwood_config.imports.append(f'from lightwood.encoder import {encoder_initialization}')
+        imports.append(f'from lightwood.encoder import {encoder_initialization}')
 
-    lightwood_config.imports = list(set(lightwood_config.imports))
-    return lightwood_config
+    imports = list(set(imports))
+    return LightwoodConfig(
+        cleaner='cleaner',
+        splitter='splitter',
+        analyzer='model_analyzer',
+        features=features,
+        output=output,
+        imports=imports,
+        problem_definition=problem_definition
+    )

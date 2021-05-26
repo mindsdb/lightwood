@@ -1,64 +1,30 @@
 from typing import Dict, List
-import json
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
+from dataclasses_json.core import _asdict, Json
 
 
+@dataclass_json
 @dataclass
 class Feature:
     name: str
     data_dtype: str
     dependency: List[str]
-    encoder: str
-
-    def __init__(self):
-        self.dependency = []
-
-
-@dataclass
-class Output:
-    name: str
-    data_dtype: str
-    encoder: str
-    models: List[str]
-    ensemble: str
-
-    def __init__(self):
-        self.models = []
+    encoder: str = None
 
 
 @dataclass_json
 @dataclass
-class LightwoodConfig:
-    features: Dict[str, Feature]
-    output: Output
-    cleaner: str
-    splitter: str
-    analyzer: str
-    imports: str
-
-    def __init__(self, dict_obj: Dict[str, object] = None):
-        if dict_obj is None:
-            self.features = dict()
-            self.imports = ''
-        else:
-            # TODO impl serialization for classes that contain sub-objects that need it
-            self.features = dict_obj['features']
-            self.output = dict_obj['output']
-            self.cleaner = dict_obj['cleaner']
-            self.splitter = dict_obj['splitter']
-            self.analyzer = dict_obj['analyzer']
-
-    @staticmethod
-    def loads(json_str):
-        config_json = json.loads(json_str)
-        return LightwoodConfig(config_json)
-
-    def dumps(self):
-        return ''
+class Output:
+    name: str
+    data_dtype: str
+    encoder: str = None
+    models: List[str] = None
+    ensemble: str = None
 
 
+@dataclass_json
 @dataclass
 class TypeInformation:
     dtypes: Dict[str, str]
@@ -71,6 +37,7 @@ class TypeInformation:
         self.identifiers = dict()
 
 
+@dataclass_json
 @dataclass
 class StatisticalAnalysis:
     # Addition of stuff here pending discussion with Jorge
@@ -80,32 +47,69 @@ class StatisticalAnalysis:
 @dataclass
 class TimeseriesSettings:
     is_timeseries: bool
-    group_by: List[str]
-    order_by: List[str]
-    window: int
-    use_previous_target: bool
-    nr_predictions: int
-    historical_columns: List[str]
+    order_by: List[str] = None
+    window: int = None
+    group_by: List[str] = None
+    use_previous_target: bool = False
+    nr_predictions: int = None
+    historical_columns: List[str] = None
 
-    def __init__(self, obj: Dict) -> None:
+    @staticmethod
+    def from_dict(obj: Dict):
         if len(obj) > 0:
-            self.is_timeseries = True
             for mandatory_setting in ['order_by', 'window']:
                 err = f'Missing mandatory timeseries setting: {mandatory_setting}'
                 log.error(err)
                 raise Exception(err)
+
+            timeseries_settings = TimeseriesSettings(
+                is_timeseries=True,
+                historical_columns=[],
+                order_by=obj['order_by'],
+                window=obj['window']
+
+            )
             for setting in obj:
-                self.__setattr__(setting, obj['setting'])
+                timeseries_settings.__setattr__(setting, obj['setting'])
+
         else:
-            self.is_timeseries = False
+            timeseries_settings = TimeseriesSettings(is_timeseries=False)
+
+        return timeseries_settings
+    
+    def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        return _asdict(self, encode_json=encode_json)
 
 
-@dataclass_json
 @dataclass
 class ProblemDefinition:
     time_per_model: int
     timeseries_settings: TimeseriesSettings
+    
+    @staticmethod
+    def from_dict(obj: Dict) -> None:
+        time_per_model = obj.get('time_per_model', 18446744073709551615)
+        timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
 
-    def __init__(self, obj: Dict) -> None:
-        self.time_per_model = obj.get('time_per_model', 18446744073709551615)
-        self.timeseries_settings = TimeseriesSettings(obj.get('timeseries_settings', {}))
+        problem_definition = ProblemDefinition(
+            time_per_model=time_per_model,
+            timeseries_settings=timeseries_settings
+        )
+
+        return problem_definition
+
+    def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        return _asdict(self, encode_json=encode_json)
+
+
+@dataclass_json
+@dataclass
+class LightwoodConfig:
+    features: Dict[str, Feature]
+    output: Output
+    problem_definition: ProblemDefinition
+    cleaner: str = None
+    splitter: str = None
+    analyzer: str = None
+    imports: str = None
+

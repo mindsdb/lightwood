@@ -1,7 +1,23 @@
+from typing import Dict
+from lightwood.api.types import ProblemDefinition
 import lightwood
 import pprint
 from lightwood.api import LightwoodConfig
 from mindsdb_datasources import DataSource
+
+
+def dump_config(lightwood_config: LightwoodConfig) -> str:
+    config_dump: Dict[str, object] = lightwood_config.to_dict()
+    del config_dump['analyzer']
+    del config_dump['cleaner']
+    del config_dump['splitter']
+    for feature in config_dump['features'].values():
+        del feature['encoder']
+    del config_dump['imports']
+    del config_dump['output']['encoder']
+    del config_dump['output']['models']
+    del config_dump['output']['ensemble']
+    return pprint.pformat(config_dump)
 
 
 def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
@@ -11,7 +27,7 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
 
     encoder_code = '{\n            ' + ',\n            '.join(feature_code_arr) + '\n        }'
     import_code = '\n'.join(lightwood_config.imports)
-    config_dump: str = pprint.pformat(lightwood_config.to_dict())
+    config_dump = dump_config(lightwood_config)
 
     return f"""{import_code}
 import pandas as pd
@@ -20,9 +36,20 @@ from lightwood.helpers.seed import seed
 from lightwood.helpers.log import log
 import lightwood
 from lightwood.api import LightwoodConfig
+from lightwood.model import BaseModel
+from lightwood.encoder import BaseEncoder
+from lightwood.ensemble import BaseEnsemble
+from typing import Dict, List
 
 
 class Predictor():
+    target: str
+    lightwood_config: LightwoodConfig
+    models: List[BaseModel]
+    encoders: Dict[str, BaseEncoder]
+    ensemble: BaseEnsemble
+
+
     def __init__(self):
         seed()
         self.target = '{lightwood_config.output.name}'
@@ -30,7 +57,7 @@ class Predictor():
     def learn(self, data: DataSource) -> None:
         # Build a Graph from the JSON
         # Using eval is a bit ugly and we could replace it with factories, personally I'm against this, as it ads pointless complexity
-        self.lightwood_config = LightwoodConfig({config_dump})
+        self.lightwood_config = LightwoodConfig.from_dict({config_dump})
         self.encoders = {encoder_code}
 
         log.info('Cleaning up, transforming and splitting the data')
@@ -68,16 +95,11 @@ class Predictor():
 """
 
 
-def config_from_data(target: str, data: DataSource) -> None:
-    type_information = lightwood.data.infer_types(data)
-    statistical_analysis = lightwood.data.statistical_analysis(data, type_information)
-    lightwood_config = lightwood.generate_config(target, type_information=type_information, statistical_analysis=statistical_analysis)
-    return lightwood_config
-
-
-def generate_predictor(target: str = None, datasource: DataSource = None, lightwood_config: LightwoodConfig = None) -> str:
+def generate_predictor(target: str = None, datasource: DataSource = None, problem_definition: ProblemDefinition = None, lightwood_config: LightwoodConfig = None) -> str:
     if lightwood_config is None:
-        lightwood_config = config_from_data(target, datasource)
+        type_information = lightwood.data.infer_types(datasource)
+        statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information)
+        lightwood_config = lightwood.generate_config(target, type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
     predictor_code = generate_predictor_code(lightwood_config)
     return predictor_code
