@@ -36,7 +36,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         for combination in list(product(*[set(x) for x in group_info[0]['group_info'].values()])):
             combination = frozenset(combination)
             idxs, subset = get_group_matches(group_info[0], combination, group_info[0]['group_info'].keys())
-            if subset.size > 0:
+            if subset.size > 0 and self._normalizers.get(combination, False):
                 data[idxs] =  self._normalizers[combination].encode(subset)
 
         data[torch.isnan(data)] = 0.0
