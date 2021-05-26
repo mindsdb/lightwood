@@ -3,8 +3,8 @@ import pandas as pd
 from copy import deepcopy
 from itertools import product
 from sklearn.preprocessing import OneHotEncoder
-from nonconformist.icp import IcpRegressor, IcpClassifier
-from nonconformist.nc import RegressorNc, ClassifierNc, MarginErrFunc
+from nc.icp import IcpRegressor, IcpClassifier
+from nc.nc import RegressorNc, ClassifierNc, MarginErrFunc
 
 from lightwood.model.nn import Nn
 from mindsdb_native.libs.helpers.general_helpers import pickle_obj, evaluate_accuracy
