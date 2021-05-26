@@ -6,19 +6,18 @@ from mindsdb_datasources import DataSource
 def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
     feature_code_arr = []
     for feature in lightwood_config.features.values():
-        feature_code_arr.append(f"""'{feature.name}':{feature.encoder}""")
+        feature_code_arr.append(f"""'{feature.name}': {feature.encoder}""")
 
-    encoder_code = '{\n' + '\n,'.join(feature_code_arr) + '\n}'
+    encoder_code = '{\n            ' + ',\n            '.join(feature_code_arr) + '\n        }'
     import_code = '\n'.join(lightwood_config.imports)
 
     return f"""{import_code}
 import pandas as pd
 from mindsdb_datasources import DataSource
-import torch
-import numpy as np
 from lightwood.helpers.seed import seed
 from lightwood.helpers.log import log
 import lightwood
+
 
 class Predictor():
     def __init__(self):
@@ -29,7 +28,6 @@ class Predictor():
         # Build a Graph from the JSON
         # Using eval is a bit ugly and we could replace it with factories, personally I'm against this, as it ads pointless complexity
         self.encoders = {encoder_code}
-
 
         log.info('Cleaning up, transforming and splitting the data')
         data = {lightwood_config.cleaner}(data)
@@ -56,13 +54,14 @@ class Predictor():
 
         log.info('Analyzing the ensemble')
         # Add back when analysis works
-        #self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds], data[nfolds])
+        # self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds], data[nfolds])
 
     def predict(self, data: DataSource) -> pd.DataFrame:
         encoded_ds_arr = lightwood.encode(self.encoders, data)
         df = self.ensemble(encoded_ds_arr)
         return df
-    """
+
+"""
 
 
 def config_from_data(target: str, data: DataSource) -> None:
