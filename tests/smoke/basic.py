@@ -1,3 +1,4 @@
+from lightwood.api.types import ProblemDefinition
 import unittest
 import os
 import importlib
@@ -10,7 +11,7 @@ class TestBasic(unittest.TestCase):
 
         datasource = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/adult_income/adult.csv')
 
-        predictor_class_str = generate_predictor('income', datasource)
+        predictor_class_str = generate_predictor('income', datasource, ProblemDefinition.from_dict({'time_per_model': 100}))
 
         try:
             with open('dynamic_predictor.py', 'w') as fp:
