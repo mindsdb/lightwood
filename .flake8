@@ -2,4 +2,4 @@
 # E701: multiple statements on one line (colon)
 ignore = E701
 max-line-length = 160
-max-complexity=10
+max-complexity = 10

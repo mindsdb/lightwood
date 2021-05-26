@@ -3,7 +3,7 @@ import inspect
 import copy
 import random
 import string
-from typing import List
+from typing import List, Tuple
 import torch
 import numpy as np
 import pandas as pd
@@ -32,7 +32,7 @@ class EncodedDs(Dataset):
         """
         return int(self.data_frame.shape[0])
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         if self.cache_encoded:
             if self.cache[idx] is not None:
                 return self.cache[idx]
@@ -50,14 +50,15 @@ class EncodedDs(Dataset):
         
         return X, Y
 
-    def get_column_original_data(self, column_name):
+    def get_column_original_data(self, column_name: str) -> pd.Series:
         return self.data_frame[column_name]
 
-    def get_encoded_column_data(self, column_name):
+    def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         encoded_vals: List[torch.FloatTensor] = []
         for i in range(len(self)):
             encoded_vals.append(self.encoders[col_name].encode(self.data_frame[col_name]))
         return torch.stack(encoded_vals)
+
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):
@@ -65,15 +66,15 @@ class ConcatedEncodedDs(EncodedDs):
         self.encoded_ds_arr = encoded_ds_arr
     
     def __len__(self):
-        return np.sum([len(x) for x in encoded_ds_arr])
+        return np.sum([len(x) for x in self.encoded_ds_arr])
 
-    def __getitem__(self, idx):
-        self.encoded_ds_arr[idx//len(self.encoded_ds_arr)][idx%self.encoded_ds_arr]
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        self.encoded_ds_arr[idx // len(self.encoded_ds_arr)][idx % self.encoded_ds_arr]
 
-    def get_column_original_data(self, column_name):
+    def get_column_original_data(self, column_name: str) -> pd.Series:
         encoded_df_arr = [x.get_column_original_data(column_name) for x in self.encoded_ds_arr]
         return pd.concat(encoded_df_arr)
 
-    def get_encoded_column_data(self, column_name):
+    def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         encoded_df_arr = [x.get_encoded_column_data(column_name) for x in self.encoded_ds_arr]
         return torch.stack(encoded_df_arr)
