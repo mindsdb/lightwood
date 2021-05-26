@@ -1,4 +1,5 @@
 import lightwood
+import pprint
 from lightwood.api import LightwoodConfig
 from mindsdb_datasources import DataSource
 
@@ -10,7 +11,7 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
 
     encoder_code = '{\n            ' + ',\n            '.join(feature_code_arr) + '\n        }'
     import_code = '\n'.join(lightwood_config.imports)
-    config_dump: str = lightwood_config.to_dict()
+    config_dump: str = pprint.pformat(lightwood_config.to_dict())
 
     return f"""{import_code}
 import pandas as pd
