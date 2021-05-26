@@ -18,6 +18,6 @@ from lightwood.helpers.log import log
 
 # Encoders that depend on optiona dependencies
 try:
-	from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
+    from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
 except Exception as e:
-	log.info('Unable to import AmplitudeTsEncoder, if you wish to encode audio data please install pydub and initialize lightwood again')
+    log.info('Unable to import AmplitudeTsEncoder, if you wish to encode audio data please install pydub and initialize lightwood again')
