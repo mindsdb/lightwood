@@ -4,7 +4,6 @@ from mindsdb_datasources import DataSource
 
 
 def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
-    print(f'\n\n{repr(lightwood_config)}\n\n')
     feature_code_arr = []
     for feature in lightwood_config.features.values():
         feature_code_arr.append(f"""'{feature.name}':{feature.encoder}""")
