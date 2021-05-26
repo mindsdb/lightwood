@@ -19,6 +19,7 @@ from mindsdb_datasources import DataSource
 import torch
 import numpy as np
 from lightwood.helpers.seed import seed
+from lightwood.helpers.log import log
 import lightwood
 
 class Predictor():
@@ -32,35 +33,36 @@ class Predictor():
         self.encoders = {encoder_code}
 
 
-        # Do all the trainining and the data cleaning/processing
+        log.info('Cleaning up, transforming and splitting the data')
         data = {lightwood_config.cleaner}(data)
         folds = {lightwood_config.splitter}(data, 10)
         nfolds = len(data)
 
+        log.info('Training the encoders')
         for col_name, encoder in self.encoders.items():
             if encoder.uses_folds:
                 encoder.prepare([x[col_name] for x in folds[0:nfolds]])
             else:
                 encoder.prepare(pd.concat(folds[0:nfolds])[col_name])
 
+        log.info('Featurizing the data')
         encoded_folds = lightwood.encode(self.encoders, folds, self.target)
 
+        log.info('Training the models')
         self.models = {lightwood_config.output.models}
         for model in self.models:
             model.fit(encoded_data[0:nfolds], folds[0:nfolds])
 
+        log.info('Ensembling the model')
         self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_data[nfolds], data[nfolds])
 
+        log.info('Analyzing the ensemble')
         # Add back when analysis works
         #self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_data[nfolds], data[nfolds])
 
     def predict(self, data: DataSource) -> pd.DataFrame:
         encoded_data = lightwood.encode(self.encoders, data)
         df = self.ensemble(encoded_data)
-        return df
-    def predict(self, data: DataSource) -> pd.DataFrame:
-        encoded_data = lightwood.encode(self.encoders, [data])[0]
-        df = self.ensemble.predict(encoded_data)
         return df
     """
 

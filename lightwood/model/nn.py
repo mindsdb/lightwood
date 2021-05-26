@@ -14,7 +14,6 @@ from lightwood.model.base import BaseModel
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.model.helpers.default_net import DefaultNet
 from lightwood.model.helpers.ar_net import ArNet
-from lightwood.model.helpers.selfaware import SelfAware
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 
