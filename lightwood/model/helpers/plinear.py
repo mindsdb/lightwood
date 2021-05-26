@@ -6,7 +6,6 @@ from torch.nn import init
 import math
 import numpy as np
 
-from lightwood.config.config import CONFIG
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
 
