@@ -11,6 +11,5 @@ labels:
 
 ## Describe your issue
 
-<Here>
 
 ## How can we replicate it?
