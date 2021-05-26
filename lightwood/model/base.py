@@ -1,2 +1,2 @@
 class BaseModel:
-    pass
+	pass
