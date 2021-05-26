@@ -6,7 +6,7 @@ from dataclasses import dataclass
 @dataclass
 class Feature:
     name: str = None
-    dtype: dtype = None
+    data_dtype: dtype = None
     dependency: List[str] = None
     encoder: str = None
 
@@ -16,7 +16,7 @@ class Feature:
 @dataclass
 class Output:
     name: str = None
-    dtype: dtype = None
+    data_dtype: dtype = None
     encoder: str = None
     models: List[str] = None
     ensemble: str = None

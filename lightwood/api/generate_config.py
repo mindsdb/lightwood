@@ -12,7 +12,7 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
         dtype.date: 'DatetimeEncoder',
         dtype.datetime: 'DatetimeEncoder',
         dtype.image: 'Img2VecEncoder',
-        dtype.rich_text: f'PretrainedLangEncoder',
+        dtype.rich_text: 'PretrainedLangEncoder',
         dtype.short_text: 'ShortTextEncoder',
         dtype.array: 'TsRnnEncoder',
     }
@@ -30,18 +30,19 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
 
     # Set arguments for the encoder
     if 'PretrainedLangEncoder' in encoder_initialization and not is_target:
-        encoder_initialization += f"""output_type={output.dtype}"""
+        encoder_initialization += f"""output_type={output.data_dtype}"""
 
     encoder_initialization += ')'
 
     return encoder_initialization
+
 
 def generate_config(target: str, type_information: TypeInformation, statistical_analysis: StatisticalAnalysis) -> LightwoodConfig:
 
     lightwood_config = LightwoodConfig()
     output = Output()
     output.name = target
-    output.dtype = type_information.dtypes[target]
+    output.data_dtype = type_information.dtypes[target]
     output.encoder = lookup_encoder(type_information.dtypes[target], True, output)
     output.models = '[Nn(), LightGBM()]'
     output.ensemble = 'BestOf'
@@ -49,13 +50,11 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
 
     for col_name, col_dtype in type_information.dtypes.items():
         if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
-                feature = Feature()
-                feature.name = col_name
-                feature.dtype = dtype
-                feature.encoder = lookup_encoder(col_dtype, False, output)
-                lightwood_config.features[col_name] = feature
-
-
+            feature = Feature()
+            feature.name = col_name
+            feature.data_dtype = dtype
+            feature.encoder = lookup_encoder(col_dtype, False, output)
+            lightwood_config.features[col_name] = feature
 
     lightwood_config.cleaner = 'cleaner'
     lightwood_config.splitter = 'splitter'
@@ -63,13 +62,11 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
 
     # @TODO: Only import the minimal amount of things we need
     lightwood_config.imports = [
-        'from lightwood.model import LightGBM'
-        ,'from lightwood.model import Nn'
-        ,'from lightwood.ensemble import BestOf'
-        ,'from lightwood.data import cleaner'
-        ,'from lightwood.data import splitter'
-        # Add back when analysis works
-        #,'from lightwood.analysis import model_analyzer'
+        'from lightwood.model import LightGBM',
+        'from lightwood.model import Nn',
+        'from lightwood.ensemble import BestOf',
+        'from lightwood.data import cleaner',
+        'from lightwood.data import splitter'
     ]
 
     for feature in lightwood_config.features.values():
