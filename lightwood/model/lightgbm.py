@@ -24,7 +24,7 @@ def check_gpu_support():
     except Exception as e:
         return False
 
-class LightGBMMixer(BaseModel):
+class LightGBM(BaseModel):
     def __init__(self, stop_training_after_seconds=None, grid_search=False):
         super().__init__()
         self.models = {}
