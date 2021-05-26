@@ -52,7 +52,7 @@ def generate_config(target: str, type_information: TypeInformation, statistical_
         if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
             feature = Feature()
             feature.name = col_name
-            feature.data_dtype = dtype
+            feature.data_dtype = col_dtype
             feature.encoder = lookup_encoder(col_dtype, False, output)
             lightwood_config.features[col_name] = feature
 
