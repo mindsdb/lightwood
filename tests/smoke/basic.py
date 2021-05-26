@@ -28,5 +28,4 @@ class TestBasic(unittest.TestCase):
             predictions = predictor.predict(datasource)
             print(predictions[0:100])
         finally:
-            #os.remove('dynamic_predictor.py')
-            pass
+            os.remove('dynamic_predictor.py')
