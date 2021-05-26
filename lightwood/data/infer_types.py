@@ -1,22 +1,19 @@
+from collections import Counter
 import random
 import dateutil
-import string
 from scipy.stats import norm
 import pandas as pd
 import numpy as np
 import imghdr
 import sndhdr
-from copy import deepcopy
-from collections import Counter, defaultdict
 import multiprocessing as mp
-from functools import partial
-import datetime
 from mindsdb_datasources import DataSource
 from lightwood.api import TypeInformation
 from lightwood.api import dtype
 from lightwood.helpers.parallelism import get_nr_procs
-from lightwood.helpers.text import get_identifier_description_mp, cast_string_to_python_type
+from lightwood.helpers.text import get_identifier_description_mp, cast_string_to_python_type, get_language_dist, analyze_sentences
 from lightwood.helpers.log import log
+
 
 def get_binary_type(element: object) -> str:
     try:
@@ -43,9 +40,9 @@ def get_numeric_type(element: object) -> str:
     else:
         return None
 
+
 def type_check_sequence(element: object) -> str:
     dtype_guess = None
-    additional_info = {}
 
     for sep_char in [',', '\t', '|', ' ']:
         all_nr = True
@@ -64,6 +61,7 @@ def type_check_sequence(element: object) -> str:
 
     return dtype_guess
 
+
 def type_check_date(element: object) -> str:
     dtype_guess = None
     try:
@@ -71,8 +69,7 @@ def type_check_date(element: object) -> str:
 
         # Not accurate 100% for a single datetime str,
         # but should work in aggregate
-        if dt.hour == 0 and dt.minute == 0 and \
-            dt.second == 0 and len(element) <= 16:
+        if dt.hour == 0 and dt.minute == 0 and dt.second == 0 and len(element) <= 16:
             dtype_guess = dtype.date
         else:
             dtype_guess = dtype.datetime
@@ -80,6 +77,7 @@ def type_check_date(element: object) -> str:
     except ValueError:
         pass
     return dtype_guess
+
 
 def count_data_types_in_column(data):
     dtype_counts = Counter()
@@ -156,7 +154,7 @@ def get_column_data_type(arg_tup):
                 unique_tokens = unique_tokens.union(set(item_tags))
 
         # If more than 30% of the samples contain more than 1 category and there's more than 6 of them and they are shared between the various cells
-        if can_be_tags and np.mean(lengths) > 1.3 and len(unique_tokens) >= 6 and len(unique_tokens)/np.mean(lengths) < (len(data)/4):
+        if can_be_tags and np.mean(lengths) > 1.3 and len(unique_tokens) >= 6 and len(unique_tokens) / np.mean(lengths) < (len(data) / 4):
             curr_dtype = dtype.tags
 
     # Categorical based on unique values
@@ -193,17 +191,17 @@ def get_column_data_type(arg_tup):
 
                 return curr_dtype, dtype_counts, additional_info, warn, info
 
-
     if curr_dtype in [dtype.categorical, dtype.rich_text, dtype.short_text]:
         dtype_counts = {curr_dtype: len(data)}
 
     return curr_dtype, dict(dtype_counts), additional_info, warn, info
 
+
 def calculate_sample_size(
     population_size,
     margin_error=.05,
     confidence_level=.99,
-    sigma=1/2
+    sigma=1 / 2
 ):
     """
     Calculate the minimal sample size to use to achieve a certain
@@ -247,28 +245,28 @@ def calculate_sample_size(
     if confidence_level in zdict:
         z = zdict[confidence_level]
     else:
-        #Inf fix
+        # Inf fix
         if alpha == 0.0:
             alpha += 0.001
-        z = norm.ppf(1 - (alpha/2))
+        z = norm.ppf(1 - (alpha / 2))
     N = population_size
     M = margin_error
-    numerator = z**2 * sigma**2 * (N / (N-1))
-    denom = M**2 + ((z**2 * sigma**2)/(N-1))
-    return numerator/denom
+    numerator = z**2 * sigma**2 * (N / (N - 1))
+    denom = M**2 + ((z**2 * sigma**2) / (N - 1))
+    return numerator / denom
+
 
 def sample_data(df: pd.DataFrame):
     population_size = len(df)
     if population_size <= 50:
         sample_size = population_size
     else:
-        sample_size = int(round(calculate_sample_size(population_size,
-                                                  0.01,
-                                                  1 - 0.005)))
+        sample_size = int(round(calculate_sample_size(population_size, 0.01, 1 - 0.005)))
 
     population_size = len(df)
     input_data_sample_indexes = random.sample(range(population_size), sample_size)
     return df.iloc[input_data_sample_indexes]
+
 
 def infer_types(data: DataSource) -> TypeInformation:
     type_information = TypeInformation()
@@ -277,12 +275,11 @@ def infer_types(data: DataSource) -> TypeInformation:
     sample_df = sample_data(data)
     sample_size = len(sample_df)
     population_size = len(data)
-    log.info(f'Analyzing a sample of {sample_size} '
-                              f'from a total population of {population_size},'
-                              f' this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.')
+    log.info(f'Analyzing a sample of {sample_size}')
+    log.info(f'from a total population of {population_size}, this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.')
 
     nr_procs = get_nr_procs(data)
-    if nr_procs > 1 and False:
+    if nr_procs > 1:
         log.info(f'Using {nr_procs} processes to deduct types.')
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
@@ -315,9 +312,7 @@ def infer_types(data: DataSource) -> TypeInformation:
     if nr_procs > 1:
         pool = mp.Pool(processes=nr_procs)
         answer_arr = pool.map(get_identifier_description_mp, [
-            (data[x],
-            x,
-            type_information.dtypes[x])
+            (data[x], x, type_information.dtypes[x])
             for x in sample_df.columns.values
         ])
         pool.close()
@@ -325,7 +320,7 @@ def infer_types(data: DataSource) -> TypeInformation:
     else:
         answer_arr = []
         for x in sample_df.columns.values:
-            answer = get_identifier_description_mp([data[x], x,type_information.dtypes[x]])
+            answer = get_identifier_description_mp([data[x], x, type_information.dtypes[x]])
             answer_arr.append(answer)
 
     for i, col_name in enumerate(sample_df.columns.values):

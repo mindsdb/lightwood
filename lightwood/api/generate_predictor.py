@@ -10,6 +10,7 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
 
     encoder_code = '{\n            ' + ',\n            '.join(feature_code_arr) + '\n        }'
     import_code = '\n'.join(lightwood_config.imports)
+    config_dump: str = lightwood_config.to_dict()
 
     return f"""{import_code}
 import pandas as pd
@@ -17,6 +18,7 @@ from mindsdb_datasources import DataSource
 from lightwood.helpers.seed import seed
 from lightwood.helpers.log import log
 import lightwood
+from lightwood.api import LightwoodConfig
 
 
 class Predictor():
@@ -27,6 +29,7 @@ class Predictor():
     def learn(self, data: DataSource) -> None:
         # Build a Graph from the JSON
         # Using eval is a bit ugly and we could replace it with factories, personally I'm against this, as it ads pointless complexity
+        self.lightwood_config = LightwoodConfig({config_dump})
         self.encoders = {encoder_code}
 
         log.info('Cleaning up, transforming and splitting the data')

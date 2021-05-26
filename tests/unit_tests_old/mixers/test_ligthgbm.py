@@ -3,10 +3,10 @@ import random
 import pandas
 from lightwood.api.data_source import DataSource
 from lightwood.data_schemas.predictor_config import predictor_config_schema
-from lightwood.mixers.lightgbm import LightGBMMixer
+from lightwood.mixers.lightgbm import LightGBM
 
 
-class TestLightGBMMixer(unittest.TestCase):
+class TestLightGBM(unittest.TestCase):
     def test_fit_and_predict(self):
         config = {
             'input_features': [
@@ -45,7 +45,7 @@ class TestLightGBMMixer(unittest.TestCase):
         train_ds = DataSource(data_frame, config)
         test_ds = train_ds.subset(0.25)
 
-        mixer = LightGBMMixer()
+        mixer = LightGBM()
         mixer.fit(train_ds, test_ds )
         _ = mixer.predict(train_ds.make_child(data_frame[['x', 'y']]))
 
@@ -76,7 +76,7 @@ class TestLightGBMMixer(unittest.TestCase):
         train_ds = DataSource(data_frame, config)
         test_ds = train_ds.subset(0.25)
 
-        mixer = LightGBMMixer()
+        mixer = LightGBM()
         mixer.fit(train_ds, test_ds)
         preds = mixer.predict(train_ds.make_child(data_frame[['x', 'y']]))
         print(preds)

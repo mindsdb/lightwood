@@ -30,3 +30,4 @@ flair >= 0.5,<=0.6.1
 nonconformist >= 2.1.0
 dill >= 0.3.1.1
 mindsdb_datasources >= 1.1.0
+dataclasses-json >= 0.5.0

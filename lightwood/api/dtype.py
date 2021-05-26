@@ -1,6 +1,4 @@
-from enum import Enum
-
-class dtype(Enum):
+class dtype():
     binary = 'binary'
     integer = 'integer'
     float = 'float'

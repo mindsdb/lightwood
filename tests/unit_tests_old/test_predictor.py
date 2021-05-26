@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 from lightwood import Predictor
-from lightwood.mixers import NnMixer, BoostMixer, SklearnMixer, LightGBMMixer
+from lightwood.mixers import NnMixer, BoostMixer, SklearnMixer, LightGBM
 
 
 class TestPredictor(unittest.TestCase):
@@ -97,7 +97,7 @@ class TestPredictor(unittest.TestCase):
             "output_features": [
                 {"name": "output", "type": "numeric"},
             ],
-            "mixer": {"class": LightGBMMixer},
+            "mixer": {"class": LightGBM},
         }
 
         inpx = ["this is a test case of text", "lightwood is awesome!"] *100
