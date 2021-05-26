@@ -11,8 +11,7 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
     encoder_code = '{\n' + '\n,'.join(feature_code_arr) + '\n}'
     import_code = '\n'.join(lightwood_config.imports)
 
-    return f"""
-{import_code}
+    return f"""{import_code}
 import pandas as pd
 from mindsdb_datasources import DataSource
 import torch
@@ -45,23 +44,23 @@ class Predictor():
                 encoder.prepare(pd.concat(folds[0:nfolds])[col_name])
 
         log.info('Featurizing the data')
-        encoded_folds = lightwood.encode(self.encoders, folds, self.target)
+        encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
 
         log.info('Training the models')
         self.models = {lightwood_config.output.models}
         for model in self.models:
-            model.fit(encoded_data[0:nfolds], folds[0:nfolds])
+            model.fit(encoded_ds_arr[0:nfolds], folds[0:nfolds])
 
         log.info('Ensembling the model')
-        self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_data[nfolds], data[nfolds])
+        self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[nfolds], data[nfolds])
 
         log.info('Analyzing the ensemble')
         # Add back when analysis works
-        #self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_data[nfolds], data[nfolds])
+        #self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds], data[nfolds])
 
     def predict(self, data: DataSource) -> pd.DataFrame:
-        encoded_data = lightwood.encode(self.encoders, data)
-        df = self.ensemble(encoded_data)
+        encoded_ds_arr = lightwood.encode(self.encoders, data)
+        df = self.ensemble(encoded_ds_arr)
         return df
     """
 
