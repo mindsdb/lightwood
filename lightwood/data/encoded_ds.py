@@ -48,10 +48,7 @@ class EncodedDs(Dataset):
         return self.data_frame[column_name]
 
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
-        encoded_vals: List[torch.FloatTensor] = []
-        for i in range(len(self)):
-            encoded_vals.append(self.encoders[column_name].encode(self.data_frame[column_name]))
-        return torch.stack(encoded_vals)
+        return self.encoders[column_name].encode(self.data_frame[column_name])
 
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
@@ -71,4 +68,4 @@ class ConcatedEncodedDs(EncodedDs):
 
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         encoded_df_arr = [x.get_encoded_column_data(column_name) for x in self.encoded_ds_arr]
-        return torch.stack(encoded_df_arr)
+        return torch.cat(encoded_df_arr, 0)

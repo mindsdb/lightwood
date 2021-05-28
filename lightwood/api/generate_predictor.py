@@ -68,7 +68,7 @@ class Predictor():
         self.dependencies = {dependency_code}
 
         log.info('Cleaning up, transforming and splitting the data')
-        data = {lightwood_config.cleaner}(data)
+        data = {lightwood_config.cleaner}(data, self.lightwood_config)
         folds = {lightwood_config.splitter}(data, 10)
         nfolds = len(data)
 
