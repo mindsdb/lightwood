@@ -1,14 +1,8 @@
-import importlib
-import inspect
-import copy
-import random
-import string
 from typing import List, Tuple
 import torch
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
-from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 from lightwood.encoder.base import BaseEncoder
 
 
@@ -39,11 +33,11 @@ class EncodedDs(Dataset):
 
         X = torch.FloatTensor()
         for col in self.data_frame:
-            if col != target:
-                encoded_tensor = self.encoders[col_name].encode(self.data_frame.iloc[idx][col_name])[0]
+            if col != self.target:
+                encoded_tensor = self.encoders[col].encode(self.data_frame.iloc[idx][col])[0]
                 X = torch.cat([X, encoded_tensor])
 
-        Y = self.encoders[target].encode(self.data_frame.iloc[idx][col_name])[0]
+        Y = self.encoders[self.target].encode(self.data_frame.iloc[idx][col])[0]
 
         if self.cache_encoded:
             self.cache[idx] = (X, Y)
@@ -56,7 +50,7 @@ class EncodedDs(Dataset):
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         encoded_vals: List[torch.FloatTensor] = []
         for i in range(len(self)):
-            encoded_vals.append(self.encoders[col_name].encode(self.data_frame[col_name]))
+            encoded_vals.append(self.encoders[column_name].encode(self.data_frame[column_name]))
         return torch.stack(encoded_vals)
 
 
