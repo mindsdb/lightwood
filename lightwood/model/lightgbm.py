@@ -39,7 +39,7 @@ class LightGBM(BaseModel):
     device_str: str
 
     def __init__(self, lightwood_config: LightwoodConfig):
-        super().__init__()
+        super().__init__(lightwood_config)
         self.model = None
         self.ordinal_encoder = None
         self.label_set = set()
@@ -53,7 +53,7 @@ class LightGBM(BaseModel):
                 self.device_str = 'cpu'
             else:
                 self.device_str = 'gpu'
-
+        
         self.max_bin = 255
         if self.device_str == 'gpu':
             self.max_bin = 63  # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
