@@ -46,9 +46,10 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         name=target,
         data_dtype=type_information.dtypes[target],
         encoder=None,
-        models='[Nn(self.lightwood_config), LightGBM(self.lightwood_config)]',
+        models='[LightGBM(self.lightwood_config)]',
         ensemble='BestOf'
     )
+
     output.encoder = lookup_encoder(type_information.dtypes[target], True, output)
 
     features: Dict[str, Feature] = {}
