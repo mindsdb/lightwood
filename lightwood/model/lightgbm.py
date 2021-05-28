@@ -1,9 +1,11 @@
+from copy import deepcopy
+import pandas as pd
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.api.types import LightwoodConfig
-from lightwooda.api import dtype
+from lightwood.api import dtype
 from typing import List, Set
 import numpy as np
-import optuna.integration.lightgbm as optunna_lightgbm
+import optuna.integration.lightgbm as optuna_lightgbm
 import lightgbm
 import optuna
 import torch
@@ -11,7 +13,6 @@ import time
 from lightwood.helpers.log import log
 from lightwood.helpers.device import get_devices
 from sklearn.preprocessing import OrdinalEncoder
-from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
 
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
@@ -57,8 +58,7 @@ class LightGBM(BaseModel):
         if self.device_str == 'gpu':
             self.max_bin = 63  # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
 
-    def _fit(self, ds_arr: List[EncodedDs]):
-        
+    def fit(self, ds_arr: List[EncodedDs]) -> None:
         data = {
             'train': {'ds': ConcatedEncodedDs(ds_arr[0:-1]), 'data': None, 'label_data': {}},
             'test': {'ds': ConcatedEncodedDs(ds_arr[-1:]), 'data': None, 'label_data': {}}
@@ -119,20 +119,38 @@ class LightGBM(BaseModel):
             validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
             start = time.time()
             params['num_iterations'] = 1
-            bst = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
+            self.model = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
             end = time.time()
             seconds_for_one_iteration = max(0.1, end - start)
-            log.info(f'A single GBM itteration takes {seconds_for_one_iteration} seconds')
+            log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
             max_itt = int(self.lightwood_config.problem_definition.time_per_model / seconds_for_one_iteration)
             num_iterations = max(1, min(num_iterations, max_itt))
             # Turn on grid search if training doesn't take too long using it
             if max_itt >= num_iterations and seconds_for_one_iteration < 10:
-                model_generator = optunna_lightgbm if self.grid_search else lightgbm
+                model_generator = optuna_lightgbm if self.grid_search else lightgbm
                 kwargs['time_budget'] = self.lightwood_config.problem_definition.time_per_model
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
-        
+
         log.info(f'Training GBM ({model_generator}) with {num_iterations} iterations given {self.stop_training_after_seconds} seconds constraint')
         params['num_iterations'] = num_iterations
-        self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)   
+        self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
+
+    def predict(self, ds: EncodedDs) -> pd.DataFrame:
+        data = None
+        for input_col in self.lightwood_config.features.keys():
+            if data is None:
+                data = ds.get_encoded_column_data(input_col).to(self.device)
+            else:
+                data = torch.cat((data, ds.get_encoded_column_data(input_col).to(self.device)), 1)
+        data = data.tolist()
+
+        ydf = pd.DataFrame({'predictions': self.model.predict(data)})
+
+        if self.ordinal_encoder is not None:
+            ydf['class_distribution'] = deepcopy(ydf['predictions'])
+            ydf['class_labels'] = {i: cls for i, cls in enumerate(self.all_classes)}
+            ydf = self.ordinal_encoder.inverse_transform(np.argmax(ydf['predictions'], axis=1).reshape(-1, 1)).flatten()
+
+        return ydf
