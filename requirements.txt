@@ -24,7 +24,7 @@ scikit-learn >= 0.22.1, <= 0.23.2
 colorlog >= 4.0.2
 ImageHash == 4.0
 imageio == 2.5.0
-pillow<7
+pillow < 7
 portalocker >= 1.7.0
 flair >= 0.5,<=0.6.1
 nonconformist >= 2.1.0
