@@ -63,20 +63,18 @@ def type_check_sequence(element: object) -> str:
 
 
 def type_check_date(element: object) -> str:
-    dtype_guess = None
     try:
         dt = dateutil.parser.parse(element)
 
         # Not accurate 100% for a single datetime str,
         # but should work in aggregate
         if dt.hour == 0 and dt.minute == 0 and dt.second == 0 and len(element) <= 16:
-            dtype_guess = dtype.date
+            return dtype.date
         else:
-            dtype_guess = dtype.datetime
+            return dtype.datetime
 
     except ValueError:
-        pass
-    return dtype_guess
+        return None
 
 
 def count_data_types_in_column(data):
