@@ -19,5 +19,9 @@ from lightwood.helpers.log import log
 # Encoders that depend on optiona dependencies
 try:
     from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
-except Exception as e:
+except Exception:
+    AmplitudeTsEncoder = None
     log.info('Unable to import AmplitudeTsEncoder, if you wish to encode audio data please install pydub and initialize lightwood again')
+
+
+__all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NnAutoEncoder', 'NumericEncoder', 'TsNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder', 'CategoricalAutoEncoder', 'TsRnnEncoder', 'TimeSeriesPlainEncoder', 'MultiHotEncoder', 'PretrainedLangEncoder', 'AmplitudeTsEncoder']
