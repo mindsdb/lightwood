@@ -1,3 +1,6 @@
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.api.types import LightwoodConfig
+from typing import List, Set
 import numpy as np
 import optuna.integration.lightgbm as lgb
 import lightgbm
@@ -19,43 +22,51 @@ def check_gpu_support():
         label = np.random.randint(2, size=50)
         train_data = lightgbm.Dataset(data, label=label)
         params = {'num_iterations': 1, 'device': 'gpu'}
-        gbm = lightgbm.train(params, train_set=train_data)
+        lightgbm.train(params, train_set=train_data)
         return True
-    except Exception as e:
+    except Exception:
         return False
 
+
 class LightGBM(BaseModel):
-    def __init__(self, stop_training_after_seconds=None, grid_search=False):
+    model: lightgbm.LGBMModel
+    ordinal_encoder: OrdinalEncoder
+    label_set: Set[str]
+    max_bin: int
+    device: torch.device
+    device_str: str
+
+    def __init__(self, lightwood_config: LightwoodConfig):
         super().__init__()
-        self.models = {}
-        self.ord_encs = {}
-        self.label_sets = {}
-        self.stop_training_after_seconds = stop_training_after_seconds
-        self.grid_search = grid_search  # using Optuna
+        self.model = None
+        self.ordinal_encoder = None
+        self.label_set = set()
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
-        self.device, _ = get_devices()
-        self.device_str = 'cpu' if str(self.device) == 'cpu' else 'gpu'
-        if self.device_str == 'gpu':
+        self.device, self.device_str = get_devices()
+        if self.device_str != 'cpu':
             gpu_works = check_gpu_support()
             if not gpu_works:
                 self.device = torch.device('cpu')
                 self.device_str = 'cpu'
+            else:
+                self.device_str = 'gpu'
 
-        self.max_bin = 255  # Default value
+        self.max_bin = 255
         if self.device_str == 'gpu':
             self.max_bin = 63  # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
 
-    def _fit(self, train_ds, test_ds=None):
-        """
-        :param train_ds: DataSource
-        :param test_ds: DataSource
-        """
-
+    def _fit(self, ds_arr: List[EncodedDs]):
+        
         data = {
-            'train': {'ds': train_ds, 'data': None, 'label_data': {}},
-            'test': {'ds': test_ds, 'data': None, 'label_data': {}}
+            'train': {'ds': ConcatedEncodedDs(ds_arr[0:-1]), 'data': None, 'label_data': {}},
+            'test': {'ds': ConcatedEncodedDs(ds_arr[-1:]), 'data': None, 'label_data': {}}
         }
+
+        input_col_arr = list(self.lightwood_config.features.keys())
+        output_col = self.lightwood_config.output.name
+        for input_col in input_col_arr:
+            
 
         # Order is important here
         for subset_name in ['train','test']:
