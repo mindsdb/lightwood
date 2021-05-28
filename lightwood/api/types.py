@@ -10,7 +10,7 @@ from dataclasses_json.core import _asdict, Json
 class Feature:
     name: str
     data_dtype: str
-    dependency: List[str]
+    dependency: List[str] = None
     encoder: str = None
 
 
@@ -76,7 +76,7 @@ class TimeseriesSettings:
             timeseries_settings = TimeseriesSettings(is_timeseries=False)
 
         return timeseries_settings
-    
+
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
         return _asdict(self, encode_json=encode_json)
 
@@ -86,7 +86,7 @@ class ProblemDefinition:
     target: str
     time_per_model: int
     timeseries_settings: TimeseriesSettings
-    
+
     @staticmethod
     def from_dict(obj: Dict) -> None:
         target = obj['target']
@@ -115,4 +115,3 @@ class LightwoodConfig:
     splitter: str = None
     analyzer: str = None
     imports: str = None
-
