@@ -38,7 +38,9 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
     return encoder_initialization
 
 
-def generate_config(target: str, type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> LightwoodConfig:
+def generate_config(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> LightwoodConfig:
+    
+    target = problem_definition.target
 
     output = Output(
         name=target,

@@ -1,4 +1,6 @@
 from typing import Dict
+
+from nltk.corpus.reader import dependency
 from lightwood.api.types import ProblemDefinition
 import lightwood
 import pprint
@@ -13,6 +15,7 @@ def dump_config(lightwood_config: LightwoodConfig) -> str:
     del config_dump['splitter']
     for feature in config_dump['features'].values():
         del feature['encoder']
+        del feature['dependency']
     del config_dump['imports']
     del config_dump['output']['encoder']
     del config_dump['output']['models']
@@ -22,10 +25,14 @@ def dump_config(lightwood_config: LightwoodConfig) -> str:
 
 def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
     feature_code_arr = []
+    dependency_arr = []
     for feature in lightwood_config.features.values():
         feature_code_arr.append(f"""'{feature.name}': {feature.encoder}""")
+        dependency_arr.append(f"""'{feature.name}': {feature.dependency}""")
 
     encoder_code = '{\n            ' + ',\n            '.join(feature_code_arr) + '\n        }'
+    dependency_code = '{\n            ' + ',\n            '.join(dependency_arr) + '\n        }'
+
     import_code = '\n'.join(lightwood_config.imports)
     config_dump = dump_config(lightwood_config)
 
@@ -49,7 +56,6 @@ class Predictor():
     encoders: Dict[str, BaseEncoder]
     ensemble: BaseEnsemble
 
-
     def __init__(self):
         seed()
         self.target = '{lightwood_config.output.name}'
@@ -59,6 +65,7 @@ class Predictor():
         # Using eval is a bit ugly and we could replace it with factories, personally I'm against this, as it ads pointless complexity
         self.lightwood_config = LightwoodConfig.from_dict({config_dump})
         self.encoders = {encoder_code}
+        self.dependencies = {dependency_code}
 
         log.info('Cleaning up, transforming and splitting the data')
         data = {lightwood_config.cleaner}(data)
@@ -67,10 +74,19 @@ class Predictor():
 
         log.info('Training the encoders')
         for col_name, encoder in self.encoders.items():
-            if encoder.uses_folds:
-                encoder.prepare([x[col_name] for x in folds[0:nfolds]])
-            else:
-                encoder.prepare(pd.concat(folds[0:nfolds])[col_name])
+            # @TODO recursive later to handle depndency columns that have dependencies
+            if len(self.dependencies[col_name]) > 0:
+                for dep_col in self.dependencies[col_name]:
+                    if encoder.uses_folds:
+                        encoder.prepare([x[dep_col] for x in folds[0:nfolds]])
+                    else:
+                        encoder.prepare(pd.concat(folds[0:nfolds])[dep_col])  
+            
+            if not encoder._prepared:
+                if encoder.uses_folds:
+                    encoder.prepare([x[col_name] for x in folds[0:nfolds]])
+                else:
+                    encoder.prepare(pd.concat(folds[0:nfolds])[col_name])    
 
         log.info('Featurizing the data')
         encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
@@ -95,11 +111,11 @@ class Predictor():
 """
 
 
-def generate_predictor(target: str = None, datasource: DataSource = None, problem_definition: ProblemDefinition = None, lightwood_config: LightwoodConfig = None) -> str:
+def generate_predictor(problem_definition: ProblemDefinition = None, datasource: DataSource = None, lightwood_config: LightwoodConfig = None) -> str:
     if lightwood_config is None:
         type_information = lightwood.data.infer_types(datasource)
         statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information)
-        lightwood_config = lightwood.generate_config(target, type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
+        lightwood_config = lightwood.generate_config(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
     predictor_code = generate_predictor_code(lightwood_config)
     return predictor_code
