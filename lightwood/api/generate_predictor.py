@@ -97,7 +97,7 @@ class Predictor():
             model.fit(encoded_ds_arr[0:nfolds])
 
         log.info('Ensembling the model')
-        self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[nfolds], data[nfolds])
+        self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[nfolds], self.lightwood_config)
 
         log.info('Analyzing the ensemble')
         # Add back when analysis works
