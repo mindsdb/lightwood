@@ -323,6 +323,4 @@ def infer_types(data: DataSource, pct_invalid: float) -> TypeInformation:
 
         # @TODO Column removal logic was here, if the column was an identifier, move it elsewhere
 
-    print(type_information)
-    exit()
     return type_information
