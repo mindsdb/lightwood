@@ -137,20 +137,16 @@ class LightGBM(BaseModel):
         params['num_iterations'] = num_iterations
         self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
 
-    def predict(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         data = None
         for input_col in self.lightwood_config.features.keys():
             if data is None:
                 data = ds.get_encoded_column_data(input_col).to(self.device)
             else:
                 data = torch.cat((data, ds.get_encoded_column_data(input_col).to(self.device)), 1)
+                
         data = data.tolist()
-
-        ydf = pd.DataFrame({'predictions': self.model.predict(data)})
-
-        if self.ordinal_encoder is not None:
-            ydf['class_distribution'] = deepcopy(ydf['predictions'])
-            ydf['class_labels'] = {i: cls for i, cls in enumerate(self.all_classes)}
-            ydf = self.ordinal_encoder.inverse_transform(np.argmax(ydf['predictions'], axis=1).reshape(-1, 1)).flatten()
-
+        raw_predictions = self.model.predict(data)
+        decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
+        ydf = pd.DataFrame({'predictions': decoded_predictions})
         return ydf
