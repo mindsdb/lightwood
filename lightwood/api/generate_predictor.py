@@ -106,7 +106,7 @@ class Predictor():
         # self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], data[nfolds-1])
 
     def predict(self, data: DataSource) -> pd.DataFrame:
-        encoded_ds_arr = lightwood.encode(self.encoders, data)
+        encoded_ds_arr = lightwood.encode(self.encoders, data, self.target)
         df = self.ensemble(encoded_ds_arr)
         return df
 
