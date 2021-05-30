@@ -1,4 +1,12 @@
 import os
 import logging
 
-log = logging.getLogger(f'lightwood.{os.getpid()}')
+
+def initialize_log():
+    logging.basicConfig()
+    log = logging.getLogger()
+    log.setLevel(logging.DEBUG)
+    return log
+
+
+log = initialize_log()

@@ -90,8 +90,9 @@ def count_data_types_in_column(data):
             dtype_guess = type_checker(element)
             if dtype_guess is not None:
                 dtype_counts[dtype_guess] += 1
-            else:
-                dtype_counts[dtype.invalid] += 1
+                break
+        else:
+            dtype_counts[dtype.invalid] += 1
 
     return dtype_counts
 
@@ -119,12 +120,20 @@ def get_column_data_type(arg_tup):
     dtype_counts = count_data_types_in_column(data)
 
     known_dtype_dist = {k: v for k, v in dtype_counts.items()}
-    
+    if dtype.float in known_dtype_dist and dtype.integer in known_dtype_dist:
+        known_dtype_dist[dtype.float] += known_dtype_dist[dtype.integer]
+        del known_dtype_dist[dtype.integer]
+
+    if dtype.datetime in known_dtype_dist and dtype.date in known_dtype_dist:
+        known_dtype_dist[dtype.datetime] += known_dtype_dist[dtype.date]
+        del known_dtype_dist[dtype.date]
+
     max_known_dtype, max_known_dtype_count = max(
         known_dtype_dist.items(),
         key=lambda kv: kv[1]
     )
 
+    print(known_dtype_dist, col_name)
     actual_pct_invalid = 100 * (len(data) - max_known_dtype_count) / len(data)
     if max_known_dtype is None or max_known_dtype == dtype.invalid or actual_pct_invalid > pct_invalid:
         curr_dtype = None
@@ -182,14 +191,12 @@ def get_column_data_type(arg_tup):
                 else:
                     curr_dtype = curr_dtype.short_text
 
-                dtype_counts = {curr_dtype: len(data)}
-
-                return curr_dtype, dtype_counts, additional_info, warn, info
+                return curr_dtype, {curr_dtype: len(data)}, additional_info, warn, info
 
     if curr_dtype in [dtype.categorical, dtype.rich_text, dtype.short_text]:
-        dtype_counts = {curr_dtype: len(data)}
+        known_dtype_dist = {curr_dtype: len(data)}
 
-    return curr_dtype, dict(dtype_counts), additional_info, warn, info
+    return curr_dtype, known_dtype_dist, additional_info, warn, info
 
 
 def calculate_sample_size(

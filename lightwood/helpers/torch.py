@@ -30,6 +30,7 @@ class LightwoodAutocast:
     to activate the feature only when the GPU has tensor cores to leverage AMP.
     """
     active = False
+
     def __init__(self, enabled=True):
         self.major = 0  # GPU major version
         torch_version = [int(i) for i in torch.__version__.split('.')[:-1]]

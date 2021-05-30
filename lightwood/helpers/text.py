@@ -89,7 +89,7 @@ def clean_float(val):
     if isinstance(val, (int, float)):
         return float(val)
 
-    if isinstance(val, np.float):
+    if isinstance(val, float):
         return val
 
     val = str(val).strip(' ')
