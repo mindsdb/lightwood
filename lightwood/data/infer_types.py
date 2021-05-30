@@ -133,7 +133,6 @@ def get_column_data_type(arg_tup):
         key=lambda kv: kv[1]
     )
 
-    print(known_dtype_dist, col_name)
     actual_pct_invalid = 100 * (len(data) - max_known_dtype_count) / len(data)
     if max_known_dtype is None or max_known_dtype == dtype.invalid or actual_pct_invalid > pct_invalid:
         curr_dtype = None

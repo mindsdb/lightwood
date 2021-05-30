@@ -70,7 +70,7 @@ class Predictor():
         log.info('Cleaning up, transforming and splitting the data')
         data = {lightwood_config.cleaner}(data, self.lightwood_config)
         folds = {lightwood_config.splitter}(data, 10)
-        nfolds = len(data)
+        nfolds = len(folds)
 
         log.info('Training the encoders')
         for col_name, encoder in self.encoders.items():
