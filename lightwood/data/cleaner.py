@@ -21,7 +21,7 @@ def cleaner(data: DataSource, lightwood_config: LightwoodConfig) -> pd.DataFrame
                 new_data.append(None)
                 log.warning(f'Unable to parse elemnt: {element} or type {col_data.data_dtype} from column {col_data.name}. Excetpion: {e}')
 
-        pct_invalid = 100 * (len(new_data) - len([x for x in new_data if x is None])) / len(new_data)
+        pct_invalid = 100 * (len(new_data) - len([x for x in new_data if x is not None])) / len(new_data)
         
         if pct_invalid > lightwood_config.problem_definition.pct_invalid:
             err = f'Too many ({pct_invalid}%) invalid values in column {col_data.name} of type {col_data.data_dtype}'
