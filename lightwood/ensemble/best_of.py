@@ -10,7 +10,7 @@ class BestOf(BaseEnsemble):
     best_index: int
 
     def __init__(self, models: List[BaseModel], test_ds: EncodedDs, lightwood_config: LightwoodConfig) -> None:
-        super().__init__(test_ds, lightwood_config)
+        super().__init__(models, test_ds, lightwood_config)
         # @TODO: Need some shared accuracy functionality to determine model selection here
         self.best_index = 0
 

@@ -11,7 +11,7 @@ class TestBasic(unittest.TestCase):
 
         datasource = FileDS('tests/data/adult.csv')
 
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income', 'seconds_per_model': 100}), datasource)
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income', 'seconds_per_model': 2}), datasource)
 
         try:
             with open('dynamic_predictor.py', 'w') as fp:
