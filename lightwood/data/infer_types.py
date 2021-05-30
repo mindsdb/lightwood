@@ -91,7 +91,7 @@ def count_data_types_in_column(data):
             if dtype_guess is not None:
                 dtype_counts[dtype_guess] += 1
                 break
-
+    
     return dtype_counts
 
 
@@ -105,7 +105,7 @@ def get_column_data_type(arg_tup):
     :return: type and type distribution, we can later use type_distribution to determine data quality
     NOTE: type distribution is the count that this column has for belonging cells to each DATA_TYPE
     """
-    data, full_data, col_name = arg_tup
+    data, full_data, col_name, pct_invalid = arg_tup
     additional_info = {'other_potential_dtypes': []}
 
     warn = []
@@ -118,7 +118,7 @@ def get_column_data_type(arg_tup):
     dtype_counts = count_data_types_in_column(data)
 
     # @TODO consider removing or flagging rows where data type is unknown in the future, might just be corrupt data...
-    known_dtype_dist = {k: v for k, v in dtype_counts.items() if k != 'Unknown'}
+    known_dtype_dist = {k: v for k, v in dtype_counts.items()}
 
     if known_dtype_dist:
         max_known_dtype, max_known_dtype_count = max(
@@ -128,14 +128,13 @@ def get_column_data_type(arg_tup):
     else:
         max_known_dtype, max_known_dtype_count = None, None
 
+    if 100 - max_known_dtype_count / len(data) > pct_invalid or max_known_dtype is None:
+        curr_dtype = None
+    else:
+        curr_dtype = max_known_dtype
+
     nr_vals = len(full_data)
     nr_distinct_vals = len(set(full_data))
-
-    # Data is mostly not unknown, go with type counting results
-    if max_known_dtype and max_known_dtype_count > dtype_counts['Unknown']:
-        curr_dtype = max_known_dtype
-    else:
-        curr_dtype = None
 
     # Check for Tags subtype
     if curr_dtype != dtype.array:
@@ -266,7 +265,7 @@ def sample_data(df: pd.DataFrame):
     return df.iloc[input_data_sample_indexes]
 
 
-def infer_types(data: DataSource) -> TypeInformation:
+def infer_types(data: DataSource, pct_invalid: float) -> TypeInformation:
     type_information = TypeInformation()
     data = data.df
 
@@ -282,14 +281,14 @@ def infer_types(data: DataSource) -> TypeInformation:
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
         answer_arr = pool.map(get_column_data_type, [
-            (sample_df[x].dropna(), data[x], x) for x in sample_df.columns.values
+            (sample_df[x].dropna(), data[x], x, pct_invalid) for x in sample_df.columns.values
         ])
         pool.close()
         pool.join()
     else:
         answer_arr = []
         for x in sample_df.columns.values:
-            answer_arr.append(get_column_data_type([sample_df[x].dropna(), data[x], x]))
+            answer_arr.append(get_column_data_type([sample_df[x].dropna(), data[x], x, pct_invalid]))
 
     for i, col_name in enumerate(sample_df.columns.values):
         (data_dtype, data_dtype_dist, additional_info, warn, info) = answer_arr[i]
@@ -327,4 +326,6 @@ def infer_types(data: DataSource) -> TypeInformation:
 
         # @TODO Column removal logic was here, if the column was an identifier, move it elsewhere
 
+    print(type_information)
+    exit()
     return type_information

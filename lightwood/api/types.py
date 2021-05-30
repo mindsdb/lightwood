@@ -84,19 +84,22 @@ class TimeseriesSettings:
 @dataclass
 class ProblemDefinition:
     target: str
-    time_per_model: int
+    seconds_per_model: int
     timeseries_settings: TimeseriesSettings
+    pct_invalid: float
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
         target = obj['target']
-        time_per_model = obj.get('time_per_model', 18446744073709551615)
+        seconds_per_model = obj.get('seconds_per_model', 18446744073709551615)
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
+        pct_invalid = obj.get('pct_invalid', 1)
 
         problem_definition = ProblemDefinition(
             target=target,
-            time_per_model=time_per_model,
-            timeseries_settings=timeseries_settings
+            seconds_per_model=seconds_per_model,
+            timeseries_settings=timeseries_settings,
+            pct_invalid=pct_invalid,
         )
 
         return problem_definition
