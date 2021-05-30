@@ -123,12 +123,12 @@ class LightGBM(BaseModel):
             end = time.time()
             seconds_for_one_iteration = max(0.1, end - start)
             log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
-            max_itt = int(self.lightwood_config.problem_definition.time_per_model / seconds_for_one_iteration)
+            max_itt = int(self.lightwood_config.problem_definition.seconds_per_model / seconds_for_one_iteration)
             num_iterations = max(1, min(num_iterations, max_itt))
             # Turn on grid search if training doesn't take too long using it
             if max_itt >= num_iterations and seconds_for_one_iteration < 10:
                 model_generator = optuna_lightgbm if self.grid_search else lightgbm
-                kwargs['time_budget'] = self.lightwood_config.problem_definition.time_per_model
+                kwargs['time_budget'] = self.lightwood_config.problem_definition.seconds_per_model
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])

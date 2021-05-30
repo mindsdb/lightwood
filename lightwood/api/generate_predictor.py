@@ -113,7 +113,7 @@ class Predictor():
 
 def generate_predictor(problem_definition: ProblemDefinition = None, datasource: DataSource = None, lightwood_config: LightwoodConfig = None) -> str:
     if lightwood_config is None:
-        type_information = lightwood.data.infer_types(datasource)
+        type_information = lightwood.data.infer_types(datasource, problem_definition.pct_invalid)
         statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information)
         lightwood_config = lightwood.generate_config(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
