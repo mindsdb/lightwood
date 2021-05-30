@@ -77,16 +77,18 @@ class Predictor():
             # @TODO recursive later to handle depndency columns that have dependencies
             if len(self.dependencies[col_name]) > 0:
                 for dep_col in self.dependencies[col_name]:
+                    log.info('Preparting encoder for column: ' + col_name)
                     if encoder.uses_folds:
-                        encoder.prepare([x[dep_col] for x in folds[0:nfolds]])
+                        encoder.prepare([x[dep_col] for x in folds[0:nfolds-1]])
                     else:
-                        encoder.prepare(pd.concat(folds[0:nfolds])[dep_col])  
+                        encoder.prepare(pd.concat(folds[0:nfolds-1])[dep_col])  
             
             if not encoder._prepared:
+                log.info('Preparting encoder for column: ' + col_name)
                 if encoder.uses_folds:
-                    encoder.prepare([x[col_name] for x in folds[0:nfolds]])
+                    encoder.prepare([x[col_name] for x in folds[0:nfolds-1]])
                 else:
-                    encoder.prepare(pd.concat(folds[0:nfolds])[col_name])    
+                    encoder.prepare(pd.concat(folds[0:nfolds-1])[col_name])    
 
         log.info('Featurizing the data')
         encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
@@ -94,14 +96,14 @@ class Predictor():
         log.info('Training the models')
         self.models = {lightwood_config.output.models}
         for model in self.models:
-            model.fit(encoded_ds_arr[0:nfolds])
+            model.fit(encoded_ds_arr[0:nfolds-1])
 
         log.info('Ensembling the model')
-        self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[nfolds], self.lightwood_config)
+        self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[nfolds-1], self.lightwood_config)
 
         log.info('Analyzing the ensemble')
         # Add back when analysis works
-        # self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds], data[nfolds])
+        # self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], data[nfolds-1])
 
     def predict(self, data: DataSource) -> pd.DataFrame:
         encoded_ds_arr = lightwood.encode(self.encoders, data)
