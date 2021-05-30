@@ -90,8 +90,9 @@ def count_data_types_in_column(data):
             dtype_guess = type_checker(element)
             if dtype_guess is not None:
                 dtype_counts[dtype_guess] += 1
-                break
-    
+            else:
+                dtype_counts[dtype.invalid] += 1
+
     return dtype_counts
 
 
@@ -117,20 +118,14 @@ def get_column_data_type(arg_tup):
 
     dtype_counts = count_data_types_in_column(data)
 
-    # @TODO consider removing or flagging rows where data type is unknown in the future, might just be corrupt data...
     known_dtype_dist = {k: v for k, v in dtype_counts.items()}
     
-    if known_dtype_dist:
-        max_known_dtype, max_known_dtype_count = max(
-            known_dtype_dist.items(),
-            key=lambda kv: kv[1]
-        )
-    else:
-        print(known_dtype_dist, dtype_counts)
-        exit()
-        max_known_dtype, max_known_dtype_count = None, None
+    max_known_dtype, max_known_dtype_count = max(
+        known_dtype_dist.items(),
+        key=lambda kv: kv[1]
+    )
 
-    if max_known_dtype is None or 100 - max_known_dtype_count / len(data) > pct_invalid:
+    if max_known_dtype is None or max_known_dtype == dtype.invalid or 100 - max_known_dtype_count / len(data) > pct_invalid:
         curr_dtype = None
     else:
         curr_dtype = max_known_dtype
