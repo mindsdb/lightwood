@@ -1,26 +1,34 @@
 import numpy as np
 import pandas as pd
+from typing import List
 from copy import deepcopy
 from itertools import product
 from sklearn.preprocessing import OneHotEncoder
+
+from lightwood.model.nn import Nn
+from lightwood.ensemble import BaseEnsemble
+from lightwood.data.encoded_ds import EncodedDs
+from lightwood.helpers.general import evaluate_accuracy
+
+
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
 from lightwood.analysis.nc.nc import RegressorNc, ClassifierNc, MarginErrFunc
 from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc
-
-from lightwood.model.nn import Nn
-from lightwood.helpers.general import evaluate_accuracy
-from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter
 from lightwood.analysis.nc.norm import SelfawareNormalizer
 from lightwood.analysis.nc.util import clean_df, set_conf_range
+from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter
+
 # from mindsdb_native.libs.helpers.accuracy_stats import AccStats
 
 
-def model_analyzer(predictor, config, data):
-    np.seterr(divide='warn', invalid='warn')
-    np.random.seed(0)
-    """
-    # Runs the model on the validation set in order to evaluate the accuracy and confidence of future predictions
-    """
+def model_analyzer(
+        predictor: BaseEnsemble,  # config
+        data: List[EncodedDs]
+    ):
+    """Analyses model on validation set to evaluate its accuracy and confidence of future predictions """
+
+    # np.seterr(divide='warn', invalid='warn')
+
     train_df = data.train_df
     if predictor.lmd['tss']['is_timeseries']:
         train_df = data.train_df[data.train_df['make_predictions'] == True]
