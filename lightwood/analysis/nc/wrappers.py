@@ -1,18 +1,15 @@
 import os
 import torch
-import numpy as np
-from scipy.interpolate import interp1d
 from torch.nn.functional import softmax
-from base import RegressorAdapter
-from base import ClassifierAdapter
-from lightwood.analysis.nc.nc import BaseScorer, RegressionErrFunc
+from lightwood.analysis.nc.base import RegressorAdapter, ClassifierAdapter
 
-from lightwood.api.predictor import Predictor
-from mindsdb_native.config import CONFIG
+from lightwood.model import BaseModel
+# from mindsdb_native.config import CONFIG
 
 
 def t_softmax(x, t=1.0, axis=1):
     """ Softmax with temperature scaling """
+    # @TODO: move this, not a wrapper
     return softmax(torch.Tensor(x) / t, dim=axis).numpy()
 
 
