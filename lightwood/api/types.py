@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
@@ -41,6 +41,8 @@ class TypeInformation:
 @dataclass
 class StatisticalAnalysis:
     nr_rows: int
+    train_std_dev: float
+    train_observed_classes: Union[None, List[str]]
 
 
 @dataclass
@@ -86,6 +88,7 @@ class ProblemDefinition:
     seconds_per_model: int
     timeseries_settings: TimeseriesSettings
     pct_invalid: float
+    fixed_confidence: Union[int, float, None]
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
@@ -93,12 +96,14 @@ class ProblemDefinition:
         seconds_per_model = obj.get('seconds_per_model', None)
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         pct_invalid = obj.get('pct_invalid', 1)
+        fixed_confidence = obj.get('fixed_confidence', None)
 
         problem_definition = ProblemDefinition(
             target=target,
             seconds_per_model=seconds_per_model,
             timeseries_settings=timeseries_settings,
             pct_invalid=pct_invalid,
+            fixed_confidence=fixed_confidence
         )
 
         return problem_definition

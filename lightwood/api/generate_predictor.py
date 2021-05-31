@@ -46,6 +46,7 @@ from lightwood.api import LightwoodConfig
 from lightwood.model import BaseModel
 from lightwood.encoder import BaseEncoder
 from lightwood.ensemble import BaseEnsemble
+from lightwood.analysis import model_analyzer
 from typing import Dict, List
 
 
@@ -103,7 +104,7 @@ class Predictor():
 
         log.info('Analyzing the ensemble')
         # Add back when analysis works
-        # self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], data[nfolds-1])
+        # self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], folds[nfolds-1], self.lightwood_config)
 
     def predict(self, data: DataSource) -> pd.DataFrame:
         encoded_ds = lightwood.encode(self.encoders, data.df, self.target)
@@ -116,7 +117,7 @@ class Predictor():
 def generate_predictor(problem_definition: ProblemDefinition = None, datasource: DataSource = None, lightwood_config: LightwoodConfig = None) -> str:
     if lightwood_config is None:
         type_information = lightwood.data.infer_types(datasource, problem_definition.pct_invalid)
-        statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information)
+        statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information, problem_definition)
         lightwood_config = lightwood.generate_config(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
     import pprint
     pprint.pp(lightwood_config.to_json())
