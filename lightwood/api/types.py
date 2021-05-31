@@ -40,8 +40,7 @@ class TypeInformation:
 @dataclass_json
 @dataclass
 class StatisticalAnalysis:
-    # Addition of stuff here pending discussion with Jorge
-    pass
+    nr_rows: int
 
 
 @dataclass
@@ -91,7 +90,7 @@ class ProblemDefinition:
     @staticmethod
     def from_dict(obj: Dict) -> None:
         target = obj['target']
-        seconds_per_model = obj.get('seconds_per_model', 18446744073709551615)
+        seconds_per_model = obj.get('seconds_per_model', None)
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         pct_invalid = obj.get('pct_invalid', 1)
 

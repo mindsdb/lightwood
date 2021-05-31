@@ -1,13 +1,15 @@
+from typing import List
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 import time
 import copy
 import random
-import operator
 
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from torch.cuda.amp import GradScaler
 
+from lightwood.api.types import LightwoodConfig
 from lightwood.helpers.log import log
 from lightwood.encoder import NumericEncoder
 from lightwood.model.base import BaseModel
@@ -20,64 +22,15 @@ from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossE
 
 class Nn(BaseModel):
 
-    def __init__(self,
-                 selfaware=False,
-                 callback_on_iter=None,
-                 eval_every_x_epochs=20,
-                 dropout_p=0.0,
-                 stop_training_after_seconds=None,
-                 stop_model_bencodersuilding_after_seconds=None,
-                 param_optimizer=None):
-        """
-        :param selfaware: bool
-        :param callback_on_iter: Callable[epoch, training_error, test_error, delta_mean, accuracy]
-        :param eval_every_x_epochs: int
-        :param stop_training_after_seconds: int
-        :param stop_model_building_after_seconds: int
-        :param param_optimizer: ?
-        """
-        super().__init__()
+    def __init__(self, lightwood_config: LightwoodConfig):
+        super().__init__(lightwood_config)
+        self.model = None
 
-        self.selfaware = selfaware
-        self.eval_every_x_epochs = eval_every_x_epochs
-        self.stop_training_after_seconds = stop_training_after_seconds
-        self.stop_model_building_after_seconds = stop_model_building_after_seconds
-        self.param_optimizer = param_optimizer
+    def fit(self, ds_arr: List[EncodedDs]) -> None:
+        train_ds = ConcatedEncodedDs(ds_arr[0:-1])
+        test_ds = ConcatedEncodedDs(ds_arr[-1:])
 
-        self.net = None
-        self.selfaware_net = None
-        self.optimizer = None
-        self.selfaware_optimizer = None
-        self.optimizer_class = None
-        self.optimizer_args = None
-        self.selfaware_optimizer_args = None
-        self.criterion_arr = None
-        self.unreduced_criterion_arr = None
-
-        self.batch_size = 200
-
-        self.nn_class = DefaultNet
-        self.dropout_p = max(0.0, min(1.0, dropout_p))
-        self.dynamic_parameters = {}
-        self.awareness_criterion = None
-        self.awareness_scale_factor = 1/6  # scales self-aware total loss contribution
-        self.selfaware_lr_factor = 2/3      # scales self-aware learning rate compared to mixer
-        self.start_selfaware_training = False
-        self.stop_selfaware_training = False
-        self.is_selfaware = False
-
-        self.max_confidence_per_output = []
-        self.monitor = None
-
-        for k in CONFIG.MONITORING:
-            if CONFIG.MONITORING[k]:
-                from lightwood.mixers.helpers.debugging import TrainingMonitor
-                self.monitor = TrainingMonitor()
-                break
-
-        self.total_iterations = 0
-        self._nonpersistent = {'sampler': None, 'callback': callback_on_iter}
-
+        
     def _default_on_iter(self, epoch, train_error, test_error, delta_mean, accuracy):
         test_error_rounded = round(test_error, 4)
         for col in accuracy:
