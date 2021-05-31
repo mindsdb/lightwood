@@ -22,10 +22,12 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 
 
 def model_analyzer(
-        predictor: BaseEnsemble,  # config
-        data: List[EncodedDs]
+        predictor: BaseEnsemble,
+        encoded_data: EncodedDs,
+        data: pd.DataFrame,
+        # also ProblemDefinition
     ):
-    """Analyses model on validation set to evaluate its accuracy and confidence of future predictions """
+    """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
 
     # np.seterr(divide='warn', invalid='warn')
 
