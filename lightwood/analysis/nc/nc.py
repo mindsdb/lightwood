@@ -7,8 +7,8 @@ Nonconformity functions.
 import abc
 import numpy as np
 import sklearn.base
-from base import ClassifierAdapter, RegressorAdapter
-from base import OobClassifierAdapter, OobRegressorAdapter
+from lightwood.analysis.nc.base import ClassifierAdapter, RegressorAdapter
+from lightwood.analysis.nc.base import OobClassifierAdapter, OobRegressorAdapter
 
 
 # -----------------------------------------------------------------------------
@@ -157,6 +157,27 @@ class AbsErrorErrFunc(RegressionErrFunc):
         nc = np.sort(nc)[::-1]
         border = int(np.floor(significance * (nc.size + 1))) - 1
         # TODO: should probably warn against too few calibration examples
+        border = min(max(border, 0), nc.size - 1)
+        return np.vstack([nc[border], nc[border]])
+
+
+class BoostedAbsErrorErrFunc(RegressionErrFunc):
+    """ Calculates absolute error nonconformity for regression problems. Applies linear interpolation
+    for nonconformity scores when we have less than 100 samples in the validation dataset.
+    """
+    def __init__(self):
+        super(BoostedAbsErrorErrFunc, self).__init__()
+
+    def apply(self, prediction, y):
+        return np.abs(prediction - y)
+
+    def apply_inverse(self, nc, significance):
+        nc = np.sort(nc)[::-1]
+        border = int(np.floor(significance * (nc.size + 1))) - 1
+        if 1 < nc.size < 100:
+            x = np.arange(nc.shape[0])
+            interp = interp1d(x, nc)
+            nc = interp(np.linspace(0, nc.size-1, 100))
         border = min(max(border, 0), nc.size - 1)
         return np.vstack([nc[border], nc[border]])
 

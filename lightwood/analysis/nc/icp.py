@@ -10,7 +10,7 @@ from functools import partial
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from base import RegressorMixin, ClassifierMixin
+from lightwood.analysis.nc.base import RegressorMixin, ClassifierMixin
 
 
 # -----------------------------------------------------------------------------

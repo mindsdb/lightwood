@@ -3,16 +3,16 @@ import pandas as pd
 from copy import deepcopy
 from itertools import product
 from sklearn.preprocessing import OneHotEncoder
-from nc.icp import IcpRegressor, IcpClassifier
-from nc.nc import RegressorNc, ClassifierNc, MarginErrFunc
+from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
+from lightwood.analysis.nc.nc import RegressorNc, ClassifierNc, MarginErrFunc
+from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc
 
 from lightwood.model.nn import Nn
-from mindsdb_native.libs.helpers.general_helpers import pickle_obj, evaluate_accuracy
-from mindsdb_native.libs.constants.mindsdb import *
-from mindsdb_native.libs.helpers.conformal_helpers import ConformalClassifierAdapter, ConformalRegressorAdapter
-from mindsdb_native.libs.helpers.conformal_helpers import BoostedAbsErrorErrFunc, SelfawareNormalizer
-from mindsdb_native.libs.helpers.confidence_helpers import clean_df, set_conf_range
-from mindsdb_native.libs.helpers.accuracy_stats import AccStats
+from lightwood.helpers.general import evaluate_accuracy
+from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter
+from lightwood.analysis.nc.norm import SelfawareNormalizer
+from lightwood.analysis.nc.util import clean_df, set_conf_range
+# from mindsdb_native.libs.helpers.accuracy_stats import AccStats
 
 
 def model_analyzer(predictor, config, data):
@@ -307,7 +307,7 @@ def model_analyzer(predictor, config, data):
         predictor.lmd['accuracy_histogram'][col] = accuracy_histogram
         predictor.lmd['confusion_matrices'][col] = cm
         predictor.lmd['accuracy_samples'][col] = accuracy_samples
-        predictor.hmd['acc_stats'][col] = pickle_obj(acc_stats)
+        # predictor.hmd['acc_stats'][col] = pickle_obj(acc_stats) # TODO: replace pickle_obj with some saving logic
 
     predictor.lmd['validation_set_accuracy'] = normal_accuracy
     if predictor.lmd['stats_v2'][col]['typing']['data_type'] == DATA_TYPES.NUMERIC:
