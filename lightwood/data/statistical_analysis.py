@@ -345,8 +345,10 @@ class DataAnalyzer():
         self.transaction.lmd['data_preparation']['used_row_count'] = len(sample_df)
 
 
-
 def statistical_analysis(data: DataSource, type_information: TypeInformation) -> StatisticalAnalysis:
-    stats = StatisticalAnalysis()
+    df = data.df
+    nr_rows = len(df)
 
-    return stats
+    return StatisticalAnalysis(
+        nr_rows=nr_rows
+    )
