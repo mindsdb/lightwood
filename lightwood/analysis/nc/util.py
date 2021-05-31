@@ -2,12 +2,10 @@ import numpy as np
 from lightwood.api.dtype import dtype
 
 
-def clean_df(df, target, transaction, is_classification, extra_params):
+def clean_df(df, target, is_classification, label_encoders):
     """ Returns cleaned DF for nonconformist calibration """
-    output_columns = transaction.lmd['predict_columns']
-    ignored_columns = extra_params['columns_to_ignore']
-    enc = transaction.hmd['label_encoders'].get(target, None)
-    stats = transaction.lmd['stats_v2']
+    # @TODO: reevaluate whether this can be streamlined inside custom nonconf
+    enc = label_encoders
 
     y = df.pop(target).values
 
@@ -17,12 +15,6 @@ def clean_df(df, target, transaction, is_classification, extra_params):
             y = np.array([cats.index(i) for i in y])
         y = y.astype(int)
 
-    for key, value in stats.items():
-        if key in df.columns and key in output_columns:
-            df.pop(key)
-    for col in ignored_columns:
-        if col in df.columns:
-            df.pop(col)
     return df, y
 
 
@@ -31,8 +23,9 @@ def set_conf_range(X, icp, target, typing_info, lmd, std_tol=1, group='__default
     significance: desired confidence level. can be preset 0 < x <= 0.99
     """
     # numerical
-    if typing_info['data_type'] == dtype.NUMERIC or (typing_info['data_type'] == dtype.SEQUENTIAL and
-                                                     dtype.NUMERIC in typing_info['data_type_dist'].keys()):
+    if target.data_dtype in [dtype.integer, dtype.float, dtype.array]:
+        # and dtype.NUMERIC in typing_info['data_type_dist'].keys()):
+
         # ICP gets all possible bounds (shape: (B, 2, 99))
         all_ranges = icp.predict(X.values)
 
@@ -59,10 +52,10 @@ def set_conf_range(X, icp, target, typing_info, lmd, std_tol=1, group='__default
                 return 0.9901, ranges
 
     # categorical
-    elif (typing_info['data_type'] == dtype.CATEGORICAL or  # categorical
-          (typing_info['data_type'] == dtype.SEQUENTIAL and  # time-series w/ cat target
-           dtype.CATEGORICAL in typing_info['data_type_dist'].keys())) and \
-            lmd['stats_v2'][target]['typing']['data_subtype'] != dtype.TAGS:  # no tag support yet
+    elif target.data_dtype == dtype.categorical:  # or  #
+        # (target.data_dtype == dtype.array and  # time-series w/ cat target
+        #  dtype.categorical in typing_info['data_type_dist'].keys())) and \
+        #   lmd['stats_v2'][target]['typing']['data_subtype'] != dtype.tags:  # no tag support yet
 
         pvals = icp.predict(X.values)
         conf = np.subtract(1, pvals.min(axis=1)).mean()

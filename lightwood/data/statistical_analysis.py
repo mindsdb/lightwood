@@ -1,5 +1,5 @@
 from mindsdb_datasources import DataSource
-from lightwood.api import TypeInformation, StatisticalAnalysis
+from lightwood.api import TypeInformation, StatisticalAnalysis, ProblemDefinition, dtype
 
 import dateutil
 import string
@@ -345,10 +345,29 @@ class DataAnalyzer():
         self.transaction.lmd['data_preparation']['used_row_count'] = len(sample_df)
 
 
-def statistical_analysis(data: DataSource, type_information: TypeInformation) -> StatisticalAnalysis:
+def statistical_analysis(data: DataSource,
+                         type_information: TypeInformation,
+                         problem_definition: ProblemDefinition) -> StatisticalAnalysis:
     df = data.df
     nr_rows = len(df)
+    target = problem_definition.target
+
+    # get train std, used in analysis
+    if type_information.dtypes[target] in [dtype.float, dtype.integer]:
+        train_std = df[target].std().values
+    else:
+        train_std = None
+
+    # get observed classes, used in analysis
+    if type_information.dtypes[target] == dtype.categorical:
+        train_observed_classes = list(df[target].unique())
+    elif type_information.dtypes[target] == dtype.tags:
+        train_observed_classes = None  # @TODO: pending call to tags logic -> get all possible tags
+    else:
+        train_observed_classes = None
 
     return StatisticalAnalysis(
-        nr_rows=nr_rows
+        nr_rows=nr_rows,
+        train_std_dev=train_std,
+        train_observed_classes=train_observed_classes
     )
