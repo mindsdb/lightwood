@@ -1,4 +1,3 @@
-from copy import deepcopy
 import pandas as pd
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.api.types import LightwoodConfig
@@ -53,7 +52,7 @@ class LightGBM(BaseModel):
                 self.device_str = 'cpu'
             else:
                 self.device_str = 'gpu'
-        
+
         self.max_bin = 255
         if self.device_str == 'gpu':
             self.max_bin = 63  # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
@@ -144,7 +143,7 @@ class LightGBM(BaseModel):
                 data = ds.get_encoded_column_data(input_col).to(self.device)
             else:
                 data = torch.cat((data, ds.get_encoded_column_data(input_col).to(self.device)), 1)
-                
+
         data = data.tolist()
         raw_predictions = self.model.predict(data)
         decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
