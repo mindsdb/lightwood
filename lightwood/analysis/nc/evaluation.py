@@ -9,7 +9,7 @@ Evaluation of conformal predictors.
 # TODO: cross_val_score/run_experiment should possibly allow multiple to be evaluated on identical folding
 
 
-from base import RegressorMixin, ClassifierMixin
+from lightwood.analysis.nc.base import RegressorMixin, ClassifierMixin
 
 import sys
 import numpy as np

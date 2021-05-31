@@ -3,6 +3,7 @@ import torch
 
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
+from lightwood.analysis.nc.nc import BaseScorer
 
 
 class SelfAware(torch.nn.Module):
@@ -54,3 +55,24 @@ class SelfAware(torch.nn.Module):
             aware_in = true_input
             output = self.net(aware_in)
             return output
+
+
+class SelfawareNormalizer(BaseScorer):
+    def __init__(self, fit_params=None):
+        super(SelfawareNormalizer, self).__init__()
+        self.prediction_cache = None
+        self.output_column = fit_params['output_column']
+
+    def fit(self, x, y):
+        """ No fitting is needed, as the self-aware model is trained in Lightwood """
+        pass
+
+    def score(self, true_input, y=None):
+        sa_score = self.prediction_cache
+
+        if sa_score is None:
+            sa_score = np.ones(true_input.shape[0])  # by default, normalizing factor is 1 for all predictions
+        else:
+            sa_score = np.array(sa_score)
+
+        return sa_score
