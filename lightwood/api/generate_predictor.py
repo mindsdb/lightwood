@@ -118,6 +118,8 @@ def generate_predictor(problem_definition: ProblemDefinition = None, datasource:
         type_information = lightwood.data.infer_types(datasource, problem_definition.pct_invalid)
         statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information)
         lightwood_config = lightwood.generate_config(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
-
+    import pprint
+    pprint.pp(lightwood_config.to_json())
+    exit()
     predictor_code = generate_predictor_code(lightwood_config)
     return predictor_code
