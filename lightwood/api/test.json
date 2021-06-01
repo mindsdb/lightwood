@@ -1,0 +1,132 @@
+{
+    "features": {
+        "age": {
+            "name": "age",
+            "data_dtype": "integer",
+            "dependency": [],
+            "encoder": "NumericEncoder()"
+        },
+        "workclass": {
+            "name": "workclass",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        },
+        "fnlwgt": {
+            "name": "fnlwgt",
+            "data_dtype": "integer",
+            "dependency": [],
+            "encoder": "NumericEncoder()"
+        },
+        "education": {
+            "name": "education",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        },
+        "educational-num": {
+            "name": "educational-num",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        },
+        "marital-status": {
+            "name": "marital-status",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        },
+        "occupation": {
+            "name": "occupation",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        },
+        "relationship": {
+            "name": "relationship",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        },
+        "race": {
+            "name": "race",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        },
+        "gender": {
+            "name": "gender",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        },
+        "capital-gain": {
+            "name": "capital-gain",
+            "data_dtype": "integer",
+            "dependency": [],
+            "encoder": "NumericEncoder()"
+        },
+        "capital-loss": {
+            "name": "capital-loss",
+            "data_dtype": "integer",
+            "dependency": [],
+            "encoder": "NumericEncoder()"
+        },
+        "hours-per-week": {
+            "name": "hours-per-week",
+            "data_dtype": "integer",
+            "dependency": [],
+            "encoder": "NumericEncoder()"
+        },
+        "native-country": {
+            "name": "native-country",
+            "data_dtype": "categorical",
+            "dependency": [],
+            "encoder": "CategoricalAutoEncoder()"
+        }
+    },
+    "output": {
+        "name": "income",
+        "data_dtype": "categorical",
+        "encoder": "CategoricalAutoEncoder()",
+        "models": "[Neural(self.lightwood_config)]",
+        "ensemble": "BestOf"
+    },
+    "problem_definition": {
+        "target": "income",
+        "seconds_per_model": 36631.5,
+        "timeseries_settings": {
+            "is_timeseries": false,
+            "order_by": null,
+            "window": null,
+            "group_by": null,
+            "use_previous_target": false,
+            "nr_predictions": null,
+            "historical_columns": null
+        },
+        "pct_invalid": 1,
+        "fixed_confidence": null,
+        "target_weights": null
+    },
+    "statistical_analyzer": {
+        "nr_rows": 48842,
+        "train_std_dev": null,
+        "train_observed_classes": [
+            "<=50K",
+            ">50K"
+        ]
+    },
+    "cleaner": "cleaner",
+    "splitter": "splitter",
+    "analyzer": "model_analyzer",
+    "imports": [
+        "from lightwood.encoder import NumericEncoder",
+        "from lightwood.data import splitter",
+        "from lightwood.data import cleaner",
+        "from lightwood.model import LightGBM",
+        "from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score",
+        "from lightwood.ensemble import BestOf",
+        "from lightwood.encoder import CategoricalAutoEncoder",
+        "from lightwood.model import Neural"
+    ]
+}

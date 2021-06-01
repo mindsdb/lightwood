@@ -29,6 +29,8 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
     for feature in lightwood_config.features.values():
         feature_code_arr.append(f"""'{feature.name}': {feature.encoder}""")
         dependency_arr.append(f"""'{feature.name}': {feature.dependency}""")
+        
+    feature_code_arr.append(f"""'{lightwood_config.output.name}': {lightwood_config.output.encoder}""")
 
     encoder_code = '{\n            ' + ',\n            '.join(feature_code_arr) + '\n        }'
     dependency_code = '{\n            ' + ',\n            '.join(dependency_arr) + '\n        }'
@@ -75,7 +77,7 @@ class Predictor():
         log.info('Training the encoders')
         for col_name, encoder in self.encoders.items():
             # @TODO recursive later to handle depndency columns that have dependencies
-            if len(self.dependencies[col_name]) > 0:
+            if len(self.dependencies.get(col_name, [])) > 0:
                 for dep_col in self.dependencies[col_name]:
                     log.info('Preparting encoder for column: ' + col_name)
                     if encoder.uses_folds:
@@ -118,5 +120,6 @@ def generate_predictor(problem_definition: ProblemDefinition = None, datasource:
         type_information = lightwood.data.infer_types(datasource, problem_definition.pct_invalid)
         statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information, problem_definition)
         lightwood_config = lightwood.generate_config(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
+        
     predictor_code = generate_predictor_code(lightwood_config)
     return predictor_code
