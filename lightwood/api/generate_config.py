@@ -42,6 +42,7 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
 def populate_problem_definition(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> ProblemDefinition:
     if problem_definition.seconds_per_model is None:
         problem_definition.seconds_per_model = max(100, statistical_analysis.nr_rows / 20) * np.sum([4 if x in [dtype.rich_text, dtype.short_text, dtype.array, dtype.video, dtype.audio, dtype.image] else 1 for x in type_information.dtypes.values()])
+    
     return problem_definition
 
 
@@ -78,7 +79,8 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         'from lightwood.model import Neural',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
-        'from lightwood.data import splitter'
+        'from lightwood.data import splitter',
+        'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score'
     ]
 
     for feature in features.values():

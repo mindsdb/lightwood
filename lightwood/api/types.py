@@ -89,6 +89,8 @@ class ProblemDefinition:
     timeseries_settings: TimeseriesSettings
     pct_invalid: float
     fixed_confidence: Union[int, float, None]
+    target_weights: List[float]
+    accuracy_target: str
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
@@ -97,13 +99,15 @@ class ProblemDefinition:
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         pct_invalid = obj.get('pct_invalid', 1)
         fixed_confidence = obj.get('fixed_confidence', None)
+        target_weights = obj.get('target_weights', None)
 
         problem_definition = ProblemDefinition(
             target=target,
             seconds_per_model=seconds_per_model,
             timeseries_settings=timeseries_settings,
             pct_invalid=pct_invalid,
-            fixed_confidence=fixed_confidence
+            fixed_confidence=fixed_confidence,
+            target_weights=target_weights
         )
 
         return problem_definition

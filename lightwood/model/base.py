@@ -13,7 +13,7 @@ class BaseModel:
     def fit(self, data: List[EncodedDs]) -> None:
         raise NotImplementedError()
 
-    def __call__(self, EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         raise NotImplementedError()
 
     def partial_fit(self, data: List[EncodedDs]) -> None:
