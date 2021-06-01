@@ -46,7 +46,6 @@ from lightwood.api import LightwoodConfig
 from lightwood.model import BaseModel
 from lightwood.encoder import BaseEncoder
 from lightwood.ensemble import BaseEnsemble
-from lightwood.analysis import model_analyzer
 from typing import Dict, List
 
 
