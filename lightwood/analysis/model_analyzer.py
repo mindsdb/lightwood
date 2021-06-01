@@ -1,34 +1,31 @@
 import numpy as np
 import pandas as pd
-from typing import Mapping, Tuple, NamedTuple, Dict
 from copy import deepcopy
 from itertools import product
 from sklearn.preprocessing import OneHotEncoder
 
-from lightwood.api import LightwoodConfig, dtype
 from lightwood.ensemble import BaseEnsemble
 from lightwood.data.encoded_ds import EncodedDs
+from lightwood.api import LightwoodConfig, dtype
 from lightwood.helpers.general import evaluate_accuracy
 
-
+from lightwood.analysis.acc_stats import AccStats
+from lightwood.analysis.nc.norm import SelfawareNormalizer
+from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc
+from lightwood.analysis.nc.util import clean_df, set_conf_range
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
 from lightwood.analysis.nc.nc import RegressorNc, ClassifierNc, MarginErrFunc
-from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc
-from lightwood.analysis.nc.norm import SelfawareNormalizer
-from lightwood.analysis.nc.util import clean_df, set_conf_range
 from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter
-
-# from mindsdb_native.libs.helpers.accuracy_stats import AccStats  # @TODO: find replacement
 
 
 """
 [31/5/21] Analyzer roadmap:
 
-- v0: flow works for categorical and numerical with minimal adaptation to code logic
+- v0: flow works for categorical and numerical with minimal adaptation to code logic, should include accStats, 
+      global feat importance and ICP confidence
 - v1: streamline nonconformist custom implementation to cater analysis needs
 - v2: introduce model-agnostic normalizer (previously known as self aware NN)
 - v3: re-introduce time series (and grouped ICPs)
-
 """
 
 
@@ -37,40 +34,24 @@ def model_analyzer(
         encoded_data: EncodedDs,
         data: pd.DataFrame,      # @TODO: turn data and encoded into data: Tuple(Tuple(pd.DataFrame, EncodedDs)) ?
         config: LightwoodConfig,
-        disable_column_importance=False
+        disable_column_importance=True
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
 
-    # train_df = data.train_df
-    # if ts_cfg.is_timeseries:
-    #     train_df = data.train_df[data.train_df['make_predictions'] == True]
-    #
+    # @ TODO: ?
     # validation_df = data.validation_df
     # if ts_cfg.is_timeseries:
     #     validation_df = data.validation_df[data.validation_df['make_predictions'] == True]
-    #
-    # test_df = data.test_df
-    # if ts_cfg.is_timeseries:
-    #     test_df = data.test_df[data.test_df['make_predictions'] == True]
-
-    print("hi")
+    # ... same with test and train dfs
 
     analysis = {}
     predictions = {}
     params = config.problem_definition
     input_columns = list(config.features.keys())
     target = config.output
-    normal_predictions = predictor(encoded_data)
+    normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
 
-    # @TODO: need stats_info to be input from... type deduction phase?
-    # Needs:
-    #   - target histogram and std()
-    #   - all target classes
-    #
-    #
-    # Obsolete:
-    #   - lightwood class map -> not needed anymore
-    # stats_info = predictor.lmd['stats_v2']
+    # @TODO: still need target histogram and std()
     stats_info = config.statistical_analyzer
 
     # confidence estimation with inductive conformal predictors (ICPs)
@@ -96,7 +77,6 @@ def model_analyzer(
     fit_params['columns_to_ignore'].extend([f'{target}_timestep_{i}' for i in range(1, fit_params['nr_preds'])])
 
     # @TODO: adapters should not be needed anymore
-
     if is_classification:
         if data_subtype != dtype.tags:
             all_classes = np.array(stats_info.train_observed_classes)
@@ -127,12 +107,10 @@ def model_analyzer(
         fixed_significance = params.fixed_confidence
 
         # instance the ICP
-        nc = nc_class(model, nc_function)  # , normalizer=normalizer)
+        nc = nc_class(model, nc_function)  # , normalizer=normalizer)  # @TODO: reintroduce normalizer
         icp = icp_class(nc)
 
-        # noinspection PyTypeChecker
-        # for now
-        analysis['icp']['__default'] = icp
+        analysis['icp']['__default'] = icp  # @TODO: better typing for output
 
         # setup prediction cache to avoid additional .predict() calls
         if is_classification:
@@ -142,11 +120,7 @@ def model_analyzer(
                 icp.nc_function.model.class_map = stats_info['lightwood_class_map']
             else:
                 class_map = {i: v for i, v in enumerate(stats_info.train_observed_classes)}
-
-                # inv_class_map = {v: i for i, v in enumerate(stats_info.train_observed_classes)}
-                # [[inv_class_map[p[0]]] for p in normal_predictions.values]
-
-                predicted_classes = pd.get_dummies(normal_predictions['predictions']).values
+                predicted_classes = pd.get_dummies(normal_predictions['predictions']).values  # inflate to one-hot enc
 
                 icp.nc_function.model.prediction_cache = predicted_classes
                 icp.nc_function.model.class_map = class_map  # @TODO: still needed?
@@ -156,8 +130,7 @@ def model_analyzer(
         else:
             icp.nc_function.model.prediction_cache = np.array(normal_predictions[target])
 
-        # "fit" the default ICP
-        analysis['icp']['__default'].fit(None, None)  # @TODO: remove this step after v1 works
+        analysis['icp']['__default'].fit(None, None)  # @TODO: rm fit call after v1 works, 'twas a hack from the start
         if not is_classification:
             analysis['stats_v2']['train_std_dev'] = {'__default': stats_info.train_std_dev}
 
@@ -244,12 +217,11 @@ def model_analyzer(
 
         analysis['icp']['__mdb_active'] = True
 
-    # get accuracy metric
+    # get accuracy metric for validation data
     normal_accuracy = evaluate_accuracy(
         normal_predictions,
         data,
-        stats_info,
-        [target.name],
+        target,
         backend=predictor
     )
 
@@ -257,6 +229,7 @@ def model_analyzer(
     empty_input_accuracy = {}
     empty_input_predictions_test = {}
 
+    # @TODO: reactivate this
     if not disable_column_importance:
         ignorable_input_columns = [x for x in input_columns if stats_info[x]['typing']['data_type'] != dcat.file_path
                                    and (not ts_cfg.is_timeseries or
@@ -283,53 +256,17 @@ def model_analyzer(
             assert analysis['column_importances'][col] <= 10
 
     # Get accuracy stats
-    overall_accuracy_arr = []
+    analysis['overall_accuracy'] = {}
     analysis['accuracy_histogram'] = {}
     analysis['confusion_matrices'] = {}
     analysis['accuracy_samples'] = {}
-    analysis['acc_stats'] = {}
 
-    analysis['train_data_accuracy'] = {}
-    analysis['test_data_accuracy'] = {}
-    analysis['valid_data_accuracy'] = {}
-
-
-
-    # Training data accuracy
+    # Training / testing data accuracy ?
     # predictions = predictor.predict('predict_on_train_data')
-    # analysis['train_data_accuracy'][col] = evaluate_accuracy(
-    #     predictions,
-    #     data.train_df,
-    #     stats_info,
-    #     [col],
-    #     backend=predictor
-    # )
-    #
-    # # Testing data accuracy
-    # analysis['test_data_accuracy'][col] = evaluate_accuracy(
-    #     normal_predictions_test,
-    #     test_df,
-    #     stats_info,
-    #     [col],
-    #     backend=predictor
-    # )
 
-    # Validation data accuracy
-    analysis['valid_data_accuracy'][target.name] = evaluate_accuracy(
-        normal_predictions,
-        data,
-        stats_info,
-        [target.name],
-        backend=predictor
-    )
+    acc_stats = AccStats(col_stats=config.features, target=target)
 
-    acc_stats = AccStats(
-        col_stats=stats_info[target.name],
-        col_name=col,
-        input_columns=input_columns
-    )
-
-    predictions_arr = [normal_predictions] + [x for x in empty_input_predictions_test.values()]
+    predictions_arr = [normal_predictions.values.flatten().tolist()] + [x for x in empty_input_predictions_test.values()]
 
     acc_stats.fit(
         data,
@@ -338,15 +275,15 @@ def model_analyzer(
     )
 
     overall_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats()
-    overall_accuracy_arr.append(overall_accuracy)
 
-    analysis['accuracy_histogram'][col] = accuracy_histogram
-    analysis['confusion_matrices'][col] = cm
-    analysis['accuracy_samples'][col] = accuracy_samples
-    # analysis['acc_stats'][col] = pickle_obj(acc_stats) # TODO: replace pickle_obj with some saving logic
+    analysis['overall_accuracy'] = overall_accuracy
+    analysis['accuracy_histogram'] = accuracy_histogram
+    analysis['confusion_matrices'] = cm
+    analysis['accuracy_samples'] = accuracy_samples
+    # analysis['acc_stats'] = pickle_obj(acc_stats) # TODO: replace pickle_obj with some saving logic
 
     analysis['validation_set_accuracy'] = normal_accuracy
-    if stats_info[col]['typing']['data_type'] == dcat.numeric:
+    if target.data_dtype in [dtype.integer, dtype.float]:
         analysis['validation_set_accuracy_r2'] = normal_accuracy
 
     return analysis, predictions

@@ -105,7 +105,7 @@ class Predictor():
 
         log.info('Analyzing the ensemble')
         # Add back when analysis works
-        # self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], folds[nfolds-1], self.lightwood_config)
+        self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], folds[nfolds-1], self.lightwood_config)
 
     def predict(self, data: DataSource) -> pd.DataFrame:
         encoded_ds = lightwood.encode(self.encoders, data.df, self.target)
@@ -120,6 +120,6 @@ def generate_predictor(problem_definition: ProblemDefinition = None, datasource:
         type_information = lightwood.data.infer_types(datasource, problem_definition.pct_invalid)
         statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information, problem_definition)
         lightwood_config = lightwood.generate_config(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
-        
+
     predictor_code = generate_predictor_code(lightwood_config)
     return predictor_code

@@ -10,8 +10,7 @@ class TestBasic(unittest.TestCase):
         from mindsdb_datasources import FileDS
 
         # call: Go with dataframes
-        datasource = FileDS('tests/data/adult.csv')
-        
+        datasource = FileDS('../data/adult.csv')
         predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income'}), datasource)
 
         try:
