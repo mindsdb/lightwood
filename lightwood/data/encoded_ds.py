@@ -49,6 +49,9 @@ class EncodedDs(Dataset):
 
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         return self.encoders[column_name].encode(self.data_frame[column_name])
+    
+    def decode_prediction(self, prediction: torch.Tensor) -> object:
+        return self.encoders[self.target].decode(prediction)
 
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
