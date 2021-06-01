@@ -90,7 +90,6 @@ class ProblemDefinition:
     pct_invalid: float
     fixed_confidence: Union[int, float, None]
     target_weights: List[float]
-    accuracy_target: str
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
