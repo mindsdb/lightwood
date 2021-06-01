@@ -20,7 +20,7 @@ from torch.optim.optimizer import Optimizer
 
 
 class Neural(BaseModel):
-    model: DefaultNet
+    model: nn.Module
 
     def __init__(self, lightwood_config: LightwoodConfig):
         super().__init__(lightwood_config)
@@ -82,7 +82,7 @@ class Neural(BaseModel):
         train_ds = ConcatedEncodedDs(ds_arr[0:-1])
         test_ds = ConcatedEncodedDs(ds_arr[-1:])
 
-        self.model = self.DefaultNet(
+        self.model = DefaultNet(
             input_size=len(train_ds[0][0]),
             output_size=len(train_ds[0][1])
         )

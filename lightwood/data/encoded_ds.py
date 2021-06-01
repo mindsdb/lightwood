@@ -63,7 +63,7 @@ class ConcatedEncodedDs(EncodedDs):
         return np.sum([len(x) for x in self.encoded_ds_arr])
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        self.encoded_ds_arr[idx // len(self.encoded_ds_arr)][idx % self.encoded_ds_arr]
+        self.encoded_ds_arr[idx // len(self.encoded_ds_arr)][idx % len(self.encoded_ds_arr)]
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
         encoded_df_arr = [x.get_column_original_data(column_name) for x in self.encoded_ds_arr]
