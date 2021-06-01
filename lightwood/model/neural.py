@@ -20,7 +20,7 @@ from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 
 
-class Nn(BaseModel):
+class Neural(BaseModel):
 
     def __init__(self, lightwood_config: LightwoodConfig):
         super().__init__(lightwood_config)
@@ -29,7 +29,10 @@ class Nn(BaseModel):
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         train_ds = ConcatedEncodedDs(ds_arr[0:-1])
         test_ds = ConcatedEncodedDs(ds_arr[-1:])
-
+        self.model = self.DefaultNet(
+            input_size=len(train_ds[0][0]),
+            output_size=len(train_ds[0][1])
+        )
         
     def _default_on_iter(self, epoch, train_error, test_error, delta_mean, accuracy):
         test_error_rounded = round(test_error, 4)

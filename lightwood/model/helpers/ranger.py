@@ -1,12 +1,11 @@
 import math
-
 import torch
 from torch.optim.optimizer import Optimizer
 
 
 class Ranger(Optimizer):
-    def __init__(self, params, lr=0.0005, alpha=0.5, k=5, N_sma_threshold=5, betas=(.9,0.999), eps=1e-5, weight_decay=0.000):
-        #parameter checks
+    def __init__(self, params, lr=0.0005, alpha=0.5, k=5, N_sma_threshold=5, betas=(0.9, 0.999), eps=1e-5, weight_decay=0.000):
+        # parameter checks
         if not 0.0 <= alpha <= 1.0:
             raise ValueError(f'Invalid slow update rate: {alpha}')
         if not 1 <= k:
@@ -83,9 +82,9 @@ class Ranger(Optimizer):
                 beta1, beta2 = group['betas']
 
                 # compute variance mov avg
-                exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1-beta2)
+                exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
                 # compute mean moving avg
-                exp_avg.mul_(beta1).add_(grad, alpha=1-beta1)
+                exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
 
                 state['step'] += 1
 
@@ -111,9 +110,9 @@ class Ranger(Optimizer):
 
                 if N_sma > self.N_sma_threshold:
                     denom = exp_avg_sq.sqrt().add_(group['eps'])
-                    p_data_fp32.addcdiv_(exp_avg, denom, value=-step_size*group['lr'])
+                    p_data_fp32.addcdiv_(exp_avg, denom, value=-step_size * group['lr'])
                 else:
-                    p_data_fp32.add_(exp_avg, alpha=-step_size*group['lr'])
+                    p_data_fp32.add_(exp_avg, alpha=-step_size * group['lr'])
 
                 p.data.copy_(p_data_fp32)
 
