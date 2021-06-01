@@ -90,6 +90,7 @@ class ProblemDefinition:
     pct_invalid: float
     fixed_confidence: Union[int, float, None]
     target_weights: List[float]
+    positive_domain: bool
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
@@ -99,6 +100,7 @@ class ProblemDefinition:
         pct_invalid = obj.get('pct_invalid', 1)
         fixed_confidence = obj.get('fixed_confidence', None)
         target_weights = obj.get('target_weights', None)
+        positive_domain = obj.get('positive_domain', False)
 
         problem_definition = ProblemDefinition(
             target=target,
@@ -106,7 +108,8 @@ class ProblemDefinition:
             timeseries_settings=timeseries_settings,
             pct_invalid=pct_invalid,
             fixed_confidence=fixed_confidence,
-            target_weights=target_weights
+            target_weights=target_weights,
+            positive_domain=positive_domain
         )
 
         return problem_definition

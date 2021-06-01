@@ -88,6 +88,10 @@ class LightGBM(BaseModel):
 
                 label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
+            elif output_dtype == dtype.integer:
+                label_data = label_data.astype(int)
+            elif output_dtype == dtype.float:
+                label_data = label_data.astype(float)
 
             data[subset_name]['label_data'] = label_data
 
@@ -146,6 +150,11 @@ class LightGBM(BaseModel):
 
         data = data.tolist()
         raw_predictions = self.model.predict(data)
-        decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
+
+        # @TODO: probably better to store self.target_dtype or similar, and use that for the check instead
+        if self.ordinal_encoder is not None:
+            decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
+        else:
+            decoded_predictions = raw_predictions
         ydf = pd.DataFrame({'predictions': decoded_predictions})
         return ydf
