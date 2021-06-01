@@ -36,7 +36,7 @@ class EncodedDs(Dataset):
             if col != self.target:
                 encoded_tensor = self.encoders[col].encode(self.data_frame.iloc[idx][col])[0]
                 X = torch.cat([X, encoded_tensor])
-
+        
         Y = self.encoders[self.target].encode(self.data_frame.iloc[idx][col])[0]
 
         if self.cache_encoded:

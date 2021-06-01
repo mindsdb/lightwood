@@ -83,7 +83,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score'
     ]
 
-    for feature in features.values():
+    for feature in [output, *features.values()]:
         encoder_initialization = feature.encoder.split('(')[0]
         imports.append(f'from lightwood.encoder import {encoder_initialization}')
 
