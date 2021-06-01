@@ -54,7 +54,8 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         name=target,
         data_dtype=type_information.dtypes[target],
         encoder=None,
-        models='[LightGBM(self.lightwood_config)]',
+        models='[Neural(self.lightwood_config)]',
+        # LightGBM
         ensemble='BestOf'
     )
 
@@ -74,7 +75,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
     # @TODO: Only import the minimal amount of things we need
     imports = [
         'from lightwood.model import LightGBM',
-        'from lightwood.model import Nn',
+        'from lightwood.model import Neural',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
         'from lightwood.data import splitter'
