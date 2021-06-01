@@ -16,6 +16,7 @@ from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.model.helpers.default_net import DefaultNet
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
+from torch.optim.optimizer import Optimizer
 
 
 class Neural(BaseModel):
@@ -39,7 +40,7 @@ class Neural(BaseModel):
 
         return criterion
 
-    def _select_optimizer(self) -> torch.optim.optimizer.Optimizer:
+    def _select_optimizer(self) -> Optimizer:
         if self.lightwood_config.problem_definition.timeseries_settings.is_timeseries:
             optimizer = Ranger(self.net.params(), lr=0.0005)
         else:
