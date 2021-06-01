@@ -2,8 +2,6 @@ import random
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-
-from lightwood.model.nn import Nn
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym

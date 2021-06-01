@@ -6,7 +6,6 @@ from itertools import product
 from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api import LightwoodConfig, dtype
-from lightwood.model.nn import Nn
 from lightwood.ensemble import BaseEnsemble
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.helpers.general import evaluate_accuracy
