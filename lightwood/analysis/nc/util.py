@@ -14,11 +14,13 @@ def clean_df(df, target, is_classification, label_encoders):
             cats = enc.categories_[0].tolist()
             y = np.array([cats.index(i) for i in y])
         y = y.astype(int)
+    else:
+        y = y.astype(float)
 
     return df, y
 
 
-def set_conf_range(X, icp, target, typing_info, lmd, std_tol=1, group='__default', significance=None):
+def set_conf_range(X, icp, target, analysis_info, lmd, std_tol=1, group='__default', significance=None):
     """ Sets confidence level and returns it plus predictions regions
     significance: desired confidence level. can be preset 0 < x <= 0.99
     """
@@ -38,11 +40,11 @@ def set_conf_range(X, icp, target, typing_info, lmd, std_tol=1, group='__default
                 for significance in range(99):
                     ranges = all_ranges[:, :, significance]
                     spread = np.mean(ranges[:, 1] - ranges[:, 0])
-                    tolerance = lmd['stats_v2'][target]['train_std_dev'][group] * tol
+                    tolerance = analysis_info['train_std_dev'][group] * tol
 
                     if spread <= tolerance:
                         confidence = (99 - significance) / 100
-                        if lmd['stats_v2'][target].get('positive_domain', False):
+                        if lmd.positive_domain:
                             ranges[ranges < 0] = 0
                         return confidence, ranges
             else:

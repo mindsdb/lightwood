@@ -354,7 +354,7 @@ def statistical_analysis(data: DataSource,
 
     # get train std, used in analysis
     if type_information.dtypes[target] in [dtype.float, dtype.integer]:
-        train_std = df[target].std().values
+        train_std = df[target].astype(float).std()
     else:
         train_std = None
 

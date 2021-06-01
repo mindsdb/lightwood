@@ -128,11 +128,11 @@ def model_analyzer(
             # we fit ICPs for time series confidence bounds only at t+1 forecast
             icp.nc_function.model.prediction_cache = np.array([p[0] for p in normal_predictions[target]])
         else:
-            icp.nc_function.model.prediction_cache = np.array(normal_predictions[target])
+            icp.nc_function.model.prediction_cache = np.array(normal_predictions['predictions'])
 
         analysis['icp']['__default'].fit(None, None)  # @TODO: rm fit call after v1 works, 'twas a hack from the start
         if not is_classification:
-            analysis['stats_v2']['train_std_dev'] = {'__default': stats_info.train_std_dev}
+            analysis['train_std_dev'] = {'__default': stats_info.train_std_dev}
 
         # fit additional ICPs in time series tasks with grouped columns
         if ts_cfg.is_timeseries and ts_cfg.group_by:
@@ -155,9 +155,10 @@ def model_analyzer(
         analysis['icp']['__default'].calibrate(icp_df.values, y)
 
         # get confidence estimation for validation dataset
-        _, ranges = set_conf_range(icp_df, icp, target, stats_info, params, significance=fixed_significance)
+        _, ranges = set_conf_range(icp_df, icp, target, analysis, params, significance=fixed_significance)
         if not is_classification:
-            result_df = pd.DataFrame(index=data.cached_val_df.index, columns=['lower', 'upper'])
+            # previously using cached_val_df index, analyze how to replicate once again for the TS case
+            result_df = pd.DataFrame(index=data.index, columns=['lower', 'upper'])
             result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
             result_df.loc[icp_df.index, 'upper'] = ranges[:, 1]
 
@@ -165,6 +166,7 @@ def model_analyzer(
         if ts_cfg.is_timeseries and ts_cfg.group_by:
             icps = analysis['icp']
             group_keys = icps['__mdb_group_keys']
+            analysis['train_std_dev'] = {}
 
             # add all predictions to the cached DF
             icps_df = deepcopy(data.cached_val_df)
@@ -197,10 +199,10 @@ def model_analyzer(
                     for key, val in zip(group_keys, group):
                         icp_train_df = icp_train_df[icp_train_df[key] == val]
                     y_train = icp_train_df[target].values
-                    analysis['stats_v2']['train_std_dev'][frozenset(group)] = y_train.std()
+                    analysis['train_std_dev'][frozenset(group)] = y_train.std()
 
                 # get bounds for relevant rows in validation dataset
-                _, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], target, stats_info,
+                _, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], target, analysis,
                                                  params, group=frozenset(group),
                                                  significance=fixed_significance)
                 # save group bounds

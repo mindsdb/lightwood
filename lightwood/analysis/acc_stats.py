@@ -89,28 +89,29 @@ class AccStats:
                         feature_existance[self.input_columns.index(missing_col)] = 0
 
     def get_accuracy_stats(self):
-        bucket_accuracy = {}
-        bucket_acc_counts = {}
-        for i, bucket in enumerate(self.normal_predictions_bucketized):
-            if bucket not in bucket_acc_counts:
-                bucket_acc_counts[bucket] = []
-
-            if len(self.numerical_samples_arr) != 0:
-                bucket_acc_counts[bucket].append(self.numerical_samples_arr[i][1][0] < self.numerical_samples_arr[i][0] < self.numerical_samples_arr[i][1][1])
-            else:
-                bucket_acc_counts[bucket].append(1 if bucket == self.real_values_bucketized[i] else 0)
-
-        for bucket in bucket_acc_counts:
-            bucket_accuracy[bucket] = sum(bucket_acc_counts[bucket])/len(bucket_acc_counts[bucket])
-
-        accuracy_count = []
-        for counts in list(bucket_acc_counts.values()):
-            accuracy_count += counts
-
-        overall_accuracy = sum(accuracy_count) / len(accuracy_count)
 
         # @TODO: reintroduce once statistical analysis does buckets
         if False:
+            bucket_accuracy = {}
+            bucket_acc_counts = {}
+            for i, bucket in enumerate(self.normal_predictions_bucketized):
+                if bucket not in bucket_acc_counts:
+                    bucket_acc_counts[bucket] = []
+
+                if len(self.numerical_samples_arr) != 0:
+                    bucket_acc_counts[bucket].append(self.numerical_samples_arr[i][1][0] < self.numerical_samples_arr[i][0] < self.numerical_samples_arr[i][1][1])
+                else:
+                    bucket_acc_counts[bucket].append(1 if bucket == self.real_values_bucketized[i] else 0)
+
+            for bucket in bucket_acc_counts:
+                bucket_accuracy[bucket] = sum(bucket_acc_counts[bucket])/len(bucket_acc_counts[bucket])
+
+            accuracy_count = []
+            for counts in list(bucket_acc_counts.values()):
+                accuracy_count += counts
+
+            overall_accuracy = sum(accuracy_count) / len(accuracy_count)
+
             for bucket in range(len(self.buckets)):
                 if bucket not in bucket_accuracy:
                     if bucket in self.real_values_bucketized:
@@ -149,6 +150,7 @@ class AccStats:
                 'predicted': [],
                 'real': []
             }
+            overall_accuracy = 0.000123456  # sum(accuracy_count) / len(accuracy_count)
 
         accuracy_samples = None
         if len(self.numerical_samples_arr) > 0:
