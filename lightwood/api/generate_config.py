@@ -51,12 +51,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
     problem_definition = populate_problem_definition(type_information, statistical_analysis, problem_definition)
     target = problem_definition.target
 
-    output = Output(
-        name=target,
-        data_dtype=type_information.dtypes[target],
-        encoder=None,
-        models=[
-            '''
+    '''
             {
                 
                 'object': 'Neural',
@@ -70,7 +65,14 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                     'input_cols': 'self.input_cols'
                 }
             },
-            '''
+    '''
+
+    output = Output(
+        name=target,
+        data_dtype=type_information.dtypes[target],
+        encoder=None,
+        models=[
+
             {
                 'object': 'LightGBM',
                 'config_args': {

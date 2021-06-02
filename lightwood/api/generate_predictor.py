@@ -31,7 +31,7 @@ self.dependencies = {inline_dict(dependency_dict)}
 # The type of each column
 self.dtype_dict = {inline_dict(dtype_dict)}
 #
-self.input_cols = {[input_cols]}
+self.input_cols = [{input_cols}]
 
 log.info('Cleaning the data')
 data = {call(lightwood_config.cleaner, lightwood_config)}
