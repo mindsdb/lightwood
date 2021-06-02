@@ -62,7 +62,7 @@ class Neural(BaseModel):
                 loss = criterion(Yh, Y)
                 if LightwoodAutocast.active:
                     scaler.scale(loss).backward()
-                    scaler.step(self.optimizer)
+                    scaler.step(optimizer)
                     scaler.update()
                 else:
                     loss.backward()
@@ -95,8 +95,8 @@ class Neural(BaseModel):
 
         started = time.time()
         scaler = GradScaler()
-        train_dl = DataLoader(train_ds, batch_size=200)
-        test_dl = DataLoader(test_ds, batch_size=200)
+        train_dl = DataLoader(train_ds, batch_size=200, shuffle=True)
+        test_dl = DataLoader(test_ds, batch_size=200, shuffle=True)
 
         running_errors: List[float] = []
         for epoch in range(int(1e10)):
@@ -107,7 +107,10 @@ class Neural(BaseModel):
             if time.time() - started > self.stop_after:
                 break
 
-            if len(running_errors) > 10 and np.mean(running_errors[-5:]) < error:
+            if len(running_errors) > 10 and np.mean(running_errors[-5:]) < running_errors[-1]:
+                break
+
+            if running_errors[-1] < 0.00001:
                 break
         
         # Do a single training run on the test data as well

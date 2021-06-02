@@ -1,3 +1,4 @@
+import enum
 from typing import List, Tuple
 import torch
 import numpy as np
@@ -58,12 +59,17 @@ class EncodedDs(Dataset):
 class ConcatedEncodedDs(EncodedDs):
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
         self.encoded_ds_arr = encoded_ds_arr
+        self.encoded_ds_lenghts = [len(x) for x in self.encoded_ds_arr]
     
     def __len__(self):
-        return np.sum([len(x) for x in self.encoded_ds_arr])
+        return np.sum(self.encoded_ds_lenghts)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-       return self.encoded_ds_arr[idx // len(self.encoded_ds_arr)][idx % len(self.encoded_ds_arr)]
+        for ds_idx, length in enumerate(self.encoded_ds_lenghts):
+            if idx - length < 0:
+                return self.encoded_ds_arr[ds_idx][idx]
+            else:
+                idx -= length
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
         encoded_df_arr = [x.get_column_original_data(column_name) for x in self.encoded_ds_arr]
