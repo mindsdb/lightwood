@@ -25,6 +25,7 @@ class TestBasic(unittest.TestCase):
 
             predictor.learn(datasource)
 
+            print('Making predictions')
             predictions = predictor.predict(datasource)
             print(predictions[0:100])
         finally:
