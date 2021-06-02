@@ -11,11 +11,11 @@ class TestBasic(unittest.TestCase):
 
         # call: Go with dataframes
         datasource = FileDS('tests/data/adult.csv')
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income'}), datasource)
+        # predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income'}), datasource)
 
         try:
-            with open('dynamic_predictor.py', 'w') as fp:
-                fp.write(predictor_class_str)
+            # with open('dynamic_predictor.py', 'w') as fp:
+            #     fp.write(predictor_class_str)
 
             predictor_class = importlib.import_module('dynamic_predictor').Predictor
             print('Class was evaluated successfully')
