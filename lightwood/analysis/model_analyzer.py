@@ -1,5 +1,5 @@
 from typing import Dict
-from lightwood.api.types import Feature, Output, ProblemDefinition, StatisticalAnalysis
+from lightwood.api.types import Feature, Output, ProblemDefinition, StatisticalAnalysis, TimeseriesSettings
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -33,11 +33,11 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 
 def model_analyzer(
         predictor: BaseEnsemble,
-        encoded_data: EncodedDs,
+        data: EncodedDs,
         stats_info: StatisticalAnalysis,
-        target: Output,
-        params: ProblemDefinition,
-        features: Dict[str, Feature],
+        target: str,
+        timeseries_settings: TimeseriesSettings,
+        dtype_dict: Dict[str, str],
         disable_column_importance=True
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
