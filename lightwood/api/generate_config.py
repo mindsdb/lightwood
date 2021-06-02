@@ -157,14 +157,14 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         analyzer={
             'object': 'model_analyzer',
             'config_args': {
-                'stats_info': 'statistical_analysis',
-                'dtype_dict': 'self.dtype_dict'
+                'stats_info': 'statistical_analysis'
             },
             'dynamic_args': {
                 'predictor': 'self.ensemble',
                 'data': 'test_data',
                 'target': 'self.target',
-                'disable_column_importance': 'True'
+                'disable_column_importance': 'True',
+                'dtype_dict': 'self.dtype_dict'
             }
         },
         features=features,
