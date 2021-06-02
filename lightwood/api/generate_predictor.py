@@ -1,26 +1,10 @@
 from typing import Dict
-
-from nltk.corpus.reader import dependency
+from lightwood.helpers.templating import call, inline_dict, align
 from lightwood.api.types import ProblemDefinition
 import lightwood
 import pprint
 from lightwood.api import LightwoodConfig
 from mindsdb_datasources import DataSource
-
-
-def dump_config(lightwood_config: LightwoodConfig) -> str:
-    config_dump: Dict[str, object] = lightwood_config.to_dict()
-    del config_dump['analyzer']
-    del config_dump['cleaner']
-    del config_dump['splitter']
-    for feature in config_dump['features'].values():
-        del feature['encoder']
-        del feature['dependency']
-    del config_dump['imports']
-    del config_dump['output']['encoder']
-    del config_dump['output']['models']
-    del config_dump['output']['ensemble']
-    return pprint.pformat(config_dump)
 
 
 def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
@@ -36,7 +20,6 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
     dependency_code = '{\n            ' + ',\n            '.join(dependency_arr) + '\n        }'
 
     import_code = '\n'.join(lightwood_config.imports)
-    config_dump = dump_config(lightwood_config)
 
     return f"""{import_code}
 
@@ -55,7 +38,6 @@ class Predictor():
     def learn(self, data: DataSource) -> None:
         # Build a Graph from the JSON
         # Using eval is a bit ugly and we could replace it with factories, personally I'm against this, as it ads pointless complexity
-        self.lightwood_config = LightwoodConfig.from_dict({config_dump})
         self.encoders = {encoder_code}
         self.dependencies = {dependency_code}
 
@@ -91,11 +73,11 @@ class Predictor():
             model.fit(encoded_ds_arr[0:nfolds-1])
 
         log.info('Ensembling the model')
-        self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[nfolds-1], self.lightwood_config)
+        self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[nfolds-1])
 
         log.info('Analyzing the ensemble')
         # Add back when analysis works
-        self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], folds[nfolds-1], self.lightwood_config)
+        self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], folds[nfolds-1])
 
     def predict(self, data: DataSource) -> pd.DataFrame:
         encoded_ds = lightwood.encode(self.encoders, data.df, self.target)
@@ -113,5 +95,4 @@ def generate_predictor(problem_definition: ProblemDefinition = None, datasource:
 
     predictor_code = generate_predictor_code(lightwood_config)
     print(lightwood_config.to_json())
-    exit()
     return predictor_code
