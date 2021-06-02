@@ -14,7 +14,7 @@ def clean_value(element: object, data_dtype: str):
 
 
 def cleaner(data: DataSource, dtype_dict: Dict[str, str], pct_invalid: int) -> pd.DataFrame:
-    for name, data_dtype in dtype_dict:
+    for name, data_dtype in dtype_dict.items():
         new_data = []
         for element in data.df[name]:
             try:
