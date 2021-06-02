@@ -8,6 +8,7 @@ from lightwood.helpers.device import get_devices
 
 class DefaultNet(torch.nn.Module):
     def __init__(self, input_size: int = None, output_size: int = None, shape: List[int] = None, max_params: int = int(3e5)) -> None:
+        super(DefaultNet, self).__init__()
         self.max_params = max_params
         if shape is None:
             self.input_size = input_size
