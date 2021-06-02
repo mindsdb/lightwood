@@ -39,16 +39,6 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
     config_dump = dump_config(lightwood_config)
 
     return f"""{import_code}
-import pandas as pd
-from mindsdb_datasources import DataSource
-from lightwood.helpers.seed import seed
-from lightwood.helpers.log import log
-import lightwood
-from lightwood.api import LightwoodConfig
-from lightwood.model import BaseModel
-from lightwood.encoder import BaseEncoder
-from lightwood.ensemble import BaseEnsemble
-from typing import Dict, List
 
 
 class Predictor():
