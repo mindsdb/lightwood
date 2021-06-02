@@ -136,7 +136,8 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             'object': 'splitter',
             'config_args': {},
             'dynamic_args': {
-                'data': 'data'
+                'data': 'data',
+                'k': 'nfolds'
             }
         },
         analyzer={
