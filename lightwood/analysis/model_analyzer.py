@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 from lightwood.api.types import Feature, Output, ProblemDefinition, StatisticalAnalysis
 import numpy as np
 import pandas as pd
@@ -8,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.ensemble import BaseEnsemble
 from lightwood.data.encoded_ds import EncodedDs
-from lightwood.api import LightwoodConfig, dtype
+from lightwood.api import dtype
 from lightwood.helpers.general import evaluate_accuracy
 
 from lightwood.analysis.acc_stats import AccStats
@@ -101,7 +101,7 @@ def model_analyzer(
 
         norm_params = {'output_column': target}
         normalizer = SelfawareNormalizer(fit_params=norm_params)
-        normalizer.prediction_cache = normal_predictions.get(f'{target}_selfaware_scores', None)
+        normalizer.prediction_cache = normal_predictions.get(f'{target}_selfaware_scores', None)  # @TODO: call to .explain()
 
         fixed_significance = params.fixed_confidence
 
@@ -230,21 +230,17 @@ def model_analyzer(
     empty_input_accuracy = {}
     empty_input_predictions_test = {}
 
-    # @TODO: reactivate this
+    # @TODO: reactivate global feature importance
     if not disable_column_importance:
-        ignorable_input_columns = [x for x in input_columns if stats_info[x]['typing']['data_type'] != dcat.file_path
-                                   and (not ts_cfg.is_timeseries or
-                                        (x not in ts_cfg.order_by and
-                                         x not in ts_cfg.historical_columns))]
-
+        ignorable_input_columns = [x for x in input_columns if (not ts_cfg.is_timeseries or
+                                                                (x not in ts_cfg.order_by and
+                                                                 x not in ts_cfg.historical_columns))]
         for col in ignorable_input_columns:
-            empty_input_predictions[col] = predictor.predict('validate', ignore_columns=[col])
-            empty_input_predictions_test[col] = predictor.predict('test', ignore_columns=[col])
+            empty_input_predictions[col] = predictor('validate', ignore_columns=[col])  # @TODO: add this param?
             empty_input_accuracy[col] = evaluate_accuracy(
                 empty_input_predictions[col],
                 data,
-                stats_info,
-                [target.name],
+                target,
                 backend=predictor
             )
 
@@ -262,8 +258,7 @@ def model_analyzer(
     analysis['confusion_matrices'] = {}
     analysis['accuracy_samples'] = {}
 
-    # Training / testing data accuracy ?
-    # predictions = predictor.predict('predict_on_train_data')
+    # @TODO: Training / testing data accuracy here ?
 
     acc_stats = AccStats(col_stats=features, target=target)
 
@@ -281,7 +276,6 @@ def model_analyzer(
     analysis['accuracy_histogram'] = accuracy_histogram
     analysis['confusion_matrices'] = cm
     analysis['accuracy_samples'] = accuracy_samples
-    # analysis['acc_stats'] = pickle_obj(acc_stats) # TODO: replace pickle_obj with some saving logic
 
     analysis['validation_set_accuracy'] = normal_accuracy
     if target.data_dtype in [dtype.integer, dtype.float]:
