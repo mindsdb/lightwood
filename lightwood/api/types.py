@@ -91,6 +91,7 @@ class ProblemDefinition:
     fixed_confidence: Union[int, float, None]
     target_weights: List[float]
     positive_domain: bool
+    nfolds: int
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
@@ -101,6 +102,7 @@ class ProblemDefinition:
         fixed_confidence = obj.get('fixed_confidence', None)
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
+        nfolds = obj.get('nfolds', 10)
 
         problem_definition = ProblemDefinition(
             target=target,
@@ -109,7 +111,8 @@ class ProblemDefinition:
             pct_invalid=pct_invalid,
             fixed_confidence=fixed_confidence,
             target_weights=target_weights,
-            positive_domain=positive_domain
+            positive_domain=positive_domain,
+            nfolds=nfolds
         )
 
         return problem_definition

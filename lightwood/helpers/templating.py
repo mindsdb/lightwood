@@ -1,7 +1,18 @@
-def call(entity: str, args: dict) -> str:
-    args = [f'{k}={v}' for k, v in args.items()]
+from lightwood.api.types import LightwoodConfig
+
+
+def call(entity: dict, lightwood_config: LightwoodConfig) -> str:
+    args = [f'{k}={v}' for k, v in entity['dynamic_args'].items()]
     args = ', '.join(args)
-    return f'{entity}({args})'
+    for k, v in entity['config_args']:
+        val = lightwood_config
+        for item in v.split('.'):
+            val = val.__getattribute__(item)
+        args += f', {k}={val}'
+
+    call = entity['object']
+
+    return f'{call}({args})'
 
 
 def inline_dict(obj: dict) -> str:
