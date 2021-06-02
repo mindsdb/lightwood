@@ -45,18 +45,20 @@ self.encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1
 
 log.info('Featurizing the data')
 encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
+train_data = encoded_ds_arr[0:nfolds-1]
+test_data = encoded_ds_arr[nfolds]
 
 log.info('Training the models')
 self.models = [{', '.join([call(x, lightwood_config) for x in lightwood_config.output.models])}]
 for model in self.models:
-    model.fit(encoded_ds_arr[0:nfolds-1])
+    model.fit(train_data)
 
 log.info('Ensembling the model')
-self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[nfolds-1])
+self.ensemble = {call(lightwood_config.output.ensemble, lightwood_config)}
 
 log.info('Analyzing the ensemble')
 # Add back when analysis works
-# self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], folds[nfolds-1])
+# self.confidence_model, self.predictor_analysis = {call(lightwood_config.analyzer, lightwood_config)}
 """
     learn_body = align(learn_body, 2)
 

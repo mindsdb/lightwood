@@ -159,11 +159,12 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             'config_args': {
                 'encoded_data': 'test_data',
                 'stats_info': 'statistical_analysis',
-                'target': 'output',
-                'features': 'features'
+                'dtype_dict': 'self.dtype_dict'
             },
             'dynamic_args': {
                 'predictor': 'self.ensemble',
+                'data': 'test_data',
+                'target': 'self.target',
                 'disable_column_importance': 'True'
             }
         },
