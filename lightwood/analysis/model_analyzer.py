@@ -1,3 +1,5 @@
+from typing import Dict, List
+from lightwood.api.types import Feature, Output, ProblemDefinition, StatisticalAnalysis
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -32,8 +34,10 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 def model_analyzer(
         predictor: BaseEnsemble,
         encoded_data: EncodedDs,
-        data: pd.DataFrame,      # @TODO: turn data and encoded into data: Tuple(Tuple(pd.DataFrame, EncodedDs)) ?
-        config: LightwoodConfig,
+        stats_info: StatisticalAnalysis,
+        target: Output,
+        params: ProblemDefinition,
+        features: Dict[str, Feature],
         disable_column_importance=True
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
@@ -43,16 +47,11 @@ def model_analyzer(
     # if ts_cfg.is_timeseries:
     #     validation_df = data.validation_df[data.validation_df['make_predictions'] == True]
     # ... same with test and train dfs
-
+    data = encoded_data.data_frame
     analysis = {}
     predictions = {}
-    params = config.problem_definition
-    input_columns = list(config.features.keys())
-    target = config.output
+    input_columns = list(features.keys())
     normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
-
-    # @TODO: still need target histogram and std()
-    stats_info = config.statistical_analysis
 
     # confidence estimation with inductive conformal predictors (ICPs)
     analysis['icp'] = {'__mdb_active': False}
@@ -67,7 +66,7 @@ def model_analyzer(
     is_classification = data_type in [dtype.categorical] or data_type in [dtype.array]
                         # dtype.categorical in typing_info['data_type_dist'].keys())
 
-    ts_cfg = config.problem_definition.timeseries_settings
+    ts_cfg = params.timeseries_settings
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
 
     fit_params = {
@@ -266,7 +265,7 @@ def model_analyzer(
     # Training / testing data accuracy ?
     # predictions = predictor.predict('predict_on_train_data')
 
-    acc_stats = AccStats(col_stats=config.features, target=target)
+    acc_stats = AccStats(col_stats=features, target=target)
 
     predictions_arr = [normal_predictions.values.flatten().tolist()] + [x for x in empty_input_predictions_test.values()]
 

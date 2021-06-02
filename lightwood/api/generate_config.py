@@ -23,20 +23,22 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
         dtype.rich_text: 'VocabularyEncoder'
     }
 
-    encoder_initialization = encoder_lookup[col_dtype]
+    encoder_dict = {
+        'object': encoder_lookup[col_dtype],
+        'config_args': {},
+        'dynamic_args': {
+            'data': 'train_data'
+        }
+    }
     if is_target:
         if col_dtype in target_encoder_lookup_override:
-            encoder_initialization = target_encoder_lookup_override[col_dtype]
-
-    encoder_initialization += '('
+            encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
 
     # Set arguments for the encoder
     if 'PretrainedLangEncoder' in encoder_initialization and not is_target:
-        encoder_initialization += f"""output_type={output.data_dtype}"""
+        encoder_dict['config_args']['output_type'] = 'output.data_dtype'
 
-    encoder_initialization += ')'
-
-    return encoder_initialization
+    return encoder_dict
 
 
 def populate_problem_definition(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> ProblemDefinition:
@@ -55,9 +57,34 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         name=target,
         data_dtype=type_information.dtypes[target],
         encoder=None,
-        models='[Neural(self.lightwood_config)]',
-        # LightGBM
-        ensemble='BestOf'
+        models=[
+            {
+                'object': 'Neural',
+                'config_args': {
+                    'stop_after': 'problem_defintion.time_per_model'
+                },
+                'dynamic_args': {
+                    'data': 'train_data'
+                }
+            },
+            {
+                'object': 'LightGBM',
+                'config_args': {
+                    'stop_after': 'problem_defintion.time_per_model'
+                },
+                'dynamic_args': {
+                    'data': 'train_data'
+                }
+            }
+        ],
+        ensemble={
+            'object': 'BestOf',
+            'config_args': {},
+            'dynamic_args': {
+                'data': 'test_data',
+                'modles': 'self.models'
+            }
+        }
     )
 
     output.encoder = lookup_encoder(type_information.dtypes[target], True, output)
@@ -100,9 +127,33 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
 
     imports = list(set(imports))
     return LightwoodConfig(
-        cleaner='cleaner',
-        splitter='splitter',
-        analyzer='model_analyzer',
+        cleaner={
+            'object': 'cleaner',
+            'config_args': {},
+            'dynamic_args': {
+                'data': 'all_data'
+            }
+        },
+        splitter={
+            'object': 'splitter',
+            'config_args': {},
+            'dynamic_args': {
+                'data': 'all_data'
+            }
+        },
+        analyzer={
+            'object': 'model_analyzer',
+            'config_args': {
+                'encoded_data': 'test_data',
+                'stats_info': 'statistical_analysis',
+                'target': 'output',
+                'features': 'features'
+            },
+            'dynamic_args': {
+                'predictor': 'self.ensemble',
+                'disable_column_importance': 'True'
+            }
+        },
         features=features,
         output=output,
         imports=imports,
