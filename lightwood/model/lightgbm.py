@@ -71,8 +71,6 @@ class LightGBM(BaseModel):
         for subset_name in ['train', 'test']:
             for input_col in self.input_cols:
                 if data[subset_name]['data'] is None:
-                    print(input_col, self.input_cols)
-                    exit()
                     data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(input_col).to(self.device)
                 else:
                     enc_col = data[subset_name]['ds'].get_encoded_column_data(input_col)

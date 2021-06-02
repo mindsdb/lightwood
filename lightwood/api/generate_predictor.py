@@ -56,7 +56,7 @@ self.ensemble = {lightwood_config.output.ensemble}(self.models, encoded_ds_arr[n
 
 log.info('Analyzing the ensemble')
 # Add back when analysis works
-self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], folds[nfolds-1])
+# self.confidence_model, self.predictor_analysis = {lightwood_config.analyzer}(self.ensemble, encoded_ds_arr[nfolds-1], folds[nfolds-1])
 """
     learn_body = align(learn_body, 2)
 
