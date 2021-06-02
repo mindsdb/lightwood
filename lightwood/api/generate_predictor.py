@@ -30,7 +30,7 @@ log.info('Cleaning the data')
 data = {lightwood_config.cleaner}(data, self.lightwood_config)
 
 nfolds = {lightwood_config.problem_definition.nfolds}
-log.info(f'Splitting the data into {nfolds} folds')
+log.info(f'Splitting the data into {{nfolds}} folds')
 folds = {lightwood_config.splitter}(data, nfolds)
 
 log.info('Preparing the encoders')
