@@ -45,9 +45,9 @@ class Neural(BaseModel):
 
     def _select_optimizer(self) -> Optimizer:
         if self.timeseries_settings.is_timeseries:
-            optimizer = Ranger(self.net.params(), lr=0.0005)
+            optimizer = Ranger(self.model.params(), lr=0.0005)
         else:
-            optimizer = Ranger(self.net.params(), lr=0.0005, weight_decay=2e-2)
+            optimizer = Ranger(self.model.params(), lr=0.0005, weight_decay=2e-2)
 
         return optimizer
     
@@ -55,10 +55,10 @@ class Neural(BaseModel):
         self.model = self.model.train()
         running_losses: List[float] = []
         for X, Y in train_dl:
-            X = X.to(self.net.device)
-            Y = Y.to(self.net.device)
+            X = X.to(self.model.device)
+            Y = Y.to(self.model.device)
             with LightwoodAutocast():
-                Yh = self.net(X)
+                Yh = self.model(X)
                 loss = criterion(Yh, Y)
                 if LightwoodAutocast.active:
                     scaler.scale(loss).backward()
@@ -75,9 +75,9 @@ class Neural(BaseModel):
         self.model = self.model.eval()
         running_losses: List[float] = []
         for X, Y in test_dl:
-            X = X.to(self.net.device)
-            Y = Y.to(self.net.device)
-            Yh = self.net(X)
+            X = X.to(self.model.device)
+            Y = Y.to(self.model.device)
+            Yh = self.model(X)
             running_losses.append(criterion(Yh, Y).item())
         return np.mean(running_losses)
             
@@ -117,8 +117,8 @@ class Neural(BaseModel):
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         for X, Y in ds:
-            X = X.to(self.net.device)
-            Y = Y.to(self.net.device)
+            X = X.to(self.model.device)
+            Y = Y.to(self.model.device)
             Yh = self.model(X)
             decoded_prediction = ds.decode_prediction(Yh)
             decoded_predictions.append(decoded_prediction)
