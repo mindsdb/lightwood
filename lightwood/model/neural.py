@@ -100,7 +100,7 @@ class Neural(BaseModel):
 
         running_errors: List[float] = []
         for epoch in range(int(1e10)):
-            error = self._run_epoch(self, train_dl, criterion, optimizer, scaler)
+            error = self._run_epoch(train_dl, criterion, optimizer, scaler)
             log.info(f'Training error of {error} during iteration {epoch}')
 
             running_errors.append(self._error(test_dl, criterion))
@@ -111,7 +111,7 @@ class Neural(BaseModel):
                 break
         
         # Do a single training run on the test data as well
-        self._run_epoch(self, test_dl, criterion, optimizer, scaler)
+        self._run_epoch(test_dl, criterion, optimizer, scaler)
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
