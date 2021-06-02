@@ -56,7 +56,9 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         data_dtype=type_information.dtypes[target],
         encoder=None,
         models=[
+            '''
             {
+                
                 'object': 'Neural',
                 'config_args': {
                     'stop_after': 'problem_definition.seconds_per_model',
@@ -68,6 +70,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                     'input_cols': 'self.input_cols'
                 }
             },
+            '''
             {
                 'object': 'LightGBM',
                 'config_args': {
