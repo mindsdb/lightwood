@@ -46,7 +46,7 @@ self.encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1
 log.info('Featurizing the data')
 encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
 train_data = encoded_ds_arr[0:nfolds-1]
-test_data = encoded_ds_arr[nfolds]
+test_data = encoded_ds_arr[nfolds-1]
 
 log.info('Training the models')
 self.models = [{', '.join([call(x, lightwood_config) for x in lightwood_config.output.models])}]
