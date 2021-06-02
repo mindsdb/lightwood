@@ -30,7 +30,7 @@ class DefaultNet(torch.nn.Module):
                 layers.append(torch.nn.SELU())
 
         self.net = torch.nn.Sequential(*layers)
-        self.to(**get_devices())
+        self.to(*get_devices())
 
     def to(self, device: torch.device, available_devices: int) -> None:
         self.net = self.net.to(device)
