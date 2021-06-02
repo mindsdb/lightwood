@@ -90,7 +90,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             'config_args': {},
             'dynamic_args': {
                 'data': 'test_data',
-                'modles': 'self.models'
+                'models': 'self.models'
             }
         }
     )

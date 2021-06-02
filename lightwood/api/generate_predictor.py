@@ -58,7 +58,7 @@ self.ensemble = {call(lightwood_config.output.ensemble, lightwood_config)}
 
 log.info('Analyzing the ensemble')
 # Add back when analysis works
-# self.confidence_model, self.predictor_analysis = {call(lightwood_config.analyzer, lightwood_config)}
+self.confidence_model, self.predictor_analysis = {call(lightwood_config.analyzer, lightwood_config)}
 """
     learn_body = align(learn_body, 2)
 
