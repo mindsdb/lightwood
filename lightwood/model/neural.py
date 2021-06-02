@@ -99,7 +99,7 @@ class Neural(BaseModel):
         test_dl = DataLoader(test_ds, batch_size=200)
 
         running_errors: List[float] = []
-        for epoch in range(1e10):
+        for epoch in range(int(1e10)):
             error = self._run_epoch(self, train_dl, criterion, optimizer, scaler)
             log.info(f'Training error of {error} during iteration {epoch}')
 
