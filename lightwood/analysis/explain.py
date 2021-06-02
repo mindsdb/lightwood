@@ -1,26 +1,14 @@
 from mindsdb_native.libs.helpers.confidence_helpers import get_numerical_conf_range, get_categorical_conf, get_anomalies
 from mindsdb_native.libs.helpers.conformal_helpers import restore_icp_state, clear_icp_state
 
+from lightwood.api.dtype import dtype
 from copy import deepcopy
 import pandas as pd
 import numpy as np
 
 
-def explain():
-
-    output_data = {col: [] for col in lmd['columns']}
-    predictions_df = input_data.data_frame
-
-    for col in lmd['columns']:
-        if col in lmd['predict_columns']:
-            output_data[f'__observed_{col}'] = list(predictions_df[col])
-            output_data[col] = hmd['predictions'][col]
-
-            if f'{col}_class_distribution' in hmd['predictions']:
-                output_data[f'{col}_class_distribution'] = hmd['predictions'][f'{col}_class_distribution']
-                lmd['lightwood_data'][f'{col}_class_map'] = lmd['stats_v2'][col]['lightwood_class_map']
-        else:
-            output_data[col] = list(predictions_df[col])
+def explain(predictions, target, lmd, hmd):
+    target_dtype = target.data_dtype
 
     # confidence estimation using calibrated inductive conformal predictors (ICPs)
     if hmd['icp']['__mdb_active'] and not lmd['quick_predict']:
@@ -42,22 +30,17 @@ def explain():
 
         # get confidence bounds for each target
         for predicted_col in lmd['predict_columns']:
-            output_data[f'{predicted_col}_confidence'] = [None] * len(output_data[predicted_col])
-            output_data[f'{predicted_col}_confidence_range'] = [[None, None]] * len(output_data[predicted_col])
+            predictions[f'{predicted_col}_confidence'] = [None] * len(predictions[predicted_col])
+            predictions[f'{predicted_col}_confidence_range'] = [[None, None]] * len(predictions[predicted_col])
 
-            typing_info = lmd['stats_v2'][predicted_col]['typing']
-            is_numerical = typing_info['data_type'] == DATA_TYPES.NUMERIC or \
-                           (typing_info['data_type'] == DATA_TYPES.SEQUENTIAL and
-                            DATA_TYPES.NUMERIC in typing_info['data_type_dist'].keys())
+            is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
+                           # and dtype.numerical in typing_info['data_type_dist'].keys())
 
-            is_categorical = (typing_info['data_type'] == DATA_TYPES.CATEGORICAL or
-                             (typing_info['data_type'] == DATA_TYPES.SEQUENTIAL and
-                              DATA_TYPES.CATEGORICAL in typing_info['data_type_dist'].keys())) and \
-                              typing_info['data_subtype'] != DATA_SUBTYPES.TAGS
+            is_categorical = target_dtype == dtype.categorical or target_dtype == dtype.array
+                             # and dtype.categorical in typing_info['data_type_dist'].keys())) and \
+                             # typing_info['data_subtype'] != DATA_SUBTYPES.TAGS
 
-            is_anomaly_task = is_numerical and \
-                              lmd['tss']['is_timeseries'] and \
-                              lmd['anomaly_detection']
+            is_anomaly_task = is_numerical and target.is_timeseries and target.anomaly_detection
 
             if (is_numerical or is_categorical) and hmd['icp'].get(predicted_col, False):
 
@@ -84,18 +67,18 @@ def explain():
 
                     # bounds in time series are only given for the first forecast
                     hmd['icp'][predicted_col]['__default'].nc_function.model.prediction_cache = \
-                        [p[0] for p in output_data[predicted_col]]
+                        [p[0] for p in predictions[predicted_col]]
                     all_confs = hmd['icp'][predicted_col]['__default'].predict(X.values)
 
                 elif is_numerical:
                     hmd['icp'][predicted_col]['__default'].nc_function.model.prediction_cache = \
-                        output_data[predicted_col]
+                        predictions[predicted_col]
                     all_confs = hmd['icp'][predicted_col]['__default'].predict(X.values)
 
                 # categorical
                 else:
                     hmd['icp'][predicted_col]['__default'].nc_function.model.prediction_cache = \
-                        output_data[f'{predicted_col}_class_distribution']
+                        predictions[f'{predicted_col}_class_distribution']
 
                     conf_candidates = list(range(20)) + list(range(20, 100, 10))
                     all_ranges = np.array(
@@ -171,25 +154,22 @@ def explain():
                                     significances = get_categorical_conf(all_confs, conf_candidates)
                                     result.loc[X.index, 'significance'] = significances
 
-                output_data[f'{predicted_col}_confidence'] = result['significance'].tolist()
+                predictions[f'{predicted_col}_confidence'] = result['significance'].tolist()
                 confs = [[a, b] for a, b in zip(result['lower'], result['upper'])]
-                output_data[f'{predicted_col}_confidence_range'] = confs
+                predictions[f'{predicted_col}_confidence_range'] = confs
 
                 # anomaly detection
                 if is_anomaly_task:
-                    anomalies = get_anomalies(output_data[f'{predicted_col}_confidence_range'],
-                                              output_data[f'__observed_{predicted_col}'],
+                    anomalies = get_anomalies(predictions[f'{predicted_col}_confidence_range'],
+                                              predictions[f'__observed_{predicted_col}'],
                                               cooldown=lmd['anomaly_cooldown'])
-                    output_data[f'{predicted_col}_anomaly'] = anomalies
+                    predictions[f'{predicted_col}_anomaly'] = anomalies
 
     else:
         for predicted_col in lmd['predict_columns']:
-            output_data[f'{predicted_col}_confidence'] = [None] * len(output_data[predicted_col])
-            output_data[f'{predicted_col}_confidence_range'] = [[None, None]] * len(output_data[predicted_col])
+            predictions[f'{predicted_col}_confidence'] = [None] * len(predictions[predicted_col])
+            predictions[f'{predicted_col}_confidence_range'] = [[None, None]] * len(predictions[predicted_col])
 
-    output_data = PredictTransactionOutputData(
-        transaction=self,
-        data=output_data
-    )
+    insights = predictions
 
-    return output_data
+    return insights
