@@ -35,7 +35,7 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
 
     # Set arguments for the encoder
-    if 'PretrainedLangEncoder' in encoder_initialization and not is_target:
+    if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
         encoder_dict['config_args']['output_type'] = 'output.data_dtype'
 
     return encoder_dict
@@ -118,12 +118,13 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         'from lightwood.model import BaseModel',
         'from lightwood.encoder import BaseEncoder',
         'from lightwood.ensemble import BaseEnsemble',
-        'from typing import Dict, List'
+        'from typing import Dict, List',
+        'from lightwood.helpers.parallelism import mut_method_call'
     ]
 
     for feature in [output, *features.values()]:
-        encoder_initialization = feature.encoder.split('(')[0]
-        imports.append(f'from lightwood.encoder import {encoder_initialization}')
+        encoder_import = feature.encoder['object']
+        imports.append(f'from lightwood.encoder import {encoder_import}')
 
     imports = list(set(imports))
     return LightwoodConfig(
