@@ -14,24 +14,27 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
 
     encoder_dict = {lightwood_config.output.name: call(lightwood_config.output.encoder, lightwood_config)}
     dependency_dict = {}
+    dtype_dict = {lightwood_config.output.name: f"""'{lightwood_config.output.data_dtype}'"""}
 
     for col_name, feature in lightwood_config.features.items():
         encoder_dict[col_name] = call(feature.encoder,  lightwood_config)
         dependency_dict[col_name] = feature.dependency
+        dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
     learn_body = f"""
-# How the inputs are encoded
+# How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
-
-# Dependencies between inputs
+# Which column depends on which
 self.dependencies = {inline_dict(dependency_dict)}
+# The type of each column
+self.dtype_dict = {inline_dict(dtype_dict)}
 
 log.info('Cleaning the data')
-data = {lightwood_config.cleaner}(data, self.lightwood_config)
+data = {call(lightwood_config.cleaner, lightwood_config)}
 
 nfolds = {lightwood_config.problem_definition.nfolds}
 log.info(f'Splitting the data into {{nfolds}} folds')
-folds = {lightwood_config.splitter}(data, nfolds)
+folds = {call(lightwood_config.splitter, lightwood_config)}
 
 log.info('Preparing the encoders')
 self.encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1])[dep_col], 'prepare'] for col_name, encoder in self.encoders.items()}})
@@ -65,7 +68,6 @@ return df
 
 class Predictor():
     target: str
-    lightwood_config: LightwoodConfig
     models: List[BaseModel]
     encoders: Dict[str, BaseEncoder]
     ensemble: BaseEnsemble

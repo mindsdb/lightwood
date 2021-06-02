@@ -26,9 +26,7 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
     encoder_dict = {
         'object': encoder_lookup[col_dtype],
         'config_args': {},
-        'dynamic_args': {
-            'data': 'train_data'
-        }
+        'dynamic_args': {}
     }
     if is_target:
         if col_dtype in target_encoder_lookup_override:
@@ -63,18 +61,14 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                 'config_args': {
                     'stop_after': 'problem_defintion.time_per_model'
                 },
-                'dynamic_args': {
-                    'data': 'train_data'
-                }
+                'dynamic_args': {}
             },
             {
                 'object': 'LightGBM',
                 'config_args': {
                     'stop_after': 'problem_defintion.time_per_model'
                 },
-                'dynamic_args': {
-                    'data': 'train_data'
-                }
+                'dynamic_args': {}
             }
         ],
         ensemble={
@@ -130,16 +124,19 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
     return LightwoodConfig(
         cleaner={
             'object': 'cleaner',
-            'config_args': {},
+            'config_args': {
+                'pct_invalid': 'problem_definition.pct_invalid'
+            },
             'dynamic_args': {
-                'data': 'all_data'
+                'data': 'data',
+                'dtype_dict': 'self.dtype_dict'
             }
         },
         splitter={
             'object': 'splitter',
             'config_args': {},
             'dynamic_args': {
-                'data': 'all_data'
+                'data': 'data'
             }
         },
         analyzer={
