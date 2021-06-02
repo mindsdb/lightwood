@@ -7,9 +7,7 @@
             "encoder": {
                 "object": "NumericEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "workclass": {
@@ -19,9 +17,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "fnlwgt": {
@@ -31,9 +27,7 @@
             "encoder": {
                 "object": "NumericEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "education": {
@@ -43,9 +37,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "educational-num": {
@@ -55,9 +47,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "marital-status": {
@@ -67,9 +57,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "occupation": {
@@ -79,9 +67,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "relationship": {
@@ -91,9 +77,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "race": {
@@ -103,9 +87,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "gender": {
@@ -115,9 +97,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "capital-gain": {
@@ -127,9 +107,7 @@
             "encoder": {
                 "object": "NumericEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "capital-loss": {
@@ -139,9 +117,7 @@
             "encoder": {
                 "object": "NumericEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "hours-per-week": {
@@ -151,9 +127,7 @@
             "encoder": {
                 "object": "NumericEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         },
         "native-country": {
@@ -163,9 +137,7 @@
             "encoder": {
                 "object": "CategoricalAutoEncoder",
                 "config_args": {},
-                "dynamic_args": {
-                    "data": "train_data"
-                }
+                "dynamic_args": {}
             }
         }
     },
@@ -175,18 +147,19 @@
         "encoder": {
             "object": "CategoricalAutoEncoder",
             "config_args": {},
-            "dynamic_args": {
-                "data": "train_data"
-            }
+            "dynamic_args": {}
         },
         "models": [
             {
                 "object": "Neural",
                 "config_args": {
-                    "stop_after": "problem_definition.seconds_per_model"
+                    "stop_after": "problem_definition.seconds_per_model",
+                    "timeseries_settings": "problem_definition.timeseries_settings"
                 },
                 "dynamic_args": {
-                    "data": "train_data"
+                    "target": "self.target",
+                    "dtype_dict": "self.dtype_dict",
+                    "input_cols": "self.input_cols"
                 }
             },
             {
@@ -195,7 +168,9 @@
                     "stop_after": "problem_definition.seconds_per_model"
                 },
                 "dynamic_args": {
-                    "data": "train_data"
+                    "target": "self.target",
+                    "dtype_dict": "self.dtype_dict",
+                    "input_cols": "self.input_cols"
                 }
             }
         ],
@@ -236,16 +211,20 @@
     },
     "cleaner": {
         "object": "cleaner",
-        "config_args": {},
+        "config_args": {
+            "pct_invalid": "problem_definition.pct_invalid"
+        },
         "dynamic_args": {
-            "data": "all_data"
+            "data": "data",
+            "dtype_dict": "self.dtype_dict"
         }
     },
     "splitter": {
         "object": "splitter",
         "config_args": {},
         "dynamic_args": {
-            "data": "all_data"
+            "data": "data",
+            "k": "nfolds"
         }
     },
     "analyzer": {
@@ -262,25 +241,25 @@
         }
     },
     "imports": [
-        "from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score",
-        "from lightwood.model import Neural",
-        "from lightwood.api import LightwoodConfig",
-        "from lightwood.ensemble import BaseEnsemble",
         "from mindsdb_datasources import DataSource",
         "from lightwood.model import LightGBM",
-        "from lightwood.helpers.seed import seed",
-        "from lightwood.data import cleaner",
-        "import pandas as pd",
-        "from lightwood.data import splitter",
         "from lightwood.analysis import model_analyzer",
-        "import lightwood",
+        "from lightwood.api import *",
         "from typing import Dict, List",
-        "from lightwood.encoder import BaseEncoder",
-        "from lightwood.model import BaseModel",
-        "from lightwood.ensemble import BestOf",
-        "from lightwood.helpers.parallelism import mut_method_call",
         "from lightwood.encoder import NumericEncoder",
+        "from lightwood.helpers.log import log",
+        "from lightwood.model import BaseModel",
         "from lightwood.encoder import CategoricalAutoEncoder",
-        "from lightwood.helpers.log import log"
+        "from lightwood.encoder import BaseEncoder",
+        "from lightwood.helpers.seed import seed",
+        "from lightwood.data import splitter",
+        "from lightwood.data import cleaner",
+        "import lightwood",
+        "from lightwood.model import Neural",
+        "from lightwood.helpers.parallelism import mut_method_call",
+        "import pandas as pd",
+        "from lightwood.ensemble import BestOf",
+        "from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score",
+        "from lightwood.ensemble import BaseEnsemble"
     ]
 }

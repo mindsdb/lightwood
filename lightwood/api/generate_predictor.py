@@ -97,6 +97,4 @@ def generate_predictor(problem_definition: ProblemDefinition = None, datasource:
         lightwood_config = lightwood.generate_config(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
     predictor_code = generate_predictor_code(lightwood_config)
-    print(lightwood_config.to_json())
-    exit()
     return predictor_code
