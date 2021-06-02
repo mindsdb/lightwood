@@ -52,7 +52,7 @@ def model_analyzer(
     normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
 
     # @TODO: still need target histogram and std()
-    stats_info = config.statistical_analyzer
+    stats_info = config.statistical_analysis
 
     # confidence estimation with inductive conformal predictors (ICPs)
     analysis['icp'] = {'__mdb_active': False}

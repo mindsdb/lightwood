@@ -124,7 +124,7 @@ class LightwoodConfig:
     features: Dict[str, Feature]
     output: Output
     problem_definition: ProblemDefinition
-    statistical_analyzer: StatisticalAnalysis
+    statistical_analysis: StatisticalAnalysis
     cleaner: str = None
     splitter: str = None
     analyzer: str = None

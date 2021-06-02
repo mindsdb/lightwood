@@ -97,5 +97,5 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         output=output,
         imports=imports,
         problem_definition=problem_definition,
-        statistical_analyzer=statistical_analysis
+        statistical_analysis=statistical_analysis
     )
