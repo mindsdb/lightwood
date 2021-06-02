@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 import pandas as pd
 from torch.nn.modules.loss import MSELoss
 from lightwood.api import dtype
@@ -9,7 +9,7 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from torch.cuda.amp import GradScaler
-from lightwood.api.types import LightwoodConfig
+from lightwood.api.types import LightwoodConfig, TimeseriesSettings
 from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
 from lightwood.helpers.torch import LightwoodAutocast
@@ -22,18 +22,21 @@ from torch.optim.optimizer import Optimizer
 class Neural(BaseModel):
     model: nn.Module
 
-    def __init__(self, lightwood_config: LightwoodConfig):
-        super().__init__(lightwood_config)
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings):
+        super().__init__(stop_after)
         self.model = None
+        self.dtype_dict = dtype_dict
+        self.target = target
+        self.timeseries_settings = timeseries_settings
 
     def _select_criterion(self) -> torch.nn.Module:
-        if self.lightwood_config.output.data_dtype in (dtype.categorical, dtype.binary):
+        if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
             criterion = TransformCrossEntropyLoss()
-        elif self.lightwood_config.output.data_dtype in (dtype.tags):
+        elif self.dtype_dict[self.target] in (dtype.tags):
             criterion = nn.BCEWithLogitsLoss()
-        elif self.lightwood_config.output.data_dtype in (dtype.integer, dtype.float) and self.lightwood_config.problem_definition.timeseries_settings.is_timeseries:
+        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float) and self.timeseries_settings.is_timeseries:
             criterion = nn.L1Loss()
-        elif self.lightwood_config.output.data_dtype in (dtype.integer, dtype.float):
+        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float):
             criterion = MSELoss()
         else:
             criterion = MSELoss()
@@ -41,7 +44,7 @@ class Neural(BaseModel):
         return criterion
 
     def _select_optimizer(self) -> Optimizer:
-        if self.lightwood_config.problem_definition.timeseries_settings.is_timeseries:
+        if self.timeseries_settings.is_timeseries:
             optimizer = Ranger(self.net.params(), lr=0.0005)
         else:
             optimizer = Ranger(self.net.params(), lr=0.0005, weight_decay=2e-2)
@@ -101,7 +104,7 @@ class Neural(BaseModel):
             log.info(f'Training error of {error} during iteration {epoch}')
 
             running_errors.append(self._error(test_dl, criterion))
-            if time.time() - started > self.lightwood_config.problem_definition.seconds_per_model:
+            if time.time() - started > self.stop_after:
                 break
 
             if len(running_errors) > 10 and np.mean(running_errors[-5:]) < error:

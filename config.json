@@ -183,7 +183,7 @@
             {
                 "object": "Neural",
                 "config_args": {
-                    "stop_after": "problem_defintion.time_per_model"
+                    "stop_after": "problem_definition.seconds_per_model"
                 },
                 "dynamic_args": {
                     "data": "train_data"
@@ -192,7 +192,7 @@
             {
                 "object": "LightGBM",
                 "config_args": {
-                    "stop_after": "problem_defintion.time_per_model"
+                    "stop_after": "problem_definition.seconds_per_model"
                 },
                 "dynamic_args": {
                     "data": "train_data"

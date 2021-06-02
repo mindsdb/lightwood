@@ -1,8 +1,7 @@
 import pandas as pd
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
-from lightwood.api.types import LightwoodConfig
 from lightwood.api import dtype
-from typing import List, Set
+from typing import Dict, List, Set
 import numpy as np
 import optuna.integration.lightgbm as optuna_lightgbm
 import lightgbm
@@ -37,11 +36,14 @@ class LightGBM(BaseModel):
     device: torch.device
     device_str: str
 
-    def __init__(self, lightwood_config: LightwoodConfig):
-        super().__init__(lightwood_config)
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str]):
+        super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
         self.label_set = set()
+        self.target = target
+        self.dtype_dict = dtype_dict
+        self.input_cols = input_cols
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         self.device, self.device_str = get_devices()
@@ -64,12 +66,10 @@ class LightGBM(BaseModel):
             'test': {'ds': ConcatedEncodedDs(ds_arr[-1:]), 'data': None, 'label_data': {}}
         }
 
-        input_col_arr = list(self.lightwood_config.features.keys())
-        output_col = self.lightwood_config.output.name
-        output_dtype = self.lightwood_config.output.data_dtype
+        output_dtype = self.dtype_dict[self.target]
 
         for subset_name in ['train', 'test']:
-            for input_col in input_col_arr:
+            for input_col in self.input_cols:
                 if data[subset_name]['data'] is None:
                     data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(input_col).to(self.device)
                 else:
@@ -77,7 +77,7 @@ class LightGBM(BaseModel):
                     data[subset_name]['data'] = torch.cat((data[subset_name]['data'], enc_col.to(self.device)), 1)
             data[subset_name]['data'] = data[subset_name]['data'].tolist()
 
-            label_data = data[subset_name]['ds'].get_column_original_data(output_col)
+            label_data = data[subset_name]['ds'].get_column_original_data(self.target)
 
             if output_dtype == dtype.categorical:
                 if subset_name == 'train':
@@ -126,23 +126,23 @@ class LightGBM(BaseModel):
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
         log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
-        max_itt = int(self.lightwood_config.problem_definition.seconds_per_model / seconds_for_one_iteration)
+        max_itt = int(self.stop_after / seconds_for_one_iteration)
         num_iterations = max(1, min(num_iterations, max_itt))
         # Turn on grid search if training doesn't take too long using it
         if max_itt >= num_iterations and seconds_for_one_iteration < 10:
             model_generator = optuna_lightgbm
-            kwargs['time_budget'] = self.lightwood_config.problem_definition.seconds_per_model
+            kwargs['time_budget'] = self.stop_after
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
 
-        log.info(f'Training GBM ({model_generator}) with {num_iterations} iterations given {self.lightwood_config.problem_definition.seconds_per_model} seconds constraint')
+        log.info(f'Training GBM ({model_generator}) with {num_iterations} iterations given {self.stop_after} seconds constraint')
         params['num_iterations'] = num_iterations
         self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         data = None
-        for input_col in self.lightwood_config.features.keys():
+        for input_col in self.input_cols:
             if data is None:
                 data = ds.get_encoded_column_data(input_col).to(self.device)
             else:

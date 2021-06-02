@@ -7,8 +7,8 @@ from lightwood.data.encoded_ds import EncodedDs
 class BaseModel:
     lightwood_config: LightwoodConfig
 
-    def __init__(self, lightwood_config: LightwoodConfig):
-        self.lightwood_config = lightwood_config
+    def __init__(self, stop_after: int):
+        self.stop_after = stop_after
 
     def fit(self, data: List[EncodedDs]) -> None:
         raise NotImplementedError()

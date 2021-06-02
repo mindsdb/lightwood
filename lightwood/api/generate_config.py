@@ -59,16 +59,25 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             {
                 'object': 'Neural',
                 'config_args': {
-                    'stop_after': 'problem_defintion.time_per_model'
+                    'stop_after': 'problem_definition.seconds_per_model',
+                    'timeseries_settings': 'problem_definition.timeseries_settings'
                 },
-                'dynamic_args': {}
+                'dynamic_args': {
+                    'target': 'self.target',
+                    'dtype_dict': 'self.dtype_dict',
+                    'input_cols': 'self.input_cols'
+                }
             },
             {
                 'object': 'LightGBM',
                 'config_args': {
-                    'stop_after': 'problem_defintion.time_per_model'
+                    'stop_after': 'problem_definition.seconds_per_model'
                 },
-                'dynamic_args': {}
+                'dynamic_args': {
+                    'target': 'self.target',
+                    'dtype_dict': 'self.dtype_dict',
+                    'input_cols': 'self.input_cols'
+                }
             }
         ],
         ensemble={
@@ -108,7 +117,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         'from lightwood.helpers.seed import seed',
         'from lightwood.helpers.log import log',
         'import lightwood',
-        'from lightwood.api import LightwoodConfig',
+        'from lightwood.api import *',
         'from lightwood.model import BaseModel',
         'from lightwood.encoder import BaseEncoder',
         'from lightwood.ensemble import BaseEnsemble',

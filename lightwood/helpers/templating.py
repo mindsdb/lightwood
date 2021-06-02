@@ -2,13 +2,16 @@ from lightwood.api.types import LightwoodConfig
 
 
 def call(entity: dict, lightwood_config: LightwoodConfig) -> str:
-    args = [f'{k}={v}' for k, v in entity['dynamic_args'].items()]
-    args = ', '.join(args)
+    dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items()]
+
+    config_args = []
     for k, v in entity['config_args'].items():
         val = lightwood_config
         for item in v.split('.'):
             val = val.__getattribute__(item)
-        args += f', {k}={val}'
+        config_args.append(f'{k}={val}')
+
+    args = ', '.join(config_args + dynamic_args)
 
     call = entity['object']
 
