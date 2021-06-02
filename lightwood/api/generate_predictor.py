@@ -21,6 +21,8 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
         dependency_dict[col_name] = feature.dependency
         dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
+    input_cols = ','.join([f"""'{feature.name}'""" for feature in lightwood_config.features.values()])
+
     learn_body = f"""
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
@@ -28,6 +30,8 @@ self.encoders = {inline_dict(encoder_dict)}
 self.dependencies = {inline_dict(dependency_dict)}
 # The type of each column
 self.dtype_dict = {inline_dict(dtype_dict)}
+#
+self.input_cols = {[input_cols]}
 
 log.info('Cleaning the data')
 data = {call(lightwood_config.cleaner, lightwood_config)}
@@ -37,13 +41,13 @@ log.info(f'Splitting the data into {{nfolds}} folds')
 folds = {call(lightwood_config.splitter, lightwood_config)}
 
 log.info('Preparing the encoders')
-self.encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1])[dep_col], 'prepare'] for col_name, encoder in self.encoders.items()}})
+self.encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1])[col_name], 'prepare'] for col_name, encoder in self.encoders.items()}})
 
 log.info('Featurizing the data')
 encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
 
 log.info('Training the models')
-self.models = {lightwood_config.output.models}
+self.models = [{', '.join([call(x, lightwood_config) for x in lightwood_config.output.models])}]
 for model in self.models:
     model.fit(encoded_ds_arr[0:nfolds-1])
 
