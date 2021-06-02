@@ -157,7 +157,6 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         analyzer={
             'object': 'model_analyzer',
             'config_args': {
-                'encoded_data': 'test_data',
                 'stats_info': 'statistical_analysis',
                 'dtype_dict': 'self.dtype_dict'
             },
