@@ -123,5 +123,4 @@ def generate_predictor(problem_definition: ProblemDefinition = None, datasource:
 
     predictor_code = generate_predictor_code(lightwood_config)
     print(lightwood_config.to_json())
-    exit()
     return predictor_code
