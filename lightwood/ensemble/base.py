@@ -7,11 +7,11 @@ from lightwood.data.encoded_ds import EncodedDs
 
 class BaseEnsemble:
     lightwood_config: LightwoodConfig
-    test_ds: EncodedDs
+    data: EncodedDs
     models: List[BaseModel]
 
-    def __init__(self, models: List[BaseModel], test_ds: EncodedDs, lightwood_config: LightwoodConfig) -> None:
-        self.test_ds = test_ds
+    def __init__(self, models: List[BaseModel], data: EncodedDs, lightwood_config: LightwoodConfig) -> None:
+        self.data = data
         self.lightwood_config = lightwood_config
         self.models = models
         
