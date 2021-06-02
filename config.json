@@ -223,7 +223,8 @@
         "pct_invalid": 1,
         "fixed_confidence": null,
         "target_weights": null,
-        "positive_domain": false
+        "positive_domain": false,
+        "nfolds": 10
     },
     "statistical_analysis": {
         "nr_rows": 48842,
@@ -261,24 +262,25 @@
         }
     },
     "imports": [
-        "from lightwood.encoder import CategoricalAutoEncoder",
+        "from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score",
         "from lightwood.model import Neural",
-        "from lightwood.encoder import NumericEncoder",
+        "from lightwood.api import LightwoodConfig",
+        "from lightwood.ensemble import BaseEnsemble",
+        "from mindsdb_datasources import DataSource",
+        "from lightwood.model import LightGBM",
+        "from lightwood.helpers.seed import seed",
+        "from lightwood.data import cleaner",
+        "import pandas as pd",
+        "from lightwood.data import splitter",
+        "from lightwood.analysis import model_analyzer",
+        "import lightwood",
         "from typing import Dict, List",
+        "from lightwood.encoder import BaseEncoder",
         "from lightwood.model import BaseModel",
         "from lightwood.ensemble import BestOf",
-        "from lightwood.data import cleaner",
-        "from mindsdb_datasources import DataSource",
-        "from lightwood.ensemble import BaseEnsemble",
-        "from lightwood.data import splitter",
-        "import pandas as pd",
-        "from lightwood.helpers.seed import seed",
-        "import lightwood",
-        "from lightwood.helpers.log import log",
-        "from lightwood.api import LightwoodConfig",
-        "from lightwood.model import LightGBM",
-        "from lightwood.encoder import BaseEncoder",
-        "from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score",
-        "from lightwood.analysis import model_analyzer"
+        "from lightwood.helpers.parallelism import mut_method_call",
+        "from lightwood.encoder import NumericEncoder",
+        "from lightwood.encoder import CategoricalAutoEncoder",
+        "from lightwood.helpers.log import log"
     ]
 }
