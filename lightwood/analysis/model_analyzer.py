@@ -54,7 +54,8 @@ def model_analyzer(
     analysis = {}
     predictions = {}
     input_columns = list([col for col in data.columns if col != target])
-    normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
+    normal_predictions = predictor(encoded_data) # TODO: this should include beliefs for categorical targets
+    normal_predictions = normal_predictions.set_index(data.index)
 
     # confidence estimation with inductive conformal predictors (ICPs)
     analysis['icp'] = {'__mdb_active': False}
@@ -154,10 +155,10 @@ def model_analyzer(
         analysis['icp']['__default'].calibrate(icp_df.values, y)
 
         # get confidence estimation for validation dataset
-        _, ranges = set_conf_range(icp_df, icp, target, analysis, positive_domain=positive_domain, significance=fixed_significance)
+        _, ranges = set_conf_range(icp_df, icp, dtype_dict[target], analysis, positive_domain=positive_domain, significance=fixed_significance)
         if not is_classification:
             # previously using cached_val_df index, analyze how to replicate once again for the TS case
-            result_df = pd.DataFrame(index=data.index, columns=['lower', 'upper'])
+            result_df = pd.DataFrame(index=data.index, columns=['lower', 'upper'], dtype=float)
             result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
             result_df.loc[icp_df.index, 'upper'] = ranges[:, 1]
 
@@ -218,9 +219,12 @@ def model_analyzer(
 
         analysis['icp']['__mdb_active'] = True
 
+    # join confidence to predictions
+    full_predictions = pd.concat([normal_predictions, result_df.astype(float)], axis=1)
+
     # get accuracy metric for validation data
     normal_accuracy = evaluate_accuracy(
-        normal_predictions,
+        full_predictions,
         data,
         target,
         data_type,

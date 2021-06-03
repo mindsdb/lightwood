@@ -20,12 +20,12 @@ def clean_df(df, target, is_classification, label_encoders):
     return df, y
 
 
-def set_conf_range(X, icp, target, analysis_info, positive_domain=False, std_tol=1, group='__default', significance=None):
+def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, std_tol=1, group='__default', significance=None):
     """ Sets confidence level and returns it plus predictions regions
     significance: desired confidence level. can be preset 0 < x <= 0.99
     """
     # numerical
-    if target in [dtype.integer, dtype.float, dtype.array]:
+    if target_type in [dtype.integer, dtype.float, dtype.array]:
         # and dtype.NUMERIC in typing_info['data_type_dist'].keys()):
 
         # ICP gets all possible bounds (shape: (B, 2, 99))
@@ -54,8 +54,8 @@ def set_conf_range(X, icp, target, analysis_info, positive_domain=False, std_tol
                 return 0.9901, ranges
 
     # categorical
-    elif target == dtype.categorical:  # or  #
-        # (target.data_dtype == dtype.array and  # time-series w/ cat target
+    elif target_type == dtype.categorical:  # or  #
+        # (target_type == dtype.array and  # time-series w/ cat target
         #  dtype.categorical in typing_info['data_type_dist'].keys())) and \
         #   lmd['stats_v2'][target]['typing']['data_subtype'] != dtype.tags:  # no tag support yet
 
