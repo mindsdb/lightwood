@@ -155,13 +155,17 @@ def model_analyzer(
         analysis['icp']['__default'].calibrate(icp_df.values, y)
 
         # get confidence estimation for validation dataset
-        _, ranges = set_conf_range(icp_df, icp, dtype_dict[target], analysis, positive_domain=positive_domain, significance=fixed_significance)
+        conf, ranges = set_conf_range(icp_df, icp, dtype_dict[target], analysis, positive_domain=positive_domain, significance=fixed_significance)
         if not is_classification:
             # @TODO previously using cached_val_df index, analyze how to replicate once again for the TS case
             # @TODO once using normalizer, add column for confidence proper here, and return DF in categorical case too
-            result_df = pd.DataFrame(index=data.index, columns=['lower', 'upper'], dtype=float)
+            result_df = pd.DataFrame(index=data.index, columns=['confidence', 'lower', 'upper'], dtype=float)
             result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
             result_df.loc[icp_df.index, 'upper'] = ranges[:, 1]
+        else:
+            result_df = pd.DataFrame(index=data.index, columns=['confidence'], dtype=float)
+
+        result_df.loc[icp_df.index, 'confidence'] = conf
 
         # calibrate additional grouped ICPs
         if ts_cfg.is_timeseries and ts_cfg.group_by:
@@ -203,13 +207,15 @@ def model_analyzer(
                     analysis['train_std_dev'][frozenset(group)] = y_train.std()
 
                 # get bounds for relevant rows in validation dataset
-                _, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], target, analysis,
-                                                 params, group=frozenset(group),
-                                                 significance=fixed_significance)
+                conf, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], target, analysis,
+                                                    params, group=frozenset(group),
+                                                    significance=fixed_significance)
                 # save group bounds
                 if not is_classification:
                     result_df.loc[icp_df.index, 'lower'] = group_ranges[:, 0]
                     result_df.loc[icp_df.index, 'upper'] = group_ranges[:, 1]
+
+                result_df.loc[icp_df.index, 'confidence'] = conf
 
         # consolidate all groups here
         if not is_classification:
@@ -221,7 +227,7 @@ def model_analyzer(
         analysis['icp']['__mdb_active'] = True
 
     # join confidence to predictions
-    full_predictions = pd.concat([normal_predictions, result_df.astype(float)], axis=1)
+    full_predictions = pd.concat([normal_predictions, result_df], axis=1)
 
     # get accuracy metric for validation data
     normal_accuracy = evaluate_accuracy(

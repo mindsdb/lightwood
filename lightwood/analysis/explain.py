@@ -88,8 +88,9 @@ def explain(data,
 
             # categorical
             else:
-                analysis['icp']['__default'].nc_function.model.prediction_cache = \
-                    predictions  # @TODO use the class_distribution
+                # @TODO use the real class_distribution
+                class_dists = pd.get_dummies(predictions['predictions']).values
+                analysis['icp']['__default'].nc_function.model.prediction_cache = class_dists
 
                 conf_candidates = list(range(20)) + list(range(20, 100, 10))
                 all_ranges = np.array(
@@ -182,5 +183,4 @@ def explain(data,
         predictions[f'{target_name}_confidence_range'] = [[None, None]] * len(predictions[target_name])
 
     insights = predictions
-
     return insights
