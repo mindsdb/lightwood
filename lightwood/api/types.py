@@ -85,34 +85,43 @@ class TimeseriesSettings:
 @dataclass
 class ProblemDefinition:
     target: str
-    seconds_per_model: int
-    timeseries_settings: TimeseriesSettings
+    nfolds: int
     pct_invalid: float
-    fixed_confidence: Union[int, float, None]
+    seconds_per_model: int
     target_weights: List[float]
     positive_domain: bool
-    nfolds: int
+    fixed_confidence: Union[int, float, None]
+    timeseries_settings: TimeseriesSettings
+    anomaly_detection: bool
+    anomaly_error_rate: Union[float, None]
+    anomaly_cooldown: int
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
         target = obj['target']
-        seconds_per_model = obj.get('seconds_per_model', None)
-        timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
+        nfolds = obj.get('nfolds', 10)
         pct_invalid = obj.get('pct_invalid', 1)
-        fixed_confidence = obj.get('fixed_confidence', None)
+        seconds_per_model = obj.get('seconds_per_model', None)
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
-        nfolds = obj.get('nfolds', 10)
+        fixed_confidence = obj.get('fixed_confidence', None)
+        timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
+        anomaly_detection = obj.get('anomaly_detection', True)
+        anomaly_error_rate = obj.get('anomaly_error_rate', None)
+        anomaly_cooldown = obj.get('anomaly_detection', 1)
 
         problem_definition = ProblemDefinition(
             target=target,
-            seconds_per_model=seconds_per_model,
-            timeseries_settings=timeseries_settings,
+            nfolds=nfolds,
             pct_invalid=pct_invalid,
-            fixed_confidence=fixed_confidence,
+            seconds_per_model=seconds_per_model,
             target_weights=target_weights,
             positive_domain=positive_domain,
-            nfolds=nfolds
+            fixed_confidence=fixed_confidence,
+            timeseries_settings=timeseries_settings,
+            anomaly_detection=anomaly_detection,
+            anomaly_error_rate=anomaly_error_rate,
+            anomaly_cooldown=anomaly_cooldown
         )
 
         return problem_definition
@@ -131,5 +140,6 @@ class LightwoodConfig:
     cleaner: str = None
     splitter: str = None
     analyzer: str = None
+    explainer: str = None
     imports: str = None
 

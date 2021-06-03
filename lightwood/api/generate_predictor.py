@@ -58,14 +58,14 @@ self.ensemble = {call(lightwood_config.output.ensemble, lightwood_config)}
 
 log.info('Analyzing the ensemble')
 # Add back when analysis works
-self.confidence_model, self.predictor_analysis = {call(lightwood_config.analyzer, lightwood_config)}
+self.predictor_analysis, self.analysis_predictions = {call(lightwood_config.analyzer, lightwood_config)}
 """
     learn_body = align(learn_body, 2)
 
     predict_body = f"""
 encoded_ds = lightwood.encode(self.encoders, data.df, self.target)
 df = self.ensemble(encoded_ds)
-# insights = explain(data.df, df, self.confidence_model, self.predictor_analysis)
+insights = {call(lightwood_config.explainer, lightwood_config)}
 return df
 """
     predict_body = align(predict_body, 2)
