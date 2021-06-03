@@ -80,7 +80,8 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                 'dynamic_args': {
                     'target': 'self.target',
                     'dtype_dict': 'self.dtype_dict',
-                    'input_cols': 'self.input_cols'
+                    'input_cols': 'self.input_cols',
+                    'target_encoder': 'self.encoders[self.target]'
                 }
             }
         ],

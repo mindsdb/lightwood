@@ -1,3 +1,4 @@
+from lightwood.encoder.base import BaseEncoder
 from typing import Dict, List
 import pandas as pd
 from torch.nn.modules.loss import MSELoss
@@ -22,12 +23,13 @@ from torch.optim.optimizer import Optimizer
 class Neural(BaseModel):
     model: nn.Module
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder):
         super().__init__(stop_after)
         self.model = None
         self.dtype_dict = dtype_dict
         self.target = target
         self.timeseries_settings = timeseries_settings
+        self.target_encoder = target_encoder
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
@@ -123,7 +125,7 @@ class Neural(BaseModel):
             X = X.to(self.model.device)
             Y = Y.to(self.model.device)
             Yh = self.model(X)
-            decoded_prediction = ds.decode_prediction(Yh)
+            decoded_prediction = self.target_encoder.decode(Yh)
             decoded_predictions.append(decoded_prediction)
 
         ydf = pd.DataFrame({'predictions': decoded_predictions})
