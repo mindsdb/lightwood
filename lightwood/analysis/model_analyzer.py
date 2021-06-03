@@ -36,9 +36,11 @@ def model_analyzer(
         data: EncodedDs,
         stats_info: StatisticalAnalysis,
         target: str,
-        timeseries_settings: TimeseriesSettings,
+        ts_cfg: TimeseriesSettings,
         dtype_dict: Dict[str, str],
-        disable_column_importance=True
+        disable_column_importance=True,
+        fixed_significance=None,
+        positive_domain=False
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
 
@@ -51,14 +53,14 @@ def model_analyzer(
     data = encoded_data.data_frame
     analysis = {}
     predictions = {}
-    input_columns = list(features.keys())
+    input_columns = list([col for col in data.columns if col != target])
     normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
 
     # confidence estimation with inductive conformal predictors (ICPs)
     analysis['icp'] = {'__mdb_active': False}
 
     # typing_info = stats_info['typing']
-    data_type = target.data_dtype
+    data_type = dtype_dict[target]
     data_subtype = data_type
 
     is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
@@ -67,7 +69,6 @@ def model_analyzer(
     is_classification = data_type in [dtype.categorical] or data_type in [dtype.array]
                         # dtype.categorical in typing_info['data_type_dist'].keys())
 
-    ts_cfg = params.timeseries_settings
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
 
     fit_params = {
@@ -103,8 +104,6 @@ def model_analyzer(
         norm_params = {'output_column': target}
         normalizer = SelfawareNormalizer(fit_params=norm_params)
         normalizer.prediction_cache = normal_predictions.get(f'{target}_selfaware_scores', None)  # @TODO: call to .explain()
-
-        fixed_significance = params.fixed_confidence
 
         # instance the ICP
         nc = nc_class(model, nc_function)  # , normalizer=normalizer)  # @TODO: reintroduce normalizer
@@ -150,12 +149,12 @@ def model_analyzer(
 
         # calibrate ICP
         icp_df = deepcopy(data)
-        icp_df, y = clean_df(icp_df, target.name, is_classification, analysis.get('label_encoders', None))
+        icp_df, y = clean_df(icp_df, target, is_classification, analysis.get('label_encoders', None))
         analysis['icp']['__default'].index = icp_df.columns
         analysis['icp']['__default'].calibrate(icp_df.values, y)
 
         # get confidence estimation for validation dataset
-        _, ranges = set_conf_range(icp_df, icp, target, analysis, params, significance=fixed_significance)
+        _, ranges = set_conf_range(icp_df, icp, target, analysis, positive_domain=positive_domain, significance=fixed_significance)
         if not is_classification:
             # previously using cached_val_df index, analyze how to replicate once again for the TS case
             result_df = pd.DataFrame(index=data.index, columns=['lower', 'upper'])
@@ -224,6 +223,7 @@ def model_analyzer(
         normal_predictions,
         data,
         target,
+        data_type,
         backend=predictor
     )
 
@@ -261,7 +261,7 @@ def model_analyzer(
 
     # @TODO: Training / testing data accuracy here ?
 
-    acc_stats = AccStats(col_stats=features, target=target)
+    acc_stats = AccStats(dtype_dict=dtype_dict, target=target)
 
     predictions_arr = [normal_predictions.values.flatten().tolist()] + [x for x in empty_input_predictions_test.values()]
 
@@ -279,7 +279,7 @@ def model_analyzer(
     analysis['accuracy_samples'] = accuracy_samples
 
     analysis['validation_set_accuracy'] = normal_accuracy
-    if target.data_dtype in [dtype.integer, dtype.float]:
+    if target in [dtype.integer, dtype.float]:
         analysis['validation_set_accuracy_r2'] = normal_accuracy
 
     return analysis, predictions

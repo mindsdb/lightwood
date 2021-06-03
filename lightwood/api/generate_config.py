@@ -155,14 +155,16 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             'object': 'model_analyzer',
             'config_args': {
                 'stats_info': 'statistical_analysis',
-                'timeseries_settings': 'problem_definition.timeseries_settings'
+                'ts_cfg': 'problem_definition.timeseries_settings'
             },
             'dynamic_args': {
                 'predictor': 'self.ensemble',
                 'data': 'test_data',
                 'target': 'self.target',
                 'disable_column_importance': 'True',
-                'dtype_dict': 'self.dtype_dict'
+                'dtype_dict': 'self.dtype_dict',
+                'fixed_significance': None,
+                'positive_domain': False,
             }
         },
         features=features,
