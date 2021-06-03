@@ -47,6 +47,7 @@ def model_analyzer(
     # if ts_cfg.is_timeseries:
     #     validation_df = data.validation_df[data.validation_df['make_predictions'] == True]
     # ... same with test and train dfs
+    encoded_data = data
     data = encoded_data.data_frame
     analysis = {}
     predictions = {}
