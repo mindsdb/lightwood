@@ -8,18 +8,18 @@ class AccStats:
     Computes accuracy stats and a confusion matrix for the validation dataset
     """
 
-    def __init__(self, col_stats, target):
+    def __init__(self, dtype_dict, target):
         """
         Chose the algorithm to use for the rest of the model
         As of right now we go with BernoulliNB
         """
-        self.col_stats = col_stats
+        self.col_stats = dtype_dict
         self.target = target
-        self.input_columns = [col for col in col_stats]
+        self.input_columns = [col for col in dtype_dict]
 
         self.buckets = None
-        # if 'percentage_buckets' in col_stats:  # @TODO: add these
-        #    self.buckets = col_stats['percentage_buckets']
+        # if 'percentage_buckets' in dtype_dict:  # @TODO: add these
+        #    self.buckets = dtype_dict['percentage_buckets']
 
     def fit(self, real_df, predictions_arr, missing_col_arr, hmd=None):
         """
@@ -47,34 +47,34 @@ class AccStats:
             for m in range(len(predictions_arr[n])):
                 row = real_df.iloc[m]
 
-                real_value = row[self.target.name]
+                real_value = row[self.target]
                 predicted_value = predictions_arr[n][m]
 
                 try:
                     predicted_value = predicted_value \
-                        if self.col_stats['typing']['data_type'] not in [dtype.integer, dtype.float] \
+                        if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
                         else float(predicted_value)
                 except Exception:
                     predicted_value = None
 
                 try:
                     real_value = real_value \
-                        if self.col_stats['typing']['data_type'] not in [dtype.integer, dtype.float] \
+                        if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
                         else float(real_value)
                 except Exception:
                     real_value = None
 
                 if self.buckets is not None:
-                    predicted_value_b = get_value_bucket(predicted_value, self.buckets, self.col_stats, hmd)
-                    real_value_b = get_value_bucket(real_value, self.buckets, self.col_stats, hmd)
+                    predicted_value_b = get_value_bucket(predicted_value, self.buckets, self.col_stats, self.target)
+                    real_value_b = get_value_bucket(real_value, self.buckets, self.col_stats, self.target)
                 else:
                     predicted_value_b = predicted_value
                     real_value_b = real_value
 
-                has_confidence_range = self.target.data_dtype in [dtype.integer, dtype.float] # \
-                                       # and f'{self.target.name}_confidence_range' in predictions_arr[n]
+                has_confidence_range = self.col_stats[self.target] in [dtype.integer, dtype.float] # \
+                                       # and f'{self.target}_confidence_range' in predictions_arr[n]
 
-                # predicted_range = predictions_arr[n][f'{self.target.name}_confidence_range'][m] if has_confidence_range else (None, None)
+                # predicted_range = predictions_arr[n][f'{self.target}_confidence_range'][m] if has_confidence_range else (None, None)
                 predicted_range = (None, None)
 
                 if n == 0:
@@ -165,20 +165,20 @@ class AccStats:
 
 
 # @TODO not pass huge dicts of stats to this function, just pass the data type
-def get_value_bucket(value, buckets, col_stats, hmd=None):
+def get_value_bucket(value, buckets, col_stats, target):
     """
     :return: The bucket in the `histogram` in which our `value` falls
     """
     if buckets is None:
         return None
 
-    if col_stats['typing']['data_subtype'] in (dtype.SINGLE, dtype.MULTIPLE):
+    if col_stats[target] in (dtype.SINGLE, dtype.MULTIPLE):
         if value in buckets:
             bucket = buckets.index(value)
         else:
             bucket = len(buckets)  # for null values
 
-    elif col_stats['typing']['data_subtype'] in (dtype.binary, dtype.integer, dtype.float):
+    elif col_stats[target] in (dtype.binary, dtype.integer, dtype.float):
         bucket = closest(buckets, value)
     else:
         bucket = len(buckets)  # for null values
@@ -190,8 +190,7 @@ def closest(arr, value):
     """
     :return: The index of the member of `arr` which is closest to `value`
     """
-
-    if value == None:
+    if value is None:
         return -1
 
     for i,ele in enumerate(arr):

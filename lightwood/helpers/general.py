@@ -8,29 +8,27 @@ from lightwood.api import Output
 
 def evaluate_accuracy(predictions: pd.DataFrame,
                       data_frame: pd.DataFrame,
-                      target_info: Output,
+                      target_name: str,
+                      target_type,
                       backend=None,
                       **kwargs) -> float:
-
-    col_type = target_info.data_dtype
-    column = target_info.name
-    if col_type in [dtype.integer, dtype.float]:
+    if target_type in [dtype.integer, dtype.float]:
         evaluator = evaluate_regression_accuracy
-    elif col_type == dtype.categorical:
+    elif target_type == dtype.categorical:
         evaluator = evaluate_classification_accuracy
-    elif col_type == dtype.tags:
+    elif target_type == dtype.tags:
         evaluator = evaluate_multilabel_accuracy
-    elif col_type == dtype.array:
+    elif target_type == dtype.array:
         evaluator = evaluate_array_accuracy
         # @TODO: add typing info to target_info
-        kwargs['categorical'] = True if dtype.categorical in target_info.typing.get('data_type_dist', []) else False
+        # kwargs['categorical'] = True if dtype.categorical in target_info.typing.get('data_type_dist', []) else False
     else:
         evaluator = evaluate_generic_accuracy
 
     score = evaluator(
-        column,
+        target_name,
         predictions,
-        data_frame[column],
+        data_frame[target_name],
         backend=backend,
         **kwargs
     )

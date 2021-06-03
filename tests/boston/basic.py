@@ -3,7 +3,6 @@ import unittest
 import os
 import importlib
 
-
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
         from lightwood import generate_predictor
