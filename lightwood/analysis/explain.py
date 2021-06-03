@@ -55,15 +55,15 @@ def explain(data,
 
         is_anomaly_task = is_numerical and timeseries_settings.is_timeseries and anomaly_detection
 
-        if (is_numerical or is_categorical) and analysis['icp'].get(target_name, False):
+        if (is_numerical or is_categorical) and analysis['icp'].get('__mdb_active', False):
 
             # reorder DF index
-            index = analysis['icp'][target_name]['__default'].index.values
+            index = analysis['icp']['__default'].index.values
             index = np.append(index, target_name) if target_name not in index else index
             icp_X = icp_X.reindex(columns=index)  # important, else bounds can be invalid
 
             # only one normalizer, even if it's a grouped time series task
-            normalizer = analysis['icp'][target_name]['__default'].nc_function.normalizer
+            normalizer = analysis['icp']['__default'].nc_function.normalizer
             if normalizer:
                 normalizer.prediction_cache = analysis['predictions'].get(f'{target_name}_selfaware_scores', None)
                 icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
@@ -78,22 +78,22 @@ def explain(data,
             if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1 and is_numerical:
 
                 # bounds in time series are only given for the first forecast
-                analysis['icp'][target_name]['__default'].nc_function.model.prediction_cache = \
+                analysis['icp']['__default'].nc_function.model.prediction_cache = \
                     [p[0] for p in predictions[target_name]]
-                all_confs = analysis['icp'][target_name]['__default'].predict(X.values)
+                all_confs = analysis['icp']['__default'].predict(X.values)
 
             elif is_numerical:
-                analysis['icp'][target_name]['__default'].nc_function.model.prediction_cache = predictions[target_name]
-                all_confs = analysis['icp'][target_name]['__default'].predict(X.values)
+                analysis['icp']['__default'].nc_function.model.prediction_cache = predictions['predictions']
+                all_confs = analysis['icp']['__default'].predict(X.values)
 
             # categorical
             else:
-                analysis['icp'][target_name]['__default'].nc_function.model.prediction_cache = \
-                    predictions[f'{target_name}_class_distribution']
+                analysis['icp']['__default'].nc_function.model.prediction_cache = \
+                    predictions  # @TODO use the class_distribution
 
                 conf_candidates = list(range(20)) + list(range(20, 100, 10))
                 all_ranges = np.array(
-                    [analysis['icp'][target_name]['__default'].predict(X.values, significance=s / 100)
+                    [analysis['icp']['__default'].predict(X.values, significance=s / 100)
                      for s in conf_candidates])
                 all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
 
@@ -117,8 +117,8 @@ def explain(data,
             result.loc[X.index, 'significance'] = significances
 
             # grouped time series, we replace bounds in rows that have a trained ICP
-            if analysis['icp'][target_name].get('__mdb_groups', False):
-                icps = analysis['icp'][target_name]
+            if analysis['icp'].get('__mdb_groups', False):
+                icps = analysis['icp']
                 group_keys = icps['__mdb_group_keys']
 
                 for group in icps['__mdb_groups']:
@@ -182,7 +182,5 @@ def explain(data,
         predictions[f'{target_name}_confidence_range'] = [[None, None]] * len(predictions[target_name])
 
     insights = predictions
-
-    print(insights)
 
     return insights
