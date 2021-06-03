@@ -43,10 +43,9 @@ def evaluate_regression_accuracy(
         backend,
         **kwargs
     ):
-    if f'{column}_confidence_range' in predictions:
-        Y = np.array(true_values)
-        ranges = predictions[f'{column}_confidence_range']
-        within = ((Y >= ranges[:, 0]) & (Y <= ranges[:, 1]))
+    if 'lower' and 'upper' in predictions:
+        Y = np.array(true_values).astype(float)
+        within = ((Y >= predictions['lower']) & (Y <= predictions['upper']))
         return sum(within)/len(within)
     else:
         r2 = r2_score(true_values, predictions['predictions'])
