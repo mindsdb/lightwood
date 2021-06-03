@@ -157,7 +157,8 @@ def model_analyzer(
         # get confidence estimation for validation dataset
         _, ranges = set_conf_range(icp_df, icp, dtype_dict[target], analysis, positive_domain=positive_domain, significance=fixed_significance)
         if not is_classification:
-            # previously using cached_val_df index, analyze how to replicate once again for the TS case
+            # @TODO previously using cached_val_df index, analyze how to replicate once again for the TS case
+            # @TODO once using normalizer, add column for confidence proper here, and return DF in categorical case too
             result_df = pd.DataFrame(index=data.index, columns=['lower', 'upper'], dtype=float)
             result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
             result_df.loc[icp_df.index, 'upper'] = ranges[:, 1]
@@ -286,4 +287,4 @@ def model_analyzer(
     if target in [dtype.integer, dtype.float]:
         analysis['validation_set_accuracy_r2'] = normal_accuracy
 
-    return analysis, predictions
+    return analysis, full_predictions

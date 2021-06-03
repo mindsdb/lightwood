@@ -167,6 +167,25 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                 'positive_domain': False,
             }
         },
+
+        explainer={
+            'object': 'explain',
+            'config_args': {
+                'timeseries_settings': 'problem_definition.timeseries_settings',
+                'positive_domain': 'problem_definition.positive_domain',
+                'fixed_confidence': 'problem_definition.fixed_confidence',
+                'anomaly_detection': 'problem_definition.anomaly_detection',
+                'anomaly_error_rate': 'problem_definition.anomaly_error_rate',
+                'anomaly_cooldown': 'problem_definition.anomaly_cooldown'
+            },
+            'dynamic_args': {
+                'data': 'data.df',
+                'predictions': 'df',
+                'analysis': 'self.predictor_analysis',
+                'target_name': 'self.target',
+                'target_dtype': 'self.dtype_dict[self.target]',
+            }
+        },
         features=features,
         output=output,
         imports=imports,
