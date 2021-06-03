@@ -112,7 +112,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
         'from lightwood.data import splitter',
-        'from lightwood.analysis import model_analyzer',
+        'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score',
         'import pandas as pd',
         'from mindsdb_datasources import DataSource',
