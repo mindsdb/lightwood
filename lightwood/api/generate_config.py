@@ -51,20 +51,6 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
     problem_definition = populate_problem_definition(type_information, statistical_analysis, problem_definition)
     target = problem_definition.target
 
-    '''
-            {
-                'object': 'LightGBM',
-                'config_args': {
-                    'stop_after': 'problem_definition.seconds_per_model'
-                },
-                'dynamic_args': {
-                    'target': 'self.target',
-                    'dtype_dict': 'self.dtype_dict',
-                    'input_cols': 'self.input_cols'
-                }
-            }
-    '''
-
     output = Output(
         name=target,
         data_dtype=type_information.dtypes[target],
@@ -82,6 +68,17 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                     'dtype_dict': 'self.dtype_dict',
                     'input_cols': 'self.input_cols',
                     'target_encoder': 'self.encoders[self.target]'
+                }
+            },
+            {
+                'object': 'LightGBM',
+                'config_args': {
+                    'stop_after': 'problem_definition.seconds_per_model'
+                },
+                'dynamic_args': {
+                    'target': 'self.target',
+                    'dtype_dict': 'self.dtype_dict',
+                    'input_cols': 'self.input_cols'
                 }
             }
         ],

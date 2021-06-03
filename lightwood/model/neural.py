@@ -121,12 +121,13 @@ class Neural(BaseModel):
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
+        
         for X, Y in ds:
             X = X.to(self.model.device)
             Y = Y.to(self.model.device)
             Yh = self.model(X)
-            decoded_prediction = self.target_encoder.decode(Yh)
-            decoded_predictions.append(decoded_prediction)
+            decoded_prediction = self.target_encoder.decode(torch.unsqueeze(Yh, 0))
+            decoded_predictions.extend(decoded_prediction)
 
         ydf = pd.DataFrame({'predictions': decoded_predictions})
         return ydf
