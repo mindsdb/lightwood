@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.encoder.categorical.onehot import OneHotEncoder
-from lightwood.api.gym import Gym
+from lightwood.encoder.categorical.gym import Gym
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.model.helpers.default_net import DefaultNet
@@ -55,7 +55,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
             embeddings_layer_len = self.max_encoded_length
 
-            self.net = DefaultNet(dynamic_parameters={}, shape=[
+            self.net = DefaultNet(shape=[
                                   input_len, embeddings_layer_len, input_len])
 
             criterion = torch.nn.CrossEntropyLoss()
@@ -80,7 +80,7 @@ class CategoricalAutoEncoder(BaseEncoder):
                                                        eval_every_x_epochs=1,
                                                        max_unimproving_models=5)
 
-            self.net = best_model.to(self.net.device)
+            self.net = best_model.to(self.net.device, 1)
 
             modules = [module for module in self.net.modules() if type(
                 module) != torch.nn.Sequential and type(module) != DefaultNet]
