@@ -4,7 +4,7 @@ import torch
 from sklearn.metrics import r2_score
 from lightwood.encoder.numeric import NumericEncoder
 from lightwood.encoder.text import PretrainedLangEncoder
-from lightwood import COLUMN_DATA_TYPES
+from lightwood.api.dtype import dtype
 
 
 class TestPretrainedLangEncoder(unittest.TestCase):
@@ -33,9 +33,9 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         enc = PretrainedLangEncoder()
 
         enc.prepare(priming_data,
-                            training_data={'targets': [
-                                {'output_type': COLUMN_DATA_TYPES.NUMERIC,'encoded_output': encoded_data_1},
-                            ]})#
+                    training_data={'targets': [
+                        {'output_type': dtype.float, 'encoded_output': encoded_data_1},
+                    ]})
 
         encoded_predicted_target = enc.encode(test_data).tolist()
 
