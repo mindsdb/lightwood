@@ -120,7 +120,7 @@ def model_analyzer(
                 icp.nc_function.model.class_map = stats_info['lightwood_class_map']
             else:
                 class_map = {i: v for i, v in enumerate(stats_info.train_observed_classes)}
-                predicted_classes = pd.get_dummies(normal_predictions['predictions']).values  # inflate to one-hot enc
+                predicted_classes = pd.get_dummies(normal_predictions['prediction']).values  # inflate to one-hot enc
 
                 icp.nc_function.model.prediction_cache = predicted_classes
                 icp.nc_function.model.class_map = class_map  # @TODO: still needed?
@@ -128,7 +128,7 @@ def model_analyzer(
             # we fit ICPs for time series confidence bounds only at t+1 forecast
             icp.nc_function.model.prediction_cache = np.array([p[0] for p in normal_predictions[target]])
         else:
-            icp.nc_function.model.prediction_cache = np.array(normal_predictions['predictions'])
+            icp.nc_function.model.prediction_cache = np.array(normal_predictions['prediction'])
 
         analysis['icp']['__default'].fit(None, None)  # @TODO: rm fit call after v1 works, 'twas a hack from the start
         if not is_classification:
