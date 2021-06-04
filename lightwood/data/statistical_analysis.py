@@ -1,22 +1,11 @@
-from mindsdb_datasources import DataSource
 from lightwood.api import TypeInformation, StatisticalAnalysis, ProblemDefinition, dtype
-
 import dateutil
-import string
 from collections import Counter, defaultdict
-import datetime
-
-import datetime
 import numpy as np
 from scipy.stats import entropy
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.cluster import MiniBatchKMeans
-import imagehash
-from PIL import Image
 from lightwood.helpers.text import splitRecursive, clean_float
 from sklearn.neighbors import LocalOutlierFactor
 import pandas as pd
-# from mindsdb_native.libs.helpers.general_helpers import get_value_bucket <--- impl in lightwood
 
 
 def lof_outliers(col_subtype, col_data):
@@ -87,39 +76,6 @@ def get_numeric_histogram(data, data_subtype):
     }
 
 
-def get_image_histogram(data):
-    image_hashes = []
-    for img_path in data:
-        img_hash = imagehash.phash(Image.open(img_path))
-        seq_hash = []
-        for hash_row in img_hash.hash:
-            seq_hash.extend(hash_row)
-
-        image_hashes.append(np.array(seq_hash))
-
-    kmeans = MiniBatchKMeans(n_clusters=20,
-                             batch_size=round(len(image_hashes) / 4))
-
-    kmeans.fit(image_hashes)
-
-    x = []
-    y = [0] * len(kmeans.cluster_centers_)
-
-    for cluster in kmeans.cluster_centers_:
-        similarities = cosine_similarity(image_hashes, kmeans.cluster_centers_)
-
-        similarities = list(map(lambda x: sum(x), similarities))
-
-        index_of_most_similar = similarities.index(max(similarities))
-        x.append(data.iloc[index_of_most_similar])
-
-    indices = kmeans.predict(image_hashes)
-    for index in indices:
-        y[index] += 1
-
-    return {'x': x, 'y': y}, list(kmeans.cluster_centers_)
-
-
 def get_histogram(data, data_type, data_subtype):
     """ Returns a histogram for the data and [optionaly] the percentage buckets"""
     if data_type == DATA_TYPES.TEXT:
@@ -134,7 +90,7 @@ def get_histogram(data, data_type, data_subtype):
         hist = {str(k): v for k, v in hist.items()}
         return hist, hist['x']
     elif data_subtype == DATA_SUBTYPES.IMAGE:
-        return get_image_histogram(data)
+        return None, None
     else:
         return None, None
 
