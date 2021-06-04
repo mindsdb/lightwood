@@ -129,5 +129,5 @@ class Neural(BaseModel):
             decoded_prediction = self.target_encoder.decode(torch.unsqueeze(Yh, 0))
             decoded_predictions.extend(decoded_prediction)
 
-        ydf = pd.DataFrame({'predictions': decoded_predictions})
+        ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf

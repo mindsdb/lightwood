@@ -156,5 +156,5 @@ class LightGBM(BaseModel):
             decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
         else:
             decoded_predictions = raw_predictions
-        ydf = pd.DataFrame({'predictions': decoded_predictions})
+        ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf

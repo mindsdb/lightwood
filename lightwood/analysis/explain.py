@@ -32,7 +32,7 @@ def explain(data,
         icp_X = deepcopy(data)
 
         # replace observed data w/predictions
-        preds = predictions['predictions']
+        preds = predictions['prediction']
         if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1:
             preds = [p[0] for p in preds]
         icp_X[target_name] = preds
@@ -65,7 +65,7 @@ def explain(data,
             # only one normalizer, even if it's a grouped time series task
             normalizer = analysis['icp']['__default'].nc_function.normalizer
             if normalizer:
-                normalizer.prediction_cache = analysis['predictions'].get(f'{target_name}_selfaware_scores', None)
+                normalizer.prediction_cache = analysis['prediction'].get(f'{target_name}_selfaware_scores', None)
                 icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
 
             # get ICP predictions
@@ -83,13 +83,13 @@ def explain(data,
                 all_confs = analysis['icp']['__default'].predict(X.values)
 
             elif is_numerical:
-                analysis['icp']['__default'].nc_function.model.prediction_cache = predictions['predictions']
+                analysis['icp']['__default'].nc_function.model.prediction_cache = predictions['prediction']
                 all_confs = analysis['icp']['__default'].predict(X.values)
 
             # categorical
             else:
                 # @TODO use the real class_distribution
-                class_dists = pd.get_dummies(predictions['predictions']).values
+                class_dists = pd.get_dummies(predictions['prediction']).values
                 analysis['icp']['__default'].nc_function.model.prediction_cache = class_dists
 
                 conf_candidates = list(range(20)) + list(range(20, 100, 10))
