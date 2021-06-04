@@ -7,10 +7,10 @@ from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.api.gym import Gym
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
+from lightwood.model.helpers.default_net import DefaultNet
 
 
 class CategoricalAutoEncoder(BaseEncoder):
-
     def __init__(self, is_target=False, max_encoded_length=100):
         super().__init__(is_target)
         self._prepared = False

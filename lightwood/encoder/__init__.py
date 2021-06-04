@@ -2,7 +2,6 @@
 from lightwood.encoder.base import BaseEncoder
 from lightwood.encoder.datetime.datetime import DatetimeEncoder
 from lightwood.encoder.image.img_2_vec import Img2VecEncoder
-from lightwood.encoder.image.nn import NnAutoEncoder
 from lightwood.encoder.numeric.numeric import NumericEncoder
 from lightwood.encoder.numeric.ts_numeric import TsNumericEncoder
 from lightwood.encoder.text.short import ShortTextEncoder
@@ -24,4 +23,4 @@ except Exception:
     log.info('Unable to import AmplitudeTsEncoder, if you wish to encode audio data please install pydub and initialize lightwood again')
 
 
-__all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NnAutoEncoder', 'NumericEncoder', 'TsNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder', 'CategoricalAutoEncoder', 'TsRnnEncoder', 'TimeSeriesPlainEncoder', 'MultiHotEncoder', 'PretrainedLangEncoder', 'AmplitudeTsEncoder']
+__all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder', 'TsNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder', 'CategoricalAutoEncoder', 'TsRnnEncoder', 'TimeSeriesPlainEncoder', 'MultiHotEncoder', 'PretrainedLangEncoder', 'AmplitudeTsEncoder']
