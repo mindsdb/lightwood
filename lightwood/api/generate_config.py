@@ -180,7 +180,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             },
             'dynamic_args': {
                 'data': 'data',
-                'prediction': 'df',
+                'predictions': 'df',
                 'analysis': 'self.predictor_analysis',
                 'target_name': 'self.target',
                 'target_dtype': 'self.dtype_dict[self.target]',
