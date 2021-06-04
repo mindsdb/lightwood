@@ -16,7 +16,7 @@ from math import gcd
 class TimeSeriesEncoder(BaseEncoder):
 
     def __init__(self, encoded_vector_size=128, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical):
+                 is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical, original_type=None):
         super().__init__(is_target)
         self.device, _ = get_devices()
         self.encoder_class = encoder_class
@@ -36,13 +36,14 @@ class TimeSeriesEncoder(BaseEncoder):
         self._target_ar_normalizers = {}  # dict of normalizers for each grouped-by column per previous_target column
         self._target_type = None
         self._group_combinations = None
+        self.original_type = original_type
 
     def setup_nn(self, additional_targets=None):
         """This method must be executed after initializing, else types are unassigned"""
-        if 'datetime' in (self.original_type, self.secondary_type):
+        if self.original_type in (dtype.datetime, dtype.date):
             self._normalizer = DatetimeEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields)*2  # sinusoidal datetime components
-        elif 'numeric' in (self.original_type, self.secondary_type):
+        elif self.original_type in (dtype.float, dtype.integer):
             self._normalizer = MinMaxNormalizer()
 
         total_dims = self._n_dims
