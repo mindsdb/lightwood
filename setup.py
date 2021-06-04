@@ -25,8 +25,6 @@ with open("README.md", "r") as fh:
 with open('requirements.txt') as req_file:
     requirements = [req.strip() for req in req_file.read().splitlines()]
 
-with open('optional_requirements.txt') as req_file:
-    optional_requirements = [req.strip() for req in req_file.read().splitlines()]
 
 # Windows specific requirements
 if sys_platform in ['win32','cygwin','windows']:
@@ -54,8 +52,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    extras_require = {
-        'full': optional_requirements
-    },
     python_requires=">=3.6"
 )
