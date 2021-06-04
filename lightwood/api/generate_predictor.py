@@ -61,7 +61,7 @@ self.predictor_analysis, self.analysis_predictions = {call(lightwood_config.anal
     learn_body = align(learn_body, 2)
 
     predict_body = f"""
-encoded_ds = lightwood.encode(self.encoders, data.df, self.target)
+encoded_ds = lightwood.encode(self.encoders, data, self.target)
 df = self.ensemble(encoded_ds)
 insights = {call(lightwood_config.explainer, lightwood_config)}
 return df
