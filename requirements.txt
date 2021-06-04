@@ -3,13 +3,13 @@ python-dateutil <2.8.1,>=2.1
 numpy >= 1.16.2
 pandas >= 0.25.1
 schema >= 0.6.8
-torchvision >= 0.7.0, <= 0.9.0
-torch >= 1.6.0, <= 1.8.1, != 1.8.0
+torchvision >= 0.9.1
+torch >= 1.8.1
 requests >= 2.0.0
-transformers >= 4.1.0, <= 4.3.0
+transformers >= 4.5.0
 lightgbm >= 3.1.1
 optuna >= 2.4.0
-scipy >= 1.1.0
+scipy >= 1.6.3
 psutil >= 5.7.0
 setuptools >= 21.2.1
 wheel >= 0.32.2
