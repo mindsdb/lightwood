@@ -76,6 +76,6 @@ class OneHotEncoder(BaseEncoder):
             # UNK not included in class_map nor belief distribution
             if UNCOMMON_TOKEN != 0:
                 raise Exception("Uncommon token should be the first assigned token in the vocabulary, aborting.")
-            return ret, probs, {k-1: v for k, v in self._lang.index2word.items() if k != UNCOMMON_TOKEN}
+            return ret, probs, {k - 1: v for k, v in self._lang.index2word.items() if k != UNCOMMON_TOKEN}
         else:
             return ret
