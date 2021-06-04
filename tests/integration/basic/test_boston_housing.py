@@ -10,7 +10,7 @@ class TestBasic(unittest.TestCase):
 
         # call: Go with dataframes
         datasource = FileDS('../data/boston.csv')
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'MEDV'}), datasource)
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'MEDV'}), datasource.df)
 
         try:
             with open('dynamic_predictor.py', 'w') as fp:
@@ -22,9 +22,9 @@ class TestBasic(unittest.TestCase):
             predictor = predictor_class()
             print('Class initialized successfully')
 
-            predictor.learn(datasource)
+            predictor.learn(datasource.df)
 
-            predictions = predictor.predict(datasource)
+            predictions = predictor.predict(datasource.df)
             print(predictions[0:100])
         finally:
             print('Not removing predictor for debugging purposes')
