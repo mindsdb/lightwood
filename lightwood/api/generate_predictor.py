@@ -83,20 +83,20 @@ class Predictor():
         seed()
         self.target = '{lightwood_config.output.name}'
 
-    def learn(self, data: DataSource) -> None:
+    def learn(self, data: pd.DataFrame) -> None:
 {learn_body}
 
-    def predict(self, data: DataSource) -> pd.DataFrame:
+    def predict(self, data: pd.DataFrame) -> pd.DataFrame:
 {predict_body}
 """
 
     return predictor_code
 
 
-def generate_predictor(problem_definition: ProblemDefinition = None, datasource: DataSource = None, lightwood_config: LightwoodConfig = None) -> str:
+def generate_predictor(problem_definition: ProblemDefinition = None, data: pd.DataFrame = None, lightwood_config: LightwoodConfig = None) -> str:
     if lightwood_config is None:
-        type_information = lightwood.data.infer_types(datasource, problem_definition.pct_invalid)
-        statistical_analysis = lightwood.data.statistical_analysis(datasource, type_information, problem_definition)
+        type_information = lightwood.data.infer_types(data, problem_definition.pct_invalid)
+        statistical_analysis = lightwood.data.statistical_analysis(data, type_information, problem_definition)
         lightwood_config = lightwood.generate_config(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
     predictor_code = generate_predictor_code(lightwood_config)
