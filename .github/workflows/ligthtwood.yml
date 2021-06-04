@@ -11,9 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # macos-latest disabled for now, SegFaults (error 11) suspected OOM issue
-        os: [ubuntu-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest]
+        python-version: [3.7,3.8,3.9]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -45,9 +44,7 @@ jobs:
         flake8 . --statistics
     - name: Test with unittest
       run: |
-        cd tests/unit_tests
-        python -m unittest
-        cd ../..
+        python -m unittest discover tests
 
   deploy:
     runs-on: ubuntu-latest
