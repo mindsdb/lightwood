@@ -32,13 +32,14 @@ class DefaultNet(torch.nn.Module):
         self.net = torch.nn.Sequential(*layers)
         self.to(*get_devices())
 
-    def to(self, device: torch.device, available_devices: int) -> None:
+    def to(self, device: torch.device, available_devices: int) -> torch.nn.Module:
         self.net = self.net.to(device)
         if available_devices > 1:
             self.net = torch.nn.DataParallel(self.net)
 
         self.device = device
         self.available_devices = available_devices
+        return self
 
     def forward(self, input):
         with LightwoodAutocast():
