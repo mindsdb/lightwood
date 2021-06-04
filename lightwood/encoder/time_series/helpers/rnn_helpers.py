@@ -55,7 +55,7 @@ class DecoderRNNNumerical(nn.Module):
 
 
 class EncoderRNNNumerical(nn.Module):
-    def __init__(self,  input_size, hidden_size):
+    def __init__(self, input_size, hidden_size):
         super(EncoderRNNNumerical, self).__init__()
         self.hidden_size = hidden_size
         self.dropout = nn.Dropout(0.2)
