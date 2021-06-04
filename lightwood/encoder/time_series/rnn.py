@@ -1,12 +1,12 @@
-from lightwood.encoder.time_series.helpers.common import *
-from lightwood.encoder.time_series.helpers.rnn_helpers import *
-from lightwood.encoder.time_series.helpers.transformer_helpers import *
+from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, get_group_matches
+from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerical, DecoderRNNNumerical
+from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, get_chunk, len_to_mask
 from lightwood.api import dtype
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoder.base import BaseEncoder
 from lightwood.encoder.datetime import DatetimeEncoder
 from lightwood.helpers.device import get_devices
-
+import numpy as np
 import torch
 import torch.nn as nn
 from torch import optim
@@ -42,7 +42,7 @@ class TimeSeriesEncoder(BaseEncoder):
         """This method must be executed after initializing, else types are unassigned"""
         if self.original_type in (dtype.datetime, dtype.date):
             self._normalizer = DatetimeEncoder(sinusoidal=True)
-            self._n_dims *= len(self._normalizer.fields)*2  # sinusoidal datetime components
+            self._n_dims *= len(self._normalizer.fields) * 2  # sinusoidal datetime components
         elif self.original_type in (dtype.float, dtype.integer):
             self._normalizer = MinMaxNormalizer()
 
@@ -75,7 +75,7 @@ class TimeSeriesEncoder(BaseEncoder):
             self._dec_criterion = nn.MSELoss()
             self._base_criterion = nn.MSELoss(reduction="none")
             if self._transformer_hidden_size is None:
-                self._transformer_hidden_size = total_dims*2  # arbitrary
+                self._transformer_hidden_size = total_dims * 2  # arbitrary
 
             self._encoder = self.encoder_class(ninp=total_dims,
                                                nhead=gcd(dec_hsize, total_dims),
@@ -222,7 +222,7 @@ class TimeSeriesEncoder(BaseEncoder):
         with torch.no_grad():
             # Convert to array and determine max length
             data, lengths_data = self._prepare_raw_data(data)
-            _max_ts_length = int(lengths_data.max())
+            self._max_ts_length = int(lengths_data.max())
 
             if self._normalizer:
                 data = torch.stack([self._normalizer.encode(d) for d in data]).to(self.device)
