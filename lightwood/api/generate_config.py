@@ -179,7 +179,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                 'anomaly_cooldown': 'problem_definition.anomaly_cooldown'
             },
             'dynamic_args': {
-                'data': 'data.df',
+                'data': 'data',
                 'predictions': 'df',
                 'analysis': 'self.predictor_analysis',
                 'target_name': 'self.target',
