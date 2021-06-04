@@ -7,7 +7,6 @@ import numpy as np
 import imghdr
 import sndhdr
 import multiprocessing as mp
-from mindsdb_datasources import DataSource
 from lightwood.api import TypeInformation
 from lightwood.api import dtype
 from lightwood.helpers.parallelism import get_nr_procs

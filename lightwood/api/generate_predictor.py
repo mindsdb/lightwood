@@ -1,10 +1,8 @@
-from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 from lightwood.api.types import ProblemDefinition
 import lightwood
-import pprint
 from lightwood.api import LightwoodConfig
-from mindsdb_datasources import DataSource
+import pandas as pd
 
 
 def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:

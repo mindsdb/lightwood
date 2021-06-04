@@ -11,7 +11,7 @@ class TestBasic(unittest.TestCase):
 
         # call: Go with dataframes
         datasource = FileDS('tests/data/adult.csv')
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income'}), datasource)
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income'}), datasource.df)
 
         try:
             with open('dynamic_predictor.py', 'w') as fp:
@@ -23,11 +23,11 @@ class TestBasic(unittest.TestCase):
             predictor = predictor_class()
             print('Class initialized successfully')
 
-            predictor.learn(datasource)
+            predictor.learn(datasource.df)
 
             print('Making predictions')
-            predictions = predictor.predict(datasource)
-            print(predictions[0:100])
+            predictions = predictor.predict(datasource.df.iloc[0:3])
+            print(predictions)
         finally:
             print('Not removing predictor for debugging purposes')
             #os.remove('dynamic_predictor.py')
