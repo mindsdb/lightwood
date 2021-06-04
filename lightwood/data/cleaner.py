@@ -13,10 +13,10 @@ def clean_value(element: object, data_dtype: str):
     return element
 
 
-def cleaner(data: DataSource, dtype_dict: Dict[str, str], pct_invalid: int) -> pd.DataFrame:
+def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: int) -> pd.DataFrame:
     for name, data_dtype in dtype_dict.items():
         new_data = []
-        for element in data.df[name]:
+        for element in data[name]:
             try:
                 new_data.append(clean_value(element, data_dtype))
             except Exception as e:
@@ -29,5 +29,7 @@ def cleaner(data: DataSource, dtype_dict: Dict[str, str], pct_invalid: int) -> p
             err = f'Too many ({pct_invalid}%) invalid values in column {name} of type {data_dtype}'
             log.error(err)
             raise Exception(err)
+        
+        data[name] = new_data
 
-    return data.df
+    return data

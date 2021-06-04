@@ -269,10 +269,8 @@ def sample_data(df: pd.DataFrame):
     return df.iloc[input_data_sample_indexes]
 
 
-def infer_types(data: DataSource, pct_invalid: float) -> TypeInformation:
+def infer_types(data: pd.DataFrame, pct_invalid: float) -> TypeInformation:
     type_information = TypeInformation()
-    data = data.df
-
     sample_df = sample_data(data)
     sample_size = len(sample_df)
     population_size = len(data)
