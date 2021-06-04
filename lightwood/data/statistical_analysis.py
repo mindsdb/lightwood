@@ -15,6 +15,7 @@ import imagehash
 from PIL import Image
 from lightwood.helpers.text import splitRecursive, clean_float
 from sklearn.neighbors import LocalOutlierFactor
+import pandas as pd
 # from mindsdb_native.libs.helpers.general_helpers import get_value_bucket <--- impl in lightwood
 
 
