@@ -123,6 +123,7 @@ class LightGBMMixer(BaseMixer):
                 if max_itt >= num_iterations and seconds_for_one_iteration < 10:
                     self.grid_search = True
                     kwargs['time_budget'] = self.stop_training_after_seconds
+                    kwargs['optuna_seed'] = 0  # for reproducible grid search results
 
             train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'][col_name])
             validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'][col_name])
