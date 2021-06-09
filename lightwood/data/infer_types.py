@@ -1,5 +1,6 @@
 from collections import Counter
 import random
+from typing import List
 import dateutil
 from scipy.stats import norm
 import pandas as pd
@@ -12,6 +13,45 @@ from lightwood.api import dtype
 from lightwood.helpers.parallelism import get_nr_procs
 from lightwood.helpers.text import get_identifier_description_mp, cast_string_to_python_type, get_language_dist, analyze_sentences
 from lightwood.helpers.log import log
+import re
+
+
+# @TODO: hardcode for distance, time, subunits of currency (e.g. cents) and other common units
+# @TODO: The json ml will contain the pattern we want to extract out of our quantity column, for the user modify (unit+multiplier)
+# @TODO: Add tests with plenty of examples
+def get_quantity_col_info(col_data: List[object]) -> str:
+    char_const = None
+    nr_map = set()
+    for val in col_data:
+        val = str(val)
+        char_part = re.sub("[0-9.,']", val)
+        numeric_bit = re.sub("[^0-9.,']", val)
+        
+        if len(char_part) == 0:
+            char_part = None
+        
+        if len(numeric_bit) == 0:
+            numeric_bit = None
+        else:
+            numeric_bit = float(numeric_bit)
+        
+        if numeric_bit is None:
+            return False, None
+        else:
+            nr_map.add(numeric_bit)
+
+        if char_const is None:
+            char_const = char_part
+        
+        if char_part is not None and char_part != char_const:
+            return False, None
+    
+    if len(nr_map) > 20 and len(nr_map) > len(col_data) / 200:
+        return True, {char_const: {
+            'multiplier': 1
+        }}
+    else:
+        return False, None
 
 
 def get_binary_type(element: object) -> str:
@@ -141,8 +181,17 @@ def get_column_data_type(arg_tup):
     nr_vals = len(full_data)
     nr_distinct_vals = len(set(full_data))
 
+    # Is it a quantitiy?
+    is_quantity, quantitiy_info = get_quantity_col_info(full_data)
+    if is_quantity:
+        additional_info['quantitiy_info'] = quantitiy_info
+        curr_dtype = dtype.quantitiy
+        known_dtype_dist = {
+            dtype.quantitiy: nr_vals
+        }
+
     # Check for Tags subtype
-    if curr_dtype != dtype.array:
+    if curr_dtype not in (dtype.quantitiy, dtype.array):
         lengths = []
         unique_tokens = set()
 
@@ -160,7 +209,7 @@ def get_column_data_type(arg_tup):
             curr_dtype = dtype.tags
 
     # Categorical based on unique values
-    if curr_dtype != dtype.date and curr_dtype != dtype.datetime and curr_dtype != dtype.tags:
+    if curr_dtype not in (dtype.date, dtype.datetime, dtype.tags, dtype.quantitiy):
         if nr_distinct_vals < (nr_vals / 20) or nr_distinct_vals < 6:
             if (curr_dtype != dtype.integer and curr_dtype != dtype.float) or (nr_distinct_vals < 20):
                 if curr_dtype is not None:

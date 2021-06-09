@@ -14,3 +14,4 @@ class dtype():
     rich_text = 'rich_text'
     empty = 'empty'
     invalid = 'invalid'
+    quantitiy = 'quantitiy'
