@@ -20,7 +20,8 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
     }
 
     target_encoder_lookup_override = {
-        dtype.rich_text: 'VocabularyEncoder'
+        dtype.rich_text: 'VocabularyEncoder',
+        dtype.categorical: 'OneHotEncoder'
     }
 
     encoder_dict = {
@@ -31,6 +32,8 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
     if is_target:
         if col_dtype in target_encoder_lookup_override:
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
+        if col_dtype in dtype.categorical:
+            encoder_dict['config_args'] = {'class_distribution': 'statistical_analysis.class_distribution'}
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:

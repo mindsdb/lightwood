@@ -317,14 +317,17 @@ def statistical_analysis(data: pd.DataFrame,
 
     # get observed classes, used in analysis
     if type_information.dtypes[target] == dtype.categorical:
-        train_observed_classes = list(df[target].unique())
+        class_distribution = dict(df[target].value_counts().apply(lambda x: x / len(df[target])))
+        train_observed_classes = list(class_distribution.keys())
     elif type_information.dtypes[target] == dtype.tags:
         train_observed_classes = None  # @TODO: pending call to tags logic -> get all possible tags
     else:
         train_observed_classes = None
+        
 
     return StatisticalAnalysis(
         nr_rows=nr_rows,
         train_std_dev=train_std,
-        train_observed_classes=train_observed_classes
+        train_observed_classes=train_observed_classes,
+        class_distribution=class_distribution
     )

@@ -10,10 +10,13 @@ UNCOMMON_TOKEN = 0
 
 class OneHotEncoder(BaseEncoder):
 
-    def __init__(self, is_target=False):
+    def __init__(self, is_target=False, class_distribution=None):
         super().__init__(is_target)
         self.predict_proba = False  # if True, we return the belief distribution
         self._lang = None
+        if self.is_target:
+            self.class_distribution = class_distribution
+            self.index_weights = None
 
     def prepare(self, priming_data, max_dimensions=20000):
         if self._prepared:
@@ -39,6 +42,14 @@ class OneHotEncoder(BaseEncoder):
                     break
 
             self._lang.removeWord(word_to_remove)
+        
+        if self.is_target:
+            self.index_weights = [None] * len(self._lang.n_words)
+            self.index_weights[0] = np.mean(self.class_distribution.values())
+            for word in set(priming_data):
+                self.index_weights[self._lang.word2index[word]] = 1 / self.class_distribution[word]
+            self.index_weights = torch.Tensor(self.index_weights)
+
 
         self._prepared = True
 

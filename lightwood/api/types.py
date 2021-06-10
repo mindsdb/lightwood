@@ -43,6 +43,7 @@ class StatisticalAnalysis:
     nr_rows: int
     train_std_dev: float
     train_observed_classes: Union[None, List[str]]
+    class_distribution: Dict[str, float]
 
 
 @dataclass
