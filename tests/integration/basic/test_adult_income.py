@@ -9,8 +9,8 @@ class TestBasic(unittest.TestCase):
         from mindsdb_datasources import FileDS
 
         # call: Go with dataframes
-        datasource = FileDS('tests/data/adult.csv')
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income'}), datasource.df)
+        df = FileDS('tests/data/adult.csv').df
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income'}), df)
 
         with open('dynamic_predictor.py', 'w') as fp:
             fp.write(predictor_class_str)
@@ -21,8 +21,8 @@ class TestBasic(unittest.TestCase):
         predictor = predictor_class()
         print('Class initialized successfully')
 
-        predictor.learn(datasource.df)
+        predictor.learn(df)
 
         print('Making predictions')
-        predictions = predictor.predict(datasource.df.iloc[0:3])
+        predictions = predictor.predict(df.iloc[0:3])
         print(predictions)

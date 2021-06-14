@@ -24,8 +24,8 @@ def get_quantity_col_info(col_data: List[object]) -> str:
     nr_map = set()
     for val in col_data:
         val = str(val)
-        char_part = re.sub("[0-9.,']", val)
-        numeric_bit = re.sub("[^0-9.,']", val)
+        char_part = re.sub("[0-9.,']", '', val)
+        numeric_bit = re.sub("[^0-9.,']", '', val)
         
         if len(char_part) == 0:
             char_part = None
@@ -43,7 +43,7 @@ def get_quantity_col_info(col_data: List[object]) -> str:
         if char_const is None:
             char_const = char_part
         
-        if char_part is not None and char_part != char_const:
+        if char_part is None or char_part != char_const:
             return False, None
     
     if len(nr_map) > 20 and len(nr_map) > len(col_data) / 200:
@@ -181,17 +181,17 @@ def get_column_data_type(arg_tup):
     nr_vals = len(full_data)
     nr_distinct_vals = len(set(full_data))
 
-    # Is it a quantitiy?
+    # Is it a quantity?
     is_quantity, quantitiy_info = get_quantity_col_info(full_data)
     if is_quantity:
         additional_info['quantitiy_info'] = quantitiy_info
-        curr_dtype = dtype.quantitiy
+        curr_dtype = dtype.quantity
         known_dtype_dist = {
-            dtype.quantitiy: nr_vals
+            dtype.quantity: nr_vals
         }
 
     # Check for Tags subtype
-    if curr_dtype not in (dtype.quantitiy, dtype.array):
+    if curr_dtype not in (dtype.quantity, dtype.array):
         lengths = []
         unique_tokens = set()
 
@@ -209,7 +209,7 @@ def get_column_data_type(arg_tup):
             curr_dtype = dtype.tags
 
     # Categorical based on unique values
-    if curr_dtype not in (dtype.date, dtype.datetime, dtype.tags, dtype.quantitiy):
+    if curr_dtype not in (dtype.date, dtype.datetime, dtype.tags, dtype.quantity):
         if nr_distinct_vals < (nr_vals / 20) or nr_distinct_vals < 6:
             if (curr_dtype != dtype.integer and curr_dtype != dtype.float) or (nr_distinct_vals < 20):
                 if curr_dtype is not None:
