@@ -51,12 +51,15 @@ class EncodedDs(Dataset):
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         return self.encoders[column_name].encode(self.data_frame[column_name])
 
+
 # Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
         self.encoded_ds_arr = encoded_ds_arr
         self.encoded_ds_lenghts = [len(x) for x in self.encoded_ds_arr]
-    
+        self.encoders = self.encoded_ds_arr[0].encoders
+        self.target = self.encoded_ds_arr[0].target
+
     def __len__(self):
         return np.sum(self.encoded_ds_lenghts)
 
@@ -66,6 +69,10 @@ class ConcatedEncodedDs(EncodedDs):
                 return self.encoded_ds_arr[ds_idx][idx]
             else:
                 idx -= length
+    
+    @property
+    def data_frame(self):
+        return pd.concat([x.data_frame for x in self.encoded_ds_arr])
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
         encoded_df_arr = [x.get_column_original_data(column_name) for x in self.encoded_ds_arr]
