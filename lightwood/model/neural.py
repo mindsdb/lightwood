@@ -31,9 +31,9 @@ class Neural(BaseModel):
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
 
-    def _select_criterion(self, target_encoder) -> torch.nn.Module:
+    def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
-            criterion = TransformCrossEntropyLoss(weight=target_encoder.index_weights)
+            criterion = TransformCrossEntropyLoss(weight=self.target_encoder.index_weights.to(self.model.device))
         elif self.dtype_dict[self.target] in (dtype.tags):
             criterion = nn.BCEWithLogitsLoss()
         elif self.dtype_dict[self.target] in (dtype.integer, dtype.float) and self.timeseries_settings.is_timeseries:
@@ -92,7 +92,7 @@ class Neural(BaseModel):
             output_size=len(train_ds[0][1])
         )
         
-        criterion = self._select_criterion(train_ds.encoders[self.target])
+        criterion = self._select_criterion()
         optimizer = self._select_optimizer()
 
         started = time.time()

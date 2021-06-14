@@ -44,8 +44,8 @@ class OneHotEncoder(BaseEncoder):
             self._lang.removeWord(word_to_remove)
         
         if self.is_target:
-            self.index_weights = [None] * len(self._lang.n_words)
-            self.index_weights[0] = np.mean(self.class_distribution.values())
+            self.index_weights = [None] * self._lang.n_words
+            self.index_weights[0] = np.mean(list(self.class_distribution.values()))
             for word in set(priming_data):
                 self.index_weights[self._lang.word2index[word]] = 1 / self.class_distribution[word]
             self.index_weights = torch.Tensor(self.index_weights)
