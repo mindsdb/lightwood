@@ -6,8 +6,8 @@ from lightwood.api import make_predictor
 
 
 class TestNestedDataset(unittest.TestCase):
-    def setUp(self):
-        self.sample_json = {
+    def test_nested_json(self):
+        sample_json = {
             "Airport": {
               "Code": "ATL",
               "Name": "Atlanta, GA: Hartsfield-Jackson Atlanta International"
@@ -48,34 +48,34 @@ class TestNestedDataset(unittest.TestCase):
             }
          }
 
-        self.expected_columns = ['Statistics.Minutes Delayed.Security', 'Statistics.# of Delays.Security', 'Statistics.# of Delays.Weather', 'Statistics.Minutes Delayed.Late Aircraft', 'Statistics.Flights.Total', 'Statistics.Flights.Diverted', 'Time.Month Name', 'Statistics.Flights.Delayed', 'Time.Month', 'Statistics.# of Delays.Carrier', 'Statistics.Flights.On Time', 'Time.Label', 'Airport.Name', 'Statistics.Minutes Delayed.National Aviation System', 'Airport.Code', 'Statistics.Carriers.Total', 'Statistics.Minutes Delayed.Weather', 'Time.Year', 'Statistics.# of Delays.National Aviation System', 'Statistics.Flights.Cancelled', 'Statistics.# of Delays.Late Aircraft', 'Statistics.Carriers.Names', 'Statistics.Minutes Delayed.Total', 'Statistics.Minutes Delayed.Carrier']
+        expected_columns = ['Statistics.Minutes Delayed.Security', 'Statistics.# of Delays.Security', 'Statistics.# of Delays.Weather', 'Statistics.Minutes Delayed.Late Aircraft', 'Statistics.Flights.Total', 'Statistics.Flights.Diverted', 'Time.Month Name', 'Statistics.Flights.Delayed', 'Time.Month', 'Statistics.# of Delays.Carrier', 'Statistics.Flights.On Time', 'Time.Label', 'Airport.Name', 'Statistics.Minutes Delayed.National Aviation System', 'Airport.Code', 'Statistics.Carriers.Total', 'Statistics.Minutes Delayed.Weather', 'Time.Year', 'Statistics.# of Delays.National Aviation System', 'Statistics.Flights.Cancelled', 'Statistics.# of Delays.Late Aircraft', 'Statistics.Carriers.Names', 'Statistics.Minutes Delayed.Total', 'Statistics.Minutes Delayed.Carrier']
 
         ds = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json')
-        self.pred = make_predictor(ds, {'target': 'Statistics.Flights.Delayed'})
+        pred = make_predictor(ds, {'target': 'Statistics.Flights.Delayed'})
 
-    def test_1_airline_delays_train(self):
-        ds = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json')
-        self.pred.learn(ds)
-        print(self.pred)
+        for col in expected_columns:
+            assert col in ds.df.columns
+        pred.learn(ds.df)
 
-    def test_2_airline_delays_data(self):
-        model_data = self.pred.predictor_analysis
+        model_data = pred.predictor_analysis
+        print(model_data)
         # TODO: Run some check here once we define the predictor analysis
 
-    def test_3_airline_delays_predict(self):
-        predictions = self.pred.predict(when_data=self.sample_json)
+        predictions = pred.predict(pd.json_normalize(sample_json))
+        print(predictions)
         for v in predictions:
-            isinstance(v['Statistics.Flights.Delayed'],int)
+            print(v)
+            assert isinstance(v['Statistics.Flights.Delayed'], int)
 
-        predictions = self.pred.predict(FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json'))
+        predictions = pred.predict(FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json'))
         for v in predictions:
-            isinstance(v['Statistics.Flights.Delayed'], int)
+            assert isinstance(v['Statistics.Flights.Delayed'], int)
 
-        predictions = self.pred.predict(pd.json_normalize(self.sample_json))
+        predictions = pred.predict(pd.json_normalize(sample_json))
         for v in predictions:
-            isinstance(v['Statistics.Flights.Delayed'], int)
+            assert isinstance(v['Statistics.Flights.Delayed'], int)
 
-        missing_json = deepcopy(self.sample_json)
+        missing_json = deepcopy(sample_json)
         del missing_json['Statistics']['Minutes Delayed']['Weather']
         del missing_json['Time']
 
@@ -90,21 +90,20 @@ class TestNestedDataset(unittest.TestCase):
         }
         extra_json['X'] = [1, 2, 3, 5, 6, 7, None, None, 'bar']
 
-        dot_json = pd.json_normalize(self.sample_json)
+        dot_json = pd.json_normalize(sample_json)
 
-        predictions = self.pred.predict(dot_json)
+        predictions = pred.predict(dot_json)
         for v in predictions:
-            isinstance(v['Statistics.Flights.Delayed'], int)
+            assert isinstance(v['Statistics.Flights.Delayed'], int)
 
-        predictions = self.pred.predict(extra_json)
+        predictions = pred.predict(extra_json)
         for v in predictions:
-            isinstance(v['Statistics.Flights.Delayed'], int)
+            assert isinstance(v['Statistics.Flights.Delayed'], int)
 
-        predictions = self.pred.predict(missing_json)
+        predictions = pred.predict(missing_json)
         for v in predictions:
-            isinstance(v['Statistics.Flights.Delayed'],int)
+            assert isinstance(v['Statistics.Flights.Delayed'], int)
 
-
-        predictions = self.pred.predict(pd.DataFrame([missing_json,missing_json,extra_json,self.sample_json]))
+        predictions = pred.predict(pd.DataFrame([missing_json, missing_json, extra_json, sample_json]))
         for v in predictions:
-            isinstance(v['Statistics.Flights.Delayed'], int)
+            assert isinstance(v['Statistics.Flights.Delayed'], int)
