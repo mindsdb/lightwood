@@ -10,12 +10,12 @@ UNCOMMON_TOKEN = 0
 
 class OneHotEncoder(BaseEncoder):
 
-    def __init__(self, is_target=False, class_distribution=None):
+    def __init__(self, is_target=False, target_class_distribution=None):
         super().__init__(is_target)
         self.predict_proba = False  # if True, we return the belief distribution
         self._lang = None
         if self.is_target:
-            self.class_distribution = class_distribution
+            self.target_class_distribution = target_class_distribution
             self.index_weights = None
 
     def prepare(self, priming_data, max_dimensions=20000):
@@ -45,9 +45,9 @@ class OneHotEncoder(BaseEncoder):
         
         if self.is_target:
             self.index_weights = [None] * self._lang.n_words
-            self.index_weights[0] = np.mean(list(self.class_distribution.values()))
+            self.index_weights[0] = np.mean(list(self.target_class_distribution.values()))
             for word in set(priming_data):
-                self.index_weights[self._lang.word2index[word]] = 1 / self.class_distribution[word]
+                self.index_weights[self._lang.word2index[word]] = 1 / self.target_class_distribution[word]
             self.index_weights = torch.Tensor(self.index_weights)
 
 

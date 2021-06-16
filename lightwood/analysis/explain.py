@@ -88,7 +88,7 @@ def explain(data,
 
             # categorical
             else:
-                # @TODO use the real class_distribution
+                # @TODO use the real target_class_distribution
                 class_dists = pd.get_dummies(predictions['prediction']).values
                 analysis['icp']['__default'].nc_function.model.prediction_cache = class_dists
 
