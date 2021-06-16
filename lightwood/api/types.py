@@ -1,5 +1,7 @@
 from typing import Dict, List, Union
 from dataclasses import dataclass
+
+from numpy import histogram
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
@@ -43,7 +45,18 @@ class StatisticalAnalysis:
     nr_rows: int
     train_std_dev: float
     train_observed_classes: Union[None, List[str]]
-    class_distribution: Dict[str, float]
+    target_class_distribution: Dict[str, float]
+    histograms: Dict[str, Dict[str, List[object]]]
+
+
+'''
+- Histogram
+- Percentage buckets
+- Entropy
+- Biased buckets (buckets with "too many" values)
+- Outlier values
+- Outlier buckets
+'''
 
 
 @dataclass

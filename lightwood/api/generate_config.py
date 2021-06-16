@@ -34,7 +34,7 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
         if col_dtype in target_encoder_lookup_override:
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in dtype.categorical:
-            encoder_dict['config_args'] = {'class_distribution': 'statistical_analysis.class_distribution'}
+            encoder_dict['config_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
 
             
 

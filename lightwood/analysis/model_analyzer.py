@@ -116,7 +116,7 @@ def model_analyzer(
         if is_classification:
             if False:  # config.output.returns_proba:
                 # @TODO: models should indicate whether they predict prob beliefs. if so, use them here
-                icp.nc_function.model.prediction_cache = np.array(normal_predictions[f'{target}_class_distribution'])
+                icp.nc_function.model.prediction_cache = np.array(normal_predictions[f'{target}_target_class_distribution'])
                 icp.nc_function.model.class_map = stats_info['lightwood_class_map']
             else:
                 class_map = {i: v for i, v in enumerate(stats_info.train_observed_classes)}
