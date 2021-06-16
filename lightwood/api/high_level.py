@@ -12,10 +12,7 @@ def make_predictor(datasource: DataSource, problem_definition_dict: dict):
         fp.write(predictor_class_str)
 
     predictor_class = importlib.import_module('dynamic_predictor').Predictor
-    print('Class was evaluated successfully')
-
     predictor = predictor_class()
-    print('Class initialized successfully')
 
     return predictor
 
