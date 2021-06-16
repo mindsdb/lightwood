@@ -30,7 +30,7 @@ def get_quantity_col_info(col_data: List[object]) -> str:
         if len(char_part) == 0:
             char_part = None
         
-        if len(numeric_bit) == 0:
+        if len(re.sub("[^0-9]", '', numeric_bit)) == 0:
             numeric_bit = None
         else:
             numeric_bit = float(numeric_bit)
@@ -182,13 +182,14 @@ def get_column_data_type(arg_tup):
     nr_distinct_vals = len(set(full_data))
 
     # Is it a quantity?
-    is_quantity, quantitiy_info = get_quantity_col_info(full_data)
-    if is_quantity:
-        additional_info['quantitiy_info'] = quantitiy_info
-        curr_dtype = dtype.quantity
-        known_dtype_dist = {
-            dtype.quantity: nr_vals
-        }
+    if curr_dtype not in (dtype.datetime, dtype.date):
+        is_quantity, quantitiy_info = get_quantity_col_info(full_data)
+        if is_quantity:
+            additional_info['quantitiy_info'] = quantitiy_info
+            curr_dtype = dtype.quantity
+            known_dtype_dist = {
+                dtype.quantity: nr_vals
+            }
 
     # Check for Tags subtype
     if curr_dtype not in (dtype.quantity, dtype.array):
