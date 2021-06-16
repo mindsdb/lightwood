@@ -117,6 +117,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         'from lightwood.model import Neural',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
+        'from lightwood.data import transformer_timeseries'
         'from lightwood.data import splitter',
         'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score',
@@ -138,6 +139,17 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
     imports = list(set(imports))
+    timeseries_transformer = None
+    if problem_definition.timeseries_settings.is_timeseries:
+        timeseries_transformer = {
+            'object': 'transform_timeseries',
+            'config_args': {
+                'timeseries_settings': 'problem_definition.timeseries_settings'
+            },
+            'dynamic_args': {
+                'data': 'data'
+            }
+        }
     return LightwoodConfig(
         cleaner={
             'object': 'cleaner',
@@ -199,5 +211,6 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         imports=imports,
         problem_definition=problem_definition,
         statistical_analysis=statistical_analysis,
-        identifiers=type_information.identifiers
+        identifiers=type_information.identifiers,
+        timeseries_transformer=timeseries_transformer
     )

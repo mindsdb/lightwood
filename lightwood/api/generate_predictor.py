@@ -21,6 +21,13 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
 
     input_cols = ','.join([f"""'{feature.name}'""" for feature in lightwood_config.features.values()])
 
+    ts_code = ''
+    if lightwood_config.timeseries_transformer is not None:
+        ts_code = f"""
+log.info('Transforming timeseries data')
+data = {call(lightwood_config.timeseries_transformer, lightwood_config)}
+"""
+
     learn_body = f"""
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
@@ -33,6 +40,8 @@ self.input_cols = [{input_cols}]
 
 log.info('Cleaning the data')
 data = {call(lightwood_config.cleaner, lightwood_config)}
+
+{ts_code}
 
 nfolds = {lightwood_config.problem_definition.nfolds}
 log.info(f'Splitting the data into {{nfolds}} folds')
@@ -61,6 +70,11 @@ self.predictor_analysis, self.analysis_predictions = {call(lightwood_config.anal
     learn_body = align(learn_body, 2)
 
     predict_body = f"""
+log.info('Cleaning the data')
+data = {call(lightwood_config.cleaner, lightwood_config)}
+
+{ts_code}
+
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
 df = self.ensemble(encoded_ds)
 insights = {call(lightwood_config.explainer, lightwood_config)}
