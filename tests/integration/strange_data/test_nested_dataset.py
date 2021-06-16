@@ -2,7 +2,7 @@ from copy import deepcopy
 import unittest
 import pandas as pd
 from mindsdb_datasources.datasources.file_ds import FileDS
-from lightwood import make_predictor
+from lightwood.api import make_predictor
 
 
 class TestNestedDataset(unittest.TestCase):

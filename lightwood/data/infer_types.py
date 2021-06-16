@@ -8,8 +8,8 @@ import numpy as np
 import imghdr
 import sndhdr
 import multiprocessing as mp
-from lightwood.api import TypeInformation
-from lightwood.api import dtype
+from lightwood.api.types import TypeInformation
+from lightwood.api.dtype import dtype
 from lightwood.helpers.parallelism import get_nr_procs
 from lightwood.helpers.text import get_identifier_description_mp, cast_string_to_python_type, get_language_dist, analyze_sentences
 from lightwood.helpers.log import log
@@ -24,8 +24,8 @@ def get_quantity_col_info(col_data: List[object]) -> str:
     nr_map = set()
     for val in col_data:
         val = str(val)
-        char_part = re.sub("[0-9.,']", '', val)
-        numeric_bit = re.sub("[^0-9.,']", '', val)
+        char_part = re.sub("[0-9.,]", '', val)
+        numeric_bit = re.sub("[^0-9.,]", '', val).replace(',', '.')
         
         if len(char_part) == 0:
             char_part = None
