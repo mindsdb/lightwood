@@ -7,7 +7,6 @@ from lightwood.api import make_predictor
 
 class TestNestedDataset(unittest.TestCase):
     def setUp(self):
-        self.pred = None
         self.sample_json = {
             "Airport": {
               "Code": "ATL",
@@ -51,10 +50,13 @@ class TestNestedDataset(unittest.TestCase):
 
         self.expected_columns = ['Statistics.Minutes Delayed.Security', 'Statistics.# of Delays.Security', 'Statistics.# of Delays.Weather', 'Statistics.Minutes Delayed.Late Aircraft', 'Statistics.Flights.Total', 'Statistics.Flights.Diverted', 'Time.Month Name', 'Statistics.Flights.Delayed', 'Time.Month', 'Statistics.# of Delays.Carrier', 'Statistics.Flights.On Time', 'Time.Label', 'Airport.Name', 'Statistics.Minutes Delayed.National Aviation System', 'Airport.Code', 'Statistics.Carriers.Total', 'Statistics.Minutes Delayed.Weather', 'Time.Year', 'Statistics.# of Delays.National Aviation System', 'Statistics.Flights.Cancelled', 'Statistics.# of Delays.Late Aircraft', 'Statistics.Carriers.Names', 'Statistics.Minutes Delayed.Total', 'Statistics.Minutes Delayed.Carrier']
 
-    def test_1_airline_delays_train(self):
         ds = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json')
         self.pred = make_predictor(ds, {'target': 'Statistics.Flights.Delayed'})
+
+    def test_1_airline_delays_train(self):
+        ds = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json')
         self.pred.learn(ds)
+        print(self.pred)
 
     def test_2_airline_delays_data(self):
         model_data = self.pred.predictor_analysis
