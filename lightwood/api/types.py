@@ -1,3 +1,4 @@
+from lightwood.data.statistical_analysis import statistical_analysis
 from typing import Dict, List, Union
 from dataclasses import dataclass
 
@@ -49,14 +50,11 @@ class StatisticalAnalysis:
     histograms: Dict[str, Dict[str, List[object]]]
 
 
-'''
-- Histogram
-- Percentage buckets
-- Entropy
-- Biased buckets (buckets with "too many" values)
-- Outlier values
-- Outlier buckets
-'''
+@dataclass_json
+@dataclass
+class DataAnalysis:
+    statistical_analysis: StatisticalAnalysis
+    type_information: TypeInformation
 
 
 @dataclass
@@ -162,3 +160,8 @@ class LightwoodConfig:
     imports: object = None
     timeseries_transformer: object = None
 
+
+@dataclass_json
+@dataclass
+class ModelAnalysis:
+    validation_set_accuracy: float = None
