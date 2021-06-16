@@ -1,3 +1,5 @@
+import re
+from tests.unit_tests import data
 from typing import Dict, List
 from lightwood.api.dtype import dtype
 from lightwood.api.types import Feature, LightwoodConfig, Output
@@ -76,6 +78,9 @@ def _clean_value(element: object, data_dtype: str):
 
     if data_dtype in (dtype.tags):
         element = _tags_to_tuples(element)
+    
+    if data_dtype in (dtype.quantity):
+        element = float(re.sub("[^0-9.,]", '', element).replace(',', '.'))
 
     return element
 

@@ -26,7 +26,6 @@ def statistical_analysis(data: pd.DataFrame,
 
     nr_rows = len(df)
     target = problem_definition.target
-
     # get train std, used in analysis
     if type_information.dtypes[target] in [dtype.float, dtype.integer]:
         train_std = df[target].astype(float).std()
@@ -42,6 +41,7 @@ def statistical_analysis(data: pd.DataFrame,
             histograms[col] = get_numeric_histogram(df[col], type_information.dtypes[col])
 
     # get observed classes, used in analysis
+    target_class_distribution = None
     if type_information.dtypes[target] == dtype.categorical:
         target_class_distribution = dict(df[target].value_counts().apply(lambda x: x / len(df[target])))
         train_observed_classes = list(target_class_distribution.keys())

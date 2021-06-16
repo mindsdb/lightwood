@@ -53,7 +53,7 @@ class TestNestedDataset(unittest.TestCase):
 
     def test_1_airline_delays_train(self):
         ds = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json')
-        self.pred = make_predictor(ds, {'target': 'airline_delays_train'})
+        self.pred = make_predictor(ds, {'target': 'Statistics.Flights.Delayed'})
         self.pred.learn(ds)
 
     def test_2_airline_delays_data(self):

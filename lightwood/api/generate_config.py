@@ -17,6 +17,7 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
         dtype.rich_text: 'PretrainedLangEncoder',
         dtype.short_text: 'ShortTextEncoder',
         dtype.array: 'TsRnnEncoder',
+        dtype.quantity: 'NumericEncoder',
     }
 
     target_encoder_lookup_override = {
