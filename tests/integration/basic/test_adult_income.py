@@ -1,4 +1,4 @@
-from lightwood.api import ProblemDefinition
+from lightwood.api.types import ProblemDefinition
 import unittest
 import importlib
 

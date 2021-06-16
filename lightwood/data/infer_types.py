@@ -372,7 +372,8 @@ def infer_types(data: pd.DataFrame, pct_invalid: float) -> TypeInformation:
 
     for i, col_name in enumerate(sample_df.columns.values):
         # work with the full data
-        type_information.identifiers[col_name] = answer_arr[i]
+        if answer_arr[i] is not None:
+            type_information.identifiers[col_name] = answer_arr[i]
 
         # @TODO Column removal logic was here, if the column was an identifier, move it elsewhere
 

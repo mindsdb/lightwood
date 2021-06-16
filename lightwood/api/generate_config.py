@@ -102,7 +102,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
-        if type_information.identifiers[col_name] is None and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
+        if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
             feature = Feature(
                 name=col_name,
                 data_dtype=col_dtype,
@@ -142,7 +142,9 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         cleaner={
             'object': 'cleaner',
             'config_args': {
-                'pct_invalid': 'problem_definition.pct_invalid'
+                'pct_invalid': 'problem_definition.pct_invalid',
+                'ignore_features': 'problem_definition.ignore_features',
+                'identifiers': 'identifiers'
             },
             'dynamic_args': {
                 'data': 'data',
@@ -196,5 +198,6 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         output=output,
         imports=imports,
         problem_definition=problem_definition,
-        statistical_analysis=statistical_analysis
+        statistical_analysis=statistical_analysis,
+        identifiers=type_information.identifiers
     )

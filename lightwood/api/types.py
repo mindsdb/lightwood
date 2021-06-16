@@ -29,7 +29,7 @@ class Output:
 class TypeInformation:
     dtypes: Dict[str, str]
     additional_info: Dict[str, object]
-    identifiers: Dict[str, object]
+    identifiers: Dict[str, str]
 
     def __init__(self):
         self.dtypes = dict()
@@ -96,6 +96,7 @@ class ProblemDefinition:
     anomaly_detection: bool
     anomaly_error_rate: Union[float, None]
     anomaly_cooldown: int
+    ignore_features: List[str]
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
@@ -110,6 +111,7 @@ class ProblemDefinition:
         anomaly_detection = obj.get('anomaly_detection', True)
         anomaly_error_rate = obj.get('anomaly_error_rate', None)
         anomaly_cooldown = obj.get('anomaly_detection', 1)
+        ignore_features = obj.get('ignore_features', [])
 
         problem_definition = ProblemDefinition(
             target=target,
@@ -122,7 +124,8 @@ class ProblemDefinition:
             timeseries_settings=timeseries_settings,
             anomaly_detection=anomaly_detection,
             anomaly_error_rate=anomaly_error_rate,
-            anomaly_cooldown=anomaly_cooldown
+            anomaly_cooldown=anomaly_cooldown,
+            ignore_features=ignore_features
         )
 
         return problem_definition
@@ -138,6 +141,7 @@ class LightwoodConfig:
     output: Output
     problem_definition: ProblemDefinition
     statistical_analysis: StatisticalAnalysis
+    identifiers: Dict[str, str]
     cleaner: str = None
     splitter: str = None
     analyzer: str = None
