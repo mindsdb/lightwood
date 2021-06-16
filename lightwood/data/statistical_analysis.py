@@ -1,9 +1,10 @@
 from lightwood.api import TypeInformation, StatisticalAnalysis, ProblemDefinition, dtype
 import pandas as pd
 import numpy as np
-
+from lightwood.data.cleaner import _clean_float_or_none
 
 def get_numeric_histogram(data, data_dtype):
+    data = [_clean_float_or_none(x) for x in data]
     Y, X = np.histogram(data, bins=min(50, len(set(data))),
                         range=(min(data), max(data)), density=False)
     if data_dtype == dtype.integer:
@@ -22,6 +23,7 @@ def statistical_analysis(data: pd.DataFrame,
                          type_information: TypeInformation,
                          problem_definition: ProblemDefinition) -> StatisticalAnalysis:
     df = data
+
     nr_rows = len(df)
     target = problem_definition.target
 
