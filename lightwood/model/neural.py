@@ -10,7 +10,7 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from torch.cuda.amp import GradScaler
-from lightwood.api.types import LightwoodConfig, TimeseriesSettings
+from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
 from lightwood.helpers.torch import LightwoodAutocast
