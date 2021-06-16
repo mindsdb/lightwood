@@ -2,7 +2,6 @@ from copy import deepcopy
 import unittest
 import pandas as pd
 from mindsdb_datasources.datasources.file_ds import FileDS
-from mindsdb_native import F, Predictor
 from lightwood import make_predictor
 
 
