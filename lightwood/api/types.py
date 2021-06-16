@@ -142,9 +142,10 @@ class LightwoodConfig:
     problem_definition: ProblemDefinition
     statistical_analysis: StatisticalAnalysis
     identifiers: Dict[str, str]
-    cleaner: str = None
-    splitter: str = None
-    analyzer: str = None
-    explainer: str = None
-    imports: str = None
+    cleaner: object = None
+    splitter: object = None
+    analyzer: object = None
+    explainer: object = None
+    imports: object = None
+    timeseries_transformer: object = None
 
