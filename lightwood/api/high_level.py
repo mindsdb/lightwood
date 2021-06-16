@@ -1,7 +1,7 @@
 from numpy import DataSource
 from lightwood.api.types import DataAnalysis, ProblemDefinition
 import importlib
-from lightwood import generate_predictor
+from lightwood.api.generate_predictor import generate_predictor
 import lightwood
 
 

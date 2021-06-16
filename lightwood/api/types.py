@@ -1,8 +1,5 @@
-from lightwood.data.statistical_analysis import statistical_analysis
 from typing import Dict, List, Union
 from dataclasses import dataclass
-
-from numpy import histogram
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
