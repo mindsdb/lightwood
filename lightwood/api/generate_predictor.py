@@ -83,8 +83,10 @@ return df
 
     predictor_code = f"""
 {imports}
+from lightwood.api.high_level import PredictorInterface
 
-class Predictor():
+
+class Predictor(PredictorInterface):
     target: str
     models: List[BaseModel]
     encoders: Dict[str, BaseEncoder]
