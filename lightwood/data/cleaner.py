@@ -88,12 +88,12 @@ def _clean_value(element: object, data_dtype: str):
 def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: int, ignore_features: List[str], identifiers: Dict[str, str]) -> pd.DataFrame:
     # Drop columns we don't want to use
     to_drop = [*ignore_features, *list(identifiers.keys())]
-    data = data.drop(to_drop)
+    data = data.drop(columns=to_drop)
 
     # Drop extra columns
-    for col in data.columns:
-        if col not in dtype_dict:
-            data = data.drop([col])
+    for name in list(data.columns):
+        if name not in dtype_dict:
+            data = data.drop(columns=[name])
 
     # Standardize content
     for name, data_dtype in dtype_dict.items():
