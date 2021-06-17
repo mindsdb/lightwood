@@ -89,6 +89,8 @@ class TestNestedDataset(unittest.TestCase):
         extra_json['X'] = [1, 2, 3, 5, 6, 7, None, None, 'bar']
 
         dot_json = pd.json_normalize(sample_json)
+        extra_json = pd.json_normalize(extra_json)
+        missing_json = pd.json_normalize(missing_json)
 
         predictions = pred.predict(dot_json)
         for v in predictions['prediction']:
