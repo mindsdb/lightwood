@@ -90,14 +90,19 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: int, ig
     to_drop = [*ignore_features, *list(identifiers.keys())]
     data = data.drop(to_drop)
 
+    # Drop extra columns
+    for col in data.columns:
+        if col not in dtype_dict:
+            data = data.drop([col])
+
     # Standardize content
     for name, data_dtype in dtype_dict.items():
         if name in to_drop:
             continue
         if name not in data.columns:
-            new_data = [None] * len(data)
+            data[name] = [None] * len(data)
             continue
-        
+
         new_data = []
         for element in data[name]:
             try:
