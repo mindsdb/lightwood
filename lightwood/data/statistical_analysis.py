@@ -2,6 +2,8 @@ from lightwood.api import TypeInformation, StatisticalAnalysis, ProblemDefinitio
 import pandas as pd
 import numpy as np
 from lightwood.data.cleaner import _clean_float_or_none
+from lightwood.helpers.numeric import filter_nan
+
 
 def get_numeric_histogram(data, data_dtype):
     data = [_clean_float_or_none(x) for x in data]
@@ -38,7 +40,7 @@ def statistical_analysis(data: pd.DataFrame,
         if type_information.dtypes[col] == dtype.categorical:
             histograms[col] = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
         if type_information.dtypes[col] in (dtype.integer, dtype.float):
-            histograms[col] = get_numeric_histogram(df[col], type_information.dtypes[col])
+            histograms[col] = get_numeric_histogram(filter_nan(df[col]), type_information.dtypes[col])
 
     # get observed classes, used in analysis
     target_class_distribution = None

@@ -116,7 +116,7 @@ def cast_string_to_python_type(string):
     """ Returns None, an integer, float or a string from a string"""
     if string is None or string == '':
         return None
-
+    
     if string.isnumeric():
         # Did you know you can write fractions in unicode, and they are numeric but can't be cast to integers !?
         try:

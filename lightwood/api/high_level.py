@@ -17,9 +17,10 @@ def make_predictor(datasource: DataSource, problem_definition_dict: dict):
     return predictor
 
 
-def analyze_dataset(datasource: DataSource, problem_definition_dict: dict = None):
+def analyze_dataset(datasource: DataSource, problem_definition_dict: dict = None) -> DataAnalysis:
     if problem_definition_dict is None:
-        problem_definition_dict = {}
+        # Set a random target because some things expect that, won't matter for the analysis
+        problem_definition_dict = {'target': str(datasource.df.columns[0])}
     problem_definition = ProblemDefinition.from_dict(problem_definition_dict)
 
     df = datasource.df

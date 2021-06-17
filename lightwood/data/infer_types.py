@@ -1,4 +1,5 @@
 from collections import Counter
+import math
 import random
 from typing import List
 import dateutil
@@ -14,6 +15,7 @@ from lightwood.helpers.parallelism import get_nr_procs
 from lightwood.helpers.text import get_identifier_description_mp, cast_string_to_python_type, get_language_dist, analyze_sentences
 from lightwood.helpers.log import log
 import re
+from lightwood.helpers.numeric import can_be_nan_numeric
 
 
 # @TODO: hardcode for distance, time, subunits of currency (e.g. cents) and other common units
@@ -71,13 +73,24 @@ def get_binary_type(element: object) -> str:
 
 def get_numeric_type(element: object) -> str:
     """ Returns the subtype inferred from a number string, or False if its not a number"""
-    pytype = cast_string_to_python_type(str(element))
-    if isinstance(pytype, float):
+    string_as_nr = cast_string_to_python_type(str(element))
+
+    try:
+        if string_as_nr == int(string_as_nr):
+            string_as_nr = int(string_as_nr)
+    except Exception:
+        pass
+
+    if isinstance(string_as_nr, float):
         return dtype.float
-    elif isinstance(pytype, int):
+    elif isinstance(string_as_nr, int):
         return dtype.integer
     else:
-        return None
+        try:
+            if can_be_nan_numeric(element):
+                return dtype.integer
+        except Exception:
+            return None
 
 
 def type_check_sequence(element: object) -> str:
@@ -126,7 +139,10 @@ def count_data_types_in_column(data):
 
     for element in data:
         for type_checker in type_checkers:
-            dtype_guess = type_checker(element)
+            try:
+                dtype_guess = type_checker(element)
+            except Exception:
+                dtype_guess = None
             if dtype_guess is not None:
                 dtype_counts[dtype_guess] += 1
                 break
@@ -179,7 +195,7 @@ def get_column_data_type(arg_tup):
         curr_dtype = max_known_dtype
 
     nr_vals = len(full_data)
-    nr_distinct_vals = len(set(full_data))
+    nr_distinct_vals = len(set([str(x) for x in full_data]))
 
     # Is it a quantity?
     if curr_dtype not in (dtype.datetime, dtype.date):
@@ -210,12 +226,11 @@ def get_column_data_type(arg_tup):
             curr_dtype = dtype.tags
 
     # Categorical based on unique values
-    if curr_dtype not in (dtype.date, dtype.datetime, dtype.tags, dtype.quantity):
-        if nr_distinct_vals < (nr_vals / 20) or nr_distinct_vals < 6:
-            if (curr_dtype != dtype.integer and curr_dtype != dtype.float) or (nr_distinct_vals < 20):
-                if curr_dtype is not None:
-                    additional_info['other_potential_dtypes'].append(curr_dtype)
-                curr_dtype = dtype.categorical
+    if curr_dtype not in (dtype.date, dtype.datetime, dtype.tags):
+        if nr_distinct_vals < max((nr_vals / 100), 10):
+            if curr_dtype is not None:
+                additional_info['other_potential_dtypes'].append(curr_dtype)
+            curr_dtype = dtype.categorical
 
     # If curr_data_type is still None, then it's text or category
     if curr_dtype is None:
