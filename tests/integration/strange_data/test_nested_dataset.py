@@ -62,17 +62,15 @@ class TestNestedDataset(unittest.TestCase):
         # TODO: Run some check here once we define the predictor analysis
 
         predictions = pred.predict(pd.json_normalize(sample_json))
-        print(predictions)
-        for v in predictions['Statistics.Flights.Delayed']:
-            print(v)
+        for v in predictions['prediction']:
             assert isinstance(v, int)
 
-        predictions = pred.predict(FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json'))
-        for v in predictions['Statistics.Flights.Delayed']:
+        predictions = pred.predict(FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json').df)
+        for v in predictions['prediction']:
             assert isinstance(v, int)
 
         predictions = pred.predict(pd.json_normalize(sample_json))
-        for v in predictions['Statistics.Flights.Delayed']:
+        for v in predictions['prediction']:
             assert isinstance(v, int)
 
         missing_json = deepcopy(sample_json)
@@ -93,17 +91,17 @@ class TestNestedDataset(unittest.TestCase):
         dot_json = pd.json_normalize(sample_json)
 
         predictions = pred.predict(dot_json)
-        for v in predictions['Statistics.Flights.Delayed']:
+        for v in predictions['prediction']:
             assert isinstance(v, int)
 
         predictions = pred.predict(extra_json)
-        for v in predictions['Statistics.Flights.Delayed']:
+        for v in predictions['prediction']:
             assert isinstance(v, int)
 
         predictions = pred.predict(missing_json)
-        for v in predictions['Statistics.Flights.Delayed']:
+        for v in predictions['prediction']:
             assert isinstance(v, int)
 
         predictions = pred.predict(pd.DataFrame([missing_json, missing_json, extra_json, sample_json]))
-        for v in predictions['Statistics.Flights.Delayed']:
+        for v in predictions['prediction']:
             assert isinstance(v, int)
