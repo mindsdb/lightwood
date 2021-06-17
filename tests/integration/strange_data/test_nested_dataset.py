@@ -63,17 +63,17 @@ class TestNestedDataset(unittest.TestCase):
 
         predictions = pred.predict(pd.json_normalize(sample_json))
         print(predictions)
-        for v in predictions:
+        for v in predictions['Statistics.Flights.Delayed']:
             print(v)
-            assert isinstance(v['Statistics.Flights.Delayed'], int)
+            assert isinstance(v, int)
 
         predictions = pred.predict(FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json'))
-        for v in predictions:
-            assert isinstance(v['Statistics.Flights.Delayed'], int)
+        for v in predictions['Statistics.Flights.Delayed']:
+            assert isinstance(v, int)
 
         predictions = pred.predict(pd.json_normalize(sample_json))
-        for v in predictions:
-            assert isinstance(v['Statistics.Flights.Delayed'], int)
+        for v in predictions['Statistics.Flights.Delayed']:
+            assert isinstance(v, int)
 
         missing_json = deepcopy(sample_json)
         del missing_json['Statistics']['Minutes Delayed']['Weather']
@@ -93,17 +93,17 @@ class TestNestedDataset(unittest.TestCase):
         dot_json = pd.json_normalize(sample_json)
 
         predictions = pred.predict(dot_json)
-        for v in predictions:
-            assert isinstance(v['Statistics.Flights.Delayed'], int)
+        for v in predictions['Statistics.Flights.Delayed']:
+            assert isinstance(v, int)
 
         predictions = pred.predict(extra_json)
-        for v in predictions:
-            assert isinstance(v['Statistics.Flights.Delayed'], int)
+        for v in predictions['Statistics.Flights.Delayed']:
+            assert isinstance(v, int)
 
         predictions = pred.predict(missing_json)
-        for v in predictions:
-            assert isinstance(v['Statistics.Flights.Delayed'], int)
+        for v in predictions['Statistics.Flights.Delayed']:
+            assert isinstance(v, int)
 
         predictions = pred.predict(pd.DataFrame([missing_json, missing_json, extra_json, sample_json]))
-        for v in predictions:
-            assert isinstance(v['Statistics.Flights.Delayed'], int)
+        for v in predictions['Statistics.Flights.Delayed']:
+            assert isinstance(v, int)
