@@ -32,7 +32,7 @@ def get_quantity_col_info(col_data: List[object]) -> str:
         if len(char_part) == 0:
             char_part = None
         
-        if len(re.sub("[^0-9]", '', numeric_bit)) == 0:
+        if len(re.sub("[^0-9]", '', numeric_bit)) == 0 or numeric_bit.count('.') > 1:
             numeric_bit = None
         else:
             numeric_bit = float(numeric_bit)
@@ -252,12 +252,17 @@ def get_column_data_type(arg_tup):
                 if len(word_dist) > 500 and nr_words / len(data) > 5:
                     curr_dtype = dtype.rich_text
                 else:
-                    curr_dtype = curr_dtype.short_text
+                    curr_dtype = dtype.short_text
 
                 return curr_dtype, {curr_dtype: len(data)}, additional_info, warn, info
 
     if curr_dtype in [dtype.categorical, dtype.rich_text, dtype.short_text]:
         known_dtype_dist = {curr_dtype: len(data)}
+    
+    if nr_distinct_vals < 3 and curr_dtype == dtype.categorical:
+        curr_dtype = dtype.binary
+        known_dtype_dist[dtype.binary] = known_dtype_dist[dtype.categorical]
+        del known_dtype_dist[dtype.categorical]
 
     return curr_dtype, known_dtype_dist, additional_info, warn, info
 
