@@ -3,9 +3,6 @@ import torch
 from torch.nn.functional import softmax
 from lightwood.analysis.nc.base import RegressorAdapter, ClassifierAdapter
 
-from lightwood.model import BaseModel
-# from mindsdb_native.config import CONFIG
-
 
 def t_softmax(x, t=1.0, axis=1):
     """ Softmax with temperature scaling """
