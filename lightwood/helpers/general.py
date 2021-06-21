@@ -9,10 +9,10 @@ from lightwood.api import Output
 
 def evaluate_accuracy(predictions: pd.Series,
                       true_values: pd.Series,
-                      acccuracy_functions: List[str]) -> float:
+                      accuracy_functions: List[str]) -> float:
     
     score_dict = []
-    for accuracy_function_str in acccuracy_functions:
+    for accuracy_function_str in accuracy_functions:
         if accuracy_function_str == 'evaluate_array_accuracy':
             accuracy_function = evaluate_array_accuracy
         else:
