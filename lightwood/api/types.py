@@ -156,12 +156,14 @@ class LightwoodConfig:
     explainer: object = None
     imports: object = None
     timeseries_transformer: object = None
+    accuracy_functions: List[str] = None
 
 
 @dataclass_json
 @dataclass
 class ModelAnalysis:
-    validation_set_accuracy: float = None
-    # (A bunch) of accuracy scores on the test data
-    # A confusion matrix
-    # 
+    accuracies: Dict[str,float]
+    train_sample_size: int
+    test_sample_size: int
+    column_importances: Dict[str, float]
+    confusion_matrix: object = None

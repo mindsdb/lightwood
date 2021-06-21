@@ -42,9 +42,10 @@ def model_analyzer(
         target: str,
         ts_cfg: TimeseriesSettings,
         dtype_dict: Dict[str, str],
-        disable_column_importance=True,
-        fixed_significance=None,
-        positive_domain=False
+        disable_column_importance,
+        fixed_significance,
+        positive_domain,
+        accuracy_functions
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
 
@@ -55,14 +56,14 @@ def model_analyzer(
     # ... same with test and train dfs
     encoded_data = data
     data = encoded_data.data_frame
-    analysis = {}
+    runtime_analyzer = {}
     predictions = {}
     input_columns = list([col for col in data.columns if col != target])
     normal_predictions = predictor(encoded_data) # TODO: this should include beliefs for categorical targets
     normal_predictions = normal_predictions.set_index(data.index)
 
     # confidence estimation with inductive conformal predictors (ICPs)
-    analysis['icp'] = {'__mdb_active': False}
+    runtime_analyzer['icp'] = {'__mdb_active': False}
 
     # typing_info = stats_info['typing']
     data_type = dtype_dict[target]
@@ -88,9 +89,9 @@ def model_analyzer(
             all_classes = np.array(stats_info.train_observed_classes)
             enc = OneHotEncoder(sparse=False, handle_unknown='ignore')
             enc.fit(all_classes.reshape(-1, 1))
-            analysis['label_encoders'] = enc  # needed to repr cat labels inside nonconformist @TODO: remove?
+            runtime_analyzer['label_encoders'] = enc  # needed to repr cat labels inside nonconformist @TODO: remove?
         else:
-            analysis['label_encoders'] = None
+            runtime_analyzer['label_encoders'] = None
 
         adapter = ConformalClassifierAdapter
         nc_function = MarginErrFunc()
@@ -114,7 +115,7 @@ def model_analyzer(
         nc = nc_class(model, nc_function)  # , normalizer=normalizer)  # @TODO: reintroduce normalizer
         icp = icp_class(nc)
 
-        analysis['icp']['__default'] = icp  # @TODO: better typing for output
+        runtime_analyzer['icp']['__default'] = icp  # @TODO: better typing for output
 
         # setup prediction cache to avoid additional .predict() calls
         if is_classification:
@@ -134,9 +135,9 @@ def model_analyzer(
         else:
             icp.nc_function.model.prediction_cache = np.array(normal_predictions['prediction'])
 
-        analysis['icp']['__default'].fit(None, None)  # @TODO: rm fit call after v1 works, 'twas a hack from the start
+        runtime_analyzer['icp']['__default'].fit(None, None)  # @TODO: rm fit call after v1 works, 'twas a hack from the start
         if not is_classification:
-            analysis['train_std_dev'] = {'__default': stats_info.train_std_dev}
+            runtime_analyzer['train_std_dev'] = {'__default': stats_info.train_std_dev}
 
         # fit additional ICPs in time series tasks with grouped columns
         if ts_cfg.is_timeseries and ts_cfg.group_by:
@@ -144,22 +145,22 @@ def model_analyzer(
             # create an ICP for each possible group
             group_info = data.train_df[ts_cfg.group_by].to_dict('list')
             all_group_combinations = list(product(*[set(x) for x in group_info.values()]))
-            analysis['icp']['__mdb_groups'] = all_group_combinations
-            analysis['icp']['__mdb_group_keys'] = [x for x in group_info.keys()]
+            runtime_analyzer['icp']['__mdb_groups'] = all_group_combinations
+            runtime_analyzer['icp']['__mdb_group_keys'] = [x for x in group_info.keys()]
 
             for combination in all_group_combinations:
                 # frozenset lets us hash
-                analysis['icp'][frozenset(combination)] = deepcopy(icp)
-                analysis['icp'][frozenset(combination)].fit(None, None)
+                runtime_analyzer['icp'][frozenset(combination)] = deepcopy(icp)
+                runtime_analyzer['icp'][frozenset(combination)].fit(None, None)
 
         # calibrate ICP
         icp_df = deepcopy(data)
-        icp_df, y = clean_df(icp_df, target, is_classification, analysis.get('label_encoders', None))
-        analysis['icp']['__default'].index = icp_df.columns
-        analysis['icp']['__default'].calibrate(icp_df.values, y)
+        icp_df, y = clean_df(icp_df, target, is_classification, runtime_analyzer.get('label_encoders', None))
+        runtime_analyzer['icp']['__default'].index = icp_df.columns
+        runtime_analyzer['icp']['__default'].calibrate(icp_df.values, y)
 
         # get confidence estimation for validation dataset
-        conf, ranges = set_conf_range(icp_df, icp, dtype_dict[target], analysis, positive_domain=positive_domain, significance=fixed_significance)
+        conf, ranges = set_conf_range(icp_df, icp, dtype_dict[target], runtime_analyzer, positive_domain=positive_domain, significance=fixed_significance)
         if not is_classification:
             # @TODO previously using cached_val_df index, analyze how to replicate once again for the TS case
             # @TODO once using normalizer, add column for confidence proper here, and return DF in categorical case too
@@ -173,9 +174,9 @@ def model_analyzer(
 
         # calibrate additional grouped ICPs
         if ts_cfg.is_timeseries and ts_cfg.group_by:
-            icps = analysis['icp']
+            icps = runtime_analyzer['icp']
             group_keys = icps['__mdb_group_keys']
-            analysis['train_std_dev'] = {}
+            runtime_analyzer['train_std_dev'] = {}
 
             # add all predictions to the cached DF
             icps_df = deepcopy(data.cached_val_df)
@@ -208,10 +209,10 @@ def model_analyzer(
                     for key, val in zip(group_keys, group):
                         icp_train_df = icp_train_df[icp_train_df[key] == val]
                     y_train = icp_train_df[target].values
-                    analysis['train_std_dev'][frozenset(group)] = y_train.std()
+                    runtime_analyzer['train_std_dev'][frozenset(group)] = y_train.std()
 
                 # get bounds for relevant rows in validation dataset
-                conf, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], target, analysis,
+                conf, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], target, runtime_analyzer,
                                                     params, group=frozenset(group),
                                                     significance=fixed_significance)
                 # save group bounds
@@ -227,21 +228,15 @@ def model_analyzer(
             predictions['confidence_range'] = ranges
 
         # TODO: should we pass observed confidences in validation dataset?
-
-        analysis['icp']['__mdb_active'] = True
-
-    # join confidence to predictions
-    full_predictions = pd.concat([normal_predictions, result_df], axis=1)
+        runtime_analyzer['icp']['__mdb_active'] = True
 
     # TODO: calculate acc on other folds?
     # get accuracy metric for validation data
-    normal_accuracy = evaluate_accuracy(
-        full_predictions,
-        data,
-        target,
-        data_type,
-        backend=predictor
+    score_dict = evaluate_accuracy(
+        data[target],
+        normal_predictions
     )
+    normal_accuracy = np.mean(list(score_dict.values()))
 
     empty_input_predictions = {}
     empty_input_accuracy = {}
@@ -262,18 +257,12 @@ def model_analyzer(
             )
 
         # Get some information about the importance of each column
-        analysis['column_importances'] = {}
+        # @TODO: Figure out if it's too slow
+        column_importances = {}
         for col in ignorable_input_columns:
             accuracy_increase = (normal_accuracy - empty_input_accuracy[col])
             # normalize from 0 to 10
-            analysis['column_importances'][col] = 10 * max(0, accuracy_increase)
-            assert analysis['column_importances'][col] <= 10
-
-    # Get accuracy stats
-    analysis['overall_accuracy'] = {}
-    analysis['accuracy_histogram'] = {}
-    analysis['confusion_matrices'] = {}
-    analysis['accuracy_samples'] = {}
+            column_importances[col] = 10 * max(0, accuracy_increase)
 
     # @TODO: Training / testing data accuracy here ?
 
@@ -289,13 +278,26 @@ def model_analyzer(
 
     overall_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats()
 
-    analysis['overall_accuracy'] = overall_accuracy
-    analysis['accuracy_histogram'] = accuracy_histogram
-    analysis['confusion_matrices'] = cm
-    analysis['accuracy_samples'] = accuracy_samples
+    runtime_analyzer['overall_accuracy'] = overall_accuracy
+    runtime_analyzer['accuracy_histogram'] = accuracy_histogram
+    runtime_analyzer['confusion_matrices'] = cm
+    runtime_analyzer['accuracy_samples'] = accuracy_samples
 
-    analysis['validation_set_accuracy'] = normal_accuracy
+    for accuracy_function in accuracy_functions:
+        if accuracy_function == 'r2':
+            accuracy_function = r2_score
+
+    runtime_analyzer['validation_set_accuracy'] = normal_accuracy
     if target in [dtype.integer, dtype.float]:
-        analysis['validation_set_accuracy_r2'] = normal_accuracy
+        runtime_analyzer['validation_set_accuracy_r2'] = normal_accuracy
 
-    return analysis, full_predictions
+    # TODO Properly set train_sample_size and test_sample_size
+    model_analysis = ModelAnalysis(
+        column_importances=column_importances,
+        accuracies=score_dict,
+        train_sample_size=0,
+        test_sample_size=0,
+        confusion_matrix=cm
+    )
+
+    return model_analysis, runtime_analyzer

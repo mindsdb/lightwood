@@ -151,6 +151,19 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                 'data': 'data'
             }
         }
+    
+    # Decide on the accuracy functions to use
+    if output.data_dtype in [dtype.integer, dtype.float]:
+        acccuracy_functions = ['r2_score']
+    elif output.data_dtype == dtype.categorical:
+        acccuracy_functions = ['balanced_accuracy_score']
+    elif output.data_dtype == dtype.tags:
+        acccuracy_functions = ['balanced_accuracy_score']
+    elif output.data_dtype == dtype.array:
+        acccuracy_functions = ['evaluate_array_accuracy']
+    else:
+        acccuracy_functions = ['accuracy_score']
+
     return LightwoodConfig(
         cleaner={
             'object': 'cleaner',
@@ -197,7 +210,8 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                 'fixed_confidence': 'problem_definition.fixed_confidence',
                 'anomaly_detection': 'problem_definition.anomaly_detection',
                 'anomaly_error_rate': 'problem_definition.anomaly_error_rate',
-                'anomaly_cooldown': 'problem_definition.anomaly_cooldown'
+                'anomaly_cooldown': 'problem_definition.anomaly_cooldown',
+                'accuracy_functions': 'accuracy_functions'
             },
             'dynamic_args': {
                 'data': 'data',
@@ -213,5 +227,6 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         problem_definition=problem_definition,
         statistical_analysis=statistical_analysis,
         identifiers=type_information.identifiers,
-        timeseries_transformer=timeseries_transformer
+        timeseries_transformer=timeseries_transformer,
+        acccuracy_functions=acccuracy_functions
     )
