@@ -9,7 +9,7 @@ class TestBasic(unittest.TestCase):
         from mindsdb_datasources import FileDS
 
         # call: Go with dataframes
-        datasource = FileDS('../data/boston.csv')
+        datasource = FileDS('test/data/boston.csv')
         predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'MEDV'}), datasource.df)
 
         with open('dynamic_predictor.py', 'w') as fp:
