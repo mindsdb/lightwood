@@ -154,15 +154,15 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
     
     # Decide on the accuracy functions to use
     if output.data_dtype in [dtype.integer, dtype.float]:
-        acccuracy_functions = ['r2_score']
+        accuracy_functions = ['r2_score']
     elif output.data_dtype == dtype.categorical:
-        acccuracy_functions = ['balanced_accuracy_score']
+        accuracy_functions = ['balanced_accuracy_score']
     elif output.data_dtype == dtype.tags:
-        acccuracy_functions = ['balanced_accuracy_score']
+        accuracy_functions = ['balanced_accuracy_score']
     elif output.data_dtype == dtype.array:
-        acccuracy_functions = ['evaluate_array_accuracy']
+        accuracy_functions = ['evaluate_array_accuracy']
     else:
-        acccuracy_functions = ['accuracy_score']
+        accuracy_functions = ['accuracy_score']
 
     return LightwoodConfig(
         cleaner={
@@ -228,5 +228,5 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         statistical_analysis=statistical_analysis,
         identifiers=type_information.identifiers,
         timeseries_transformer=timeseries_transformer,
-        acccuracy_functions=acccuracy_functions
+        accuracy_functions=accuracy_functions
     )
