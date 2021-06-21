@@ -189,7 +189,8 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             'object': 'model_analyzer',
             'config_args': {
                 'stats_info': 'statistical_analysis',
-                'ts_cfg': 'problem_definition.timeseries_settings'
+                'ts_cfg': 'problem_definition.timeseries_settings',
+                'accuracy_functions': 'accuracy_functions'
             },
             'dynamic_args': {
                 'predictor': 'self.ensemble',
@@ -210,8 +211,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
                 'fixed_confidence': 'problem_definition.fixed_confidence',
                 'anomaly_detection': 'problem_definition.anomaly_detection',
                 'anomaly_error_rate': 'problem_definition.anomaly_error_rate',
-                'anomaly_cooldown': 'problem_definition.anomaly_cooldown',
-                'accuracy_functions': 'accuracy_functions'
+                'anomaly_cooldown': 'problem_definition.anomaly_cooldown'
             },
             'dynamic_args': {
                 'data': 'data',
