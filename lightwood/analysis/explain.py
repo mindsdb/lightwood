@@ -29,6 +29,7 @@ def explain(data,
     # confidence estimation using calibrated inductive conformal predictors (ICPs)
     # @TODO: and not quick_predict check
     insights = pd.DataFrame(columns=['prediction', 'confidence', 'lower', 'upper', 'anomaly'])
+    insights['prediction'] = predictions['prediction']
 
     if analysis['icp']['__mdb_active']:
         icp_X = deepcopy(data)
@@ -43,10 +44,6 @@ def explain(data,
         # for col in pdef['columns_to_ignore']:
         #     if col in icp_X.columns:
         #         icp_X.pop(col)
-
-        # get confidence bounds for each target
-        insights['confidence'] = [None] * len(predictions)
-        insights['confidence_range'] = [[None, None]] * len(predictions)
 
         is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
                        # and dtype.numerical in typing_info['data_type_dist'].keys())
@@ -170,8 +167,8 @@ def explain(data,
                                 result.loc[X.index, 'significance'] = significances
 
             insights['confidence'] = result['significance'].tolist()
-            confs = [[a, b] for a, b in zip(result['lower'], result['upper'])]
-            insights['confidence_range'] = confs
+            insights['lower'] = result['lower']
+            insights['upper'] = result['upper']
 
             # anomaly detection
             if is_anomaly_task:
@@ -179,9 +176,5 @@ def explain(data,
                                           predictions[f'__observed_{target_name}'],
                                           cooldown=anomaly_cooldown)
                 insights['anomaly'] = anomalies
-
-    else:
-        insights['confidence'] = [None] * len(predictions[target_name])
-        insights['confidence_range'] = [[None, None]] * len(predictions[target_name])
 
     return insights

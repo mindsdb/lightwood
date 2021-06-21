@@ -77,7 +77,7 @@ data = {call(lightwood_config.cleaner, lightwood_config)}
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
 df = self.ensemble(encoded_ds)
 insights = {call(lightwood_config.explainer, lightwood_config)}
-return df
+return insights
 """
     predict_body = align(predict_body, 2)
 
