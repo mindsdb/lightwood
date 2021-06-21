@@ -83,7 +83,7 @@ return df
 
     predictor_code = f"""
 {imports}
-from lightwood.api.high_level import PredictorInterface
+from lightwood.api import PredictorInterface
 
 
 class Predictor(PredictorInterface):

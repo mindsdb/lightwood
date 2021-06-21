@@ -234,7 +234,8 @@ def model_analyzer(
     # get accuracy metric for validation data
     score_dict = evaluate_accuracy(
         data[target],
-        normal_predictions
+        normal_predictions,
+        accuracy_functions
     )
     normal_accuracy = np.mean(list(score_dict.values()))
 
