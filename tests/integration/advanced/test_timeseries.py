@@ -17,7 +17,8 @@ class TestTimeseries(ClickhouseTest):
                                                                                   'order_by': ['Month'],
                                                                                   'window': 5
                                                                                 },
-                                                                              },), datasource.df)
+                                                                              }),
+                                                 datasource.df)
 
         with open('dynamic_predictor.py', 'w') as fp:
             fp.write(predictor_class_str)
