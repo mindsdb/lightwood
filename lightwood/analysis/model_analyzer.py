@@ -131,7 +131,7 @@ def model_analyzer(
                 icp.nc_function.model.class_map = class_map  # @TODO: still needed?
         elif is_multi_ts:
             # we fit ICPs for time series confidence bounds only at t+1 forecast
-            icp.nc_function.model.prediction_cache = np.array([p[0] for p in normal_predictions[target]])
+            icp.nc_function.model.prediction_cache = np.array([p[0] for p in normal_predictions['prediction']])
         else:
             icp.nc_function.model.prediction_cache = np.array(normal_predictions['prediction'])
 
@@ -181,9 +181,9 @@ def model_analyzer(
             # add all predictions to the cached DF
             icps_df = deepcopy(data.cached_val_df)
             if is_multi_ts:
-                icps_df[f'__predicted_{target}'] = [p[0] for p in normal_predictions[target]]
+                icps_df[f'__predicted_{target}'] = [p[0] for p in normal_predictions['prediction']]
             else:
-                icps_df[f'__predicted_{target}'] = normal_predictions[target]
+                icps_df[f'__predicted_{target}'] = normal_predictions['prediction']
 
             for group in icps['__mdb_groups']:
                 icp_df = icps_df
@@ -234,7 +234,7 @@ def model_analyzer(
     # get accuracy metric for validation data
     score_dict = evaluate_accuracy(
         data[target],
-        normal_predictions,
+        normal_predictions['prediction'],
         accuracy_functions
     )
     normal_accuracy = np.mean(list(score_dict.values()))
@@ -267,7 +267,7 @@ def model_analyzer(
 
     acc_stats = AccStats(dtype_dict=dtype_dict, target=target)
 
-    predictions_arr = [normal_predictions.values.flatten().tolist()] + [x for x in empty_input_predictions_test.values()]
+    predictions_arr = [normal_predictions['prediction'].values.flatten().tolist()] + [x for x in empty_input_predictions_test.values()]
 
     acc_stats.fit(
         data,
