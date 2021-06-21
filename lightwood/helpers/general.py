@@ -1,10 +1,9 @@
 from typing import List
-from sklearn.metrics import r2_score, f1_score, balanced_accuracy_score, accuracy_score
+from sklearn.metrics import r2_score, f1_score, balanced_accuracy_score
+import importlib
 import numpy as np
 import pandas as pd
 import sklearn
-from lightwood.api.dtype import dtype
-from lightwood.api import Output
 
 
 def evaluate_accuracy(predictions: pd.Series,
@@ -16,7 +15,7 @@ def evaluate_accuracy(predictions: pd.Series,
         if accuracy_function_str == 'evaluate_array_accuracy':
             accuracy_function = evaluate_array_accuracy
         else:
-            accuracy_function_str = getattr(__import__('sklearn.metrics'), accuracy_function_str)
+            accuracy_function = getattr(importlib.import_module('sklearn.metrics'), accuracy_function_str)
         
         score_dict[accuracy_function_str] = accuracy_function(true_values, predictions)
 
