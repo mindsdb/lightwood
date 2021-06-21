@@ -17,7 +17,7 @@ def evaluate_accuracy(predictions: pd.Series,
         else:
             accuracy_function = getattr(importlib.import_module('sklearn.metrics'), accuracy_function_str)
         
-        score_dict[accuracy_function_str] = accuracy_function(true_values, predictions)
+        score_dict[accuracy_function_str] = accuracy_function(list(true_values), list(predictions))
 
     return score_dict
 
