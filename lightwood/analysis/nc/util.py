@@ -138,7 +138,7 @@ def get_categorical_conf(all_confs, conf_candidates):
     return significances
 
 
-def get_anomalies(bounds, observed_series, cooldown=1):
+def get_anomalies(insights, observed_series, cooldown=1):
     anomalies = []
     counter = 0
 
@@ -148,7 +148,7 @@ def get_anomalies(bounds, observed_series, cooldown=1):
     except (TypeError, ValueError):
         return [None for _ in observed_series]
 
-    for (l, u), t in zip(bounds, observed_series):
+    for (l, u), t in zip((insights['lower'], insights['upper']), observed_series):
         if t is not None:
             anomaly = not (l <= t <= u)
 

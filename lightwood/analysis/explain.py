@@ -172,7 +172,7 @@ def explain(data,
 
             # anomaly detection
             if is_anomaly_task:
-                anomalies = get_anomalies(insights['confidence_range'],
+                anomalies = get_anomalies(insights,
                                           predictions[f'__observed_{target_name}'],
                                           cooldown=anomaly_cooldown)
                 insights['anomaly'] = anomalies
