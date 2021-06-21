@@ -162,3 +162,6 @@ class LightwoodConfig:
 @dataclass
 class ModelAnalysis:
     validation_set_accuracy: float = None
+    # (A bunch) of accuracy scores on the test data
+    # A confusion matrix
+    # 
