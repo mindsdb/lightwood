@@ -262,6 +262,8 @@ def model_analyzer(
             accuracy_increase = (normal_accuracy - empty_input_accuracy[col])
             # normalize from 0 to 10
             column_importances[col] = 10 * max(0, accuracy_increase)
+    else:
+        column_importances = None
 
     # @TODO: Training / testing data accuracy here ?
 
