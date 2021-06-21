@@ -57,7 +57,7 @@ class TestNestedDataset(unittest.TestCase):
             assert col in ds.df.columns
         pred.learn(ds.df)
 
-        model_data = pred.predictor_analysis
+        model_data = pred.model_analysis
         print(model_data)
         # TODO: Run some check here once we define the predictor analysis
 
