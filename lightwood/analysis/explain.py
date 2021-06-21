@@ -43,8 +43,8 @@ def explain(data,
         #         icp_X.pop(col)
 
         # get confidence bounds for each target
-        predictions[f'{target_name}_confidence'] = [None] * len(predictions)
-        predictions[f'{target_name}_confidence_range'] = [[None, None]] * len(predictions)
+        predictions[f'confidence'] = [None] * len(predictions)
+        predictions[f'confidence_range'] = [[None, None]] * len(predictions)
 
         is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
                        # and dtype.numerical in typing_info['data_type_dist'].keys())
@@ -167,20 +167,20 @@ def explain(data,
                                 significances = get_categorical_conf(all_confs, conf_candidates)
                                 result.loc[X.index, 'significance'] = significances
 
-            predictions[f'{target_name}_confidence'] = result['significance'].tolist()
+            predictions[f'confidence'] = result['significance'].tolist()
             confs = [[a, b] for a, b in zip(result['lower'], result['upper'])]
-            predictions[f'{target_name}_confidence_range'] = confs
+            predictions[f'confidence_range'] = confs
 
             # anomaly detection
             if is_anomaly_task:
-                anomalies = get_anomalies(predictions[f'{target_name}_confidence_range'],
+                anomalies = get_anomalies(predictions[f'confidence_range'],
                                           predictions[f'__observed_{target_name}'],
                                           cooldown=anomaly_cooldown)
-                predictions[f'{target_name}_anomaly'] = anomalies
+                predictions[f'anomaly'] = anomalies
 
     else:
-        predictions[f'{target_name}_confidence'] = [None] * len(predictions[target_name])
-        predictions[f'{target_name}_confidence_range'] = [[None, None]] * len(predictions[target_name])
+        predictions[f'confidence'] = [None] * len(predictions[target_name])
+        predictions[f'confidence_range'] = [[None, None]] * len(predictions[target_name])
 
     insights = predictions
     return insights

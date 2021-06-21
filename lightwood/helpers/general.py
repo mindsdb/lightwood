@@ -1,46 +1,31 @@
+from typing import List
 from sklearn.metrics import r2_score, f1_score, balanced_accuracy_score, accuracy_score
 import numpy as np
 import pandas as pd
-
+import sklearn
 from lightwood.api.dtype import dtype
 from lightwood.api import Output
 
 
-def evaluate_accuracy(predictions: pd.DataFrame,
-                      data_frame: pd.DataFrame,
-                      target_name: str,
-                      target_type,
-                      backend=None,
-                      **kwargs) -> float:
-    if target_type in [dtype.integer, dtype.float]:
-        evaluator = evaluate_regression_accuracy
-    elif target_type == dtype.categorical:
-        evaluator = evaluate_classification_accuracy
-    elif target_type == dtype.tags:
-        evaluator = evaluate_multilabel_accuracy
-    elif target_type == dtype.array:
-        evaluator = evaluate_array_accuracy
-        # @TODO: add typing info to target_info
-        # kwargs['categorical'] = True if dtype.categorical in target_info.typing.get('data_type_dist', []) else False
-    else:
-        evaluator = evaluate_generic_accuracy
+def evaluate_accuracy(predictions: pd.Series,
+                      true_values: pd.Series,
+                      acccuracy_functions: List[str]) -> float:
+    
+    score_dict = []
+    for accuracy_function_str in acccuracy_functions:
+        if accuracy_function_str == 'evaluate_array_accuracy':
+            accuracy_function = evaluate_array_accuracy
+        else:
+            accuracy_function_str = getattr(__import__('sklearn.metrics'), accuracy_function)
+        
+        score_dict[accuracy_function_str] = accuracy_function(true_values, predictions)
 
-    score = evaluator(
-        target_name,
-        predictions,
-        data_frame[target_name],
-        backend=backend,
-        **kwargs
-    )
-
-    return 0.00000001 if score == 0 else score
+    return score_dict
 
 
 def evaluate_regression_accuracy(
-        column,
-        predictions,
         true_values,
-        backend,
+        predictions,
         **kwargs
     ):
     if 'lower' and 'upper' in predictions:
@@ -52,11 +37,8 @@ def evaluate_regression_accuracy(
         return max(r2, 0)
 
 
-def evaluate_classification_accuracy(column, predictions, true_values, **kwargs):
-    pred_values = predictions['prediction']
-    return balanced_accuracy_score(true_values, pred_values)
-
-
+# This is ugly because it uses the encoders, figure out how to do it without them
+# Maybe literally one-hot encode inside the accuracy functions
 def evaluate_multilabel_accuracy(column, predictions, true_values, backend, **kwargs):
     # @TODO: use new API
     encoder = backend.predictor._mixer.encoders[column]
@@ -65,12 +47,7 @@ def evaluate_multilabel_accuracy(column, predictions, true_values, backend, **kw
     return f1_score(true_values, pred_values, average='weighted')
 
 
-def evaluate_generic_accuracy(column, predictions, true_values, **kwargs):
-    pred_values = predictions['prediction']
-    return accuracy_score(true_values, pred_values)
-
-
-def evaluate_array_accuracy(column, predictions, true_values, **kwargs):
+def evaluate_array_accuracy(true_values, predictions, **kwargs):
     accuracy = 0
     predictions = predictions['prediction']
     true_values = list(true_values)
