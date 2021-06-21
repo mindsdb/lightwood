@@ -1,3 +1,4 @@
+from lightwood.api import predictor
 from typing import List
 from sklearn.metrics import r2_score, f1_score, balanced_accuracy_score
 import importlib

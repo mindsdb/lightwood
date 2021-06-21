@@ -250,12 +250,10 @@ def model_analyzer(
                                                                  x not in ts_cfg.historical_columns))]
         for col in ignorable_input_columns:
             empty_input_predictions[col] = predictor('validate', ignore_columns=[col])  # @TODO: add this param?
-            empty_input_accuracy[col] = evaluate_accuracy(
-                empty_input_predictions[col],
-                data,
-                target,
-                backend=predictor
-            )
+            empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
+                data[target],
+                empty_input_predictions[col]
+            ).values()))
 
         # Get some information about the importance of each column
         # @TODO: Figure out if it's too slow
