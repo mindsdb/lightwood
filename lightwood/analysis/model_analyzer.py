@@ -1,5 +1,5 @@
 from typing import Dict
-from lightwood.api.types import Feature, Output, ProblemDefinition, StatisticalAnalysis, TimeseriesSettings
+from lightwood.api.types import Feature, ModelAnalysis, Output, ProblemDefinition, StatisticalAnalysis, TimeseriesSettings
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -283,21 +283,17 @@ def model_analyzer(
     runtime_analyzer['confusion_matrices'] = cm
     runtime_analyzer['accuracy_samples'] = accuracy_samples
 
-    for accuracy_function in accuracy_functions:
-        if accuracy_function == 'r2':
-            accuracy_function = r2_score
-
     runtime_analyzer['validation_set_accuracy'] = normal_accuracy
     if target in [dtype.integer, dtype.float]:
         runtime_analyzer['validation_set_accuracy_r2'] = normal_accuracy
 
     # TODO Properly set train_sample_size and test_sample_size
     model_analysis = ModelAnalysis(
-        column_importances=column_importances,
         accuracies=score_dict,
         train_sample_size=0,
         test_sample_size=0,
-        confusion_matrix=cm
+        confusion_matrix=cm,
+        column_importances=column_importances
     )
 
     return model_analysis, runtime_analyzer
