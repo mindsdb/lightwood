@@ -25,6 +25,10 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 
 - v0: flow works for categorical and numerical with minimal adaptation to code logic, should include accStats, 
       global feat importance and ICP confidence
+     - [DONE, 3/6/21] icp confidence
+     - [] use class distribution output
+     - [] global feat importance
+     - [partially done] accStats
 - v1: streamline nonconformist custom implementation to cater analysis needs
 - v2: introduce model-agnostic normalizer (previously known as self aware NN)
 - v3: re-introduce time series (and grouped ICPs)
@@ -44,7 +48,7 @@ def model_analyzer(
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
 
-    # @ TODO: ?
+    # @ TODO: reimplement time series
     # validation_df = data.validation_df
     # if ts_cfg.is_timeseries:
     #     validation_df = data.validation_df[data.validation_df['make_predictions'] == True]
@@ -76,7 +80,7 @@ def model_analyzer(
         'nr_preds': ts_cfg.nr_predictions or 0,
         'columns_to_ignore': []
     }
-    fit_params['columns_to_ignore'].extend([f'{target}_timestep_{i}' for i in range(1, fit_params['nr_preds'])])
+    fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
 
     # @TODO: adapters should not be needed anymore
     if is_classification:
@@ -104,7 +108,7 @@ def model_analyzer(
 
         norm_params = {'output_column': target}
         normalizer = SelfawareNormalizer(fit_params=norm_params)
-        normalizer.prediction_cache = normal_predictions.get(f'{target}_selfaware_scores', None)  # @TODO: call to .explain()
+        normalizer.prediction_cache = normal_predictions.get('selfaware_scores', None)  # @TODO: call to .explain()
 
         # instance the ICP
         nc = nc_class(model, nc_function)  # , normalizer=normalizer)  # @TODO: reintroduce normalizer
@@ -116,7 +120,7 @@ def model_analyzer(
         if is_classification:
             if False:  # config.output.returns_proba:
                 # @TODO: models should indicate whether they predict prob beliefs. if so, use them here
-                icp.nc_function.model.prediction_cache = np.array(normal_predictions[f'{target}_target_class_distribution'])
+                icp.nc_function.model.prediction_cache = np.array(normal_predictions['class_distribution'])
                 icp.nc_function.model.class_map = stats_info['lightwood_class_map']
             else:
                 class_map = {i: v for i, v in enumerate(stats_info.train_observed_classes)}
@@ -220,7 +224,7 @@ def model_analyzer(
         # consolidate all groups here
         if not is_classification:
             ranges = result_df.values
-            predictions[f'{target}_confidence_range'] = ranges
+            predictions['confidence_range'] = ranges
 
         # TODO: should we pass observed confidences in validation dataset?
 
@@ -229,6 +233,7 @@ def model_analyzer(
     # join confidence to predictions
     full_predictions = pd.concat([normal_predictions, result_df], axis=1)
 
+    # TODO: calculate acc on other folds?
     # get accuracy metric for validation data
     normal_accuracy = evaluate_accuracy(
         full_predictions,
