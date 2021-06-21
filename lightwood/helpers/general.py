@@ -16,7 +16,7 @@ def evaluate_accuracy(predictions: pd.Series,
         if accuracy_function_str == 'evaluate_array_accuracy':
             accuracy_function = evaluate_array_accuracy
         else:
-            accuracy_function_str = getattr(__import__('sklearn.metrics'), accuracy_function)
+            accuracy_function_str = getattr(__import__('sklearn.metrics'), accuracy_function_str)
         
         score_dict[accuracy_function_str] = accuracy_function(true_values, predictions)
 
