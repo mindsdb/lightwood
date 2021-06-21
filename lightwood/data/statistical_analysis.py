@@ -44,7 +44,7 @@ def statistical_analysis(data: pd.DataFrame,
 
     # get observed classes, used in analysis
     target_class_distribution = None
-    if type_information.dtypes[target] == dtype.categorical:
+    if type_information.dtypes[target] in (dtype.categorical, dtype.binary):
         target_class_distribution = dict(df[target].value_counts().apply(lambda x: x / len(df[target])))
         train_observed_classes = list(target_class_distribution.keys())
     elif type_information.dtypes[target] == dtype.tags:
