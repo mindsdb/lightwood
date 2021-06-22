@@ -55,7 +55,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 self._group_combinations = t['group_combinations']
 
                 # categorical normalizers
-                if t['original_type'] == dtype.categorical:
+                if t['original_type'] in (dtype.categorical, dtype.binary):
                     self._target_type = dtype.categorical
                     total_dims += len(t['normalizers']['__default'].scaler.categories_[0])
 

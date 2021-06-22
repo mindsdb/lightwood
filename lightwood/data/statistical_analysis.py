@@ -37,7 +37,7 @@ def statistical_analysis(data: pd.DataFrame,
     histograms = {}
     # Get histograms for each column
     for col in df.columns:
-        if type_information.dtypes[col] == dtype.categorical:
+        if type_information.dtypes[col] in (dtype.categorical, dtype.binary):
             histograms[col] = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
         if type_information.dtypes[col] in (dtype.integer, dtype.float):
             histograms[col] = get_numeric_histogram(filter_nan(df[col]), type_information.dtypes[col])
