@@ -164,6 +164,10 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
     else:
         accuracy_functions = ['accuracy_score']
     
+    if problem_definition.time_aim is None and (problem_definition.seconds_per_model is None or problem_definition.seconds_per_encoder is None):
+        problem_definition.time_aim = 800 + statistical_analysis.nr_rows
+
+
     if problem_definition.time_aim is not None:
         # Should only be featurs wi2+np.log(nr_features)/5th trainable encoders
         nr_features = len(features)
