@@ -145,10 +145,11 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         timeseries_transformer = {
             'object': 'transform_timeseries',
             'config_args': {
-                'timeseries_settings': 'problem_definition.timeseries_settings'
+                'problem_definition': 'problem_definition'
             },
             'dynamic_args': {
-                'data': 'data'
+                'data': 'data',
+                'dtype_dict': 'self.dtype_dict'
             }
         }
     

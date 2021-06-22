@@ -1,4 +1,7 @@
-from lightwood.api.types import TimeseriesSettings
+from lightwood.api.types import ProblemDefinition
+from lightwood.helpers.log import log
+from lightwood.api import dtype
+from typing import Dict
 import pandas as pd
 
 # old
@@ -11,15 +14,22 @@ import numpy as np
 from pathlib import Path
 import multiprocessing as mp
 from functools import partial
+import os
+import psutil
+import multiprocessing as mp
 
 
-def transform_timeseries(data: pd.DataFrame, timeseries_settings: TimeseriesSettings) -> pd.DataFrame:
-    # @TODO: potentially need problem definition here?
-    data, secondary_type_dict, timeseries_row_mapping, df_gb_map = _ts_reshape(data, timeseries_settings, mode='predict')
+def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], problem_definition: ProblemDefinition) -> pd.DataFrame:
+
+    data, secondary_type_dict, timeseries_row_mapping, df_gb_map = _ts_reshape(data,
+                                                                               dtype_dict,
+                                                                               problem_definition,
+                                                                               mode='predict')
     return data
 
 
-def _ts_reshape(original_df, tss, mode='learn'):
+def _ts_reshape(original_df, dtype_dict, problem_definition, mode='learn'):
+    tss = problem_definition.timeseries_settings
     original_df = copy.deepcopy(original_df)
     gb_arr = tss.group_by if tss.group_by is not None else []
     ob_arr = tss.order_by
@@ -43,10 +53,8 @@ def _ts_reshape(original_df, tss, mode='learn'):
 
     secondary_type_dict = {}
     for col in ob_arr:
-        if transaction.lmd['stats_v2'][col]['typing']['data_type'] == DATA_TYPES.DATE:
-            secondary_type_dict[col] = ColumnDataTypes.DATETIME
-        else:
-            secondary_type_dict[col] = ColumnDataTypes.NUMERIC
+        if dtype_dict[col] in (dtype.date, dtype.integer, dtype.float):
+            secondary_type_dict[col] = dtype_dict[col]
 
     # Convert order_by columns to numbers (note, rows are references to mutable rows in `original_df`)
     for _, row in original_df.iterrows():
@@ -55,11 +63,12 @@ def _ts_reshape(original_df, tss, mode='learn'):
             if row[col] is None or pd.isna(row[col]):
                 row[col] = 0.0
             else:
-                if transaction.lmd['stats_v2'][col]['typing']['data_type'] == DATA_TYPES.DATE:
+                if dtype_dict[col] == dtype.date:
                     try:
                         row[col] = dateutil.parser.parse(
                             row[col],
-                            **transaction.lmd.get('dateutil_parser_kwargs_per_column', {}).get(col, {})
+                            # transaction.lmd.get('dateutil_parser_kwargs_per_column', {}).get(col, {}) # @TODO
+                            **{}
                         )
                     except (TypeError, ValueError):
                         pass
@@ -81,16 +90,15 @@ def _ts_reshape(original_df, tss, mode='learn'):
 
     last_index = original_df['original_index'].max()
     for i, subdf in enumerate(df_arr):
-        if 'make_predictions' in subdf.columns and mode == 'predict':
+        if 'make_predictions' in subdf.columns and mode == 'predict':  # @TODO: make_predictions would not be a thing anymore
             if infer_mode:
                 df_arr[i] = _ts_infer_next_row(subdf, ob_arr, last_index)
                 last_index += 1
 
     if len(original_df) > 500:
-        nr_procs = get_nr_procs(transaction.lmd.get('max_processes', None),
-                                transaction.lmd.get('max_per_proc_usage', None),
-                                original_df)
-        transaction.log.info(f'Using {nr_procs} processes to reshape.')
+        # @TODO: restore possibility to override this with args
+        nr_procs = get_nr_procs(original_df)
+        log.info(f'Using {nr_procs} processes to reshape.')
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
         df_arr = pool.map(partial(_ts_to_obj, historical_columns=ob_arr + tss.historical_columns), df_arr)
@@ -229,3 +237,23 @@ def _ts_add_previous_target(df, predict_columns, nr_predictions, window, mode):
                 df.loc[df[col].isna(), ['make_predictions']] = False
 
     return df
+
+
+def get_nr_procs(df=None, max_processes=None, max_per_proc_usage=None):
+    if os.name == 'nt':
+        return 1
+    else:
+        available_mem = psutil.virtual_memory().available
+        if max_per_proc_usage is None or type(max_per_proc_usage) not in (int, float):
+            try:
+                import mindsdb_worker
+                import ray
+                max_per_proc_usage = 0.2 * pow(10,9)
+            except:
+                max_per_proc_usage = 3 * pow(10, 9)
+            if df is not None:
+                max_per_proc_usage += df.memory_usage(index=True, deep=True).sum()
+        proc_count = int(min(mp.cpu_count(), available_mem // max_per_proc_usage)) - 1
+        if isinstance(max_processes, int):
+            proc_count = min(proc_count, max_processes)
+        return max(proc_count, 1)
