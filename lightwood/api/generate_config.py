@@ -4,6 +4,9 @@ from lightwood.api.types import LightwoodConfig, TypeInformation, StatisticalAna
 from lightwood.api import dtype
 
 
+trainable_encoders = ('TsRnnEncoder', 'PretrainedLangEncoder', 'CategoricalAutoEncoder')
+
+
 def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
@@ -30,6 +33,7 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
         'config_args': {},
         'dynamic_args': {}
     }
+
     if is_target:
         encoder_dict['dynamic_args'] = {'is_target': 'True'}
         if col_dtype in target_encoder_lookup_override:
@@ -37,11 +41,12 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
         if col_dtype in (dtype.categorical, dtype.binary):
             encoder_dict['config_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
 
-            
-
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
         encoder_dict['config_args']['output_type'] = 'output.data_dtype'
+
+    if encoder_dict['object'] in trainable_encoders:
+        encoder_dict['config_args']['stop_after'] = 'problem_definition.seconds_per_encoder'
 
     return encoder_dict
 
@@ -167,10 +172,9 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
     if problem_definition.time_aim is None and (problem_definition.seconds_per_model is None or problem_definition.seconds_per_encoder is None):
         problem_definition.time_aim = 800 + statistical_analysis.nr_rows
 
-
     if problem_definition.time_aim is not None:
         # Should only be featurs wi2+np.log(nr_features)/5th trainable encoders
-        nr_features = len(features)
+        nr_features = len([x for x in features if x.encoder['object'] in trainable_encoders])
         nr_models = len(output.models)
         encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_features) / 5)
         problem_definition.seconds_per_encoder = problem_definition.time_aim * (encoder_time_budget_pct / nr_features)
