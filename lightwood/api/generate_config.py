@@ -163,6 +163,14 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         accuracy_functions = ['evaluate_array_accuracy']
     else:
         accuracy_functions = ['accuracy_score']
+    
+    if problem_definition.time_aim is not None:
+        # Should only be featurs wi2+np.log(nr_features)/5th trainable encoders
+        nr_features = len(features)
+        nr_models = len(output.models)
+        encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_features) / 5)
+        problem_definition.seconds_per_encoder = problem_definition.time_aim * (encoder_time_budget_pct / nr_features)
+        problem_definition.seconds_per_model = problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models)
 
     return LightwoodConfig(
         cleaner={
