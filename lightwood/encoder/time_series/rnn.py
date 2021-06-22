@@ -15,7 +15,7 @@ from math import gcd
 
 class TimeSeriesEncoder(BaseEncoder):
 
-    def __init__(self, encoded_vector_size=128, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
+    def __init__(self, stop_after: int, encoded_vector_size=128, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
                  is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical, original_type=None):
         super().__init__(is_target)
         self.device, _ = get_devices()
@@ -37,6 +37,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self._target_type = None
         self._group_combinations = None
         self.original_type = original_type
+        self.stop_after = stop_after
 
     def setup_nn(self, additional_targets=None):
         """This method must be executed after initializing, else types are unassigned"""

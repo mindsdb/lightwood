@@ -62,7 +62,6 @@ class PretrainedLangEncoder(BaseEncoder):
     Args:
     is_target ::Bool; data column is the target of ML.
     model_name ::str; name of pre-trained model
-    max_training_time ::int; seconds to train
     custom_tokenizer ::function; custom tokenizing function
     batch_size  ::int; size of batch
     max_position_embeddings ::int; max sequence length of input text
@@ -73,6 +72,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
     def __init__(
         self,
+        stop_after: int,
         is_target=False,
         model_name="distilbert",
         custom_tokenizer=None,
