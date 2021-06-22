@@ -38,6 +38,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self._group_combinations = None
         self.original_type = original_type
         self.stop_after = stop_after
+        self.is_nn_encoder = True
 
     def setup_nn(self, additional_targets=None):
         """This method must be executed after initializing, else types are unassigned"""

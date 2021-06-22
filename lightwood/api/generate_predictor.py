@@ -15,7 +15,7 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
     dtype_dict = {lightwood_config.output.name: f"""'{lightwood_config.output.data_dtype}'"""}
 
     for col_name, feature in lightwood_config.features.items():
-        encoder_dict[col_name] = call(feature.encoder,  lightwood_config)
+        encoder_dict[col_name] = call(feature.encoder, lightwood_config)
         dependency_dict[col_name] = feature.dependency
         dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
