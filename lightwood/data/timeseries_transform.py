@@ -105,7 +105,7 @@ def _ts_reshape(original_df, dtype_dict, problem_definition, mode='learn'):
         df_arr = pool.map(partial(_ts_order_col_to_cell_lists, historical_columns=ob_arr + tss.historical_columns), df_arr)
         df_arr = pool.map(partial(_ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window), df_arr)
         if tss.use_previous_target:
-            df_arr = pool.map(partial(_ts_add_previous_target, predict_columns=transaction.lmd['predict_columns'], nr_predictions=nr_predictions, window=window, mode=mode), df_arr)
+            df_arr = pool.map(partial(_ts_add_previous_target, target_column=problem_definition.target, nr_predictions=tss.nr_predictions, window=tss.window, mode=mode), df_arr)
         pool.close()
         pool.join()
     else:
@@ -114,7 +114,7 @@ def _ts_reshape(original_df, dtype_dict, problem_definition, mode='learn'):
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i], historical_columns=ob_arr + tss.historical_columns, window=window)
             if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(df_arr[i], predict_columns=transaction.lmd['predict_columns'], nr_predictions=nr_predictions, window=window, mode=mode)
+                df_arr[i] = _ts_add_previous_target(df_arr[i], target_column=problem_definition.target, nr_predictions=tss.nr_predictions, window=tss.window, mode=mode)
 
     combined_df = pd.concat(df_arr)
 
@@ -207,34 +207,32 @@ def _ts_add_previous_rows(df, historical_columns, window):
     return df
 
 
-def _ts_add_previous_target(df, predict_columns, nr_predictions, window, mode):
-    for target_column in predict_columns:
-        previous_target_values = list(df[target_column])
-        del previous_target_values[-1]
-        previous_target_values = [None] + previous_target_values
+def _ts_add_previous_target(df, target_column, nr_predictions, window, mode):
+    previous_target_values = list(df[target_column])
+    del previous_target_values[-1]
+    previous_target_values = [None] + previous_target_values
 
-        previous_target_values_arr = []
-        for i in range(len(previous_target_values)):
-            prev_vals = previous_target_values[max(i - window, 0):i + 1]
-            arr = [None] * (window - len(prev_vals) + 1)
-            arr.extend(prev_vals)
-            previous_target_values_arr.append(arr)
+    previous_target_values_arr = []
+    for i in range(len(previous_target_values)):
+        prev_vals = previous_target_values[max(i - window, 0):i + 1]
+        arr = [None] * (window - len(prev_vals) + 1)
+        arr.extend(prev_vals)
+        previous_target_values_arr.append(arr)
 
-        df[f'__mdb_ts_previous_{target_column}'] = previous_target_values_arr
-        for timestep_index in range(1, nr_predictions):
-            next_target_value_arr = list(df[target_column])
-            for del_index in range(0, min(timestep_index, len(next_target_value_arr))):
-                del next_target_value_arr[0]
-                next_target_value_arr.append(None)
-            df[f'{target_column}_timestep_{timestep_index}'] = next_target_value_arr
+    df[f'__mdb_ts_previous_{target_column}'] = previous_target_values_arr
+    for timestep_index in range(1, nr_predictions):
+        next_target_value_arr = list(df[target_column])
+        for del_index in range(0, min(timestep_index, len(next_target_value_arr))):
+            del next_target_value_arr[0]
+            next_target_value_arr.append(None)
+        df[f'{target_column}_timestep_{timestep_index}'] = next_target_value_arr
 
     # drop rows with incomplete target info.
     if mode == 'learn':
-        for target_column in predict_columns:
-            for col in [f'{target_column}_timestep_{i}' for i in range(1, nr_predictions)]:
-                if 'make_predictions' not in df.columns:
-                    df['make_predictions'] = True
-                df.loc[df[col].isna(), ['make_predictions']] = False
+        for col in [f'{target_column}_timestep_{i}' for i in range(1, nr_predictions)]:
+            if 'make_predictions' not in df.columns:
+                df['make_predictions'] = True
+            df.loc[df[col].isna(), ['make_predictions']] = False
 
     return df
 
