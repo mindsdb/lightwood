@@ -137,7 +137,7 @@ class PretrainedLangEncoder(BaseEncoder):
             and output_avail
             and (
                 self.output_type
-                == dtype.categorical
+                in (dtype.categorical, dtype.binary)
             )
         ):
             log.info("Training model.")

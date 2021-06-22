@@ -48,7 +48,7 @@ def explain(data,
         is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
                        # and dtype.numerical in typing_info['data_type_dist'].keys())
 
-        is_categorical = target_dtype == dtype.categorical or target_dtype == dtype.array
+        is_categorical = target_dtype in (dtype.binary, dtype.categorical, dtype.array)
                          # and dtype.categorical in typing_info['data_type_dist'].keys())) and \
                          # typing_info['data_subtype'] != DATA_SUBTYPES.TAGS
 
