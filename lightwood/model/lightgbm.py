@@ -79,7 +79,7 @@ class LightGBM(BaseModel):
 
             label_data = data[subset_name]['ds'].get_column_original_data(self.target)
 
-            if output_dtype == dtype.categorical:
+            if output_dtype in (dtype.categorical, dtype.binary):
                 if subset_name == 'train':
                     self.ordinal_encoder = OrdinalEncoder()
                     self.label_set = set(label_data)
