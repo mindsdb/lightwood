@@ -7,7 +7,7 @@ from lightwood.api import dtype
 trainable_encoders = ('TsRnnEncoder', 'PretrainedLangEncoder', 'CategoricalAutoEncoder')
 
 
-def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
+def lookup_encoder(col_dtype: dtype, is_target: bool):
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
         dtype.float: 'NumericEncoder',
@@ -104,7 +104,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], True, output)
+    output.encoder = lookup_encoder(type_information.dtypes[target], True)
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
@@ -112,7 +112,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             feature = Feature(
                 name=col_name,
                 data_dtype=col_dtype,
-                encoder=lookup_encoder(col_dtype, False, output),
+                encoder=lookup_encoder(col_dtype, False),
                 dependency=[]
             )
             features[col_name] = feature
