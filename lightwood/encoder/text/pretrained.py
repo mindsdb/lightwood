@@ -107,7 +107,8 @@ class PretrainedLangEncoder(BaseEncoder):
         self._pretrained_model_name = "distilbert-base-uncased"
 
         self.device, _ = get_devices()
-
+        self.is_nn_encoder = True
+        self.stop_after = stop_after
 
     def prepare(self, priming_data, training_data=None):
         """

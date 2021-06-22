@@ -22,11 +22,10 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.onehot_encoder = OneHotEncoder(is_target=self.is_target)
         self.desired_error = 0.01
         self.use_autoencoder = None
-        if self.is_target:
-            self.max_encoded_length = None
-        else:
-            self.max_encoded_length = max_encoded_length
+        self.max_encoded_length = max_encoded_length
         self.stop_after = stop_after
+        # @TODO stop using instead of ONEHOT !!!@!
+        self.is_nn_encoder = True
 
     def _train_callback(self, error, real_buff, predicted_buff):
         log.info(f'{self.name} reached a loss of {error} while training !')
