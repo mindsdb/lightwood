@@ -174,7 +174,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
 
     if problem_definition.time_aim is not None:
         # Should only be featurs wi2+np.log(nr_features)/5th trainable encoders
-        nr_features = len([x for x in features if x.encoder['object'] in trainable_encoders])
+        nr_features = len([x for x in features.values() if x.encoder['object'] in trainable_encoders])
         nr_models = len(output.models)
         encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_features) / 5)
         problem_definition.seconds_per_encoder = problem_definition.time_aim * (encoder_time_budget_pct / nr_features)
