@@ -155,8 +155,7 @@ class Predictor:
         """
         device, _available_devices = get_devices()
 
-        for encname, enc in self._mixer.encoders.items():
-            enc.to(device, _available_devices)
+        self._mixer.to(device, _available_devices)
 
         log.info(f'Computing device used: {device}')
         if when is not None:
