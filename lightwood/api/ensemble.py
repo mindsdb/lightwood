@@ -39,9 +39,7 @@ class LightwoodEnsemble:
             if target['type'] == ColumnDataTypes.NUMERIC:
                 final_preds = np.mean(pred_arr, axis=0).tolist()
             elif target['type'] == ColumnDataTypes.CATEGORICAL:
-                final_preds = []
-                for idx in range(pred_arr.shape[1]):
-                    final_preds.append(max(Counter(pred_arr[:, idx])))
+                final_preds = [max(Counter(pred_arr[:, idx])) for idx in range(pred_arr.shape[1])]
             else:
                 raise Exception('Only numeric and categorical datatypes are supported for ensembles')
 
