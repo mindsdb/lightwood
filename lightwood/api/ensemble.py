@@ -1,14 +1,13 @@
-from .predictor import Predictor
+from lightwood import Predictor
 from lightwood.constants.lightwood import ColumnDataTypes
 from collections import Counter
 import numpy as np
 import pickle
-import torch
 import os
 
 
 class LightwoodEnsemble:
-    def __init__(self, predictor=None, predictors=None, load_from_path=None):
+    def __init__(self, predictors=None, load_from_path=None):
         self.path_list = None
         if load_from_path is not None:
             with open(os.path.join(load_from_path, 'lightwood_data'), 'rb') as pickle_in:
@@ -16,7 +15,7 @@ class LightwoodEnsemble:
                 self.path = load_from_path
                 self.path_list = obj.path_list
                 self.ensemble = [Predictor(load_from_path=path) for path in self.path_list]
-        elif predictor is not None:
+        elif isinstance(predictors, Predictor):
             self.ensemble = [predictor]
         elif isinstance(predictors, list):
             self.ensemble = predictors
@@ -43,6 +42,8 @@ class LightwoodEnsemble:
                 final_preds = []
                 for idx in range(pred_arr.shape[1]):
                     final_preds.append(max(Counter(pred_arr[:, idx])))
+            else:
+                raise Exception('Only numeric and categorical datatypes are supported for ensembles')
 
             formatted_predictions[target_name]['predictions'] = final_preds
 
@@ -58,7 +59,7 @@ class LightwoodEnsemble:
 
         self.path_list = path_list
 
-        # TODO: in future, just save them inside this data struct
+        # TODO: in the future, save preds inside this data struct
         self.ensemble = None  # we deref predictors for now
         with open(os.path.join(path_to, 'lightwood_data'), 'wb') as file:
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
