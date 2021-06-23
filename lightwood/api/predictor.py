@@ -23,8 +23,12 @@ class Predictor:
         :param load_from_path: str, the path to load the predictor from
         """
         if load_from_path is not None:
-            with open(load_from_path, 'rb') as pickle_in:
-                self_dict = torch.load(pickle_in)
+            try:
+                with open(load_from_path, 'rb') as pickle_in:
+                    self_dict = torch.load(pickle_in)
+            except RuntimeError:
+                with open(load_from_path, 'rb') as pickle_in:
+                    self_dict = torch.load(pickle_in, map_location=torch.device('cpu'))
             self.__dict__ = self_dict
             self.convert_to_device()
             return
@@ -150,6 +154,7 @@ class Predictor:
         :return: pandas.DataFrame
         """
         device, _available_devices = get_devices()
+
         log.info(f'Computing device used: {device}')
         if when is not None:
             when_dict = {key: [when[key]] for key in when}
