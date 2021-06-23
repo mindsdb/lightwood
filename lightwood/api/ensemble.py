@@ -16,7 +16,7 @@ class LightwoodEnsemble:
                 self.path_list = obj.path_list
                 self.ensemble = [Predictor(load_from_path=path) for path in self.path_list]
         elif isinstance(predictors, Predictor):
-            self.ensemble = [predictor]
+            self.ensemble = [predictors]
         elif isinstance(predictors, list):
             self.ensemble = predictors
 
