@@ -11,7 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # macos-latest disabled for now, SegFaults (error 11) suspected OOM issue
+        os: [ubuntu-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
