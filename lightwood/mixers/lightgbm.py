@@ -162,3 +162,8 @@ class LightGBMMixer(BaseMixer):
             ypred[col_name]['predictions'] = list(col_preds)
 
         return ypred
+
+    def to(self, device, available_devices):
+        for enc_name in self.encoders:
+            self.encoders[enc_name].to(device, available_devices)
+        return self
