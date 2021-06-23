@@ -155,8 +155,6 @@ class Predictor:
         """
         device, _available_devices = get_devices()
 
-        self._mixer.to(device, _available_devices)
-
         log.info(f'Computing device used: {device}')
         if when is not None:
             when_dict = {key: [when[key]] for key in when}
