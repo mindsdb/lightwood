@@ -1,9 +1,11 @@
+from logging import exception
 import math
 from typing import List
 import torch
 from functools import reduce
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
+from lightwood.helpers.log import log
 
 
 class DefaultNet(torch.nn.Module):
@@ -35,14 +37,24 @@ class DefaultNet(torch.nn.Module):
     def to(self, device: torch.device, available_devices: int) -> torch.nn.Module:
         self.net = self.net.to(device)
         if available_devices > 1:
-            self.net = torch.nn.DataParallel(self.net)
+            self.dp_wrapper_net = torch.nn.DataParallel(self.net)
+        else:
+            self.dp_wrapper_net = self.net
 
         self.device = device
         self.available_devices = available_devices
         return self
 
     def forward(self, input):
-        with LightwoodAutocast():
-            output = self.net(input)
+        try:
+            with LightwoodAutocast():
+                output = self.net(input)
+        except Exception as e:
+            # Data parallel error
+            if 'nccl' in str(e).lower():
+                self.dp_wrapper_net = self.net
+                log.warn(f'Data parallel not working: {e}')
+            else:
+                raise e
 
         return output

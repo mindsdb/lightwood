@@ -4,7 +4,10 @@ from lightwood.api.types import LightwoodConfig, TypeInformation, StatisticalAna
 from lightwood.api import dtype
 
 
-def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
+trainable_encoders = ('TsRnnEncoder', 'PretrainedLangEncoder', 'CategoricalAutoEncoder')
+
+
+def lookup_encoder(col_dtype: dtype, is_target: bool):
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
         dtype.float: 'NumericEncoder',
@@ -30,18 +33,20 @@ def lookup_encoder(col_dtype: dtype, is_target: bool, output: Output):
         'config_args': {},
         'dynamic_args': {}
     }
+
     if is_target:
         encoder_dict['dynamic_args'] = {'is_target': 'True'}
         if col_dtype in target_encoder_lookup_override:
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
-        if col_dtype in dtype.categorical:
+        if col_dtype in (dtype.categorical, dtype.binary):
             encoder_dict['config_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
-
-            
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
         encoder_dict['config_args']['output_type'] = 'output.data_dtype'
+
+    if encoder_dict['object'] in trainable_encoders:
+        encoder_dict['config_args']['stop_after'] = 'problem_definition.seconds_per_encoder'
 
     return encoder_dict
 
@@ -99,7 +104,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], True, output)
+    output.encoder = lookup_encoder(type_information.dtypes[target], True)
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
@@ -107,7 +112,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             feature = Feature(
                 name=col_name,
                 data_dtype=col_dtype,
-                encoder=lookup_encoder(col_dtype, False, output),
+                encoder=lookup_encoder(col_dtype, False),
                 dependency=[]
             )
             features[col_name] = feature
@@ -163,6 +168,17 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         accuracy_functions = ['evaluate_array_accuracy']
     else:
         accuracy_functions = ['accuracy_score']
+    
+    if problem_definition.time_aim is None and (problem_definition.seconds_per_model is None or problem_definition.seconds_per_encoder is None):
+        problem_definition.time_aim = 800 + statistical_analysis.nr_rows
+
+    if problem_definition.time_aim is not None:
+        # Should only be featurs wi2+np.log(nr_features)/5th trainable encoders
+        nr_features = len([x for x in features.values() if x.encoder['object'] in trainable_encoders])
+        nr_models = len(output.models)
+        encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_features) / 5)
+        problem_definition.seconds_per_encoder = problem_definition.time_aim * (encoder_time_budget_pct / nr_features)
+        problem_definition.seconds_per_model = problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models)
 
     return LightwoodConfig(
         cleaner={
