@@ -15,7 +15,6 @@ class TestTimeseries(ClickhouseTest):
                                                                               'anomaly_detection': False,
                                                                               'timeseries_settings': {
                                                                                   'order_by': ['Month'],
-                                                                                  'use_previous_target': True,
                                                                                   'window': 5
                                                                                 },
                                                                               }),
