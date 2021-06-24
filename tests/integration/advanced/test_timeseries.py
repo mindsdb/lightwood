@@ -13,6 +13,7 @@ class TestTimeseries(ClickhouseTest):
         datasource = FileDS('tests/data/sunspots.csv')
         predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'Sunspots',
                                                                               'anomaly_detection': False,
+                                                                              'use_previous_target': True,
                                                                               'timeseries_settings': {
                                                                                   'order_by': ['Month'],
                                                                                   'window': 5
