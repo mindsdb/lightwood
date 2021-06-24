@@ -1,6 +1,7 @@
 import datetime
 import calendar
 import numpy as np
+import pandas as pd  # @TODO: remove?
 import torch
 from lightwood.encoder.base import BaseEncoder
 
@@ -21,17 +22,28 @@ class DatetimeEncoder(BaseEncoder):
 
     def encode(self, data):
         """
-        Encodes a list of unix_timestamps, or a list of tensors with unix_timestamps
-        :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
-        :return: a list of vectors
+        :param data: # @TODO: receive a consistent data type here; currently either list of lists or pd.Series w/lists
+        :return: encoded data
         """
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
+        if isinstance(data, pd.Series):
+            data = data.values
+        elif not isinstance(data[0], list):
+            data = [data]  # base case, single row gets packaged inside list
+
+        ret = [self.encode_one(row) for row in data]
+        return torch.Tensor(ret).squeeze(0)  # @TODO: .to(self.device) ?
+
+    def encode_one(self, data):
+        """
+        Encodes a list of unix_timestamps, or a list of tensors with unix_timestamps
+        :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
+        :return: a list of vectors
+        """
         ret = []
-
         for unix_timestamp in data:
-
             if unix_timestamp is None:
                 if self.sinusoidal:
                     vector = [0, 1] * len(self.fields)
@@ -51,7 +63,7 @@ class DatetimeEncoder(BaseEncoder):
 
             ret.append(vector)
 
-        return torch.Tensor(ret)
+        return ret
 
     def decode(self, encoded_data, return_as_datetime=False):
         ret = []
@@ -84,3 +96,5 @@ class DatetimeEncoder(BaseEncoder):
                     )
 
         return ret
+
+    # @TODO: decode_one here
