@@ -34,7 +34,9 @@ class DatetimeEncoder(BaseEncoder):
             data = [data]  # base case, single row gets packaged inside list
 
         ret = [self.encode_one(row) for row in data]
-        return torch.Tensor(ret).squeeze(0)  # @TODO: .to(self.device) ?
+
+        # @TODO: this takes the mean embedding of the order-by window... is it the same in current lightwood?
+        return torch.mean(torch.Tensor(ret), dim=1)
 
     def encode_one(self, data):
         """
