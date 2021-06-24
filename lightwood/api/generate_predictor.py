@@ -15,7 +15,7 @@ def generate_predictor_code(lightwood_config: LightwoodConfig) -> str:
     dtype_dict = {lightwood_config.output.name: f"""'{lightwood_config.output.data_dtype}'"""}
 
     for col_name, feature in lightwood_config.features.items():
-        encoder_dict[col_name] = call(feature.encoder,  lightwood_config)
+        encoder_dict[col_name] = call(feature.encoder, lightwood_config)
         dependency_dict[col_name] = feature.dependency
         dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
@@ -48,7 +48,16 @@ log.info(f'Splitting the data into {{nfolds}} folds')
 folds = {call(lightwood_config.splitter, lightwood_config)}
 
 log.info('Preparing the encoders')
-self.encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1])[col_name], 'prepare'] for col_name, encoder in self.encoders.items()}})
+
+parallel_preped_encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1])[col_name], 'prepare'] for col_name, encoder in self.encoders.items() if not encoder.is_nn_encoder}})
+
+seq_preped_encoders = {{}}
+for col_name, encoder in self.encoders.items():
+    if encoder.is_nn_encoder:
+        encoder.prepare(pd.concat(folds[0:nfolds-1])[col_name])
+
+for col_name, encoder in parallel_preped_encoders.items():
+    self.encoders[col_name] = encoder
 
 log.info('Featurizing the data')
 encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
