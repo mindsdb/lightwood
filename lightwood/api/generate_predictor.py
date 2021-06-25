@@ -3,6 +3,7 @@ from lightwood.api.types import ProblemDefinition
 import lightwood
 from lightwood.api import JsonML
 import pandas as pd
+import autopep8
 
 
 def add_implicit_values(json_ml: JsonML) -> str:
@@ -156,4 +157,7 @@ def generate_predictor(problem_definition: ProblemDefinition = None, data: pd.Da
         json_ml = lightwood.generate_json_ml(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
     predictor_code = generate_predictor_code(json_ml)
+
+    predictor_code = autopep8.fix_code(predictor_code)  # Note: ~3s overhead, might be more depending on source complexity, should try a few more examples and make a decision
+
     return predictor_code
