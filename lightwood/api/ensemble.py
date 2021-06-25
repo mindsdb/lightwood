@@ -43,8 +43,6 @@ class LightwoodEnsemble:
 
                 # @TODO: implement class distribution for ensembles
                 # NOTE: label set *could* grow when adding predictors, which complicates belief score computation
-                # beliefs = np.array([p[target_name]['class_distribution'] for p in predictions])
-                # formatted_predictions[target_name]['class_distribution'] = np.mean(beliefs, axis=0).tolist()
                 formatted_predictions[target_name]['class_distribution'] = np.ones(shape=(len(final_preds), 1))
             else:
                 raise Exception('Only numeric and categorical datatypes are supported for ensembles')
