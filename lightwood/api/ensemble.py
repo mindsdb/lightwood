@@ -40,6 +40,10 @@ class LightwoodEnsemble:
                 final_preds = np.mean(pred_arr, axis=0).tolist()
             elif target['type'] == ColumnDataTypes.CATEGORICAL:
                 final_preds = [max(Counter(pred_arr[:, idx])) for idx in range(pred_arr.shape[1])]
+
+                # @TODO: implement class distribution for ensembles
+                # NOTE: label set *could* grow when adding predictors, which complicates belief score computation
+                formatted_predictions[target_name]['class_distribution'] = np.ones(shape=(len(final_preds), 1))
             else:
                 raise Exception('Only numeric and categorical datatypes are supported for ensembles')
 
