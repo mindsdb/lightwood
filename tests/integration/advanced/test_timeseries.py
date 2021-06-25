@@ -1,11 +1,10 @@
 import importlib
 
-from tests.integration.helpers import ClickhouseTest, break_dataset
 from lightwood.api.types import ProblemDefinition
 from lightwood.api import make_predictor
 
 
-class TestTimeseries(ClickhouseTest):
+class TestTimeseries:
     def test_timeseries(self):
         from lightwood import generate_predictor
         from mindsdb_datasources import FileDS
@@ -39,4 +38,10 @@ class TestTimeseries(ClickhouseTest):
         pass
 
     def test_anomaly_detection(self):
+        pass
+
+    def test_long_forecasts(self):
+        pass
+
+    def test_stream_predictions(self):
         pass
