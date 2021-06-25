@@ -1,10 +1,11 @@
 import importlib
+import unittest
 
 from lightwood.api.types import ProblemDefinition
 from lightwood.api import make_predictor
 
 
-class TestTimeseries:
+class TestTimeseries(unittest.TestCase):
     def test_timeseries(self):
         from lightwood import generate_predictor
         from mindsdb_datasources import FileDS
