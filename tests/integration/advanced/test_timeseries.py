@@ -1,5 +1,7 @@
-import importlib
 import unittest
+import importlib
+import pandas as pd
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 from lightwood.api.types import ProblemDefinition
 from lightwood.api import make_predictor
@@ -11,7 +13,9 @@ class TestTimeseries(unittest.TestCase):
         from mindsdb_datasources import FileDS
 
         datasource = FileDS('tests/data/sunspots.csv')
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'Sunspots',
+        target = 'Sunspots'
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': target,
+                                                                              'time_aim': 100,
                                                                               'anomaly_detection': False,
                                                                               'use_previous_target': True,
                                                                               'timeseries_settings': {
@@ -33,7 +37,20 @@ class TestTimeseries(unittest.TestCase):
         predictor.learn(datasource.df)
 
         predictions = predictor.predict(datasource.df)
-        print(predictions[0:100])
+        print(predictions)
+        print(datasource.df)
+
+        print(r2_score(datasource.df[target], predictions['prediction']))
+        print(mean_absolute_error(datasource.df[target], predictions['prediction']))
+        print(mean_squared_error(datasource.df[target], predictions['prediction']))
+
+        import matplotlib.pyplot as plt
+        df = pd.read_csv('tests/data/sunspots.csv')
+        true = df[target].values
+        preds = predictions['prediction'].values
+        plt.plot(true)
+        plt.plot(preds)
+        plt.show()
 
     def test_grouped_timeseries(self):
         pass

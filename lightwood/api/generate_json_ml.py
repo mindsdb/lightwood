@@ -1,13 +1,13 @@
 from typing import Dict
 import numpy as np
-from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition
+from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
 from lightwood.api import dtype
 
 
 trainable_encoders = ('TsRnnEncoder', 'PretrainedLangEncoder', 'CategoricalAutoEncoder')
 
 
-def lookup_encoder(col_dtype: dtype, is_target: bool):
+def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_target: bool):
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
         dtype.float: 'NumericEncoder',
@@ -40,6 +40,13 @@ def lookup_encoder(col_dtype: dtype, is_target: bool):
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
             encoder_dict['config_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
+
+    if tss.is_timeseries:
+        if col_name in tss.order_by + tss.historical_columns:
+            encoder_dict['object'] = 'TsRnnEncoder'
+            encoder_dict['dynamic_args']['original_type'] = f'"{col_dtype}"'
+        if is_target:
+            encoder_dict['object'] = 'TsNumericEncoder'
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
@@ -104,7 +111,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], True)
+    output.encoder = lookup_encoder(type_information.dtypes[target], target, problem_definition.timeseries_settings, True)
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
@@ -112,7 +119,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
             feature = Feature(
                 name=col_name,
                 data_dtype=col_dtype,
-                encoder=lookup_encoder(col_dtype, False),
+                encoder=lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, is_target=False),
                 dependency=[]
             )
             features[col_name] = feature
