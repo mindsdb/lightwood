@@ -17,9 +17,9 @@ class TestTimeseries(unittest.TestCase):
         predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': target,
                                                                               'time_aim': 100,
                                                                               'anomaly_detection': False,
-                                                                              'use_previous_target': True,
                                                                               'timeseries_settings': {
                                                                                   'order_by': ['Month'],
+                                                                                  'use_previous_target': True,
                                                                                   'window': 5
                                                                                 },
                                                                               }),
