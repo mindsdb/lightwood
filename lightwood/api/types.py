@@ -75,9 +75,10 @@ class TimeseriesSettings:
 
             timeseries_settings = TimeseriesSettings(
                 is_timeseries=True,
-                historical_columns=[],
                 order_by=obj['order_by'],
                 window=obj['window'],
+                use_previous_target=obj['use_previous_target'],
+                historical_columns=[],
                 nr_predictions=obj.get('nr_predictions', 1)
 
             )

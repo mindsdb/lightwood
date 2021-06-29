@@ -116,11 +116,15 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
         if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
+            dependency = []
+            if problem_definition.timeseries_settings.is_timeseries and \
+                problem_definition.timeseries_settings.use_previous_target:
+                dependency.append(target)
             feature = Feature(
                 name=col_name,
                 data_dtype=col_dtype,
                 encoder=lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, is_target=False),
-                dependency=[]
+                dependency=dependency
             )
             features[col_name] = feature
 
