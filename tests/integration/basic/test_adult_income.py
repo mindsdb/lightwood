@@ -10,7 +10,7 @@ class TestBasic(unittest.TestCase):
 
         # call: Go with dataframes
         df = FileDS('tests/data/adult.csv').df
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income'}), df)
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'income', 'time_aim': 50}), df)
 
         with open('dynamic_predictor.py', 'w') as fp:
             fp.write(predictor_class_str)

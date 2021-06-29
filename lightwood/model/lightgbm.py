@@ -79,7 +79,7 @@ class LightGBM(BaseModel):
 
             label_data = data[subset_name]['ds'].get_column_original_data(self.target)
 
-            if output_dtype == dtype.categorical:
+            if output_dtype in (dtype.categorical, dtype.binary):
                 if subset_name == 'train':
                     self.ordinal_encoder = OrdinalEncoder()
                     self.label_set = set(label_data)
@@ -95,8 +95,8 @@ class LightGBM(BaseModel):
 
             data[subset_name]['label_data'] = label_data
 
-        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float):
-            log.info(f'Lightgbm mixer not supported for type: {output_dtype}')
+        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary):
+            log.warn(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
             objective = 'regression' if output_dtype in (dtype.integer, dtype.float) else 'multiclass'
             metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'

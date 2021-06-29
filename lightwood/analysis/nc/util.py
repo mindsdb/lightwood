@@ -54,7 +54,7 @@ def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, st
                 return 0.9901, ranges
 
     # categorical
-    elif target_type == dtype.categorical:  # or  #
+    elif target_type in (dtype.binary, dtype.categorical):  # or  #
         # (target_type == dtype.array and  # time-series w/ cat target
         #  dtype.categorical in typing_info['data_type_dist'].keys())) and \
         #   lmd['stats_v2'][target]['typing']['data_subtype'] != dtype.tags:  # no tag support yet

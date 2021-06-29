@@ -99,6 +99,8 @@ class ProblemDefinition:
     nfolds: int
     pct_invalid: float
     seconds_per_model: int
+    seconds_per_encoder: int
+    time_aim: int
     target_weights: List[float]
     positive_domain: bool
     fixed_confidence: Union[int, float, None]
@@ -114,6 +116,8 @@ class ProblemDefinition:
         nfolds = obj.get('nfolds', 10)
         pct_invalid = obj.get('pct_invalid', 1)
         seconds_per_model = obj.get('seconds_per_model', None)
+        seconds_per_encoder = obj.get('seconds_per_encoder', None)
+        time_aim = obj.get('time_aim', None)
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
         fixed_confidence = obj.get('fixed_confidence', None)
@@ -128,6 +132,8 @@ class ProblemDefinition:
             nfolds=nfolds,
             pct_invalid=pct_invalid,
             seconds_per_model=seconds_per_model,
+            seconds_per_encoder=seconds_per_encoder,
+            time_aim=time_aim,
             target_weights=target_weights,
             positive_domain=positive_domain,
             fixed_confidence=fixed_confidence,
@@ -146,7 +152,7 @@ class ProblemDefinition:
 
 @dataclass_json
 @dataclass
-class LightwoodConfig:
+class JsonML:
     features: Dict[str, Feature]
     output: Output
     problem_definition: ProblemDefinition
@@ -159,6 +165,7 @@ class LightwoodConfig:
     imports: object = None
     timeseries_transformer: object = None
     accuracy_functions: List[str] = None
+    phases: Dict[str, object] = None
 
 
 @dataclass_json

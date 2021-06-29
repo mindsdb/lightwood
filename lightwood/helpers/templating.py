@@ -1,12 +1,12 @@
-from lightwood.api.types import LightwoodConfig
+from lightwood.api.types import JsonML
 
 
-def call(entity: dict, lightwood_config: LightwoodConfig) -> str:
+def call(entity: dict, json_ml: JsonML) -> str:
     dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items()]
 
     config_args = []
     for k, v in entity['config_args'].items():
-        val = lightwood_config
+        val = json_ml
         for item in v.split('.'):
             val = val.__getattribute__(item)
         config_args.append(f'{k}={val}')
