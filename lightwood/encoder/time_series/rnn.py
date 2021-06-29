@@ -7,6 +7,7 @@ from lightwood.encoder.base import BaseEncoder
 from lightwood.encoder.datetime import DatetimeEncoder
 from lightwood.helpers.device import get_devices
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 from torch import optim
@@ -15,23 +16,22 @@ from math import gcd
 
 class TimeSeriesEncoder(BaseEncoder):
 
-    def __init__(self, stop_after: int, encoded_vector_size=128, train_iters=100, stop_on_error=0.01, learning_rate=0.01,
-                 is_target=False, ts_n_dims=1, encoder_class=EncoderRNNNumerical, original_type=None):
+    def __init__(self, stop_after: int, is_target=False, original_type: str=None):
         super().__init__(is_target)
         self.device, _ = get_devices()
-        self.encoder_class = encoder_class
-        self._stop_on_error = stop_on_error
-        self._learning_rate = learning_rate
-        self._encoded_vector_size = encoded_vector_size
+        self.encoder_class = EncoderRNNNumerical
+        self._stop_on_error = 0.01
+        self._learning_rate = 0.01
+        self._encoded_vector_size = 128
         self._transformer_hidden_size = None
-        self._epochs = train_iters  # training epochs
+        self._epochs = 100  # training epochs
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self._is_setup = False
         self._max_ts_length = 0
         self._sos = 0.0  # start of sequence for decoding
         self._eos = 0.0  # end of input sequence -- padding value for batches
-        self._n_dims = ts_n_dims
+        self._n_dims = 1
         self._normalizer = None
         self._target_ar_normalizers = {}  # dict of normalizers for each grouped-by column per previous_target column
         self._target_type = None
@@ -115,7 +115,7 @@ class TimeSeriesEncoder(BaseEncoder):
         end = min(end, len(source))
         return source[start:end]
 
-    def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=None, batch_size=256):
+    def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=print, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
@@ -200,8 +200,9 @@ class TimeSeriesEncoder(BaseEncoder):
             average_loss = average_loss / len(priming_data)
             batch_idx += batch_size
 
-            if average_loss < self._stop_on_error:
-                break
+            # @TODO: reactivate
+            #if average_loss < self._stop_on_error:
+            #    break
             if feedback_hoop_function is not None:
                 feedback_hoop_function("epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
                     epoch_n=i + 1,
@@ -276,6 +277,9 @@ class TimeSeriesEncoder(BaseEncoder):
 
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
+
+        if isinstance(column_data, pd.Series):
+            column_data = column_data.values
 
         for i in range(len(column_data)):
             if not isinstance(column_data[i][0], list):

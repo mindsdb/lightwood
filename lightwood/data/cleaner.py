@@ -1,5 +1,4 @@
 import re
-from tests.unit_tests import data
 from typing import Dict, List
 from lightwood.api.dtype import dtype
 from lightwood.api.types import Feature, JsonML, Output

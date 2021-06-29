@@ -35,8 +35,7 @@ class DatetimeEncoder(BaseEncoder):
 
         ret = [self.encode_one(row) for row in data]
 
-        # @TODO: this takes the mean embedding of the order-by window... is it the same in current lightwood?
-        return torch.mean(torch.Tensor(ret), dim=1)
+        return torch.Tensor(ret).squeeze(0)
 
     def encode_one(self, data):
         """
