@@ -37,14 +37,14 @@ def statistical_analysis(data: pd.DataFrame,
     histograms = {}
     # Get histograms for each column
     for col in df.columns:
-        if type_information.dtypes[col] == dtype.categorical:
+        if type_information.dtypes[col] in (dtype.categorical, dtype.binary):
             histograms[col] = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
         if type_information.dtypes[col] in (dtype.integer, dtype.float):
             histograms[col] = get_numeric_histogram(filter_nan(df[col]), type_information.dtypes[col])
 
     # get observed classes, used in analysis
     target_class_distribution = None
-    if type_information.dtypes[target] == dtype.categorical:
+    if type_information.dtypes[target] in (dtype.categorical, dtype.binary):
         target_class_distribution = dict(df[target].value_counts().apply(lambda x: x / len(df[target])))
         train_observed_classes = list(target_class_distribution.keys())
     elif type_information.dtypes[target] == dtype.tags:

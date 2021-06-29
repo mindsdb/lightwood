@@ -11,22 +11,21 @@ from lightwood.model.helpers.default_net import DefaultNet
 
 
 class CategoricalAutoEncoder(BaseEncoder):
-    def __init__(self, is_target=False, max_encoded_length=100):
+    def __init__(self, stop_after: int, is_target=False, max_encoded_length=100):
         super().__init__(is_target)
         self._prepared = False
         self.name = 'Categorical Autoencoder'
         self.net = None
         self.encoder = None
         self.decoder = None
-        self.predict_proba = None # whether to return the belief distribution as well
+        self.predict_proba = None  # whether to return the belief distribution as well
         self.onehot_encoder = OneHotEncoder(is_target=self.is_target)
         self.desired_error = 0.01
         self.use_autoencoder = None
-        if self.is_target:
-            self.max_encoded_length = None
-        else:
-            self.max_encoded_length = max_encoded_length
-        self.max_training_time = 7200
+        self.max_encoded_length = max_encoded_length
+        self.stop_after = stop_after
+        # @TODO stop using instead of ONEHOT !!!@!
+        self.is_nn_encoder = True
 
     def _train_callback(self, error, real_buff, predicted_buff):
         log.info(f'{self.name} reached a loss of {error} while training !')
@@ -75,7 +74,7 @@ class CategoricalAutoEncoder(BaseEncoder):
             best_model, error, training_time = gym.fit(train_data_loader,
                                                        test_data_loader,
                                                        desired_error=self.desired_error,
-                                                       max_time=self.max_training_time,
+                                                       max_time=self.stop_after,
                                                        callback=self._train_callback,
                                                        eval_every_x_epochs=1,
                                                        max_unimproving_models=5)
