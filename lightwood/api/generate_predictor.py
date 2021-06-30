@@ -155,9 +155,6 @@ def generate_predictor(problem_definition: ProblemDefinition = None, data: pd.Da
         type_information = lightwood.data.infer_types(data, problem_definition.pct_invalid)
         statistical_analysis = lightwood.data.statistical_analysis(data, type_information, problem_definition)
         json_ml = lightwood.generate_json_ml(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
-        
-        print(json_ml.to_json())
-        exit()
 
     predictor_code = generate_predictor_code(json_ml)
 
