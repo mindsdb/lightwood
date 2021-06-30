@@ -1,6 +1,6 @@
 from typing import Dict
 import numpy as np
-from lightwood.api.types import LightwoodConfig, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition
+from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition
 from lightwood.api import dtype
 
 
@@ -54,11 +54,11 @@ def lookup_encoder(col_dtype: dtype, is_target: bool):
 def populate_problem_definition(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> ProblemDefinition:
     if problem_definition.seconds_per_model is None:
         problem_definition.seconds_per_model = max(100, statistical_analysis.nr_rows / 20) * np.sum([4 if x in [dtype.rich_text, dtype.short_text, dtype.array, dtype.video, dtype.audio, dtype.image] else 1 for x in type_information.dtypes.values()])
-    
+
     return problem_definition
 
 
-def generate_config(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> LightwoodConfig:
+def generate_json_ml(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> JsonML:
 
     problem_definition = populate_problem_definition(type_information, statistical_analysis, problem_definition)
     target = problem_definition.target
@@ -117,34 +117,6 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
             )
             features[col_name] = feature
 
-    # @TODO: Only import the minimal amount of things we need
-    imports = [
-        'from lightwood.model import LightGBM',
-        'from lightwood.model import Neural',
-        'from lightwood.ensemble import BestOf',
-        'from lightwood.data import cleaner',
-        'from lightwood.data import transform_timeseries',
-        'from lightwood.data import splitter',
-        'from lightwood.analysis import model_analyzer, explain',
-        'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score',
-        'import pandas as pd',
-        'from mindsdb_datasources import DataSource',
-        'from lightwood.helpers.seed import seed',
-        'from lightwood.helpers.log import log',
-        'import lightwood',
-        'from lightwood.api import *',
-        'from lightwood.model import BaseModel',
-        'from lightwood.encoder import BaseEncoder',
-        'from lightwood.ensemble import BaseEnsemble',
-        'from typing import Dict, List',
-        'from lightwood.helpers.parallelism import mut_method_call'
-    ]
-
-    for feature in [output, *features.values()]:
-        encoder_import = feature.encoder['object']
-        imports.append(f'from lightwood.encoder import {encoder_import}')
-
-    imports = list(set(imports))
     timeseries_transformer = None
     if problem_definition.timeseries_settings.is_timeseries:
         timeseries_transformer = {
@@ -180,7 +152,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         problem_definition.seconds_per_encoder = problem_definition.time_aim * (encoder_time_budget_pct / nr_features)
         problem_definition.seconds_per_model = problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models)
 
-    return LightwoodConfig(
+    return JsonML(
         cleaner={
             'object': 'cleaner',
             'config_args': {
@@ -239,7 +211,7 @@ def generate_config(type_information: TypeInformation, statistical_analysis: Sta
         },
         features=features,
         output=output,
-        imports=imports,
+        imports=[],
         problem_definition=problem_definition,
         statistical_analysis=statistical_analysis,
         identifiers=type_information.identifiers,
