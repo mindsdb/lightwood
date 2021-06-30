@@ -63,6 +63,7 @@ class TimeseriesSettings:
     use_previous_target: bool = False
     nr_predictions: int = None
     historical_columns: List[str] = None
+    target_type: str = ''  # @TODO: is the current setter (outside of initialization) a sane option?
 
     @staticmethod
     def from_dict(obj: Dict):

@@ -4,7 +4,7 @@ from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Fe
 from lightwood.api import dtype
 
 
-trainable_encoders = ('TsRnnEncoder', 'PretrainedLangEncoder', 'CategoricalAutoEncoder')
+trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TsRnnEncoder', 'TimeSeriesPlainEncoder')
 
 
 def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_target: bool):
@@ -47,6 +47,9 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
             encoder_dict['dynamic_args']['original_type'] = f'"{col_dtype}"'
         if is_target:
             encoder_dict['object'] = 'TsNumericEncoder'
+        if '__mdb_ts_previous' in col_name:
+            encoder_dict['object'] = 'TimeSeriesPlainEncoder'
+            encoder_dict['dynamic_args']['original_type'] = f'"{tss.target_type}"'
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
