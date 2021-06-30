@@ -9,6 +9,7 @@
  *******************************************************
 """
 
+import importlib
 from collections import Counter, defaultdict
 import string
 import json
@@ -19,6 +20,7 @@ import langdetect
 import nltk
 from nltk.corpus import stopwords
 from lightwood.api.dtype import dtype
+from lightwood.api.predictor import PredictorInterface
 
 
 langdetect.DetectorFactory.seed = 0
@@ -320,3 +322,12 @@ def decontracted(phrase):
 
 def tokenize_text(text):
     return [t.lower() for t in nltk.word_tokenize(decontracted(text)) if contains_alnum(t)]
+
+
+def predictor_from_code(code: str) -> PredictorInterface:
+    # TODO: make this safe from code injection
+    name = 'predictor_code_{}.py'.format(hash(code))
+    with open(name, 'w') as fp:
+        predictor_cls = importlib.import_module(name.rstrip('.py')).Predictor
+        predictor_obj = predictor_cls()
+    return predictor_obj
