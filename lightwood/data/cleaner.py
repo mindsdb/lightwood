@@ -2,7 +2,7 @@ import re
 from tests.unit_tests import data
 from typing import Dict, List
 from lightwood.api.dtype import dtype
-from lightwood.api.types import Feature, LightwoodConfig, Output
+from lightwood.api.types import Feature, JsonML, Output
 from lightwood.helpers.log import log
 from dateutil.parser import parse as parse_dt
 import datetime

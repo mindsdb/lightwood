@@ -150,7 +150,7 @@ class ProblemDefinition:
 
 @dataclass_json
 @dataclass
-class LightwoodConfig:
+class JsonML:
     features: Dict[str, Feature]
     output: Output
     problem_definition: ProblemDefinition
@@ -163,6 +163,7 @@ class LightwoodConfig:
     imports: object = None
     timeseries_transformer: object = None
     accuracy_functions: List[str] = None
+    phases: Dict[str, object] = None
 
 
 @dataclass_json
