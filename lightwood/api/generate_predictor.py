@@ -1,5 +1,7 @@
 from lightwood.helpers.templating import call, inline_dict, align
+from lightwood.api.generate_json_ml import lookup_encoder
 from lightwood.api.types import ProblemDefinition
+from lightwood.api import dtype
 import lightwood
 from lightwood.api import JsonML
 import pandas as pd
@@ -33,6 +35,9 @@ def add_implicit_values(json_ml: JsonML) -> str:
         encoder_import = feature.encoder['object']
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
+    if json_ml.problem_definition.timeseries_settings.use_previous_target:
+        imports.append(f'from lightwood.encoder import TimeSeriesPlainEncoder')
+
     json_ml.imports.extend(imports)
 
     return json_ml
@@ -53,6 +58,17 @@ def generate_predictor_code(json_ml: JsonML) -> str:
         encoder_dict[col_name] = call(feature.encoder, json_ml)
         dependency_dict[col_name] = feature.dependency
         dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
+
+    if json_ml.problem_definition.timeseries_settings.use_previous_target:
+        col_name = f'__mdb_ts_previous_{json_ml.output.name}'
+        json_ml.problem_definition.timeseries_settings.target_type = json_ml.output.data_dtype
+        encoder_dict[col_name] = call(lookup_encoder(dtype.array,
+                                                     col_name,
+                                                     json_ml.problem_definition.timeseries_settings,
+                                                     is_target=False),
+                                      json_ml)
+        dependency_dict[col_name] = []
+        dtype_dict[col_name] = f"""'{dtype.array}'"""
 
     input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ml.features.values()])
 

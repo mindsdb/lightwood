@@ -14,11 +14,15 @@ class MinMaxNormalizer:
         self.abs_mean = None
 
     def prepare(self, x):
-        X = np.array([j for i in x for j in i]).reshape(-1, 1) if isinstance(x, list) else x
-        X[X == None] = 0
-        self.abs_mean = np.mean(np.abs(X))
-        self.scaler.fit(X)
-        self.single_scaler.fit(X[:, -1:])  # fit using non-windowed column data
+        if isinstance(x, list):
+            x = np.array([j for i in x for j in i]).reshape(-1, 1)
+        elif isinstance(x[0], list):
+            x = np.vstack(x)
+
+        x[x == None] = 0
+        self.abs_mean = np.mean(np.abs(x))
+        self.scaler.fit(x)
+        self.single_scaler.fit(x[:, -1:])  # fit using non-windowed column data
 
     def encode(self, y):
         if not isinstance(y, np.ndarray) and not isinstance(y[0], list):
