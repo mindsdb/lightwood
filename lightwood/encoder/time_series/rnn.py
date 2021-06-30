@@ -54,7 +54,7 @@ class TimeSeriesEncoder(BaseEncoder):
         if additional_targets:
             for t in additional_targets:
                 self._target_ar_normalizers[t['name']] = t['normalizers']
-                self._group_combinations = t['group_combinations']
+                self._group_combinations = None # t['group_combinations']  # @TODO: restore this!
 
                 # categorical normalizers
                 if t['original_type'] in (dtype.categorical, dtype.binary):
@@ -115,11 +115,11 @@ class TimeSeriesEncoder(BaseEncoder):
         end = min(end, len(source))
         return source[start:end]
 
-    def prepare(self, priming_data, previous_target_data=None, feedback_hoop_function=print, batch_size=256):
+    def prepare(self, priming_data, dependency_data=None, feedback_hoop_function=print, batch_size=256):
         """
         The usual, run this on the initial training data for the encoder
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
-        :param previous_target_data: tensor with encoded previous target values for autoregressive tasks
+        :param dependency_data: tensor with encoded previous target values for autoregressive tasks
         :param feedback_hoop_function: [if you want to get feedback on the training process]
         :param batch_size
         :return:
@@ -127,7 +127,7 @@ class TimeSeriesEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
         else:
-            self.setup_nn(previous_target_data)
+            self.setup_nn(dependency_data)
 
         # Convert to array and determine max length
         priming_data, lengths_data = self._prepare_raw_data(priming_data)
@@ -140,9 +140,9 @@ class TimeSeriesEncoder(BaseEncoder):
             priming_data = torch.stack([d for d in priming_data]).unsqueeze(-1).to(self.device)
 
         # merge all normalized data into a training batch
-        if previous_target_data is not None and len(previous_target_data) > 0:
+        if dependency_data is not None and len(dependency_data) > 0:
             normalized_tensors = []
-            for target_dict in previous_target_data:
+            for target_dict in dependency_data:
                 if target_dict['original_type'] in (dtype.integer, dtype.float):
                     data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
                     for group_name, normalizer in target_dict['normalizers'].items():
@@ -266,7 +266,7 @@ class TimeSeriesEncoder(BaseEncoder):
         else:
             return encoder_hidden
 
-    def encode(self, column_data, previous_target_data=None, get_next_count=None):
+    def encode(self, column_data, dependency_data=None, get_next_count=None):
         """
         Encode a list of time series data
         :param column_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...] to encode
@@ -287,8 +287,8 @@ class TimeSeriesEncoder(BaseEncoder):
 
         # include autoregressive target data
         ptd = []
-        if previous_target_data is not None and len(previous_target_data) > 0:
-            for i, prev_col_data in enumerate(previous_target_data):
+        if dependency_data is not None and len(dependency_data) > 0:
+            for i, prev_col_data in enumerate(dependency_data):
                 # normalize numerical target per group-by
                 if self._target_type in (dtype.integer, dtype.float):
                     tensor = torch.zeros((len(prev_col_data['data']), len(prev_col_data['data'][0]), 1)).to(self.device)
@@ -322,7 +322,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
         for i, val in enumerate(column_data):
             if get_next_count is None:
-                if previous_target_data is not None and len(previous_target_data) > 0:
+                if dependency_data is not None and len(dependency_data) > 0:
                     encoded = self._encode_one(val, previous=[values[i] for values in ptd])
                 else:
                     encoded = self._encode_one(val)
