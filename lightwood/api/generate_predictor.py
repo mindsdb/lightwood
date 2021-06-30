@@ -105,7 +105,20 @@ parallel_preped_encoders = mut_method_call({{col_name: [encoder, pd.concat(folds
 seq_preped_encoders = {{}}
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
-        encoder.prepare(pd.concat(folds[0:nfolds-1])[col_name])
+        priming_data = pd.concat(folds[0:nfolds-1])
+        kwargs = {{}}
+        if self.dependencies[col_name]:
+            kwargs['dependency_data'] = []
+            for col in self.dependencies[col_name]:
+                # @TODO: should probably move this into a code generator method
+                kwargs['dependency_data'].append({{
+                    'name': col,
+                    'normalizers': {{}},            # @TODO: reinstate
+                    'group_combinations': {{}},     # @TODO: reinstate
+                    'original_type': self.dtype_dict[col],
+                    'data': priming_data[col]
+                }})
+        encoder.prepare(priming_data[col_name], **kwargs)
 
 for col_name, encoder in parallel_preped_encoders.items():
     self.encoders[col_name] = encoder
