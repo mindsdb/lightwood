@@ -18,4 +18,5 @@ pillow < 7
 mindsdb_datasources >= 1.1.0
 dataclasses-json >= 0.5.0
 langdetect >= 1.0.0
-dataclasses_json >= 0.5.4 
+dataclasses_json >= 0.5.4
+autopep8 >= 1.5.7
