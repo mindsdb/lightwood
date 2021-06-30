@@ -16,7 +16,7 @@ class PredictorInterface():
     def save(self, file_path: str):
         with open(file_path, 'w') as fp:
             pickle.dump(self, fp)
-    
+
     @staticmethod
     def load(file_path: str):
         with open(file_path, 'r') as fp:
