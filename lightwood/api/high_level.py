@@ -3,7 +3,7 @@ from lightwood.api.types import DataAnalysis, ProblemDefinition
 import importlib
 from lightwood.api.generate_predictor import generate_predictor
 import lightwood
-from lightwood import PredictorInterface
+from lightwood.api.predictor import PredictorInterface
 
 
 def make_predictor(datasource: DataSource, problem_definition_dict: dict) -> PredictorInterface:
