@@ -10,6 +10,7 @@ class BaseEncoder:
         self._prepared = False
         self.uses_folds = False
         self.is_nn_encoder = False
+        self.dependencies = []
 
     # Not all encoders need to be prepared
     def prepare(self, priming_data):

@@ -122,7 +122,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
             dependency = []
             if problem_definition.timeseries_settings.is_timeseries and \
                 problem_definition.timeseries_settings.use_previous_target:
-                dependency.append(target)
+                dependency.append(f'__mdb_ts_previous_{target}')
             feature = Feature(
                 name=col_name,
                 data_dtype=col_dtype,
