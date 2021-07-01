@@ -145,16 +145,10 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         problem_definition.time_aim = 800 + statistical_analysis.nr_rows
 
     if problem_definition.time_aim is not None:
-<<<<<<< HEAD
-        # Should only be featurs wi2+np.log(nr_features)/5th trainable encoders
-        nr_trainable_encoders = len([x for x in features.values() if x.encoder['object'] in trainable_encoders])
-        nr_models = len(output.models)
-        encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders) / 5)
-=======
         nr_trainable_encoders = len([x for x in features.values() if x.encoder['object'] in trainable_encoders])
         nr_models = len(output.models)
         encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5)
->>>>>>> 7b8f392406741d3360c0f6572ce2d16cbacc5abe
+
         if nr_trainable_encoders == 0:
             problem_definition.seconds_per_encoder = 0
         else:
