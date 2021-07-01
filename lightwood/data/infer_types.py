@@ -16,6 +16,7 @@ from lightwood.helpers.text import get_identifier_description_mp, cast_string_to
 from lightwood.helpers.log import log
 import re
 from lightwood.helpers.numeric import can_be_nan_numeric
+from lightwood.helpers.seed import seed
 
 
 # @TODO: hardcode for distance, time, subunits of currency (e.g. cents) and other common units
@@ -339,6 +340,7 @@ def sample_data(df: pd.DataFrame):
 
 
 def infer_types(data: pd.DataFrame, pct_invalid: float) -> TypeInformation:
+    seed()
     type_information = TypeInformation()
     sample_df = sample_data(data)
     sample_size = len(sample_df)
