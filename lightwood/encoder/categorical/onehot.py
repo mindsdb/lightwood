@@ -22,6 +22,7 @@ class OneHotEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
+        priming_data = [x if x is not None else UNCOMMON_WORD for x in priming_data]
         self._lang = Lang('default')
         self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
         self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
