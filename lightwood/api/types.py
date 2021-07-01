@@ -68,9 +68,10 @@ class TimeseriesSettings:
     def from_dict(obj: Dict):
         if len(obj) > 0:
             for mandatory_setting in ['order_by', 'window']:
-                err = f'Missing mandatory timeseries setting: {mandatory_setting}'
-                log.error(err)
-                raise Exception(err)
+                if mandatory_setting not in obj:
+                    err = f'Missing mandatory timeseries setting: {mandatory_setting}'
+                    log.error(err)
+                    raise Exception(err)
 
             timeseries_settings = TimeseriesSettings(
                 is_timeseries=True,
