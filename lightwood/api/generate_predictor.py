@@ -17,7 +17,6 @@ def add_implicit_values(json_ml: JsonML) -> str:
         'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score',
         'import pandas as pd',
-        'from mindsdb_datasources import DataSource',
         'from lightwood.helpers.seed import seed',
         'from lightwood.helpers.log import log',
         'import lightwood',

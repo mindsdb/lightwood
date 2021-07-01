@@ -6,7 +6,6 @@ from lightwood.api.types import Feature, JsonML, Output
 from lightwood.helpers.log import log
 from dateutil.parser import parse as parse_dt
 import datetime
-from mindsdb_datasources import DataSource
 from lightwood.helpers.text import clean_float
 import pandas as pd
 
