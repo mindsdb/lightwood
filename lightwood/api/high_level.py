@@ -5,20 +5,19 @@ from lightwood.api.generate_predictor import generate_predictor
 import lightwood
 from lightwood.api.predictor import PredictorInterface
 import os
+import tempfile
+
 
 def make_predictor(df: pd.DataFrame, problem_definition_dict: dict) -> PredictorInterface:
     predictor_class_str = generate_predictor(ProblemDefinition.from_dict(problem_definition_dict), df)
 
-    try:
-        os.remove('dynamic_predictor.py')
-    except Exception:
-        pass
-
-    with open('dynamic_predictor.py', 'w') as fp:
-        fp.write(predictor_class_str)
-
-    predictor_class = importlib.import_module('dynamic_predictor').Predictor
-    predictor = predictor_class()
+    with tempfile.NamedTemporaryFile(suffix='.py') as temp:
+        temp.write(predictor_class_str.encode('utf-8'))
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('a_temp_module', temp.name)
+        temp_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(temp_module)
+        predictor = temp_module.Predictor()
 
     return predictor
 
