@@ -147,7 +147,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
     if problem_definition.time_aim is not None:
         nr_trainable_encoders = len([x for x in features.values() if x.encoder['object'] in trainable_encoders])
         nr_models = len(output.models)
-        encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders) / 5)
+        encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5)
         if nr_trainable_encoders == 0:
             problem_definition.seconds_per_encoder = 0
         else:
