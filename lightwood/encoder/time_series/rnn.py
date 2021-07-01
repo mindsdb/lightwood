@@ -263,9 +263,12 @@ class TimeSeriesEncoder(BaseEncoder):
                 encoder_hidden = encoder_hidden if initial_hidden is None else initial_hidden
 
                 next_tensor = None
-                for tensor_i in range(steps):
-                    next_tensor, encoder_hidden = self._encoder.forward(data_tensor[:, tensor_i, :].unsqueeze(dim=0),
-                                                                        encoder_hidden)
+                try:
+                    for tensor_i in range(steps):
+                        next_tensor, encoder_hidden = self._encoder.forward(data_tensor[:, tensor_i, :].unsqueeze(dim=0),
+                                                                            encoder_hidden)
+                except:
+                    print('hey')
             else:
                 next_tensor = None
                 len_batch = self._get_batch(lengths_data, 0, len(data))
