@@ -1,6 +1,7 @@
-from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, get_group_matches
+from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer, get_group_matches
 from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerical, DecoderRNNNumerical
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, get_chunk, len_to_mask
+from lightwood.encoder.time_series.plain import TimeSeriesPlainEncoder
 from lightwood.api import dtype
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoder.base import BaseEncoder
@@ -39,8 +40,10 @@ class TimeSeriesEncoder(BaseEncoder):
         self.original_type = original_type
         self.stop_after = stop_after
         self.is_nn_encoder = True
+        self.plain_encoders = {}  # @TODO: These will add the plain TS encodings to the output, thus merging all TS
+        # logic into a single encoder, though NOTE the TsNNMixer would need the index range of these values to operate
 
-    def setup_nn(self, additional_targets=None):
+    def setup_nn(self, dependencies=None):
         """This method must be executed after initializing, else types are unassigned"""
         if self.original_type in (dtype.datetime, dtype.date):
             self._normalizer = DatetimeEncoder(sinusoidal=True)
@@ -51,20 +54,33 @@ class TimeSeriesEncoder(BaseEncoder):
         total_dims = self._n_dims
         dec_hsize = self._encoded_vector_size
 
-        if additional_targets:
-            for t in additional_targets:
-                self._target_ar_normalizers[t['name']] = t['normalizers']
-                self._group_combinations = None # t['group_combinations']  # @TODO: restore this!
+        if dependencies:
+            for dep in dependencies:
+                self.dependencies.append(dep['name'])
+                self._target_ar_normalizers[dep['name']] = {}
+                if dep['normalizers']:
+                    self._target_ar_normalizers[dep['name']] = dep['normalizers']
+                elif dep['original_type'] in (dtype.categorical, dtype.binary):
+                    self._target_ar_normalizers[dep['name']]['__default'] = CatNormalizer()
+                    self._target_ar_normalizers[dep['name']]['__default'] .prepare(dep['data'])
+                else:
+                    self._target_ar_normalizers[dep['name']]['__default']  = MinMaxNormalizer()
+                    self._target_ar_normalizers[dep['name']]['__default'].prepare(dep['data'])
+
+                self._group_combinations = [] # t['group_combinations']  # @TODO: restore this!
 
                 # categorical normalizers
-                if t['original_type'] in (dtype.categorical, dtype.binary):
+                if dep['original_type'] in (dtype.categorical, dtype.binary):
                     self._target_type = dtype.categorical
-                    total_dims += len(t['normalizers']['__default'].scaler.categories_[0])
+                    total_dims += len(self._target_ar_normalizers[dep['name']]['__default'].scaler.categories_[0])
 
                 # numerical normalizers
-                else:
-                    self._target_type in (dtype.integer, dtype.float)
+                elif dep['original_type'] in  (dtype.integer, dtype.float):
+                    self._target_type = dep['original_type']
                     total_dims += 1
+
+                else:
+                    raise(Exception(f"Dependency data type {dep['original_type']} not supported!"))
 
         if self.encoder_class == EncoderRNNNumerical:
             self._enc_criterion = nn.MSELoss()
@@ -145,7 +161,7 @@ class TimeSeriesEncoder(BaseEncoder):
             for target_dict in dependency_data:
                 if target_dict['original_type'] in (dtype.integer, dtype.float):
                     data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
-                    for group_name, normalizer in target_dict['normalizers'].items():
+                    for group_name, normalizer in self._target_ar_normalizers[target_dict['name']].items():
                         idxs, subset = get_group_matches(target_dict, normalizer.combination, normalizer.keys)
                         normalized = normalizer.encode(subset).unsqueeze(-1)
                         data[idxs, :, :] = normalized
@@ -200,9 +216,8 @@ class TimeSeriesEncoder(BaseEncoder):
             average_loss = average_loss / len(priming_data)
             batch_idx += batch_size
 
-            # @TODO: reactivate
-            #if average_loss < self._stop_on_error:
-            #    break
+            if average_loss < self._stop_on_error:
+               break
             if feedback_hoop_function is not None:
                 feedback_hoop_function("epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
                     epoch_n=i + 1,
@@ -288,11 +303,12 @@ class TimeSeriesEncoder(BaseEncoder):
         # include autoregressive target data
         ptd = []
         if dependency_data is not None and len(dependency_data) > 0:
-            for i, prev_col_data in enumerate(dependency_data):
+            for dep, data in dependency_data.items():
                 # normalize numerical target per group-by
                 if self._target_type in (dtype.integer, dtype.float):
-                    tensor = torch.zeros((len(prev_col_data['data']), len(prev_col_data['data'][0]), 1)).to(self.device)
-                    all_idxs = set(range(len(prev_col_data['data'])))
+                    tensor = torch.zeros((len(data), len(data[0]), 1)).to(self.device)
+                    all_idxs = set(range(len(data)))
+                    # @ TODO: restore groups
                     for combination in [c for c in self._group_combinations if c != '__default']:
                         normalizer = self._target_ar_normalizers[prev_col_data['name']].get(frozenset(combination), None)
                         if normalizer is None:
@@ -304,8 +320,8 @@ class TimeSeriesEncoder(BaseEncoder):
 
                     # encode all remaining rows (not belonging to any grouped combination) with default normalizer
                     if all_idxs:
-                        default_norm = self._target_ar_normalizers[prev_col_data['name']]['__default']
-                        subset = [prev_col_data['data'][idx] for idx in all_idxs]
+                        default_norm = self._target_ar_normalizers[dep]['__default']
+                        subset = [data[idx] for idx in all_idxs]
                         tensor[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
                         tensor[torch.isnan(tensor)] = 0.0
 
@@ -326,6 +342,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     encoded = self._encode_one(val, previous=[values[i] for values in ptd])
                 else:
                     encoded = self._encode_one(val)
+
             else:
                 if get_next_count <= 0:
                     raise Exception('get_next_count must be greater than 0')

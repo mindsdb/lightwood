@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import pandas as pd
 from itertools import product
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
 
@@ -81,6 +82,8 @@ def get_group_matches(data, combination, keys):
     """
     if not combination:
         idxs = range(len(data['data']))
+        if isinstance(data['data'], pd.Series):
+            data['data'] = np.vstack(data['data'])
         return [idxs, np.array(data['data'])[idxs, :]]  # return all data
     else:
         all_sets = []

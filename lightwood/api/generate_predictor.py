@@ -62,13 +62,13 @@ def generate_predictor_code(json_ml: JsonML) -> str:
     if json_ml.problem_definition.timeseries_settings.use_previous_target:
         col_name = f'__mdb_ts_previous_{json_ml.output.name}'
         json_ml.problem_definition.timeseries_settings.target_type = json_ml.output.data_dtype
-        encoder_dict[col_name] = call(lookup_encoder(dtype.array,
+        encoder_dict[col_name] = call(lookup_encoder(json_ml.output.data_dtype,
                                                      col_name,
                                                      json_ml.problem_definition.timeseries_settings,
                                                      is_target=False),
                                       json_ml)
         dependency_dict[col_name] = []
-        dtype_dict[col_name] = f"""'{dtype.array}'"""
+        dtype_dict[col_name] = f"""'{json_ml.output.data_dtype}'"""
 
     input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ml.features.values()])
 
