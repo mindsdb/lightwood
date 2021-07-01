@@ -54,7 +54,11 @@ class EncodedDs(Dataset):
         return self.data_frame[column_name]
 
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
-        return self.encoders[column_name].encode(self.data_frame[column_name])
+        kwargs = {}
+        if 'dependency_data' in inspect.signature(self.encoders[column_name].encode).parameters:
+            kwargs['dependency_data'] = {dep: self.data_frame[dep].values
+                                         for dep in self.encoders[column_name].dependencies}
+        return self.encoders[column_name].encode(self.data_frame[column_name], **kwargs)
 
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
