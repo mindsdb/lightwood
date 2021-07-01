@@ -25,7 +25,7 @@ def statistical_analysis(data: pd.DataFrame,
                          type_information: TypeInformation,
                          problem_definition: ProblemDefinition) -> StatisticalAnalysis:
     df = data
-
+    
     nr_rows = len(df)
     target = problem_definition.target
     # get train std, used in analysis

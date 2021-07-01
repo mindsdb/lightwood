@@ -49,7 +49,10 @@ class EncodedDs(Dataset):
         return self.data_frame[column_name]
 
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
-        return self.encoders[column_name].encode(self.data_frame[column_name])
+        encoded_data = self.encoders[column_name].encode(self.data_frame[column_name])
+        if not isinstance(encoded_data, torch.Tensor):
+            raise Exception(f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor !')
+        return encoded_data
 
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
