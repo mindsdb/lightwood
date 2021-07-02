@@ -113,8 +113,8 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
         raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size. If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` advanced argument to `True`, but this might lead to subpar predictions.')
 
     df_gb_map = None
-    if len(df_arr) > 1 and (transaction.lmd['quick_learn'] or transaction.lmd['quick_predict']):
-        df_gb_list = list(combined_df.groupby(transaction.lmd['split_models_on']))
+    if len(df_arr) > 1:  # @TODO: and (transaction.lmd['quick_learn'] or transaction.lmd['quick_predict']):
+        df_gb_list = list(combined_df.groupby(tss.group_by))
         df_gb_map = {}
         for gb, df in df_gb_list:
             df_gb_map['_' + '_'.join(gb)] = df

@@ -1,10 +1,13 @@
-from typing import Dict
 import numpy as np
-from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
+from typing import Dict
+
 from lightwood.api import dtype
+from lightwood.encoder import __ts_encoders__
+from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
 
 
 trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder')
+ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder')
 
 
 def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_target: bool):
@@ -46,6 +49,7 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
             encoder_dict['object'] = 'TimeSeriesEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{col_dtype}"'
             encoder_dict['dynamic_args']['target'] = "self.target"
+            encoder_dict['dynamic_args']['grouped_by'] = f"{tss.group_by}"
         if is_target:
             encoder_dict['object'] = 'TsNumericEncoder'
         if '__mdb_ts_previous' in col_name:
@@ -121,13 +125,19 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
     for col_name, col_dtype in type_information.dtypes.items():
         if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
             dependency = []
-            if problem_definition.timeseries_settings.is_timeseries and \
-                problem_definition.timeseries_settings.use_previous_target:
-                dependency.append(f'__mdb_ts_previous_{target}')
+            encoder = lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, is_target=False)
+
+            if problem_definition.timeseries_settings.is_timeseries and encoder['object'] in ts_encoders:
+                for group in problem_definition.timeseries_settings.group_by:
+                    dependency.append(group)
+
+                if problem_definition.timeseries_settings.use_previous_target:
+                    dependency.append(f'__mdb_ts_previous_{target}')
+
             feature = Feature(
                 name=col_name,
                 data_dtype=col_dtype,
-                encoder=lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, is_target=False),
+                encoder=encoder,
                 dependency=dependency
             )
             features[col_name] = feature

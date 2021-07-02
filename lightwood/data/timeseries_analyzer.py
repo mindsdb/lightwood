@@ -7,21 +7,14 @@ from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNo
 
 
 def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str) -> (Dict, Dict):
-    tss = timeseries_settings
-    target_normalizers = {}
-    group_combinations = {'__default': data.index.tolist()}
+    info = {
+        'original_type': dtype_dict[target],
+        'data': data[target],
+        'group_info': {gcol: data[gcol].tolist() for gcol in timeseries_settings.group_by}  # group col values
+    }
 
-    # instance and train target normalizers
-    if dtype_dict[target] in (dtype.categorical, dtype.binary):
-        target_normalizers['__default'] = CatNormalizer()
-    else:
-        target_normalizers['__default'] = MinMaxNormalizer()
+    # @TODO: maybe normalizers should fit using only the training folds??
+    new_data = generate_target_group_normalizers(info) if timeseries_settings.group_by else {}
 
-    target_normalizers['__default'].prepare(data[target].values)
-
-    # get groups (if any) from training data
-    if tss.group_by:
-        get_group_matches(data[target].values, tss.group_by, )
-
-    return {'target_normalizers': target_normalizers,
-            'group_combinations': group_combinations}
+    return {'target_normalizers': new_data['target_normalizers'],
+            'group_combinations': new_data['group_combinations']}
