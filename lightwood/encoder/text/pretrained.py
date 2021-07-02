@@ -328,7 +328,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
                 encoded_representation.append(output.detach())
 
-        return torch.stack(encoded_representation).squeeze(1)
+        return torch.stack(encoded_representation).squeeze(1).to('cpu')
 
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception("Decoder not implemented.")

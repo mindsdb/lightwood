@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 from lightwood.data.cleaner import _clean_float_or_none
 from lightwood.helpers.numeric import filter_nan
-
+from lightwood.helpers.seed import seed
+from lightwood.data.cleaner import cleaner
 
 def get_numeric_histogram(data, data_dtype):
     data = [_clean_float_or_none(x) for x in data]
@@ -24,8 +25,9 @@ def get_numeric_histogram(data, data_dtype):
 def statistical_analysis(data: pd.DataFrame,
                          type_information: TypeInformation,
                          problem_definition: ProblemDefinition) -> StatisticalAnalysis:
-    df = data
-
+    seed()
+    df = cleaner(data, type_information.dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, type_information.identifiers, problem_definition.target, 'train')
+    
     nr_rows = len(df)
     target = problem_definition.target
     # get train std, used in analysis

@@ -229,7 +229,6 @@
         }
     },
     "imports": [
-        "from mindsdb_datasources import DataSource",
         "from lightwood.encoder import CategoricalAutoEncoder",
         "from lightwood.helpers.log import log",
         "from lightwood.encoder import NumericEncoder",

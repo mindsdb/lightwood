@@ -19,7 +19,6 @@ def add_implicit_values(json_ml: JsonML) -> str:
         'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score',
         'import pandas as pd',
-        'from mindsdb_datasources import DataSource',
         'from lightwood.helpers.seed import seed',
         'from lightwood.helpers.log import log',
         'import lightwood',
@@ -80,6 +79,7 @@ data = {call(json_ml.timeseries_transformer, json_ml)}
 """
 
     learn_body = f"""
+self.mode = 'train'
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
 # Which column depends on which
@@ -142,6 +142,7 @@ self.model_analysis, self.runtime_analyzer = {call(json_ml.analyzer, json_ml)}
     learn_body = align(learn_body, 2)
 
     predict_body = f"""
+self.mode = 'predict'
 log.info('Cleaning the data')
 data = {call(json_ml.cleaner, json_ml)}
 
@@ -164,10 +165,12 @@ class Predictor(PredictorInterface):
     models: List[BaseModel]
     encoders: Dict[str, BaseEncoder]
     ensemble: BaseEnsemble
+    mode: str
 
     def __init__(self):
         seed()
         self.target = '{json_ml.output.name}'
+        self.mode = 'innactive'
 
     def learn(self, data: pd.DataFrame) -> None:
 {learn_body}
@@ -186,7 +189,6 @@ def generate_predictor(problem_definition: ProblemDefinition = None, data: pd.Da
         json_ml = lightwood.generate_json_ml(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
     predictor_code = generate_predictor_code(json_ml)
-
     predictor_code = autopep8.fix_code(predictor_code)  # Note: ~3s overhead, might be more depending on source complexity, should try a few more examples and make a decision
 
     return predictor_code
