@@ -8,6 +8,7 @@ import time
 from torch import nn
 import torch
 import numpy as np
+from copy import deepcopy
 from torch.utils.data import DataLoader
 from torch.cuda.amp import GradScaler
 from lightwood.api.types import TimeseriesSettings
@@ -101,22 +102,32 @@ class Neural(BaseModel):
         test_dl = DataLoader(test_ds, batch_size=200, shuffle=True)
 
         running_errors: List[float] = []
+        best_model = None
+        best_test_error = pow(2, 32)
         for epoch in range(int(1e10)):
             error = self._run_epoch(train_dl, criterion, optimizer, scaler)
             test_error = self._error(test_dl, criterion)
             log.info(f'Training error of {error} | Testing error of | During iteration {epoch}')
 
+            if best_test_error > test_error:
+                best_test_error = test_error
+                best_model = deepcopy(self.model)
+
             if np.isnan(error):
+                self.model = best_model
                 break
 
             running_errors.append(test_error)
             if time.time() - started > self.stop_after:
+                self.model = best_model
                 break
 
-            if len(running_errors) > 10 and np.mean(running_errors[-5:]) < test_error:
+            if len(running_errors) > 12 and np.mean(running_errors[-8:]) < test_error:
+                self.model = best_model
                 break
 
             if test_error < 0.00001:
+                self.model = best_model
                 break
         
         # Do a single training run on the test data as well
