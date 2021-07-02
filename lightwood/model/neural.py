@@ -103,16 +103,20 @@ class Neural(BaseModel):
         running_errors: List[float] = []
         for epoch in range(int(1e10)):
             error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            log.info(f'Training error of {error} during iteration {epoch}')
+            test_error = self._error(test_dl, criterion)
+            log.info(f'Training error of {error} | Testing error of | During iteration {epoch}')
 
-            running_errors.append(self._error(test_dl, criterion))
+            if np.isnan(error):
+                break
+
+            running_errors.append(test_error)
             if time.time() - started > self.stop_after:
                 break
 
-            if len(running_errors) > 10 and np.mean(running_errors[-5:]) < running_errors[-1]:
+            if len(running_errors) > 10 and np.mean(running_errors[-5:]) < test_error:
                 break
 
-            if running_errors[-1] < 0.00001:
+            if test_error < 0.00001:
                 break
         
         # Do a single training run on the test data as well
