@@ -92,8 +92,8 @@ class Neural(BaseModel):
         test_ds_arr = ds_arr[-1:]
 
         self.model = ResidualNet(
-            input_size=len(train_ds[0][0]),
-            output_size=len(train_ds[0][1])
+            input_size=len(ds_arr[0][0][0]),
+            output_size=len(ds_arr[0][0][1])
         )
         
         criterion = self._select_criterion()
@@ -109,14 +109,14 @@ class Neural(BaseModel):
         # @TODO (Maybe) try adding wramup
         # Progressively decrease the learning rate
         total_epochs = 0
-        for lr in [0.1, 0.01, 0.001]:
+        for lr in [0.1, 0.01, 0.0005]:
             running_errors: List[float] = []
             optimizer = self._select_optimizer(lr)
-            for epoch in range(int(1e10)):
+            for _ in range(int(1e10)):
                 total_epochs += 1
                 error = self._run_epoch(train_dl, criterion, optimizer, scaler)
                 test_error = self._error(test_dl, criterion)
-                log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {epoch}')
+                log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs}')
                 running_errors.append(test_error)
 
                 if best_test_error > test_error:
@@ -147,7 +147,6 @@ class Neural(BaseModel):
         dl = DataLoader(ds, batch_size=200, shuffle=True)
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
-        started = time.time()
         scaler = GradScaler()
         for _ in range(max(2, int(self.epochs_to_best / 10))):
             self._run_epoch(dl, criterion, optimizer, scaler)

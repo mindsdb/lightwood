@@ -23,8 +23,7 @@ class ResidualModule(nn.Module):
         self.linear_first = nn.Linear(input_size, intermediate_size)
         self.activation_first = nn.SELU()
         self.linear_second = nn.Linear(intermediate_size, input_size)
-        self.activation_second = nn.SELU()
-        self.dropout = nn.Dropout(0.2)
+        self.dropout = nn.Dropout(0.1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Perform the forward pass."""
@@ -33,9 +32,8 @@ class ResidualModule(nn.Module):
             x = self.normalization(x)
         x = self.linear_first(x)
         x = self.activation_first(x)
-        x = self.linear_second(x)
-        x = self.activation_second(x)
         x = self.dropout(x)
+        x = self.linear_second(x)
         x = x_input + x
         return x
 
@@ -43,7 +41,7 @@ class ResidualModule(nn.Module):
 class ResidualNet(torch.nn.Module):
     def __init__(self, input_size: int = None, output_size: int = None, shape: List[int] = None, max_params: int = int(3e5)) -> None:
         super(ResidualNet, self).__init__()
-        self.net = torch.nn.Sequential(*([ResidualModule(input_size) for _ in range(3)] + [nn.Linear(input_size, output_size)]))
+        self.net = torch.nn.Sequential(*([ResidualModule(input_size) for _ in range(5)] + [nn.Linear(input_size, output_size)]))
         self.to(*get_devices())
 
     def to(self, device: torch.device, available_devices: int) -> torch.nn.Module:
