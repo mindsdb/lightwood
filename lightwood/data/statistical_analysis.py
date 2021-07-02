@@ -26,7 +26,7 @@ def statistical_analysis(data: pd.DataFrame,
                          type_information: TypeInformation,
                          problem_definition: ProblemDefinition) -> StatisticalAnalysis:
     seed()
-    df = cleaner(data, type_information.dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, type_information.identifiers)
+    df = cleaner(data, type_information.dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, type_information.identifiers, problem_definition.target, 'train')
     
     nr_rows = len(df)
     target = problem_definition.target
