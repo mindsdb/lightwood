@@ -76,8 +76,8 @@ class ShortTextEncoder(BaseEncoder):
             tokens = tokenize_text(sent)
             encoded_words = self.cae.encode(tokens)
             encoded_sent = self._combine_fn(encoded_words)
-            output.append(encoded_sent)
-        output = torch.Tensor(output)
+            output.append(torch.Tensor(encoded_sent))
+        output = torch.stack(output)
         return output
 
     def decode(self, vectors):

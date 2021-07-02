@@ -2,7 +2,6 @@ from copy import deepcopy
 import re
 from typing import Dict, List
 from lightwood.api.dtype import dtype
-from lightwood.api.types import Feature, JsonML, Output
 from lightwood.helpers.log import log
 from dateutil.parser import parse as parse_dt
 import datetime
@@ -87,11 +86,23 @@ def _clean_value(element: object, data_dtype: str):
     return element
 
 
-def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: int, ignore_features: List[str], identifiers: Dict[str, str]) -> pd.DataFrame:
+def clean_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
+    len_before = len(df)
+    df = df
+    len_after = len(df)
+    nr_removed = len_before - len_after
+    if nr_removed != 0:
+        log.warning(f'Removed {nr_removed} rows due to the target value missing. Training with rows without a target value makes no sense, please avoid this!')
+    return df
+
+
+def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: int, ignore_features: List[str], identifiers: Dict[str, str], target: str, mode: str) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]
     data = data.drop(columns=to_drop)
+    if mode == 'train':
+        data = clean_empty_targets(data, target)
 
     # Drop extra columns
     for name in list(data.columns):

@@ -161,11 +161,13 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
             'config_args': {
                 'pct_invalid': 'problem_definition.pct_invalid',
                 'ignore_features': 'problem_definition.ignore_features',
-                'identifiers': 'identifiers'
+                'identifiers': 'identifiers',
             },
             'dynamic_args': {
                 'data': 'data',
-                'dtype_dict': 'self.dtype_dict'
+                'dtype_dict': 'self.dtype_dict',
+                'target': 'self.target',
+                'mode': 'self.mode'
             }
         },
         splitter={
