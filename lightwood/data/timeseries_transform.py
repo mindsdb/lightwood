@@ -1,4 +1,4 @@
-from lightwood.api.types import ProblemDefinition
+from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.log import log
 from lightwood.api import dtype
 from typing import Dict
@@ -19,8 +19,8 @@ import psutil
 import multiprocessing as mp
 
 
-def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], problem_definition: ProblemDefinition) -> pd.DataFrame:
-    tss = problem_definition.timeseries_settings
+def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str) -> pd.DataFrame:
+    tss = timeseries_settings
     original_df = copy.deepcopy(data)
     gb_arr = tss.group_by if tss.group_by is not None else []
     ob_arr = tss.order_by
@@ -96,7 +96,7 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], problem
         df_arr = pool.map(partial(_ts_order_col_to_cell_lists, historical_columns=ob_arr + tss.historical_columns), df_arr)
         df_arr = pool.map(partial(_ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window), df_arr)
         if tss.use_previous_target:
-            df_arr = pool.map(partial(_ts_add_previous_target, target=problem_definition.target, nr_predictions=tss.nr_predictions, window=tss.window), df_arr)
+            df_arr = pool.map(partial(_ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions, window=tss.window), df_arr)
         pool.close()
         pool.join()
     else:
@@ -105,7 +105,7 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], problem
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i], historical_columns=ob_arr + tss.historical_columns, window=window)
             if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(df_arr[i], target=problem_definition.target, nr_predictions=tss.nr_predictions, window=tss.window)
+                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions, window=tss.window)
 
     combined_df = pd.concat(df_arr)
 

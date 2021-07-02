@@ -137,11 +137,12 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         timeseries_transformer = {
             'object': 'transform_timeseries',
             'config_args': {
-                'problem_definition': 'problem_definition'
+                'timeseries_settings': 'problem_definition.timeseries_settings'
             },
             'dynamic_args': {
                 'data': 'data',
-                'dtype_dict': 'self.dtype_dict'
+                'dtype_dict': 'self.dtype_dict',
+                'target': 'self.target'
             }
         }
     
