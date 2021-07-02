@@ -63,6 +63,7 @@ data = {call(json_ml.timeseries_transformer, json_ml)}
 """
 
     learn_body = f"""
+self.mode = 'train'
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
 # Which column depends on which
@@ -112,6 +113,7 @@ self.model_analysis, self.runtime_analyzer = {call(json_ml.analyzer, json_ml)}
     learn_body = align(learn_body, 2)
 
     predict_body = f"""
+self.mode = 'predict'
 log.info('Cleaning the data')
 data = {call(json_ml.cleaner, json_ml)}
 
@@ -134,10 +136,12 @@ class Predictor(PredictorInterface):
     models: List[BaseModel]
     encoders: Dict[str, BaseEncoder]
     ensemble: BaseEnsemble
+    mode: str
 
     def __init__(self):
         seed()
         self.target = '{json_ml.output.name}'
+        self.mode = 'innactive'
 
     def learn(self, data: pd.DataFrame) -> None:
 {learn_body}
