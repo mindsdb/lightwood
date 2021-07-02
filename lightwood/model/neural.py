@@ -48,9 +48,9 @@ class Neural(BaseModel):
 
     def _select_optimizer(self) -> Optimizer:
         if self.timeseries_settings.is_timeseries:
-            optimizer = Ranger(self.model.parameters(), lr=0.0005)
+            optimizer = Ranger(self.model.parameters(), lr=0.05)
         else:
-            optimizer = Ranger(self.model.parameters(), lr=0.0005, weight_decay=2e-2)
+            optimizer = Ranger(self.model.parameters(), lr=0.05, weight_decay=2e-2)
 
         return optimizer
     
@@ -91,8 +91,7 @@ class Neural(BaseModel):
 
         self.model = DefaultNet(
             input_size=len(ds_arr[0][0][0]),
-            output_size=len(ds_arr[0][0][1]),
-            max_params=
+            output_size=len(ds_arr[0][0][1])
         )
         
         criterion = self._select_criterion()
