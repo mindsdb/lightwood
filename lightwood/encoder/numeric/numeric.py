@@ -60,7 +60,7 @@ class NumericEncoder(BaseEncoder):
                     vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
                     vector[2] = real / self._abs_mean
                 else:
-                    log.debug(f'Can\'t encode target value: {real}')
+                    raise Exception(f'Can\'t encode target value: {real}')
 
             else:
                 vector = [0] * 4
