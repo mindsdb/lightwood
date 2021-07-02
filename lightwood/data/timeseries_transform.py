@@ -1,22 +1,18 @@
+import os
+import copy
+import psutil
+import datetime
+import dateutil
+import numpy as np
+import pandas as pd
+import multiprocessing as mp
+
+from functools import partial
+from typing import Dict
+
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.log import log
 from lightwood.api import dtype
-from typing import Dict
-import pandas as pd
-
-# old
-import time
-import copy
-import dateutil
-import datetime
-import traceback
-import numpy as np
-from pathlib import Path
-import multiprocessing as mp
-from functools import partial
-import os
-import psutil
-import multiprocessing as mp
 
 
 def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str) -> pd.DataFrame:

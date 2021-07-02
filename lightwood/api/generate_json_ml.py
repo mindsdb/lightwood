@@ -4,7 +4,7 @@ from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Fe
 from lightwood.api import dtype
 
 
-trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TsRnnEncoder', 'TimeSeriesPlainEncoder')
+trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder')
 
 
 def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_target: bool):
@@ -19,7 +19,7 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
         dtype.image: 'Img2VecEncoder',
         dtype.rich_text: 'PretrainedLangEncoder',
         dtype.short_text: 'ShortTextEncoder',
-        dtype.array: 'TsRnnEncoder',
+        dtype.array: 'TimeSeriesEncoder',
         dtype.quantity: 'NumericEncoder',
     }
 
@@ -43,11 +43,11 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
 
     if tss.is_timeseries:
         if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict['object'] = 'TsRnnEncoder'
+            encoder_dict['object'] = 'TimeSeriesEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{col_dtype}"'
+            encoder_dict['dynamic_args']['target'] = "self.target"
         if is_target:
-            pass
-            # encoder_dict['object'] = 'TsNumericEncoder'
+            encoder_dict['object'] = 'TsNumericEncoder'
         if '__mdb_ts_previous' in col_name:
             encoder_dict['object'] = 'TimeSeriesPlainEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{tss.target_type}"'
@@ -136,6 +136,18 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
     if problem_definition.timeseries_settings.is_timeseries:
         timeseries_transformer = {
             'object': 'transform_timeseries',
+            'config_args': {
+                'timeseries_settings': 'problem_definition.timeseries_settings'
+            },
+            'dynamic_args': {
+                'data': 'data',
+                'dtype_dict': 'self.dtype_dict',
+                'target': 'self.target'
+            }
+        }
+
+        timeseries_analyzer = {
+            'object': 'timeseries_analyzer',
             'config_args': {
                 'timeseries_settings': 'problem_definition.timeseries_settings'
             },
@@ -238,5 +250,6 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         statistical_analysis=statistical_analysis,
         identifiers=type_information.identifiers,
         timeseries_transformer=timeseries_transformer,
+        timeseries_analyzer=timeseries_analyzer,
         accuracy_functions=accuracy_functions
     )
