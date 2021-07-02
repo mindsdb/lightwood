@@ -97,7 +97,7 @@ class CategoricalAutoEncoder(BaseEncoder):
             with torch.no_grad():
                 oh_encoded_tensor = oh_encoded_tensor.to(self.net.device)
                 embeddings = self.encoder(oh_encoded_tensor)
-                return embeddings
+                return embeddings.to('cpu')
 
     def decode(self, encoded_data):
         self.onehot_encoder.predict_proba = self.predict_proba
