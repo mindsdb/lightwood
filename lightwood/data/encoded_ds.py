@@ -1,4 +1,5 @@
 import enum
+import inspect
 from typing import List, Tuple
 import torch
 import numpy as np
@@ -35,7 +36,11 @@ class EncodedDs(Dataset):
         X = torch.FloatTensor()
         for col in self.data_frame:
             if col != self.target:
-                encoded_tensor = self.encoders[col].encode([self.data_frame.iloc[idx][col]])[0]
+                kwargs = {}
+                if 'dependency_data' in inspect.signature(self.encoders[col].encode).parameters:
+                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
+                                                 for dep in self.encoders[col].dependencies}
+                encoded_tensor = self.encoders[col].encode([self.data_frame.iloc[idx][col]], **kwargs)[0]
                 X = torch.cat([X, encoded_tensor])
 
         Y = self.encoders[self.target].encode([self.data_frame.iloc[idx][self.target]])[0]
@@ -49,11 +54,15 @@ class EncodedDs(Dataset):
         return self.data_frame[column_name]
 
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
-        encoded_data = self.encoders[column_name].encode(self.data_frame[column_name])
+        kwargs = {}
+        if 'dependency_data' in inspect.signature(self.encoders[column_name].encode).parameters:
+            kwargs['dependency_data'] = {dep: self.data_frame[dep].values
+                                         for dep in self.encoders[column_name].dependencies}
+        encoded_data = self.encoders[column_name].encode(self.data_frame[column_name], **kwargs)
+        
         if not isinstance(encoded_data, torch.Tensor):
             raise Exception(f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor !')
         return encoded_data
-
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):

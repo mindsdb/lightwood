@@ -63,6 +63,7 @@ class TimeseriesSettings:
     use_previous_target: bool = False
     nr_predictions: int = None
     historical_columns: List[str] = None
+    target_type: str = ''  # @TODO: is the current setter (outside of initialization) a sane option?
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -75,13 +76,15 @@ class TimeseriesSettings:
 
             timeseries_settings = TimeseriesSettings(
                 is_timeseries=True,
-                historical_columns=[],
                 order_by=obj['order_by'],
-                window=obj['window']
+                window=obj['window'],
+                use_previous_target=obj['use_previous_target'],
+                historical_columns=[],
+                nr_predictions=obj.get('nr_predictions', 1)
 
             )
             for setting in obj:
-                timeseries_settings.__setattr__(setting, obj['setting'])
+                timeseries_settings.__setattr__(setting, obj[setting])
 
         else:
             timeseries_settings = TimeseriesSettings(is_timeseries=False)

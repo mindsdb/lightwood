@@ -1,13 +1,13 @@
 from typing import Dict
 import numpy as np
-from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition
+from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
 from lightwood.api import dtype
 
 
-trainable_encoders = ('TsRnnEncoder', 'PretrainedLangEncoder', 'CategoricalAutoEncoder')
+trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TsRnnEncoder', 'TimeSeriesPlainEncoder')
 
 
-def lookup_encoder(col_dtype: dtype, is_target: bool):
+def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_target: bool):
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
         dtype.float: 'NumericEncoder',
@@ -40,6 +40,17 @@ def lookup_encoder(col_dtype: dtype, is_target: bool):
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
             encoder_dict['config_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
+
+    if tss.is_timeseries:
+        if col_name in tss.order_by + tss.historical_columns:
+            encoder_dict['object'] = 'TsRnnEncoder'
+            encoder_dict['dynamic_args']['original_type'] = f'"{col_dtype}"'
+        if is_target:
+            pass
+            # encoder_dict['object'] = 'TsNumericEncoder'
+        if '__mdb_ts_previous' in col_name:
+            encoder_dict['object'] = 'TimeSeriesPlainEncoder'
+            encoder_dict['dynamic_args']['original_type'] = f'"{tss.target_type}"'
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
@@ -104,16 +115,20 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], True)
+    output.encoder = lookup_encoder(type_information.dtypes[target], target, problem_definition.timeseries_settings, True)
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
         if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
+            dependency = []
+            if problem_definition.timeseries_settings.is_timeseries and \
+                problem_definition.timeseries_settings.use_previous_target:
+                dependency.append(f'__mdb_ts_previous_{target}')
             feature = Feature(
                 name=col_name,
                 data_dtype=col_dtype,
-                encoder=lookup_encoder(col_dtype, False),
-                dependency=[]
+                encoder=lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, is_target=False),
+                dependency=dependency
             )
             features[col_name] = feature
 
@@ -122,10 +137,11 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         timeseries_transformer = {
             'object': 'transform_timeseries',
             'config_args': {
-                'timeseries_settings': 'problem_definition.timeseries_settings'
+                'problem_definition': 'problem_definition'
             },
             'dynamic_args': {
-                'data': 'data'
+                'data': 'data',
+                'dtype_dict': 'self.dtype_dict'
             }
         }
     
