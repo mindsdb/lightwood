@@ -88,11 +88,12 @@ def _clean_value(element: object, data_dtype: str):
 
 def clean_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     len_before = len(df)
-    df = df
+    df = df.dropna(subset=[target])
     len_after = len(df)
     nr_removed = len_before - len_after
     if nr_removed != 0:
         log.warning(f'Removed {nr_removed} rows due to the target value missing. Training with rows without a target value makes no sense, please avoid this!')
+    exit()
     return df
 
 
