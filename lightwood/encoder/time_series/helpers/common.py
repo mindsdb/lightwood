@@ -19,11 +19,15 @@ class MinMaxNormalizer:
             x = np.array([j for i in x for j in i]).reshape(-1, 1)
         elif isinstance(x[0], list):
             x = np.vstack(x)
+        elif isinstance(x, np.ndarray):
+            if len(x.shape) == 1:
+                x = x.reshape(-1, 1)
 
         x[x == None] = 0
         self.abs_mean = np.mean(np.abs(x))
         self.scaler.fit(x)
-        self.single_scaler.fit(x[:, -1:])  # fit using non-windowed column data
+        if isinstance(x, np.ndarray):
+            self.single_scaler.fit(x[:, -1:])  # fit using non-windowed column data
 
     def encode(self, y):
         if not isinstance(y, np.ndarray) and not isinstance(y[0], list):

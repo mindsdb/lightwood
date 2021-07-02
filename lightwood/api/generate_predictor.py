@@ -14,7 +14,7 @@ def add_implicit_values(json_ml: JsonML) -> str:
         'from lightwood.model import Neural',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
-        'from lightwood.data import transform_timeseries',
+        'from lightwood.data import transform_timeseries, timeseries_analyzer',
         'from lightwood.data import splitter',
         'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score',
@@ -24,7 +24,7 @@ def add_implicit_values(json_ml: JsonML) -> str:
         'import lightwood',
         'from lightwood.api import *',
         'from lightwood.model import BaseModel',
-        'from lightwood.encoder import BaseEncoder',
+        'from lightwood.encoder import BaseEncoder, __ts_encoders__',
         'from lightwood.ensemble import BaseEnsemble',
         'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call'
@@ -72,10 +72,19 @@ def generate_predictor_code(json_ml: JsonML) -> str:
     input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ml.features.values()])
 
     ts_code = ''
+    ts_analysis_code = ''
     if json_ml.timeseries_transformer is not None:
         ts_code = f"""
 log.info('Transforming timeseries data')
 data = {call(json_ml.timeseries_transformer, json_ml)}
+
+self.ts_analysis = {call(json_ml.timeseries_analyzer, json_ml)}
+"""
+
+    if json_ml.timeseries_analyzer is not None:
+        ts_analysis_code = f"""
+if type(encoder) in __ts_encoders__:
+    kwargs['ts_analysis'] = self.ts_analysis
 """
 
     learn_body = f"""
@@ -110,14 +119,12 @@ for col_name, encoder in self.encoders.items():
         if self.dependencies[col_name]:
             kwargs['dependency_data'] = []
             for col in self.dependencies[col_name]:
-                # @TODO: should probably move this into a code generator method
                 kwargs['dependency_data'].append({{
                     'name': col,
-                    'normalizers': {{}},            # @TODO: reinstate
-                    'group_combinations': {{}},     # @TODO: reinstate
                     'original_type': self.dtype_dict[col],
                     'data': priming_data[col]
                 }})
+            {align(ts_analysis_code, 3)}
         encoder.prepare(priming_data[col_name], **kwargs)
 
 for col_name, encoder in parallel_preped_encoders.items():
