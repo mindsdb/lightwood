@@ -62,7 +62,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     self.target_ar_normalizers[dep['name']] = dep['normalizers']
                 elif dep['original_type'] in (dtype.categorical, dtype.binary):
                     self.target_ar_normalizers[dep['name']]['__default'] = CatNormalizer()
-                    self.target_ar_normalizers[dep['name']]['__default'] .prepare(dep['data'])
+                    self.target_ar_normalizers[dep['name']]['__default'].prepare(dep['data'])
                 else:
                     self.target_ar_normalizers[dep['name']]['__default']  = MinMaxNormalizer()
                     self.target_ar_normalizers[dep['name']]['__default'].prepare(dep['data'])
