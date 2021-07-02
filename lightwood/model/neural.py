@@ -31,7 +31,7 @@ class Neural(BaseModel):
         self.target = target
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
-        self.training_time = None
+        self.epochs_to_best = None
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
@@ -106,10 +106,12 @@ class Neural(BaseModel):
         
         # @TODO (Maybe) try adding wramup
         # Progressively decrease the learning rate
+        total_epochs = 0
         for lr in [0.1, 0.01, 0.001]:
             running_errors: List[float] = []
             optimizer = self._select_optimizer(lr)
             for epoch in range(int(1e10)):
+                total_epochs += 1
                 error = self._run_epoch(train_dl, criterion, optimizer, scaler)
                 test_error = self._error(test_dl, criterion)
                 log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {epoch}')
@@ -118,6 +120,7 @@ class Neural(BaseModel):
                 if best_test_error > test_error:
                     best_test_error = test_error
                     best_model = deepcopy(self.model)
+                    self.epochs_to_best = total_epochs
 
                 stop = False
                 if np.isnan(error):
@@ -130,7 +133,6 @@ class Neural(BaseModel):
                     stop = True
 
                 if stop:
-                    self.training_time = time.time() - started
                     self.model = best_model
                     break
         
@@ -145,10 +147,8 @@ class Neural(BaseModel):
         criterion = self._select_criterion()
         started = time.time()
         scaler = GradScaler()
-        for _ in range(10000):
+        for _ in range(max(2, int(self.epochs_to_best / 10))):
             self._run_epoch(dl, criterion, optimizer, scaler)
-            if time.time() - started > self.training_time / 10:
-                break
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
