@@ -85,12 +85,14 @@ class Neural(BaseModel):
         return np.mean(running_losses)
             
     def fit(self, ds_arr: List[EncodedDs]) -> None:
-        train_ds = ConcatedEncodedDs(ds_arr[0:-1])
-        test_ds = ConcatedEncodedDs(ds_arr[-1:])
+        # ConcatedEncodedDs
+        train_ds_arr = ds_arr[0:-1]
+        test_ds_arr = ds_arr[-1:]
 
         self.model = DefaultNet(
-            input_size=len(train_ds[0][0]),
-            output_size=len(train_ds[0][1])
+            input_size=len(ds_arr[0][0][0]),
+            output_size=len(ds_arr[0][0][1]),
+            max_params=
         )
         
         criterion = self._select_criterion()
@@ -98,16 +100,21 @@ class Neural(BaseModel):
 
         started = time.time()
         scaler = GradScaler()
-        train_dl = DataLoader(train_ds, batch_size=200, shuffle=True)
-        test_dl = DataLoader(test_ds, batch_size=200, shuffle=True)
+        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=True)
+        test_dl = DataLoader(ConcatedEncodedDs(test_ds_arr), batch_size=200, shuffle=True)
 
         running_errors: List[float] = []
         best_model = None
         best_test_error = pow(2, 32)
+
+        # Iterate through different training subsets
+        # @TODO
+        # Tweak the learning rate
+        # @TODO
         for epoch in range(int(1e10)):
             error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            test_error = self._error(test_dl, criterion)
-            log.info(f'Training error of {error} | Testing error of | During iteration {epoch}')
+            test_error = error # self._error(test_dl, criterion)
+            log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {epoch}')
 
             if best_test_error > test_error:
                 best_test_error = test_error
@@ -122,7 +129,7 @@ class Neural(BaseModel):
                 self.model = best_model
                 break
 
-            if len(running_errors) > 12 and np.mean(running_errors[-8:]) < test_error:
+            if len(running_errors) > 12 and np.mean(running_errors[-8:]) < test_error and np.mean(running_errors[-8:]) < np.mean(running_errors[-4:]):
                 self.model = best_model
                 break
 
