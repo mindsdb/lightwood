@@ -2,6 +2,7 @@ import os
 from typing import Dict
 import psutil
 import multiprocessing as mp
+from lightwood.helpers.log import log
 
 
 def get_nr_procs(df=None):
@@ -23,8 +24,12 @@ def get_nr_procs(df=None):
 
 
 def run_mut_method(obj: object, arg: object, method: str, identifier: str, return_dict: dict) -> str:
-    obj.__getattribute__(method)(arg)
-    return_dict[identifier] = obj
+    try:
+        obj.__getattribute__(method)(arg)
+        return_dict[identifier] = obj
+    except Exception as e:
+        return_dict[identifier] = False
+        raise e
 
 
 def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
@@ -39,5 +44,9 @@ def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
 
     for proc in jobs:
         proc.join()
+
+    for identifier in return_dict:
+        if return_dict[identifier] == False:
+            raise Exception(f'Failed to run in parallel on identifier: {identifier}')
 
     return dict(return_dict)

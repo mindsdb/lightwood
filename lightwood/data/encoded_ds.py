@@ -42,8 +42,8 @@ class EncodedDs(Dataset):
                                                  for dep in self.encoders[col].dependencies}
                 encoded_tensor = self.encoders[col].encode([self.data_frame.iloc[idx][col]], **kwargs)[0]
                 X = torch.cat([X, encoded_tensor])
-            else:
-                Y = self.encoders[self.target].encode([self.data_frame.iloc[idx][col]])[0]
+
+        Y = self.encoders[self.target].encode([self.data_frame.iloc[idx][self.target]])[0]
 
         if self.cache_encoded:
             self.cache[idx] = (X, Y)
@@ -58,8 +58,11 @@ class EncodedDs(Dataset):
         if 'dependency_data' in inspect.signature(self.encoders[column_name].encode).parameters:
             kwargs['dependency_data'] = {dep: self.data_frame[dep].values
                                          for dep in self.encoders[column_name].dependencies}
-        return self.encoders[column_name].encode(self.data_frame[column_name], **kwargs)
-
+        encoded_data = self.encoders[column_name].encode(self.data_frame[column_name], **kwargs)
+        
+        if not isinstance(encoded_data, torch.Tensor):
+            raise Exception(f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor !')
+        return encoded_data
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):

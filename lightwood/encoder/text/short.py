@@ -1,6 +1,6 @@
+from typing import List
 import torch
 from torch.nn.functional import pad
-
 from lightwood.encoder import BaseEncoder
 from lightwood.encoder.categorical import CategoricalAutoEncoder
 from lightwood.helpers.text import tokenize_text
@@ -36,7 +36,7 @@ class ShortTextEncoder(BaseEncoder):
         # Defined in self.prepare()
         self._combine_fn = None
         self.max_words_per_sent = None
-
+        self.is_nn_encoder = True
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
     
     def _unexpected_mode(self):
@@ -69,14 +69,15 @@ class ShortTextEncoder(BaseEncoder):
         else:
             self._unexpected_mode()
 
-    def encode(self, column_data):
+    def encode(self, column_data: List[str]) -> torch.Tensor:
         no_null_sentences = (x if x is not None else '' for x in column_data)
         output = []
         for sent in no_null_sentences:
             tokens = tokenize_text(sent)
             encoded_words = self.cae.encode(tokens)
             encoded_sent = self._combine_fn(encoded_words)
-            output.append(encoded_sent)
+            output.append(torch.Tensor(encoded_sent))
+        output = torch.stack(output)
         return output
 
     def decode(self, vectors):

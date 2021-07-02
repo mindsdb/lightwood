@@ -22,6 +22,7 @@ class OneHotEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
+        priming_data = [x if x is not None else UNCOMMON_WORD for x in priming_data]
         self._lang = Lang('default')
         self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
         self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
@@ -47,7 +48,7 @@ class OneHotEncoder(BaseEncoder):
             self.index_weights = [None] * self._lang.n_words
             self.index_weights[0] = np.mean(list(self.target_class_distribution.values()))
             for word in set(priming_data):
-                self.index_weights[self._lang.word2index[word]] = 1 / self.target_class_distribution[word]
+                self.index_weights[self._lang.word2index[str(word)]] = 1 / self.target_class_distribution[word]
             self.index_weights = torch.Tensor(self.index_weights)
 
 
