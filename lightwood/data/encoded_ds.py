@@ -56,7 +56,7 @@ class EncodedDs(Dataset):
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         kwargs = {}
         if 'dependency_data' in inspect.signature(self.encoders[column_name].encode).parameters:
-            kwargs['dependency_data'] = {dep: self.data_frame[dep].values
+            kwargs['dependency_data'] = {dep: self.data_frame[dep].tolist()
                                          for dep in self.encoders[column_name].dependencies}
         encoded_data = self.encoders[column_name].encode(self.data_frame[column_name], **kwargs)
         

@@ -84,10 +84,10 @@ def get_group_matches(data, combination, keys):
 
     return: indexes for rows to normalize, data to normalize
     """
+    if isinstance(data['data'], pd.Series):
+        data['data'] = np.vstack(data['data'])
     if not combination:
         idxs = range(len(data['data']))
-        if isinstance(data['data'], pd.Series):
-            data['data'] = np.vstack(data['data'])
         return [idxs, np.array(data['data'])[idxs, :]]  # return all data
     else:
         all_sets = []
@@ -95,7 +95,10 @@ def get_group_matches(data, combination, keys):
             all_sets.append(set([i for i, elt in enumerate(data['group_info'][key]) if elt == val]))
         if all_sets:
             idxs = list(set.intersection(*all_sets))
-            return idxs, np.array(data['data'])[idxs, :]
+            try:
+                return idxs, np.array(data['data'])[idxs, :]
+            except:
+                print('ashifa')
         else:
             return [], np.array([])
 
@@ -132,7 +135,7 @@ def generate_target_group_normalizers(data):
         normalizers['__default'].prepare(data['data'])
         group_combinations.append('__default')
 
-    data['normalizers'] = normalizers
+    data['target_normalizers'] = normalizers
     data['group_combinations'] = group_combinations
 
     return data

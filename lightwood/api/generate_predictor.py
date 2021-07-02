@@ -86,6 +86,11 @@ self.ts_analysis = {call(json_ml.timeseries_analyzer, json_ml)}
 if type(encoder) in __ts_encoders__:
     kwargs['ts_analysis'] = self.ts_analysis
 """
+#     if json_ml.problem_definition.timeseries_settings.group_by:
+#         ts_analysis_code += f"""
+#     for col in self.dependencies[col_name]:
+#         kwargs['dependency_data'][col]['group_info'] = {{gby: priming_data[gby] for gby in {json_ml.problem_definition.timeseries_settings.group_by}}}
+# """
 
     learn_body = f"""
 self.mode = 'train'
@@ -117,13 +122,12 @@ for col_name, encoder in self.encoders.items():
         priming_data = pd.concat(folds[0:nfolds-1])
         kwargs = {{}}
         if self.dependencies[col_name]:
-            kwargs['dependency_data'] = []
+            kwargs['dependency_data'] = {{}}
             for col in self.dependencies[col_name]:
-                kwargs['dependency_data'].append({{
-                    'name': col,
+                kwargs['dependency_data'][col] = {{
                     'original_type': self.dtype_dict[col],
                     'data': priming_data[col]
-                }})
+                }}
             {align(ts_analysis_code, 3)}
         encoder.prepare(priming_data[col_name], **kwargs)
 

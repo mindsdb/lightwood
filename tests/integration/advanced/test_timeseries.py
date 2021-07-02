@@ -53,7 +53,49 @@ class TestTimeseries(unittest.TestCase):
         plt.show()
 
     def test_grouped_timeseries(self):
-        pass
+        from lightwood import generate_predictor
+        from mindsdb_datasources import FileDS
+
+        datasource = FileDS('tests/data/arrivals.csv')
+        target = 'Traffic'
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': target,
+                                                                              'time_aim': 100,
+                                                                              'anomaly_detection': False,
+                                                                              'timeseries_settings': {
+                                                                                  'order_by': ['T'],
+                                                                                  'group_by': ['Country'],
+                                                                                  'use_previous_target': True,
+                                                                                  'window': 5
+                                                                              },
+                                                                              }),
+                                                 datasource.df)
+
+        with open('dynamic_predictor.py', 'w') as fp:
+            fp.write(predictor_class_str)
+
+        predictor_class = importlib.import_module('dynamic_predictor').Predictor
+        print('Class was evaluated successfully')
+
+        predictor = predictor_class()
+        print('Class initialized successfully')
+
+        predictor.learn(datasource.df)
+
+        predictions = predictor.predict(datasource.df)
+        print(predictions)
+        print(datasource.df)
+
+        print(r2_score(datasource.df[target], predictions['prediction']))
+        print(mean_absolute_error(datasource.df[target], predictions['prediction']))
+        print(mean_squared_error(datasource.df[target], predictions['prediction']))
+
+        import matplotlib.pyplot as plt
+        df = pd.read_csv('tests/data/arrivals.csv')
+        true = df[target].values
+        preds = predictions['prediction'].values
+        plt.plot(true)
+        plt.plot(preds)
+        plt.show()
 
     def test_anomaly_detection(self):
         pass
