@@ -48,7 +48,7 @@ class OneHotEncoder(BaseEncoder):
             self.index_weights = [None] * self._lang.n_words
             self.index_weights[0] = np.mean(list(self.target_class_distribution.values()))
             for word in set(priming_data):
-                self.index_weights[self._lang.word2index[word]] = 1 / self.target_class_distribution[word]
+                self.index_weights[self._lang.word2index[str(word)]] = 1 / self.target_class_distribution[word]
             self.index_weights = torch.Tensor(self.index_weights)
 
 

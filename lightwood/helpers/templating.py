@@ -9,6 +9,8 @@ def call(entity: dict, json_ml: JsonML) -> str:
         val = json_ml
         for item in v.split('.'):
             val = val.__getattribute__(item)
+            if isinstance(val, str):
+                val = f'"{val}"'
         config_args.append(f'{k}={val}')
 
     args = ', '.join(config_args + dynamic_args)
