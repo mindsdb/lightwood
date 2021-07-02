@@ -29,8 +29,8 @@ class NumericEncoder(BaseEncoder):
 
             if np.isnan(number):
                 err = 'Lightwood does not support working with NaN values !'
-                log.error(err)
-                raise Exception(err)
+                log.warning(err)
+                continue
 
             if int(number) != number:
                 value_type = 'float'
