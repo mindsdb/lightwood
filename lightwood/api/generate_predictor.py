@@ -86,13 +86,15 @@ self.ts_analysis = {call(json_ml.timeseries_analyzer, json_ml)}
 if type(encoder) in __ts_encoders__:
     kwargs['ts_analysis'] = self.ts_analysis
 """
-#     if json_ml.problem_definition.timeseries_settings.group_by:
-#         ts_analysis_code += f"""
-#     for col in self.dependencies[col_name]:
-#         kwargs['dependency_data'][col]['group_info'] = {{gby: priming_data[gby] for gby in {json_ml.problem_definition.timeseries_settings.group_by}}}
-# """
 
-    learn_body = f"""
+    if json_ml.problem_definition.timeseries_settings.is_timeseries:
+        ts_target_code = f"""
+if encoder.is_target:
+    encoder.normalizers = self.ts_analysis['target_normalizers']
+    encoder.group_combinations = self.ts_analysis['group_combinations']
+"""
+
+    dataprep_body = f"""
 self.mode = 'train'
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
@@ -116,7 +118,6 @@ log.info('Preparing the encoders')
 
 parallel_preped_encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1])[col_name], 'prepare'] for col_name, encoder in self.encoders.items() if not encoder.is_nn_encoder}})
 
-seq_preped_encoders = {{}}
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
         priming_data = pd.concat(folds[0:nfolds-1])
@@ -133,7 +134,11 @@ for col_name, encoder in self.encoders.items():
 
 for col_name, encoder in parallel_preped_encoders.items():
     self.encoders[col_name] = encoder
+    {align(ts_target_code, 1)}
+"""
+    dataprep_body = align(dataprep_body, 2)
 
+    learn_body = f"""
 log.info('Featurizing the data')
 encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
 train_data = encoded_ds_arr[0:nfolds-1]
@@ -184,6 +189,7 @@ class Predictor(PredictorInterface):
         self.mode = 'innactive'
 
     def learn(self, data: pd.DataFrame) -> None:
+{dataprep_body}
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:

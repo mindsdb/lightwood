@@ -52,6 +52,7 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
             encoder_dict['dynamic_args']['grouped_by'] = f"{tss.group_by}"
         if is_target:
             encoder_dict['object'] = 'TsNumericEncoder'
+            encoder_dict['dynamic_args']['grouped_by'] = f"{tss.group_by}"
         if '__mdb_ts_previous' in col_name:
             encoder_dict['object'] = 'TimeSeriesPlainEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{tss.target_type}"'
