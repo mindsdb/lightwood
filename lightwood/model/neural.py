@@ -140,12 +140,12 @@ class Neural(BaseModel):
     def partial_fit(self, data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
         ds = ConcatedEncodedDs(data)
-        dl = DataLoader(ConcatedEncodedDs(ds), batch_size=200, shuffle=True)
+        dl = DataLoader(ds, batch_size=200, shuffle=True)
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
         started = time.time()
         scaler = GradScaler()
-        for epoch in range(10000):
+        for _ in range(10000):
             self._run_epoch(dl, criterion, optimizer, scaler)
             if time.time() - started > self.training_time / 10:
                 break
