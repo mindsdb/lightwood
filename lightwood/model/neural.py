@@ -105,7 +105,7 @@ class Neural(BaseModel):
         for epoch in range(int(1e10)):
             error = self._run_epoch(train_dl, criterion, optimizer, scaler)
             test_error = self._error(test_dl, criterion)
-            log.info(f'Training error of {error} | Testing error of | During iteration {epoch}')
+            log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {epoch}')
 
             if np.isnan(error):
                 break

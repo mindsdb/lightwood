@@ -29,10 +29,12 @@ class ResidualModule(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Perform the forward pass."""
         x_input = x
-        x = self.normalization(x)
+        if self.training:
+            x = self.normalization(x)
         x = self.linear_first(x)
-        x = self.activation(x)
+        x = self.activation_first(x)
         x = self.linear_second(x)
+        x = self.activation_second(x)
         x = self.dropout(x)
         x = x_input + x
         return x
