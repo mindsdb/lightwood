@@ -16,6 +16,7 @@ from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.model.helpers.default_net import DefaultNet
+from lightwood.model.helpers.residual_net import ResidualNet
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
@@ -90,14 +91,15 @@ class Neural(BaseModel):
         train_ds_arr = ds_arr[0:-1]
         test_ds_arr = ds_arr[-1:]
 
-        self.model = DefaultNet(
-            input_size=len(ds_arr[0][0][0]),
-            output_size=len(ds_arr[0][0][1])
+        self.model = ResidualNet(
+            input_size=len(train_ds[0][0]),
+            output_size=len(train_ds[0][1])
         )
         
         criterion = self._select_criterion()
         started = time.time()
         scaler = GradScaler()
+
         train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=True)
         test_dl = DataLoader(ConcatedEncodedDs(test_ds_arr), batch_size=200, shuffle=True)
 
