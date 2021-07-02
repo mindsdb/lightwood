@@ -36,7 +36,7 @@ class ShortTextEncoder(BaseEncoder):
         # Defined in self.prepare()
         self._combine_fn = None
         self.max_words_per_sent = None
-
+        self.is_nn_encoder = True
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
     
     def _unexpected_mode(self):

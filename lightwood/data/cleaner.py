@@ -1,3 +1,4 @@
+from copy import deepcopy
 import re
 from typing import Dict, List
 from lightwood.api.dtype import dtype
@@ -82,12 +83,13 @@ def _clean_value(element: object, data_dtype: str):
 
     if data_dtype in (dtype.short_text, dtype.rich_text, dtype.categorical, dtype.binary):
         element = str(element)
-        
+
     return element
 
 
 def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: int, ignore_features: List[str], identifiers: Dict[str, str]) -> pd.DataFrame:
     # Drop columns we don't want to use
+    data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]
     data = data.drop(columns=to_drop)
 
