@@ -138,6 +138,10 @@ self.ensemble = {call(json_ml.output.ensemble, json_ml)}
 
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ml.analyzer, json_ml)}
+
+# Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
+for model in self.models:
+    model.partial_fit(test_data)
 """
     learn_body = align(learn_body, 2)
 
