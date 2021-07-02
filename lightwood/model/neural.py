@@ -15,6 +15,7 @@ from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.model.helpers.default_net import DefaultNet
+from lightwood.model.helpers.residual_net import ResidualNet
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
@@ -87,7 +88,7 @@ class Neural(BaseModel):
         train_ds = ConcatedEncodedDs(ds_arr[0:-1])
         test_ds = ConcatedEncodedDs(ds_arr[-1:])
 
-        self.model = DefaultNet(
+        self.model = ResidualNet(
             input_size=len(train_ds[0][0]),
             output_size=len(train_ds[0][1])
         )
