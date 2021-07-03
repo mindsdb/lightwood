@@ -41,7 +41,7 @@ class ResidualModule(nn.Module):
 class ResidualNet(torch.nn.Module):
     def __init__(self, input_size: int = None, output_size: int = None, shape: List[int] = None, max_params: int = int(3e5)) -> None:
         super(ResidualNet, self).__init__()
-        self.net = torch.nn.Sequential(*([ResidualModule(input_size) for _ in range(5)] + [nn.Linear(input_size, output_size)]))
+        self.net = torch.nn.Sequential(*([ResidualModule(input_size) for _ in range(1)] + [nn.Linear(input_size, max([input_size * 2, output_size * 2, 400])), nn.Linear(max([input_size * 2, output_size * 2, 400]), output_size)]))
         self.to(*get_devices())
 
     def to(self, device: torch.device, available_devices: int) -> torch.nn.Module:
