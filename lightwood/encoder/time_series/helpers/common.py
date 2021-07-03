@@ -15,6 +15,9 @@ class MinMaxNormalizer:
         self.abs_mean = None
 
     def prepare(self, x):
+        if isinstance(x, pd.Series):
+            x = x.values
+
         if isinstance(x, list):
             x = np.array([j for i in x for j in i]).reshape(-1, 1)
         elif isinstance(x[0], list):
