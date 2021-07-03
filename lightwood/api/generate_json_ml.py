@@ -45,14 +45,15 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
             encoder_dict['config_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
 
     if tss.is_timeseries:
+        gby = tss.group_by if tss.group_by is not None else []
         if col_name in tss.order_by + tss.historical_columns:
             encoder_dict['object'] = 'TimeSeriesEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{col_dtype}"'
             encoder_dict['dynamic_args']['target'] = "self.target"
-            encoder_dict['dynamic_args']['grouped_by'] = f"{tss.group_by}"
+            encoder_dict['dynamic_args']['grouped_by'] = f"{gby}"
         if is_target:
             encoder_dict['object'] = 'TsNumericEncoder'
-            encoder_dict['dynamic_args']['grouped_by'] = f"{tss.group_by}"
+            encoder_dict['dynamic_args']['grouped_by'] = f"{gby}"
         if '__mdb_ts_previous' in col_name:
             encoder_dict['object'] = 'TimeSeriesPlainEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{tss.target_type}"'
@@ -129,8 +130,9 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
             encoder = lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, is_target=False)
 
             if problem_definition.timeseries_settings.is_timeseries and encoder['object'] in ts_encoders:
-                for group in problem_definition.timeseries_settings.group_by:
-                    dependency.append(group)
+                if problem_definition.timeseries_settings.group_by is not None:
+                    for group in problem_definition.timeseries_settings.group_by:
+                        dependency.append(group)
 
                 if problem_definition.timeseries_settings.use_previous_target:
                     dependency.append(f'__mdb_ts_previous_{target}')
