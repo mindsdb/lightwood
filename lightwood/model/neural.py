@@ -91,7 +91,7 @@ class Neural(BaseModel):
         train_ds_arr = ds_arr[0:-1]
         test_ds_arr = ds_arr[-1:]
 
-        self.model = ResidualNet(
+        self.model = DefaultNet(
             input_size=len(ds_arr[0][0][0]),
             output_size=len(ds_arr[0][0][1])
         )
@@ -129,7 +129,7 @@ class Neural(BaseModel):
                     stop = True
                 elif (time.time() - started) > self.stop_after * 0.8:
                     stop = True
-                elif len(running_errors) > 10 and np.mean(running_errors[-5:]) < test_error:
+                elif len(running_errors) > 6 and np.mean(running_errors[-5:]) < test_error:
                     stop = True
                 elif test_error < 0.00001:
                     stop = True
