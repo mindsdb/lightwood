@@ -95,6 +95,8 @@ if encoder.is_target:
     encoder.normalizers = self.ts_analysis['target_normalizers']
     encoder.group_combinations = self.ts_analysis['group_combinations']
 """
+    else:
+        ts_target_code = ''
 
     dataprep_body = f"""
 self.mode = 'train'
