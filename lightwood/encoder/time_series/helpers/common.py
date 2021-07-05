@@ -4,6 +4,8 @@ import pandas as pd
 from itertools import product
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
 
+from lightwood.api.dtype import dtype
+
 
 class MinMaxNormalizer:
     def __init__(self, combination=(), keys=(), factor=1):
@@ -115,7 +117,7 @@ def generate_target_group_normalizers(data):
     group_combinations = []
 
     # categorical normalizers
-    if data['original_type'] == 'categorical':
+    if data['original_type'] in [dtype.categorical, dtype.binary]:
         normalizers['__default'] = CatNormalizer()
         normalizers['__default'].prepare(data['data'])
 
