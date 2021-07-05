@@ -228,7 +228,7 @@ def get_column_data_type(arg_tup):
 
     # Categorical based on unique values
     if curr_dtype not in (dtype.date, dtype.datetime, dtype.tags):
-        if curr_dtype in (dtype.int, dtype.float):
+        if curr_dtype in (dtype.integer, dtype.float):
             is_categorical = nr_distinct_vals < 10
         else:
             is_categorical = max((nr_vals / 100), 10)
