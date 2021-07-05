@@ -37,9 +37,8 @@ class TestTimeseries(unittest.TestCase):
         predictor.learn(datasource.df)
 
         predictions = predictor.predict(datasource.df)
-        print(predictions)
-        print(datasource.df)
 
+        # @TODO: Remove later
         print(r2_score(datasource.df[target], predictions['prediction']))
         print(mean_absolute_error(datasource.df[target], predictions['prediction']))
         print(mean_squared_error(datasource.df[target], predictions['prediction']))
@@ -81,14 +80,12 @@ class TestTimeseries(unittest.TestCase):
         print('Class initialized successfully')
 
         predictor.learn(datasource.df)
-
         predictions = predictor.predict(datasource.df)
-        print(predictions)
-        print(datasource.df)
 
-        print(r2_score(datasource.df[target], predictions['prediction']))
-        print(mean_absolute_error(datasource.df[target], predictions['prediction']))
-        print(mean_squared_error(datasource.df[target], predictions['prediction']))
+        # @TODO: Remove later
+        print('R2 score:', r2_score(datasource.df[target], predictions['prediction']))
+        print('MAE:', mean_absolute_error(datasource.df[target], predictions['prediction']))
+        print('MSE:', mean_squared_error(datasource.df[target], predictions['prediction']))
 
         import matplotlib.pyplot as plt
         df = pd.read_csv('tests/data/arrivals.csv')
