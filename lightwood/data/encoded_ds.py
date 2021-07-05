@@ -35,15 +35,16 @@ class EncodedDs(Dataset):
 
         X = torch.FloatTensor()
         for col in self.data_frame:
-            if col != self.target:
-                kwargs = {}
-                if 'dependency_data' in inspect.signature(self.encoders[col].encode).parameters:
-                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
-                                                 for dep in self.encoders[col].dependencies}
-                encoded_tensor = self.encoders[col].encode([self.data_frame.iloc[idx][col]], **kwargs)[0]
-                X = torch.cat([X, encoded_tensor])
+            kwargs = {}
+            if 'dependency_data' in inspect.signature(self.encoders[col].encode).parameters:
+                kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
+                                             for dep in self.encoders[col].dependencies}
 
-        Y = self.encoders[self.target].encode([self.data_frame.iloc[idx][self.target]])[0]
+            encoded_tensor = self.encoders[col].encode([self.data_frame.iloc[idx][col]], **kwargs)[0]
+            if col != self.target:
+                X = torch.cat([X, encoded_tensor])
+            else:
+                Y = encoded_tensor
 
         if self.cache_encoded:
             self.cache[idx] = (X, Y)
