@@ -14,7 +14,7 @@ def add_implicit_values(json_ml: JsonML) -> str:
         'from lightwood.model import Neural',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
-        'from lightwood.data import transform_timeseries',
+        'from lightwood.data import transform_timeseries, timeseries_analyzer',
         'from lightwood.data import splitter',
         'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score',
@@ -24,7 +24,7 @@ def add_implicit_values(json_ml: JsonML) -> str:
         'import lightwood',
         'from lightwood.api import *',
         'from lightwood.model import BaseModel',
-        'from lightwood.encoder import BaseEncoder',
+        'from lightwood.encoder import BaseEncoder, __ts_encoders__',
         'from lightwood.ensemble import BaseEnsemble',
         'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call'
@@ -71,14 +71,32 @@ def generate_predictor_code(json_ml: JsonML) -> str:
 
     input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ml.features.values()])
 
-    ts_code = ''
+    ts_transform_code = ''
+    ts_analyze_code = ''
+    ts_encoder_code = ''
     if json_ml.timeseries_transformer is not None:
-        ts_code = f"""
+        ts_transform_code = f"""
 log.info('Transforming timeseries data')
 data = {call(json_ml.timeseries_transformer, json_ml)}
 """
+        ts_analyze_code = f"""
+self.ts_analysis = {call(json_ml.timeseries_analyzer, json_ml)}
+"""
 
-    learn_body = f"""
+    if json_ml.timeseries_analyzer is not None:
+        ts_encoder_code = f"""
+if type(encoder) in __ts_encoders__:
+    kwargs['ts_analysis'] = self.ts_analysis
+"""
+
+    if json_ml.problem_definition.timeseries_settings.is_timeseries:
+        ts_target_code = f"""
+if encoder.is_target:
+    encoder.normalizers = self.ts_analysis['target_normalizers']
+    encoder.group_combinations = self.ts_analysis['group_combinations']
+"""
+
+    dataprep_body = f"""
 self.mode = 'train'
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
@@ -92,7 +110,8 @@ self.input_cols = [{input_cols}]
 log.info('Cleaning the data')
 data = {call(json_ml.cleaner, json_ml)}
 
-{ts_code}
+{ts_transform_code}
+{ts_analyze_code}
 
 nfolds = {json_ml.problem_definition.nfolds}
 log.info(f'Splitting the data into {{nfolds}} folds')
@@ -102,27 +121,27 @@ log.info('Preparing the encoders')
 
 parallel_preped_encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1])[col_name], 'prepare'] for col_name, encoder in self.encoders.items() if not encoder.is_nn_encoder}})
 
-seq_preped_encoders = {{}}
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
         priming_data = pd.concat(folds[0:nfolds-1])
         kwargs = {{}}
         if self.dependencies[col_name]:
-            kwargs['dependency_data'] = []
+            kwargs['dependency_data'] = {{}}
             for col in self.dependencies[col_name]:
-                # @TODO: should probably move this into a code generator method
-                kwargs['dependency_data'].append({{
-                    'name': col,
-                    'normalizers': {{}},            # @TODO: reinstate
-                    'group_combinations': {{}},     # @TODO: reinstate
+                kwargs['dependency_data'][col] = {{
                     'original_type': self.dtype_dict[col],
                     'data': priming_data[col]
-                }})
+                }}
+            {align(ts_encoder_code, 3)}
         encoder.prepare(priming_data[col_name], **kwargs)
 
 for col_name, encoder in parallel_preped_encoders.items():
     self.encoders[col_name] = encoder
+    {align(ts_target_code, 1)}
+"""
+    dataprep_body = align(dataprep_body, 2)
 
+    learn_body = f"""
 log.info('Featurizing the data')
 encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
 train_data = encoded_ds_arr[0:nfolds-1]
@@ -150,7 +169,7 @@ self.mode = 'predict'
 log.info('Cleaning the data')
 data = {call(json_ml.cleaner, json_ml)}
 
-{ts_code}
+{ts_transform_code}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
 df = self.ensemble(encoded_ds)
@@ -177,6 +196,7 @@ class Predictor(PredictorInterface):
         self.mode = 'innactive'
 
     def learn(self, data: pd.DataFrame) -> None:
+{dataprep_body}
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
