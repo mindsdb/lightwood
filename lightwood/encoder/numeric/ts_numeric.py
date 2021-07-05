@@ -11,24 +11,23 @@ class TsNumericEncoder(NumericEncoder):
     """
     Variant of vanilla numerical encoder, supports dynamic mean re-scaling
     """
-    def __init__(self, is_target=False):
+    def __init__(self, is_target=False, grouped_by=None):
         super(TsNumericEncoder, self).__init__(is_target=is_target)
         # time series normalization params
         self.normalizers = None
         self.group_combinations = None
+        self.dependencies = grouped_by
 
-    def encode(self, data, extra_data=None):
-        """extra_data[0]['group_info']: dict with all grouped_by column info,
+    def encode(self, data, dependency_data={}):
+        """dependency_data: dict with grouped_by column info,
         to retrieve the correct normalizer for each datum"""
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
-        if extra_data is None or not extra_data[0]['group_info']:
-            group_info = {'__default': [None] * len(data)}
-        else:
-            group_info = extra_data[0]['group_info']
+        if not dependency_data:
+            dependency_data = {'__default': [None] * len(data)}
 
         ret = []
-        for real, group in zip(data, list(zip(*group_info.values()))):
+        for real, group in zip(data, list(zip(*dependency_data.values()))):
             try:
                 real = float(real)
             except:
@@ -66,7 +65,7 @@ class TsNumericEncoder(NumericEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_values, decode_log=None, group_info=None):
+    def decode(self, encoded_values, decode_log=None, dependency_data=None):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
@@ -74,12 +73,14 @@ class TsNumericEncoder(NumericEncoder):
             decode_log = self.decode_log
 
         ret = []
-        if not group_info:
-            group_info = {'__default': [None] * len(encoded_values)}
+        if not dependency_data:
+            dependency_data = {'__default': [None] * len(encoded_values)}
+        # else:
+        #     dependency_data = [[] for col_name, arr in dependency_data.items()]
         if type(encoded_values) != type([]):
             encoded_values = encoded_values.tolist()
 
-        for vector, group in zip(encoded_values, list(zip(*group_info.values()))):
+        for vector, group in zip(encoded_values, list(zip(*dependency_data.values()))):
             if self.is_target:
                 if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf'):
                     log.error(f'Got weird target value to decode: {vector}')
@@ -107,7 +108,7 @@ class TsNumericEncoder(NumericEncoder):
                         real_value = abs(real_value)
 
                     if self._type == 'int':
-                        real_value = int(real_value)
+                        real_value = int(round(real_value, 0))
 
             else:
                 if vector[0] < 0.5:
