@@ -109,34 +109,33 @@ class Neural(BaseModel):
         # @TODO (Maybe) try adding wramup
         # Progressively decrease the learning rate
         total_epochs = 0
-        for lr in [0.1, 0.01, 0.0005]:
-            running_errors: List[float] = []
-            optimizer = self._select_optimizer(lr)
-            for _ in range(int(1e10)):
-                total_epochs += 1
-                error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-                test_error = self._error(test_dl, criterion)
-                log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs}')
-                running_errors.append(test_error)
+        running_errors: List[float] = []
+        optimizer = self._select_optimizer(0.0005)
+        for _ in range(int(1e10)):
+            total_epochs += 1
+            error = self._run_epoch(train_dl, criterion, optimizer, scaler)
+            test_error = self._error(test_dl, criterion)
+            log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs}')
+            running_errors.append(test_error)
 
-                if best_test_error > test_error:
-                    best_test_error = test_error
-                    best_model = deepcopy(self.model)
-                    self.epochs_to_best = total_epochs
+            if best_test_error > test_error:
+                best_test_error = test_error
+                best_model = deepcopy(self.model)
+                self.epochs_to_best = total_epochs
 
-                stop = False
-                if np.isnan(error):
-                    stop = True
-                elif (time.time() - started) > self.stop_after * 0.8:
-                    stop = True
-                elif len(running_errors) > 6 and np.mean(running_errors[-5:]) < test_error:
-                    stop = True
-                elif test_error < 0.00001:
-                    stop = True
+            stop = False
+            if np.isnan(error):
+                stop = True
+            elif (time.time() - started) > self.stop_after * 0.8:
+                stop = True
+            elif len(running_errors) > 10 and np.mean(running_errors[-5:]) < test_error:
+                stop = True
+            elif test_error < 0.00001:
+                stop = True
 
-                if stop:
-                    self.model = best_model
-                    break
+            if stop:
+                self.model = best_model
+                break
         
         # Do a single training run on the test data as well
         self.partial_fit(test_ds_arr)
