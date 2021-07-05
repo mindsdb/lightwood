@@ -71,18 +71,20 @@ def generate_predictor_code(json_ml: JsonML) -> str:
 
     input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ml.features.values()])
 
-    ts_code = ''
-    ts_analysis_code = ''
+    ts_transform_code = ''
+    ts_analyze_code = ''
+    ts_encoder_code = ''
     if json_ml.timeseries_transformer is not None:
-        ts_code = f"""
+        ts_transform_code = f"""
 log.info('Transforming timeseries data')
 data = {call(json_ml.timeseries_transformer, json_ml)}
-
+"""
+        ts_analyze_code = f"""
 self.ts_analysis = {call(json_ml.timeseries_analyzer, json_ml)}
 """
 
     if json_ml.timeseries_analyzer is not None:
-        ts_analysis_code = f"""
+        ts_encoder_code = f"""
 if type(encoder) in __ts_encoders__:
     kwargs['ts_analysis'] = self.ts_analysis
 """
@@ -108,7 +110,8 @@ self.input_cols = [{input_cols}]
 log.info('Cleaning the data')
 data = {call(json_ml.cleaner, json_ml)}
 
-{ts_code}
+{ts_transform_code}
+{ts_analyze_code}
 
 nfolds = {json_ml.problem_definition.nfolds}
 log.info(f'Splitting the data into {{nfolds}} folds')
@@ -129,7 +132,7 @@ for col_name, encoder in self.encoders.items():
                     'original_type': self.dtype_dict[col],
                     'data': priming_data[col]
                 }}
-            {align(ts_analysis_code, 3)}
+            {align(ts_encoder_code, 3)}
         encoder.prepare(priming_data[col_name], **kwargs)
 
 for col_name, encoder in parallel_preped_encoders.items():
@@ -162,7 +165,7 @@ self.mode = 'predict'
 log.info('Cleaning the data')
 data = {call(json_ml.cleaner, json_ml)}
 
-{ts_code}
+{ts_transform_code}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
 df = self.ensemble(encoded_ds)
