@@ -60,6 +60,7 @@ class TestTimeseries(unittest.TestCase):
         target = 'Traffic'
         predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': target,
                                                                               'time_aim': 100,
+                                                                              'nfolds': 4,
                                                                               'anomaly_detection': False,
                                                                               'timeseries_settings': {
                                                                                   'order_by': ['T'],
