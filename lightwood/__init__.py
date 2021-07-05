@@ -1,3 +1,6 @@
+import os
+os.environ['TOKENIZERS_PARALLELISM'] = 'true'
+
 from lightwood.api import (
     dtype,
     JsonML,
