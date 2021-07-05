@@ -1,14 +1,17 @@
 import unittest
 import importlib
 import pandas as pd
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, balanced_accuracy_score
 
 from lightwood.api.types import ProblemDefinition
 from lightwood.api import make_predictor
 
 
 class TestTimeseries(unittest.TestCase):
-    def test_timeseries(self):
+    def test_timeseries_regression(self):
+        """
+        Tests a regression dataset and unsupervised anomaly detection
+        """
         from lightwood import generate_predictor
         from mindsdb_datasources import FileDS
 
@@ -38,7 +41,7 @@ class TestTimeseries(unittest.TestCase):
 
         predictions = predictor.predict(datasource.df)
 
-        # @TODO: Remove later
+        # @TODO: Remove later and add asserts for both acc and anomalies
         print(r2_score(datasource.df[target], predictions['prediction']))
         print(mean_absolute_error(datasource.df[target], predictions['prediction']))
         print(mean_squared_error(datasource.df[target], predictions['prediction']))
@@ -95,8 +98,46 @@ class TestTimeseries(unittest.TestCase):
         plt.plot(preds)
         plt.show()
 
-    def test_anomaly_detection(self):
-        pass
+    def test_time_series_classification(self):
+        from lightwood import generate_predictor
+        from mindsdb_datasources import FileDS
+
+        datasource = FileDS('tests/data/occupancy.csv')
+        target = 'Occupancy'
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': target,
+                                                                              'time_aim': 100,
+                                                                              'nfolds': 10,
+                                                                              'anomaly_detection': False,
+                                                                              'timeseries_settings': {
+                                                                                  'order_by': ['date'],
+                                                                                  'use_previous_target': True,
+                                                                                  'window': 10
+                                                                              },
+                                                                              }),
+                                                 datasource.df)
+
+        with open('dynamic_predictor.py', 'w') as fp:
+            fp.write(predictor_class_str)
+
+        predictor_class = importlib.import_module('dynamic_predictor').Predictor
+        print('Class was evaluated successfully')
+
+        predictor = predictor_class()
+        print('Class initialized successfully')
+
+        predictor.learn(datasource.df)
+        predictions = predictor.predict(datasource.df)
+
+        # @TODO: Remove later
+        print('R2 score:', balanced_accuracy_score(datasource.df[target], predictions['prediction']))
+
+        import matplotlib.pyplot as plt
+        df = pd.read_csv('tests/data/occupancy.csv')
+        true = df[target].values
+        preds = predictions['prediction'].values
+        plt.plot(true)
+        plt.plot(preds)
+        plt.show()
 
     def test_long_forecasts(self):
         pass
