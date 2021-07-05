@@ -15,15 +15,22 @@ class MinMaxNormalizer:
         self.abs_mean = None
 
     def prepare(self, x):
+        if isinstance(x, pd.Series):
+            x = x.values
+
         if isinstance(x, list):
             x = np.array([j for i in x for j in i]).reshape(-1, 1)
         elif isinstance(x[0], list):
             x = np.vstack(x)
+        elif isinstance(x, np.ndarray):
+            if len(x.shape) == 1:
+                x = x.reshape(-1, 1)
 
         x[x == None] = 0
         self.abs_mean = np.mean(np.abs(x))
         self.scaler.fit(x)
-        self.single_scaler.fit(x[:, -1:])  # fit using non-windowed column data
+        if isinstance(x, np.ndarray):
+            self.single_scaler.fit(x[:, -1:])  # fit using non-windowed column data
 
     def encode(self, y):
         if not isinstance(y, np.ndarray) and not isinstance(y[0], list):
@@ -80,10 +87,10 @@ def get_group_matches(data, combination, keys):
 
     return: indexes for rows to normalize, data to normalize
     """
+    if isinstance(data['data'], pd.Series):
+        data['data'] = np.vstack(data['data'])
     if not combination:
         idxs = range(len(data['data']))
-        if isinstance(data['data'], pd.Series):
-            data['data'] = np.vstack(data['data'])
         return [idxs, np.array(data['data'])[idxs, :]]  # return all data
     else:
         all_sets = []
@@ -92,6 +99,7 @@ def get_group_matches(data, combination, keys):
         if all_sets:
             idxs = list(set.intersection(*all_sets))
             return idxs, np.array(data['data'])[idxs, :]
+
         else:
             return [], np.array([])
 
@@ -128,7 +136,7 @@ def generate_target_group_normalizers(data):
         normalizers['__default'].prepare(data['data'])
         group_combinations.append('__default')
 
-    data['normalizers'] = normalizers
+    data['target_normalizers'] = normalizers
     data['group_combinations'] = group_combinations
 
     return data

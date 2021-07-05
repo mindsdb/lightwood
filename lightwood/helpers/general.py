@@ -7,8 +7,8 @@ import pandas as pd
 import sklearn
 
 
-def evaluate_accuracy(predictions: pd.Series,
-                      true_values: pd.Series,
+def evaluate_accuracy(true_values: pd.Series,
+                      predictions: pd.Series,
                       accuracy_functions: List[str]) -> float:
     
     score_dict = {}
