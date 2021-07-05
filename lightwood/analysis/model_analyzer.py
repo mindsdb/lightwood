@@ -23,15 +23,16 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 """
 [31/5/21] Analyzer roadmap:
 
-- v0: flow works for categorical and numerical with minimal adaptation to code logic, should include accStats, 
+- flow works for categorical and numerical with minimal adaptation to code logic, should include accStats, 
       global feat importance and ICP confidence
      - [DONE, 3/6/21] icp confidence
      - [] use class distribution output
      - [] global feat importance
      - [partially done] accStats
-- v1: streamline nonconformist custom implementation to cater analysis needs
-- v2: introduce model-agnostic normalizer (previously known as self aware NN)
-- v3: re-introduce time series (and grouped ICPs)
+- streamline nonconformist custom implementation to cater analysis needs
+- introduce model-agnostic normalizer (previously known as self aware NN)
+- re-introduce time series (and grouped ICPs)
+    - [2/7/2021] currently working on this
 """
 
 
@@ -143,7 +144,7 @@ def model_analyzer(
         if ts_cfg.is_timeseries and ts_cfg.group_by:
 
             # create an ICP for each possible group
-            group_info = data.train_df[ts_cfg.group_by].to_dict('list')
+            group_info = data[ts_cfg.group_by].to_dict('list')  # @TODO: should save this info from all data in timeseries_analyzer then send it here. Fow now, validation only means it can have incomplete data
             all_group_combinations = list(product(*[set(x) for x in group_info.values()]))
             runtime_analyzer['icp']['__mdb_groups'] = all_group_combinations
             runtime_analyzer['icp']['__mdb_group_keys'] = [x for x in group_info.keys()]
@@ -176,10 +177,9 @@ def model_analyzer(
         if ts_cfg.is_timeseries and ts_cfg.group_by:
             icps = runtime_analyzer['icp']
             group_keys = icps['__mdb_group_keys']
-            runtime_analyzer['train_std_dev'] = {}
 
             # add all predictions to the cached DF
-            icps_df = deepcopy(data.cached_val_df)
+            icps_df = deepcopy(data)  # @TODO: previously used cached_val_df
             if is_multi_ts:
                 icps_df[f'__predicted_{target}'] = [p[0] for p in normal_predictions['prediction']]
             else:
@@ -187,7 +187,8 @@ def model_analyzer(
 
             for group in icps['__mdb_groups']:
                 icp_df = icps_df
-                icp_df[f'__selfaware_{target}'] = icps[frozenset(group)].nc_function.normalizer.prediction_cache
+                if icps[frozenset(group)].nc_function.normalizer is not None:  # @TODO: reintroduce normalizer
+                    icp_df[f'__selfaware_{target}'] = icps[frozenset(group)].nc_function.normalizer.prediction_cache
 
                 # filter irrelevant rows for each group combination
                 for key, val in zip(group_keys, group):
@@ -196,8 +197,8 @@ def model_analyzer(
                 # save relevant predictions in the caches, then calibrate the ICP
                 pred_cache = icp_df.pop(f'__predicted_{target}').values
                 icps[frozenset(group)].nc_function.model.prediction_cache = pred_cache
-                icp_df, y = clean_df(icp_df, target, predictor, is_classification, fit_params)
-                if icps[frozenset(group)].nc_function.normalizer is not None:
+                icp_df, y = clean_df(icp_df, target, is_classification, runtime_analyzer.get('label_encoders', None))
+                if icps[frozenset(group)].nc_function.normalizer is not None:  # @TODO: reintroduce normalizer
                     icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(f'__selfaware_{target}').values
 
                 icps[frozenset(group)].index = icp_df.columns      # important at inference time
@@ -209,11 +210,12 @@ def model_analyzer(
                     for key, val in zip(group_keys, group):
                         icp_train_df = icp_train_df[icp_train_df[key] == val]
                     y_train = icp_train_df[target].values
-                    runtime_analyzer['train_std_dev'][frozenset(group)] = y_train.std()
+                    runtime_analyzer['train_std_dev'][frozenset(group)] = y_train.std()  # @TODO: check that this is indeed train std dev
 
                 # get bounds for relevant rows in validation dataset
-                conf, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], target, runtime_analyzer,
-                                                    params, group=frozenset(group),
+                conf, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], dtype_dict[target], runtime_analyzer,
+                                                    group=frozenset(group),
+                                                    positive_domain=positive_domain,
                                                     significance=fixed_significance)
                 # save group bounds
                 if not is_classification:

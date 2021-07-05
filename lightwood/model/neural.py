@@ -155,11 +155,15 @@ class Neural(BaseModel):
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         
-        for X, Y in ds:
+        for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
             Y = Y.to(self.model.device)
             Yh = self.model(X)
-            decoded_prediction = self.target_encoder.decode(torch.unsqueeze(Yh, 0))
+
+            kwargs = {}
+            for dep in self.target_encoder.dependencies:
+                kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
+            decoded_prediction = self.target_encoder.decode(torch.unsqueeze(Yh, 0), **kwargs)
             decoded_predictions.extend(decoded_prediction)
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})

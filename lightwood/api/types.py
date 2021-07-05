@@ -166,6 +166,7 @@ class JsonML:
     explainer: object = None
     imports: object = None
     timeseries_transformer: object = None
+    timeseries_analyzer: object = None
     accuracy_functions: List[str] = None
     phases: Dict[str, object] = None
 
