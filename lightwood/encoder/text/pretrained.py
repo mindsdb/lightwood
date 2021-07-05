@@ -117,6 +117,7 @@ class PretrainedLangEncoder(BaseEncoder):
         Training data must be a dict with "targets" avail.
         Automatically assumes this.
         """
+        os.environ['TOKENIZERS_PARALLELISM'] = 'true'
         if self._prepared:
             raise Exception("Encoder is already prepared.")
 
