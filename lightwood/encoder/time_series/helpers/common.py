@@ -98,10 +98,8 @@ def get_group_matches(data, combination, keys):
             all_sets.append(set([i for i, elt in enumerate(data['group_info'][key]) if elt == val]))
         if all_sets:
             idxs = list(set.intersection(*all_sets))
-            try:
-                return idxs, np.array(data['data'])[idxs, :]
-            except:
-                print('ashifa')
+            return idxs, np.array(data['data'])[idxs, :]
+
         else:
             return [], np.array([])
 

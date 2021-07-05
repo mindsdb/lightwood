@@ -79,7 +79,7 @@ class TimeSeriesEncoder(BaseEncoder):
                         self.dep_norms[dep_name]['__default']  = MinMaxNormalizer()
 
                     self.dep_norms[dep_name]['__default'].prepare(dep['data'])
-                    self._group_combinations = {'__default': None}  # @TODO: does this work? Maybe None instead?
+                    self._group_combinations = {'__default': None}
 
                 # add descriptor size to the total encoder output dimensionality
                 if dep['original_type'] in (dtype.categorical, dtype.binary):
