@@ -11,9 +11,6 @@ import tempfile
 def make_predictor(df: pd.DataFrame, problem_definition_dict: dict) -> PredictorInterface:
     predictor_class_str = generate_predictor(ProblemDefinition.from_dict(problem_definition_dict), df)
 
-    with open('/home/george/debug.py', 'w') as fp:
-        fp.write(predictor_class_str)
-
     with tempfile.NamedTemporaryFile(suffix='.py') as temp:
         temp.write(predictor_class_str.encode('utf-8'))
         import importlib.util
