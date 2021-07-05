@@ -18,18 +18,16 @@ class TsNumericEncoder(NumericEncoder):
         self.group_combinations = None
         self.dependencies = grouped_by
 
-    def encode(self, data, extra_data=None):
-        """extra_data[0]['group_info']: dict with all grouped_by column info,
+    def encode(self, data, dependency_data=None):
+        """dependency_data: dict with grouped_by column info,
         to retrieve the correct normalizer for each datum"""
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
-        if extra_data is None or not extra_data[0]['group_info']:
-            group_info = {'__default': [None] * len(data)}
-        else:
-            group_info = extra_data[0]['group_info']
+        if dependency_data is None:
+            dependency_data = {dep: [None] * len(data) for dep in self.dependencies}
 
         ret = []
-        for real, group in zip(data, list(zip(*group_info.values()))):
+        for real, group in zip(data, list(zip(*dependency_data.values()))):
             try:
                 real = float(real)
             except:
@@ -110,7 +108,7 @@ class TsNumericEncoder(NumericEncoder):
                         real_value = abs(real_value)
 
                     if self._type == 'int':
-                        real_value = int(real_value)
+                        real_value = int(round(real_value, 0))
 
             else:
                 if vector[0] < 0.5:
