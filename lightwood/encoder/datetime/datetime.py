@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd  # @TODO: remove?
 import torch
 from lightwood.encoder.base import BaseEncoder
+from collections.abc import Iterable
 
 
 class DatetimeEncoder(BaseEncoder):
@@ -30,8 +31,8 @@ class DatetimeEncoder(BaseEncoder):
 
         if isinstance(data, pd.Series):
             data = data.values
-        elif not isinstance(data[0], list):
-            data = [data]  # base case, single row gets packaged inside list
+        if not isinstance(data[0], Iterable):
+            data = [data]
 
         ret = [self.encode_one(row) for row in data]
 
