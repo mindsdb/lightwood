@@ -18,13 +18,13 @@ class TsNumericEncoder(NumericEncoder):
         self.group_combinations = None
         self.dependencies = grouped_by
 
-    def encode(self, data, dependency_data=None):
+    def encode(self, data, dependency_data={}):
         """dependency_data: dict with grouped_by column info,
         to retrieve the correct normalizer for each datum"""
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
-        if dependency_data is None:
-            dependency_data = {dep: [None] * len(data) for dep in self.dependencies}
+        if not dependency_data:
+            dependency_data = {'__default': [None] * len(data)}
 
         ret = []
         for real, group in zip(data, list(zip(*dependency_data.values()))):
