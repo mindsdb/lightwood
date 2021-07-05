@@ -170,6 +170,8 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
                 'target': 'self.target'
             }
         }
+    else:
+        timeseries_analyzer = None
     
     # Decide on the accuracy functions to use
     if output.data_dtype in [dtype.integer, dtype.float]:
