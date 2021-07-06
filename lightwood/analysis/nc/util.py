@@ -148,7 +148,10 @@ def get_anomalies(insights, observed_series, cooldown=1):
     except (TypeError, ValueError):
         return [None for _ in observed_series]
 
-    for (l, u), t in zip((insights['lower'], insights['upper']), observed_series):
+    lower_bounds = insights['lower'].tolist()
+    upper_bounds = insights['upper'].tolist()
+
+    for (l, u), t in zip(zip(lower_bounds, upper_bounds), observed_series):
         if t is not None:
             anomaly = not (l <= t <= u)
 

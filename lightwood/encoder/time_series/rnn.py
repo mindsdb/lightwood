@@ -154,7 +154,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
         if self._normalizer:
             self._normalizer.prepare(priming_data)
-            priming_data = torch.stack([self._normalizer.encode(d) for d in priming_data]).to(self.device)
+            priming_data = self._normalizer.encode(priming_data).to(self.device)
         else:
             priming_data = torch.stack([d for d in priming_data]).unsqueeze(-1).to(self.device)
 
@@ -173,7 +173,7 @@ class TimeSeriesEncoder(BaseEncoder):
                         data[idxs, :, :] = normalized
                 else:
                     # categorical has only one normalizer at all times
-                    normalizer = dep_data['normalizers']['__default']
+                    normalizer = self.dep_norms[dep_name]['__default']
                     data = normalizer.encode(dep_data['data'])
                     if len(data.shape) < 3:
                         data = data.unsqueeze(-1)  # add feature dimension
@@ -249,7 +249,7 @@ class TimeSeriesEncoder(BaseEncoder):
             self._max_ts_length = int(lengths_data.max())
 
             if self._normalizer:
-                data = torch.stack([self._normalizer.encode(d) for d in data]).to(self.device)
+                data = self._normalizer.encode(data).unsqueeze(0).to(self.device)
             else:
                 data = torch.stack([d for d in data]).unsqueeze(-1).to(self.device)
 
@@ -340,8 +340,8 @@ class TimeSeriesEncoder(BaseEncoder):
 
                 # normalize categorical target
                 else:
-                    normalizer = self.dep_norms[prev_col_data['name']]['__default']
-                    tensor = normalizer.encode(prev_col_data['data'])
+                    normalizer = self.dep_norms[dep]['__default']
+                    tensor = normalizer.encode(data)
                     tensor[torch.isnan(tensor)] = 0.0
 
                 ptd.append(tensor)
