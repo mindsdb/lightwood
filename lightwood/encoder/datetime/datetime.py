@@ -31,8 +31,6 @@ class DatetimeEncoder(BaseEncoder):
 
         if isinstance(data, pd.Series):
             data = data.values
-        if not isinstance(data[0], Iterable):
-            data = [data]
 
         ret = [self.encode_one(row) for row in data]
 
