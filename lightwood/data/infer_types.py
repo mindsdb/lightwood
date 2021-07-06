@@ -232,7 +232,7 @@ def get_column_data_type(arg_tup):
         if curr_dtype in (dtype.integer, dtype.float):
             is_categorical = nr_distinct_vals < 10
         else:
-            is_categorical = max((nr_vals / 100), 10)
+            is_categorical = nr_distinct_vals < max((nr_vals / 100), 10)
         
         if is_categorical:
             if curr_dtype is not None:
@@ -241,6 +241,7 @@ def get_column_data_type(arg_tup):
 
     # If curr_data_type is still None, then it's text or category
     if curr_dtype is None:
+        print(f'Doing text detection for column: {col_name}')
         lang_dist = get_language_dist(data)
 
         # Normalize lang probabilities
