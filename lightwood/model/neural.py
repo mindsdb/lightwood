@@ -32,7 +32,7 @@ class Neural(BaseModel):
         self.target = target
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
-        self.epochs_to_best = None
+        self.epochs_to_best = 1
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
