@@ -164,6 +164,7 @@ def get_column_data_type(arg_tup):
     NOTE: type distribution is the count that this column has for belonging cells to each DATA_TYPE
     """
     data, full_data, col_name, pct_invalid = arg_tup
+    print(f'Infering for: {col_name}')
     additional_info = {'other_potential_dtypes': []}
 
     warn = []
