@@ -10,11 +10,11 @@ trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSe
 ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder')
 
 
-def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_target: bool):
+def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_target: bool, statistical_analysis: StatisticalAnalysis):
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
         dtype.float: 'NumericEncoder',
-        dtype.binary: 'OneHotEncoder',
+        dtype.binary: 'BinaryEncoder',
         dtype.categorical: 'CategoricalAutoEncoder',
         dtype.tags: 'MultiHotEncoder',
         dtype.date: 'DatetimeEncoder',
@@ -36,6 +36,13 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
         'config_args': {},
         'dynamic_args': {}
     }
+
+    if col_dtype == dtype.categorical and len(statistical_analysis.histograms) < 100:
+        encoder_dict = {
+            'object': 'OneHotEncoder',
+            'config_args': {},
+            'dynamic_args': {}
+        }
 
     if is_target:
         encoder_dict['dynamic_args'] = {'is_target': 'True'}
@@ -122,13 +129,13 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], target, problem_definition.timeseries_settings, True)
+    output.encoder = lookup_encoder(type_information.dtypes[target], target, problem_definition.timeseries_settings, True, statistical_analysis)
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
         if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
             dependency = []
-            encoder = lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, is_target=False)
+            encoder = lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, False, statistical_analysis)
 
             if problem_definition.timeseries_settings.is_timeseries and encoder['object'] in ts_encoders:
                 if problem_definition.timeseries_settings.group_by is not None:
