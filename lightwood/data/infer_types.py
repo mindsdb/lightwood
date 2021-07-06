@@ -164,7 +164,7 @@ def get_column_data_type(arg_tup):
     NOTE: type distribution is the count that this column has for belonging cells to each DATA_TYPE
     """
     data, full_data, col_name, pct_invalid = arg_tup
-    print(f'Infering for: {col_name}')
+    log.info(f'Infering for: {col_name}')
     additional_info = {'other_potential_dtypes': []}
 
     warn = []
@@ -232,7 +232,7 @@ def get_column_data_type(arg_tup):
         if curr_dtype in (dtype.integer, dtype.float):
             is_categorical = nr_distinct_vals < 10
         else:
-            is_categorical = nr_distinct_vals < max((nr_vals / 100), 10)
+            is_categorical = nr_distinct_vals < min(max((nr_vals / 100), 10), 3000)
         
         if is_categorical:
             if curr_dtype is not None:
@@ -241,7 +241,7 @@ def get_column_data_type(arg_tup):
 
     # If curr_data_type is still None, then it's text or category
     if curr_dtype is None:
-        print(f'Doing text detection for column: {col_name}')
+        log.info(f'Doing text detection for column: {col_name}')
         lang_dist = get_language_dist(data)
 
         # Normalize lang probabilities
@@ -272,6 +272,7 @@ def get_column_data_type(arg_tup):
         known_dtype_dist[dtype.binary] = known_dtype_dist[dtype.categorical]
         del known_dtype_dist[dtype.categorical]
 
+    log.info(f'Column {col_name} has data type {curr_dtype}')
     return curr_dtype, known_dtype_dist, additional_info, warn, info
 
 
