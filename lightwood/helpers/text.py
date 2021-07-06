@@ -21,10 +21,8 @@ from nltk.corpus import stopwords
 from lightwood.api.dtype import dtype
 
 
-langdetect.DetectorFactory.seed = 0
-
-
 def get_language_dist(data):
+    langdetect.DetectorFactory.seed = 0
     lang_dist = defaultdict(lambda: 0)
     lang_dist['Unknown'] = 0
     lang_probs_cache = dict()
