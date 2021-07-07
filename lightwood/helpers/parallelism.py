@@ -22,6 +22,7 @@ def get_nr_procs(df=None):
 def run_mut_method(obj: object, arg: object, method: str, identifier: str, return_dict: dict) -> str:
     try:
         obj.__getattribute__(method)(arg)
+        log.inof(f'Got a result, return dict lenght now at {len(return_dict)}')
         return_dict[identifier] = obj
     except Exception as e:
         return_dict[identifier] = False
@@ -31,11 +32,14 @@ def run_mut_method(obj: object, arg: object, method: str, identifier: str, retur
 def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
     manager = mp.Manager()
     return_dict = manager.dict()
+    import time
 
     nr_procs = get_nr_procs()
     pool = mp.Pool(processes=nr_procs)
     for name, data in object_dict.items():
-        pool.apply_async(target=run_mut_method, args=(data[0], data[1], data[2], name, return_dict))
+        log.info(f'Return dict lenght now at {len(return_dict)}')
+        time.sleep(0.1)
+        pool.apply_async(func=run_mut_method, args=(data[0], data[1], data[2], name, return_dict))
     pool.close()
     pool.join()
 
