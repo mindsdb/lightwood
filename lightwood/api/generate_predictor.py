@@ -121,7 +121,13 @@ folds = {call(json_ml.splitter, json_ml)}
 
 log.info('Preparing the encoders')
 
-parallel_preped_encoders = mut_method_call({{col_name: [encoder, pd.concat(folds[0:nfolds-1])[col_name], 'prepare'] for col_name, encoder in self.encoders.items() if not encoder.is_nn_encoder}})
+encoder_preping_dict = {{}}
+for col_name, encoder in self.encoders.items(): 
+    if not encoder.is_nn_encoder:
+        encoder_preping_dict[col_name] = [encoder, pd.concat(folds[0:nfolds-1])[col_name], 'prepare']
+        log.info(f'Encoder preping dict lenght of: {{len(encoder_preping_dict)}}')
+
+parallel_preped_encoders = mut_method_call(encoder_preping_dict)
 
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
