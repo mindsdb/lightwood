@@ -42,6 +42,7 @@ def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
     for promise in promise_arr:
         obj, identifier = promise.get()
         return_dict[identifier] = obj
+        log.info(f'Done running for: {identifier}')
 
     pool.close()
     pool.join()
