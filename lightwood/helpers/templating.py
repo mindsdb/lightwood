@@ -1,19 +1,19 @@
-from lightwood.api.types import JsonML
+from lightwood.api.types import JsonAI
 
 
-def call(entity: dict, json_ml: JsonML) -> str:
+def call(entity: dict, json_ai: JsonAI) -> str:
     dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items()]
 
-    config_args = []
-    for k, v in entity['config_args'].items():
-        val = json_ml
+    static_args = []
+    for k, v in entity['static_args'].items():
+        val = json_ai
         for item in v.split('.'):
             val = val.__getattribute__(item)
             if isinstance(val, str):
                 val = f'"{val}"'
-        config_args.append(f'{k}={val}')
+        static_args.append(f'{k}={val}')
 
-    args = ', '.join(config_args + dynamic_args)
+    args = ', '.join(static_args + dynamic_args)
 
     call = entity['object']
 

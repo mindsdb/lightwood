@@ -154,7 +154,7 @@ class ProblemDefinition:
 
 @dataclass_json
 @dataclass
-class JsonML:
+class JsonAI:
     features: Dict[str, Feature]
     output: Output
     problem_definition: ProblemDefinition

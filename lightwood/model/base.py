@@ -1,11 +1,11 @@
-from lightwood.api.types import JsonML
+from lightwood.api.types import JsonAI
 from typing import List
 import pandas as pd
 from lightwood.data.encoded_ds import EncodedDs
 
 
 class BaseModel:
-    json_ml: JsonML
+    json_ai: JsonAI
 
     def __init__(self, stop_after: int):
         self.stop_after = stop_after

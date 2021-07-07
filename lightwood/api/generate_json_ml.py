@@ -3,7 +3,7 @@ from typing import Dict
 
 from lightwood.api import dtype
 from lightwood.encoder import __ts_encoders__
-from lightwood.api.types import JsonML, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
+from lightwood.api.types import JsonAI, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
 
 
 trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder')
@@ -33,14 +33,14 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
 
     encoder_dict = {
         'object': encoder_lookup[col_dtype],
-        'config_args': {},
+        'static_args': {},
         'dynamic_args': {}
     }
 
     if col_dtype == dtype.categorical and len(statistical_analysis.histograms) < 100:
         encoder_dict = {
             'object': 'OneHotEncoder',
-            'config_args': {},
+            'static_args': {},
             'dynamic_args': {}
         }
 
@@ -49,7 +49,7 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
         if col_dtype in target_encoder_lookup_override:
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
-            encoder_dict['config_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
+            encoder_dict['static_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
 
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
@@ -68,10 +68,10 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
-        encoder_dict['config_args']['output_type'] = 'output.data_dtype'
+        encoder_dict['static_args']['output_type'] = 'output.data_dtype'
 
     if encoder_dict['object'] in trainable_encoders:
-        encoder_dict['config_args']['stop_after'] = 'problem_definition.seconds_per_encoder'
+        encoder_dict['static_args']['stop_after'] = 'problem_definition.seconds_per_encoder'
 
     return encoder_dict
 
@@ -83,45 +83,47 @@ def populate_problem_definition(type_information: TypeInformation, statistical_a
     return problem_definition
 
 
-def generate_json_ml(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> JsonML:
+def generate_json_ai(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> JsonAI:
 
     problem_definition = populate_problem_definition(type_information, statistical_analysis, problem_definition)
     target = problem_definition.target
 
+    models = [
+        {
+            
+            'object': 'Neural',
+            'static_args': {
+                'stop_after': 'problem_definition.seconds_per_model',
+                'timeseries_settings': 'problem_definition.timeseries_settings'
+            },
+            'dynamic_args': {
+                'target': 'self.target',
+                'dtype_dict': 'self.dtype_dict',
+                'input_cols': 'self.input_cols',
+                'target_encoder': 'self.encoders[self.target]'
+            }
+        },
+        {
+            'object': 'LightGBM',
+            'static_args': {
+                'stop_after': 'problem_definition.seconds_per_model'
+            },
+            'dynamic_args': {
+                'target': 'self.target',
+                'dtype_dict': 'self.dtype_dict',
+                'input_cols': 'self.input_cols'
+            }
+        }
+    ]
+    
     output = Output(
         name=target,
         data_dtype=type_information.dtypes[target],
         encoder=None,
-        models=[
-            {
-                
-                'object': 'Neural',
-                'config_args': {
-                    'stop_after': 'problem_definition.seconds_per_model',
-                    'timeseries_settings': 'problem_definition.timeseries_settings'
-                },
-                'dynamic_args': {
-                    'target': 'self.target',
-                    'dtype_dict': 'self.dtype_dict',
-                    'input_cols': 'self.input_cols',
-                    'target_encoder': 'self.encoders[self.target]'
-                }
-            },
-            {
-                'object': 'LightGBM',
-                'config_args': {
-                    'stop_after': 'problem_definition.seconds_per_model'
-                },
-                'dynamic_args': {
-                    'target': 'self.target',
-                    'dtype_dict': 'self.dtype_dict',
-                    'input_cols': 'self.input_cols'
-                }
-            }
-        ],
+        models=models,
         ensemble={
             'object': 'BestOf',
-            'config_args': {},
+            'static_args': {},
             'dynamic_args': {
                 'data': 'test_data',
                 'models': 'self.models'
@@ -157,7 +159,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
     if problem_definition.timeseries_settings.is_timeseries:
         timeseries_transformer = {
             'object': 'transform_timeseries',
-            'config_args': {
+            'static_args': {
                 'timeseries_settings': 'problem_definition.timeseries_settings'
             },
             'dynamic_args': {
@@ -169,7 +171,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
 
         timeseries_analyzer = {
             'object': 'timeseries_analyzer',
-            'config_args': {
+            'static_args': {
                 'timeseries_settings': 'problem_definition.timeseries_settings'
             },
             'dynamic_args': {
@@ -207,10 +209,10 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
             problem_definition.seconds_per_encoder = problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders)
         problem_definition.seconds_per_model = problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models)
 
-    return JsonML(
+    return JsonAI(
         cleaner={
             'object': 'cleaner',
-            'config_args': {
+            'static_args': {
                 'pct_invalid': 'problem_definition.pct_invalid',
                 'ignore_features': 'problem_definition.ignore_features',
                 'identifiers': 'identifiers',
@@ -224,7 +226,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         },
         splitter={
             'object': 'splitter',
-            'config_args': {},
+            'static_args': {},
             'dynamic_args': {
                 'data': 'data',
                 'k': 'nfolds'
@@ -232,7 +234,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
         },
         analyzer={
             'object': 'model_analyzer',
-            'config_args': {
+            'static_args': {
                 'stats_info': 'statistical_analysis',
                 'ts_cfg': 'problem_definition.timeseries_settings',
                 'accuracy_functions': 'accuracy_functions'
@@ -250,7 +252,7 @@ def generate_json_ml(type_information: TypeInformation, statistical_analysis: St
 
         explainer={
             'object': 'explain',
-            'config_args': {
+            'static_args': {
                 'timeseries_settings': 'problem_definition.timeseries_settings',
                 'positive_domain': 'problem_definition.positive_domain',
                 'fixed_confidence': 'problem_definition.fixed_confidence',
