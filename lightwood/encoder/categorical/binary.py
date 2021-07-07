@@ -14,7 +14,7 @@ class BinaryEncoder(BaseEncoder):
         self.rev_map = {}
         if self.is_target:
             self.target_class_distribution = target_class_distribution
-            self.index_weights = {}
+            self.index_weights = None
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -31,8 +31,10 @@ class BinaryEncoder(BaseEncoder):
                 break
         
         if self.is_target:
+            self.index_weights = [None, None]
             for word in self.map:
                 self.index_weights[self.map[word]] = 1 / self.target_class_distribution[word]
+            self.index_weights = torch.Tensor(self.index_weights)
 
         self._prepared = True
 
