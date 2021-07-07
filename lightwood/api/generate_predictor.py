@@ -1,14 +1,14 @@
 from lightwood.helpers.templating import call, inline_dict, align
-from lightwood.api.generate_json_ml import lookup_encoder
+from lightwood.api.generate_json_ai import lookup_encoder
 from lightwood.api.types import ProblemDefinition
 from lightwood.api import dtype
 import lightwood
-from lightwood.api import JsonML
+from lightwood.api import JsonAI
 import pandas as pd
 import autopep8
 
 
-def add_implicit_values(json_ml: JsonML) -> str:
+def add_implicit_values(json_ai: JsonAI) -> str:
     imports = [
         'from lightwood.model import LightGBM',
         'from lightwood.model import Neural',
@@ -30,66 +30,66 @@ def add_implicit_values(json_ml: JsonML) -> str:
         'from lightwood.helpers.parallelism import mut_method_call'
     ]
 
-    for feature in [json_ml.output, *json_ml.features.values()]:
+    for feature in [json_ai.output, *json_ai.features.values()]:
         encoder_import = feature.encoder['object']
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
-    if json_ml.problem_definition.timeseries_settings.use_previous_target:
+    if json_ai.problem_definition.timeseries_settings.use_previous_target:
         imports.append(f'from lightwood.encoder import TimeSeriesPlainEncoder')
 
-    json_ml.imports.extend(imports)
+    json_ai.imports.extend(imports)
 
-    return json_ml
+    return json_ai
 
 
-def generate_predictor_code(json_ml: JsonML) -> str:
-    json_ml = add_implicit_values(json_ml)
+def generate_predictor_code(json_ai: JsonAI) -> str:
+    json_ai = add_implicit_values(json_ai)
 
     predictor_code = ''
 
-    imports = '\n'.join(json_ml.imports)
+    imports = '\n'.join(json_ai.imports)
 
-    encoder_dict = {json_ml.output.name: call(json_ml.output.encoder, json_ml)}
+    encoder_dict = {json_ai.output.name: call(json_ai.output.encoder, json_ai)}
     dependency_dict = {}
-    dtype_dict = {json_ml.output.name: f"""'{json_ml.output.data_dtype}'"""}
+    dtype_dict = {json_ai.output.name: f"""'{json_ai.output.data_dtype}'"""}
 
-    for col_name, feature in json_ml.features.items():
-        encoder_dict[col_name] = call(feature.encoder, json_ml)
+    for col_name, feature in json_ai.features.items():
+        encoder_dict[col_name] = call(feature.encoder, json_ai)
         dependency_dict[col_name] = feature.dependency
         dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
-    if json_ml.problem_definition.timeseries_settings.use_previous_target:
-        col_name = f'__mdb_ts_previous_{json_ml.output.name}'
-        json_ml.problem_definition.timeseries_settings.target_type = json_ml.output.data_dtype
-        encoder_dict[col_name] = call(lookup_encoder(json_ml.output.data_dtype,
+    if json_ai.problem_definition.timeseries_settings.use_previous_target:
+        col_name = f'__mdb_ts_previous_{json_ai.output.name}'
+        json_ai.problem_definition.timeseries_settings.target_type = json_ai.output.data_dtype
+        encoder_dict[col_name] = call(lookup_encoder(json_ai.output.data_dtype,
                                                      col_name,
-                                                     json_ml.problem_definition.timeseries_settings,
+                                                     json_ai.problem_definition.timeseries_settings,
                                                      is_target=False),
-                                      json_ml)
+                                      json_ai)
         dependency_dict[col_name] = []
-        dtype_dict[col_name] = f"""'{json_ml.output.data_dtype}'"""
+        dtype_dict[col_name] = f"""'{json_ai.output.data_dtype}'"""
 
-    input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ml.features.values()])
+    input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ai.features.values()])
 
     ts_transform_code = ''
     ts_analyze_code = ''
     ts_encoder_code = ''
-    if json_ml.timeseries_transformer is not None:
+    if json_ai.timeseries_transformer is not None:
         ts_transform_code = f"""
 log.info('Transforming timeseries data')
-data = {call(json_ml.timeseries_transformer, json_ml)}
+data = {call(json_ai.timeseries_transformer, json_ai)}
 """
         ts_analyze_code = f"""
-self.ts_analysis = {call(json_ml.timeseries_analyzer, json_ml)}
+self.ts_analysis = {call(json_ai.timeseries_analyzer, json_ai)}
 """
 
-    if json_ml.timeseries_analyzer is not None:
+    if json_ai.timeseries_analyzer is not None:
         ts_encoder_code = f"""
 if type(encoder) in __ts_encoders__:
     kwargs['ts_analysis'] = self.ts_analysis
 """
 
-    if json_ml.problem_definition.timeseries_settings.is_timeseries:
+    if json_ai.problem_definition.timeseries_settings.is_timeseries:
         ts_target_code = f"""
 if encoder.is_target:
     encoder.normalizers = self.ts_analysis['target_normalizers']
@@ -110,14 +110,14 @@ self.dtype_dict = {inline_dict(dtype_dict)}
 self.input_cols = [{input_cols}]
 
 log.info('Cleaning the data')
-data = {call(json_ml.cleaner, json_ml)}
+data = {call(json_ai.cleaner, json_ai)}
 
 {ts_transform_code}
 {ts_analyze_code}
 
-nfolds = {json_ml.problem_definition.nfolds}
+nfolds = {json_ai.problem_definition.nfolds}
 log.info(f'Splitting the data into {{nfolds}} folds')
-folds = {call(json_ml.splitter, json_ml)}
+folds = {call(json_ai.splitter, json_ai)}
 
 log.info('Preparing the encoders')
 
@@ -157,15 +157,15 @@ train_data = encoded_ds_arr[0:nfolds-1]
 test_data = encoded_ds_arr[nfolds-1]
 
 log.info('Training the models')
-self.models = [{', '.join([call(x, json_ml) for x in json_ml.output.models])}]
+self.models = [{', '.join([call(x, json_ai) for x in json_ai.output.models])}]
 for model in self.models:
     model.fit(train_data)
 
 log.info('Ensembling the model')
-self.ensemble = {call(json_ml.output.ensemble, json_ml)}
+self.ensemble = {call(json_ai.output.ensemble, json_ai)}
 
 log.info('Analyzing the ensemble')
-self.model_analysis, self.runtime_analyzer = {call(json_ml.analyzer, json_ml)}
+self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
 
 # Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
 for model in self.models:
@@ -176,13 +176,13 @@ for model in self.models:
     predict_body = f"""
 self.mode = 'predict'
 log.info('Cleaning the data')
-data = {call(json_ml.cleaner, json_ml)}
+data = {call(json_ai.cleaner, json_ai)}
 
 {ts_transform_code}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
 df = self.ensemble(encoded_ds)
-insights = {call(json_ml.explainer, json_ml)}
+insights = {call(json_ai.explainer, json_ai)}
 return insights
 """
     predict_body = align(predict_body, 2)
@@ -201,7 +201,7 @@ class Predictor(PredictorInterface):
 
     def __init__(self):
         seed()
-        self.target = '{json_ml.output.name}'
+        self.target = '{json_ai.output.name}'
         self.mode = 'innactive'
 
     def learn(self, data: pd.DataFrame) -> None:
@@ -215,13 +215,13 @@ class Predictor(PredictorInterface):
     return predictor_code
 
 
-def generate_predictor(problem_definition: ProblemDefinition = None, data: pd.DataFrame = None, json_ml: JsonML = None) -> str:
-    if json_ml is None:
+def generate_predictor(problem_definition: ProblemDefinition = None, data: pd.DataFrame = None, json_ai: JsonAI = None) -> str:
+    if json_ai is None:
         type_information = lightwood.data.infer_types(data, problem_definition.pct_invalid)
         statistical_analysis = lightwood.data.statistical_analysis(data, type_information, problem_definition)
-        json_ml = lightwood.generate_json_ml(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
+        json_ai = lightwood.generate_json_ai(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
-    predictor_code = generate_predictor_code(json_ml)
+    predictor_code = generate_predictor_code(json_ai)
     # Runs OOM and takes forever if the code is very long
     if len(predictor_code) < 5000:
         predictor_code = autopep8.fix_code(predictor_code)
