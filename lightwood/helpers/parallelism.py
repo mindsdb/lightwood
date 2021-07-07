@@ -19,14 +19,13 @@ def get_nr_procs(df=None):
         return max(proc_count, 1)
 
 
-def run_mut_method(obj: object, arg: object, method: str, identifier: str, return_dict: dict) -> str:
+def run_mut_method(obj: object, arg: object, method: str, identifier: str) -> str:
     try:
         obj.__getattribute__(method)(arg)
-        log.info(f'Got a result, return dict lenght now at {len(return_dict)}')
-        return_dict[identifier] = obj
+        return obj, identifier
     except Exception as e:
-        return_dict[identifier] = False
-        raise e
+        log.error(e)
+        return False, identifier
 
 
 def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
@@ -35,13 +34,18 @@ def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
 
     nr_procs = get_nr_procs()
     pool = mp.Pool(processes=nr_procs)
+    promise_arr = []
     for name, data in object_dict.items():
-        pool.apply_async(func=run_mut_method, args=(data[0], data[1], data[2], name, return_dict))
+        promise = pool.apply_async(func=run_mut_method, args=(data[0], data[1], data[2], name))
+        promise_arr.append(promise)
+
+    for promise in promise_arr:
+        obj, identifier = promise.get()
+        if obj == False:
+            raise Exception(f'Failed to run in parallel on identifier: {identifier}')
+        return_dict[identifier] = obj
+
     pool.close()
     pool.join()
-
-    for identifier in return_dict:
-        if return_dict[identifier] == False:
-            raise Exception(f'Failed to run in parallel on identifier: {identifier}')
 
     return dict(return_dict)
