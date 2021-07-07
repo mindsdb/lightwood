@@ -21,13 +21,12 @@ class BinaryEncoder(BaseEncoder):
             raise Exception('You can only call "prepare" once for a given encoder.')
         
         for x in priming_data:
-            i = 0
             x = str(x)
             if x not in self.map:
-                self.map[x] = i
-                self.rev_map[i] = x
-                i += 1
-            if len(self.map) > 1:
+                self.map[x] = len(self.map)
+                self.rev_map[len(self.rev_map)] = x
+
+            if len(self.map) == 2:
                 break
         
         if self.is_target:
