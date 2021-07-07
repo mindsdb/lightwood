@@ -14,7 +14,7 @@ class BinaryEncoder(BaseEncoder):
         self.rev_map = {}
         if self.is_target:
             self.target_class_distribution = target_class_distribution
-            self.index_weights = None
+            self.index_weights = {}
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -29,6 +29,10 @@ class BinaryEncoder(BaseEncoder):
                 i += 1
             if len(self.map) > 1:
                 break
+        
+        if self.is_target:
+            for word in self.map:
+                self.index_weights[self.map[word]] = 1 / self.target_class_distribution[word]
 
         self._prepared = True
 
