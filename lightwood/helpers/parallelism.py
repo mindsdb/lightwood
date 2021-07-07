@@ -24,8 +24,8 @@ def run_mut_method(obj: object, arg: object, method: str, identifier: str) -> st
         obj.__getattribute__(method)(arg)
         return obj, identifier
     except Exception as e:
-        log.error(e)
-        return False, identifier
+        log.error(f'Exception {e} when running with identifier {identifier}')
+        raise e
 
 
 def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
@@ -41,8 +41,6 @@ def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
 
     for promise in promise_arr:
         obj, identifier = promise.get()
-        if obj == False:
-            raise Exception(f'Failed to run in parallel on identifier: {identifier}')
         return_dict[identifier] = obj
 
     pool.close()
