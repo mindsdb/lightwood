@@ -36,15 +36,13 @@ of the output embedding
 """
 import torch
 from torch.utils.data import DataLoader
-
+import os
 from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
-
 from lightwood.helpers.device import get_devices
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.api import dtype
-
 from transformers import (
     DistilBertModel,
     DistilBertForSequenceClassification,
