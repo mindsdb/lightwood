@@ -132,6 +132,8 @@ class LightGBM(BaseModel):
         if max_itt >= num_iterations and seconds_for_one_iteration < 10:
             model_generator = optuna_lightgbm
             kwargs['time_budget'] = self.stop_after
+        else:
+            model_generator = lightgbm
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
