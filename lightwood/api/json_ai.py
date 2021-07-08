@@ -1,10 +1,6 @@
 from lightwood.helpers.templating import call, inline_dict, align
 from lightwood.api.generate_json_ai import lookup_encoder
-from lightwood.api.types import ProblemDefinition
-from lightwood.api import dtype
-import lightwood
 from lightwood.api import JsonAI
-import pandas as pd
 import autopep8
 
 

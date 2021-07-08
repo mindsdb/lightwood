@@ -17,7 +17,7 @@ class TestTimeseries(unittest.TestCase):
         datasource = FileDS('tests/data/sunspots.csv')
         target = 'Sunspots'
 
-        predictor = predictor_from_problem(ProblemDefinition.from_dict(
+        predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict(
             {
                 'target': target,
                 'time_aim': 100,
@@ -27,7 +27,7 @@ class TestTimeseries(unittest.TestCase):
                 'use_previous_target': True,
                 'window': 5
             },
-        }), datasource.df)
+        }))
 
         predictor.learn(datasource.df)
 
@@ -52,7 +52,7 @@ class TestTimeseries(unittest.TestCase):
 
         datasource = FileDS('tests/data/arrivals.csv')
         target = 'Traffic'
-        predictor = predictor_from_problem(ProblemDefinition.from_dict({'target': target,
+        predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict({'target': target,
             'time_aim': 100,
             'nfolds': 4,
             'anomaly_detection': True,
@@ -62,8 +62,7 @@ class TestTimeseries(unittest.TestCase):
                 'use_previous_target': True,
                 'window': 5
             },
-            }),
-        datasource.df)
+            }))
 
         predictor.learn(datasource.df)
         predictions = predictor.predict(datasource.df)
@@ -88,7 +87,8 @@ class TestTimeseries(unittest.TestCase):
         datasource = FileDS('tests/data/occupancy.csv')
         target = 'Occupancy'
 
-        predictor = predictor_from_problem(ProblemDefinition.from_dict({'target': target,
+        predictor = predictor_from_problem(
+        datasource.df, ProblemDefinition.from_dict({'target': target,
                 'time_aim': 100,
                 'nfolds': 10,
                 'anomaly_detection': False,
@@ -97,8 +97,7 @@ class TestTimeseries(unittest.TestCase):
                     'use_previous_target': True,
                     'window': 10
                 },
-                }),
-        datasource.df)
+                }))
 
         predictor.learn(datasource.df)
         predictions = predictor.predict(datasource.df)

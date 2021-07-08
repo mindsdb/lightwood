@@ -11,7 +11,7 @@ class TestBasic(unittest.TestCase):
         # call: Go with dataframes
         df = FileDS('tests/data/adult.csv').df
         
-        predictor = predictor_from_problem(ProblemDefinition.from_dict({'target': 'income', 'time_aim': 50}), df)
+        predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 50}))
         predictor.learn(df)
 
         print('Making predictions')
