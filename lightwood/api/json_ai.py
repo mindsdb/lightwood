@@ -8,7 +8,7 @@ import pandas as pd
 import autopep8
 
 
-def add_implicit_values(json_ai: JsonAI) -> str:
+def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     imports = [
         'from lightwood.model import LightGBM',
         'from lightwood.model import Neural',
@@ -42,7 +42,7 @@ def add_implicit_values(json_ai: JsonAI) -> str:
     return json_ai
 
 
-def generate_predictor_code(json_ai: JsonAI) -> str:
+def code_from_json_ai(json_ai: JsonAI) -> str:
     json_ai = add_implicit_values(json_ai)
 
     predictor_code = ''
@@ -212,18 +212,16 @@ class Predictor(PredictorInterface):
 {predict_body}
 """
 
-    return predictor_code
-
-
-def generate_predictor(problem_definition: ProblemDefinition = None, data: pd.DataFrame = None, json_ai: JsonAI = None) -> str:
-    if json_ai is None:
-        type_information = lightwood.data.infer_types(data, problem_definition.pct_invalid)
-        statistical_analysis = lightwood.data.statistical_analysis(data, type_information, problem_definition)
-        json_ai = lightwood.generate_json_ai(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
-
-    predictor_code = generate_predictor_code(json_ai)
-    # Runs OOM and takes forever if the code is very long
     if len(predictor_code) < 5000:
         predictor_code = autopep8.fix_code(predictor_code)
 
     return predictor_code
+
+
+def validate_json_ai(json_ai: JsonAI) -> bool:
+    from lightwood.api.high_level import predictor_from_code, code_from_json_ai
+    try:
+        predictor_from_code(code_from_json_ai(json_ai))
+        return True
+    except Exception:
+        return False

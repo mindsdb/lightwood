@@ -1,25 +1,12 @@
+from lightwood.api.json_ai import code_from_json_ai
 import pandas as pd
-from lightwood.api.types import DataAnalysis, ProblemDefinition
+from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
 import importlib
 from lightwood.api.generate_predictor import generate_predictor
 import lightwood
 from lightwood.api.predictor import PredictorInterface
 import os
 import tempfile
-
-
-def make_predictor(df: pd.DataFrame, problem_definition_dict: dict) -> PredictorInterface:
-    predictor_class_str = generate_predictor(ProblemDefinition.from_dict(problem_definition_dict), df)
-
-    with tempfile.NamedTemporaryFile(suffix='.py') as temp:
-        temp.write(predictor_class_str.encode('utf-8'))
-        import importlib.util
-        spec = importlib.util.spec_from_file_location('a_temp_module', temp.name)
-        temp_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(temp_module)
-        predictor = temp_module.Predictor()
-
-    return predictor
 
 
 def analyze_dataset(df: pd.DataFrame, problem_definition_dict: dict = None) -> DataAnalysis:
@@ -35,3 +22,33 @@ def analyze_dataset(df: pd.DataFrame, problem_definition_dict: dict = None) -> D
         type_information=type_information,
         statistical_analysis=statistical_analysis
     )
+
+
+def code_from_problem(problem_definition: ProblemDefinition = None, data: pd.DataFrame = None, json_ai: JsonAI = None) -> str:
+    if json_ai is None:
+        type_information = lightwood.data.infer_types(data, problem_definition.pct_invalid)
+        statistical_analysis = lightwood.data.statistical_analysis(data, type_information, problem_definition)
+        json_ai = lightwood.generate_json_ai(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
+
+    predictor_code = code_from_json_ai(json_ai)
+    # Runs OOM and takes forever if the code is very long
+
+    return predictor_code
+
+
+def predictor_from_code(code: str) -> PredictorInterface:
+    # TODO: make this safe from code injection
+    with tempfile.NamedTemporaryFile(suffix='.py') as temp:
+        temp.write(code.encode('utf-8'))
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('a_temp_module', temp.name)
+        temp_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(temp_module)
+        predictor = temp_module.Predictor()
+    return predictor
+
+
+def predictor_from_problem(df: pd.DataFrame, problem_definition_dict: dict) -> PredictorInterface:
+    predictor_class_str = code_from_problem(ProblemDefinition.from_dict(problem_definition_dict), df)
+
+    return predictor_from_code(predictor_class_str)
