@@ -1,9 +1,14 @@
-from lightwood.api.json_ai import code_from_json_ai
 import pandas as pd
-from lightwood.api.types import DataAnalysis, ProblemDefinition
+from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
 import lightwood
 from lightwood.api.predictor import PredictorInterface
+from lightwood.api.json_ai import generate_json_ai
 import tempfile
+from lightwood.api.json_ai import code_from_json_ai as _code_from_json_ai
+
+
+def code_from_json_ai(json_ai: JsonAI) -> str:
+    return _code_from_json_ai(json_ai)
 
 
 def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
@@ -18,17 +23,20 @@ def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
     )
 
 
-def code_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> str:
+def json_ai_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> JsonAI:
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
     statistical_analysis = lightwood.data.statistical_analysis(df, type_information, problem_definition)
-    json_ai = lightwood.generate_json_ai(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
+    json_ai = generate_json_ai(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
+    return json_ai
+
+
+def code_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> str:
+    json_ai = json_ai_from_problem(df, problem_definition)
     predictor_code = code_from_json_ai(json_ai)
-    # Runs OOM and takes forever if the code is very long
-
     return predictor_code
 
 
