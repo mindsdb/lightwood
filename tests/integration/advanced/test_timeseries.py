@@ -4,7 +4,6 @@ import pandas as pd
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, balanced_accuracy_score
 
 from lightwood.api.types import ProblemDefinition
-from lightwood.api import make_predictor
 
 
 class TestTimeseries(unittest.TestCase):
@@ -12,12 +11,13 @@ class TestTimeseries(unittest.TestCase):
         """
         Tests a regression dataset and unsupervised anomaly detection
         """
-        from lightwood import generate_predictor
+        from lightwood.api.high_level import predictor_from_problem
         from mindsdb_datasources import FileDS
 
         datasource = FileDS('tests/data/sunspots.csv')
         target = 'Sunspots'
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict(
+
+        predictor = predictor_from_problem(ProblemDefinition.from_dict(
             {
                 'target': target,
                 'time_aim': 100,
@@ -28,15 +28,6 @@ class TestTimeseries(unittest.TestCase):
                 'window': 5
             },
         }), datasource.df)
-
-        with open('dynamic_predictor.py', 'w') as fp:
-            fp.write(predictor_class_str)
-
-        predictor_class = importlib.import_module('dynamic_predictor').Predictor
-        print('Class was evaluated successfully')
-
-        predictor = predictor_class()
-        print('Class initialized successfully')
 
         predictor.learn(datasource.df)
 
@@ -56,32 +47,23 @@ class TestTimeseries(unittest.TestCase):
         plt.show()
 
     def test_grouped_timeseries(self):
-        from lightwood import generate_predictor
+        from lightwood.api.high_level import predictor_from_problem
         from mindsdb_datasources import FileDS
 
         datasource = FileDS('tests/data/arrivals.csv')
         target = 'Traffic'
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': target,
-                                                                              'time_aim': 100,
-                                                                              'nfolds': 4,
-                                                                              'anomaly_detection': True,
-                                                                              'timeseries_settings': {
-                                                                                  'order_by': ['T'],
-                                                                                  'group_by': ['Country'],
-                                                                                  'use_previous_target': True,
-                                                                                  'window': 5
-                                                                              },
-                                                                              }),
-                                                 datasource.df)
-
-        with open('dynamic_predictor.py', 'w') as fp:
-            fp.write(predictor_class_str)
-
-        predictor_class = importlib.import_module('dynamic_predictor').Predictor
-        print('Class was evaluated successfully')
-
-        predictor = predictor_class()
-        print('Class initialized successfully')
+        predictor = predictor_from_problem(ProblemDefinition.from_dict({'target': target,
+            'time_aim': 100,
+            'nfolds': 4,
+            'anomaly_detection': True,
+            'timeseries_settings': {
+                'order_by': ['T'],
+                'group_by': ['Country'],
+                'use_previous_target': True,
+                'window': 5
+            },
+            }),
+        datasource.df)
 
         predictor.learn(datasource.df)
         predictions = predictor.predict(datasource.df)
@@ -100,31 +82,23 @@ class TestTimeseries(unittest.TestCase):
         plt.show()
 
     def test_time_series_classification(self):
-        from lightwood import generate_predictor
+        from lightwood.api.high_level import predictor_from_problem
         from mindsdb_datasources import FileDS
 
         datasource = FileDS('tests/data/occupancy.csv')
         target = 'Occupancy'
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': target,
-                                                                              'time_aim': 100,
-                                                                              'nfolds': 10,
-                                                                              'anomaly_detection': False,
-                                                                              'timeseries_settings': {
-                                                                                  'order_by': ['date'],
-                                                                                  'use_previous_target': True,
-                                                                                  'window': 10
-                                                                              },
-                                                                              }),
-                                                 datasource.df)
 
-        with open('dynamic_predictor.py', 'w') as fp:
-            fp.write(predictor_class_str)
-
-        predictor_class = importlib.import_module('dynamic_predictor').Predictor
-        print('Class was evaluated successfully')
-
-        predictor = predictor_class()
-        print('Class initialized successfully')
+        predictor = predictor_from_problem(ProblemDefinition.from_dict({'target': target,
+                'time_aim': 100,
+                'nfolds': 10,
+                'anomaly_detection': False,
+                'timeseries_settings': {
+                    'order_by': ['date'],
+                    'use_previous_target': True,
+                    'window': 10
+                },
+                }),
+        datasource.df)
 
         predictor.learn(datasource.df)
         predictions = predictor.predict(datasource.df)

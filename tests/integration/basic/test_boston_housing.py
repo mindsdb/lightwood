@@ -5,22 +5,12 @@ import importlib
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
-        from lightwood import generate_predictor
+        from lightwood.api.high_level import predictor_from_problem
         from mindsdb_datasources import FileDS
 
         # call: Go with dataframes
         datasource = FileDS('tests/data/boston.csv')
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': 'MEDV'}), datasource.df)
-
-        with open('dynamic_predictor.py', 'w') as fp:
-            fp.write(predictor_class_str)
-
-        predictor_class = importlib.import_module('dynamic_predictor').Predictor
-        print('Class was evaluated successfully')
-
-        predictor = predictor_class()
-        print('Class initialized successfully')
-
+        predictor = predictor_from_problem(ProblemDefinition.from_dict({'target': 'MEDV'}), datasource.df)
         predictor.learn(datasource.df)
 
         predictions = predictor.predict(datasource.df)
