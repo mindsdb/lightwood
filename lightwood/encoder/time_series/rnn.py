@@ -167,10 +167,19 @@ class TimeSeriesEncoder(BaseEncoder):
                 if dep_data['original_type'] in (dtype.integer, dtype.float):
                     dep_data['group_info'] = {group: dependency_data[group]['data'] for group in self.grouped_by}
                     data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
+                    all_idxs = set(range(len(data)))
                     for group_name, normalizer in self.dep_norms[dep_name].items():
-                        idxs, subset = get_group_matches(dep_data, normalizer.combination, normalizer.keys)
-                        normalized = normalizer.encode(subset).unsqueeze(-1)
-                        data[idxs, :, :] = normalized
+                        if group_name != '__default':
+                            idxs, subset = get_group_matches(dep_data, normalizer.combination, normalizer.keys)
+                            normalized = normalizer.encode(subset).unsqueeze(-1)
+                            data[idxs, :, :] = normalized
+                            all_idxs -= set(idxs)
+                    if len(all_idxs) > 0 and '__default' in self.dep_norms[dep_name].keys():
+                        default_norm = self.dep_norms[dep_name]['__default']
+                        subset = np.array([data[idx] for idx in all_idxs])
+                        data[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
+
+
                 else:
                     # categorical has only one normalizer at all times
                     normalizer = self.dep_norms[dep_name]['__default']
