@@ -238,9 +238,6 @@ class TimeSeriesEncoder(BaseEncoder):
             if epoch > self._epochs_running_avg and average_loss > np.average(running_losses):
                 bad_epochs += 1
 
-            if bad_epochs > self._stop_on_n_bad_epochs:
-                break
-
             # update running loss
             running_losses[:-1] = running_losses[1:]
             running_losses[-1] = average_loss
@@ -250,6 +247,9 @@ class TimeSeriesEncoder(BaseEncoder):
                     epoch_n=epoch+1,
                     total=self._epochs,
                     average_loss=average_loss))
+
+            if bad_epochs > self._stop_on_n_bad_epochs:
+                break
 
         self._prepared = True
 
