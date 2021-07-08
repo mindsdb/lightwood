@@ -2,7 +2,6 @@ from lightwood.api.json_ai import code_from_json_ai
 import pandas as pd
 from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
 import importlib
-from lightwood.api.generate_predictor import generate_predictor
 import lightwood
 from lightwood.api.predictor import PredictorInterface
 import os
