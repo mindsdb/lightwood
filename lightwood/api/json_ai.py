@@ -60,6 +60,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         encoder_dict[col_name] = call(lookup_encoder(json_ai.output.data_dtype,
                                                      col_name,
                                                      json_ai.problem_definition.timeseries_settings,
+                                                     json_ai.statistical_analysis,
                                                      is_target=False),
                                       json_ai)
         dependency_dict[col_name] = []
