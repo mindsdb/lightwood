@@ -229,7 +229,7 @@ class JsonAI:
         return _asdict(self, encode_json=encode_json)
 
     def to_json(self) -> Dict[str, Json]:
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(), indent=4)
 
 
 @dataclass_json
