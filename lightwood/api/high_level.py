@@ -23,11 +23,10 @@ def analyze_dataset(df: pd.DataFrame, problem_definition_dict: dict = None) -> D
     )
 
 
-def code_from_problem(problem_definition: ProblemDefinition = None, data: pd.DataFrame = None, json_ai: JsonAI = None) -> str:
-    if json_ai is None:
-        type_information = lightwood.data.infer_types(data, problem_definition.pct_invalid)
-        statistical_analysis = lightwood.data.statistical_analysis(data, type_information, problem_definition)
-        json_ai = lightwood.generate_json_ai(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
+def code_from_problem(df: pd.DataFrame = None, problem_definition: ProblemDefinition = None) -> str:
+    type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
+    statistical_analysis = lightwood.data.statistical_analysis(df, type_information, problem_definition)
+    json_ai = lightwood.generate_json_ai(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
 
     predictor_code = code_from_json_ai(json_ai)
     # Runs OOM and takes forever if the code is very long
