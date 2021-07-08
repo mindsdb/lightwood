@@ -17,16 +17,17 @@ class TestTimeseries(unittest.TestCase):
 
         datasource = FileDS('tests/data/sunspots.csv')
         target = 'Sunspots'
-        predictor_class_str = generate_predictor(ProblemDefinition.from_dict({'target': target,
-                                                                              'time_aim': 100,
-                                                                              'anomaly_detection': False,
-                                                                              'timeseries_settings': {
-                                                                                  'order_by': ['Month'],
-                                                                                  'use_previous_target': True,
-                                                                                  'window': 5
-                                                                                },
-                                                                              }),
-                                                 datasource.df)
+        predictor_class_str = generate_predictor(ProblemDefinition.from_dict(
+            {
+                'target': target,
+                'time_aim': 100,
+                'anomaly_detection': False,
+                'timeseries_settings': {
+                'order_by': ['Month'],
+                'use_previous_target': True,
+                'window': 5
+            },
+        }), datasource.df)
 
         with open('dynamic_predictor.py', 'w') as fp:
             fp.write(predictor_class_str)

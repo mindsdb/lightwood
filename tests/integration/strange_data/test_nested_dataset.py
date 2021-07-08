@@ -2,7 +2,7 @@ from copy import deepcopy
 import unittest
 import pandas as pd
 from mindsdb_datasources.datasources.file_ds import FileDS
-from lightwood.api import make_predictor
+from lightwood.api import predictor_from_problem
 
 
 class TestNestedDataset(unittest.TestCase):
@@ -51,7 +51,7 @@ class TestNestedDataset(unittest.TestCase):
         expected_columns = ['Statistics.Minutes Delayed.Security', 'Statistics.# of Delays.Security', 'Statistics.# of Delays.Weather', 'Statistics.Minutes Delayed.Late Aircraft', 'Statistics.Flights.Total', 'Statistics.Flights.Diverted', 'Time.Month Name', 'Statistics.Flights.Delayed', 'Time.Month', 'Statistics.# of Delays.Carrier', 'Statistics.Flights.On Time', 'Time.Label', 'Airport.Name', 'Statistics.Minutes Delayed.National Aviation System', 'Airport.Code', 'Statistics.Carriers.Total', 'Statistics.Minutes Delayed.Weather', 'Time.Year', 'Statistics.# of Delays.National Aviation System', 'Statistics.Flights.Cancelled', 'Statistics.# of Delays.Late Aircraft', 'Statistics.Carriers.Names', 'Statistics.Minutes Delayed.Total', 'Statistics.Minutes Delayed.Carrier']
 
         ds = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json')
-        pred = make_predictor(ds, {'target': 'Statistics.Flights.Delayed'})
+        pred = predictor_from_problem(ds, {'target': 'Statistics.Flights.Delayed'})
 
         for col in expected_columns:
             assert col in ds.df.columns
