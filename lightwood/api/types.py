@@ -44,9 +44,10 @@ class TypeInformation:
 class StatisticalAnalysis:
     nr_rows: int
     train_std_dev: float
-    train_observed_classes: Union[None, List[str]]
-    target_class_distribution: Dict[str, float]
-    histograms: Dict[str, Dict[str, List[object]]]
+    # Write proper to and from dict parsing for this than switch back to using the types bellow, dataclasses_json sucks!
+    train_observed_classes: object  # Union[None, List[str]]
+    target_class_distribution: object  # Dict[str, float]
+    histograms: object  # Dict[str, Dict[str, List[object]]]
 
 
 @dataclass_json
@@ -167,7 +168,6 @@ class ProblemDefinition:
         return json.dumps(self.to_dict())
 
 
-@dataclass_json
 @dataclass
 class JsonAI:
     features: Dict[str, Feature]
@@ -185,11 +185,57 @@ class JsonAI:
     accuracy_functions: List[str] = None
     phases: Dict[str, object] = None
 
+    @staticmethod
+    def from_dict(obj: Dict) -> None:
+        features = {k: Feature.from_dict(v) for k,v in obj['features'].items()} 
+        output = Output.from_dict(obj['output'])
+        problem_definition = ProblemDefinition.from_dict(obj['problem_definition'])
+        statistical_analysis = StatisticalAnalysis.from_dict(obj['statistical_analysis']) 
+        identifiers = obj['identifiers']
+        cleaner = obj.get('cleaner', None)
+        splitter = obj.get('splitter', None)
+        analyzer = obj.get('analyzer', None)
+        explainer = obj.get('explainer', None)
+        imports = obj.get('imports', None)
+        timeseries_transformer = obj.get('timeseries_transformer', None)
+        timeseries_analyzer = obj.get('timeseries_analyzer', None)
+        accuracy_functions = obj.get('accuracy_functions', None)
+        phases = obj.get('phases', None)
+
+        json_ai = JsonAI(
+            features=features,
+            output=output,
+            problem_definition=problem_definition,
+            statistical_analysis=statistical_analysis,
+            identifiers=identifiers,
+            cleaner=cleaner,
+            splitter=splitter,
+            analyzer=analyzer,
+            explainer=explainer,
+            imports=imports,
+            timeseries_transformer=timeseries_transformer,
+            timeseries_analyzer=timeseries_analyzer,
+            accuracy_functions=accuracy_functions,
+            phases=phases
+        )
+
+        return json_ai
+
+    @staticmethod
+    def from_json(data: str):
+        return JsonAI.from_dict(json.loads(data))
+
+    def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        return _asdict(self, encode_json=encode_json)
+
+    def to_json(self) -> Dict[str, Json]:
+        return json.dumps(self.to_dict())
+
 
 @dataclass_json
 @dataclass
 class ModelAnalysis:
-    accuracies: Dict[str,float]
+    accuracies: Dict[str, float]
     train_sample_size: int
     test_sample_size: int
     column_importances: Dict[str, float]
