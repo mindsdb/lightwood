@@ -1,6 +1,8 @@
+from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 import autopep8
 from lightwood.api import dtype
+import numpy as np
 from lightwood.api.types import JsonAI, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
 
 
@@ -305,7 +307,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
     if json_ai.problem_definition.timeseries_settings.use_previous_target:
-        imports.append(f'from lightwood.encoder import TimeSeriesPlainEncoder')
+        imports.append('from lightwood.encoder import TimeSeriesPlainEncoder')
 
     json_ai.imports.extend(imports)
 
@@ -355,13 +357,13 @@ self.ts_analysis = {call(json_ai.timeseries_analyzer, json_ai)}
 """
 
     if json_ai.timeseries_analyzer is not None:
-        ts_encoder_code = f"""
+        ts_encoder_code = """
 if type(encoder) in __ts_encoders__:
     kwargs['ts_analysis'] = self.ts_analysis
 """
 
     if json_ai.problem_definition.timeseries_settings.is_timeseries:
-        ts_target_code = f"""
+        ts_target_code = """
 if encoder.is_target:
     encoder.normalizers = self.ts_analysis['target_normalizers']
     encoder.group_combinations = self.ts_analysis['group_combinations']
