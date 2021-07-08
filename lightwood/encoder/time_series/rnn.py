@@ -177,8 +177,8 @@ class TimeSeriesEncoder(BaseEncoder):
                             all_idxs -= set(idxs)
                     if len(all_idxs) > 0 and '__default' in self.dep_norms[dep_name].keys():
                         default_norm = self.dep_norms[dep_name]['__default']
-                        subset = np.array([data[idx] for idx in all_idxs])
-                        data[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
+                        subset = [dep_data['data'][idx] for idx in list(all_idxs)]
+                        data[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1)
 
 
                 else:
@@ -246,7 +246,7 @@ class TimeSeriesEncoder(BaseEncoder):
             running_losses[-1] = average_loss
 
             if feedback_hoop_function is not None:
-                feedback_hoop_function("epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
+                feedback_hoop_function("time series encoder epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
                     epoch_n=epoch+1,
                     total=self._epochs,
                     average_loss=average_loss))
