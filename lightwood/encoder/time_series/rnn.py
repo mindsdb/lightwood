@@ -26,11 +26,12 @@ class TimeSeriesEncoder(BaseEncoder):
         self.target = target
         self.grouped_by = grouped_by
         self.encoder_class = EncoderRNNNumerical
-        self._stop_on_error = 0.01
         self._learning_rate = 0.01
         self._encoded_vector_size = 128
         self._transformer_hidden_size = None
-        self._epochs = 100  # training epochs
+        self._epochs = int(1e5)  # default training epochs
+        self._stop_on_n_bad_epochs = 5  # stop training after N epochs where loss is worse than running avg
+        self._epochs_running_avg = 5  # amount of epochs for running average
         self._pytorch_wrapper = torch.FloatTensor
         self._prepared = False
         self._is_setup = False
@@ -167,10 +168,19 @@ class TimeSeriesEncoder(BaseEncoder):
                 if dep_data['original_type'] in (dtype.integer, dtype.float):
                     dep_data['group_info'] = {group: dependency_data[group]['data'] for group in self.grouped_by}
                     data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
+                    all_idxs = set(range(len(data)))
                     for group_name, normalizer in self.dep_norms[dep_name].items():
-                        idxs, subset = get_group_matches(dep_data, normalizer.combination, normalizer.keys)
-                        normalized = normalizer.encode(subset).unsqueeze(-1)
-                        data[idxs, :, :] = normalized
+                        if group_name != '__default':
+                            idxs, subset = get_group_matches(dep_data, normalizer.combination, normalizer.keys)
+                            normalized = normalizer.encode(subset).unsqueeze(-1)
+                            data[idxs, :, :] = normalized
+                            all_idxs -= set(idxs)
+                    if len(all_idxs) > 0 and '__default' in self.dep_norms[dep_name].keys():
+                        default_norm = self.dep_norms[dep_name]['__default']
+                        subset = np.array([data[idx] for idx in all_idxs])
+                        data[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
+
+
                 else:
                     # categorical has only one normalizer at all times
                     normalizer = self.dep_norms[dep_name]['__default']
@@ -184,7 +194,10 @@ class TimeSeriesEncoder(BaseEncoder):
             priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
         self._encoder.train()
-        for i in range(self._epochs):
+        running_losses = np.full(self._epochs_running_avg, np.nan)
+        bad_epochs = 0
+
+        for epoch in range(self._epochs):
             average_loss = 0
 
             for batch_idx in range(0, len(priming_data), batch_size):
@@ -222,11 +235,19 @@ class TimeSeriesEncoder(BaseEncoder):
             average_loss = average_loss / len(priming_data)
             batch_idx += batch_size
 
-            if average_loss < self._stop_on_error:
-               break
+            if epoch > self._epochs_running_avg and average_loss > np.average(running_losses):
+                bad_epochs += 1
+
+            if bad_epochs > self._stop_on_n_bad_epochs:
+                break
+
+            # update running loss
+            running_losses[:-1] = running_losses[1:]
+            running_losses[-1] = average_loss
+
             if feedback_hoop_function is not None:
                 feedback_hoop_function("epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
-                    epoch_n=i + 1,
+                    epoch_n=epoch+1,
                     total=self._epochs,
                     average_loss=average_loss))
 

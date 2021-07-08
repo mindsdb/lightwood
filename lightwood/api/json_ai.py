@@ -1,7 +1,5 @@
 from lightwood.helpers.templating import call, inline_dict, align
 import autopep8
-import numpy as np
-from typing import Dict
 from lightwood.api import dtype
 from lightwood.api.types import JsonAI, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
 
@@ -10,7 +8,7 @@ trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSe
 ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder')
 
 
-def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, is_target: bool, statistical_analysis: StatisticalAnalysis):
+def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, statistical_analysis: StatisticalAnalysis, is_target: bool):
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
         dtype.float: 'NumericEncoder',
@@ -131,13 +129,13 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], target, problem_definition.timeseries_settings, True, statistical_analysis)
+    output.encoder = lookup_encoder(type_information.dtypes[target], target, problem_definition.timeseries_settings, statistical_analysis, is_target=True)
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
         if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
             dependency = []
-            encoder = lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, False, statistical_analysis)
+            encoder = lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, statistical_analysis, is_target=False)
 
             if problem_definition.timeseries_settings.is_timeseries and encoder['object'] in ts_encoders:
                 if problem_definition.timeseries_settings.group_by is not None:
@@ -336,6 +334,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         encoder_dict[col_name] = call(lookup_encoder(json_ai.output.data_dtype,
                                                      col_name,
                                                      json_ai.problem_definition.timeseries_settings,
+                                                     json_ai.statistical_analysis,
                                                      is_target=False),
                                       json_ai)
         dependency_dict[col_name] = []
