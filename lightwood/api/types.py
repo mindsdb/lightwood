@@ -1,8 +1,10 @@
+from os import stat
 from typing import Dict, List, Union
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
+import json
 
 
 @dataclass_json
@@ -90,10 +92,16 @@ class TimeseriesSettings:
             timeseries_settings = TimeseriesSettings(is_timeseries=False)
 
         return timeseries_settings
+    
+    @staticmethod
+    def from_json(data: str):
+        return TimeseriesSettings.from_dict(json.loads(data))
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
         return _asdict(self, encode_json=encode_json)
 
+    def to_json(self) -> Dict[str, Json]:
+        return json.dumps(self.to_dict())
 
 @dataclass
 class ProblemDefinition:
@@ -148,8 +156,15 @@ class ProblemDefinition:
 
         return problem_definition
 
+    @staticmethod
+    def from_json(data: str):
+        return ProblemDefinition.from_dict(json.loads(data))
+
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
         return _asdict(self, encode_json=encode_json)
+
+    def to_json(self) -> Dict[str, Json]:
+        return json.dumps(self.to_dict())
 
 
 @dataclass_json
