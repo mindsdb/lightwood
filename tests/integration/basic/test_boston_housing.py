@@ -1,6 +1,5 @@
 from lightwood.api.types import ProblemDefinition
 import unittest
-import importlib
 
 
 class TestBasic(unittest.TestCase):

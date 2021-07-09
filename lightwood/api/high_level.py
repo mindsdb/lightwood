@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
 import lightwood
@@ -5,6 +6,28 @@ from lightwood.api.predictor import PredictorInterface
 from lightwood.api.json_ai import generate_json_ai
 import tempfile
 from lightwood.api.json_ai import code_from_json_ai as _code_from_json_ai
+import importlib.util
+import sys
+import random
+import string
+import dill
+
+
+def _module_from_code(code, module_name):
+    dev_file = os.environ.get('LIGHTWOWD_DEV_SAVE_TO', None)
+    if dev_file is not None:
+        fp = open(dev_file, 'wb')
+    else:
+        fp = tempfile.NamedTemporaryFile(suffix='.py')
+
+    fp.write(code.encode('utf-8'))
+    spec = importlib.util.spec_from_file_location(module_name, fp.name)
+    temp_module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = temp_module
+    spec.loader.exec_module(temp_module)
+
+    fp.close()
+    return temp_module
 
 
 def code_from_json_ai(json_ai: JsonAI) -> str:
@@ -41,15 +64,24 @@ def code_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -
 
 
 def predictor_from_code(code: str) -> PredictorInterface:
-    # TODO: make this safe from code injection
-    with tempfile.NamedTemporaryFile(suffix='.py') as temp:
-        temp.write(code.encode('utf-8'))
-        import importlib.util
-        spec = importlib.util.spec_from_file_location('a_temp_module', temp.name)
-        temp_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(temp_module)
-        predictor = temp_module.Predictor()
+    module_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+    predictor = _module_from_code(code, module_name).Predictor()
     return predictor
+
+
+def predictor_from_state(state_file: str, code: str = None) -> PredictorInterface:
+    with open(state_file, 'rb') as fp:
+        try:
+            predictor = dill.load(fp)
+        except Exception as e:
+            module_name = str(e).lstrip("No module named '").split("'")[0]
+            if code is None:
+                raise Exception('You need to provide the code if trying to load a predictor from outside the scope/script it was created in!')
+            _module_from_code(code, module_name)
+            predictor = dill.load(fp)
+
+    return predictor
+
 
 
 def predictor_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> PredictorInterface:
