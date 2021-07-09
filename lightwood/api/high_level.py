@@ -40,7 +40,7 @@ def code_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -
     return predictor_code
 
 
-def predictor_from_code(code: str) -> PredictorInterface:
+def predictor_from_code(code: str, return_class: bool = False) -> PredictorInterface:
     # TODO: make this safe from code injection
     with tempfile.NamedTemporaryFile(suffix='.py') as temp:
         temp.write(code.encode('utf-8'))
@@ -48,13 +48,15 @@ def predictor_from_code(code: str) -> PredictorInterface:
         spec = importlib.util.spec_from_file_location('a_temp_module', temp.name)
         temp_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(temp_module)
+        if return_class:
+            return temp_module.Predictor
         predictor = temp_module.Predictor()
     return predictor
 
 
-def predictor_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> PredictorInterface:
+def predictor_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition, return_class: bool = False) -> PredictorInterface:
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
     predictor_class_str = code_from_problem(df, problem_definition)
-    return predictor_from_code(predictor_class_str)
+    return predictor_from_code(predictor_class_str, return_class)
