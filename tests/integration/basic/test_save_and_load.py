@@ -1,7 +1,7 @@
 from lightwood.api.high_level import code_from_problem, predictor_from_code
 from lightwood.api.types import ProblemDefinition
 import unittest
-import importlib
+from mindsdb_datasources import FileDS
 
 
 def save(predictor, path):
@@ -20,9 +20,6 @@ def load(code, path):
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
-        from lightwood.api.high_level import predictor_from_problem
-        from mindsdb_datasources import FileDS
-
         # call: Go with dataframes
         df = FileDS('tests/data/adult.csv').df
         
