@@ -25,10 +25,11 @@ def _module_from_code(code, module_name):
     temp_module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = temp_module
     spec.loader.exec_module(temp_module)
-    
+
     fp.close()
     return temp_module
-        
+
+
 def code_from_json_ai(json_ai: JsonAI) -> str:
     return _code_from_json_ai(json_ai)
 
