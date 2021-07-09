@@ -5,7 +5,7 @@ from mindsdb_datasources import FileDS
 
 
 def save(predictor, path):
-    predictor.save()
+    predictor.save(path)
 
 
 def train(predictor, df):

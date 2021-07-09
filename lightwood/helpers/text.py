@@ -8,8 +8,6 @@
  * permission of MindsDB Inc
  *******************************************************
 """
-
-import importlib
 from collections import Counter, defaultdict
 import string
 import json
