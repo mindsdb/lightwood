@@ -11,6 +11,8 @@ class PredictorInterface():
 
     def learn(self, data: pd.DataFrame) -> None: pass
 
+    def adjust(self, data: pd.DataFrame) -> None: pass
+
     def predict(self, data: pd.DataFrame) -> pd.DataFrame: pass
 
     def save(self, file_path: str):
