@@ -4,7 +4,6 @@ from sklearn.metrics import r2_score, f1_score, balanced_accuracy_score
 import importlib
 import numpy as np
 import pandas as pd
-import sklearn
 
 
 def evaluate_accuracy(true_values: pd.Series,

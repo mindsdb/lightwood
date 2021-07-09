@@ -51,6 +51,7 @@ def predictor_from_code(code: str, return_class: bool = False) -> PredictorInter
         if return_class:
             return temp_module.Predictor
         predictor = temp_module.Predictor()
+        predictor._code = code
     return predictor
 
 
