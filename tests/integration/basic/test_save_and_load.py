@@ -24,7 +24,7 @@ def execute_second_bit(code, df, path):
     predictor_1.learn(data=df)
 
     save(predictor_1, path)
-    execute_third_bit()
+    execute_third_bit(code, df, path)
 
 
 def execute_third_bit(code, df, path):
@@ -33,12 +33,13 @@ def execute_third_bit(code, df, path):
     predictions = predictor_2.predict(df.iloc[0:3])
     for p in predictions['prediction']:
         assert p is not None
+    print('Done running third bit')
 
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
         df = FileDS('tests/data/adult.csv').df.iloc[0:2000]
-        code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 30}))
+        code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 25}))
         path = 'test.pickle'
         try:
             os.remove(path)
