@@ -28,6 +28,7 @@ def execute_second_bit(code, df, path):
 
 
 def execute_third_bit(code, df, path):
+    print('Running execute_third_bit')
     predictor_2 = predictor_from_state(path, code)
     predictions = predictor_2.predict(df.iloc[0:3])
     for p in predictions['prediction']:
