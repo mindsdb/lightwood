@@ -41,26 +41,26 @@ class Neural(BaseModel):
 
             decoded_predictions = []
             deocded_real_values = []
-            dl = DataLoader(ConcatedEncodedDs(data_arr), batch_size=200, shuffle=True)
 
-            for X, Y in dl:
-                X = X.to(self.model.device)
-                Y = Y.to(self.model.device)
-                Yh = self.model(X)
+            for data in data_arr:
+                for X, Y in data:
+                    X = X.to(self.model.device)
+                    Y = Y.to(self.model.device)
+                    Yh = self.model(X)
 
-                decoded_predictions.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+                    decoded_predictions.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
 
-                deocded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+                    deocded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
 
-            self.target_encoder.decode_log = True
-            log_acc = r2_score(deocded_real_values, decoded_predictions)
-            self.target_encoder.decode_log = False
-            lin_acc = r2_score(deocded_real_values, decoded_predictions)
-
-            if lin_acc < log_acc:
                 self.target_encoder.decode_log = True
-            else:
+                log_acc = r2_score(deocded_real_values, decoded_predictions)
                 self.target_encoder.decode_log = False
+                lin_acc = r2_score(deocded_real_values, decoded_predictions)
+
+                if lin_acc < log_acc:
+                    self.target_encoder.decode_log = True
+                else:
+                    self.target_encoder.decode_log = False
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
