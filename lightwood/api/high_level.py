@@ -14,7 +14,7 @@ import dill
 
 
 def _module_from_code(code, module_name):
-    dev_file = os.environ.get('LIGHTWOWD_DEV_SAVE_TO', None)
+    dev_file = os.environ.get('LIGHTWOOD_DEV_SAVE_TO', None)
     if dev_file is not None:
         fp = open(dev_file, 'wb')
     else:
@@ -72,11 +72,14 @@ def predictor_from_code(code: str) -> PredictorInterface:
 def predictor_from_state(state_file: str, code: str = None) -> PredictorInterface:
     with open(state_file, 'rb') as fp:
         try:
+            module_name = None
             predictor = dill.load(fp)
         except Exception as e:
             module_name = str(e).lstrip("No module named '").split("'")[0]
             if code is None:
                 raise Exception('You need to provide the code if trying to load a predictor from outside the scope/script it was created in!')
+        
+        if module_name is not None:
             _module_from_code(code, module_name)
             predictor = dill.load(fp)
 
