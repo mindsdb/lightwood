@@ -109,6 +109,7 @@ class ProblemDefinition:
     target: str
     nfolds: int
     pct_invalid: float
+    unbias_target: Bool
     seconds_per_model: int
     seconds_per_encoder: int
     time_aim: int
@@ -126,6 +127,7 @@ class ProblemDefinition:
         target = obj['target']
         nfolds = obj.get('nfolds', 10)
         pct_invalid = obj.get('pct_invalid', 1)
+        unbias_target = obj.get('unbias_target', False)
         seconds_per_model = obj.get('seconds_per_model', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
         time_aim = obj.get('time_aim', None)
@@ -142,6 +144,7 @@ class ProblemDefinition:
             target=target,
             nfolds=nfolds,
             pct_invalid=pct_invalid,
+            unbias_target=unbias_target,
             seconds_per_model=seconds_per_model,
             seconds_per_encoder=seconds_per_encoder,
             time_aim=time_aim,
