@@ -1,5 +1,5 @@
 from lightwood.api.types import ModelAnalysis
-import pickle
+import dill
 import pandas as pd
 
 
@@ -17,4 +17,4 @@ class PredictorInterface():
 
     def save(self, file_path: str):
         with open(file_path, 'wb') as fp:
-            pickle.dump(self, fp)
+            dill.dump(self, fp)
