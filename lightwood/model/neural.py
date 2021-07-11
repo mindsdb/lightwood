@@ -20,6 +20,7 @@ from lightwood.model.helpers.residual_net import ResidualNet
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
+from sklearn.metrics import r2_score
 
 
 class Neural(BaseModel):
@@ -33,6 +34,33 @@ class Neural(BaseModel):
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
         self.epochs_to_best = 1
+    
+    def _final_tuning(self, data_arr):
+        if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
+            self.model = self.model.eval()
+
+            decoded_predictions = []
+            deocded_real_values = []
+            dl = DataLoader(ConcatedEncodedDs(data_arr), batch_size=200, shuffle=True)
+
+            for X, Y in dl:
+                X = X.to(self.model.device)
+                Y = Y.to(self.model.device)
+                Yh = self.model(X)
+
+                decoded_predictions.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+
+                deocded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+
+            self.target_encoder.decode_log = True
+            log_acc = r2_score(deocded_real_values, decoded_predictions)
+            self.target_encoder.decode_log = False
+            lin_acc = r2_score(deocded_real_values, decoded_predictions)
+
+            if lin_acc < log_acc:
+                self.target_encoder.decode_log = True
+            else:
+                self.target_encoder.decode_log = False
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
@@ -139,6 +167,7 @@ class Neural(BaseModel):
         
         # Do a single training run on the test data as well
         self.partial_fit(test_ds_arr)
+        self._final_tuning(test_ds_arr)
     
     def partial_fit(self, data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
