@@ -1,5 +1,5 @@
 import os
-import pickle
+import dill
 import pandas as pd
 from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
 import lightwood
@@ -73,7 +73,7 @@ def predictor_from_state(state_file: str, code: str = None) -> PredictorInterfac
     with open(state_file, 'rb') as fp:
         try:
             module_name = None
-            predictor = pickle.load(fp)
+            predictor = dill.load(fp)
         except Exception as e:
             module_name = str(e).lstrip("No module named '").split("'")[0]
             if code is None:
@@ -81,7 +81,7 @@ def predictor_from_state(state_file: str, code: str = None) -> PredictorInterfac
         
         if module_name is not None:
             _module_from_code(code, module_name)
-            predictor = pickle.load(fp)
+            predictor = dill.load(fp)
 
     return predictor
 
