@@ -109,7 +109,7 @@ class ProblemDefinition:
     target: str
     nfolds: int
     pct_invalid: float
-    unbias_target: Bool
+    unbias_target: bool
     seconds_per_model: int
     seconds_per_encoder: int
     time_aim: int
