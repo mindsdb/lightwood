@@ -4,6 +4,7 @@ import unittest
 from mindsdb_datasources import FileDS
 import sys
 import multiprocessing as mp
+import os
 
 
 def save(predictor, path):
@@ -47,8 +48,11 @@ class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
         df = FileDS('tests/data/adult.csv').df
         code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 300}))
-        path = 'a_path.pickle'
-        
+        path = 'test.pickle'
+        try:
+            os.remove(path)
+        except Exception:
+            pass
         proc = mp.Process(target=execute_first_bit, args=(code, df, path,))
         proc.start()
         proc.join()
