@@ -10,7 +10,8 @@ trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSe
 ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder')
 
 
-def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, statistical_analysis: StatisticalAnalysis, is_target: bool):
+def lookup_encoder(col_dtype: dtype, col_name: str, statistical_analysis: StatisticalAnalysis, is_target: bool, problem_defintion: ProblemDefinition):
+    tss = problem_defintion.timeseries_settings
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
         dtype.float: 'NumericEncoder',
@@ -49,7 +50,8 @@ def lookup_encoder(col_dtype: dtype, col_name: str, tss: TimeseriesSettings, sta
         if col_dtype in target_encoder_lookup_override:
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
-            encoder_dict['static_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
+            if problem_defintion.unbias_target:
+                encoder_dict['static_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
 
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
@@ -131,13 +133,13 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], target, problem_definition.timeseries_settings, statistical_analysis, is_target=True)
+    output.encoder = lookup_encoder(type_information.dtypes[target], target, statistical_analysis, True, problem_definition)
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
         if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
             dependency = []
-            encoder = lookup_encoder(col_dtype, col_name, problem_definition.timeseries_settings, statistical_analysis, is_target=False)
+            encoder = lookup_encoder(col_dtype, col_name, statistical_analysis, False, problem_definition)
 
             if problem_definition.timeseries_settings.is_timeseries and encoder['object'] in ts_encoders:
                 if problem_definition.timeseries_settings.group_by is not None:
@@ -325,19 +327,22 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     dependency_dict = {}
     dtype_dict = {json_ai.output.name: f"""'{json_ai.output.data_dtype}'"""}
 
+    # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
     for col_name, feature in json_ai.features.items():
         encoder_dict[col_name] = call(feature.encoder, json_ai)
         dependency_dict[col_name] = feature.dependency
         dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
+    # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
     if json_ai.problem_definition.timeseries_settings.use_previous_target:
         col_name = f'__mdb_ts_previous_{json_ai.output.name}'
         json_ai.problem_definition.timeseries_settings.target_type = json_ai.output.data_dtype
         encoder_dict[col_name] = call(lookup_encoder(json_ai.output.data_dtype,
                                                      col_name,
-                                                     json_ai.problem_definition.timeseries_settings,
                                                      json_ai.statistical_analysis,
-                                                     is_target=False),
+                                                     False,
+                                                     json_ai.problem_definition
+                                                     ),
                                       json_ai)
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{json_ai.output.data_dtype}'"""
