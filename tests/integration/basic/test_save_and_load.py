@@ -31,7 +31,6 @@ def execute_second_bit(code, df, path):
     assert 'temp_predictor_module' not in sys.modules
     
     predictor_1 = predictor_from_state(path, code)
-    print(predictor_1, predictor_1.learn)
     predictor_1.learn(data=df)
 
     save(predictor_1, path)
@@ -47,7 +46,7 @@ def execute_third_bit(code, df, path):
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
         df = FileDS('tests/data/adult.csv').df
-        code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 300}))
+        code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 25}))
         path = 'test.pickle'
         try:
             os.remove(path)
