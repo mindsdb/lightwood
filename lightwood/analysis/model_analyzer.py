@@ -1,4 +1,6 @@
-from typing import Dict
+from typing import Dict, List
+
+from torch.utils.data.dataset import ConcatDataset
 from lightwood.api.types import Feature, ModelAnalysis, Output, ProblemDefinition, StatisticalAnalysis, TimeseriesSettings
 import numpy as np
 import pandas as pd
@@ -7,7 +9,7 @@ from itertools import product
 from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.ensemble import BaseEnsemble
-from lightwood.data.encoded_ds import EncodedDs
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.api import dtype
 from lightwood.helpers.general import evaluate_accuracy
 
@@ -38,7 +40,7 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 
 def model_analyzer(
         predictor: BaseEnsemble,
-        data: EncodedDs,
+        data: List[EncodedDs],
         stats_info: StatisticalAnalysis,
         target: str,
         ts_cfg: TimeseriesSettings,
@@ -55,7 +57,7 @@ def model_analyzer(
     # if ts_cfg.is_timeseries:
     #     validation_df = data.validation_df[data.validation_df['make_predictions'] == True]
     # ... same with test and train dfs
-    encoded_data = data
+    encoded_data = ConcatedEncodedDs(data)
     data = encoded_data.data_frame
     runtime_analyzer = {}
     predictions = {}
