@@ -125,12 +125,13 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         models=models,
         ensemble={
             'object': 'BestOf',
-            'static_args': {},
+            'static_args': {
+                'accuracy_functions': 'accuracy_functions'
+            },
             'dynamic_args': {
                 'target': 'self.target',
                 'data': 'test_data',
-                'models': 'self.models',
-                'accuracy_functions': 'accuracy_functions'
+                'models': 'self.models'
             }
         }
     )

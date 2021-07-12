@@ -11,13 +11,14 @@ class BestOf(BaseEnsemble):
     best_index: int
 
     def __init__(self, target, models: List[BaseModel], data: List[EncodedDs], accuracy_functions) -> None:
-        super().__init__(models, data)
+        super().__init__(target, models, data)
         # @TODO: Need some shared accuracy functionality to determine model selection here
         best_score = -pow(2, 32)
+        ds = ConcatedEncodedDs(data)
         for idx, model in enumerate(models):
             score_dict = evaluate_accuracy(
-                data[target],
-                model(ConcatedEncodedDs(data))['prediction'],
+                ds[target],
+                model(ds)['prediction'],
                 accuracy_functions
             )
             avg_score = np.mean(list(score_dict.values()))
