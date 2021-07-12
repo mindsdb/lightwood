@@ -129,9 +129,10 @@ class LightGBM(BaseModel):
         max_itt = int(self.stop_after / seconds_for_one_iteration)
         num_iterations = max(1, min(num_iterations, max_itt))
         # Turn on grid search if training doesn't take too long using it
-        if max_itt >= num_iterations and seconds_for_one_iteration < 10:
+        if max_itt >= num_iterations * 2:
             model_generator = optuna_lightgbm
             kwargs['time_budget'] = self.stop_after
+            kwargs['optuna_seed'] = 0
         else:
             model_generator = lightgbm
 
