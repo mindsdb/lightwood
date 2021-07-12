@@ -35,6 +35,7 @@ class LightGBM(BaseModel):
     max_bin: int
     device: torch.device
     device_str: str
+    num_iterations: int
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str]):
         super().__init__(stop_after)
@@ -44,6 +45,7 @@ class LightGBM(BaseModel):
         self.target = target
         self.dtype_dict = dtype_dict
         self.input_cols = input_cols
+        self.params = {}
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         self.device, self.device_str = get_devices()
@@ -58,17 +60,9 @@ class LightGBM(BaseModel):
         self.max_bin = 255
         if self.device_str == 'gpu':
             self.max_bin = 63  # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
-
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
-        log.info('Started fitting LGBM model')
-        data = {
-            'train': {'ds': ConcatedEncodedDs(ds_arr[0:-1]), 'data': None, 'label_data': {}},
-            'test': {'ds': ConcatedEncodedDs(ds_arr[-1:]), 'data': None, 'label_data': {}}
-        }
-
-        output_dtype = self.dtype_dict[self.target]
-
-        for subset_name in ['train', 'test']:
+    
+    def _to_dataset(self, data, output_dtype):
+        for subset_name in data.keys():
             for input_col in self.input_cols:
                 if data[subset_name]['data'] is None:
                     data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(input_col).to(self.device)
@@ -95,52 +89,96 @@ class LightGBM(BaseModel):
 
             data[subset_name]['label_data'] = label_data
 
+        return data
+
+    def fit(self, ds_arr: List[EncodedDs]) -> None:
+        log.info('Started fitting LGBM model')
+        train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
+        test_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
+        data = {
+            'train': {'ds': ConcatedEncodedDs(train_ds_arr), 'data': None, 'label_data': {}},
+            'test': {'ds': ConcatedEncodedDs(test_ds_arr), 'data': None, 'label_data': {}}
+        }
+        self.fit_data_len = len(data['train']['ds'])
+
+        output_dtype = self.dtype_dict[self.target]
+
+        data = self._to_dataset(data, output_dtype)
+
         if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary):
             log.warn(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
             objective = 'regression' if output_dtype in (dtype.integer, dtype.float) else 'multiclass'
             metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'
 
-        params = {
+        self.params = {
             'objective': objective,
             'metric': metric,
             'verbose': -1,
             'lambda_l1': 0.1,
             'lambda_l2': 0.1,
             'force_row_wise': True,
-            'device_type': self.device_str
+            'device_type': self.device_str,
         }
 
         if objective == 'multiclass':
             self.all_classes = self.ordinal_encoder.categories_[0]
-            params['num_class'] = self.all_classes.size
+            self.params['num_class'] = self.all_classes.size
 
-        num_iterations = 50
+        self.num_iterations = 100
         kwargs = {}
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
         start = time.time()
-        params['num_iterations'] = 1
-        self.model = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
+        self.params['num_iterations'] = 1
+        self.model = lightgbm.train(self.params, train_data, verbose_eval=False)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
         log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
         max_itt = int(self.stop_after / seconds_for_one_iteration)
-        num_iterations = max(1, min(num_iterations, max_itt))
+        self.num_iterations = max(1, min(self.num_iterations, max_itt))
         # Turn on grid search if training doesn't take too long using it
-        if max_itt >= num_iterations and seconds_for_one_iteration < 10:
+        if max_itt >= self.num_iterations * 2:
             model_generator = optuna_lightgbm
-            kwargs['time_budget'] = self.stop_after
+            kwargs['time_budget'] = self.stop_after * 0.7
+            kwargs['optuna_seed'] = 0
         else:
             model_generator = lightgbm
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
 
-        log.info(f'Training GBM ({model_generator}) with {num_iterations} iterations given {self.stop_after} seconds constraint')
-        params['num_iterations'] = num_iterations
-        self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
+        log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
+        self.params['num_iterations'] = self.num_iterations
+
+        self.params['early_stopping_rounds'] = 10
+        self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data], valid_names=['eval'], verbose_eval=False, **kwargs)
+        self.num_iterations = self.model.best_iteration
+        log.info(f'Lightgbm model contains {self.num_iterations} weak estimators')
+        self.partial_fit(test_ds_arr)
+
+    def partial_fit(self, data: List[EncodedDs]) -> None:
+        ds = ConcatedEncodedDs(data)
+        pct_of_original = len(ds) / self.fit_data_len
+        iterations = max(1, int(self.num_iterations * pct_of_original * 0.5))
+        data = {
+            'retrain': {'ds': ds, 'data': None, 'label_data': {}}
+        }
+        output_dtype = self.dtype_dict[self.target]
+        data = self._to_dataset(data, output_dtype)
+        
+        if 'early_stopping_rounds' in self.params:
+            del self.params['early_stopping_rounds']
+
+        dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
+
+        log.info(f'Updating lightgbm model with {iterations} weak estimators')
+        self.params['num_iterations'] = iterations
+        self.model = lightgbm.train(self.params, dataset, verbose_eval=False, init_model=self.model)
+        log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
+        
+        pass
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         data = None
