@@ -167,7 +167,10 @@ class LightGBM(BaseModel):
         }
         output_dtype = self.dtype_dict[self.target]
         data = self._to_dataset(data, output_dtype)
-        del self.params['early_stopping_rounds']
+        
+        if 'early_stopping_rounds' in self.params:
+            del self.params['early_stopping_rounds']
+            
         dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
 
         log.info(f'Updating lightgbm model with {iterations} weak estimators')
