@@ -45,6 +45,7 @@ class LightGBM(BaseModel):
         self.target = target
         self.dtype_dict = dtype_dict
         self.input_cols = input_cols
+        self.params = {}
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         self.device, self.device_str = get_devices()
@@ -110,28 +111,28 @@ class LightGBM(BaseModel):
             objective = 'regression' if output_dtype in (dtype.integer, dtype.float) else 'multiclass'
             metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'
 
-        params = {
+        self.params = {
             'objective': objective,
             'metric': metric,
             'verbose': -1,
             'lambda_l1': 0.1,
             'lambda_l2': 0.1,
             'force_row_wise': True,
-            'device_type': self.device_str
+            'device_type': self.device_str,
         }
 
         if objective == 'multiclass':
             self.all_classes = self.ordinal_encoder.categories_[0]
-            params['num_class'] = self.all_classes.size
+            self.params['num_class'] = self.all_classes.size
 
-        self.num_iterations = 50
+        self.num_iterations = 100
         kwargs = {}
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
         start = time.time()
-        params['num_iterations'] = 1
-        self.model = lightgbm.train(params, train_data, valid_sets=validate_data, verbose_eval=False)
+        self.params['num_iterations'] = 1
+        self.model = lightgbm.train(self.params, train_data, verbose_eval=False)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
         log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
@@ -149,25 +150,30 @@ class LightGBM(BaseModel):
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
 
         log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
-        params['num_iterations'] = self.num_iterations
-        self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
+        self.params['num_iterations'] = self.num_iterations
+
+        self.params['early_stopping_rounds'] = 5
+        self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data, train_data], valid_names=['eval', 'train'], verbose_eval=False, **kwargs)
+        self.num_iterations = self.model.best_iteration
+        log.info(f'Lightgbm model contains {self.num_iterations} weak estimators')
         self.partial_fit(test_ds_arr)
 
     def partial_fit(self, data: List[EncodedDs]) -> None:
         ds = ConcatedEncodedDs(data)
         pct_of_original = len(ds) / self.fit_data_len
-        iterations = int(self.num_iterations * pct_of_original
-)
+        iterations = max(1, int(self.num_iterations * pct_of_original))
         data = {
             'retrain': {'ds': ds, 'data': None, 'label_data': {}}
         }
         output_dtype = self.dtype_dict[self.target]
         data = self._to_dataset(data, output_dtype)
-        train_data = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
+        del self.params['early_stopping_rounds']
+        dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
 
-        print(f'Refitting for {iterations} iterations')
-        for _ in range(iterations):
-            self.model.update(train_data)
+        log.info(f'Updating lightgbm model with {iterations} weak estimators')
+        self.params['num_iterations'] = iterations
+        self.model = lightgbm.train(self.params, dataset, verbose_eval=False, init_model=self.model)
+        pass
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         data = None
