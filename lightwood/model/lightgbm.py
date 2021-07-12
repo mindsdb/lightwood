@@ -152,8 +152,8 @@ class LightGBM(BaseModel):
         log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
         self.params['num_iterations'] = self.num_iterations
 
-        self.params['early_stopping_rounds'] = 5
-        self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data, train_data], valid_names=['eval', 'train'], verbose_eval=False, **kwargs)
+        self.params['early_stopping_rounds'] = 10
+        self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data], valid_names=['eval'], verbose_eval=False, **kwargs)
         self.num_iterations = self.model.best_iteration
         log.info(f'Lightgbm model contains {self.num_iterations} weak estimators')
         self.partial_fit(test_ds_arr)
@@ -170,7 +170,7 @@ class LightGBM(BaseModel):
         
         if 'early_stopping_rounds' in self.params:
             del self.params['early_stopping_rounds']
-            
+
         dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
 
         log.info(f'Updating lightgbm model with {iterations} weak estimators')
