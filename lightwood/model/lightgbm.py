@@ -35,6 +35,7 @@ class LightGBM(BaseModel):
     max_bin: int
     device: torch.device
     device_str: str
+    num_iterations: int
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str]):
         super().__init__(stop_after)
@@ -65,6 +66,7 @@ class LightGBM(BaseModel):
             'train': {'ds': ConcatedEncodedDs(ds_arr[0:-1]), 'data': None, 'label_data': {}},
             'test': {'ds': ConcatedEncodedDs(ds_arr[-1:]), 'data': None, 'label_data': {}}
         }
+        self.fit_data_len = len(data['train']['ds'])
 
         output_dtype = self.dtype_dict[self.target]
 
@@ -115,7 +117,7 @@ class LightGBM(BaseModel):
             self.all_classes = self.ordinal_encoder.categories_[0]
             params['num_class'] = self.all_classes.size
 
-        num_iterations = 50
+        self.num_iterations = 50
         kwargs = {}
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
@@ -127,9 +129,9 @@ class LightGBM(BaseModel):
         seconds_for_one_iteration = max(0.1, end - start)
         log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
         max_itt = int(self.stop_after / seconds_for_one_iteration)
-        num_iterations = max(1, min(num_iterations, max_itt))
+        self.num_iterations = max(1, min(self.num_iterations, max_itt))
         # Turn on grid search if training doesn't take too long using it
-        if max_itt >= num_iterations * 2:
+        if max_itt >= self.num_iterations * 2:
             model_generator = optuna_lightgbm
             kwargs['time_budget'] = self.stop_after * 0.7
             kwargs['optuna_seed'] = 0
@@ -140,11 +142,12 @@ class LightGBM(BaseModel):
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
 
         log.info(f'Training GBM ({model_generator}) with {num_iterations} iterations given {self.stop_after} seconds constraint')
-        params['num_iterations'] = num_iterations
+        params['num_iterations'] = self.num_iterations
         self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
 
     def partial_fit(self, data: List[EncodedDs]) -> None:
-        
+        ds = ConcatedEncodedDs(data)
+        pct_of_original = len(ds) / self.fit_data_len
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         data = None

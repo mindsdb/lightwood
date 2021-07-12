@@ -118,6 +118,7 @@ class Neural(BaseModel):
         # ConcatedEncodedDs
         train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
         test_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
+        self.fit_data_len = len(ConcatedEncodedDs(train_ds_arr))
 
         self.model = DefaultNet(
             input_size=len(ds_arr[0][0][0]),
@@ -186,7 +187,8 @@ class Neural(BaseModel):
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
         scaler = GradScaler()
-        for _ in range(max(1, int(self.epochs_to_best / 10))):
+        pct_of_original = len(ds)/self.fit_data_len
+        for _ in range(max(1, int(self.epochs_to_best * pct_of_original))):
             self._run_epoch(dl, criterion, optimizer, scaler)
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
