@@ -187,6 +187,8 @@ class Neural(BaseModel):
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
         scaler = GradScaler()
+
+        # @TODO Does it make sense to train less for less data... not sure, I think no, for now I'm hedging my bets even though it makes no sense, think of how to correct this later, maybe keep original data in pickle
         pct_of_original = len(ds)/self.fit_data_len
         for _ in range(max(1, int(self.epochs_to_best * pct_of_original))):
             self._run_epoch(dl, criterion, optimizer, scaler)
