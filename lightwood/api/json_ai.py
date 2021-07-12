@@ -127,6 +127,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'object': 'BestOf',
             'static_args': {},
             'dynamic_args': {
+                'data': 'test_data',
                 'models': 'self.models'
             }
         }
