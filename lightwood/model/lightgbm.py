@@ -92,9 +92,11 @@ class LightGBM(BaseModel):
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting LGBM model')
+        train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
+        test_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
         data = {
-            'train': {'ds': ConcatedEncodedDs(ds_arr[0:-1]), 'data': None, 'label_data': {}},
-            'test': {'ds': ConcatedEncodedDs(ds_arr[-1:]), 'data': None, 'label_data': {}}
+            'train': {'ds': ConcatedEncodedDs(train_ds_arr), 'data': None, 'label_data': {}},
+            'test': {'ds': ConcatedEncodedDs(test_ds_arr), 'data': None, 'label_data': {}}
         }
         self.fit_data_len = len(data['train']['ds'])
 
@@ -146,9 +148,10 @@ class LightGBM(BaseModel):
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
 
-        log.info(f'Training GBM ({model_generator}) with {num_iterations} iterations given {self.stop_after} seconds constraint')
+        log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
         params['num_iterations'] = self.num_iterations
         self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
+        self.partial_fit(test_ds_arr)
 
     def partial_fit(self, data: List[EncodedDs]) -> None:
         ds = ConcatedEncodedDs(data)
@@ -162,6 +165,8 @@ class LightGBM(BaseModel):
         data = self._to_dataset(data, output_dtype)
         train_data = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
 
+        print(f'Refitting for {iterations} iterations')
+        exit()
         for _ in range(iterations):
             self.model.update(train_data)
 
