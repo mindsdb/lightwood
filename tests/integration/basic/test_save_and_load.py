@@ -38,6 +38,7 @@ def execute_third_bit(code, df, path):
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
+        ctx = mp.get_context('spawn')
         df = FileDS('tests/data/adult.csv').df.iloc[0:2000]
         code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 25}))
         path = 'test.pickle'
@@ -45,17 +46,17 @@ class TestBasic(unittest.TestCase):
             os.remove(path)
         except Exception:
             pass
-        proc = mp.Process(target=execute_first_bit, args=(code, df, path,))
+        proc = ctx.Process(target=execute_first_bit, args=(code, df, path,))
         proc.start()
         proc.join()
         proc.close()
 
-        proc = mp.Process(target=execute_second_bit, args=(code, df, path,))
+        proc = ctx.Process(target=execute_second_bit, args=(code, df, path,))
         proc.start()
         proc.join()
         proc.close()
 
-        proc = mp.Process(target=execute_third_bit, args=(code, df, path,))
+        proc = ctx.Process(target=execute_third_bit, args=(code, df, path,))
         proc.start()
         proc.join()
         proc.close()
