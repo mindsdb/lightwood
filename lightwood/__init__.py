@@ -1,4 +1,6 @@
 import os
+import logging
+logging.setLevel(level=logging.WARNING)
 from lightwood.api import __all__ as api_all_list
 from lightwood.api import *
 import lightwood.data as data
