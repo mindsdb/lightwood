@@ -1,3 +1,4 @@
+from lightwood.helpers.general import evaluate_accuracy
 from typing import List
 from lightwood.model.base import BaseModel
 import pandas as pd
