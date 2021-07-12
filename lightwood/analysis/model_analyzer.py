@@ -62,7 +62,7 @@ def model_analyzer(
     runtime_analyzer = {}
     predictions = {}
     input_columns = list([col for col in data.columns if col != target])
-    normal_predictions = predictor(encoded_data) # TODO: this should include beliefs for categorical targets
+    normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
     normal_predictions = normal_predictions.set_index(data.index)
 
     # confidence estimation with inductive conformal predictors (ICPs)
