@@ -46,7 +46,10 @@ class OneHotEncoder(BaseEncoder):
         
         if self.is_target:
             self.index_weights = [None] * self._lang.n_words
-            self.index_weights[0] = np.mean(list(self.target_class_distribution.values()))
+            if self.target_class_distribution is not None:
+                self.index_weights[0] = np.mean(list(self.target_class_distribution.values()))
+            else:
+                self.index_weights[0] = 1
             for word in set(priming_data):
                 if self.target_class_distribution is not None:
                     self.index_weights[self._lang.word2index[str(word)]] = 1 / self.target_class_distribution[word]
