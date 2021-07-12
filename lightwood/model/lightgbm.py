@@ -59,18 +59,9 @@ class LightGBM(BaseModel):
         self.max_bin = 255
         if self.device_str == 'gpu':
             self.max_bin = 63  # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
-
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
-        log.info('Started fitting LGBM model')
-        data = {
-            'train': {'ds': ConcatedEncodedDs(ds_arr[0:-1]), 'data': None, 'label_data': {}},
-            'test': {'ds': ConcatedEncodedDs(ds_arr[-1:]), 'data': None, 'label_data': {}}
-        }
-        self.fit_data_len = len(data['train']['ds'])
-
-        output_dtype = self.dtype_dict[self.target]
-
-        for subset_name in ['train', 'test']:
+    
+    def _to_dataset(self, data, output_dtype):
+        for subset_name in data.keys():
             for input_col in self.input_cols:
                 if data[subset_name]['data'] is None:
                     data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(input_col).to(self.device)
@@ -96,6 +87,20 @@ class LightGBM(BaseModel):
                 label_data = label_data.astype(float)
 
             data[subset_name]['label_data'] = label_data
+
+        return data
+
+    def fit(self, ds_arr: List[EncodedDs]) -> None:
+        log.info('Started fitting LGBM model')
+        data = {
+            'train': {'ds': ConcatedEncodedDs(ds_arr[0:-1]), 'data': None, 'label_data': {}},
+            'test': {'ds': ConcatedEncodedDs(ds_arr[-1:]), 'data': None, 'label_data': {}}
+        }
+        self.fit_data_len = len(data['train']['ds'])
+
+        output_dtype = self.dtype_dict[self.target]
+
+        data = self._to_dataset(data, output_dtype)
 
         if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary):
             log.warn(f'Lightgbm mixer not supported for type: {output_dtype}')
@@ -148,6 +153,17 @@ class LightGBM(BaseModel):
     def partial_fit(self, data: List[EncodedDs]) -> None:
         ds = ConcatedEncodedDs(data)
         pct_of_original = len(ds) / self.fit_data_len
+        iterations = self.num_iterations * pct_of_original
+
+        data = {
+            'retrain': {'ds': ds, 'data': None, 'label_data': {}}
+        }
+        output_dtype = self.dtype_dict[self.target]
+        data = self._to_dataset(data, output_dtype)
+        train_data = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
+
+        for _ in range(iterations):
+            self.model.update(train_data)
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         data = None
