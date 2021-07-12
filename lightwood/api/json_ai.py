@@ -431,8 +431,8 @@ for col_name, encoder in parallel_preped_encoders.items():
     learn_body = f"""
 log.info('Featurizing the data')
 encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
-train_data = encoded_ds_arr[0:nfolds-1]
-test_data = encoded_ds_arr[nfolds-1]
+train_data = encoded_ds_arr[0:int(nfolds*0.9)]
+test_data = encoded_ds_arr[int(nfolds*0.9):]
 
 log.info('Training the models')
 self.models = [{', '.join([call(x, json_ai) for x in json_ai.output.models])}]
@@ -447,7 +447,7 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
 
 # Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
 for model in self.models:
-    model.partial_fit([test_data])
+    model.partial_fit(test_data)
 """
     learn_body = align(learn_body, 2)
 
