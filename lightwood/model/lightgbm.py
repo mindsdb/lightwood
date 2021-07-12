@@ -143,6 +143,9 @@ class LightGBM(BaseModel):
         params['num_iterations'] = num_iterations
         self.model = model_generator.train(params, train_data, valid_sets=validate_data, verbose_eval=False, **kwargs)
 
+    def partial_fit(self, data: List[EncodedDs]) -> None:
+        
+
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         data = None
         for input_col in self.input_cols:
