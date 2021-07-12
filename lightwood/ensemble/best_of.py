@@ -17,7 +17,7 @@ class BestOf(BaseEnsemble):
         ds = ConcatedEncodedDs(data)
         for idx, model in enumerate(models):
             score_dict = evaluate_accuracy(
-                ds[target],
+                ds.data_frame[target],
                 model(ds)['prediction'],
                 accuracy_functions
             )

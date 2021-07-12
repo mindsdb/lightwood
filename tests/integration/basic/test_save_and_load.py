@@ -39,8 +39,8 @@ def execute_third_bit(code, df, path):
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
         ctx = mp.get_context('spawn')
-        df = FileDS('tests/data/adult.csv').df.iloc[0:2000]
-        code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 25}))
+        df = FileDS('tests/data/adult.csv').df.iloc[0:400]
+        code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 20}))
         path = 'test.pickle'
         try:
             os.remove(path)
