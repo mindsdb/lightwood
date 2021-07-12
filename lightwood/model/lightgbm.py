@@ -156,8 +156,8 @@ class LightGBM(BaseModel):
     def partial_fit(self, data: List[EncodedDs]) -> None:
         ds = ConcatedEncodedDs(data)
         pct_of_original = len(ds) / self.fit_data_len
-        iterations = self.num_iterations * pct_of_original
-
+        iterations = int(self.num_iterations * pct_of_original
+)
         data = {
             'retrain': {'ds': ds, 'data': None, 'label_data': {}}
         }
@@ -166,7 +166,6 @@ class LightGBM(BaseModel):
         train_data = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
 
         print(f'Refitting for {iterations} iterations')
-        exit()
         for _ in range(iterations):
             self.model.update(train_data)
 
