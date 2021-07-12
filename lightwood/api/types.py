@@ -125,7 +125,7 @@ class ProblemDefinition:
     @staticmethod
     def from_dict(obj: Dict) -> None:
         target = obj['target']
-        nfolds = obj.get('nfolds', 10)
+        nfolds = obj.get('nfolds', 30)
         pct_invalid = obj.get('pct_invalid', 1)
         unbias_target = obj.get('unbias_target', False)
         seconds_per_model = obj.get('seconds_per_model', None)
