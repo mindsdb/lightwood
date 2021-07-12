@@ -2,8 +2,8 @@ from lightwood.api.high_level import code_from_problem, predictor_from_code, pre
 from lightwood.api.types import ProblemDefinition
 import unittest
 from mindsdb_datasources import FileDS
-import sys
 import multiprocessing as mp
+import os
 
 
 def save(predictor, path):
@@ -16,50 +16,47 @@ def train(predictor, df):
 
 def execute_first_bit(code, df, path):
     predictor = predictor_from_code(code)
-
     save(predictor, path)
 
 
-def execute_second_bit(code, df, path):    
-    import gc
-    try:
-        del sys.modules['temp_predictor_module']
-    except Exception:
-        pass
-    gc.collect()
-    assert 'temp_predictor_module' not in sys.modules
-    
+def execute_second_bit(code, df, path):
     predictor_1 = predictor_from_state(path, code)
-    print(predictor_1, predictor_1.learn)
     predictor_1.learn(data=df)
 
     save(predictor_1, path)
+    execute_third_bit(code, df, path)
 
 
 def execute_third_bit(code, df, path):
+    print('Running execute_third_bit')
     predictor_2 = predictor_from_state(path, code)
-    print('Making predictions')
     predictions = predictor_2.predict(df.iloc[0:3])
-    print(predictions)
+    for p in predictions['prediction']:
+        assert p is not None
+    print('Done running third bit')
 
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
-        df = FileDS('tests/data/adult.csv').df
-        code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 300}))
-        path = 'a_path.pickle'
-        
-        proc = mp.Process(target=execute_first_bit, args=(code, df, path,))
+        ctx = mp.get_context('spawn')
+        df = FileDS('tests/data/adult.csv').df.iloc[0:400]
+        code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 20}))
+        path = 'test.pickle'
+        try:
+            os.remove(path)
+        except Exception:
+            pass
+        proc = ctx.Process(target=execute_first_bit, args=(code, df, path,))
         proc.start()
         proc.join()
         proc.close()
 
-        proc = mp.Process(target=execute_second_bit, args=(code, df, path,))
+        proc = ctx.Process(target=execute_second_bit, args=(code, df, path,))
         proc.start()
         proc.join()
         proc.close()
 
-        proc = mp.Process(target=execute_third_bit, args=(code, df, path,))
+        proc = ctx.Process(target=execute_third_bit, args=(code, df, path,))
         proc.start()
         proc.join()
         proc.close()

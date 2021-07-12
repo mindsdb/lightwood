@@ -1,8 +1,6 @@
 from lightwood.api.types import ModelAnalysis
 import dill
 import pandas as pd
-import importlib.util
-import sys
 
 
 # Interface that must be respected by predictor objects generated from JSON ML and/or compatible with Mindsdb
