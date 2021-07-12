@@ -186,7 +186,7 @@ class Neural(BaseModel):
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
         scaler = GradScaler()
-        for _ in range(max(2, int(self.epochs_to_best / 10))):
+        for _ in range(max(1, int(self.epochs_to_best / 10))):
             self._run_epoch(dl, criterion, optimizer, scaler)
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
