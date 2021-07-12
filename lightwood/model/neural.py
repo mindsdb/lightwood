@@ -20,6 +20,7 @@ from lightwood.model.helpers.residual_net import ResidualNet
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
+from sklearn.metrics import r2_score
 
 
 class Neural(BaseModel):
@@ -33,6 +34,33 @@ class Neural(BaseModel):
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
         self.epochs_to_best = 1
+    
+    def _final_tuning(self, data_arr):
+        if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
+            self.model = self.model.eval()
+
+            decoded_predictions = []
+            deocded_real_values = []
+
+            for data in data_arr:
+                for X, Y in data:
+                    X = X.to(self.model.device)
+                    Y = Y.to(self.model.device)
+                    Yh = self.model(X)
+
+                    decoded_predictions.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+
+                    deocded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+
+                self.target_encoder.decode_log = True
+                log_acc = r2_score(deocded_real_values, decoded_predictions)
+                self.target_encoder.decode_log = False
+                lin_acc = r2_score(deocded_real_values, decoded_predictions)
+
+                if lin_acc < log_acc:
+                    self.target_encoder.decode_log = True
+                else:
+                    self.target_encoder.decode_log = False
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
@@ -85,11 +113,11 @@ class Neural(BaseModel):
             Yh = self.model(X)
             running_losses.append(criterion(Yh, Y).item())
         return np.mean(running_losses)
-            
+
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         # ConcatedEncodedDs
-        train_ds_arr = ds_arr[0:-1]
-        test_ds_arr = ds_arr[-1:]
+        train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
+        test_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
 
         self.model = DefaultNet(
             input_size=len(ds_arr[0][0][0]),
@@ -100,45 +128,56 @@ class Neural(BaseModel):
         started = time.time()
         scaler = GradScaler()
 
-        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=True)
-        test_dl = DataLoader(ConcatedEncodedDs(test_ds_arr), batch_size=200, shuffle=True)
+        full_test_dl = DataLoader(ConcatedEncodedDs(test_ds_arr), batch_size=200, shuffle=False)
+        # Train on subsets
+        for subset_itt in (0, 1):
+            for subset_idx in range(len(test_ds_arr)):
+                train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
+                test_dl = DataLoader(test_ds_arr[subset_idx], batch_size=200, shuffle=False)
 
-        best_model = deepcopy(self.model)
-        best_test_error = pow(2, 32)
-        
-        # @TODO (Maybe) try adding wramup
-        # Progressively decrease the learning rate
-        total_epochs = 0
-        running_errors: List[float] = []
-        optimizer = self._select_optimizer(0.0005)
-        for _ in range(int(1e10)):
-            total_epochs += 1
-            error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            test_error = self._error(test_dl, criterion)
-            log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs}')
-            running_errors.append(test_error)
-
-            if best_test_error > test_error:
-                best_test_error = test_error
                 best_model = deepcopy(self.model)
-                self.epochs_to_best = total_epochs
+                best_full_test_error = pow(2, 32)
 
-            stop = False
-            if np.isnan(error):
-                stop = True
-            elif (time.time() - started) > self.stop_after * 0.8:
-                stop = True
-            elif len(running_errors) > 10 and np.mean(running_errors[-5:]) < test_error:
-                stop = True
-            elif test_error < 0.00001:
-                stop = True
+                # @TODO (Maybe) try adding wramup
+                # Progressively decrease the learning rate
+                total_epochs = 0
+                running_errors: List[float] = []
+                optimizer = self._select_optimizer(0.0005)
+                for _ in range(int(1e10)):
+                    total_epochs += 1
+                    error = self._run_epoch(train_dl, criterion, optimizer, scaler)
+                    test_error = self._error(test_dl, criterion)
+                    full_test_error = self._error(full_test_dl, criterion)
+                    log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs}')
+                    running_errors.append(test_error)
 
-            if stop:
-                self.model = best_model
-                break
-        
+                    if best_full_test_error > full_test_error:
+                        best_full_test_error = full_test_error
+                        best_model = deepcopy(self.model)
+                        self.epochs_to_best = total_epochs
+
+                    stop = False
+                    if subset_itt == 0:
+                        # Don't go through normal stopping logic, we don't want to assing the best model, this is just a "priming" iteration
+                        break
+                    elif len(running_errors) > 5:
+                        delta_mean = np.mean([running_errors[-i] - running_errors[-i - 1] for i in range(1, len(running_errors))])
+                        if delta_mean <= 0:
+                            stop = True
+                    elif np.isnan(error):
+                        stop = True
+                    elif (time.time() - started) > self.stop_after * (0.5 + subset_idx * 0.4 / len(test_ds_arr)):
+                        stop = True
+                    elif test_error < 0.00001:
+                        stop = True
+
+                    if stop:
+                        self.model = best_model
+                        break
+
         # Do a single training run on the test data as well
         self.partial_fit(test_ds_arr)
+        self._final_tuning(test_ds_arr)
     
     def partial_fit(self, data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
@@ -154,6 +193,7 @@ class Neural(BaseModel):
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         
+        dl = DataLoader
         for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
             Y = Y.to(self.model.device)

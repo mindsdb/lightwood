@@ -32,7 +32,11 @@ class BinaryEncoder(BaseEncoder):
         if self.is_target:
             self.index_weights = [None, None]
             for word in self.map:
-                self.index_weights[self.map[word]] = 1 / self.target_class_distribution[word]
+                if self.target_class_distribution is not None:
+                    self.index_weights[self.map[word]] = 1 / self.target_class_distribution[word]
+                else:
+                    self.index_weights[self.map[word]] = 1
+                    
             self.index_weights = torch.Tensor(self.index_weights)
 
         self._prepared = True

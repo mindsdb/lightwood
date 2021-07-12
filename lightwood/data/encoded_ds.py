@@ -65,6 +65,7 @@ class EncodedDs(Dataset):
             raise Exception(f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor !')
         return encoded_data
 
+
 # Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
@@ -74,7 +75,7 @@ class ConcatedEncodedDs(EncodedDs):
         self.target = self.encoded_ds_arr[0].target
 
     def __len__(self):
-        return np.sum(self.encoded_ds_lenghts)
+        return np.sum(self.encoded_ds_lenghts) - 2
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         for ds_idx, length in enumerate(self.encoded_ds_lenghts):
@@ -82,7 +83,8 @@ class ConcatedEncodedDs(EncodedDs):
                 return self.encoded_ds_arr[ds_idx][idx]
             else:
                 idx -= length
-    
+        raise StopIteration()    
+
     @property
     def data_frame(self):
         return pd.concat([x.data_frame for x in self.encoded_ds_arr])

@@ -1,4 +1,5 @@
 import os
+import dill
 import pandas as pd
 from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
 import lightwood
@@ -10,11 +11,12 @@ import importlib.util
 import sys
 import random
 import string
-import dill
+import gc
+import sys
 
 
 def _module_from_code(code, module_name):
-    dev_file = os.environ.get('LIGHTWOWD_DEV_SAVE_TO', None)
+    dev_file = os.environ.get('LIGHTWOOD_DEV_SAVE_TO', None)
     if dev_file is not None:
         fp = open(dev_file, 'wb')
     else:
@@ -70,14 +72,23 @@ def predictor_from_code(code: str) -> PredictorInterface:
 
 
 def predictor_from_state(state_file: str, code: str = None) -> PredictorInterface:
-    with open(state_file, 'rb') as fp:
-        try:
+    try:
+        module_name = None
+        with open(state_file, 'rb') as fp:
             predictor = dill.load(fp)
-        except Exception as e:
-            module_name = str(e).lstrip("No module named '").split("'")[0]
-            if code is None:
-                raise Exception('You need to provide the code if trying to load a predictor from outside the scope/script it was created in!')
-            _module_from_code(code, module_name)
+    except Exception as e:
+        module_name = str(e).lstrip("No module named '").split("'")[0]
+        if code is None:
+            raise Exception('You need to provide the code if trying to load a predictor from outside the scope/script it was created in!')
+    
+    if module_name is not None:
+        try:
+            del sys.modules[module_name]
+        except Exception:
+            pass
+        gc.collect()
+        _module_from_code(code, module_name)
+        with open(state_file, 'rb') as fp:
             predictor = dill.load(fp)
 
     return predictor
