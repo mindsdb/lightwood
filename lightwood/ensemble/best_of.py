@@ -8,10 +8,10 @@ from lightwood.ensemble.base import BaseEnsemble
 class BestOf(BaseEnsemble):
     best_index: int
 
-    def __init__(self, models: List[BaseModel]) -> None:
-        super().__init__(models)
+    def __init__(self, models: List[BaseModel], data: List[EncodedDs]) -> None:
+        super().__init__(models, data)
         # @TODO: Need some shared accuracy functionality to determine model selection here
         self.best_index = 0
 
-    def __call__(self, ds_arr: List[EncodedDs]) -> pd.DataFrame:
-        return self.models[self.best_index](ConcatedEncodedDs(ds_arr))
+    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+        return self.models[self.best_index](ds)
