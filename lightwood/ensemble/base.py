@@ -8,7 +8,7 @@ class BaseEnsemble:
     data: List[EncodedDs]
     models: List[BaseModel]
 
-    def __init__(self, models: List[BaseModel], data: List[EncodedDs]) -> None:
+    def __init__(self, target, models: List[BaseModel], data: List[EncodedDs]) -> None:
         self.data = data
         self.models = models
         
