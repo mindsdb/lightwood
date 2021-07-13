@@ -144,7 +144,7 @@ class Neural(BaseModel):
                 total_epochs = 0
                 running_errors: List[float] = []
                 optimizer = self._select_optimizer(0.0005)
-                for _ in range(int(1e10)):
+                for _ in range(int(20000)):
                     total_epochs += 1
                     error = self._run_epoch(train_dl, criterion, optimizer, scaler)
                     test_error = self._error(test_dl, criterion)
