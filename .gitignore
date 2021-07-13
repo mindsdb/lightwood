@@ -53,3 +53,5 @@ pip-delete-this-directory.txt
 
 # Temporary
 dynamic_predictor.py
+
+test.pickle
