@@ -21,7 +21,6 @@ from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
 from sklearn.metrics import r2_score
-from accelerate import Accelerator
 
 
 class Neural(BaseModel):
@@ -85,7 +84,7 @@ class Neural(BaseModel):
 
         return optimizer
 
-    def _run_epoch(self, train_dl, criterion, optimizer, scaler, accelerator) -> float:
+    def _run_epoch(self, train_dl, criterion, optimizer, scaler) -> float:
         self.model = self.model.train()
         running_losses: List[float] = []
         for X, Y in train_dl:
@@ -96,11 +95,11 @@ class Neural(BaseModel):
                 Yh = self.model(X)
                 loss = criterion(Yh, Y)
                 if LightwoodAutocast.active:
-                    accelerator.backward(scaler.scale(loss))
+                    scaler.scale(loss).backward()
                     scaler.step(optimizer)
                     scaler.update()
                 else:
-                    accelerator.backward(loss)
+                    loss.backward()
                     optimizer.step()
             running_losses.append(loss.item())
         return np.mean(running_losses)
@@ -145,11 +144,9 @@ class Neural(BaseModel):
                 total_epochs = 0
                 running_errors: List[float] = []
                 optimizer = self._select_optimizer(0.0005)
-                accelerator = Accelerator()
-                self.model, optimizer, train_dl = accelerator.prepare(self.model, optimizer, train_dl)
                 for _ in range(int(20000)):
                     total_epochs += 1
-                    error = self._run_epoch(train_dl, criterion, optimizer, scaler, accelerator)
+                    error = self._run_epoch(train_dl, criterion, optimizer, scaler)
                     test_error = self._error(test_dl, criterion)
                     full_test_error = self._error(full_test_dl, criterion)
                     log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs} with subset {subset_idx}')
@@ -179,7 +176,6 @@ class Neural(BaseModel):
                         self.model = best_model
                         break
                 
-                accelerator.unwrap_model(self.model)
         # Do a single training run on the test data as well
         self.partial_fit(test_ds_arr)
         self._final_tuning(test_ds_arr)
@@ -194,11 +190,8 @@ class Neural(BaseModel):
 
         # @TODO Does it make sense to train less for less data... not sure, I think no, for now I'm hedging my bets even though it makes no sense, think of how to correct this later, maybe keep original data in pickle
         pct_of_original = len(ds) / self.fit_data_len
-        accelerator = Accelerator()
-        self.model, optimizer, dl = accelerator.prepare(self.model, optimizer, dl)       
         for _ in range(max(1, int(self.epochs_to_best * pct_of_original))):
-            self._run_epoch(dl, criterion, optimizer, scaler, accelerator)
-        accelerator.unwrap_model(self.model)
+            self._run_epoch(dl, criterion, optimizer, scaler)
         
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()

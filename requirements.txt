@@ -21,4 +21,3 @@ dataclasses_json >= 0.5.4
 autopep8 >= 1.5.7
 dill == 0.3.4
 colorlog >= 5.0.0
-accelerate >= 0.3.0

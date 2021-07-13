@@ -50,7 +50,6 @@ from transformers import (
     AdamW,
     get_linear_schedule_with_warmup,
 )
-from accelerate import Accelerator
 
 
 class PretrainedLangEncoder(BaseEncoder):
@@ -220,7 +219,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
             # Train model; declare optimizer earlier if desired.
             self._tune_model(
-                dataset, optimizer, scheduler,self._epochs
+                dataset, optim=optimizer, scheduler=scheduler, n_epochs=self._epochs
             )
 
         else:
@@ -233,7 +232,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
         self._prepared = True
 
-    def _tune_model(self, dataset, optim, scheduler, n_epochs):
+    def _tune_model(self, dataset, optim, scheduler, n_epochs=1):
         """
         Given a model, train for n_epochs.
         Specifically intended for tuning; it does NOT use loss/
@@ -248,10 +247,18 @@ class PretrainedLangEncoder(BaseEncoder):
         n_epochs - number of epochs to train
 
         """
-        accelerator = Accelerator()
-        self._model, optim, dataset = accelerator.prepare(self._model, optim, dataset)
-
         self._model.train()
+
+        if optim is None:
+            log.info("No opt. provided, setting all params with AdamW.")
+            optim = AdamW(self._model.parameters(), lr=5e-5)
+        else:
+            log.info("Optimizer provided")
+
+        if scheduler is None:
+            log.info("No scheduler provided.")
+        else:
+            log.info("Scheduler provided.")
 
         for epoch in range(n_epochs):
             total_loss = 0
@@ -260,23 +267,21 @@ class PretrainedLangEncoder(BaseEncoder):
                 optim.zero_grad()
 
                 with LightwoodAutocast():
-                    inpids = batch["input_ids"]
-                    attn = batch["attention_mask"]
-                    labels = batch["labels"]
+                    inpids = batch["input_ids"].to(self.device)
+                    attn = batch["attention_mask"].to(self.device)
+                    labels = batch["labels"].to(self.device)
                     outputs = self._model(inpids, attention_mask=attn, labels=labels)
                     loss = outputs[0]
 
                 total_loss += loss.item()
 
-                accelerator.backward(loss)
+                loss.backward()
                 optim.step()
                 if scheduler is not None:
                     scheduler.step()
 
-            self._model = accelerator.unwrap_model(self._model)
             self._train_callback(epoch, total_loss / len(dataset))
-        self._model = accelerator.unwrap_model(self._model)
-        
+
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
 
