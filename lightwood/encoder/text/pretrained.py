@@ -50,6 +50,7 @@ from transformers import (
     AdamW,
     get_linear_schedule_with_warmup,
 )
+from accelerate import Accelerator
 
 
 class PretrainedLangEncoder(BaseEncoder):
@@ -104,7 +105,7 @@ class PretrainedLangEncoder(BaseEncoder):
         self._tokenizer_class = DistilBertTokenizerFast
         self._pretrained_model_name = "distilbert-base-uncased"
 
-        self.device, self.available_devices = get_devices()
+        self.device, _ = get_devices()
         self.is_nn_encoder = True
         self.stop_after = stop_after
 
@@ -161,8 +162,6 @@ class PretrainedLangEncoder(BaseEncoder):
                 self._pretrained_model_name,
                 num_labels=label_size,
             ).to(self.device)
-            if self.available_devices > 1:
-                self._model = torch.nn.DataParallel(self._model)
 
             # Construct the dataset for training
             xinp = TextEmbed(text, labels)
@@ -221,7 +220,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
             # Train model; declare optimizer earlier if desired.
             self._tune_model(
-                dataset, optim=optimizer, scheduler=scheduler, n_epochs=self._epochs
+                dataset, optimizer, scheduler,self._epochs
             )
 
         else:
@@ -231,12 +230,10 @@ class PretrainedLangEncoder(BaseEncoder):
             self._model = self._embeddings_model_class.from_pretrained(
                 self._pretrained_model_name
             ).to(self.device)
-            if self.available_devices > 1:
-                self._model = torch.nn.DataParallel(self._model)
-                
+
         self._prepared = True
 
-    def _tune_model(self, dataset, optim, scheduler, n_epochs=1):
+    def _tune_model(self, dataset, optim, scheduler, n_epochs=):
         """
         Given a model, train for n_epochs.
         Specifically intended for tuning; it does NOT use loss/
@@ -252,17 +249,8 @@ class PretrainedLangEncoder(BaseEncoder):
 
         """
         self._model.train()
-
-        if optim is None:
-            log.info("No opt. provided, setting all params with AdamW.")
-            optim = AdamW(self._model.parameters(), lr=5e-5)
-        else:
-            log.info("Optimizer provided")
-
-        if scheduler is None:
-            log.info("No scheduler provided.")
-        else:
-            log.info("Scheduler provided.")
+        accelerator = Accelerator()
+        self._model, optim, data = accelerator.prepare(self._model, optim, dataset)
 
         for epoch in range(n_epochs):
             total_loss = 0
