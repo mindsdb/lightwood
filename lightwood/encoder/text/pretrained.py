@@ -233,7 +233,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
         self._prepared = True
 
-    def _tune_model(self, dataset, optim, scheduler, n_epochs=):
+    def _tune_model(self, dataset, optim, scheduler, n_epochs):
         """
         Given a model, train for n_epochs.
         Specifically intended for tuning; it does NOT use loss/
