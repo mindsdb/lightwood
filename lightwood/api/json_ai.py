@@ -450,7 +450,7 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
 
 # Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
 for model in self.models:
-    model.partial_fit(test_data)
+    model.partial_fit(test_data, train_data)
 """
     learn_body = align(learn_body, 2)
 
