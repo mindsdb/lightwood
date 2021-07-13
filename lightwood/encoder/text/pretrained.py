@@ -104,7 +104,7 @@ class PretrainedLangEncoder(BaseEncoder):
         self._tokenizer_class = DistilBertTokenizerFast
         self._pretrained_model_name = "distilbert-base-uncased"
 
-        self.device, _ = get_devices()
+        self.device, self.available_devices = get_devices()
         self.is_nn_encoder = True
         self.stop_after = stop_after
 
@@ -161,6 +161,8 @@ class PretrainedLangEncoder(BaseEncoder):
                 self._pretrained_model_name,
                 num_labels=label_size,
             ).to(self.device)
+            if self.available_devices > 1:
+                self._model = torch.nn.DataParallel(self._model)
 
             # Construct the dataset for training
             xinp = TextEmbed(text, labels)
@@ -229,7 +231,9 @@ class PretrainedLangEncoder(BaseEncoder):
             self._model = self._embeddings_model_class.from_pretrained(
                 self._pretrained_model_name
             ).to(self.device)
-
+            if self.available_devices > 1:
+                self._model = torch.nn.DataParallel(self._model)
+                
         self._prepared = True
 
     def _tune_model(self, dataset, optim, scheduler, n_epochs=1):
