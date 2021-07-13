@@ -165,6 +165,9 @@ class Neural(BaseModel):
                         delta_mean = np.mean([running_errors[-i] - running_errors[-i - 1] for i in range(1, len(running_errors))])
                         if delta_mean <= 0:
                             stop = True
+                    elif len(running_errors) > 20:
+                        if np.mean(running_errors[-5]) > (np.mean(running_errors[-20:-10]) - 0.001) and running_errors[-1] > (np.mean(running_errors[-20:-10]) - 0.001):
+                            stop = True
                     elif np.isnan(error):
                         stop = True
                     elif (time.time() - started) > self.stop_after * (0.5 + subset_idx * 0.4 / len(test_ds_arr)):
