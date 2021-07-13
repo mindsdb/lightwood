@@ -178,7 +178,8 @@ class Neural(BaseModel):
                     if stop:
                         self.model = best_model
                         break
-
+                
+                accelerator.unwrap_model(self.model)
         # Do a single training run on the test data as well
         self.partial_fit(test_ds_arr)
         self._final_tuning(test_ds_arr)
@@ -197,7 +198,8 @@ class Neural(BaseModel):
         self.model, optimizer, dl = accelerator.prepare(self.model, optimizer, dl)       
         for _ in range(max(1, int(self.epochs_to_best * pct_of_original))):
             self._run_epoch(dl, criterion, optimizer, scaler, accelerator)
-
+        accelerator.unwrap_model(self.model)
+        
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
