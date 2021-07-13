@@ -248,9 +248,10 @@ class PretrainedLangEncoder(BaseEncoder):
         n_epochs - number of epochs to train
 
         """
-        self._model.train()
         accelerator = Accelerator()
         self._model, optim, dataset = accelerator.prepare(self._model, optim, dataset)
+        
+        self._model.train()
 
         for epoch in range(n_epochs):
             total_loss = 0
