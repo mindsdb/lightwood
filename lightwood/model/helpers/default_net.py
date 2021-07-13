@@ -1,7 +1,7 @@
-from logging import exception
 import math
 import torch
 from functools import reduce
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.log import log
 
@@ -42,4 +42,7 @@ class DefaultNet(torch.nn.Module):
         return self
 
     def forward(self, input):
-        return self.net(input)
+        with LightwoodAutocast():
+            output = self.net(input)
+
+        return output
