@@ -1,9 +1,7 @@
 from logging import exception
 import math
-from typing import List
 import torch
 from functools import reduce
-from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.log import log
 
@@ -33,31 +31,15 @@ class DefaultNet(torch.nn.Module):
             raise Exception('You must specify other a shape or an input and output size when creating a DefaultNet!')
 
         self.net = torch.nn.Sequential(*layers)
-        self.to(*get_devices())
+        self.to(get_devices()[0])
 
-    def to(self, device: torch.device, available_devices: int) -> torch.nn.Module:
-        if available_devices == 0:
+    def to(self, device: torch.device) -> torch.nn.Module:
+        if 'cuda' not in str(torch.device) == 0:
             log.warning('Creating neural network on CPU, it will be significantly slower than using a GPU, consider using a GPU instead')
         self.net = self.net.to(device)
-        if available_devices > 1:
-            self.dp_wrapper_net = torch.nn.DataParallel(self.net)
-        else:
-            self.dp_wrapper_net = self.net
 
         self.device = device
-        self.available_devices = available_devices
         return self
 
     def forward(self, input):
-        try:
-            with LightwoodAutocast():
-                output = self.net(input)
-        except Exception as e:
-            # Data parallel error
-            if 'nccl' in str(e).lower():
-                self.dp_wrapper_net = self.net
-                log.warn(f'Data parallel not working: {e}')
-            else:
-                raise e
-
-        return output
+        return self.net(input)

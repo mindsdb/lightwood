@@ -10,17 +10,15 @@ import torch
 import numpy as np
 from copy import deepcopy
 from torch.utils.data import DataLoader
-from torch.cuda.amp import GradScaler
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
-from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.model.helpers.default_net import DefaultNet
-from lightwood.model.helpers.residual_net import ResidualNet
 from lightwood.model.helpers.ranger import Ranger
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
 from sklearn.metrics import r2_score
+from accelerate import Accelerator
 
 
 class Neural(BaseModel):
@@ -83,24 +81,18 @@ class Neural(BaseModel):
             optimizer = Ranger(self.model.parameters(), lr=lr, weight_decay=2e-2)
 
         return optimizer
-    
-    def _run_epoch(self, train_dl, criterion, optimizer, scaler) -> float:
+
+    def _run_epoch(self, train_dl, criterion, optimizer, accelerator) -> float:
         self.model = self.model.train()
         running_losses: List[float] = []
         for X, Y in train_dl:
-            X = X.to(self.model.device)
-            Y = Y.to(self.model.device)
-            with LightwoodAutocast():
-                optimizer.zero_grad()
-                Yh = self.model(X)
-                loss = criterion(Yh, Y)
-                if LightwoodAutocast.active:
-                    scaler.scale(loss).backward()
-                    scaler.step(optimizer)
-                    scaler.update()
-                else:
-                    loss.backward()
-                    optimizer.step()
+            X = X
+            Y = Y
+            optimizer.zero_grad()
+            Yh = self.model(X)
+            loss = criterion(Yh, Y)
+            accelerator.backward(loss)
+            optimizer.step()
             running_losses.append(loss.item())
         return np.mean(running_losses)
     
@@ -127,7 +119,6 @@ class Neural(BaseModel):
         
         criterion = self._select_criterion()
         started = time.time()
-        scaler = GradScaler()
 
         full_test_dl = DataLoader(ConcatedEncodedDs(test_ds_arr), batch_size=200, shuffle=False)
         # Train on subsets
@@ -144,9 +135,11 @@ class Neural(BaseModel):
                 total_epochs = 0
                 running_errors: List[float] = []
                 optimizer = self._select_optimizer(0.0005)
+                accelerator = Accelerator()
+                self.model, optimizer, train_dl = accelerator.prepare(self.model, optimizer, train_dl)
                 for _ in range(int(20000)):
                     total_epochs += 1
-                    error = self._run_epoch(train_dl, criterion, optimizer, scaler)
+                    error = self._run_epoch(train_dl, criterion, optimizer, accelerator)
                     test_error = self._error(test_dl, criterion)
                     full_test_error = self._error(full_test_dl, criterion)
                     log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs} with subset {subset_idx}')
@@ -186,12 +179,13 @@ class Neural(BaseModel):
         dl = DataLoader(ds, batch_size=200, shuffle=True)
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
-        scaler = GradScaler()
 
         # @TODO Does it make sense to train less for less data... not sure, I think no, for now I'm hedging my bets even though it makes no sense, think of how to correct this later, maybe keep original data in pickle
         pct_of_original = len(ds)/self.fit_data_len
+        accelerator = Accelerator()
+        self.model, optimizer, dl = accelerator.prepare(self.model, optimizer, dl)
         for _ in range(max(1, int(self.epochs_to_best * pct_of_original))):
-            self._run_epoch(dl, criterion, optimizer, scaler)
+            self._run_epoch(dl, criterion, optimizer, accelerator)
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
