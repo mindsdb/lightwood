@@ -15,5 +15,5 @@ class BaseModel:
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         raise NotImplementedError()
 
-    def partial_fit(self, data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
+    def partial_fit(self, train_data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
         pass
