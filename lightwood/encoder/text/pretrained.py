@@ -267,7 +267,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
                 total_loss += loss.item()
 
-                loss.backward()
+                accelerator.backward(loss)
                 optim.step()
                 if scheduler is not None:
                     scheduler.step()
