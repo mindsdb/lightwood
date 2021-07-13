@@ -273,8 +273,10 @@ class PretrainedLangEncoder(BaseEncoder):
                 if scheduler is not None:
                     scheduler.step()
 
+            self._model = accelerator.unwrap_model(self._model)
             self._train_callback(epoch, total_loss / len(dataset))
-
+        self._model = accelerator.unwrap_model(self._model)
+        
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
 
