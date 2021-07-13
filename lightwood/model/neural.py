@@ -88,8 +88,8 @@ class Neural(BaseModel):
         self.model = self.model.train()
         running_losses: List[float] = []
         for X, Y in train_dl:
-            X = X
-            Y = Y
+            X = X.to(self.model.device)
+            Y = Y.to(self.model.device)
             with LightwoodAutocast():
                 optimizer.zero_grad()
                 Yh = self.model(X)
