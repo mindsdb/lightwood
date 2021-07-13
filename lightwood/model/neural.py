@@ -160,7 +160,7 @@ class Neural(BaseModel):
                     if subset_itt == 0:
                         # Don't go through normal stopping logic, we don't want to assing the best model, this is just a "priming" iteration
                         break
-                    elif len(running_errors) > 10:
+                    elif len(running_errors) > 5:
                         delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-5:]))])
                         if delta_mean <= 0:
                             stop = True
@@ -176,18 +176,30 @@ class Neural(BaseModel):
                         break
                 
         # Do a single training run on the test data as well
-        self.partial_fit(test_ds_arr)
+        self.partial_fit(test_ds_arr, train_ds_arr)
         self._final_tuning(test_ds_arr)
     
-    def partial_fit(self, data: List[EncodedDs]) -> None:
+    def partial_fit(self, data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
-        dl = DataLoader(ConcatedEncodedDs(data), batch_size=200, shuffle=True)
+        train_ds = ConcatedEncodedDs(data)
+        test_ds = ConcatedEncodedDs(test_data)
+        train_dl = DataLoader(train_ds, batch_size=200, shuffle=True)
+        test_dl = DataLoader(test_ds, batch_size=200, shuffle=True)
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
+        best_error = pow(2, 32)
+        best_model = self.model
+        test_error = self._error(test_dl, criterion)
         for _ in range(self.epochs_to_best):
-            self._run_epoch(dl, criterion, optimizer, scaler)
+            train_error = self._run_epoch(train_dl, criterion, optimizer, scaler)
+            combined_error = train_error * (len(train_ds) / (len(train_ds) + len(test_ds))) + test_error * (len(test_ds) / (len(train_ds) + len(test_ds)))
+            if combined_error < best_error:
+                best_error = combined_error
+                best_model = deepcopy(self.model)
+        
+        self.model = best_model
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()

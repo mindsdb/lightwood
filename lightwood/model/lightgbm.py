@@ -159,9 +159,9 @@ class LightGBM(BaseModel):
         self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data], valid_names=['eval'], verbose_eval=False, **kwargs)
         self.num_iterations = self.model.best_iteration
         log.info(f'Lightgbm model contains {self.num_iterations} weak estimators')
-        self.partial_fit(test_ds_arr)
+        self.partial_fit(test_ds_arr, train_ds_arr)
 
-    def partial_fit(self, data: List[EncodedDs]) -> None:
+    def partial_fit(self, data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
         ds = ConcatedEncodedDs(data)
         pct_of_original = len(ds) / self.fit_data_len
         iterations = max(1, int(self.num_iterations * pct_of_original * 0.5))
