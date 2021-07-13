@@ -25,6 +25,7 @@ class BestOf(BaseEnsemble):
             if avg_score > best_score:
                 best_score = avg_score
                 self.best_index = idx
-
+        self.best_index = 0
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+        print(self.models[self.best_index])
         return self.models[self.best_index](ds)
