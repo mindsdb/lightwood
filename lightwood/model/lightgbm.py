@@ -58,8 +58,6 @@ class LightGBM(BaseModel):
             self.device_str = 'gpu'
 
         self.max_bin = 255
-        if self.device_str == 'gpu':
-            self.max_bin = 63  # As recommended by https://lightgbm.readthedocs.io/en/latest/Parameters.html#device_type
     
     def _to_dataset(self, data, output_dtype):
         for subset_name in data.keys():
@@ -106,7 +104,8 @@ class LightGBM(BaseModel):
         data = self._to_dataset(data, output_dtype)
 
         if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary):
-            log.warn(f'Lightgbm mixer not supported for type: {output_dtype}')
+            log.error(f'Lightgbm mixer not supported for type: {output_dtype}')
+            raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
             objective = 'regression' if output_dtype in (dtype.integer, dtype.float) else 'multiclass'
             metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'
@@ -127,6 +126,7 @@ class LightGBM(BaseModel):
         
         if self.device_str == 'gpu':
             self.num_iterations = 400
+            self.params['gpu_use_dp'] = True
         else:
             self.num_iterations = 100
         kwargs = {}
