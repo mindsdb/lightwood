@@ -48,14 +48,14 @@ class LightGBM(BaseModel):
         self.params = {}
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
-        self.device, self.device_str = get_devices()
-        if self.device_str != 'cpu':
-            gpu_works = check_gpu_support()
-            if not gpu_works:
-                self.device = torch.device('cpu')
-                self.device_str = 'cpu'
-            else:
-                self.device_str = 'gpu'
+        gpu_works = check_gpu_support()
+        if not gpu_works:
+            self.device = torch.device('cpu')
+            self.device_str = 'cpu'
+            log.warning('LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead')
+        else:
+            self.device = torch.device('cuda')
+            self.device_str = 'gpu'
 
         self.max_bin = 255
         if self.device_str == 'gpu':
@@ -124,8 +124,11 @@ class LightGBM(BaseModel):
         if objective == 'multiclass':
             self.all_classes = self.ordinal_encoder.categories_[0]
             self.params['num_class'] = self.all_classes.size
-
-        self.num_iterations = 100
+        
+        if self.device_str == 'gpu':
+            self.num_iterations = 400
+        else:
+            self.num_iterations = 100
         kwargs = {}
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
