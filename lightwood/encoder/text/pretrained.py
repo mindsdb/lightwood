@@ -250,7 +250,7 @@ class PretrainedLangEncoder(BaseEncoder):
         """
         accelerator = Accelerator()
         self._model, optim, dataset = accelerator.prepare(self._model, optim, dataset)
-        
+
         self._model.train()
 
         for epoch in range(n_epochs):
@@ -260,9 +260,9 @@ class PretrainedLangEncoder(BaseEncoder):
                 optim.zero_grad()
 
                 with LightwoodAutocast():
-                    inpids = batch["input_ids"].to(self.device)
-                    attn = batch["attention_mask"].to(self.device)
-                    labels = batch["labels"].to(self.device)
+                    inpids = batch["input_ids"]
+                    attn = batch["attention_mask"]
+                    labels = batch["labels"]
                     outputs = self._model(inpids, attention_mask=attn, labels=labels)
                     loss = outputs[0]
 
