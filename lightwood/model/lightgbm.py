@@ -125,10 +125,10 @@ class LightGBM(BaseModel):
             self.params['num_class'] = self.all_classes.size
         
         if self.device_str == 'gpu':
-            self.num_iterations = 400
+            self.num_iterations = 50
             self.params['gpu_use_dp'] = True
         else:
-            self.num_iterations = 100
+            self.num_iterations = 50
         kwargs = {}
 
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
@@ -156,29 +156,27 @@ class LightGBM(BaseModel):
         self.params['num_iterations'] = self.num_iterations
 
         self.params['early_stopping_rounds'] = 10
-        self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data], valid_names=['eval'], verbose_eval=False, **kwargs)
+        self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data], valid_names=['test'], verbose_eval=False, **kwargs)
         self.num_iterations = self.model.best_iteration
-        log.info(f'Lightgbm model contains {self.num_iterations} weak estimators')
+        log.info(f'Lightgbm model contains {self.model.num_trees()} weak estimators')
         self.partial_fit(test_ds_arr, train_ds_arr)
 
-    def partial_fit(self, data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
-        ds = ConcatedEncodedDs(data)
+    def partial_fit(self, train_data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
+        ds = ConcatedEncodedDs(train_data)
         pct_of_original = len(ds) / self.fit_data_len
-        iterations = max(1, int(self.num_iterations * pct_of_original * 0.5))
-        data = {
-            'retrain': {'ds': ds, 'data': None, 'label_data': {}}
-        }
+        iterations = max(1, int(self.num_iterations * pct_of_original))
+
+        data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'test': {'ds': ConcatedEncodedDs(train_data + test_data), 'data': None, 'label_data': {}}}
+
         output_dtype = self.dtype_dict[self.target]
         data = self._to_dataset(data, output_dtype)
         
-        if 'early_stopping_rounds' in self.params:
-            del self.params['early_stopping_rounds']
-
-        dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
+        train_data = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
+        validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
 
         log.info(f'Updating lightgbm model with {iterations} weak estimators')
         self.params['num_iterations'] = iterations
-        self.model = lightgbm.train(self.params, dataset, verbose_eval=False, init_model=self.model)
+        self.model = lightgbm.train(self.params, train_data, valid_sets=[validate_data], valid_names=['test'], verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
         
         pass

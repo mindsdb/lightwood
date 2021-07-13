@@ -179,9 +179,9 @@ class Neural(BaseModel):
         self.partial_fit(test_ds_arr, train_ds_arr)
         self._final_tuning(test_ds_arr)
     
-    def partial_fit(self, data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
+    def partial_fit(self, train_data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
-        train_ds = ConcatedEncodedDs(data)
+        train_ds = ConcatedEncodedDs(train_data)
         test_ds = ConcatedEncodedDs(test_data)
         train_dl = DataLoader(train_ds, batch_size=200, shuffle=True)
         test_dl = DataLoader(test_ds, batch_size=200, shuffle=True)
