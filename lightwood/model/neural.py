@@ -149,7 +149,7 @@ class Neural(BaseModel):
                     error = self._run_epoch(train_dl, criterion, optimizer, scaler)
                     test_error = self._error(test_dl, criterion)
                     full_test_error = self._error(full_test_dl, criterion)
-                    log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs}')
+                    log.info(f'Training error of {error} | Testing error of {test_error} | During iteration {total_epochs} with subset {subset_idx}')
                     running_errors.append(test_error)
 
                     if best_full_test_error > full_test_error:
@@ -162,11 +162,8 @@ class Neural(BaseModel):
                         # Don't go through normal stopping logic, we don't want to assing the best model, this is just a "priming" iteration
                         break
                     elif len(running_errors) > 5:
-                        delta_mean = np.mean([running_errors[-i] - running_errors[-i - 1] for i in range(1, len(running_errors))])
+                        delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-5:]))])
                         if delta_mean <= 0:
-                            stop = True
-                    elif len(running_errors) > 20:
-                        if np.mean(running_errors[-5]) > (np.mean(running_errors[-20:-10]) - 0.001) and running_errors[-1] > (np.mean(running_errors[-20:-10]) - 0.001):
                             stop = True
                     elif np.isnan(error):
                         stop = True
