@@ -131,13 +131,12 @@ class Neural(BaseModel):
 
         full_test_dl = DataLoader(ConcatedEncodedDs(test_ds_arr), batch_size=200, shuffle=False)
         # Train on subsets
+        best_full_test_error = pow(2, 32)
+        best_model = None
         for subset_itt in (0, 1):
             for subset_idx in range(len(test_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
                 test_dl = DataLoader(test_ds_arr[subset_idx], batch_size=200, shuffle=False)
-
-                best_model = deepcopy(self.model)
-                best_full_test_error = pow(2, 32)
 
                 # @TODO (Maybe) try adding wramup
                 # Progressively decrease the learning rate
@@ -182,17 +181,14 @@ class Neural(BaseModel):
     
     def partial_fit(self, data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
-        ds = ConcatedEncodedDs(data)
-        dl = DataLoader(ds, batch_size=200, shuffle=True)
+        dl = DataLoader(ConcatedEncodedDs(data), batch_size=200, shuffle=True)
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        # @TODO Does it make sense to train less for less data... not sure, I think no, for now I'm hedging my bets even though it makes no sense, think of how to correct this later, maybe keep original data in pickle
-        pct_of_original = len(ds) / self.fit_data_len
-        for _ in range(max(1, int(self.epochs_to_best * pct_of_original))):
+        for _ in range(self.epochs_to_best):
             self._run_epoch(dl, criterion, optimizer, scaler)
-        
+
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
