@@ -174,7 +174,7 @@ class LightGBM(BaseModel):
         train_data = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
 
-        log.info(f'Updating lightgbm model with {iterations} weak estimators')
+        log.info(f'Updating lightgbm model with {iterations} iterations')
         self.params['num_iterations'] = iterations
         self.model = lightgbm.train(self.params, train_data, valid_sets=[validate_data], valid_names=['test'], verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
