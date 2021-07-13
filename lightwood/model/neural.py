@@ -200,7 +200,6 @@ class Neural(BaseModel):
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         
-        dl = DataLoader
         for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
             Y = Y.to(self.model.device)

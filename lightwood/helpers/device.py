@@ -14,6 +14,6 @@ def get_devices():
                 available_devices = 1
     else:
         device_str = "cpu"
-        available_devices = 1
+        available_devices = 0
 
     return torch.device(device_str), available_devices
