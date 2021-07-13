@@ -64,6 +64,10 @@ def lookup_encoder(col_dtype: dtype, col_name: str, statistical_analysis: Statis
             if col_dtype in [dtype.integer, dtype.float]:
                 encoder_dict['dynamic_args']['grouped_by'] = f"{gby}"
                 encoder_dict['object'] = 'TsNumericEncoder'
+            if tss.nr_predictions > 1:
+                encoder_dict['dynamic_args']['grouped_by'] = f"{gby}"
+                encoder_dict['dynamic_args']['timesteps'] = f"{tss.nr_predictions}"
+                encoder_dict['object'] = 'TsArrayNumericEncoder'
         if '__mdb_ts_previous' in col_name:
             encoder_dict['object'] = 'TimeSeriesPlainEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{tss.target_type}"'
