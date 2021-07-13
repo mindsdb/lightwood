@@ -250,7 +250,7 @@ class PretrainedLangEncoder(BaseEncoder):
         """
         self._model.train()
         accelerator = Accelerator()
-        self._model, optim, data = accelerator.prepare(self._model, optim, dataset)
+        self._model, optim, dataset = accelerator.prepare(self._model, optim, dataset)
 
         for epoch in range(n_epochs):
             total_loss = 0
