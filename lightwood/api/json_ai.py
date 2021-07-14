@@ -102,7 +102,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'target': 'self.target',
                 'dtype_dict': 'self.dtype_dict',
                 'input_cols': 'self.input_cols',
-                'target_encoder': 'self.encoders[self.target]'
+                'target_encoder': 'self.encoders[self.target]',
+                'fit_on_dev': 'False'
             }
         },
         {
@@ -113,7 +114,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'dynamic_args': {
                 'target': 'self.target',
                 'dtype_dict': 'self.dtype_dict',
-                'input_cols': 'self.input_cols'
+                'input_cols': 'self.input_cols',
+                'fit_on_dev': 'False'
             }
         }
     ]
@@ -450,7 +452,8 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
 
 # Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
 for model in self.models:
-    model.partial_fit(test_data, train_data)
+    if {json_ai.problem_definition.fit_on_validation}:
+        model.partial_fit(test_data, train_data)
 """
     learn_body = align(learn_body, 2)
 

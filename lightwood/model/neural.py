@@ -26,7 +26,7 @@ from sklearn.metrics import r2_score
 class Neural(BaseModel):
     model: nn.Module
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, fit_on_dev: bool):
         super().__init__(stop_after)
         self.model = None
         self.dtype_dict = dtype_dict
@@ -34,6 +34,7 @@ class Neural(BaseModel):
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
         self.epochs_to_best = 1
+        self.fit_on_dev = fit_on_dev
     
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
@@ -181,7 +182,8 @@ class Neural(BaseModel):
                         break
                 
         # Do a single training run on the test data as well
-        self.partial_fit(test_ds_arr, train_ds_arr)
+        if self.fit_on_dev:
+            self.partial_fit(test_ds_arr, train_ds_arr)
         self._final_tuning(test_ds_arr)
     
     def partial_fit(self, train_data: List[EncodedDs], test_data: List[EncodedDs]) -> None:

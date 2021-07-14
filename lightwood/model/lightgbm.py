@@ -37,7 +37,7 @@ class LightGBM(BaseModel):
     device_str: str
     num_iterations: int
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str]):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], fit_on_dev: bool):
         super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
@@ -46,6 +46,7 @@ class LightGBM(BaseModel):
         self.dtype_dict = dtype_dict
         self.input_cols = input_cols
         self.params = {}
+        self.fit_on_dev = fit_on_dev
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         gpu_works = check_gpu_support()
@@ -159,7 +160,9 @@ class LightGBM(BaseModel):
         self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data], valid_names=['test'], verbose_eval=False, **kwargs)
         self.num_iterations = self.model.best_iteration
         log.info(f'Lightgbm model contains {self.model.num_trees()} weak estimators')
-        self.partial_fit(test_ds_arr, train_ds_arr)
+
+        if self.fit_on_dev:
+            self.partial_fit(test_ds_arr, train_ds_arr)
 
     def partial_fit(self, train_data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
         ds = ConcatedEncodedDs(train_data)
