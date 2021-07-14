@@ -114,6 +114,11 @@ class Neural(BaseModel):
             running_losses.append(criterion(Yh, Y).item())
         return np.mean(running_losses)
 
+    # @TODO: Rename test to validation in the main code
+    # @TODO: Rename the interanl dataset the models use to `dev`
+    # @TODO: Allow tunring off partial fitting -- 1 during model fitting, 2 after the analysis
+    # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
+    # @TODO: Writeup on the methodology for partial fitting
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         # ConcatedEncodedDs
         train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
