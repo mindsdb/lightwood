@@ -63,4 +63,4 @@ class TsArrayNumericEncoder(BaseEncoder):
         for encoded_timestep in torch.split(encoded_values, 1, dim=1):
             ret.extend(self.sub_encoder.decode(encoded_timestep.squeeze(1), dependency_data=dependency_data))
 
-        return ret # if return_all else ret[0]
+        return ret

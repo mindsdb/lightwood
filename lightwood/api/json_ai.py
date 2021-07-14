@@ -125,6 +125,19 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'input_cols': 'self.input_cols'
             }
         })
+    elif problem_definition.timeseries_settings.nr_predictions > 1:
+        models.append({
+            'object': 'LightGBMArray',
+            'static_args': {
+                'stop_after': 'problem_definition.seconds_per_model',
+                'n_ts_predictions': 'problem_definition.timeseries_settings.nr_predictions'
+            },
+            'dynamic_args': {
+                'target': 'self.target',
+                'dtype_dict': 'self.dtype_dict',
+                'input_cols': 'self.input_cols'
+            }
+        })
     
     output = Output(
         name=target,
@@ -298,8 +311,9 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     imports = [
-        'from lightwood.model import LightGBM',
         'from lightwood.model import Neural',
+        'from lightwood.model import LightGBM',
+        'from lightwood.model import LightGBMArray',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
         'from lightwood.data import transform_timeseries, timeseries_analyzer',

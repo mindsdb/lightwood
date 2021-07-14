@@ -46,18 +46,17 @@ def evaluate_multilabel_accuracy(column, predictions, true_values, backend, **kw
     return f1_score(true_values, pred_values, average='weighted')
 
 
-def evaluate_array_accuracy(true_values: List[Union[int, float]], predictions: List[List[Union[int, float]]], **kwargs):
-    nr_predictions = len(predictions) / len(true_values)  # @TODO: pass instead of inferring
-    assert nr_predictions % 1 == 0
+# @TODO: types here
+def evaluate_array_accuracy(true_values, predictions, **kwargs):
+    nr_predictions = len(predictions[0])  # @TODO: pass instead of inferring
 
-    formatted_predictions = np.array([predictions[i:i + int(nr_predictions)]
-                                      for i in range(int(len(predictions) // nr_predictions))])
+    # @TODO: this is incorrect in grouped scenarios, we need to get data from _timestep columns that have true values
     formatted_truths = sliding_window_view(np.array(true_values + [np.nan for _ in range(int(nr_predictions - 1))]),
                                            int(nr_predictions)).copy()
     formatted_truths[np.isnan(formatted_truths)] = 0.0
 
     aggregate = 0
-    for i in range(len(formatted_predictions)):
-        aggregate += mean_absolute_error(formatted_predictions[i], formatted_truths[i])
+    for i in range(len(predictions)):
+        aggregate += mean_absolute_error(predictions[i], formatted_truths[i])
 
     return aggregate / len(predictions)
