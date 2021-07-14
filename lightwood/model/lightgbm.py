@@ -3,6 +3,7 @@ from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.api import dtype
 from typing import Dict, List, Set
 import numpy as np
+from numpy.lib.stride_tricks import sliding_window_view
 import optuna.integration.lightgbm as optuna_lightgbm
 import lightgbm
 import optuna
@@ -36,8 +37,9 @@ class LightGBM(BaseModel):
     device: torch.device
     device_str: str
     num_iterations: int
+    n_ts_predictions:  int
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str]):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], n_ts_predictions: int):
         super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
@@ -46,6 +48,7 @@ class LightGBM(BaseModel):
         self.dtype_dict = dtype_dict
         self.input_cols = input_cols
         self.params = {}
+        self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         gpu_works = check_gpu_support()
@@ -84,6 +87,10 @@ class LightGBM(BaseModel):
                 label_data = label_data.astype(int)
             elif output_dtype == dtype.float:
                 label_data = label_data.astype(float)
+            elif output_dtype == dtype.array:
+                label_data = label_data.astype(float).values
+                label_data = np.append(label_data, [np.nan for _ in range(self.n_ts_predictions-1)])
+                label_data = sliding_window_view(label_data, window_shape=self.n_ts_predictions).tolist()
 
             data[subset_name]['label_data'] = label_data
 
@@ -103,11 +110,11 @@ class LightGBM(BaseModel):
 
         data = self._to_dataset(data, output_dtype)
 
-        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary):
+        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary, dtype.array):
             log.error(f'Lightgbm mixer not supported for type: {output_dtype}')
             raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
-            objective = 'regression' if output_dtype in (dtype.integer, dtype.float) else 'multiclass'
+            objective = 'regression' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multiclass'
             metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'
 
         self.params = {

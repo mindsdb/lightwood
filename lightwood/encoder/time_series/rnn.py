@@ -53,7 +53,7 @@ class TimeSeriesEncoder(BaseEncoder):
             self._normalizer = DatetimeEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields) * 2  # sinusoidal datetime components
         elif self.original_type in (dtype.float, dtype.integer):
-            self._normalizer = MinMaxNormalizer()
+            self._normalizer = MinMaxNormalizer(original_type=self.original_type)
 
         total_dims = self._n_dims
         dec_hsize = self._encoded_vector_size
@@ -65,7 +65,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 if dep_name in self.grouped_by:
                     continue  # we only use group column for indexing and selecting rows
 
-                assert dep['original_type'] in (dtype.categorical, dtype.binary, dtype.integer, dtype.float)
+                assert dep['original_type'] in (dtype.categorical, dtype.binary, dtype.integer, dtype.float, dtype.array)
 
                 if f'__mdb_ts_previous_{self.target}' == dep_name:
                     self.dep_norms[dep_name] = ts_analysis['target_normalizers']
@@ -77,7 +77,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     if dep['original_type'] in (dtype.categorical, dtype.binary):
                         self.dep_norms[dep_name]['__default'] = CatNormalizer()
                     else:
-                        self.dep_norms[dep_name]['__default']  = MinMaxNormalizer()
+                        self.dep_norms[dep_name]['__default']  = MinMaxNormalizer(original_type=self.original_type)
 
                     self.dep_norms[dep_name]['__default'].prepare(dep['data'])
                     self._group_combinations = {'__default': None}
@@ -85,7 +85,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 # add descriptor size to the total encoder output dimensionality
                 if dep['original_type'] in (dtype.categorical, dtype.binary):
                     total_dims += len(self.dep_norms[dep_name]['__default'].scaler.categories_[0])
-                elif dep['original_type'] in  (dtype.integer, dtype.float):
+                elif dep['original_type'] in  (dtype.integer, dtype.float, dtype.array):
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:

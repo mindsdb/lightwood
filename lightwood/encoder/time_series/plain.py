@@ -1,5 +1,6 @@
 import torch
 import pandas as pd
+import numpy as np
 
 from lightwood.encoder.base import BaseEncoder
 from lightwood.api import dtype
@@ -24,7 +25,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         if self.original_type in (dtype.categorical, dtype.binary):
             self._normalizer = CatNormalizer(encoder_class='ordinal')
         else:
-            self._normalizer = MinMaxNormalizer()
+            self._normalizer = MinMaxNormalizer(original_type=self.original_type)
 
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values

@@ -8,13 +8,14 @@ from lightwood.api.dtype import dtype
 
 
 class MinMaxNormalizer:
-    def __init__(self, combination=(), keys=(), factor=1):
+    def __init__(self, combination=(), keys=(), factor=1, original_type=None):
         self.scaler = MinMaxScaler()
         self.single_scaler = MinMaxScaler()  # for non-windowed arrays (when using numerical encoder)
         self.factor = factor
         self.keys = list(keys)  # columns involved in grouped-by subset dataset to normalize
         self.combination = combination  # tuple with values in those columns
         self.abs_mean = None
+        self.original_type = original_type
 
     def prepare(self, x):
         if isinstance(x, pd.Series):
@@ -28,6 +29,9 @@ class MinMaxNormalizer:
             if len(x.shape) == 1:
                 x = x.reshape(-1, 1)
 
+        if self.original_type == dtype.array:
+            x = x.astype(np.float)
+
         x[x == None] = 0
         self.abs_mean = np.mean(np.abs(x))
         self.scaler.fit(x)
@@ -35,8 +39,13 @@ class MinMaxNormalizer:
             self.single_scaler.fit(x[:, -1:])  # fit using non-windowed column data
 
     def encode(self, y):
+        # @TODO: streamline this
+        if self.original_type == dtype.array and isinstance(y, pd.Series):
+            y = np.array(y.tolist())
+
         if not isinstance(y, np.ndarray) and not isinstance(y[0], list):
             y = y.reshape(-1, 1)
+
         return torch.Tensor(self.scaler.transform(y))
 
     def decode(self, y):
@@ -123,18 +132,23 @@ def generate_target_group_normalizers(data):
 
     # numerical normalizers, here we spawn one per each group combination
     else:
+        if data['original_type'] == dtype.array:
+            data['data'] = data['data'].values.reshape(-1, 1).astype(np.float)
+
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
         for combination in all_group_combinations:
             if combination != ():
                 combination = frozenset(combination)  # freeze so that we can hash with it
                 _, subset = get_group_matches(data, combination, data['group_info'].keys())
                 if subset.size > 0:
-                    normalizers[combination] = MinMaxNormalizer(combination=combination, keys=data['group_info'].keys())
+                    normalizers[combination] = MinMaxNormalizer(combination=combination,
+                                                                original_type=data['original_type'],
+                                                                keys=data['group_info'].keys())
                     normalizers[combination].prepare(subset)
                     group_combinations.append(combination)
 
         # ...plus a default one, used at inference time and fitted with all training data
-        normalizers['__default'] = MinMaxNormalizer()
+        normalizers['__default'] = MinMaxNormalizer(original_type=data['original_type'])
         normalizers['__default'].prepare(data['data'])
         group_combinations.append('__default')
 
