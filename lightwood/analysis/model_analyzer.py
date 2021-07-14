@@ -75,7 +75,7 @@ def model_analyzer(
     is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
                    # and dtype.numeric in typing_info['data_type_dist'].keys())
 
-    is_classification = data_type in (dtype.categorical, dtype.binary, dtype.array)
+    is_classification = data_type in (dtype.categorical, dtype.binary)
                         # dtype.categorical in typing_info['data_type_dist'].keys())
 
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
