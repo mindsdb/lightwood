@@ -36,8 +36,9 @@ class LightGBM(BaseModel):
     device: torch.device
     device_str: str
     num_iterations: int
+    n_ts_predictions:  int
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str]):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], n_ts_predictions: int):
         super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
@@ -46,6 +47,7 @@ class LightGBM(BaseModel):
         self.dtype_dict = dtype_dict
         self.input_cols = input_cols
         self.params = {}
+        self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         gpu_works = check_gpu_support()
@@ -84,6 +86,8 @@ class LightGBM(BaseModel):
                 label_data = label_data.astype(int)
             elif output_dtype == dtype.float:
                 label_data = label_data.astype(float)
+            elif output_dtype == dtype.array:
+                label_data = label_data.astype(float)
 
             data[subset_name]['label_data'] = label_data
 
@@ -103,12 +107,12 @@ class LightGBM(BaseModel):
 
         data = self._to_dataset(data, output_dtype)
 
-        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary):
+        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary, dtype.array):
             log.error(f'Lightgbm mixer not supported for type: {output_dtype}')
             raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
-            objective = 'regression' if output_dtype in (dtype.integer, dtype.float) else 'multiclass'
-            metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'
+            objective = 'regression' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multiclass'
+            metric = 'l2' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multi_logloss'
 
         self.params = {
             'objective': objective,
@@ -197,6 +201,10 @@ class LightGBM(BaseModel):
             decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
         else:
             decoded_predictions = raw_predictions
+
+        if self.dtype_dict[self.target] == dtype.array:
+            # For now, naive predictions for T+N time series tasks @TODO: implement a TsLightGBMMixer for this
+            decoded_predictions = [[value for _ in range(self.n_ts_predictions)] for value in decoded_predictions]
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf
