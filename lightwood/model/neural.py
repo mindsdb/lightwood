@@ -50,7 +50,7 @@ class Neural(BaseModel):
 
                     decoded_predictions.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
 
-                    deocded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+                    deocded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Y, 0)))
 
                 self.target_encoder.decode_log = True
                 log_acc = r2_score(deocded_real_values, decoded_predictions)
@@ -214,7 +214,11 @@ class Neural(BaseModel):
             for dep in self.target_encoder.dependencies:
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
             decoded_prediction = self.target_encoder.decode(torch.unsqueeze(Yh, 0), **kwargs)
-            decoded_predictions.extend(decoded_prediction)
+
+            if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
+                decoded_predictions.extend(decoded_prediction)
+            else:
+                decoded_predictions.append(decoded_prediction)
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf

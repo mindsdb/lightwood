@@ -1,210 +1,44 @@
-import pandas as pd
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
-from lightwood.api import dtype
-from typing import Dict, List, Set
 import numpy as np
-import optuna.integration.lightgbm as optuna_lightgbm
-import lightgbm
-import optuna
-import torch
-import time
+import pandas as pd
+from typing import Dict, List, Set
+
+from lightwood.api import dtype
 from lightwood.helpers.log import log
-from lightwood.helpers.device import get_devices
-from sklearn.preprocessing import OrdinalEncoder
 from lightwood.model.base import BaseModel
-
-optuna.logging.set_verbosity(optuna.logging.CRITICAL)
-
-
-def check_gpu_support():
-    try:
-        data = np.random.rand(50, 2)
-        label = np.random.randint(2, size=50)
-        train_data = lightgbm.Dataset(data, label=label)
-        params = {'num_iterations': 1, 'device': 'gpu'}
-        lightgbm.train(params, train_set=train_data)
-        return True
-    except Exception:
-        return False
+from lightwood.model.lightgbm import LightGBM
+from lightwood.data.encoded_ds import EncodedDs
 
 
-class LightGBM(BaseModel):
-    model: lightgbm.LGBMModel
-    ordinal_encoder: OrdinalEncoder
-    label_set: Set[str]
-    max_bin: int
-    device: torch.device
-    device_str: str
-    num_iterations: int
+class LightGBMArray(BaseModel):
+    models: List[LightGBM]
     n_ts_predictions:  int
+    submodel_stop_after: float
+    target: str
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], n_ts_predictions: int):
         super().__init__(stop_after)
-        self.model = None
-        self.ordinal_encoder = None
-        self.label_set = set()
+        self.submodel_stop_after = stop_after/n_ts_predictions
         self.target = target
-        self.dtype_dict = dtype_dict
-        self.input_cols = input_cols
-        self.params = {}
+        dtype_dict[target] = dtype.float
+        self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols) for _ in range(n_ts_predictions)]
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
 
-        # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
-        gpu_works = check_gpu_support()
-        if not gpu_works:
-            self.device = torch.device('cpu')
-            self.device_str = 'cpu'
-            log.warning('LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead')
-        else:
-            self.device = torch.device('cuda')
-            self.device_str = 'gpu'
-
-        self.max_bin = 255
-    
-    def _to_dataset(self, data, output_dtype):
-        for subset_name in data.keys():
-            for input_col in self.input_cols:
-                if data[subset_name]['data'] is None:
-                    data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(input_col).to(self.device)
-                else:
-                    enc_col = data[subset_name]['ds'].get_encoded_column_data(input_col)
-                    data[subset_name]['data'] = torch.cat((data[subset_name]['data'], enc_col.to(self.device)), 1)
-            data[subset_name]['data'] = data[subset_name]['data'].tolist()
-
-            label_data = data[subset_name]['ds'].get_column_original_data(self.target)
-
-            if output_dtype in (dtype.categorical, dtype.binary):
-                if subset_name == 'train':
-                    self.ordinal_encoder = OrdinalEncoder()
-                    self.label_set = set(label_data)
-                    self.label_set.add('__mdb_unknown_cat')
-                    self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
-
-                label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
-                label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
-            elif output_dtype == dtype.integer:
-                label_data = label_data.astype(int)
-            elif output_dtype == dtype.float:
-                label_data = label_data.astype(float)
-            elif output_dtype == dtype.array:
-                label_data = label_data.astype(float)
-
-            data[subset_name]['label_data'] = label_data
-
-        return data
-
     def fit(self, ds_arr: List[EncodedDs]) -> None:
-        log.info('Started fitting LGBM model')
-        train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
-        test_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
-        data = {
-            'train': {'ds': ConcatedEncodedDs(train_ds_arr), 'data': None, 'label_data': {}},
-            'test': {'ds': ConcatedEncodedDs(test_ds_arr), 'data': None, 'label_data': {}}
-        }
-        self.fit_data_len = len(data['train']['ds'])
+        log.info('Started fitting LGBM models for array prediction')
 
-        output_dtype = self.dtype_dict[self.target]
-
-        data = self._to_dataset(data, output_dtype)
-
-        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary, dtype.array):
-            log.error(f'Lightgbm mixer not supported for type: {output_dtype}')
-            raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
-        else:
-            objective = 'regression' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multiclass'
-            metric = 'l2' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multi_logloss'
-
-        self.params = {
-            'objective': objective,
-            'metric': metric,
-            'verbose': -1,
-            'lambda_l1': 0.1,
-            'lambda_l2': 0.1,
-            'force_row_wise': True,
-            'device_type': self.device_str,
-        }
-
-        if objective == 'multiclass':
-            self.all_classes = self.ordinal_encoder.categories_[0]
-            self.params['num_class'] = self.all_classes.size
-        
-        if self.device_str == 'gpu':
-            self.num_iterations = 50
-            self.params['gpu_use_dp'] = True
-        else:
-            self.num_iterations = 50
-        kwargs = {}
-
-        train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
-        validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
-        start = time.time()
-        self.params['num_iterations'] = 1
-        self.model = lightgbm.train(self.params, train_data, verbose_eval=False)
-        end = time.time()
-        seconds_for_one_iteration = max(0.1, end - start)
-        log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
-        max_itt = int(self.stop_after / seconds_for_one_iteration)
-        self.num_iterations = max(1, min(self.num_iterations, max_itt))
-        # Turn on grid search if training doesn't take too long using it
-        if max_itt >= 200:
-            model_generator = optuna_lightgbm
-            kwargs['time_budget'] = self.stop_after * 0.7
-            kwargs['optuna_seed'] = 0
-        else:
-            model_generator = lightgbm
-
-        train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
-        validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
-
-        log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
-        self.params['num_iterations'] = self.num_iterations
-
-        self.params['early_stopping_rounds'] = 10
-        self.model = model_generator.train(self.params, train_data, valid_sets=[validate_data], valid_names=['test'], verbose_eval=False, **kwargs)
-        self.num_iterations = self.model.best_iteration
-        log.info(f'Lightgbm model contains {self.model.num_trees()} weak estimators')
-        self.partial_fit(test_ds_arr, train_ds_arr)
-
-    def partial_fit(self, train_data: List[EncodedDs], test_data: List[EncodedDs]) -> None:
-        ds = ConcatedEncodedDs(train_data)
-        pct_of_original = len(ds) / self.fit_data_len
-        iterations = max(1, int(self.num_iterations * pct_of_original))
-
-        data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'test': {'ds': ConcatedEncodedDs(train_data + test_data), 'data': None, 'label_data': {}}}
-
-        output_dtype = self.dtype_dict[self.target]
-        data = self._to_dataset(data, output_dtype)
-        
-        train_data = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
-        validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
-
-        log.info(f'Updating lightgbm model with {iterations} iterations')
-        self.params['num_iterations'] = iterations
-        self.model = lightgbm.train(self.params, train_data, valid_sets=[validate_data], valid_names=['test'], verbose_eval=False, init_model=self.model)
-        log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
-        
-        pass
+        for timestep in range(self.n_ts_predictions):
+            if timestep > 0:
+                for fold in range(len(ds_arr)):
+                    ds_arr[fold].data_frame[self.target] = ds_arr[fold].data_frame[f'{self.target}_timestep_{timestep}']
+            self.models[timestep].fit(ds_arr) # @TODO: this call should be parallelized
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
-        data = None
-        for input_col in self.input_cols:
-            if data is None:
-                data = ds.get_encoded_column_data(input_col).to(self.device)
-            else:
-                data = torch.cat((data, ds.get_encoded_column_data(input_col).to(self.device)), 1)
+        ydf = pd.DataFrame(0,  # zero-filled
+                           index=np.arange(sum(ds.encoded_ds_lenghts)),
+                           columns=[f'prediction_{i}' for i in range(self.n_ts_predictions)])
 
-        data = data.tolist()
-        raw_predictions = self.model.predict(data)
+        for timestep in range(self.n_ts_predictions):
+            ydf[f'prediction_{timestep}'] = self.models[timestep](ds)
 
-        # @TODO: probably better to store self.target_dtype or similar, and use that for the check instead
-        if self.ordinal_encoder is not None:
-            decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
-        else:
-            decoded_predictions = raw_predictions
-
-        if self.dtype_dict[self.target] == dtype.array:
-            # For now, naive predictions for T+N time series tasks @TODO: implement a TsLightGBMMixer for this
-            decoded_predictions = [[value for _ in range(self.n_ts_predictions)] for value in decoded_predictions]
-
-        ydf = pd.DataFrame({'prediction': decoded_predictions})
-        return ydf
+        ydf['prediction'] = ydf.values.tolist()
+        return ydf[['prediction']]

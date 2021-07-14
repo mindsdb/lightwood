@@ -22,6 +22,7 @@ class BestOf(BaseEnsemble):
                 accuracy_functions
             )
             avg_score = np.mean(list(score_dict.values()))
+            print(f"MODEL {model} score: {avg_score}")
             if avg_score > best_score:
                 best_score = avg_score
                 self.best_index = idx

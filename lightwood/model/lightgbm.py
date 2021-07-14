@@ -192,7 +192,6 @@ class LightGBM(BaseModel):
         data = data.tolist()
         raw_predictions = self.model.predict(data)
 
-        # @TODO: probably better to store self.target_dtype or similar, and use that for the check instead
         if self.ordinal_encoder is not None:
             decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
         else:
