@@ -3,6 +3,7 @@ from typing import List
 from sklearn.metrics import r2_score, f1_score, balanced_accuracy_score
 import importlib
 import numpy as np
+from numpy.lib.stride_tricks import sliding_window_view
 import pandas as pd
 
 
@@ -47,15 +48,18 @@ def evaluate_multilabel_accuracy(column, predictions, true_values, backend, **kw
 
 
 def evaluate_array_accuracy(true_values, predictions, **kwargs):
-    accuracy = 0
-    predictions = predictions['prediction']
-    true_values = list(true_values)
-    acc_f = balanced_accuracy_score if kwargs['categorical'] else r2_score
-    for i in range(len(predictions)):
-        if isinstance(true_values[i], list):
-            accuracy += max(0, acc_f(predictions[i], true_values[i]))
-        else:
-            # For the T+1 usecase
-            return max(0, acc_f([x[0] for x in predictions], true_values))
-    return accuracy / len(predictions)
+    if isinstance(predictions[0], list):
+        predictions = [value for prediction in predictions for value in prediction]
+
+    nr_predictions = len(predictions)/len(true_values)
+    assert nr_predictions%1==0
+
+    formatted_predictions = np.array([predictions[i:i+int(nr_predictions)] for i in range(int(len(predictions)//nr_predictions))])
+    formatted_truths = sliding_window_view(np.array(true_values + [np.nan for _ in range(int(nr_predictions-1))]), int(nr_predictions)).copy()
+    formatted_truths[np.isnan(formatted_truths)] = 0.0
+
+    agg_r2 = 0
+    for i in range(len(formatted_predictions)):
+        agg_r2 += max(0, r2_score(formatted_predictions[i], formatted_truths[i]))
+    return agg_r2 / len(predictions)
 

@@ -3,7 +3,6 @@ from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.api import dtype
 from typing import Dict, List, Set
 import numpy as np
-from numpy.lib.stride_tricks import sliding_window_view
 import optuna.integration.lightgbm as optuna_lightgbm
 import lightgbm
 import optuna
@@ -88,9 +87,7 @@ class LightGBM(BaseModel):
             elif output_dtype == dtype.float:
                 label_data = label_data.astype(float)
             elif output_dtype == dtype.array:
-                label_data = label_data.astype(float).values
-                label_data = np.append(label_data, [np.nan for _ in range(self.n_ts_predictions-1)])
-                label_data = sliding_window_view(label_data, window_shape=self.n_ts_predictions).tolist()
+                label_data = label_data.astype(float)
 
             data[subset_name]['label_data'] = label_data
 
@@ -115,7 +112,7 @@ class LightGBM(BaseModel):
             raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
             objective = 'regression' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multiclass'
-            metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'
+            metric = 'l2' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multi_logloss'
 
         self.params = {
             'objective': objective,
@@ -204,5 +201,10 @@ class LightGBM(BaseModel):
             decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
         else:
             decoded_predictions = raw_predictions
+
+        if self.dtype_dict[self.target] == dtype.array:
+            # For now, naive predictions for T+N time series tasks @TODO: implement a TsLightGBMMixer for this
+            decoded_predictions = [[value for _ in range(self.n_ts_predictions)] for value in decoded_predictions]
+
         ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf
