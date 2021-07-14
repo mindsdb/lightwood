@@ -108,8 +108,12 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'input_cols': 'self.input_cols',
                 'target_encoder': 'self.encoders[self.target]'
             }
-        },
-        {
+        }
+    ]
+
+    if not problem_definition.timeseries_settings.is_timeseries or \
+            problem_definition.timeseries_settings.nr_predictions <= 1:
+        models.append({
             'object': 'LightGBM',
             'static_args': {
                 'stop_after': 'problem_definition.seconds_per_model',
@@ -120,8 +124,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'dtype_dict': 'self.dtype_dict',
                 'input_cols': 'self.input_cols'
             }
-        }
-    ]
+        })
     
     output = Output(
         name=target,
