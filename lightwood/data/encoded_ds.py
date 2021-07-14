@@ -35,20 +35,24 @@ class EncodedDs(Dataset):
 
         X = torch.FloatTensor()
         for col in self.data_frame:
-            kwargs = {}
-            if 'dependency_data' in inspect.signature(self.encoders[col].encode).parameters:
-                kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
-                                             for dep in self.encoders[col].dependencies}
-
-            encoded_tensor = self.encoders[col].encode([self.data_frame.iloc[idx][col]], **kwargs)[0]
-            if col != self.target:
-                X = torch.cat([X, encoded_tensor])
-            else:
-                Y = encoded_tensor
+            if self.encoders.get(col, None):
+                kwargs = {}
+                if 'dependency_data' in inspect.signature(self.encoders[col].encode).parameters:
+                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
+                                                 for dep in self.encoders[col].dependencies}
+                if hasattr(self.encoders[col], 'data_window'):
+                    data = self.data_frame.iloc[idx:idx+self.encoders[col].data_window][col].tolist()
+                else:
+                    data = [self.data_frame.iloc[idx][col]]
+                encoded_tensor = self.encoders[col].encode(data, **kwargs)[0]
+                if col != self.target:
+                    X = torch.cat([X, encoded_tensor])
+                else:
+                    Y = encoded_tensor
 
         if self.cache_encoded:
             self.cache[idx] = (X, Y)
-        
+
         return X, Y
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
