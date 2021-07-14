@@ -112,10 +112,7 @@ class TestTimeseries(unittest.TestCase):
         plt.plot(preds)
         plt.show()
 
-    def test_long_forecasts(self):
-        pass
-
-    def test_infer_mode(self):
+    def test_long_forecasts_and_infer_mode(self):
         from lightwood.api.high_level import predictor_from_problem
         from mindsdb_datasources import FileDS
 
@@ -139,12 +136,16 @@ class TestTimeseries(unittest.TestCase):
                                                                                'timeseries_settings': {
                                                                                    'order_by': ['T'],
                                                                                    'group_by': ['Country'],
-                                                                                   'nr_predictions': 3,
+                                                                                   'nr_predictions': 5,
                                                                                    'use_previous_target': True,
-                                                                                   'window': 5
+                                                                                   'window': 10
                                                                                },
                                                                                }))
         predictor.learn(train)
+
+        # @TODO: test predict long forecasts
+
+        # @TODO: test predict infer mode
 
 
         # features[-1][0] = 'make_predictions'  # add make_predictions column as mindsdb would

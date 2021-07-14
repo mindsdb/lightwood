@@ -1,6 +1,6 @@
 from lightwood.api import predictor
 from typing import List
-from sklearn.metrics import r2_score, f1_score, balanced_accuracy_score
+from sklearn.metrics import r2_score, f1_score, balanced_accuracy_score, mean_absolute_error
 import importlib
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
@@ -60,6 +60,7 @@ def evaluate_array_accuracy(true_values, predictions, **kwargs):
 
     agg_r2 = 0
     for i in range(len(formatted_predictions)):
-        agg_r2 += max(0, r2_score(formatted_predictions[i], formatted_truths[i]))
+        agg_r2 += mean_absolute_error(formatted_predictions[i], formatted_truths[i])
+        # agg_r2 += max(0, r2_score(formatted_predictions[i], formatted_truths[i]))
     return agg_r2 / len(predictions)
 
