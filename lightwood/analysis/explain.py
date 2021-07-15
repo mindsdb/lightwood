@@ -28,8 +28,9 @@ def explain(data,
 
     # confidence estimation using calibrated inductive conformal predictors (ICPs)
     # @TODO: and not quick_predict check
-    insights = pd.DataFrame(columns=['prediction', 'confidence', 'lower', 'upper', 'anomaly'])
+    insights = pd.DataFrame(columns=['prediction', 'confidence', 'lower', 'upper', 'anomaly', 'truth'])
     insights['prediction'] = predictions['prediction']
+    insights['truth'] = data[target_name]
 
     if analysis['icp']['__mdb_active']:
         icp_X = deepcopy(data)
@@ -78,7 +79,7 @@ def explain(data,
 
                 # bounds in time series are only given for the first forecast
                 analysis['icp']['__default'].nc_function.model.prediction_cache = \
-                    [p[0] for p in predictions[target_name]]
+                    [p[0] for p in predictions['prediction']]
                 all_confs = analysis['icp']['__default'].predict(X.values)
 
             elif is_numerical:
