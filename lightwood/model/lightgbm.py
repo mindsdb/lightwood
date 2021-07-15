@@ -36,8 +36,9 @@ class LightGBM(BaseModel):
     device: torch.device
     device_str: str
     num_iterations: int
+    use_optuna: bool
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str]):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], use_optuna: bool = True):
         super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
@@ -45,6 +46,7 @@ class LightGBM(BaseModel):
         self.target = target
         self.dtype_dict = dtype_dict
         self.input_cols = input_cols
+        self.use_optuna = use_optuna
         self.params = {}
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
@@ -142,7 +144,7 @@ class LightGBM(BaseModel):
         max_itt = int(self.stop_after / seconds_for_one_iteration)
         self.num_iterations = max(1, min(self.num_iterations, max_itt))
         # Turn on grid search if training doesn't take too long using it
-        if max_itt >= 200:
+        if self.use_optuna and max_itt >= 200:
             model_generator = optuna_lightgbm
             kwargs['time_budget'] = self.stop_after * 0.7
             kwargs['optuna_seed'] = 0
