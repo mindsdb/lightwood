@@ -140,7 +140,7 @@ class ProblemDefinition:
         anomaly_error_rate = obj.get('anomaly_error_rate', None)
         anomaly_cooldown = obj.get('anomaly_detection', 1)
         ignore_features = obj.get('ignore_features', [])
-        fit_on_validation = obj.get('fit_on_validation', False)
+        fit_on_validation = obj.get('fit_on_validation', True)
 
         problem_definition = ProblemDefinition(
             target=target,
