@@ -103,7 +103,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'dtype_dict': 'self.dtype_dict',
                 'input_cols': 'self.input_cols',
                 'target_encoder': 'self.encoders[self.target]',
-                'fit_on_dev': 'False'
+                'fit_on_dev': True
             }
         },
         {
@@ -115,7 +115,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'target': 'self.target',
                 'dtype_dict': 'self.dtype_dict',
                 'input_cols': 'self.input_cols',
-                'fit_on_dev': 'False'
+                'fit_on_dev': True
             }
         }
     ]
