@@ -171,7 +171,7 @@ class LightGBM(BaseModel):
         pct_of_original = len(ds) / self.fit_data_len
         iterations = max(1, int(self.num_iterations * pct_of_original))
 
-        data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'dev': {'ds': ConcatedEncodedDs(train_data + dev_data), 'data': None, 'label_data': {}}}
+        data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'dev': {'ds': ConcatedEncodedDs(dev_data), 'data': None, 'label_data': {}}}
 
         output_dtype = self.dtype_dict[self.target]
         data = self._to_dataset(data, output_dtype)
