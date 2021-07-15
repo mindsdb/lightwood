@@ -138,7 +138,7 @@ class Neural(BaseModel):
         full_test_dl = DataLoader(ConcatedEncodedDs(test_ds_arr), batch_size=200, shuffle=False)
         # Train on subsets
         best_full_test_error = pow(2, 32)
-        best_model = None
+        best_model = self.model
         for subset_itt in (0, 1):
             for subset_idx in range(len(test_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
