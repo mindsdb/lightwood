@@ -148,7 +148,7 @@ class Neural(BaseModel):
                 # Progressively decrease the learning rate
                 total_epochs = 0
                 running_errors: List[float] = []
-                optimizer = self._select_optimizer(0.0005)
+                optimizer = self._select_optimizer(0.005)
                 for _ in range(int(20000)):
                     total_epochs += 1
                     error = self._run_epoch(train_dl, criterion, optimizer, scaler)
