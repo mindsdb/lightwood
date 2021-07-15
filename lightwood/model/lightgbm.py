@@ -126,12 +126,9 @@ class LightGBM(BaseModel):
             self.params['num_class'] = self.all_classes.size
         
         if self.device_str == 'gpu':
-            self.num_iterations = 50
             self.params['gpu_use_dp'] = True
-        else:
-            self.num_iterations = 50
-        kwargs = {}
 
+        kwargs = {}
         train_data = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
         validate_data = lightgbm.Dataset(data['test']['data'], label=data['test']['label_data'])
         start = time.time()
@@ -140,12 +137,12 @@ class LightGBM(BaseModel):
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
         log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
-        max_itt = int(self.stop_after / seconds_for_one_iteration)
-        self.num_iterations = max(1, min(self.num_iterations, max_itt))
+        self.num_iterations = int(self.stop_after * 0.8 / seconds_for_one_iteration)
         # Turn on grid search if training doesn't take too long using it
-        if max_itt >= 200:
+        if self.num_iterations >= 200:
             model_generator = optuna_lightgbm
-            kwargs['time_budget'] = self.stop_after * 0.7
+            kwargs['time_budget'] = self.stop_after * 0.4
+            self.num_iterations = int(self.num_iterations / 2)
             kwargs['optuna_seed'] = 0
         else:
             model_generator = lightgbm
