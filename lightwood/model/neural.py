@@ -166,8 +166,8 @@ class Neural(BaseModel):
                     if subset_itt == 0:
                         # Don't go through normal stopping logic, we don't want to assing the best model, this is just a "priming" iteration
                         break
-                    elif len(running_errors) > 5:
-                        delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-5:]))])
+                    elif len(running_errors) > 15:
+                        delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-10:]))])
                         if delta_mean <= 0:
                             stop = True
                     elif np.isnan(error):
