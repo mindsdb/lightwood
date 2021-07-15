@@ -107,7 +107,7 @@ class Gym:
 
                 if lowest_test_error is None or test_error < lowest_test_error:
                     lowest_test_error = test_error
-                    self.best_model = copy.deepcopy(self.model).to('cpu', 1)
+                    self.best_model = copy.deepcopy(self.model).to('cpu')
 
                 if last_test_error is None:
                     test_error_delta_buff.append(0)
