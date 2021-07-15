@@ -41,7 +41,8 @@ class EncodedDs(Dataset):
                     kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
                                                  for dep in self.encoders[col].dependencies}
                 if hasattr(self.encoders[col], 'data_window'):
-                    data = self.data_frame.iloc[idx:idx+self.encoders[col].data_window][col].tolist()
+                    cols = [self.target] + [f'{self.target}_timestep_{i}' for i in range(1, self.encoders[col].data_window)]
+                    data = self.data_frame[cols].iloc[idx].tolist()
                 else:
                     data = [self.data_frame.iloc[idx][col]]
                 encoded_tensor = self.encoders[col].encode(data, **kwargs)[0]

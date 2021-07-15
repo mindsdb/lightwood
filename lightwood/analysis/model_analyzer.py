@@ -237,8 +237,9 @@ def model_analyzer(
     # TODO: calculate acc on other folds?
     # get accuracy metric for validation data
     score_dict = evaluate_accuracy(
-        data[target],
+        data,
         normal_predictions['prediction'],
+        target,
         accuracy_functions
     )
     normal_accuracy = np.mean(list(score_dict.values()))
@@ -255,7 +256,7 @@ def model_analyzer(
         for col in ignorable_input_columns:
             empty_input_predictions[col] = predictor('validate', ignore_columns=[col])  # @TODO: add this param?
             empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
-                data[target],
+                data,
                 empty_input_predictions[col]
             ).values()))
 
