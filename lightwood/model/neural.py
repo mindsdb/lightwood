@@ -41,7 +41,7 @@ class Neural(BaseModel):
             self.model = self.model.eval()
 
             decoded_predictions = []
-            deocded_real_values = []
+            decoded_real_values = []
 
             for data in data_arr:
                 for X, Y in data:
@@ -51,12 +51,12 @@ class Neural(BaseModel):
 
                     decoded_predictions.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
 
-                    deocded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+                    decoded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Y, 0)))
 
                 self.target_encoder.decode_log = True
-                log_acc = r2_score(deocded_real_values, decoded_predictions)
+                log_acc = r2_score(decoded_real_values, decoded_predictions)
                 self.target_encoder.decode_log = False
-                lin_acc = r2_score(deocded_real_values, decoded_predictions)
+                lin_acc = r2_score(decoded_real_values, decoded_predictions)
 
                 if lin_acc < log_acc:
                     self.target_encoder.decode_log = True
