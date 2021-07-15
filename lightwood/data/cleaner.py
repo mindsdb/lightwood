@@ -101,13 +101,14 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: int, ig
     # Drop columns we don't want to use
     data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]
+    exceptions = ['__mdb_make_predictions']
     data = data.drop(columns=to_drop)
     if mode == 'train':
         data = clean_empty_targets(data, target)
 
     # Drop extra columns
     for name in list(data.columns):
-        if name not in dtype_dict:
+        if name not in dtype_dict and name not in exceptions:
             data = data.drop(columns=[name])
 
     # Standardize content

@@ -15,18 +15,20 @@ from lightwood.helpers.log import log
 from lightwood.api import dtype
 
 
-def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str) -> pd.DataFrame:
+def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
     tss = timeseries_settings
     original_df = copy.deepcopy(data)
     gb_arr = tss.group_by if tss.group_by is not None else []
     ob_arr = tss.order_by
     window = tss.window
 
-    if 'make_predictions' in original_df.columns:
-        index = original_df[original_df['make_predictions'].map({'True': True, 'False': False, True: True, False: False}) == True]
-        infer_mode = index.shape[0] == 0  # condition to trigger: make_predictions is set to False everywhere
+    if '__mdb_make_predictions' in original_df.columns:
+        index = original_df[original_df['__mdb_make_predictions'].map({'True': True, 'False': False, True: True, False: False}) == True]
+        infer_mode = index.shape[0] == 0  # condition to trigger: __mdb_make_predictions is set to False everywhere
+        original_df = original_df.reset_index(drop=True) if infer_mode else original_df  # @TODO: dont drop and use instead of original_index?
     else:
         infer_mode = False
+
     original_index_list = []
     idx = 0
     for row in original_df.itertuples():
@@ -77,7 +79,7 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
 
     last_index = original_df['original_index'].max()
     for i, subdf in enumerate(df_arr):
-        if 'make_predictions' in subdf.columns:  # and mode == 'predict':  # @TODO: make sure this is still working OK
+        if '__mdb_make_predictions' in subdf.columns and mode == 'predict':
             if infer_mode:
                 df_arr[i] = _ts_infer_next_row(subdf, ob_arr, last_index)
                 last_index += 1
@@ -92,7 +94,7 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
         df_arr = pool.map(partial(_ts_order_col_to_cell_lists, historical_columns=ob_arr + tss.historical_columns), df_arr)
         df_arr = pool.map(partial(_ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window), df_arr)
         if tss.use_previous_target:
-            df_arr = pool.map(partial(_ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type), df_arr)
+            df_arr = pool.map(partial(_ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type, mode=mode), df_arr)
         pool.close()
         pool.join()
     else:
@@ -101,13 +103,13 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i], historical_columns=ob_arr + tss.historical_columns, window=window)
             if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type)
+                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type, mode=mode)
 
     combined_df = pd.concat(df_arr)
 
-    if 'make_predictions' in combined_df.columns:
-        combined_df = pd.DataFrame(combined_df[combined_df['make_predictions'].astype(bool) == True])
-        del combined_df['make_predictions']
+    if '__mdb_make_predictions' in combined_df.columns:
+        combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool) == True])
+        del combined_df['__mdb_make_predictions']
 
     if len(combined_df) == 0:
         raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size. If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` advanced argument to `True`, but this might lead to subpar predictions.')
@@ -155,13 +157,13 @@ def _ts_infer_next_row(df, ob, last_index):
         delta = 1
     last_row.original_index = None
     last_row.index = [last_index + 1]
-    last_row['make_predictions'] = True
+    last_row['__mdb_make_predictions'] = True
     last_row[ob] += delta
     return df.append(last_row)
 
 
 def _make_pred(row):
-    return not hasattr(row, 'make_predictions') or row.make_predictions
+    return not hasattr(row, '__mdb_make_predictions') or row.make_predictions
 
 
 def _ts_to_obj(df, historical_columns):
@@ -197,7 +199,7 @@ def _ts_add_previous_rows(df, historical_columns, window):
     return df
 
 
-def _ts_add_previous_target(df, target, nr_predictions, window, data_dtype):
+def _ts_add_previous_target(df, target, nr_predictions, window, data_dtype, mode):
     if data_dtype in (dtype.integer, dtype.float, dtype.array):
         df[target] = df[target].astype(np.float)
     previous_target_values = list(df[target])
@@ -220,11 +222,11 @@ def _ts_add_previous_target(df, target, nr_predictions, window, data_dtype):
         df[f'{target}_timestep_{timestep_index}'] = next_target_value_arr
 
     # drop rows with incomplete target info.
-    # if mode == 'learn':  # @TODO: make sure the behavior is right, because mode kwarg was dropped for now
-    for col in [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]:
-        if 'make_predictions' not in df.columns:
-            df['make_predictions'] = True
-        df.loc[df[col].isna(), ['make_predictions']] = False
+    if mode == 'train':
+        for col in [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]:
+            if '__mdb_make_predictions' not in df.columns:
+                df['__mdb_make_predictions'] = True
+            df.loc[df[col].isna(), ['__mdb_make_predictions']] = False
 
     return df
 

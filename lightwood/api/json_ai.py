@@ -190,7 +190,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'dynamic_args': {
                 'data': 'data',
                 'dtype_dict': 'self.dtype_dict',
-                'target': 'self.target'
+                'target': 'self.target',
+                'mode': 'self.mode'
             }
         }
 

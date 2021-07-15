@@ -55,7 +55,7 @@ def model_analyzer(
     # @ TODO: reimplement time series
     # validation_df = data.validation_df
     # if ts_cfg.is_timeseries:
-    #     validation_df = data.validation_df[data.validation_df['make_predictions'] == True]
+    #     validation_df = data.validation_df[data.validation_df['__mdb_make_predictions'] == True]
     # ... same with test and train dfs
     encoded_data = ConcatedEncodedDs(data)
     data = encoded_data.data_frame

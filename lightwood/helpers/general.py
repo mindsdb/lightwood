@@ -1,3 +1,4 @@
+import math
 import importlib
 from typing import List, Union
 
@@ -62,6 +63,12 @@ def evaluate_array_accuracy(
     nr_predictions = len(predictions[0])
 
     for i in range(len(predictions)):
-        aggregate += mean_absolute_error(predictions[i], true_values[i])
+        try:
+            valid_horizon = [math.isnan(x) for x in true_values[i]].index(True)
+        except ValueError:
+            valid_horizon = len(true_values[i])
+
+        aggregate += mean_absolute_error(predictions[i][:valid_horizon],
+                                         true_values[i][:valid_horizon])
 
     return aggregate / len(predictions)
