@@ -117,7 +117,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'object': 'LightGBM',
             'static_args': {
                 'stop_after': 'problem_definition.seconds_per_model',
-                'n_ts_predictions': 'problem_definition.timeseries_settings.nr_predictions'
             },
             'dynamic_args': {
                 'target': 'self.target',
