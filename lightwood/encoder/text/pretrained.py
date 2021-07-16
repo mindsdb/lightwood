@@ -56,6 +56,7 @@ of the output embedding
 import torch
 from torch.utils.data import DataLoader
 import os
+import pandas as pd
 from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
 from lightwood.helpers.device import get_devices
 from lightwood.encoder.base import BaseEncoder
@@ -96,7 +97,6 @@ class PretrainedLangEncoder(BaseEncoder):
         custom_tokenizer=None,
         batch_size=10,
         max_position_embeddings=None,
-        custom_train=True,
         frozen=False,
         epochs=1,
         output_type=None,
@@ -109,7 +109,6 @@ class PretrainedLangEncoder(BaseEncoder):
         log.info(self.name)
 
         self._max_len = max_position_embeddings
-        self._custom_train = custom_train
         self._frozen = frozen
         self._batch_size = batch_size
         self._epochs = epochs
@@ -137,7 +136,7 @@ class PretrainedLangEncoder(BaseEncoder):
         else:
             log.info("Embedding mode off. Logits are output of encode()")
 
-    def prepare(self, priming_data, training_data=None):
+    def prepare(self, priming_data: pd.Series, encoded_target_values: torch.Tensor):
         """
         Prepare the encoder by training on the target.
 
@@ -150,25 +149,15 @@ class PretrainedLangEncoder(BaseEncoder):
 
         # TODO: Make tokenizer custom with partial function; feed custom->model
         if self._tokenizer is None:
-            self._tokenizer = self._tokenizer_class.from_pretrained(
-                self._pretrained_model_name
-            )
+            self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
 
         # Replaces empty strings with ''
         priming_data = [x if x is not None else "" for x in priming_data]
 
         # Checks training data details
         # TODO: Regression flag; currently training supported for categorical only
-        output_avail = training_data is not None and len(training_data["targets"]) == 1
 
-        if (
-            self._custom_train
-            and output_avail
-            and (
-                self.output_type
-                in (dtype.categorical, dtype.binary)
-            )
-        ):
+        if (self.output_type in (dtype.categorical, dtype.binary)):
             log.info("Training model.")
 
             # Prepare priming data into tokenized form + attention masks
@@ -176,19 +165,12 @@ class PretrainedLangEncoder(BaseEncoder):
 
             log.info("\tOutput trained is categorical")
 
-            if training_data["targets"][0]["encoded_output"].shape[1] > 1:
-                labels = training_data["targets"][0]["encoded_output"].argmax(
-                    dim=1
-                )  # Nbatch x N_classes
-            else:
-                labels = training_data["targets"][0]["encoded_output"]
-
-            label_size = len(set(training_data["targets"][0]["unencoded_output"])) + 1
+            labels = encoded_target_values.argmax(dim=1)
 
             # Construct the model
             self._model = self._classifier_model_class.from_pretrained(
                 self._pretrained_model_name,
-                num_labels=label_size,
+                num_labels=len(encoded_target_values[0]),
             ).to(self.device)
 
             # Construct the dataset for training
