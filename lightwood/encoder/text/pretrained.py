@@ -363,7 +363,7 @@ class PretrainedLangEncoder(BaseEncoder):
                         output = self._model.pre_classifier(output)
 
                 else: #Embedding mode off; return classes
-                    raise NotImplementedError 
+                    output = self._model(inp).logits
 
                 encoded_representation.append(output.detach())
 
