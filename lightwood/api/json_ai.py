@@ -71,6 +71,7 @@ def lookup_encoder(col_dtype: dtype, col_name: str, statistical_analysis: Statis
         if '__mdb_ts_previous' in col_name:
             encoder_dict['object'] = 'TimeSeriesPlainEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{tss.target_type}"'
+            encoder_dict['dynamic_args']['window'] = f'{tss.window}'
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
@@ -97,7 +98,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     models = [
         {
             
-            'object': 'Neural',
+            'object': 'Neural', # if not problem_definition.timeseries_settings.is_timeseries else 'TsNeural',
             'static_args': {
                 'stop_after': 'problem_definition.seconds_per_model',
                 'timeseries_settings': 'problem_definition.timeseries_settings'
@@ -312,6 +313,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     imports = [
         'from lightwood.model import Neural',
+        'from lightwood.model import TsNeural',
         'from lightwood.model import LightGBM',
         'from lightwood.model import LightGBMArray',
         'from lightwood.ensemble import BestOf',

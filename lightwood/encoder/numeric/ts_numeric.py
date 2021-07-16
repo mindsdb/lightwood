@@ -17,7 +17,7 @@ class TsNumericEncoder(NumericEncoder):
         self.normalizers = None
         self.group_combinations = None
         self.dependencies = grouped_by
-        self.out_features = 2 if is_target else 3
+        self.output_size = 2 if is_target else 3
 
     def encode(self, data, dependency_data={}):
         """dependency_data: dict with grouped_by column info,

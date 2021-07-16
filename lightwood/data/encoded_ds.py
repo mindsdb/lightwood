@@ -20,6 +20,15 @@ class EncodedDs(Dataset):
         self.target = target
         self.cache_encoded = True
         self.cache = [None] * len(self.data_frame)
+        self.encoder_spans = {}
+        self.input_length = 0
+
+        # save encoder span, has to use same iterator as in __getitem__ for correct indeces
+        for col in self.data_frame:
+            if col != self.target:
+                self.encoder_spans[col] = (self.input_length,
+                                           self.input_length + self.encoders[col].output_size)
+                self.input_length += self.encoders[col].output_size
 
     def __len__(self):
         """

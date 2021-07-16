@@ -7,7 +7,12 @@ from lightwood.helpers.log import log
 
 
 class DefaultNet(torch.nn.Module):
-    def __init__(self, input_size: int = None, output_size: int = None, shape: list = None, max_params: int = int(3e5)) -> None:
+    def __init__(self,
+                 input_size: int = None,
+                 output_size: int = None,
+                 shape: list = None,
+                 max_params: int = int(3e5)) -> None:
+
         super(DefaultNet, self).__init__()
         if input_size is not None and output_size is not None:
             self.input_size = input_size

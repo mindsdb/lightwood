@@ -48,9 +48,11 @@ class Neural(BaseModel):
                     Y = Y.to(self.model.device)
                     Yh = self.model(X)
 
-                    decoded_predictions.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+                    Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
+                    Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
 
-                    deocded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Y, 0)))
+                    decoded_predictions.extend(self.target_encoder.decode(Yh))
+                    deocded_real_values.extend(self.target_encoder.decode(Y))
 
                 self.target_encoder.decode_log = True
                 log_acc = r2_score(deocded_real_values, decoded_predictions)
@@ -207,13 +209,13 @@ class Neural(BaseModel):
         
         for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
-            Y = Y.to(self.model.device)
             Yh = self.model(X)
+            Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
 
             kwargs = {}
             for dep in self.target_encoder.dependencies:
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
-            decoded_prediction = self.target_encoder.decode(torch.unsqueeze(Yh, 0), **kwargs)
+            decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
 
             if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
                 decoded_predictions.extend(decoded_prediction)

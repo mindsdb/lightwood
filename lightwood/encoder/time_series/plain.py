@@ -8,7 +8,7 @@ from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNo
 
 
 class TimeSeriesPlainEncoder(BaseEncoder):
-    def __init__(self, stop_after: int, is_target=False, original_type=None):
+    def __init__(self, stop_after: int, window: int, is_target=False, original_type=None):
         """
         Fits a normalizer for a time series previous historical data.
         When encoding, it returns a normalized window of previous data.
@@ -17,6 +17,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         self.stop_after = stop_after
         self.original_type = original_type
         self._normalizer = None
+        self.output_size = window+1
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -30,6 +31,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values
 
+        self.output_size *= self._normalizer.output_size
         self._normalizer.prepare(priming_data)
         self._prepared = True
 
