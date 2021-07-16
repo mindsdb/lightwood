@@ -15,7 +15,7 @@ class AccStats:
         """
         self.col_stats = dtype_dict
         self.target = target
-        self.input_columns = [col for col in dtype_dict]
+        self.input_cols = [col for col in dtype_dict]
 
         self.buckets = None
         # if 'percentage_buckets' in dtype_dict:  # @TODO: add these
@@ -32,13 +32,13 @@ class AccStats:
         self.numerical_samples_arr = []
 
         column_indexes = {}
-        for i, col in enumerate(self.input_columns):
+        for i, col in enumerate(self.input_cols):
             column_indexes[col] = i
 
         real_present_inputs_arr = []
         for _, row in real_df.iterrows():
-            present_inputs = [1] * len(self.input_columns)
-            for i, col in enumerate(self.input_columns):
+            present_inputs = [1] * len(self.input_cols)
+            for i, col in enumerate(self.input_cols):
                 if str(row[col]) in ('None', 'nan', '', 'Nan', 'NAN', 'NaN'):
                     present_inputs[i] = 0
             real_present_inputs_arr.append(present_inputs)
@@ -86,7 +86,7 @@ class AccStats:
                 feature_existance = real_present_inputs_arr[m]
                 if n > 0:
                     for missing_col in missing_col_arr[n - 1]:
-                        feature_existance[self.input_columns.index(missing_col)] = 0
+                        feature_existance[self.input_cols.index(missing_col)] = 0
 
     def get_accuracy_stats(self):
 

@@ -61,7 +61,7 @@ def model_analyzer(
     data = encoded_data.data_frame
     runtime_analyzer = {}
     predictions = {}
-    input_columns = list([col for col in data.columns if col != target])
+    input_cols = list([col for col in data.columns if col != target])
     normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
     normal_predictions = normal_predictions.set_index(data.index)
 
@@ -249,10 +249,10 @@ def model_analyzer(
 
     # @TODO: reactivate global feature importance
     if not disable_column_importance:
-        ignorable_input_columns = [x for x in input_columns if (not ts_cfg.is_timeseries or
+        ignorable_input_cols = [x for x in input_cols if (not ts_cfg.is_timeseries or
                                                                 (x not in ts_cfg.order_by and
                                                                  x not in ts_cfg.historical_columns))]
-        for col in ignorable_input_columns:
+        for col in ignorable_input_cols:
             empty_input_predictions[col] = predictor('validate', ignore_columns=[col])  # @TODO: add this param?
             empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
                 data[target],
@@ -262,7 +262,7 @@ def model_analyzer(
         # Get some information about the importance of each column
         # @TODO: Figure out if it's too slow
         column_importances = {}
-        for col in ignorable_input_columns:
+        for col in ignorable_input_cols:
             accuracy_increase = (normal_accuracy - empty_input_accuracy[col])
             # normalize from 0 to 10
             column_importances[col] = 10 * max(0, accuracy_increase)
