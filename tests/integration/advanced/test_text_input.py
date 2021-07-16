@@ -10,11 +10,13 @@ class TestText(unittest.TestCase):
         predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict({'target': 'Label'}))
         predictor.learn(datasource.df)
         predictions = predictor.predict(datasource.df)
-        print(predictions[0:100])
+        for x in predictions['prediction']:
+            assert x is not None
 
     def test_1_train_and_predict_model(self):
         datasource = FileDS('tests/data/wine_reviews_binary_sample.csv')
         predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict({'target': 'label'}))
         predictor.learn(datasource.df)
         predictions = predictor.predict(datasource.df)
-        print(predictions[0:100])
+        for x in predictions['prediction']:
+            assert x is not None
