@@ -25,7 +25,7 @@ class EncodedDs(Dataset):
 
         # save encoder span, has to use same iterator as in __getitem__ for correct indeces
         for col in self.data_frame:
-            if col != self.target:
+            if col != self.target and self.encoders.get(col, False):
                 self.encoder_spans[col] = (self.input_length,
                                            self.input_length + self.encoders[col].output_size)
                 self.input_length += self.encoders[col].output_size

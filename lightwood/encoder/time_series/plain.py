@@ -31,8 +31,8 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values
 
-        self.output_size *= self._normalizer.output_size
         self._normalizer.prepare(priming_data)
+        self.output_size *= self._normalizer.output_size
         self._prepared = True
 
     def encode(self, column_data):

@@ -201,7 +201,7 @@ def _ts_add_previous_rows(df, historical_columns, window):
 
 def _ts_add_previous_target(df, target, nr_predictions, window, data_dtype, mode):
     if data_dtype in (dtype.integer, dtype.float, dtype.array):
-        df[target] = df[target].astype(np.float)
+        df[target] = df[target].astype(float)
     previous_target_values = list(df[target])
     del previous_target_values[-1]
     previous_target_values = [None] + previous_target_values
