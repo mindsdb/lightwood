@@ -5,7 +5,13 @@ For encoders that already fine-tune on the targets (namely text)
 the unity mixer just arg-maxes the output of the encoder.
 """
 
+from typing import List
+from lightwood.encoder.base import BaseEncoder
 from lightwood.model.base import BaseModel
+from lightwood.helpers.log import log
+from lightwood.data.encoded_ds import EncodedDs
+import pandas as pd
+import torch
 
 
 class Unit(BaseModel):
@@ -25,10 +31,8 @@ class Unit(BaseModel):
 
         decoded_predictions: List[object] = []
 
-        for idx, (X, Y) in enumerate(ds):
-            decoded_prediction = self.target_encoder.decode(
-                torch.unsqueeze(X, 0), **kwargs
-            )
+        for X, _ in ds:
+            decoded_prediction = self.target_encoder.decode(torch.unsqueeze(X, 0))
             decoded_predictions.extend(decoded_prediction)
 
         ydf = pd.DataFrame({"prediction": decoded_predictions})
