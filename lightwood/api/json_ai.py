@@ -10,7 +10,7 @@ trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSe
 ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder')
 
 
-def lookup_encoder(col_dtype: dtype, col_name: str, statistical_analysis: StatisticalAnalysis, is_target: bool, problem_defintion: ProblemDefinition, num_columns: int):
+def lookup_encoder(col_dtype: str, col_name: str, statistical_analysis: StatisticalAnalysis, is_target: bool, problem_defintion: ProblemDefinition, is_target_predicting_encoder: bool):
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
@@ -75,6 +75,9 @@ def lookup_encoder(col_dtype: dtype, col_name: str, statistical_analysis: Statis
     if encoder_dict['object'] in trainable_encoders:
         encoder_dict['static_args']['stop_after'] = 'problem_definition.seconds_per_encoder'
 
+    if is_target_predicting_encoder:
+        encoder_dict['dynamic_args']['embed_mode'] = 'False'
+
     return encoder_dict
 
 
@@ -86,40 +89,59 @@ def populate_problem_definition(type_information: TypeInformation, statistical_a
 
 
 def generate_json_ai(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> JsonAI:
-
     problem_definition = populate_problem_definition(type_information, statistical_analysis, problem_definition)
-    target = problem_definition.target
 
-    models = [
-        {
-            
-            'object': 'Neural',
-            'static_args': {
-                'stop_after': 'problem_definition.seconds_per_model',
-                'timeseries_settings': 'problem_definition.timeseries_settings'
-            },
-            'dynamic_args': {
-                'target': 'self.target',
-                'dtype_dict': 'self.dtype_dict',
-                'input_cols': 'self.input_cols',
-                'target_encoder': 'self.encoders[self.target]',
-                'fit_on_dev': True
-            }
-        },
-        {
-            'object': 'LightGBM',
+    target = problem_definition.target
+    input_cols = []
+    for col_name, col_dtype in type_information.dtypes.items():
+        if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
+            input_cols.append(col_name)
+
+    is_target_predicting_encoder = False
+    # Single text column classification
+    if len(input_cols) == 1 and type_information.dtypes[input_cols[0]] in (dtype.rich_text) and type_information.dtypes[target] in (dtype.categorical, dtype.binary):
+        is_target_predicting_encoder = True
+
+    if is_target_predicting_encoder:
+        models = [{   
+            'object': 'Uint',
             'static_args': {
                 'stop_after': 'problem_definition.seconds_per_model'
             },
             'dynamic_args': {
-                'target': 'self.target',
-                'dtype_dict': 'self.dtype_dict',
-                'input_cols': 'self.input_cols',
-                'fit_on_dev': True
+                'target_encoder': 'self.encoders[self.target]'
             }
-        }
-    ]
-    
+        }]
+    else:
+        models = [
+            {
+                'object': 'Neural',
+                'static_args': {
+                    'stop_after': 'problem_definition.seconds_per_model',
+                    'timeseries_settings': 'problem_definition.timeseries_settings'
+                },
+                'dynamic_args': {
+                    'target': 'self.target',
+                    'dtype_dict': 'self.dtype_dict',
+                    'input_cols': 'self.input_cols',
+                    'target_encoder': 'self.encoders[self.target]',
+                    'fit_on_dev': True
+                }
+            },
+            {
+                'object': 'LightGBM',
+                'static_args': {
+                    'stop_after': 'problem_definition.seconds_per_model'
+                },
+                'dynamic_args': {
+                    'target': 'self.target',
+                    'dtype_dict': 'self.dtype_dict',
+                    'input_cols': 'self.input_cols',
+                    'fit_on_dev': True
+                }
+            }
+        ]
+
     output = Output(
         name=target,
         data_dtype=type_information.dtypes[target],
@@ -138,29 +160,29 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], target, statistical_analysis, True, problem_definition, num_columns)
+    output.encoder = lookup_encoder(type_information.dtypes[target], target, statistical_analysis, True, problem_definition, False)
 
     features: Dict[str, Feature] = {}
-    for col_name, col_dtype in type_information.dtypes.items():
-        if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
-            dependency = []
-            encoder = lookup_encoder(col_dtype, col_name, statistical_analysis, False, problem_definition, num_columns)
+    for col_name in input_cols:
+        col_dtype = type_information.dtypes[col_name]
+        dependency = []
+        encoder = lookup_encoder(col_dtype, col_name, statistical_analysis, False, problem_definition, is_target_predicting_encoder)
 
-            if problem_definition.timeseries_settings.is_timeseries and encoder['object'] in ts_encoders:
-                if problem_definition.timeseries_settings.group_by is not None:
-                    for group in problem_definition.timeseries_settings.group_by:
-                        dependency.append(group)
+        if problem_definition.timeseries_settings.is_timeseries and encoder['object'] in ts_encoders:
+            if problem_definition.timeseries_settings.group_by is not None:
+                for group in problem_definition.timeseries_settings.group_by:
+                    dependency.append(group)
 
-                if problem_definition.timeseries_settings.use_previous_target:
-                    dependency.append(f'__mdb_ts_previous_{target}')
+            if problem_definition.timeseries_settings.use_previous_target:
+                dependency.append(f'__mdb_ts_previous_{target}')
 
-            feature = Feature(
-                name=col_name,
-                data_dtype=col_dtype,
-                encoder=encoder,
-                dependency=dependency
-            )
-            features[col_name] = feature
+        feature = Feature(
+            name=col_name,
+            data_dtype=col_dtype,
+            encoder=encoder,
+            dependency=dependency
+        )
+        features[col_name] = feature
 
     timeseries_transformer = None
     if problem_definition.timeseries_settings.is_timeseries:
@@ -289,6 +311,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     imports = [
+        'from lightwood.model import Unit',
         'from lightwood.model import LightGBM',
         'from lightwood.model import Neural',
         'from lightwood.ensemble import BestOf',
@@ -324,15 +347,10 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 def code_from_json_ai(json_ai: JsonAI) -> str:
     json_ai = add_implicit_values(json_ai)
 
-    predictor_code = ''
-
-    imports = '\n'.join(json_ai.imports)
-
     encoder_dict = {json_ai.output.name: call(json_ai.output.encoder, json_ai)}
     dependency_dict = {}
     dtype_dict = {json_ai.output.name: f"""'{json_ai.output.data_dtype}'"""}
 
-    # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
     for col_name, feature in json_ai.features.items():
         encoder_dict[col_name] = call(feature.encoder, json_ai)
         dependency_dict[col_name] = feature.dependency
@@ -347,7 +365,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      json_ai.statistical_analysis,
                                                      False,
                                                      json_ai.problem_definition,
-                                                     num_columns,
+                                                     len(json_ai.features),
                                                      ),
                                       json_ai)
         dependency_dict[col_name] = []
@@ -473,7 +491,7 @@ return insights
     predict_body = align(predict_body, 2)
 
     predictor_code = f"""
-{imports}
+{'\n'.join(json_ai.imports)}
 from lightwood.api import PredictorInterface
 
 
