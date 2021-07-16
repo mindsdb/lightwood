@@ -16,6 +16,7 @@ class MinMaxNormalizer:
         self.combination = combination  # tuple with values in those columns
         self.abs_mean = None
         self.original_type = original_type
+        self.output_size = 1
 
     def prepare(self, x):
         if isinstance(x, pd.Series):
@@ -67,6 +68,7 @@ class CatNormalizer:
         else:
             self.scaler = OrdinalEncoder()
         self.unk = "<UNK>"
+        self.output_size = self.scaler._categories.shape[0]
 
     def prepare(self, x):
         X = []

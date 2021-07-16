@@ -21,7 +21,7 @@ class TsArrayNumericEncoder(BaseEncoder):
         self.group_combinations = None
         self.dependencies = grouped_by
         self.data_window = timesteps
-        self.out_features = self.data_window*self.sub_encoder.out_features
+        self.output_size = self.data_window*self.sub_encoder.output_size
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -44,7 +44,7 @@ class TsArrayNumericEncoder(BaseEncoder):
             ret.append(self.sub_encoder.encode([data_point], dependency_data=dependency_data))
 
         ret = torch.hstack(ret)
-        padding_size = self.out_features - ret.shape[-1]
+        padding_size = self.output_size - ret.shape[-1]
 
         if padding_size > 0:
             ret = F.pad(ret, (0, padding_size))
@@ -57,7 +57,7 @@ class TsArrayNumericEncoder(BaseEncoder):
 
         encoded_values = encoded_values.reshape(encoded_values.shape[0],
                                                 self.data_window,
-                                                self.sub_encoder.out_features)
+                                                self.sub_encoder.output_size)
 
         ret = []
         for encoded_timestep in torch.split(encoded_values, 1, dim=1):
