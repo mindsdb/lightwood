@@ -27,7 +27,8 @@ def explain(data,
             ):
 
     # confidence estimation using calibrated inductive conformal predictors (ICPs)
-    # @TODO: and not quick_predict check
+    # @TODO: check not quick_predict
+    data = data.reset_index(drop=True)
     insights = pd.DataFrame(columns=['prediction', 'confidence', 'lower', 'upper', 'anomaly', 'truth'])
     insights['prediction'] = predictions['prediction']
     insights['truth'] = data[target_name]
