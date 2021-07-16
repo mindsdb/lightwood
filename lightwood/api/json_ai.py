@@ -10,7 +10,7 @@ trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSe
 ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder')
 
 
-def lookup_encoder(col_dtype: dtype, col_name: str, statistical_analysis: StatisticalAnalysis, is_target: bool, problem_defintion: ProblemDefinition):
+def lookup_encoder(col_dtype: dtype, col_name: str, statistical_analysis: StatisticalAnalysis, is_target: bool, problem_defintion: ProblemDefinition, num_columns: int):
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
         dtype.integer: 'NumericEncoder',
@@ -138,13 +138,13 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     )
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], target, statistical_analysis, True, problem_definition)
+    output.encoder = lookup_encoder(type_information.dtypes[target], target, statistical_analysis, True, problem_definition, num_columns)
 
     features: Dict[str, Feature] = {}
     for col_name, col_dtype in type_information.dtypes.items():
         if col_name not in type_information.identifiers and col_dtype not in (dtype.invalid, dtype.empty) and col_name != target:
             dependency = []
-            encoder = lookup_encoder(col_dtype, col_name, statistical_analysis, False, problem_definition)
+            encoder = lookup_encoder(col_dtype, col_name, statistical_analysis, False, problem_definition, num_columns)
 
             if problem_definition.timeseries_settings.is_timeseries and encoder['object'] in ts_encoders:
                 if problem_definition.timeseries_settings.group_by is not None:
@@ -346,7 +346,8 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      col_name,
                                                      json_ai.statistical_analysis,
                                                      False,
-                                                     json_ai.problem_definition
+                                                     json_ai.problem_definition,
+                                                     num_columns,
                                                      ),
                                       json_ai)
         dependency_dict[col_name] = []
