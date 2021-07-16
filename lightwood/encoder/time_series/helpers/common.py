@@ -31,7 +31,7 @@ class MinMaxNormalizer:
                 x = x.reshape(-1, 1)
 
         if self.original_type == dtype.array:
-            x = x.astype(np.float)
+            x = x.astype(float)
 
         x[x == None] = 0
         self.abs_mean = np.mean(np.abs(x))
@@ -67,8 +67,8 @@ class CatNormalizer:
             self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
         else:
             self.scaler = OrdinalEncoder()
+
         self.unk = "<UNK>"
-        self.output_size = self.scaler._categories.shape[0]
 
     def prepare(self, x):
         X = []
@@ -76,6 +76,7 @@ class CatNormalizer:
             for j in i:
                 X.append(j if j is not None else self.unk)
         self.scaler.fit(np.array(X).reshape(-1, 1))
+        self.output_size = len(self.scaler.categories_[0])
 
     def encode(self, Y):
         y = np.array([[j if j is not None else self.unk for j in i] for i in Y])
@@ -135,7 +136,7 @@ def generate_target_group_normalizers(data):
     # numerical normalizers, here we spawn one per each group combination
     else:
         if data['original_type'] == dtype.array:
-            data['data'] = data['data'].values.reshape(-1, 1).astype(np.float)
+            data['data'] = data['data'].values.reshape(-1, 1).astype(float)
 
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
         for combination in all_group_combinations:
