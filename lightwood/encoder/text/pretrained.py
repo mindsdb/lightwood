@@ -129,7 +129,8 @@ class PretrainedLangEncoder(BaseEncoder):
         self.stop_after = stop_after
  
         self.embed_mode = embed_mode
-
+        self.uses_target = True
+        
         ## DEBUGGING!!!
         if self.embed_mode:
             log.info("Embedding mode on. [CLS] embedding dim output of encode()")
