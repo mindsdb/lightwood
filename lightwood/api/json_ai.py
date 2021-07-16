@@ -104,7 +104,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
     if is_target_predicting_encoder:
         models = [{   
-            'object': 'Uint',
+            'object': 'Unit',
             'static_args': {
                 'stop_after': 'problem_definition.seconds_per_model'
             },
@@ -490,8 +490,9 @@ return insights
 """
     predict_body = align(predict_body, 2)
 
+    imports = '\n'.join(json_ai.imports)
     predictor_code = f"""
-{'\n'.join(json_ai.imports)}
+{imports}
 from lightwood.api import PredictorInterface
 
 
