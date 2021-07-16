@@ -85,7 +85,7 @@ class PretrainedLangEncoder(BaseEncoder):
     custom_train ::Bool; If true, trains model on target procided
     frozen ::Bool; If true, freezes transformer layers during training.
     epochs ::int; number of epochs to train model with
-    embedmode ::Bool; If true, assumes the output of the encode() step is the CLS embedding.
+    embed_mode ::Bool; If true, assumes the output of the encode() step is the CLS embedding.
     """
 
     def __init__(
@@ -100,7 +100,7 @@ class PretrainedLangEncoder(BaseEncoder):
         frozen=False,
         epochs=1,
         output_type=None,
-        embedmode=True,
+        embed_mode=True,
     ):
         super().__init__(is_target)
 
@@ -128,10 +128,10 @@ class PretrainedLangEncoder(BaseEncoder):
         self.device, _ = get_devices()
         self.is_nn_encoder = True
         self.stop_after = stop_after
+ 
+        self.embed_mode = embed_mode
 
-        ## DEBUGGING!!! 
-        self.embed_mode = embedmode
-
+        ## DEBUGGING!!!
         if self.embed_mode:
             log.info("Embedding mode on. [CLS] embedding dim output of encode()")
         else:
