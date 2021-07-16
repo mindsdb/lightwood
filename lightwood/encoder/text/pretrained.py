@@ -1,4 +1,8 @@
 """
+2021.07.15
+Adding flag for mode.
+With single mode versus multi-mode.
+
 2021.03.18
 
 ## Padding changes the answer slightly in the model.
@@ -331,7 +335,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception("Decoder not implemented.")
-        
+
     def to(self, device, available_devices):
         for v in vars(self):
             attr = getattr(self, v)
