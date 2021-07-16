@@ -1,7 +1,22 @@
 """
-2021.07.15
-Adding flag for mode.
-With single mode versus multi-mode.
+2021.07.16
+Adding flag "embedmode".
+
+Embed-mode is made for when text is one of many columns in the model.
+IF the model is direct (text) -> output, then it's worth just using
+the fine-tuned encoder as the "mixer" persay; thus, turn embed-mode OFF.
+
+This means there are 3 possible modes:
+
+(1) Classification
+    -> Fine tuned, output of encoder is [CLS] embedding
+    -> Fine tuned, output of encoder is the class value
+(2) Regression
+    -> Untrained; output of encoder is [CLS] embedding
+
+Training with regression is WIP; seems like quantile-binning is the best approach
+but using MSE loss while fine-tuning did not demonstrate decent results. Particularly
+because the mixer seems to address this.
 
 2021.03.18
 
@@ -70,6 +85,7 @@ class PretrainedLangEncoder(BaseEncoder):
     custom_train ::Bool; If true, trains model on target procided
     frozen ::Bool; If true, freezes transformer layers during training.
     epochs ::int; number of epochs to train model with
+    embedmode ::Bool; If true, assumes the output of the encode() step is the CLS embedding.
     """
 
     def __init__(
@@ -83,7 +99,8 @@ class PretrainedLangEncoder(BaseEncoder):
         custom_train=True,
         frozen=False,
         epochs=1,
-        output_type=None
+        output_type=None,
+        embedmode=True,
     ):
         super().__init__(is_target)
 
@@ -111,6 +128,14 @@ class PretrainedLangEncoder(BaseEncoder):
         self.device, _ = get_devices()
         self.is_nn_encoder = True
         self.stop_after = stop_after
+
+        ## DEBUGGING!!! 
+        self.embed_mode = embedmode
+
+        if self.embed_mode:
+            log.info("Embedding mode on. [CLS] embedding dim output of encode()")
+        else:
+            log.info("Embedding mode off. Logits are output of encode()")
 
     def prepare(self, priming_data, training_data=None):
         """
@@ -227,12 +252,19 @@ class PretrainedLangEncoder(BaseEncoder):
             )
 
         else:
-            log.info("Embeddings Generator only")
+            log.info("Target is not classification; Embeddings Generator only")
 
             self.model_type = "embeddings_generator"
             self._model = self._embeddings_model_class.from_pretrained(
                 self._pretrained_model_name
             ).to(self.device)
+
+            # TODO: Not a great flag
+            # Currently, if the task is not classification, you must have
+            # an embedding generator only.
+            if self.embed_mode is False:
+                log.info("Embedding mode must be ON for non-classification targets.")
+                self.embed_mode = True
 
         self._prepared = True
 
@@ -323,11 +355,15 @@ class PretrainedLangEncoder(BaseEncoder):
                     text, truncation=True, return_tensors="pt"
                 ).to(self.device)
 
-                output = self._model.base_model(inp).last_hidden_state[:, 0]
+                if self.embed_mode: #Embedding mode ON; return [CLS]
+                    output = self._model.base_model(inp).last_hidden_state[:, 0]
 
-                # If the model has a pre-classifier layer, use this embedding.
-                if hasattr(self._model, "pre_classifier"):
-                    output = self._model.pre_classifier(output)
+                    # If the model has a pre-classifier layer, use this embedding.
+                    if hasattr(self._model, "pre_classifier"):
+                        output = self._model.pre_classifier(output)
+
+                else: #Embedding mode off; return classes
+                    raise NotImplementedError 
 
                 encoded_representation.append(output.detach())
 
