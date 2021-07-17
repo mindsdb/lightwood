@@ -365,7 +365,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      json_ai.statistical_analysis,
                                                      False,
                                                      json_ai.problem_definition,
-                                                     len(json_ai.features),
+                                                     False,
                                                      ),
                                       json_ai)
         dependency_dict[col_name] = []
