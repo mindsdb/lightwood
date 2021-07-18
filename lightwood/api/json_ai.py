@@ -216,7 +216,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         accuracy_functions = ['accuracy_score']
 
     if problem_definition.time_aim is None and (problem_definition.seconds_per_model is None or problem_definition.seconds_per_encoder is None):
-        problem_definition.time_aim = 1000 + statistical_analysis.nr_rows * np.sum([4 if x in [dtype.rich_text, dtype.short_text, dtype.array, dtype.video, dtype.audio, dtype.image] else 1 for x in type_information.dtypes.values()]) * 0.1
+        problem_definition.time_aim = 1000 + np.log(statistical_analysis.nr_rows / 10 + 1) * np.sum([4 if x in [dtype.rich_text, dtype.short_text, dtype.array, dtype.video, dtype.audio, dtype.image] else 1 for x in type_information.dtypes.values()]) * 200
 
     if problem_definition.time_aim is not None:
         nr_trainable_encoders = len([x for x in features.values() if x.encoder['object'] in trainable_encoders])
