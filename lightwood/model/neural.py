@@ -104,7 +104,39 @@ class Neural(BaseModel):
                     optimizer.step()
             running_losses.append(loss.item())
         return np.mean(running_losses)
-    
+
+    def _max_fit(train_dl, test_dl, criterion, optimizer, scaler):
+        epochs_to_best = -1
+        for epoch in range(1, int(20000)):
+            error = self._run_epoch(train_dl, criterion, optimizer, scaler)
+            test_error = self._error(test_dl, criterion)
+            full_test_error = self._error(full_test_dl, criterion)
+            running_errors.append(test_error)
+
+            if best_full_test_error > full_test_error:
+                best_full_test_error = full_test_error
+                best_model = deepcopy(self.model)
+                epochs_to_best = epoch
+
+            stop = False
+            if subset_itt == 0:
+                # Don't go through normal stopping logic, we don't want to assing the best model, this is just a "priming" iteration
+                break
+            elif len(running_errors) > 15:
+                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-10:]))])
+                if delta_mean <= 0:
+                    stop = True
+            elif np.isnan(error):
+                stop = True
+            elif (time.time() - started) > self.stop_after * (0.5 + subset_idx * 0.4 / len(test_ds_arr)):
+                stop = True
+            elif test_error < 0.00001:
+                stop = True
+
+            if stop:
+                self.model = best_model
+                break
+
     def _error(self, test_dl, criterion) -> float:
         self.model = self.model.eval()
         running_losses: List[float] = []
