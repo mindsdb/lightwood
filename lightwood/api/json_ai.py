@@ -462,8 +462,8 @@ self.models = [{', '.join([call(x, json_ai) for x in json_ai.output.models])}]
 trained_models = []
 for model in self.models:
     try:
-        trained_models.fit(train_data)
-        new_models.append(model)
+        model.fit(train_data)
+        trained_models.append(model)
     except Exception as e:
         if {json_ai.problem_definition.strict_mode}:
             raise e
