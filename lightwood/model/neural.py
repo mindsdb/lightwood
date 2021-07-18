@@ -1,4 +1,3 @@
-from torch.nn.modules import dropout
 from lightwood.encoder.base import BaseEncoder
 from typing import Dict, List
 import pandas as pd
@@ -17,7 +16,7 @@ from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.model.helpers.default_net import DefaultNet
-from torch_optimizer import optim as ad_optim
+import torch_optimizer as ad_optim
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
 from sklearn.metrics import r2_score
@@ -106,7 +105,7 @@ class Neural(BaseModel):
             running_losses.append(loss.item())
         return np.mean(running_losses)
 
-    def _max_fit(self, train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after):
+    def _max_fit(self, train_dl, dev_dl, criterion, optimizer, scheduler, scaler, stop_after, return_model_after):
         started = time.time()
         epochs_to_best = 0
         best_dev_error = pow(2, 32)
@@ -135,9 +134,10 @@ class Neural(BaseModel):
                 break
             elif running_errors[-1] < 0.0001 or train_error < 0.0001:
                 break
+        scheduler.step()
 
         log.info(f'Stopped a training bout at (dev,train) error ({running_errors[-1]},{train_error})')
-        return best_model, epochs_to_best
+        return best_model, epochs_to_best, best_dev_error
 
     def _error(self, dev_dl, criterion) -> float:
         self.model = self.model.eval()
@@ -156,32 +156,53 @@ class Neural(BaseModel):
         train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
         dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
 
-        self.model = DefaultNet(
-            input_size=len(ds_arr[0][0][0]),
-            output_size=len(ds_arr[0][0][1])
-        )
-
         criterion = self._select_criterion()
         scaler = GradScaler()
-
         dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=200, shuffle=False)
         train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=False)
 
         time_for_trials = self.stop_after / 2
         nr_trails = 40
         time_per_trial = time_for_trials / nr_trails
-        def objective(trial):
 
+        def objective(trial):
             # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
-            n_hidden = trial.suggest_int('n_hidden', 1, 2)
+            num_hidden = trial.suggest_int('n_hidden', 1, 2)
             lr = trial.suggest_loguniform('lr', 0.0005, 0.1)
             dropout = trial.suggest_uniform('dropout', 0, 0.25)
 
-            return accuracy
+            optimizer = self._select_optimizer(lr)
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
+            self.model = DefaultNet(
+                input_size=len(ds_arr[0][0][0]),
+                output_size=len(ds_arr[0][0][1]),
+                num_hidden=num_hidden,
+                dropout=dropout
+            )
 
-        study = optuna.create_study(direction='maximize')
+            self.model, epoch_to_best_model, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, time_per_trial, return_model_after=20000)
+
+            return best_error
+
+        log.info('Running hyperparameter search!')
+        study = optuna.create_study(direction='minimize')
         study.optimize(objective, n_trials=nr_trails)
+        self.num_hidden = study.best_trial.params['num_hidden']
+        self.dropout = study.best_trial.params['dropout']
+        self.lr = study.best_trial.params['lr']
 
+        log.info(f'Found hyperparameters num_hidden:{self.num_hidden} lr:{self.lr} dropout:{self.dropout}')
+
+        optimizer = self._select_optimizer(self.lr)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
+        self.model = DefaultNet(
+            input_size=len(ds_arr[0][0][0]),
+            output_size=len(ds_arr[0][0][1]),
+            num_hidden=self.num_hidden,
+            dropout=self.dropout
+        )
+
+        self.model, self.epochs_to_best, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, self.stop_after / 2, return_model_after=20000)
         '''
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
@@ -204,11 +225,12 @@ class Neural(BaseModel):
         dev_ds = ConcatedEncodedDs(dev_data + train_data)
         train_dl = DataLoader(train_ds, batch_size=200, shuffle=True)
         dev_dl = DataLoader(dev_ds, batch_size=200, shuffle=True)
-        optimizer = self._select_optimizer(0.0005)
+        optimizer = self._select_optimizer(self.lr)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        self.model, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=self.epochs_to_best)
+        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, scheduler, optimizer, scaler, self.stop_after, return_model_after=self.epochs_to_best)
     
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
