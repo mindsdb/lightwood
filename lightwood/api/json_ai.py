@@ -469,8 +469,12 @@ test_data = encoded_ds_arr[int(nfolds*0.9):]
 log.info('Training the models')
 self.models = [{', '.join([call(x, json_ai) for x in json_ai.output.models])}]
 for model in self.models:
-    model.fit(train_data)
-
+    try:
+        model.fit(train_data)
+    except Exception as e:
+        if {json_ai.problem_definition.strict_mode}:
+            raise e
+            
 log.info('Ensembling the model')
 self.ensemble = {call(json_ai.output.ensemble, json_ai)}
 
