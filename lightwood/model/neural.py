@@ -1,3 +1,4 @@
+from torch.nn.modules import dropout
 from lightwood.encoder.base import BaseEncoder
 from typing import Dict, List
 import pandas as pd
@@ -16,11 +17,11 @@ from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.model.helpers.default_net import DefaultNet
-from lightwood.model.helpers.residual_net import ResidualNet
-from lightwood.model.helpers.ranger import Ranger
+from torch_optimizer import optim as ad_optim
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
 from sklearn.metrics import r2_score
+import optuna
 
 
 class Neural(BaseModel):
@@ -79,9 +80,9 @@ class Neural(BaseModel):
 
     def _select_optimizer(self, lr) -> Optimizer:
         if self.timeseries_settings.is_timeseries:
-            optimizer = Ranger(self.model.parameters(), lr=lr)
+            optimizer = ad_optim.Ranger(self.model.parameters(), lr=lr)
         else:
-            optimizer = Ranger(self.model.parameters(), lr=lr, weight_decay=2e-2)
+            optimizer = ad_optim.Ranger(self.model.parameters(), lr=lr, weight_decay=2e-2)
 
         return optimizer
 
@@ -154,27 +155,44 @@ class Neural(BaseModel):
         # ConcatedEncodedDs
         train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
         dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
-        self.fit_data_len = len(ConcatedEncodedDs(train_ds_arr))
 
         self.model = DefaultNet(
             input_size=len(ds_arr[0][0][0]),
             output_size=len(ds_arr[0][0][1])
         )
-        
+
         criterion = self._select_criterion()
         scaler = GradScaler()
 
         dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=200, shuffle=False)
+        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=False)
 
+        time_for_trials = self.stop_after / 2
+        nr_trails = 40
+        time_per_trial = time_for_trials / nr_trails
+        def objective(trial):
+
+            # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
+            n_hidden = trial.suggest_int('n_hidden', 1, 2)
+            lr = trial.suggest_loguniform('lr', 0.0005, 0.1)
+            dropout = trial.suggest_uniform('dropout', 0, 0.25)
+
+            return accuracy
+
+        study = optuna.create_study(direction='maximize')
+        study.optimize(objective, n_trials=nr_trails)
+
+        '''
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
 
                 optimizer = self._select_optimizer(0.005)
-                stop_after = self.stop_after * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
+                stop_after = (self.stop_after / 2) * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
                 self.model, epoch_to_best_model = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after=20000 if subset_itt > 0 else 1)
                 self.epochs_to_best += epoch_to_best_model
-                
+        '''
+
         # Do a single training run on the test data as well
         if self.fit_on_dev:
             self.partial_fit(dev_ds_arr, train_ds_arr)
@@ -191,7 +209,7 @@ class Neural(BaseModel):
         scaler = GradScaler()
 
         self.model, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=self.epochs_to_best)
-
+    
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
