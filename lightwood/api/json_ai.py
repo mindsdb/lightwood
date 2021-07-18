@@ -81,16 +81,7 @@ def lookup_encoder(col_dtype: str, col_name: str, statistical_analysis: Statisti
     return encoder_dict
 
 
-def populate_problem_definition(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> ProblemDefinition:
-    if problem_definition.seconds_per_model is None:
-        problem_definition.seconds_per_model = max(100, statistical_analysis.nr_rows / 20) * np.sum([4 if x in [dtype.rich_text, dtype.short_text, dtype.array, dtype.video, dtype.audio, dtype.image] else 1 for x in type_information.dtypes.values()])
-
-    return problem_definition
-
-
 def generate_json_ai(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis, problem_definition: ProblemDefinition) -> JsonAI:
-    problem_definition = populate_problem_definition(type_information, statistical_analysis, problem_definition)
-
     target = problem_definition.target
     input_cols = []
     for col_name, col_dtype in type_information.dtypes.items():
@@ -103,7 +94,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         is_target_predicting_encoder = True
 
     if is_target_predicting_encoder:
-        models = [{   
+        models = [{
             'object': 'Unit',
             'static_args': {
                 'stop_after': 'problem_definition.seconds_per_model'
@@ -211,7 +202,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     else:
         timeseries_analyzer = None
-    
+
     # Decide on the accuracy functions to use
     if output.data_dtype in [dtype.integer, dtype.float]:
         accuracy_functions = ['r2_score']
@@ -223,9 +214,9 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         accuracy_functions = ['evaluate_array_accuracy']
     else:
         accuracy_functions = ['accuracy_score']
-    
+
     if problem_definition.time_aim is None and (problem_definition.seconds_per_model is None or problem_definition.seconds_per_encoder is None):
-        problem_definition.time_aim = 800 + statistical_analysis.nr_rows
+        problem_definition.time_aim = 1000 + statistical_analysis.nr_rows * np.sum([4 if x in [dtype.rich_text, dtype.short_text, dtype.array, dtype.video, dtype.audio, dtype.image] else 1 for x in type_information.dtypes.values()]) * 0.1
 
     if problem_definition.time_aim is not None:
         nr_trainable_encoders = len([x for x in features.values() if x.encoder['object'] in trainable_encoders])
@@ -235,8 +226,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         if nr_trainable_encoders == 0:
             problem_definition.seconds_per_encoder = 0
         else:
-            problem_definition.seconds_per_encoder = problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders)
-        problem_definition.seconds_per_model = problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models)
+            problem_definition.seconds_per_encoder = int(problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders))
+        problem_definition.seconds_per_model = int(problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models))
 
     return JsonAI(
         cleaner={
