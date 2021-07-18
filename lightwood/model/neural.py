@@ -33,7 +33,7 @@ class Neural(BaseModel):
         self.target = target
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
-        self.epochs_to_best = 1
+        self.epochs_to_best = 0
         self.fit_on_dev = fit_on_dev
     
     def _final_tuning(self, data_arr):
@@ -105,37 +105,38 @@ class Neural(BaseModel):
             running_losses.append(loss.item())
         return np.mean(running_losses)
 
-    def _max_fit(train_dl, dev_dl, criterion, optimizer, scaler):
-        epochs_to_best = -1
-        for epoch in range(1, int(20000)):
-            error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            dev_error = self._error(dev_dl, criterion)
-            full_dev_error = self._error(full_dev_dl, criterion)
-            running_errors.append(dev_error)
+    def _max_fit(self, train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after):
+        started = time.time()
+        epochs_to_best = 0
+        best_dev_error = pow(2, 32)
+        running_errors = []
+        best_model = self.model
 
-            if best_full_dev_error > full_dev_error:
-                best_full_dev_error = full_dev_error
+        initial_dev_error = self._error(dev_dl, criterion)
+        log.info(f'Starting a training bout at (dev) error ({initial_dev_error})')
+        train_error = None
+        for epoch in range(1, return_model_after + 1):
+            train_error = self._run_epoch(train_dl, criterion, optimizer, scaler)
+            running_errors.append(self._error(dev_dl, criterion))
+
+            if best_dev_error > running_errors[-1]:
+                best_dev_error = running_errors[-1]
                 best_model = deepcopy(self.model)
                 epochs_to_best = epoch
 
-            stop = False
-            if subset_itt == 0:
-                # Don't go through normal stopping logic, we don't want to assing the best model, this is just a "priming" iteration
-                break
-            elif len(running_errors) > 15:
-                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-10:]))])
+            if len(running_errors) > 10:
+                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-7:]))])
                 if delta_mean <= 0:
-                    stop = True
-            elif np.isnan(error):
-                stop = True
-            elif (time.time() - started) > self.stop_after * (0.5 + subset_idx * 0.4 / len(dev_ds_arr)):
-                stop = True
-            elif dev_error < 0.00001:
-                stop = True
-
-            if stop:
-                self.model = best_model
+                    break
+            elif np.isnan(train_error):
                 break
+            elif (time.time() - started) > stop_after:
+                break
+            elif running_errors[-1] < 0.0001 or train_error < 0.0001:
+                break
+
+        log.info(f'Stopped a training bout at (dev,train) error ({running_errors[-1]},{train_error})')
+        return best_model, epochs_to_best
 
     def _error(self, dev_dl, criterion) -> float:
         self.model = self.model.eval()
@@ -161,54 +162,18 @@ class Neural(BaseModel):
         )
         
         criterion = self._select_criterion()
-        started = time.time()
         scaler = GradScaler()
 
-        full_dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=200, shuffle=False)
-        # Train on subsets
-        best_full_dev_error = pow(2, 32)
-        best_model = self.model
+        dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=200, shuffle=False)
+
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
-                dev_dl = DataLoader(dev_ds_arr[subset_idx], batch_size=200, shuffle=False)
 
-                # @TODO (Maybe) try adding wramup
-                # Progressively decrease the learning rate
-                total_epochs = 0
-                running_errors: List[float] = []
                 optimizer = self._select_optimizer(0.005)
-                for _ in range(int(20000)):
-                    total_epochs += 1
-                    error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-                    dev_error = self._error(dev_dl, criterion)
-                    full_dev_error = self._error(full_dev_dl, criterion)
-                    log.info(f'Training error of {error} | Testing error of {dev_error} | During iteration {total_epochs} with subset {subset_idx}')
-                    running_errors.append(dev_error)
-
-                    if best_full_dev_error > full_dev_error:
-                        best_full_dev_error = full_dev_error
-                        best_model = deepcopy(self.model)
-                        self.epochs_to_best = total_epochs
-
-                    stop = False
-                    if subset_itt == 0:
-                        # Don't go through normal stopping logic, we don't want to assing the best model, this is just a "priming" iteration
-                        break
-                    elif len(running_errors) > 15:
-                        delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-10:]))])
-                        if delta_mean <= 0:
-                            stop = True
-                    elif np.isnan(error):
-                        stop = True
-                    elif (time.time() - started) > self.stop_after * (0.5 + subset_idx * 0.4 / len(dev_ds_arr)):
-                        stop = True
-                    elif dev_error < 0.00001:
-                        stop = True
-
-                    if stop:
-                        self.model = best_model
-                        break
+                stop_after = self.stop_after * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
+                self.model, epoch_to_best_model = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after=20000 if subset_itt > 0 else 1)
+                self.epochs_to_best += epoch_to_best_model
                 
         # Do a single training run on the test data as well
         if self.fit_on_dev:
@@ -218,24 +183,14 @@ class Neural(BaseModel):
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
         train_ds = ConcatedEncodedDs(train_data)
-        dev_ds = ConcatedEncodedDs(dev_data)
+        dev_ds = ConcatedEncodedDs(dev_data + train_data)
         train_dl = DataLoader(train_ds, batch_size=200, shuffle=True)
         dev_dl = DataLoader(dev_ds, batch_size=200, shuffle=True)
         optimizer = self._select_optimizer(0.0005)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        best_error = pow(2, 32)
-        best_model = self.model
-        dev_error = self._error(dev_dl, criterion)
-        for _ in range(self.epochs_to_best):
-            train_error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            combined_error = train_error * (len(train_ds) / (len(train_ds) + len(dev_ds))) + dev_error * (len(dev_ds) / (len(train_ds) + len(dev_ds)))
-            if combined_error < best_error:
-                best_error = combined_error
-                best_model = deepcopy(self.model)
-        
-        self.model = best_model
+        self.model, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=self.epochs_to_best)
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
