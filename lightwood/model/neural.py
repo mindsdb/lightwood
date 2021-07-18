@@ -85,10 +85,10 @@ class Neural(BaseModel):
 
         return optimizer
 
-    def _run_epoch(self, train_dl, criterion, optimizer, scaler) -> float:
+    def _run_epoch(self, train_dl, criterion, optimizer, scaler, scheduler) -> float:
         self.model = self.model.train()
         running_losses: List[float] = []
-        for X, Y in train_dl:
+        for i, (X, Y) in enumerate(train_dl):
             X = X.to(self.model.device)
             Y = Y.to(self.model.device)
             with LightwoodAutocast():
@@ -103,6 +103,10 @@ class Neural(BaseModel):
                     loss.backward()
                     optimizer.step()
             running_losses.append(loss.item())
+
+            if i % 4 == 0:
+                scheduler.step()
+
         return np.mean(running_losses)
 
     def _max_fit(self, train_dl, dev_dl, criterion, optimizer, scheduler, scaler, stop_after, return_model_after):
@@ -112,31 +116,30 @@ class Neural(BaseModel):
         running_errors = []
         best_model = self.model
 
-        initial_dev_error = self._error(dev_dl, criterion)
-        log.info(f'Starting a training bout at (dev) error ({initial_dev_error})')
         train_error = None
         for epoch in range(1, return_model_after + 1):
-            train_error = self._run_epoch(train_dl, criterion, optimizer, scaler)
+            train_error = self._run_epoch(train_dl, criterion, optimizer, scaler, scheduler)
             running_errors.append(self._error(dev_dl, criterion))
+
+            if np.isnan(train_error) or np.isnan(running_errors[-1]) or np.isinf(train_error) or np.isinf(running_errors[-1]):
+                break
 
             if best_dev_error > running_errors[-1]:
                 best_dev_error = running_errors[-1]
                 best_model = deepcopy(self.model)
                 epochs_to_best = epoch
 
-            if len(running_errors) > 10:
-                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-7:]))])
+            if len(running_errors) > 6:
+                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-5:]))])
                 if delta_mean <= 0:
                     break
-            elif np.isnan(train_error):
-                break
             elif (time.time() - started) > stop_after:
                 break
             elif running_errors[-1] < 0.0001 or train_error < 0.0001:
                 break
-        scheduler.step()
 
-        log.info(f'Stopped a training bout at (dev,train) error ({running_errors[-1]},{train_error})')
+        if np.isnan(best_dev_error):
+            best_dev_error = pow(2, 32)
         return best_model, epochs_to_best, best_dev_error
 
     def _error(self, dev_dl, criterion) -> float:
@@ -156,51 +159,66 @@ class Neural(BaseModel):
         train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
         dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
 
-        criterion = self._select_criterion()
         scaler = GradScaler()
-        dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=200, shuffle=False)
-        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=False)
+        self.batch_size = min(200, int(len(ConcatedEncodedDs(train_ds_arr)) / 20))
+        dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
+        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
 
         time_for_trials = self.stop_after / 2
-        nr_trails = 40
+        nr_trails = 30
         time_per_trial = time_for_trials / nr_trails
 
         def objective(trial):
+            print(f'Running trial in max {time_per_trial} seconds')
             # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
-            num_hidden = trial.suggest_int('n_hidden', 1, 2)
-            lr = trial.suggest_loguniform('lr', 0.0005, 0.1)
-            dropout = trial.suggest_uniform('dropout', 0, 0.25)
+            num_hidden = trial.suggest_int('num_hidden', 1, 2)
+            lr = trial.suggest_loguniform('lr', 0.0003, 0.05)
+            dropout = trial.suggest_uniform('dropout', 0, 0.2)
 
-            optimizer = self._select_optimizer(lr)
-            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
             self.model = DefaultNet(
                 input_size=len(ds_arr[0][0][0]),
                 output_size=len(ds_arr[0][0][1]),
                 num_hidden=num_hidden,
                 dropout=dropout
             )
-
-            self.model, epoch_to_best_model, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, time_per_trial, return_model_after=20000)
+            optimizer = self._select_optimizer(lr)
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
+            criterion = self._select_criterion()
+            
+            try:
+                _, _, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, time_per_trial, return_model_after=20000)
+            except Exception as e:
+                log.error(e)
+                return pow(2, 32)
 
             return best_error
 
         log.info('Running hyperparameter search!')
-        study = optuna.create_study(direction='minimize')
+        sampler = optuna.samplers.TPESampler(seed=len(train_dl))
+        study = optuna.create_study(direction='minimize', sampler=sampler)
         study.optimize(objective, n_trials=nr_trails)
+
+        print("  Value: {}".format(study.best_trial.value))
+
+        print("  Params: ")
+        for key, value in study.best_trial.params.items():
+            print("    {}: {}".format(key, value))
+
         self.num_hidden = study.best_trial.params['num_hidden']
         self.dropout = study.best_trial.params['dropout']
         self.lr = study.best_trial.params['lr']
 
         log.info(f'Found hyperparameters num_hidden:{self.num_hidden} lr:{self.lr} dropout:{self.dropout}')
 
-        optimizer = self._select_optimizer(self.lr)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
         self.model = DefaultNet(
             input_size=len(ds_arr[0][0][0]),
             output_size=len(ds_arr[0][0][1]),
             num_hidden=self.num_hidden,
             dropout=self.dropout
         )
+        optimizer = self._select_optimizer(self.lr)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
+        criterion = self._select_criterion()
 
         self.model, self.epochs_to_best, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, self.stop_after / 2, return_model_after=20000)
         '''
@@ -223,14 +241,14 @@ class Neural(BaseModel):
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
         train_ds = ConcatedEncodedDs(train_data)
         dev_ds = ConcatedEncodedDs(dev_data + train_data)
-        train_dl = DataLoader(train_ds, batch_size=200, shuffle=True)
-        dev_dl = DataLoader(dev_ds, batch_size=200, shuffle=True)
+        train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
+        dev_dl = DataLoader(dev_ds, batch_size=self.batch_size, shuffle=True)
         optimizer = self._select_optimizer(self.lr)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, scheduler, optimizer, scaler, self.stop_after, return_model_after=self.epochs_to_best)
+        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, self.stop_after, return_model_after=self.epochs_to_best)
     
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()

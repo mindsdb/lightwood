@@ -18,8 +18,11 @@ import sys
 def _module_from_code(code, module_name):
     dirname = tempfile.gettempdir()
     filename = os.urandom(24).hex() + '.py'
+    path = os.path.join(dirname, filename)
+    if 'LIGHTWOOD_DEV_SAVE_TO' in os.environ:
+        path = os.environ['LIGHTWOOD_DEV_SAVE_TO']
 
-    with open(os.path.join(dirname, filename), 'wb') as fp:
+    with open(path, 'wb') as fp:
         fp.write(code.encode('utf-8'))
         spec = importlib.util.spec_from_file_location(module_name, fp.name)
         temp_module = importlib.util.module_from_spec(spec)
