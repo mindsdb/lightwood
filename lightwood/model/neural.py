@@ -104,7 +104,7 @@ class Neural(BaseModel):
                     optimizer.step()
             running_losses.append(loss.item())
 
-            if i % 4 == 3 and scheduler is not None:
+            if i % 10 == 8 and scheduler:
                 scheduler.step()
 
         return np.mean(running_losses)
@@ -162,8 +162,8 @@ class Neural(BaseModel):
         scaler = GradScaler()
         self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 20))
 
-        time_for_trials = self.stop_after / 2
-        nr_trails = 30
+        time_for_trials = self.stop_after * 10 / 2
+        nr_trails = 200
         time_per_trial = time_for_trials / nr_trails
 
         def objective(trial):
