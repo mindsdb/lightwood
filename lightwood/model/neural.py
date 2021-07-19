@@ -179,8 +179,8 @@ class Neural(BaseModel):
             optimizer = self._select_optimizer(lr)
             criterion = self._select_criterion()
             
-            dev_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[0:int(len(train_ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
-            train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[int(len(train_ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
+            train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[0:int(len(train_ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
+            dev_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[int(len(train_ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
             try:
                 _, _, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, time_per_trial, 20000)
             except Exception as e:
