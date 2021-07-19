@@ -160,7 +160,7 @@ class Neural(BaseModel):
         scaler = GradScaler()
         self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 20))
 
-        time_for_trials = self.stop_after * 10 / 2
+        time_for_trials = self.stop_after / 2
         nr_trails = 20
         time_per_trial = time_for_trials / nr_trails
 
