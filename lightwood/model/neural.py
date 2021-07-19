@@ -159,46 +159,51 @@ class Neural(BaseModel):
 
         scaler = GradScaler()
         self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 20))
+        
 
-        time_for_trials = self.stop_after / 2
-        nr_trails = 20
-        time_per_trial = time_for_trials / nr_trails
+        if False:
+            time_for_trials = self.stop_after / 2
+            nr_trails = 20
+            time_per_trial = time_for_trials / nr_trails
 
-        def objective(trial):
-            log.debug(f'Running trial in max {time_per_trial} seconds')
-            # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
-            num_hidden = trial.suggest_int('num_hidden', 1, 2)
-            lr = trial.suggest_loguniform('lr', 0.0005, 0.1)
+            def objective(trial):
+                log.debug(f'Running trial in max {time_per_trial} seconds')
+                # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
+                num_hidden = trial.suggest_int('num_hidden', 1, 2)
+                lr = trial.suggest_loguniform('lr', 0.0005, 0.1)
 
-            self.model = DefaultNet(
-                input_size=len(ds_arr[0][0][0]),
-                output_size=len(ds_arr[0][0][1]),
-                num_hidden=num_hidden,
-                dropout=0
-            )
-            optimizer = self._select_optimizer(lr)
-            criterion = self._select_criterion()
-            
-            train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[0:int(len(train_ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
-            dev_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[int(len(train_ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
-            try:
-                _, _, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, time_per_trial, 20000)
-            except Exception as e:
-                log.error(e)
-                return pow(2, 32)
+                self.model = DefaultNet(
+                    input_size=len(ds_arr[0][0][0]),
+                    output_size=len(ds_arr[0][0][1]),
+                    num_hidden=num_hidden,
+                    dropout=0
+                )
+                optimizer = self._select_optimizer(lr)
+                criterion = self._select_criterion()
+                
+                train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[0:int(len(train_ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
+                dev_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[int(len(train_ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
+                try:
+                    _, _, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, time_per_trial, 20000)
+                except Exception as e:
+                    log.error(e)
+                    return pow(2, 32)
 
-            return best_error
+                return best_error
 
-        log.info('Running hyperparameter search!')
-        sampler = optuna.samplers.RandomSampler(seed=len(ds_arr[0][0][0]))
-        study = optuna.create_study(direction='minimize', sampler=sampler)
-        study.optimize(objective, n_trials=nr_trails)
+            log.info('Running hyperparameter search!')
+            sampler = optuna.samplers.RandomSampler(seed=len(ds_arr[0][0][0]))
+            study = optuna.create_study(direction='minimize', sampler=sampler)
+            study.optimize(objective, n_trials=nr_trails)
 
-        log.debug(f'Best trial had a loss of : {study.best_trial.value}')
-        log.debug(f'Best trial suggested parameters : {study.best_trial.params.items()}')
+            log.debug(f'Best trial had a loss of : {study.best_trial.value}')
+            log.debug(f'Best trial suggested parameters : {study.best_trial.params.items()}')
 
-        self.num_hidden = study.best_trial.params['num_hidden']
-        self.lr = study.best_trial.params['lr']
+            self.num_hidden = study.best_trial.params['num_hidden']
+            self.lr = study.best_trial.params['lr']
+        else:
+            self.num_hidden = 1
+            self.lr = 0.001
         dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
 
