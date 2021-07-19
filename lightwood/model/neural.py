@@ -104,7 +104,7 @@ class Neural(BaseModel):
                     optimizer.step()
             running_losses.append(loss.item())
 
-            if i % 4 == 0:
+            if i % 4 == 3 and scheduler is not None:
                 scheduler.step()
 
         return np.mean(running_losses)
@@ -129,8 +129,8 @@ class Neural(BaseModel):
                 best_model = deepcopy(self.model)
                 epochs_to_best = epoch
 
-            if len(running_errors) > 6:
-                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-5:]))])
+            if len(running_errors) > 15:
+                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-7:]))])
                 if delta_mean <= 0:
                     break
             elif (time.time() - started) > stop_after:
@@ -160,20 +160,18 @@ class Neural(BaseModel):
         dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
 
         scaler = GradScaler()
-        self.batch_size = min(200, int(len(ConcatedEncodedDs(train_ds_arr)) / 20))
-        dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
-        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
+        self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 20))
 
         time_for_trials = self.stop_after / 2
         nr_trails = 30
         time_per_trial = time_for_trials / nr_trails
 
         def objective(trial):
-            print(f'Running trial in max {time_per_trial} seconds')
+            log.debug(f'Running trial in max {time_per_trial} seconds')
             # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
             num_hidden = trial.suggest_int('num_hidden', 1, 2)
             lr = trial.suggest_loguniform('lr', 0.0003, 0.05)
-            dropout = trial.suggest_uniform('dropout', 0, 0.2)
+            dropout = trial.suggest_uniform('dropout', 0, 0.35)
 
             self.model = DefaultNet(
                 input_size=len(ds_arr[0][0][0]),
@@ -185,8 +183,10 @@ class Neural(BaseModel):
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
             criterion = self._select_criterion()
             
+            dev_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[0:int(len(train_ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
+            train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[int(len(train_ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
             try:
-                _, _, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, time_per_trial, return_model_after=20000)
+                _, _, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, time_per_trial, 20000)
             except Exception as e:
                 log.error(e)
                 return pow(2, 32)
@@ -194,19 +194,18 @@ class Neural(BaseModel):
             return best_error
 
         log.info('Running hyperparameter search!')
-        sampler = optuna.samplers.TPESampler(seed=len(train_dl))
+        sampler = optuna.samplers.RandomSampler(seed=len(ds_arr[0][0][0]))
         study = optuna.create_study(direction='minimize', sampler=sampler)
         study.optimize(objective, n_trials=nr_trails)
 
-        print("  Value: {}".format(study.best_trial.value))
-
-        print("  Params: ")
-        for key, value in study.best_trial.params.items():
-            print("    {}: {}".format(key, value))
+        log.debug(f'Best trial had a loss of : {study.best_trial.value}')
+        log.debug(f'Best trial suggested parameters : {study.best_trial.params.items()}')
 
         self.num_hidden = study.best_trial.params['num_hidden']
         self.dropout = study.best_trial.params['dropout']
         self.lr = study.best_trial.params['lr']
+        dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
+        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
 
         log.info(f'Found hyperparameters num_hidden:{self.num_hidden} lr:{self.lr} dropout:{self.dropout}')
 
@@ -220,7 +219,7 @@ class Neural(BaseModel):
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0.0005, last_epoch=-1)
         criterion = self._select_criterion()
 
-        self.model, self.epochs_to_best, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, self.stop_after / 2, return_model_after=20000)
+        self.model, self.epochs_to_best, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scheduler, scaler, self.stop_after / 2, 20000)
         '''
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
