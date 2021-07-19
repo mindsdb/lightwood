@@ -28,7 +28,6 @@ class Neural(BaseModel):
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, fit_on_dev: bool):
         super().__init__(stop_after)
-        self.model = None
         self.dtype_dict = dtype_dict
         self.target = target
         self.timeseries_settings = timeseries_settings
