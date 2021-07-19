@@ -93,14 +93,14 @@ class CatNormalizer:
         return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
 
 
-def get_group_matches(data, combination, keys):
+def get_group_matches(data, combination):
     """Given a grouped-by combination, return rows of the data that match belong to it. Params:
     data: dict with data to filter and group-by columns info.
     combination: tuple with values to filter by
-    keys: which column does each combination value belong to
-
     return: indexes for rows to normalize, data to normalize
     """
+    keys = data['group_info'].keys()  #  which column does each combination value belong to
+
     if isinstance(data['data'], pd.Series):
         data['data'] = np.vstack(data['data'])
     if not combination:
@@ -132,6 +132,7 @@ def generate_target_group_normalizers(data):
     if data['original_type'] in [dtype.categorical, dtype.binary]:
         normalizers['__default'] = CatNormalizer()
         normalizers['__default'].prepare(data['data'])
+        group_combinations.append('__default')
 
     # numerical normalizers, here we spawn one per each group combination
     else:
@@ -142,7 +143,7 @@ def generate_target_group_normalizers(data):
         for combination in all_group_combinations:
             if combination != ():
                 combination = frozenset(combination)  # freeze so that we can hash with it
-                _, subset = get_group_matches(data, combination, data['group_info'].keys())
+                _, subset = get_group_matches(data, combination)
                 if subset.size > 0:
                     normalizers[combination] = MinMaxNormalizer(combination=combination,
                                                                 original_type=data['original_type'],

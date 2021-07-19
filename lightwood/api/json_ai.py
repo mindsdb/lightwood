@@ -294,6 +294,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'data': 'data',
                 'predictions': 'df',
                 'analysis': 'self.runtime_analyzer',
+                'ts_analysis': 'self.ts_analysis',
                 'target_name': 'self.target',
                 'target_dtype': 'self.dtype_dict[self.target]',
             }

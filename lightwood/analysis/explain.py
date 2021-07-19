@@ -4,12 +4,14 @@ import numpy as np
 import pandas as pd
 
 from lightwood.analysis.nc.util import get_numerical_conf_range, get_categorical_conf, get_anomalies  #  restore_icp_state, clear_icp_state
+from lightwood.helpers.ts import get_inferred_timestamps, add_tn_conf_bounds
 from lightwood.api.dtype import dtype
+from lightwood.api.types import TimeseriesSettings
 
 
 def explain(data,
             predictions,
-            timeseries_settings,
+            timeseries_settings: TimeseriesSettings,
             analysis,
             target_name,
             target_dtype,
@@ -23,13 +25,14 @@ def explain(data,
             # (Int) ignores anomaly detection for N steps after an
             # initial anomaly triggers the cooldown period;
             # implicitly assumes series are regularly spaced
-            anomaly_cooldown
+            anomaly_cooldown,
+            ts_analysis: dict = None
             ):
 
     # confidence estimation using calibrated inductive conformal predictors (ICPs)
     # @TODO: check not quick_predict
     data = data.reset_index(drop=True)
-    insights = pd.DataFrame(columns=['prediction', 'confidence', 'lower', 'upper', 'anomaly', 'truth'])
+    insights = pd.DataFrame(columns=['prediction', 'confidence', 'lower', 'upper', 'truth'])
     insights['prediction'] = predictions['prediction']
     insights['truth'] = data[target_name]
 
@@ -178,5 +181,21 @@ def explain(data,
                                           data[target_name],
                                           cooldown=anomaly_cooldown)
                 insights['anomaly'] = anomalies
+
+    if timeseries_settings.is_timeseries:
+        for col in timeseries_settings.order_by:
+            insights[f'order_{col}'] = data[col]
+        for col in timeseries_settings.group_by:
+            insights[f'group_{col}'] = data[col]
+
+        for col in timeseries_settings.order_by:
+            insights[f'order_{col}'] = get_inferred_timestamps(insights,
+                                                               col,
+                                                               ts_analysis['deltas'],
+                                                               timeseries_settings)
+
+        # @TODO: add T+N confidence bounds and disaggregate into rows if nr_predictions > 1
+        #if timeseries_settings.nr_predictions > 1:
+        #    insights = add_tn_conf_bounds(insights, timeseries_settings)
 
     return insights

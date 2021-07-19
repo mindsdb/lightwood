@@ -158,6 +158,7 @@ def _ts_infer_next_row(df, ob, last_index):
     last_row.original_index = None
     last_row.index = [last_index + 1]
     last_row['__mdb_make_predictions'] = True
+    last_row['__mdb_ts_inferred'] = True
     last_row[ob] += delta
     return df.append(last_row)
 
