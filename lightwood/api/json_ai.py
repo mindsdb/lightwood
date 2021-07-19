@@ -130,6 +130,15 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     'input_cols': 'self.input_cols',
                     'fit_on_dev': True
                 }
+            },
+            {
+                'object': 'Regression',
+                'static_args': {
+                    'stop_after': 'problem_definition.seconds_per_model'
+                },
+                'dynamic_args': {
+                    'target_encoder': 'self.encoders[self.target]'
+                }
             }
         ]
 
@@ -305,6 +314,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.model import Unit',
         'from lightwood.model import LightGBM',
         'from lightwood.model import Neural',
+        'from lightwood.model import Regression',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
         'from lightwood.data import transform_timeseries, timeseries_analyzer',

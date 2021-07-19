@@ -23,12 +23,12 @@ class BestOf(BaseEnsemble):
                 accuracy_functions
             )
             avg_score = np.mean(list(score_dict.values()))
-            log.info(f'Model {model} obtained a best-of evaluation score of {avg_score}')
+            log.info(f'Model {type(model).__name__} obtained a best-of evaluation score of {round(avg_score,4)}')
             if avg_score > best_score:
                 best_score = avg_score
                 self.best_index = idx
 
-        log.info(f'Picked best model: {self.models[self.best_index]}')
+        log.info(f'Picked best model: {type(self.models[self.best_index]).__name__}')
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         return self.models[self.best_index](ds)
