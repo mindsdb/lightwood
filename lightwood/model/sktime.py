@@ -33,6 +33,11 @@ class SkTime(BaseModel):
             # ds_arr[fold].data_frame[self.target] = ds_arr[fold].data_frame[f'{self.target}_timestep_{timestep}']
             self.model.fit(ds_arr[fold].data_frame[self.target])
 
+            # index = [row[-1][0][-1] for idx, row in ds_arr[fold].data_frame[['T']].iterrows()]
+            # d = pd.Series(ds_arr[fold].data_frame[self.target].values, index=pd.Int64Index(index))
+            # d = d.sort_index(ascending=True)
+            # self.model.fit(d)
+
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs]) -> pd.DataFrame:
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
