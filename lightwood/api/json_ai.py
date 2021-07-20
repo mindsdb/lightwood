@@ -173,14 +173,14 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'dynamic_args': {
                 'target': 'self.target',
                 'dtype_dict': 'self.dtype_dict',
-                'input_cols': 'self.input_cols'
+                'ts_analysis': 'self.ts_analysis'
             },
             }
         ])
 
     # @TODO: Test, remove later
-    print(models)
-    # models = models[-1]
+    # models = [models[-1]]
+    # print(models)
 
     output = Output(
         name=target,
