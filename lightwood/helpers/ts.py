@@ -4,11 +4,16 @@ from lightwood.api.types import TimeseriesSettings
 
 def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: TimeseriesSettings) -> pd.DataFrame:
     nr_predictions = tss.nr_predictions
-    gby = [f'group_{g}' for g in tss.group_by]
+    if tss.group_by:
+        gby = [f'group_{g}' for g in tss.group_by]
 
     for (idx, row) in df.iterrows():
         last = row[f'order_{col}'][-1]
-        series_delta = deltas[frozenset(row[gby].tolist())][col]
+
+        if tss.group_by:
+            series_delta = deltas[frozenset(row[gby].tolist())][col]
+        else:
+            series_delta = deltas['__default'][col]
         timestamps = [last + t*series_delta for t in range(nr_predictions)]
         df[f'order_{col}'].iloc[idx] = timestamps
     return df[f'order_{col}']
