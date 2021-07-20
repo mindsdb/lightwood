@@ -54,7 +54,7 @@ class Neural(BaseModel):
                     Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
 
                     decoded_predictions.extend(self.target_encoder.decode(Yh))
-                    decoded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Y, 0)))
+                    decoded_real_values.extend(self.target_encoder.decode(Y))
 
                 self.target_encoder.decode_log = True
                 log_acc = r2_score(decoded_real_values, decoded_predictions)

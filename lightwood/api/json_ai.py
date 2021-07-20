@@ -320,7 +320,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'data': 'data',
                 'predictions': 'df',
                 'analysis': 'self.runtime_analyzer',
-                'ts_analysis': 'self.ts_analysis',
+                'ts_analysis': 'self.ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
                 'target_name': 'self.target',
                 'target_dtype': 'self.dtype_dict[self.target]',
             }
