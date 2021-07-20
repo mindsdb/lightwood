@@ -98,7 +98,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     models = [
         {
             
-            'object': 'Neural', # if not problem_definition.timeseries_settings.is_timeseries else 'TsNeural',
+            'object': 'Neural' if not problem_definition.timeseries_settings.is_timeseries else 'TsNeural',
             'static_args': {
                 'stop_after': 'problem_definition.seconds_per_model',
                 'timeseries_settings': 'problem_definition.timeseries_settings'
