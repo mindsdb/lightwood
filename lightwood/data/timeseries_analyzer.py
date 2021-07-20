@@ -1,9 +1,8 @@
 from typing import Dict
 import pandas as pd
 
-from lightwood.api import dtype
 from lightwood.api.types import TimeseriesSettings
-from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer, get_group_matches, generate_target_group_normalizers
+from lightwood.encoder.time_series.helpers.common import get_group_matches, generate_target_group_normalizers
 
 
 def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str) -> (Dict, Dict):
@@ -27,6 +26,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseri
 
     return {'target_normalizers': new_data['target_normalizers'],
             'deltas': deltas,
+            'tss': timeseries_settings,
             'group_combinations': new_data['group_combinations']}
 
 

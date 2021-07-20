@@ -100,7 +100,7 @@ def get_group_matches(data, combination):
     combination: tuple with values to filter by
     return: indexes for rows to normalize, data to normalize
     """
-    keys = data['group_info'].keys()  #  which column does each combination value belong to
+    keys = data['group_info'].keys()  # which column does each combination value belong to
 
     if isinstance(data['data'], pd.Series):
         data['data'] = np.vstack(data['data'])
