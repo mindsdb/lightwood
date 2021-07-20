@@ -63,6 +63,7 @@ class MinMaxNormalizer:
 
 class CatNormalizer:
     def __init__(self, encoder_class='one_hot'):
+        self.encoder_class = encoder_class
         if encoder_class == 'one_hot':
             self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
         else:
@@ -76,7 +77,7 @@ class CatNormalizer:
             for j in i:
                 X.append(j if j is not None else self.unk)
         self.scaler.fit(np.array(X).reshape(-1, 1))
-        self.output_size = len(self.scaler.categories_[0])
+        self.output_size = len(self.scaler.categories_[0]) if self.encoder_class == 'one_hot' else 1
 
     def encode(self, Y):
         y = np.array([[j if j is not None else self.unk for j in i] for i in Y])
