@@ -51,9 +51,10 @@ class EncodedDs(Dataset):
                                                  for dep in self.encoders[col].dependencies}
                 if hasattr(self.encoders[col], 'data_window'):
                     cols = [self.target] + [f'{self.target}_timestep_{i}' for i in range(1, self.encoders[col].data_window)]
-                    data = self.data_frame[cols].iloc[idx].tolist()
                 else:
-                    data = [self.data_frame.iloc[idx][col]]
+                    cols = [col]
+
+                data = self.data_frame[cols].iloc[idx].tolist()
                 encoded_tensor = self.encoders[col].encode(data, **kwargs)[0]
                 if col != self.target:
                     X = torch.cat([X, encoded_tensor])

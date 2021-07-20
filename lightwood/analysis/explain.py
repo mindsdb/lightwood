@@ -37,8 +37,10 @@ def explain(data,
     insights['prediction'] = predictions['prediction']
 
     if timeseries_settings.is_timeseries:
-        for col in timeseries_settings.group_by:
-            insights[f'group_{col}'] = data[col]
+
+        if timeseries_settings.group_by:
+            for col in timeseries_settings.group_by:
+                insights[f'group_{col}'] = data[col]
 
         for col in timeseries_settings.order_by:
             insights[f'order_{col}'] = data[col]

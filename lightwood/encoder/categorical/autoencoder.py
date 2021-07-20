@@ -79,7 +79,7 @@ class CategoricalAutoEncoder(BaseEncoder):
                                                        eval_every_x_epochs=1,
                                                        max_unimproving_models=5)
 
-            self.net = best_model.to(self.net.device, 1)
+            self.net = best_model.to(self.net.device)
 
             modules = [module for module in self.net.modules() if type(
                 module) != torch.nn.Sequential and type(module) != DefaultNet]

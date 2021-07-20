@@ -83,6 +83,10 @@ class OneHotEncoder(BaseEncoder):
         probs = []
 
         for vector in encoded_data_list:
+            # Logits and onehots are not the same in definition
+            # But this explicitly operates on logits; it will take care of
+            # the one hot (so you can pass something in the softmax logit space)
+            # But will not affect something that is already OHE.
             ohe_index = np.argmax(vector)
             ret.append(self._lang.index2word[ohe_index])
 

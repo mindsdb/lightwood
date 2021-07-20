@@ -5,6 +5,7 @@ import pandas as pd
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 from lightwood.ensemble.base import BaseEnsemble
 import numpy as np
+from lightwood.helpers.log import log
 
 
 class BestOf(BaseEnsemble):
@@ -23,9 +24,12 @@ class BestOf(BaseEnsemble):
                 accuracy_functions
             )
             avg_score = np.mean(list(score_dict.values()))
+            log.info(f'Model {type(model).__name__} obtained a best-of evaluation score of {round(avg_score,4)}')
             if avg_score > best_score:
                 best_score = avg_score
                 self.best_index = idx
-                
+
+        log.info(f'Picked best model: {type(self.models[self.best_index]).__name__}')
+
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         return self.models[self.best_index](ds)

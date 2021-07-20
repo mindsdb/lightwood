@@ -2,7 +2,6 @@ import torch
 from torch import nn
 from lightwood.model.helpers.default_net import DefaultNet
 from lightwood.helpers.torch import LightwoodAutocast
-from itertools import chain
 
 
 class ArNet(DefaultNet):
@@ -13,16 +12,20 @@ class ArNet(DefaultNet):
     def __init__(self,
                  encoder_span: dict,  # contains index span for each encoder
                  target_name: str,
-                 input_size=None,
-                 output_size=None,
-                 shape=None,
-                 max_params=3e5):
+                 input_size: int = None,
+                 output_size: int = None,
+                 shape: list = None,
+                 max_params: int = 3e7,
+                 num_hidden: int = 1,
+                 dropout: float = 0) -> None:
 
         self.ar_net = None
         super().__init__(input_size=input_size,
                          output_size=output_size,
                          shape=shape,
-                         max_params=max_params
+                         max_params=max_params,
+                         num_hidden=num_hidden,
+                         dropout=dropout
                          )
         self.target = target_name
         self.encoder_span = encoder_span
