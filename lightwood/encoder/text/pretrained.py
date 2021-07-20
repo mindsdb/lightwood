@@ -1,4 +1,23 @@
 """
+2021.07.16
+Adding flag "embedmode".
+
+Embed-mode is made for when text is one of many columns in the model.
+IF the model is direct (text) -> output, then it's worth just using
+the fine-tuned encoder as the "mixer" persay; thus, turn embed-mode OFF.
+
+This means there are 3 possible modes:
+
+(1) Classification
+    -> Fine tuned, output of encoder is [CLS] embedding
+    -> Fine tuned, output of encoder is the class value
+(2) Regression
+    -> Untrained; output of encoder is [CLS] embedding
+
+Training with regression is WIP; seems like quantile-binning is the best approach
+but using MSE loss while fine-tuning did not demonstrate decent results. Particularly
+because the mixer seems to address this.
+
 2021.03.18
 
 ## Padding changes the answer slightly in the model.
@@ -37,6 +56,7 @@ of the output embedding
 import torch
 from torch.utils.data import DataLoader
 import os
+import pandas as pd
 from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
 from lightwood.helpers.device import get_devices
 from lightwood.encoder.base import BaseEncoder
@@ -66,6 +86,7 @@ class PretrainedLangEncoder(BaseEncoder):
     custom_train ::Bool; If true, trains model on target procided
     frozen ::Bool; If true, freezes transformer layers during training.
     epochs ::int; number of epochs to train model with
+    embed_mode ::Bool; If true, assumes the output of the encode() step is the CLS embedding.
     """
 
     def __init__(
@@ -76,10 +97,10 @@ class PretrainedLangEncoder(BaseEncoder):
         custom_tokenizer=None,
         batch_size=10,
         max_position_embeddings=None,
-        custom_train=True,
         frozen=False,
         epochs=1,
-        output_type=None
+        output_type=None,
+        embed_mode=True,
     ):
         super().__init__(is_target)
 
@@ -88,7 +109,6 @@ class PretrainedLangEncoder(BaseEncoder):
         log.info(self.name)
 
         self._max_len = max_position_embeddings
-        self._custom_train = custom_train
         self._frozen = frozen
         self._batch_size = batch_size
         self._epochs = epochs
@@ -107,8 +127,17 @@ class PretrainedLangEncoder(BaseEncoder):
         self.device, _ = get_devices()
         self.is_nn_encoder = True
         self.stop_after = stop_after
+ 
+        self.embed_mode = embed_mode
+        self.uses_target = True
+        
+        ## DEBUGGING!!!
+        if self.embed_mode:
+            log.info("Embedding mode on. [CLS] embedding dim output of encode()")
+        else:
+            log.info("Embedding mode off. Logits are output of encode()")
 
-    def prepare(self, priming_data, training_data=None):
+    def prepare(self, priming_data: pd.Series, encoded_target_values: torch.Tensor):
         """
         Prepare the encoder by training on the target.
 
@@ -121,25 +150,15 @@ class PretrainedLangEncoder(BaseEncoder):
 
         # TODO: Make tokenizer custom with partial function; feed custom->model
         if self._tokenizer is None:
-            self._tokenizer = self._tokenizer_class.from_pretrained(
-                self._pretrained_model_name
-            )
+            self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
 
         # Replaces empty strings with ''
         priming_data = [x if x is not None else "" for x in priming_data]
 
         # Checks training data details
         # TODO: Regression flag; currently training supported for categorical only
-        output_avail = training_data is not None and len(training_data["targets"]) == 1
 
-        if (
-            self._custom_train
-            and output_avail
-            and (
-                self.output_type
-                in (dtype.categorical, dtype.binary)
-            )
-        ):
+        if (self.output_type in (dtype.categorical, dtype.binary)):
             log.info("Training model.")
 
             # Prepare priming data into tokenized form + attention masks
@@ -147,19 +166,12 @@ class PretrainedLangEncoder(BaseEncoder):
 
             log.info("\tOutput trained is categorical")
 
-            if training_data["targets"][0]["encoded_output"].shape[1] > 1:
-                labels = training_data["targets"][0]["encoded_output"].argmax(
-                    dim=1
-                )  # Nbatch x N_classes
-            else:
-                labels = training_data["targets"][0]["encoded_output"]
-
-            label_size = len(set(training_data["targets"][0]["unencoded_output"])) + 1
+            labels = encoded_target_values.argmax(dim=1)
 
             # Construct the model
             self._model = self._classifier_model_class.from_pretrained(
                 self._pretrained_model_name,
-                num_labels=label_size,
+                num_labels=len(encoded_target_values[0]),
             ).to(self.device)
 
             # Construct the dataset for training
@@ -223,12 +235,19 @@ class PretrainedLangEncoder(BaseEncoder):
             )
 
         else:
-            log.info("Embeddings Generator only")
+            log.info("Target is not classification; Embeddings Generator only")
 
             self.model_type = "embeddings_generator"
             self._model = self._embeddings_model_class.from_pretrained(
                 self._pretrained_model_name
             ).to(self.device)
+
+            # TODO: Not a great flag
+            # Currently, if the task is not classification, you must have
+            # an embedding generator only.
+            if self.embed_mode is False:
+                log.info("Embedding mode must be ON for non-classification targets.")
+                self.embed_mode = True
 
         self._prepared = True
 
@@ -319,11 +338,15 @@ class PretrainedLangEncoder(BaseEncoder):
                     text, truncation=True, return_tensors="pt"
                 ).to(self.device)
 
-                output = self._model.base_model(inp).last_hidden_state[:, 0]
+                if self.embed_mode: #Embedding mode ON; return [CLS]
+                    output = self._model.base_model(inp).last_hidden_state[:, 0]
 
-                # If the model has a pre-classifier layer, use this embedding.
-                if hasattr(self._model, "pre_classifier"):
-                    output = self._model.pre_classifier(output)
+                    # If the model has a pre-classifier layer, use this embedding.
+                    if hasattr(self._model, "pre_classifier"):
+                        output = self._model.pre_classifier(output)
+
+                else: #Embedding mode off; return classes
+                    output = self._model(inp).logits
 
                 encoded_representation.append(output.detach())
 
@@ -331,3 +354,10 @@ class PretrainedLangEncoder(BaseEncoder):
 
     def decode(self, encoded_values_tensor, max_length=100):
         raise Exception("Decoder not implemented.")
+
+    def to(self, device, available_devices):
+        for v in vars(self):
+            attr = getattr(self, v)
+            if isinstance(attr, torch.nn.Module):
+                attr.to(device)
+        return self

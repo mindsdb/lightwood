@@ -15,12 +15,12 @@ class LightGBMArray(BaseModel):
     submodel_stop_after: float
     target: str
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], n_ts_predictions: int):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], n_ts_predictions: int, fit_on_dev: bool):
         super().__init__(stop_after)
         self.submodel_stop_after = stop_after/n_ts_predictions
         self.target = target
         dtype_dict[target] = dtype.float
-        self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, use_optuna=False)
+        self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna=False)
                        for _ in range(n_ts_predictions)]
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
 
