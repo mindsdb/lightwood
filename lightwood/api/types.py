@@ -109,10 +109,10 @@ class ProblemDefinition:
     nfolds: int
     pct_invalid: float
     unbias_target: bool
-    seconds_per_model: int
-    seconds_per_encoder: int
-    time_aim: int
-    target_weights: List[float]
+    seconds_per_model: Union[int, None]
+    seconds_per_encoder: Union[int, None]
+    time_aim: Union[int, None]
+    target_weights: Union[List[float], None]
     positive_domain: bool
     fixed_confidence: Union[int, float, None]
     timeseries_settings: TimeseriesSettings
@@ -120,6 +120,8 @@ class ProblemDefinition:
     anomaly_error_rate: Union[float, None]
     anomaly_cooldown: int
     ignore_features: List[str]
+    fit_on_validation: bool
+    strict_mode: bool
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
@@ -138,6 +140,8 @@ class ProblemDefinition:
         anomaly_error_rate = obj.get('anomaly_error_rate', None)
         anomaly_cooldown = obj.get('anomaly_detection', 1)
         ignore_features = obj.get('ignore_features', [])
+        fit_on_validation = obj.get('fit_on_validation', True)
+        strict_mode = obj.get('strict_mode', True)
 
         problem_definition = ProblemDefinition(
             target=target,
@@ -154,7 +158,9 @@ class ProblemDefinition:
             anomaly_detection=anomaly_detection,
             anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,
-            ignore_features=ignore_features
+            ignore_features=ignore_features,
+            fit_on_validation=fit_on_validation,
+            strict_mode=strict_mode
         )
 
         return problem_definition

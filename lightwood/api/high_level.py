@@ -16,19 +16,19 @@ import sys
 
 
 def _module_from_code(code, module_name):
-    dev_file = os.environ.get('LIGHTWOOD_DEV_SAVE_TO', None)
-    if dev_file is not None:
-        fp = open(dev_file, 'wb')
-    else:
-        fp = tempfile.NamedTemporaryFile(suffix='.py')
+    dirname = tempfile.gettempdir()
+    filename = os.urandom(24).hex() + '.py'
+    path = os.path.join(dirname, filename)
+    if 'LIGHTWOOD_DEV_SAVE_TO' in os.environ:
+        path = os.environ['LIGHTWOOD_DEV_SAVE_TO']
 
-    fp.write(code.encode('utf-8'))
-    spec = importlib.util.spec_from_file_location(module_name, fp.name)
-    temp_module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = temp_module
-    spec.loader.exec_module(temp_module)
+    with open(path, 'wb') as fp:
+        fp.write(code.encode('utf-8'))
+        spec = importlib.util.spec_from_file_location(module_name, fp.name)
+        temp_module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = temp_module
+        spec.loader.exec_module(temp_module)
 
-    fp.close()
     return temp_module
 
 

@@ -1,9 +1,11 @@
 import unittest
+import numpy as np
 import pandas as pd
 from typing import List
-from datetime import datetime
 
 from lightwood.api.types import ProblemDefinition
+
+np.random.seed(0)
 
 
 class TestTimeseries(unittest.TestCase):
@@ -74,24 +76,28 @@ class TestTimeseries(unittest.TestCase):
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > latest_timestamp
 
-    @unittest.skip
     def test_time_series_classification(self):
         from lightwood.api.high_level import predictor_from_problem
 
-        datasource = pd.read_csv('tests/data/occupancy.csv')  # @TODO: make into synth dataset for faster execution
-        target = 'Occupancy'
+        df = pd.read_csv('tests/data/arrivals.csv')
+        target = 'Traffic'
+        df[target] = df[target] > 100000
 
-        predictor = predictor_from_problem(
-        datasource.df, ProblemDefinition.from_dict({'target': target,
-                'time_aim': 100,
-                'nfolds': 10,
-                'anomaly_detection': False,
-                'timeseries_settings': {
-                    'order_by': ['date'],
-                    'use_previous_target': True,
-                    'window': 10
-                },
-                }))
+        train_idxs = np.random.rand(len(df)) < 0.8
+        train = df[train_idxs]
+        test = df[~train_idxs]
 
-        predictor.learn(datasource.df)
-        predictions = predictor.predict(datasource.df)
+        predictor = predictor_from_problem(df,
+                                           ProblemDefinition.from_dict({'target': target,
+                                                                        'time_aim': 30,
+                                                                        'nfolds': 5,
+                                                                        'anomaly_detection': False,
+                                                                        'timeseries_settings': {
+                                                                            'order_by': ['T'],
+                                                                            'use_previous_target': True,
+                                                                            'window': 5
+                                                                        },
+                                                                        }))
+
+        predictor.learn(train)
+        predictions = predictor.predict(test)

@@ -9,7 +9,7 @@ class TestBasic(unittest.TestCase):
 
         # call: Go with dataframes
         datasource = FileDS('tests/data/boston.csv')
-        predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict({'target': 'MEDV'}))
+        predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict({'target': 'MEDV', 'time_aim': 200}))
         predictor.learn(datasource.df)
 
         predictions = predictor.predict(datasource.df)
