@@ -126,7 +126,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             }
         })
     elif problem_definition.timeseries_settings.nr_predictions > 1:
-        models.append({
+        models.extend([{
             'object': 'LightGBMArray',
             'static_args': {
                 'stop_after': 'problem_definition.seconds_per_model',
@@ -137,7 +137,24 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'dtype_dict': 'self.dtype_dict',
                 'input_cols': 'self.input_cols'
             }
-        })
+        },
+            {
+            'object': 'SkTime',
+            'static_args': {
+                'stop_after': 'problem_definition.seconds_per_model',
+                'n_ts_predictions': 'problem_definition.timeseries_settings.nr_predictions'
+            },
+            'dynamic_args': {
+                'target': 'self.target',
+                'dtype_dict': 'self.dtype_dict',
+                'input_cols': 'self.input_cols'
+            },
+            }
+        ])
+
+    # @TODO: Test, remove later
+    print(models)
+    # models = models[-1]
     
     output = Output(
         name=target,
@@ -317,6 +334,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.model import TsNeural',
         'from lightwood.model import LightGBM',
         'from lightwood.model import LightGBMArray',
+        'from lightwood.model import SkTime',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',
         'from lightwood.data import transform_timeseries, timeseries_analyzer',
