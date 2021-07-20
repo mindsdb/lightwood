@@ -36,8 +36,9 @@ class LightGBM(BaseModel):
     device: torch.device
     device_str: str
     num_iterations: int
+    use_optuna: bool
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], fit_on_dev: bool):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], fit_on_dev: bool, use_optuna: bool = True):
         super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
@@ -45,6 +46,7 @@ class LightGBM(BaseModel):
         self.target = target
         self.dtype_dict = dtype_dict
         self.input_cols = input_cols
+        self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
 
@@ -141,7 +143,7 @@ class LightGBM(BaseModel):
 
         # Turn on grid search if training doesn't take too long using it
         kwargs = {}
-        if self.num_iterations >= 200:
+        if self.use_optuna and self.num_iterations >= 200:
             model_generator = optuna_lightgbm
             kwargs['time_budget'] = self.stop_after * 0.4
             self.num_iterations = int(self.num_iterations / 2)
@@ -197,10 +199,10 @@ class LightGBM(BaseModel):
         data = data.tolist()
         raw_predictions = self.model.predict(data)
 
-        # @TODO: probably better to store self.target_dtype or similar, and use that for the check instead
         if self.ordinal_encoder is not None:
             decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
         else:
             decoded_predictions = raw_predictions
+
         ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf

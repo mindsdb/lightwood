@@ -12,6 +12,7 @@ class BinaryEncoder(BaseEncoder):
         self.map = {}
         self.predict_proba = False
         self.rev_map = {}
+        self.output_size = 2
         if self.is_target:
             self.target_class_distribution = target_class_distribution
             self.index_weights = None

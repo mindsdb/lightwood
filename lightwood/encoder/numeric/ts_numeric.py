@@ -17,6 +17,7 @@ class TsNumericEncoder(NumericEncoder):
         self.normalizers = None
         self.group_combinations = None
         self.dependencies = grouped_by
+        self.output_size = 2 if is_target else 3
 
     def encode(self, data, dependency_data={}):
         """dependency_data: dict with grouped_by column info,
@@ -75,8 +76,6 @@ class TsNumericEncoder(NumericEncoder):
         ret = []
         if not dependency_data:
             dependency_data = {'__default': [None] * len(encoded_values)}
-        # else:
-        #     dependency_data = [[] for col_name, arr in dependency_data.items()]
         if type(encoded_values) != type([]):
             encoded_values = encoded_values.tolist()
 

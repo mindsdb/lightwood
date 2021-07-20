@@ -84,7 +84,6 @@ class TimeseriesSettings:
                 use_previous_target=obj.get('use_previous_target', True),
                 historical_columns=[],
                 nr_predictions=obj.get('nr_predictions', 1)
-
             )
             for setting in obj:
                 timeseries_settings.__setattr__(setting, obj[setting])

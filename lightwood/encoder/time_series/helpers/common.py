@@ -8,13 +8,15 @@ from lightwood.api.dtype import dtype
 
 
 class MinMaxNormalizer:
-    def __init__(self, combination=(), keys=(), factor=1):
+    def __init__(self, combination=(), keys=(), factor=1, original_type=None):
         self.scaler = MinMaxScaler()
         self.single_scaler = MinMaxScaler()  # for non-windowed arrays (when using numerical encoder)
         self.factor = factor
         self.keys = list(keys)  # columns involved in grouped-by subset dataset to normalize
         self.combination = combination  # tuple with values in those columns
         self.abs_mean = None
+        self.original_type = original_type
+        self.output_size = 1
 
     def prepare(self, x):
         if isinstance(x, pd.Series):
@@ -28,6 +30,9 @@ class MinMaxNormalizer:
             if len(x.shape) == 1:
                 x = x.reshape(-1, 1)
 
+        if self.original_type == dtype.array:
+            x = x.astype(float)
+
         x[x == None] = 0
         self.abs_mean = np.mean(np.abs(x))
         self.scaler.fit(x)
@@ -35,8 +40,13 @@ class MinMaxNormalizer:
             self.single_scaler.fit(x[:, -1:])  # fit using non-windowed column data
 
     def encode(self, y):
+        # @TODO: streamline this
+        if self.original_type == dtype.array and isinstance(y, pd.Series):
+            y = np.array(y.tolist())
+
         if not isinstance(y, np.ndarray) and not isinstance(y[0], list):
             y = y.reshape(-1, 1)
+
         return torch.Tensor(self.scaler.transform(y))
 
     def decode(self, y):
@@ -53,10 +63,12 @@ class MinMaxNormalizer:
 
 class CatNormalizer:
     def __init__(self, encoder_class='one_hot'):
+        self.encoder_class = encoder_class
         if encoder_class == 'one_hot':
             self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
         else:
             self.scaler = OrdinalEncoder()
+
         self.unk = "<UNK>"
 
     def prepare(self, x):
@@ -65,6 +77,7 @@ class CatNormalizer:
             for j in i:
                 X.append(j if j is not None else self.unk)
         self.scaler.fit(np.array(X).reshape(-1, 1))
+        self.output_size = len(self.scaler.categories_[0]) if self.encoder_class == 'one_hot' else 1
 
     def encode(self, Y):
         y = np.array([[j if j is not None else self.unk for j in i] for i in Y])
@@ -81,14 +94,14 @@ class CatNormalizer:
         return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
 
 
-def get_group_matches(data, combination, keys):
+def get_group_matches(data, combination):
     """Given a grouped-by combination, return rows of the data that match belong to it. Params:
     data: dict with data to filter and group-by columns info.
     combination: tuple with values to filter by
-    keys: which column does each combination value belong to
-
     return: indexes for rows to normalize, data to normalize
     """
+    keys = data['group_info'].keys()  #  which column does each combination value belong to
+
     if isinstance(data['data'], pd.Series):
         data['data'] = np.vstack(data['data'])
     if not combination:
@@ -120,21 +133,27 @@ def generate_target_group_normalizers(data):
     if data['original_type'] in [dtype.categorical, dtype.binary]:
         normalizers['__default'] = CatNormalizer()
         normalizers['__default'].prepare(data['data'])
+        group_combinations.append('__default')
 
     # numerical normalizers, here we spawn one per each group combination
     else:
+        if data['original_type'] == dtype.array:
+            data['data'] = data['data'].values.reshape(-1, 1).astype(float)
+
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
         for combination in all_group_combinations:
             if combination != ():
                 combination = frozenset(combination)  # freeze so that we can hash with it
-                _, subset = get_group_matches(data, combination, data['group_info'].keys())
+                _, subset = get_group_matches(data, combination)
                 if subset.size > 0:
-                    normalizers[combination] = MinMaxNormalizer(combination=combination, keys=data['group_info'].keys())
+                    normalizers[combination] = MinMaxNormalizer(combination=combination,
+                                                                original_type=data['original_type'],
+                                                                keys=data['group_info'].keys())
                     normalizers[combination].prepare(subset)
                     group_combinations.append(combination)
 
         # ...plus a default one, used at inference time and fitted with all training data
-        normalizers['__default'] = MinMaxNormalizer()
+        normalizers['__default'] = MinMaxNormalizer(original_type=data['original_type'])
         normalizers['__default'].prepare(data['data'])
         group_combinations.append('__default')
 

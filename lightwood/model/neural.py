@@ -16,6 +16,7 @@ from lightwood.helpers.log import log
 from lightwood.model.base import BaseModel
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.model.helpers.default_net import DefaultNet
+from lightwood.model.helpers.ar_net import ArNet
 import torch_optimizer as ad_optim
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from torch.optim.optimizer import Optimizer
@@ -26,7 +27,7 @@ import optuna
 class Neural(BaseModel):
     model: nn.Module
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, fit_on_dev: bool):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool):
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
         self.target = target
@@ -34,6 +35,7 @@ class Neural(BaseModel):
         self.target_encoder = target_encoder
         self.epochs_to_best = 0
         self.fit_on_dev = fit_on_dev
+        self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
     
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
@@ -48,9 +50,11 @@ class Neural(BaseModel):
                     Y = Y.to(self.model.device)
                     Yh = self.model(X)
 
-                    decoded_predictions.extend(self.target_encoder.decode(torch.unsqueeze(Yh, 0)))
+                    Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
+                    Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
 
-                    decoded_real_values.extend(self.target_encoder.decode(torch.unsqueeze(Y, 0)))
+                    decoded_predictions.extend(self.target_encoder.decode(Yh))
+                    decoded_real_values.extend(self.target_encoder.decode(Y))
 
                 self.target_encoder.decode_log = True
                 log_acc = r2_score(decoded_real_values, decoded_predictions)
@@ -208,12 +212,16 @@ class Neural(BaseModel):
 
         log.info(f'Found hyperparameters num_hidden:{self.num_hidden} lr:{self.lr}')
 
-        self.model = DefaultNet(
-            input_size=len(ds_arr[0][0][0]),
-            output_size=len(ds_arr[0][0][1]),
-            num_hidden=self.num_hidden,
-            dropout=0
-        )
+        net_kwargs = {'input_size': len(ds_arr[0][0][0]),
+                      'output_size': len(ds_arr[0][0][1]),
+                      'num_hidden': self.num_hidden,
+                      'dropout': 0}
+
+        if self.net_class == ArNet:
+            net_kwargs['encoder_span'] = train_ds_arr[0].encoder_spans
+            net_kwargs['target_name'] = self.target
+
+        self.model = self.net_class(**net_kwargs)
         optimizer = self._select_optimizer(self.lr)
         criterion = self._select_criterion()
 
@@ -251,14 +259,18 @@ class Neural(BaseModel):
         
         for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
-            Y = Y.to(self.model.device)
             Yh = self.model(X)
+            Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
 
             kwargs = {}
             for dep in self.target_encoder.dependencies:
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
-            decoded_prediction = self.target_encoder.decode(torch.unsqueeze(Yh, 0), **kwargs)
-            decoded_predictions.extend(decoded_prediction)
+            decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
+
+            if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
+                decoded_predictions.extend(decoded_prediction)
+            else:
+                decoded_predictions.append(decoded_prediction)
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf

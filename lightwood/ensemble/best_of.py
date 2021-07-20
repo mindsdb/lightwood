@@ -18,8 +18,9 @@ class BestOf(BaseEnsemble):
         ds = ConcatedEncodedDs(data)
         for idx, model in enumerate(models):
             score_dict = evaluate_accuracy(
-                ds.data_frame[target],
+                ds.data_frame,
                 model(ds)['prediction'],
+                target,
                 accuracy_functions
             )
             avg_score = np.mean(list(score_dict.values()))
