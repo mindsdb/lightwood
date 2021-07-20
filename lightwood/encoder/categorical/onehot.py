@@ -57,7 +57,7 @@ class OneHotEncoder(BaseEncoder):
                     self.index_weights[self._lang.word2index[str(word)]] = 1
             self.index_weights = torch.Tensor(self.index_weights)
 
-
+        self.output_size = self._lang.n_words
         self._prepared = True
 
     def encode(self, column_data):

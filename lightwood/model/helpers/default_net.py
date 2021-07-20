@@ -7,7 +7,14 @@ import numpy as np
 
 
 class DefaultNet(torch.nn.Module):
-    def __init__(self, input_size: int = None, output_size: int = None, shape: list = None, max_params: int = int(3e7), num_hidden: int = 1, dropout: float = 0) -> None:
+    def __init__(self,
+                 input_size: int = None,
+                 output_size: int = None,
+                 shape: list = None,
+                 max_params: int = int(3e7),
+                 num_hidden: int = 1,
+                 dropout: float = 0) -> None:
+
         super(DefaultNet, self).__init__()
         if input_size is not None and output_size is not None:
             self.input_size = input_size

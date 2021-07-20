@@ -55,7 +55,7 @@ def model_analyzer(
     # @ TODO: reimplement time series
     # validation_df = data.validation_df
     # if ts_cfg.is_timeseries:
-    #     validation_df = data.validation_df[data.validation_df['make_predictions'] == True]
+    #     validation_df = data.validation_df[data.validation_df['__mdb_make_predictions'] == True]
     # ... same with test and train dfs
     encoded_data = ConcatedEncodedDs(data)
     data = encoded_data.data_frame
@@ -75,7 +75,7 @@ def model_analyzer(
     is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
                    # and dtype.numeric in typing_info['data_type_dist'].keys())
 
-    is_classification = data_type in (dtype.categorical, dtype.binary, dtype.array)
+    is_classification = data_type in (dtype.categorical, dtype.binary)
                         # dtype.categorical in typing_info['data_type_dist'].keys())
 
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
@@ -237,8 +237,9 @@ def model_analyzer(
     # TODO: calculate acc on other folds?
     # get accuracy metric for validation data
     score_dict = evaluate_accuracy(
-        data[target],
+        data,
         normal_predictions['prediction'],
+        target,
         accuracy_functions
     )
     normal_accuracy = np.mean(list(score_dict.values()))
@@ -255,7 +256,7 @@ def model_analyzer(
         for col in ignorable_input_cols:
             empty_input_predictions[col] = predictor('validate', ignore_columns=[col])  # @TODO: add this param?
             empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
-                data[target],
+                data,
                 empty_input_predictions[col]
             ).values()))
 

@@ -27,7 +27,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self.grouped_by = grouped_by
         self.encoder_class = EncoderRNNNumerical
         self._learning_rate = 0.01
-        self._encoded_vector_size = 128
+        self.output_size = 128
         self._transformer_hidden_size = None
         self._epochs = int(1e5)  # default training epochs
         self._stop_on_n_bad_epochs = 5  # stop training after N epochs where loss is worse than running avg
@@ -53,10 +53,10 @@ class TimeSeriesEncoder(BaseEncoder):
             self._normalizer = DatetimeEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields) * 2  # sinusoidal datetime components
         elif self.original_type in (dtype.float, dtype.integer):
-            self._normalizer = MinMaxNormalizer()
+            self._normalizer = MinMaxNormalizer(original_type=self.original_type)
 
         total_dims = self._n_dims
-        dec_hsize = self._encoded_vector_size
+        dec_hsize = self.output_size
 
         if dependencies:
             for dep_name, dep in dependencies.items():
@@ -65,7 +65,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 if dep_name in self.grouped_by:
                     continue  # we only use group column for indexing and selecting rows
 
-                assert dep['original_type'] in (dtype.categorical, dtype.binary, dtype.integer, dtype.float)
+                assert dep['original_type'] in (dtype.categorical, dtype.binary, dtype.integer, dtype.float, dtype.array)
 
                 if f'__mdb_ts_previous_{self.target}' == dep_name:
                     self.dep_norms[dep_name] = ts_analysis['target_normalizers']
@@ -77,7 +77,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     if dep['original_type'] in (dtype.categorical, dtype.binary):
                         self.dep_norms[dep_name]['__default'] = CatNormalizer()
                     else:
-                        self.dep_norms[dep_name]['__default']  = MinMaxNormalizer()
+                        self.dep_norms[dep_name]['__default']  = MinMaxNormalizer(original_type=self.original_type)
 
                     self.dep_norms[dep_name]['__default'].prepare(dep['data'])
                     self._group_combinations = {'__default': None}
@@ -85,14 +85,14 @@ class TimeSeriesEncoder(BaseEncoder):
                 # add descriptor size to the total encoder output dimensionality
                 if dep['original_type'] in (dtype.categorical, dtype.binary):
                     total_dims += len(self.dep_norms[dep_name]['__default'].scaler.categories_[0])
-                elif dep['original_type'] in  (dtype.integer, dtype.float):
+                elif dep['original_type'] in  (dtype.integer, dtype.float, dtype.array):
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
             self._enc_criterion = nn.MSELoss()
             self._dec_criterion = self._enc_criterion
             self._encoder = self.encoder_class(input_size=total_dims,
-                                               hidden_size=self._encoded_vector_size).to(self.device)
+                                               hidden_size=self.output_size).to(self.device)
         elif self.encoder_class == TransformerEncoder:
             self._enc_criterion = self._masked_criterion
             self._dec_criterion = nn.MSELoss()
@@ -409,7 +409,7 @@ class TimeSeriesEncoder(BaseEncoder):
     def _decode_one(self, hidden, steps):
         """
         Decodes a single time series from its encoded representation.
-        :param hidden: time series embedded representation tensor, with size self._encoded_vector_size
+        :param hidden: time series embedded representation tensor, with size self.output_size
         :param steps: as in decode(), defines how many values to output when reconstructing
         :return: decoded time series list
         """

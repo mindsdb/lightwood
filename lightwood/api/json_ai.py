@@ -64,9 +64,14 @@ def lookup_encoder(col_dtype: str, col_name: str, statistical_analysis: Statisti
             if col_dtype in [dtype.integer, dtype.float]:
                 encoder_dict['dynamic_args']['grouped_by'] = f"{gby}"
                 encoder_dict['object'] = 'TsNumericEncoder'
+            if tss.nr_predictions > 1:
+                encoder_dict['dynamic_args']['grouped_by'] = f"{gby}"
+                encoder_dict['dynamic_args']['timesteps'] = f"{tss.nr_predictions}"
+                encoder_dict['object'] = 'TsArrayNumericEncoder'
         if '__mdb_ts_previous' in col_name:
             encoder_dict['object'] = 'TimeSeriesPlainEncoder'
             encoder_dict['dynamic_args']['original_type'] = f'"{tss.target_type}"'
+            encoder_dict['dynamic_args']['window'] = f'{tss.window}'
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
@@ -104,22 +109,26 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             }
         }]
     else:
-        models = [
-            {
+        models = [{
                 'object': 'Neural',
                 'static_args': {
                     'stop_after': 'problem_definition.seconds_per_model',
-                    'timeseries_settings': 'problem_definition.timeseries_settings'
+                    'timeseries_settings': 'problem_definition.timeseries_settings',
                 },
                 'dynamic_args': {
+                    'target_encoder': 'self.encoders[self.target]',
                     'target': 'self.target',
                     'dtype_dict': 'self.dtype_dict',
                     'input_cols': 'self.input_cols',
-                    'target_encoder': 'self.encoders[self.target]',
+                    'net': f'"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries else f'"ArNet"',
                     'fit_on_dev': True
                 }
-            },
-            {
+
+        }]
+
+    if not problem_definition.timeseries_settings.is_timeseries or \
+            problem_definition.timeseries_settings.nr_predictions <= 1:
+        models.extend([{
                 'object': 'LightGBM',
                 'static_args': {
                     'stop_after': 'problem_definition.seconds_per_model'
@@ -140,7 +149,21 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     'target_encoder': 'self.encoders[self.target]'
                 }
             }
-        ]
+        ])
+    elif problem_definition.timeseries_settings.nr_predictions > 1:
+        models.append({
+            'object': 'LightGBMArray',
+            'static_args': {
+                'stop_after': 'problem_definition.seconds_per_model',
+                'n_ts_predictions': 'problem_definition.timeseries_settings.nr_predictions'
+            },
+            'dynamic_args': {
+                'target': 'self.target',
+                'dtype_dict': 'self.dtype_dict',
+                'input_cols': 'self.input_cols',
+                'fit_on_dev': True
+            }
+        })
 
     output = Output(
         name=target,
@@ -194,7 +217,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'dynamic_args': {
                 'data': 'data',
                 'dtype_dict': 'self.dtype_dict',
-                'target': 'self.target'
+                'target': 'self.target',
+                'mode': 'self.mode'
             }
         }
 
@@ -209,6 +233,9 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'target': 'self.target'
             }
         }
+
+        if problem_definition.timeseries_settings.nr_predictions > 1:
+            output.data_dtype = dtype.array
     else:
         timeseries_analyzer = None
 
@@ -293,6 +320,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'data': 'data',
                 'predictions': 'df',
                 'analysis': 'self.runtime_analyzer',
+                'ts_analysis': 'self.ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
                 'target_name': 'self.target',
                 'target_dtype': 'self.dtype_dict[self.target]',
             }
@@ -311,9 +339,10 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     imports = [
-        'from lightwood.model import Unit',
-        'from lightwood.model import LightGBM',
         'from lightwood.model import Neural',
+        'from lightwood.model import LightGBM',
+        'from lightwood.model import LightGBMArray',
+        'from lightwood.model import Unit',
         'from lightwood.model import Regression',
         'from lightwood.ensemble import BestOf',
         'from lightwood.data import cleaner',

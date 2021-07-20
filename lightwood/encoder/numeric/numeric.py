@@ -15,6 +15,7 @@ class NumericEncoder(BaseEncoder):
         self._abs_mean = None
         self.positive_domain = False
         self.decode_log = False
+        self.output_size = 4 if not self.is_target else 3
 
     def prepare(self, priming_data):
         if self._prepared:

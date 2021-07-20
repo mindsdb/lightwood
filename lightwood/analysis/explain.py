@@ -4,12 +4,14 @@ import numpy as np
 import pandas as pd
 
 from lightwood.analysis.nc.util import get_numerical_conf_range, get_categorical_conf, get_anomalies  #  restore_icp_state, clear_icp_state
+from lightwood.helpers.ts import get_inferred_timestamps, add_tn_conf_bounds
 from lightwood.api.dtype import dtype
+from lightwood.api.types import TimeseriesSettings
 
 
 def explain(data,
             predictions,
-            timeseries_settings,
+            timeseries_settings: TimeseriesSettings,
             analysis,
             target_name,
             target_dtype,
@@ -23,14 +25,30 @@ def explain(data,
             # (Int) ignores anomaly detection for N steps after an
             # initial anomaly triggers the cooldown period;
             # implicitly assumes series are regularly spaced
-            anomaly_cooldown
+            anomaly_cooldown,
+            ts_analysis: dict = None
             ):
 
-    # confidence estimation using calibrated inductive conformal predictors (ICPs)
-    # @TODO: and not quick_predict check
-    insights = pd.DataFrame(columns=['prediction', 'confidence', 'lower', 'upper', 'anomaly'])
+    # @TODO: check not quick_predict
+    data = data.reset_index(drop=True)
+
+    insights = pd.DataFrame()
+    insights['truth'] = data[target_name]
     insights['prediction'] = predictions['prediction']
 
+    if timeseries_settings.is_timeseries:
+
+        if timeseries_settings.group_by:
+            for col in timeseries_settings.group_by:
+                insights[f'group_{col}'] = data[col]
+
+        for col in timeseries_settings.order_by:
+            insights[f'order_{col}'] = data[col]
+
+        for col in timeseries_settings.order_by:
+            insights[f'order_{col}'] = get_inferred_timestamps(insights, col, ts_analysis['deltas'], timeseries_settings)
+
+    # confidence estimation using calibrated inductive conformal predictors (ICPs)
     if analysis['icp']['__mdb_active']:
         icp_X = deepcopy(data)
 
@@ -38,20 +56,16 @@ def explain(data,
         preds = predictions['prediction']
         if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1:
             preds = [p[0] for p in preds]
+
         icp_X[target_name] = preds
 
-        # erase ignorable columns @TODO: reintroduce
+        # erase ignorable columns @TODO: reintroduce?
         # for col in pdef['columns_to_ignore']:
         #     if col in icp_X.columns:
         #         icp_X.pop(col)
 
-        is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
-                       # and dtype.numerical in typing_info['data_type_dist'].keys())
-
         is_categorical = target_dtype in (dtype.binary, dtype.categorical, dtype.array)
-                         # and dtype.categorical in typing_info['data_type_dist'].keys())) and \
-                         # typing_info['data_subtype'] != DATA_SUBTYPES.TAGS
-
+        is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
         is_anomaly_task = is_numerical and timeseries_settings.is_timeseries and anomaly_detection
 
         if (is_numerical or is_categorical) and analysis['icp'].get('__mdb_active', False):
@@ -78,7 +92,7 @@ def explain(data,
 
                 # bounds in time series are only given for the first forecast
                 analysis['icp']['__default'].nc_function.model.prediction_cache = \
-                    [p[0] for p in predictions[target_name]]
+                    [p[0] for p in predictions['prediction']]
                 all_confs = analysis['icp']['__default'].predict(X.values)
 
             elif is_numerical:
@@ -176,5 +190,9 @@ def explain(data,
                                           data[target_name],
                                           cooldown=anomaly_cooldown)
                 insights['anomaly'] = anomalies
+
+            # @TODO: add T+N confidence bounds and disaggregate into rows if nr_predictions > 1
+            if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1 and is_numerical:
+                insights = add_tn_conf_bounds(insights, timeseries_settings)
 
     return insights

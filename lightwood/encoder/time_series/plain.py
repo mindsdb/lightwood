@@ -1,5 +1,6 @@
 import torch
 import pandas as pd
+import numpy as np
 
 from lightwood.encoder.base import BaseEncoder
 from lightwood.api import dtype
@@ -7,7 +8,7 @@ from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNo
 
 
 class TimeSeriesPlainEncoder(BaseEncoder):
-    def __init__(self, stop_after: int, is_target=False, original_type=None):
+    def __init__(self, stop_after: int, window: int, is_target=False, original_type=None):
         """
         Fits a normalizer for a time series previous historical data.
         When encoding, it returns a normalized window of previous data.
@@ -16,6 +17,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         self.stop_after = stop_after
         self.original_type = original_type
         self._normalizer = None
+        self.output_size = window+1
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -24,12 +26,13 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         if self.original_type in (dtype.categorical, dtype.binary):
             self._normalizer = CatNormalizer(encoder_class='ordinal')
         else:
-            self._normalizer = MinMaxNormalizer()
+            self._normalizer = MinMaxNormalizer(original_type=self.original_type)
 
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values
 
         self._normalizer.prepare(priming_data)
+        self.output_size *= self._normalizer.output_size
         self._prepared = True
 
     def encode(self, column_data):

@@ -1,119 +1,103 @@
 import unittest
+import numpy as np
 import pandas as pd
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, balanced_accuracy_score
+from typing import List
 
 from lightwood.api.types import ProblemDefinition
 
+np.random.seed(0)
+
 
 class TestTimeseries(unittest.TestCase):
-    def test_timeseries_regression(self):
-        """
-        Tests a regression dataset and unsupervised anomaly detection
-        """
+
+    def check_ts_prediction_df(self, df: pd.DataFrame, nr_preds: int, orders: List[str]):
+        for idx, row in df.iterrows():
+            assert len(row['prediction']) == nr_preds
+
+            for oby in orders:
+                assert len(row[f'order_{oby}']) == nr_preds
+
+            for t in range(nr_preds):
+                assert row['lower'][t] <= row['prediction'][t] <= row['upper'][t]
+
+            for oby in orders:
+                assert len(row[f'order_{oby}']) == nr_preds
+
+            if row['anomaly']:
+                assert not (row['lower'][0] <= row['truth'] <= row['upper'][0])
+            else:
+                assert row['lower'][0] <= row['truth'] <= row['upper'][0]
+
+    def test_grouped_regression_timeseries(self):
+        """ Test grouped numerical predictions (forecast horizon > 1), covering most of the TS pipeline """
         from lightwood.api.high_level import predictor_from_problem
-        from mindsdb_datasources import FileDS
 
-        datasource = FileDS('tests/data/sunspots.csv')
-        target = 'Sunspots'
+        data = pd.read_csv('tests/data/arrivals.csv')
+        group = 'Country'
+        train = pd.DataFrame(columns=data.columns)
+        test = pd.DataFrame(columns=data.columns)
 
-        predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict(
-            {
-                'target': target,
-                'time_aim': 100,
-                'anomaly_detection': False,
-                'timeseries_settings': {
-                'order_by': ['Month'],
-                'use_previous_target': True,
-                'window': 5
-            },
-        }))
+        train_ratio = 0.8
+        for g in data[group].unique():
+            subframe = data[data[group] == g]
+            length = subframe.shape[0]
+            train = train.append(subframe[:int(length * train_ratio)])
+            test = test.append(subframe[int(length * train_ratio):])
 
-        predictor.learn(datasource.df)
-
-        predictions = predictor.predict(datasource.df)
-
-        # @TODO: Remove later and add asserts for both acc and anomalies
-        print(r2_score(datasource.df[target], predictions['prediction']))
-        print(mean_absolute_error(datasource.df[target], predictions['prediction']))
-        print(mean_squared_error(datasource.df[target], predictions['prediction']))
-
-        import matplotlib.pyplot as plt
-        df = pd.read_csv('tests/data/sunspots.csv')
-        true = df[target].values
-        preds = predictions['prediction'].values
-        plt.plot(true)
-        plt.plot(preds)
-        plt.show()
-
-    def test_grouped_timeseries(self):
-        from lightwood.api.high_level import predictor_from_problem
-        from mindsdb_datasources import FileDS
-
-        datasource = FileDS('tests/data/arrivals.csv')
         target = 'Traffic'
-        predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict({'target': target,
-            'time_aim': 100,
-            'nfolds': 4,
+        nr_preds = 2
+        order_by = 'T'
+
+        predictor = predictor_from_problem(train, ProblemDefinition.from_dict({'target': target,
+            'time_aim': 30,
+            'nfolds': 10,
             'anomaly_detection': True,
             'timeseries_settings': {
-                'order_by': ['T'],
-                'group_by': ['Country'],
                 'use_previous_target': True,
+                'group_by': ['Country'],
+                'nr_predictions': nr_preds,
+                'order_by': [order_by],
                 'window': 5
             },
             }))
 
-        predictor.learn(datasource.df)
-        predictions = predictor.predict(datasource.df)
+        predictor.learn(train)
+        preds = predictor.predict(test)
+        self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
-        # @TODO: Remove later
-        print('R2 score:', r2_score(datasource.df[target], predictions['prediction']))
-        print('MAE:', mean_absolute_error(datasource.df[target], predictions['prediction']))
-        print('MSE:', mean_squared_error(datasource.df[target], predictions['prediction']))
+        # test inferring mode
+        test['__mdb_make_predictions'] = False
+        preds = predictor.predict(test)
+        self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
-        import matplotlib.pyplot as plt
-        df = pd.read_csv('tests/data/arrivals.csv')
-        true = df[target].values
-        preds = predictions['prediction'].values
-        plt.plot(true)
-        plt.plot(preds)
-        plt.show()
+        # Additionally, check timestamps are further into the future than test dates
+        latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
+        for idx, row in preds.iterrows():
+            for timestamp in row[f'order_{order_by}']:
+                assert timestamp > latest_timestamp
 
     def test_time_series_classification(self):
         from lightwood.api.high_level import predictor_from_problem
-        from mindsdb_datasources import FileDS
 
-        datasource = FileDS('tests/data/occupancy.csv')
-        target = 'Occupancy'
+        df = pd.read_csv('tests/data/arrivals.csv')
+        target = 'Traffic'
+        df[target] = df[target] > 100000
 
-        predictor = predictor_from_problem(
-        datasource.df, ProblemDefinition.from_dict({'target': target,
-                'time_aim': 100,
-                'nfolds': 10,
-                'anomaly_detection': False,
-                'timeseries_settings': {
-                    'order_by': ['date'],
-                    'use_previous_target': True,
-                    'window': 10
-                },
-                }))
+        train_idxs = np.random.rand(len(df)) < 0.8
+        train = df[train_idxs]
+        test = df[~train_idxs]
 
-        predictor.learn(datasource.df)
-        predictions = predictor.predict(datasource.df)
+        predictor = predictor_from_problem(df,
+                                           ProblemDefinition.from_dict({'target': target,
+                                                                        'time_aim': 30,
+                                                                        'nfolds': 5,
+                                                                        'anomaly_detection': False,
+                                                                        'timeseries_settings': {
+                                                                            'order_by': ['T'],
+                                                                            'use_previous_target': True,
+                                                                            'window': 5
+                                                                        },
+                                                                        }))
 
-        # @TODO: Remove later
-        print('R2 score:', balanced_accuracy_score(datasource.df[target], predictions['prediction']))
-
-        import matplotlib.pyplot as plt
-        df = pd.read_csv('tests/data/occupancy.csv')
-        true = df[target].values
-        preds = predictions['prediction'].values
-        plt.plot(true)
-        plt.plot(preds)
-        plt.show()
-
-    def test_long_forecasts(self):
-        pass
-
-    def test_stream_predictions(self):
-        pass
+        predictor.learn(train)
+        predictions = predictor.predict(test)
