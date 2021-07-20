@@ -14,19 +14,21 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
     return df[f'order_{col}']
 
 
-def add_tn_conf_bounds(data: pd.DataFrame, tss_args: TimeseriesSettings, target_cols, dtypes):
+def add_tn_conf_bounds(data: pd.DataFrame, tss_args: TimeseriesSettings):
     """
     Add confidence (and bounds if applicable) to t+n predictions, for n>1
         @TODO: active research question: how to guarantee 1-e coverage for t+n, n>1
         for now, we replicate the width and conf obtained for t+1
     """
-    for idx in range(len(data[tss_args.order_by[0]])):
-        for target in target_cols:
-            conf = data[f'{target}_confidence'][idx]
-            data[f'{target}_confidence'][idx] = [conf for _ in range(tss_args.nr_predictions)]
+    for col in ['confidence', 'lower', 'upper']:
+        data[col] = data[col].astype(object)
 
-            if dtypes[target]['numerical']:
-                width = data[f'{target}_confidence_range'][idx][1] - data[f'{target}_confidence_range'][idx][0]
-                data[f'{target}_confidence_range'][idx] = [[pred - width / 2, pred + width / 2] for pred in
-                                                           data[target][idx]]
+    for idx, row in data.iterrows():
+        data['confidence'].iloc[idx] = [row['confidence'] for _ in range(tss_args.nr_predictions)]
+
+        preds = row['prediction']
+        width = row['upper'] - row['lower']
+        data['lower'].iloc[idx] = [pred - width / 2 for pred in preds]
+        data['upper'].iloc[idx] = [pred + width / 2 for pred in preds]
+
     return data

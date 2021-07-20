@@ -29,13 +29,24 @@ def explain(data,
             ts_analysis: dict = None
             ):
 
-    # confidence estimation using calibrated inductive conformal predictors (ICPs)
     # @TODO: check not quick_predict
     data = data.reset_index(drop=True)
-    insights = pd.DataFrame(columns=['prediction', 'confidence', 'lower', 'upper', 'truth'])
-    insights['prediction'] = predictions['prediction']
-    insights['truth'] = data[target_name]
 
+    insights = pd.DataFrame()
+    insights['truth'] = data[target_name]
+    insights['prediction'] = predictions['prediction']
+
+    if timeseries_settings.is_timeseries:
+        for col in timeseries_settings.group_by:
+            insights[f'group_{col}'] = data[col]
+
+        for col in timeseries_settings.order_by:
+            insights[f'order_{col}'] = data[col]
+
+        for col in timeseries_settings.order_by:
+            insights[f'order_{col}'] = get_inferred_timestamps(insights, col, ts_analysis['deltas'], timeseries_settings)
+
+    # confidence estimation using calibrated inductive conformal predictors (ICPs)
     if analysis['icp']['__mdb_active']:
         icp_X = deepcopy(data)
 
@@ -43,20 +54,16 @@ def explain(data,
         preds = predictions['prediction']
         if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1:
             preds = [p[0] for p in preds]
+
         icp_X[target_name] = preds
 
-        # erase ignorable columns @TODO: reintroduce
+        # erase ignorable columns @TODO: reintroduce?
         # for col in pdef['columns_to_ignore']:
         #     if col in icp_X.columns:
         #         icp_X.pop(col)
 
-        is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
-                       # and dtype.numerical in typing_info['data_type_dist'].keys())
-
         is_categorical = target_dtype in (dtype.binary, dtype.categorical, dtype.array)
-                         # and dtype.categorical in typing_info['data_type_dist'].keys())) and \
-                         # typing_info['data_subtype'] != DATA_SUBTYPES.TAGS
-
+        is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
         is_anomaly_task = is_numerical and timeseries_settings.is_timeseries and anomaly_detection
 
         if (is_numerical or is_categorical) and analysis['icp'].get('__mdb_active', False):
@@ -182,20 +189,8 @@ def explain(data,
                                           cooldown=anomaly_cooldown)
                 insights['anomaly'] = anomalies
 
-    if timeseries_settings.is_timeseries:
-        for col in timeseries_settings.order_by:
-            insights[f'order_{col}'] = data[col]
-        for col in timeseries_settings.group_by:
-            insights[f'group_{col}'] = data[col]
-
-        for col in timeseries_settings.order_by:
-            insights[f'order_{col}'] = get_inferred_timestamps(insights,
-                                                               col,
-                                                               ts_analysis['deltas'],
-                                                               timeseries_settings)
-
-        # @TODO: add T+N confidence bounds and disaggregate into rows if nr_predictions > 1
-        #if timeseries_settings.nr_predictions > 1:
-        #    insights = add_tn_conf_bounds(insights, timeseries_settings)
+            # @TODO: add T+N confidence bounds and disaggregate into rows if nr_predictions > 1
+            if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1 and is_numerical:
+                insights = add_tn_conf_bounds(insights, timeseries_settings)
 
     return insights

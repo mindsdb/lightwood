@@ -10,16 +10,21 @@ class TestTimeseries(unittest.TestCase):
 
     def check_ts_prediction_df(self, df: pd.DataFrame, nr_preds: int, orders: List[str]):
         for idx, row in df.iterrows():
-            assert row['lower'] <= row['prediction'][0] <= row['upper']
             assert len(row['prediction']) == nr_preds
 
             for oby in orders:
                 assert len(row[f'order_{oby}']) == nr_preds
 
+            for t in range(nr_preds):
+                assert row['lower'][t] <= row['prediction'][t] <= row['upper'][t]
+
+            for oby in orders:
+                assert len(row[f'order_{oby}']) == nr_preds
+
             if row['anomaly']:
-                assert not (row['lower'] <= row['truth'] <= row['upper'])
+                assert not (row['lower'][0] <= row['truth'] <= row['upper'][0])
             else:
-                assert row['lower'] <= row['truth'] <= row['upper']
+                assert row['lower'][0] <= row['truth'] <= row['upper'][0]
 
     def test_grouped_regression_timeseries(self):
         """ Test grouped numerical predictions (forecast horizon > 1), covering most of the TS pipeline """
