@@ -157,7 +157,7 @@ class LightGBM(BaseModel):
 
         # Train the models
         log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
-        self.params['num_iterations'] = self.num_iterations
+        self.params['num_iterations'] = int(self.num_iterations)
 
         self.params['early_stopping_rounds'] = min(12, int(self.num_iterations / 8))
 
@@ -182,7 +182,7 @@ class LightGBM(BaseModel):
         dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'])
 
         log.info(f'Updating lightgbm model with {iterations} iterations')
-        self.params['num_iterations'] = iterations
+        self.params['num_iterations'] = int(iterations)
         self.model = lightgbm.train(self.params, train_dataset, valid_sets=[dev_dataset, train_dataset], valid_names=['dev', 'retrain'], verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
         
