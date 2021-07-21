@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Union
 from sktime.forecasting.theta import ThetaForecaster
+from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.ets import AutoETS
+from sktime.forecasting.naive import NaiveForecaster
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
@@ -19,7 +22,7 @@ class SkTime(BaseModel):
         super().__init__(stop_after)
         self.target = target
         dtype_dict[target] = dtype.float
-        self.model_class = ThetaForecaster
+        self.model_class = AutoARIMA
         self.models = {}
         self.n_ts_predictions = n_ts_predictions
         self.ts_analysis = ts_analysis
@@ -31,8 +34,9 @@ class SkTime(BaseModel):
         log.info('Started fitting sktime forecaster for array prediction')
 
         all_folds = ConcatedEncodedDs(ds_arr)
-        data = {'data': all_folds.data_frame[self.target].reset_index(drop=True),
-                'group_info': {gcol: all_folds.data_frame[gcol].tolist()
+        df = all_folds.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
+        data = {'data': df[self.target],
+                'group_info': {gcol: df[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
         for group in self.ts_analysis['group_combinations']:
@@ -59,21 +63,12 @@ class SkTime(BaseModel):
             if self.grouped_by == ['__default']:
                 break
 
-        # index = [row[-1][0][-1] for idx, row in ds_arr[fold].data_frame[['T']].iterrows()]
-        # d = pd.Series(ds_arr[fold].data_frame[self.target].values, index=pd.Int64Index(index))
-        # d = d.sort_index(ascending=True)
-        # self.model.fit(d)
-
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs]) -> pd.DataFrame:
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
                            columns=['prediction'],
                            dtype=object)
-
-        # print(ydf)
-
-        # ydf['prediction'] = self.model.predict(ds.data_frame[self.target].index).tolist()
 
         data = {'data': ds.data_frame[self.target].reset_index(drop=True),
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
@@ -94,22 +89,14 @@ class SkTime(BaseModel):
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
                 cutoff = self.cutoff_index[group]
-                # ydf['prediction'][series_idxs] = self.models[group].predict(np.arange(cutoff,
-                #                                                                       cutoff+self.n_ts_predictions)
-                #                                                             ).tolist()
 
                 for idx, _ in enumerate(series.iteritems()):
                     ydf['prediction'].iloc[series_idxs[idx]] = self.models[group].predict(
-                        np.arange(idx+cutoff,
-                                  idx+cutoff+self.n_ts_predictions)).tolist()
+                        np.arange(idx,  # +cutoff
+                                  idx+self.n_ts_predictions)).tolist()  # +cutoff
 
             if self.grouped_by == ['__default']:
                 break
-            # ydf[f'prediction_{timestep}'] = self.models[timestep](ds)
 
-        # ydf['prediction'] = ydf.values.tolist()
-
-        # print(ydf[['prediction']])
-        # print(ydf[['prediction']].shape)
 
         return ydf[['prediction']]

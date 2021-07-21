@@ -299,7 +299,9 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         },
         splitter={
             'object': 'splitter',
-            'static_args': {},
+            'static_args': {
+                'tss': 'problem_definition.timeseries_settings'
+            },
             'dynamic_args': {
                 'data': 'data',
                 'k': 'nfolds'
