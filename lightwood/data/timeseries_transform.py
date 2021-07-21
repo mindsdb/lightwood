@@ -70,6 +70,9 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
                 except ValueError:
                     raise ValueError(f'Failed to order based on column: "{col}" due to faulty value: {row[col]}')
 
+    for oby in tss.order_by:
+        original_df[f'__mdb_original_{oby}'] = original_df[oby]
+
     if len(gb_arr) > 0:
         df_arr = []
         for _, df in original_df.groupby(gb_arr):
