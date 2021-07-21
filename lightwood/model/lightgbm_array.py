@@ -31,7 +31,18 @@ class LightGBMArray(BaseModel):
             if timestep > 0:
                 for fold in range(len(ds_arr)):
                     ds_arr[fold].data_frame[self.target] = ds_arr[fold].data_frame[f'{self.target}_timestep_{timestep}']
-            self.models[timestep].fit(ds_arr) # @TODO: this call should be parallelized
+            self.models[timestep].fit(ds_arr)  # @TODO: this call could be parallelized
+
+    def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
+        log.info('Updating array of LGBM models...')
+
+        for timestep in range(self.n_ts_predictions):
+            if timestep > 0:
+                for data in train_data, dev_data:
+                    for fold in range(len(data)):
+                        data[fold].data_frame[self.target] = data[fold].data_frame[f'{self.target}_timestep_{timestep}']
+
+            self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs]) -> pd.DataFrame:
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)

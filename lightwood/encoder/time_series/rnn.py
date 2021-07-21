@@ -1,5 +1,6 @@
 from math import gcd
 from typing import List
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -322,26 +323,28 @@ class TimeSeriesEncoder(BaseEncoder):
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if isinstance(column_data, pd.Series):
-            column_data = column_data.values
+            data = deepcopy(column_data.values)  # get a copy to avoid modifying the actual data frame
+        else:
+            data = column_data
 
-        for i in range(len(column_data)):
-            if not isinstance(column_data[i][0], list):
-                column_data[i] = [column_data[i]]  # add dimension for 1D timeseries
+        for i in range(len(data)):
+            if not isinstance(data[i][0], list):
+                data[i] = [data[i]]  # add dimension for 1D timeseries
 
         # include autoregressive target data
         ptd = []
         if dependency_data is not None:  #  and len(dependency_data) > 0:
-            for dep, data in dependency_data.items():
+            for dep, dep_data in dependency_data.items():
                 if dep in self.grouped_by:
                     continue
                 # normalize numerical target per group-by
                 if self._target_type in (dtype.integer, dtype.float):
                     dep_data = {
                         'group_info': {group: dependency_data[group] for group in self.grouped_by},
-                        'data': data
+                        'data': dep_data
                     }
-                    tensor = torch.zeros((len(data), len(data[0]), 1)).to(self.device)
-                    all_idxs = set(range(len(data)))
+                    tensor = torch.zeros((len(dep_data), len(dep_data[0]), 1)).to(self.device)
+                    all_idxs = set(range(len(dep_data)))
 
                     for combination in [c for c in self._group_combinations if c != '__default']:
                         normalizer = self.dep_norms[dep].get(frozenset(combination), None)
@@ -355,14 +358,14 @@ class TimeSeriesEncoder(BaseEncoder):
                     # encode all remaining rows (not belonging to any grouped combination) with default normalizer
                     if all_idxs:
                         default_norm = self.dep_norms[dep]['__default']
-                        subset = [data[idx] for idx in all_idxs]
+                        subset = [dep_data[idx] for idx in all_idxs]
                         tensor[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
                         tensor[torch.isnan(tensor)] = 0.0
 
                 # normalize categorical target
                 else:
                     normalizer = self.dep_norms[dep]['__default']
-                    tensor = normalizer.encode(data)
+                    tensor = normalizer.encode(dep_data)
                     tensor[torch.isnan(tensor)] = 0.0
 
                 ptd.append(tensor)
@@ -370,7 +373,7 @@ class TimeSeriesEncoder(BaseEncoder):
         ret = []
         next = []
 
-        for i, val in enumerate(column_data):
+        for i, val in enumerate(data):
             if get_next_count is None:
                 if dependency_data is not None and len(dependency_data) > 0:
                     encoded = self._encode_one(val, previous=[values[i] for values in ptd])

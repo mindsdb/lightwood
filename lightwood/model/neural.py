@@ -163,12 +163,10 @@ class Neural(BaseModel):
         scaler = GradScaler()
         self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 20))
         
-
-        if False:
-            time_for_trials = self.stop_after / 2
-            nr_trails = 20
-            time_per_trial = time_for_trials / nr_trails
-
+        time_for_trials = self.stop_after / 2
+        nr_trails = 20
+        time_per_trial = time_for_trials / nr_trails
+        if time_per_trial > 5:
             def objective(trial):
                 log.debug(f'Running trial in max {time_per_trial} seconds')
                 # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
@@ -184,6 +182,7 @@ class Neural(BaseModel):
                 optimizer = self._select_optimizer(lr)
                 criterion = self._select_criterion()
                 
+                # @TODO Donwscale based on training time
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[0:int(len(train_ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
                 dev_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[int(len(train_ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
                 try:
@@ -232,7 +231,7 @@ class Neural(BaseModel):
                 optimizer = self._select_optimizer(0.005)
                 stop_after = (self.stop_after / 2) * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
 
-                self.model, epoch_to_best_model, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
+                self.model, epoch_to_best_model, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
 
                 self.epochs_to_best += epoch_to_best_model
 
@@ -240,7 +239,7 @@ class Neural(BaseModel):
         if self.fit_on_dev:
             self.partial_fit(dev_ds_arr, train_ds_arr)
         self._final_tuning(dev_ds_arr)
-    
+
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
         train_ds = ConcatedEncodedDs(train_data)
@@ -251,7 +250,7 @@ class Neural(BaseModel):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=self.epochs_to_best)
+        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=max(1, int(self.epochs_to_best / 3)))
     
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
