@@ -7,10 +7,12 @@ from lightwood.data.encoded_ds import EncodedDs
 class BaseEnsemble:
     data: List[EncodedDs]
     models: List[BaseModel]
+    best_index: int
 
     def __init__(self, target, models: List[BaseModel], data: List[EncodedDs]) -> None:
         self.data = data
         self.models = models
+        self.best_index = 0
         
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         raise NotImplementedError()

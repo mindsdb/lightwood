@@ -14,7 +14,8 @@ class BestOf(BaseEnsemble):
     def __init__(self, target, models: List[BaseModel], data: List[EncodedDs], accuracy_functions) -> None:
         super().__init__(target, models, data)
         # @TODO: Need some shared accuracy functionality to determine model selection here
-        best_score = -pow(2, 32)
+        self.maximize = False if 'evaluate_array_accuracy' in accuracy_functions else True
+        best_score = -pow(2, 32) if self.maximize else pow(2, 32)
         ds = ConcatedEncodedDs(data)
         for idx, model in enumerate(models):
             score_dict = evaluate_accuracy(
@@ -25,7 +26,7 @@ class BestOf(BaseEnsemble):
             )
             avg_score = np.mean(list(score_dict.values()))
             log.info(f'Model {type(model).__name__} obtained a best-of evaluation score of {round(avg_score,4)}')
-            if avg_score > best_score:
+            if self.improves(avg_score, best_score, accuracy_functions):
                 best_score = avg_score
                 self.best_index = idx
 
@@ -33,3 +34,6 @@ class BestOf(BaseEnsemble):
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         return self.models[self.best_index](ds)
+
+    def improves(self, new, old, functions):
+        return new > old if self.maximize else new < old
