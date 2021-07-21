@@ -4,7 +4,6 @@ from typing import List, Union
 
 import numpy as np
 import pandas as pd
-from numpy.lib.stride_tricks import sliding_window_view
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error
 
 
