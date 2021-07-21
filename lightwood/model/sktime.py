@@ -32,17 +32,32 @@ class SkTime(BaseModel):
 
         all_folds = ConcatedEncodedDs(ds_arr)
         data = {'data': all_folds.data_frame[self.target].reset_index(drop=True),
-                'group_info': {gcol: all_folds.data_frame[gcol].tolist() for gcol in self.grouped_by}}
+                'group_info': {gcol: all_folds.data_frame[gcol].tolist()
+                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
         for group in self.ts_analysis['group_combinations']:
             self.models[group] = self.model_class()
-            series_idxs, series_data = get_group_matches(data, group)
+
+            if self.grouped_by == ['__default']:
+                series_idxs = data['data'].index
+                series_data = data['data'].values
+            else:
+                series_idxs, series_data = get_group_matches(data, group)
+
             if series_data.size > 0:
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
-                self.models[group].fit(series)
+                try:
+                    self.models[group].fit(series)
+                except ValueError:
+                    self.models[group] = self.model_class(deseasonalize=False)
+                    self.models[group].fit(series)
+
                 self.cutoff_index[group] = len(series)
+
+            if self.grouped_by == ['__default']:
+                break
 
         # index = [row[-1][0][-1] for idx, row in ds_arr[fold].data_frame[['T']].iterrows()]
         # d = pd.Series(ds_arr[fold].data_frame[self.target].values, index=pd.Int64Index(index))
@@ -61,12 +76,19 @@ class SkTime(BaseModel):
         # ydf['prediction'] = self.model.predict(ds.data_frame[self.target].index).tolist()
 
         data = {'data': ds.data_frame[self.target].reset_index(drop=True),
-                'group_info': {gcol: ds.data_frame[gcol].tolist() for gcol in self.grouped_by}}
+                'group_info': {gcol: ds.data_frame[gcol].tolist()
+                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
         # all_idxs = list(range(length))  # @TODO: substract, and assign empty predictions to remainder
 
         for group in self.ts_analysis['group_combinations']:
-            series_idxs, series_data = get_group_matches(data, group)
+
+            if self.grouped_by == ['__default']:
+                series_idxs = data['data'].index
+                series_data = data['data'].values
+            else:
+                series_idxs, series_data = get_group_matches(data, group)
+
             if series_data.size > 0:
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
                 series = series.sort_index(ascending=True)
@@ -80,6 +102,9 @@ class SkTime(BaseModel):
                     ydf['prediction'].iloc[series_idxs[idx]] = self.models[group].predict(
                         np.arange(idx+cutoff,
                                   idx+cutoff+self.n_ts_predictions)).tolist()
+
+            if self.grouped_by == ['__default']:
+                break
             # ydf[f'prediction_{timestep}'] = self.models[timestep](ds)
 
         # ydf['prediction'] = ydf.values.tolist()
