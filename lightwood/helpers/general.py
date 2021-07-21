@@ -71,4 +71,5 @@ def evaluate_array_accuracy(
         aggregate += mean_absolute_error(predictions[i][:valid_horizon],
                                          true_values[i][:valid_horizon])
 
-    return aggregate / len(predictions)
+    return len(predictions) / aggregate   # reciprocal to conform with "higher score -> better predictor"
+
