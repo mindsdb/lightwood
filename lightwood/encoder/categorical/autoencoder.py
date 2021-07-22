@@ -26,6 +26,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.stop_after = stop_after
         # @TODO stop using instead of ONEHOT !!!@!
         self.is_nn_encoder = True
+        self.output_size = None
 
     def _train_callback(self, error, real_buff, predicted_buff):
         log.info(f'{self.name} reached a loss of {error} while training !')
@@ -87,6 +88,7 @@ class CategoricalAutoEncoder(BaseEncoder):
             self.decoder = torch.nn.Sequential(*modules[2:3]).eval()
             log.info('Categorical autoencoder ready')
 
+        self.output_size = self.onehot_encoder._lang.n_words
         self._prepared = True
 
     def encode(self, column_data):
