@@ -339,7 +339,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     continue
                 # normalize numerical target per group-by
                 if self._target_type in (dtype.integer, dtype.float):
-                    dep_data = {
+                    dep_info = {
                         'group_info': {group: dependency_data[group] for group in self.grouped_by},
                         'data': dep_data
                     }
@@ -350,7 +350,7 @@ class TimeSeriesEncoder(BaseEncoder):
                         normalizer = self.dep_norms[dep].get(frozenset(combination), None)
                         if normalizer is None:
                             normalizer = self.dep_norms[dep]['__default']
-                        idxs, subset = get_group_matches(dep_data, normalizer.combination)
+                        idxs, subset = get_group_matches(dep_info, normalizer.combination)
                         if idxs:
                             tensor[idxs, :, :] = torch.Tensor(normalizer.encode(subset)).unsqueeze(-1).to(self.device)
                             all_idxs -= set(idxs)
