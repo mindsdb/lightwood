@@ -9,6 +9,7 @@ class MultiHotEncoder(BaseEncoder):
         super().__init__(is_target)
         self._binarizer = MultiLabelBinarizer()
         self._seen = set()
+        self.output_size = None
 
     @staticmethod
     def _clean_col_data(column_data):
@@ -16,13 +17,14 @@ class MultiHotEncoder(BaseEncoder):
         column_data = [ [str(x) for x in arr] for arr in column_data]
         return column_data
 
-    def prepare(self, column_data, max_dimensions=100):
-        column_data = self._clean_col_data(column_data)
-        self._binarizer.fit(column_data + [('None')])
-        for arr in column_data:
+    def prepare(self, priming_data, max_dimensions=100):
+        priming_data = self._clean_col_data(priming_data)
+        self._binarizer.fit(priming_data + [('None')])
+        for arr in priming_data:
             for x in arr:
                 self._seen.add(x)
         self._prepared = True
+        self.output_size = len(self.encode(priming_data[0:1])[0])
 
     def encode(self, column_data):
         column_data = self._clean_col_data(column_data)
