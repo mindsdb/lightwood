@@ -8,7 +8,7 @@ from lightwood.encoder.time_series.helpers.common import get_group_matches, gene
 def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str) -> (Dict, Dict):
     info = {
         'original_type': dtype_dict[target],
-        'data': data[target]
+        'data': data[target].values
     }
     if timeseries_settings.group_by is not None:
         info['group_info'] = {gcol: data[gcol].tolist() for gcol in timeseries_settings.group_by}  # group col values

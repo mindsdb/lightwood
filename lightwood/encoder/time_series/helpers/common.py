@@ -17,6 +17,8 @@ class MinMaxNormalizer:
     def prepare(self, x: np.ndarray) -> None:
         if isinstance(x[0], list):
             x = np.vstack(x)
+        if len(x.shape) < 2:
+            x = np.expand_dims(x, axis=1)
 
         x = x.astype(float)
         x[x == None] = 0
@@ -26,6 +28,8 @@ class MinMaxNormalizer:
     def encode(self, y: np.ndarray) -> torch.Tensor:
         if isinstance(y[0], list):
             y = np.vstack(y)
+        if len(y.shape) < 2:
+            y = np.expand_dims(y, axis=1)
 
         shape = y.shape
         y = y.astype(float).reshape(-1, self.scaler.n_features_in_)
