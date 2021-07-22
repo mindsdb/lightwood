@@ -9,6 +9,11 @@ class TestBasic(unittest.TestCase):
 
         # call: Go with dataframes
         datasource = FileDS('tests/data/boston.csv')
+        
+        # import json
+        # from lightwood.api.high_level import json_ai_from_problem
+        # json.dump(json_ai_from_problem(datasource.df, ProblemDefinition.from_dict({'target': 'MEDV', 'time_aim': 200})).to_dict(), open('AI.json', 'w'))
+
         predictor = predictor_from_problem(datasource.df, ProblemDefinition.from_dict({'target': 'MEDV', 'time_aim': 200}))
         predictor.learn(datasource.df)
 

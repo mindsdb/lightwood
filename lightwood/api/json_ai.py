@@ -34,14 +34,12 @@ def lookup_encoder(col_dtype: str, col_name: str, statistical_analysis: Statisti
 
     encoder_dict = {
         'object': encoder_lookup[col_dtype],
-        'static_args': {},
         'dynamic_args': {}
     }
 
     if col_dtype == dtype.categorical and len(statistical_analysis.histograms) < 100:
         encoder_dict = {
             'object': 'OneHotEncoder',
-            'static_args': {},
             'dynamic_args': {}
         }
 
@@ -51,7 +49,7 @@ def lookup_encoder(col_dtype: str, col_name: str, statistical_analysis: Statisti
             encoder_dict['object'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
-                encoder_dict['static_args'] = {'target_class_distribution': 'statistical_analysis.target_class_distribution'}
+                encoder_dict['dynamic_args'] = {'target_class_distribution': '$statistical_analysis.target_class_distribution'}
 
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
@@ -75,10 +73,10 @@ def lookup_encoder(col_dtype: str, col_name: str, statistical_analysis: Statisti
 
     # Set arguments for the encoder
     if encoder_dict['object'] == 'PretrainedLangEncoder' and not is_target:
-        encoder_dict['static_args']['output_type'] = 'output.data_dtype'
+        encoder_dict['dynamic_args']['output_type'] = '$output.data_dtype'
 
     if encoder_dict['object'] in trainable_encoders:
-        encoder_dict['static_args']['stop_after'] = 'problem_definition.seconds_per_encoder'
+        encoder_dict['dynamic_args']['stop_after'] = '$problem_definition.seconds_per_encoder'
 
     if is_target_predicting_encoder:
         encoder_dict['dynamic_args']['embed_mode'] = 'False'
@@ -101,27 +99,23 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     if is_target_predicting_encoder:
         models = [{
             'object': 'Unit',
-            'static_args': {
-                'stop_after': 'problem_definition.seconds_per_model'
-            },
             'dynamic_args': {
-                'target_encoder': 'self.encoders[self.target]'
+                'target_encoder': 'self.encoders[self.target]',
+                'stop_after': '$problem_definition.seconds_per_model'
             }
         }]
     else:
         models = [{
                 'object': 'Neural',
-                'static_args': {
-                    'stop_after': 'problem_definition.seconds_per_model',
-                    'timeseries_settings': 'problem_definition.timeseries_settings',
-                },
                 'dynamic_args': {
                     'target_encoder': 'self.encoders[self.target]',
                     'target': 'self.target',
                     'dtype_dict': 'self.dtype_dict',
                     'input_cols': 'self.input_cols',
                     'net': f'"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries else f'"ArNet"',
-                    'fit_on_dev': True
+                    'fit_on_dev': True,
+                    'stop_after': '$problem_definition.seconds_per_model',
+                    'timeseries_settings': '$problem_definition.timeseries_settings',
                 }
 
         }]
@@ -130,10 +124,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             problem_definition.timeseries_settings.nr_predictions <= 1:
         models.extend([{
                 'object': 'LightGBM',
-                'static_args': {
-                    'stop_after': 'problem_definition.seconds_per_model'
-                },
                 'dynamic_args': {
+                    'stop_after': '$problem_definition.seconds_per_model',
                     'target': 'self.target',
                     'dtype_dict': 'self.dtype_dict',
                     'input_cols': 'self.input_cols',
@@ -142,10 +134,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             },
             {
                 'object': 'Regression',
-                'static_args': {
-                    'stop_after': 'problem_definition.seconds_per_model'
-                },
                 'dynamic_args': {
+                    'stop_after': '$problem_definition.seconds_per_model',
                     'target_encoder': 'self.encoders[self.target]'
                 }
             }
@@ -153,24 +143,20 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     elif problem_definition.timeseries_settings.nr_predictions > 1:
         models.extend([{
             'object': 'LightGBMArray',
-            'static_args': {
-                'stop_after': 'problem_definition.seconds_per_model',
-                'n_ts_predictions': 'problem_definition.timeseries_settings.nr_predictions'
-            },
             'dynamic_args': {
                 'target': 'self.target',
                 'dtype_dict': 'self.dtype_dict',
                 'input_cols': 'self.input_cols',
-                'fit_on_dev': True
+                'fit_on_dev': True,
+                'stop_after': '$problem_definition.seconds_per_model',
+                'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions'
             }
         },
             {
             'object': 'SkTime',
-            'static_args': {
-                'stop_after': 'problem_definition.seconds_per_model',
-                'n_ts_predictions': 'problem_definition.timeseries_settings.nr_predictions'
-            },
             'dynamic_args': {
+                'stop_after': '$problem_definition.seconds_per_model',
+                'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
                 'target': 'self.target',
                 'dtype_dict': 'self.dtype_dict',
                 'ts_analysis': 'self.ts_analysis'
@@ -185,10 +171,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         models=models,
         ensemble={
             'object': 'BestOf',
-            'static_args': {
-                'accuracy_functions': 'accuracy_functions'
-            },
             'dynamic_args': {
+                'accuracy_functions': '$accuracy_functions',
                 'target': 'self.target',
                 'data': 'test_data',
                 'models': 'self.models'
@@ -224,10 +208,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     if problem_definition.timeseries_settings.is_timeseries:
         timeseries_transformer = {
             'object': 'transform_timeseries',
-            'static_args': {
-                'timeseries_settings': 'problem_definition.timeseries_settings'
-            },
             'dynamic_args': {
+                'timeseries_settings': '$problem_definition.timeseries_settings',
                 'data': 'data',
                 'dtype_dict': 'self.dtype_dict',
                 'target': 'self.target',
@@ -237,10 +219,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
         timeseries_analyzer = {
             'object': 'timeseries_analyzer',
-            'static_args': {
-                'timeseries_settings': 'problem_definition.timeseries_settings'
-            },
             'dynamic_args': {
+                'timeseries_settings': '$problem_definition.timeseries_settings',
                 'data': 'data',
                 'dtype_dict': 'self.dtype_dict',
                 'target': 'self.target'
@@ -281,12 +261,10 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     return JsonAI(
         cleaner={
             'object': 'cleaner',
-            'static_args': {
-                'pct_invalid': 'problem_definition.pct_invalid',
-                'ignore_features': 'problem_definition.ignore_features',
-                'identifiers': 'identifiers',
-            },
             'dynamic_args': {
+                'pct_invalid': '$problem_definition.pct_invalid',
+                'ignore_features': '$problem_definition.ignore_features',
+                'identifiers': '$identifiers',
                 'data': 'data',
                 'dtype_dict': 'self.dtype_dict',
                 'target': 'self.target',
@@ -295,22 +273,18 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         },
         splitter={
             'object': 'splitter',
-            'static_args': {
-                'tss': 'problem_definition.timeseries_settings'
-            },
             'dynamic_args': {
+                'tss': '$problem_definition.timeseries_settings',
                 'data': 'data',
                 'k': 'nfolds'
             }
         },
         analyzer={
             'object': 'model_analyzer',
-            'static_args': {
-                'stats_info': 'statistical_analysis',
-                'ts_cfg': 'problem_definition.timeseries_settings',
-                'accuracy_functions': 'accuracy_functions'
-            },
             'dynamic_args': {
+                'stats_info': '$statistical_analysis',
+                'ts_cfg': '$problem_definition.timeseries_settings',
+                'accuracy_functions': '$accuracy_functions',
                 'predictor': 'self.ensemble',
                 'data': 'test_data',
                 'target': 'self.target',
@@ -323,15 +297,13 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
         explainer={
             'object': 'explain',
-            'static_args': {
-                'timeseries_settings': 'problem_definition.timeseries_settings',
-                'positive_domain': 'problem_definition.positive_domain',
-                'fixed_confidence': 'problem_definition.fixed_confidence',
-                'anomaly_detection': 'problem_definition.anomaly_detection',
-                'anomaly_error_rate': 'problem_definition.anomaly_error_rate',
-                'anomaly_cooldown': 'problem_definition.anomaly_cooldown'
-            },
             'dynamic_args': {
+                'timeseries_settings': '$problem_definition.timeseries_settings',
+                'positive_domain': '$problem_definition.positive_domain',
+                'fixed_confidence': '$problem_definition.fixed_confidence',
+                'anomaly_detection': '$problem_definition.anomaly_detection',
+                'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
+                'anomaly_cooldown': '$problem_definition.anomaly_cooldown',
                 'data': 'data',
                 'predictions': 'df',
                 'analysis': 'self.runtime_analyzer',
