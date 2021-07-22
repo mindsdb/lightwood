@@ -1,12 +1,35 @@
 from lightwood.api.types import JsonAI
 
 
+def is_allowed(v):
+    for t in [bool, str]:
+        if isinstance(v, t):
+            return True
+            
+    if isinstance(v, dict):
+        for k in v:
+            ka = is_allowed(k)
+            ma = is_allowed(v[k])
+            if not ka or not ma:
+                return False
+        return True
+
+    if isinstance(v, list):
+        for m in v:
+            ma = is_allowed(m)
+            if not ma:
+                return False
+        return True
+
+    return False
+
 def call(entity: dict, json_ai: JsonAI) -> str:
-    dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items() if not str(v).startswith('$')]
+    dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items() if not str(v).startswith('$') and is_allowed(v)]
 
     static_args = []
-    for k, v in entity['static_args'].items():
-        if v.startswith('$'):
+    for k, v in entity['dynamic_args'].items():
+        if str(v).startswith('$'):
+            v = str(v).lstrip('$')
             val = json_ai
             for item in v.split('.'):
                 val = val.__getattribute__(item)
