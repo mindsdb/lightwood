@@ -14,6 +14,10 @@ class DatetimeEncoder(BaseEncoder):
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']
         self.constants = {'year': 3000.0, 'month': 12.0, 'weekday': 7.0,
                           'hour': 24.0, 'minute': 60.0, 'second': 60.0}
+        if self.sinusoidal:
+            self.output_size = 2
+        else:
+            self.output_size = 7
 
     def prepare(self, priming_data):
         if self._prepared:
