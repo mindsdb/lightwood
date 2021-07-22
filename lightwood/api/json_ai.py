@@ -164,10 +164,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             }
         ])
 
-    # @TODO: Test, remove later
-    # models = [models[-1]]
-    # print(models)
-
     output = Output(
         name=target,
         data_dtype=type_information.dtypes[target],
