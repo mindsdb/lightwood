@@ -78,7 +78,7 @@ def explain(data,
             # only one normalizer, even if it's a grouped time series task
             normalizer = analysis['icp']['__default'].nc_function.normalizer
             if normalizer:
-                normalizer.prediction_cache = analysis['prediction'].get(f'{target_name}_selfaware_scores', None)
+                normalizer.prediction_cache = insights['prediction'].get(f'{target_name}_selfaware_scores', None)
                 icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
 
             # get ICP predictions
