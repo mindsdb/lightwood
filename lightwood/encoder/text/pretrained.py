@@ -130,6 +130,7 @@ class PretrainedLangEncoder(BaseEncoder):
  
         self.embed_mode = embed_mode
         self.uses_target = True
+        self.output_size = None
         
         ## DEBUGGING!!!
         if self.embed_mode:
@@ -250,6 +251,8 @@ class PretrainedLangEncoder(BaseEncoder):
                 self.embed_mode = True
 
         self._prepared = True
+        encoded = self.encode(priming_data[0:1])
+        self.output_size = len(encoded[0])
 
     def _tune_model(self, dataset, optim, scheduler, n_epochs=1):
         """
