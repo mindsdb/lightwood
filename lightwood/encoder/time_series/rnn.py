@@ -172,7 +172,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     all_idxs = set(range(len(data)))
                     for group_name, normalizer in self.dep_norms[dep_name].items():
                         if group_name != '__default':
-                            idxs, subset = get_group_matches(dep_data, normalizer.combination, normalizer.keys)
+                            idxs, subset = get_group_matches(dep_data, normalizer.combination)
                             normalized = normalizer.encode(subset).unsqueeze(-1)
                             data[idxs, :, :] = normalized
                             all_idxs -= set(idxs)
@@ -350,7 +350,7 @@ class TimeSeriesEncoder(BaseEncoder):
                         normalizer = self.dep_norms[dep].get(frozenset(combination), None)
                         if normalizer is None:
                             normalizer = self.dep_norms[dep]['__default']
-                        idxs, subset = get_group_matches(dep_data, normalizer.combination, normalizer.keys)
+                        idxs, subset = get_group_matches(dep_data, normalizer.combination)
                         if idxs:
                             tensor[idxs, :, :] = torch.Tensor(normalizer.encode(subset)).unsqueeze(-1).to(self.device)
                             all_idxs -= set(idxs)
