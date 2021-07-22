@@ -50,24 +50,22 @@ def is_allowed(v):
     
 
 def call(entity: dict, json_ai: JsonAI) -> str:
-    dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items() if not str(v).startswith('$') and is_allowed(v)]
+    args = [f'{k}={v}' for k, v in entity['args'].items() if not str(v).startswith('$') and is_allowed(v)]
 
-    static_args = []
-    for k, v in entity['dynamic_args'].items():
+    for k, v in entity['args'].items():
         if str(v).startswith('$'):
             v = str(v).lstrip('$')
-            val = json_ai
-            for item in v.split('.'):
-                val = val.__getattribute__(item)
-                if isinstance(val, str):
-                    val = f'"{val}"'
-            static_args.append(f'{k}={val}')
+            try:
+                val = json_ai
+                for item in v.split('.'):
+                    val = val.__getattribute__(item)
+                    if isinstance(val, str):
+                        val = f'"{val}"'
+                args.append(f'{k}={val}')
+            except Exception:
+                args.append(f'{k}=self.{val}')
 
-    args = ', '.join(static_args + dynamic_args)
-
-    call = entity['object']
-
-    return f'{call}({args})'
+    return f"""{entity['module']}({args})"""
 
 
 def inline_dict(obj: dict) -> str:
