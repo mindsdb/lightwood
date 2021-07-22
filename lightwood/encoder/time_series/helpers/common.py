@@ -8,9 +8,10 @@ from lightwood.api.dtype import dtype
 
 
 class MinMaxNormalizer:
-    def __init__(self):
+    def __init__(self, combination=()):
         self.scaler = MinMaxScaler()
         self.abs_mean = None
+        self.combination = combination  # tuple with values in grouped-by columns
         self.output_size = 1
 
     def prepare(self, x: np.ndarray) -> None:
@@ -120,7 +121,7 @@ def generate_target_group_normalizers(data):
                 combination = frozenset(combination)  # freeze so that we can hash with it
                 _, subset = get_group_matches(data, combination)
                 if subset.size > 0:
-                    normalizers[combination] = MinMaxNormalizer()
+                    normalizers[combination] = MinMaxNormalizer(combination=combination)
                     normalizers[combination].prepare(subset)
                     group_combinations.append(combination)
 
