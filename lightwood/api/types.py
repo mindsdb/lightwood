@@ -184,7 +184,6 @@ class JsonAI:
     features: Dict[str, Feature]
     output: Output
     problem_definition: ProblemDefinition
-    statistical_analysis: StatisticalAnalysis
     identifiers: Dict[str, str]
     cleaner: Optional[object] = None
     splitter: Optional[object] = None
