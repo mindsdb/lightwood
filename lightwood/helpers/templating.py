@@ -20,6 +20,8 @@ def is_allowed(v):
     if isinstance(v, str):
         if v.startswith('"') and v.endswith('"'):
             return True
+        if v.startswith("'") and v.endswith("'"):
+            return True
 
     # Predictor member
     if v.startswith('self.') and '(' not in v and len(v) < 50:
@@ -44,8 +46,8 @@ def is_allowed(v):
                 return False
         return True
 
-    raise Exception(f'Code injection: {v}')
-    return False
+    raise Exception(f'Possible code injection: {v}')
+    
 
 def call(entity: dict, json_ai: JsonAI) -> str:
     dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items() if not str(v).startswith('$') and is_allowed(v)]
