@@ -286,7 +286,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         analyzer={
             'object': 'model_analyzer',
             'dynamic_args': {
-                'stats_info': 'statistical_analysis',
+                'stats_info': '$statistical_analysis',
                 'ts_cfg': '$problem_definition.timeseries_settings',
                 'accuracy_functions': '$accuracy_functions',
                 'predictor': 'self.ensemble',
