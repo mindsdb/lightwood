@@ -2,10 +2,33 @@ from lightwood.api.types import JsonAI
 
 
 def is_allowed(v):
-    for t in [bool, str]:
-        if isinstance(v, t):
+    if v is None:
+        return True
+
+    if isinstance(v, bool):
+        return True
+
+    try:
+        float(v)
+        return True
+    except:
+        pass
+
+    if v in ['True', 'False']:
+        return True
+
+    if isinstance(v, str):
+        if v.startswith('"') and v.endswith('"'):
             return True
-            
+
+    # Predictor member
+    if v.startswith('self.') and '(' not in v and len(v) < 50:
+        return True
+
+    # Allowed variable names
+    if v in ['data', 'nfolds', 'data', 'train_data', 'test_data', 'df']:
+        return True
+
     if isinstance(v, dict):
         for k in v:
             ka = is_allowed(k)
@@ -21,6 +44,7 @@ def is_allowed(v):
                 return False
         return True
 
+    raise Exception(f'Code injection: {v}')
     return False
 
 def call(entity: dict, json_ai: JsonAI) -> str:
