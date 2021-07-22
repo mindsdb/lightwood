@@ -97,7 +97,7 @@ def clean_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     return df
 
 
-def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: int, ignore_features: List[str], identifiers: Dict[str, str], target: str, mode: str) -> pd.DataFrame:
+def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, ignore_features: List[str], identifiers: Dict[str, str], target: str, mode: str) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]

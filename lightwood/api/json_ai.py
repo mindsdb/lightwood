@@ -224,7 +224,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             problem_definition.seconds_per_encoder = int(problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders))
         problem_definition.seconds_per_model = int(problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models))
 
-    if problem_definition.timeseries_settings.nr_predictions > 1:
+    if problem_definition.timeseries_settings.is_timeseries and  problem_definition.timeseries_settings.nr_predictions > 1:
         output.data_dtype = dtype.array
 
     return JsonAI(
@@ -418,14 +418,14 @@ if encoder.is_target:
         ts_target_code = ''
 
     dataprep_body = f"""
-self.statistical_analysis = lightwood.data.statistical_analysis(data, type_information, problem_definition)
+# The type of each column
+self.dtype_dict = {inline_dict(dtype_dict)}
+self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, problem_definition)
 self.mode = 'train'
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
 # Which column depends on which
 self.dependencies = {inline_dict(dependency_dict)}
-# The type of each column
-self.dtype_dict = {inline_dict(dtype_dict)}
 #
 self.input_cols = [{input_cols}]
 
