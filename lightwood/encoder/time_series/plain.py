@@ -26,7 +26,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         if self.original_type in (dtype.categorical, dtype.binary):
             self._normalizer = CatNormalizer(encoder_class='ordinal')
         else:
-            self._normalizer = MinMaxNormalizer(original_type=self.original_type)
+            self._normalizer = MinMaxNormalizer()
 
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values

@@ -8,57 +8,31 @@ from lightwood.api.dtype import dtype
 
 
 class MinMaxNormalizer:
-    def __init__(self, combination=(), keys=(), factor=1, original_type=None):
+    def __init__(self):
         self.scaler = MinMaxScaler()
-        self.single_scaler = MinMaxScaler()  # for non-windowed arrays (when using numerical encoder)
-        self.factor = factor
-        self.keys = list(keys)  # columns involved in grouped-by subset dataset to normalize
-        self.combination = combination  # tuple with values in those columns
         self.abs_mean = None
-        self.original_type = original_type
         self.output_size = 1
 
-    def prepare(self, x):
-        if isinstance(x, pd.Series):
-            x = x.values
-
-        if isinstance(x, list):
-            x = np.array([j for i in x for j in i]).reshape(-1, 1)
-        elif isinstance(x[0], list):
+    def prepare(self, x: np.ndarray) -> None:
+        if isinstance(x[0], list):
             x = np.vstack(x)
-        elif isinstance(x, np.ndarray):
-            if len(x.shape) == 1:
-                x = x.reshape(-1, 1)
 
-        if self.original_type == dtype.array:
-            x = x.astype(float)
-
+        x = x.astype(float)
         x[x == None] = 0
         self.abs_mean = np.mean(np.abs(x))
         self.scaler.fit(x)
-        if isinstance(x, np.ndarray):
-            self.single_scaler.fit(x[:, -1:])  # fit using non-windowed column data
 
-    def encode(self, y):
-        # @TODO: streamline this
-        if self.original_type == dtype.array and isinstance(y, pd.Series):
-            y = np.array(y.tolist())
+    def encode(self, y: np.ndarray) -> torch.Tensor:
+        if isinstance(y[0], list):
+            y = np.vstack(y)
 
-        if not isinstance(y, np.ndarray) and not isinstance(y[0], list):
-            y = y.reshape(-1, 1)
-
-        return torch.Tensor(self.scaler.transform(y))
+        shape = y.shape
+        y = y.astype(float).reshape(-1, self.scaler.n_features_in_)
+        out = torch.reshape(torch.Tensor(self.scaler.transform(y)), shape)
+        return out
 
     def decode(self, y):
         return self.scaler.inverse_transform(y)
-
-    def single_encode(self, y):
-        """Variant designed for encoding a single scalar"""
-        return self.single_scaler.transform(y)
-
-    def single_decode(self, y):
-        """Variant designed for decoding a single scalar"""
-        return self.single_scaler.inverse_transform(y)[0][0]
 
 
 class CatNormalizer:
@@ -146,14 +120,12 @@ def generate_target_group_normalizers(data):
                 combination = frozenset(combination)  # freeze so that we can hash with it
                 _, subset = get_group_matches(data, combination)
                 if subset.size > 0:
-                    normalizers[combination] = MinMaxNormalizer(combination=combination,
-                                                                original_type=data['original_type'],
-                                                                keys=data['group_info'].keys())
+                    normalizers[combination] = MinMaxNormalizer()
                     normalizers[combination].prepare(subset)
                     group_combinations.append(combination)
 
         # ...plus a default one, used at inference time and fitted with all training data
-        normalizers['__default'] = MinMaxNormalizer(original_type=data['original_type'])
+        normalizers['__default'] = MinMaxNormalizer()
         normalizers['__default'].prepare(data['data'])
         group_combinations.append('__default')
 

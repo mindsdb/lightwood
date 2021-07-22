@@ -54,7 +54,7 @@ class TimeSeriesEncoder(BaseEncoder):
             self._normalizer = DatetimeEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields) * 2  # sinusoidal datetime components
         elif self.original_type in (dtype.float, dtype.integer):
-            self._normalizer = MinMaxNormalizer(original_type=self.original_type)
+            self._normalizer = MinMaxNormalizer()
 
         total_dims = self._n_dims
         dec_hsize = self.output_size
@@ -78,7 +78,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     if dep['original_type'] in (dtype.categorical, dtype.binary):
                         self.dep_norms[dep_name]['__default'] = CatNormalizer()
                     else:
-                        self.dep_norms[dep_name]['__default']  = MinMaxNormalizer(original_type=self.original_type)
+                        self.dep_norms[dep_name]['__default']  = MinMaxNormalizer()
 
                     self.dep_norms[dep_name]['__default'].prepare(dep['data'])
                     self._group_combinations = {'__default': None}
@@ -185,7 +185,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 else:
                     # categorical has only one normalizer at all times
                     normalizer = self.dep_norms[dep_name]['__default']
-                    data = normalizer.encode(dep_data['data'])
+                    data = normalizer.encode(dep_data['data'].values)
                     if len(data.shape) < 3:
                         data = data.unsqueeze(-1)  # add feature dimension
                 data[torch.isnan(data)] = 0.0
