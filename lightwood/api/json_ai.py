@@ -198,34 +198,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         )
         features[col_name] = feature
 
-    timeseries_transformer = None
-    if problem_definition.timeseries_settings.is_timeseries:
-        timeseries_transformer = {
-            'module': 'transform_timeseries',
-            'args': {
-                'timeseries_settings': '$problem_definition.timeseries_settings',
-                'data': 'data',
-                'dtype_dict': '$dtype_dict',
-                'target': '$target',
-                'mode': '$mode'
-            }
-        }
-
-        timeseries_analyzer = {
-            'module': 'timeseries_analyzer',
-            'args': {
-                'timeseries_settings': '$problem_definition.timeseries_settings',
-                'data': 'data',
-                'dtype_dict': '$dtype_dict',
-                'target': '$target'
-            }
-        }
-
-        if problem_definition.timeseries_settings.nr_predictions > 1:
-            output.data_dtype = dtype.array
-    else:
-        timeseries_analyzer = None
-
     # Decide on the accuracy functions to use
     if output.data_dtype in [dtype.integer, dtype.float]:
         accuracy_functions = ['r2_score']
@@ -252,72 +224,27 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             problem_definition.seconds_per_encoder = int(problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders))
         problem_definition.seconds_per_model = int(problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models))
 
-    return JsonAI(
-        cleaner={
-            'module': 'cleaner',
-            'args': {
-                'pct_invalid': '$problem_definition.pct_invalid',
-                'ignore_features': '$problem_definition.ignore_features',
-                'identifiers': '$identifiers',
-                'data': 'data',
-                'dtype_dict': '$dtype_dict',
-                'target': '$target',
-                'mode': '$mode'
-            }
-        },
-        splitter={
-            'module': 'splitter',
-            'args': {
-                'tss': '$problem_definition.timeseries_settings',
-                'data': 'data',
-                'k': 'nfolds'
-            }
-        },
-        analyzer={
-            'module': 'model_analyzer',
-            'args': {
-                'stats_info': '$statistical_analysis',
-                'ts_cfg': '$problem_definition.timeseries_settings',
-                'accuracy_functions': '$accuracy_functions',
-                'predictor': '$ensemble',
-                'data': 'test_data',
-                'target': '$target',
-                'disable_column_importance': 'True',
-                'dtype_dict': '$dtype_dict',
-                'fixed_significance': None,
-                'positive_domain': False,
-            }
-        },
+    if problem_definition.timeseries_settings.nr_predictions > 1:
+        output.data_dtype = dtype.array
 
-        explainer={
-            'module': 'explain',
-            'args': {
-                'timeseries_settings': '$problem_definition.timeseries_settings',
-                'positive_domain': '$problem_definition.positive_domain',
-                'fixed_confidence': '$problem_definition.fixed_confidence',
-                'anomaly_detection': '$problem_definition.anomaly_detection',
-                'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
-                'anomaly_cooldown': '$problem_definition.anomaly_cooldown',
-                'data': 'data',
-                'predictions': 'df',
-                'analysis': '$runtime_analyzer',
-                'ts_analysis': '$ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
-                'target_name': '$target',
-                'target_dtype': '$dtype_dict[self.target]',
-            }
-        },
+    return JsonAI(
+        cleaner=None,
+        splitter=None,
+        analyzer=None,
+        explainer=None,
         features=features,
         output=output,
         imports=[],
         problem_definition=problem_definition,
         identifiers=type_information.identifiers,
-        timeseries_transformer=timeseries_transformer,
-        timeseries_analyzer=timeseries_analyzer,
+        timeseries_transformer=None,
+        timeseries_analyzer=None,
         accuracy_functions=accuracy_functions
     )
 
 
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
+    problem_definition = json_ai.problem_definition
     imports = [
         'from lightwood.model import Neural',
         'from lightwood.model import LightGBM',
@@ -347,10 +274,90 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         encoder_import = feature.encoder['module']
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
-    if json_ai.problem_definition.timeseries_settings.use_previous_target:
+    if problem_definition.timeseries_settings.use_previous_target:
         imports.append('from lightwood.encoder import TimeSeriesPlainEncoder')
 
     json_ai.imports.extend(imports)
+
+    json_ai.cleaner = {
+        'module': 'cleaner',
+        'args': {
+            'pct_invalid': '$problem_definition.pct_invalid',
+            'ignore_features': '$problem_definition.ignore_features',
+            'identifiers': '$identifiers',
+            'data': 'data',
+            'dtype_dict': '$dtype_dict',
+            'target': '$target',
+            'mode': '$mode'
+        }
+    }
+
+    json_ai.splitter = {
+        'module': 'splitter',
+        'args': {
+            'tss': '$problem_definition.timeseries_settings',
+            'data': 'data',
+            'k': 'nfolds'
+        }
+    }
+
+    json_ai.analyzer = {
+        'module': 'model_analyzer',
+        'args': {
+            'stats_info': '$statistical_analysis',
+            'ts_cfg': '$problem_definition.timeseries_settings',
+            'accuracy_functions': '$accuracy_functions',
+            'predictor': '$ensemble',
+            'data': 'test_data',
+            'target': '$target',
+            'disable_column_importance': 'True',
+            'dtype_dict': '$dtype_dict',
+            'fixed_significance': None,
+            'positive_domain': False,
+        }
+    }
+
+    json_ai.explainer = {
+        'module': 'explain',
+        'args': {
+            'timeseries_settings': '$problem_definition.timeseries_settings',
+            'positive_domain': '$problem_definition.positive_domain',
+            'fixed_confidence': '$problem_definition.fixed_confidence',
+            'anomaly_detection': '$problem_definition.anomaly_detection',
+            'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
+            'anomaly_cooldown': '$problem_definition.anomaly_cooldown',
+            'data': 'data',
+            'predictions': 'df',
+            'analysis': '$runtime_analyzer',
+            'ts_analysis': '$ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
+            'target_name': '$target',
+            'target_dtype': '$dtype_dict[self.target]',
+        }
+    }
+
+
+    
+    if problem_definition.timeseries_settings.is_timeseries:
+        json_ai.timeseries_transformer = {
+            'module': 'transform_timeseries',
+            'args': {
+                'timeseries_settings': '$problem_definition.timeseries_settings',
+                'data': 'data',
+                'dtype_dict': '$dtype_dict',
+                'target': '$target',
+                'mode': '$mode'
+            }
+        }
+
+        json_ai.timeseries_analyzer = {
+            'module': 'timeseries_analyzer',
+            'args': {
+                'timeseries_settings': '$problem_definition.timeseries_settings',
+                'data': 'data',
+                'dtype_dict': '$dtype_dict',
+                'target': '$target'
+            }
+        }
 
     return json_ai
 
