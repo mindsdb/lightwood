@@ -388,6 +388,12 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                       json_ai)
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{json_ai.output.data_dtype}'"""
+        json_ai.features[col_name] = Feature(
+            name=col_name,
+            data_dtype=json_ai.output.data_dtype,
+            encoder=encoder_dict[col_name],
+            dependency=[]
+        )
 
     input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ai.features.values()])
 
