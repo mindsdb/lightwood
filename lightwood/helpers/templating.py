@@ -2,16 +2,17 @@ from lightwood.api.types import JsonAI
 
 
 def call(entity: dict, json_ai: JsonAI) -> str:
-    dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items()]
+    dynamic_args = [f'{k}={v}' for k, v in entity['dynamic_args'].items() if not str(v).startswith('$')]
 
     static_args = []
     for k, v in entity['static_args'].items():
-        val = json_ai
-        for item in v.split('.'):
-            val = val.__getattribute__(item)
-            if isinstance(val, str):
-                val = f'"{val}"'
-        static_args.append(f'{k}={val}')
+        if v.startswith('$'):
+            val = json_ai
+            for item in v.split('.'):
+                val = val.__getattribute__(item)
+                if isinstance(val, str):
+                    val = f'"{val}"'
+            static_args.append(f'{k}={val}')
 
     args = ', '.join(static_args + dynamic_args)
 
