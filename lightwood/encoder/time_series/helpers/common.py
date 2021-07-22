@@ -1,7 +1,8 @@
+from itertools import product
+
 import torch
 import numpy as np
 import pandas as pd
-from itertools import product
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
 
 from lightwood.api.dtype import dtype
@@ -83,6 +84,9 @@ def get_group_matches(data, combination):
 
     if isinstance(data['data'], pd.Series):
         data['data'] = np.vstack(data['data'])
+    if isinstance(data['data'], np.ndarray) and len(data['data'].shape) < 2:
+        data['data'] = np.expand_dims(data['data'], axis=1)
+
     if not combination:
         idxs = range(len(data['data']))
         return [idxs, np.array(data['data'])[idxs, :]]  # return all data
@@ -117,7 +121,7 @@ def generate_target_group_normalizers(data):
     # numerical normalizers, here we spawn one per each group combination
     else:
         if data['original_type'] == dtype.array:
-            data['data'] = data['data'].values.reshape(-1, 1).astype(float)
+            data['data'] = data['data'].reshape(-1, 1).astype(float)
 
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
         for combination in all_group_combinations:
