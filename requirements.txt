@@ -20,5 +20,5 @@ langdetect >= 1.0.0
 dataclasses_json >= 0.5.4
 autopep8 >= 1.5.7
 dill == 0.3.4
-sktime
+sktime[all_extras] >= 0.5.0
 torch_optimizer == 0.1.0
