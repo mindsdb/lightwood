@@ -38,6 +38,7 @@ class ShortTextEncoder(BaseEncoder):
         self.max_words_per_sent = None
         self.is_nn_encoder = True
         self.cae = CategoricalAutoEncoder(is_target, max_encoded_length=100)
+        self._prepared = False
     
     def _unexpected_mode(self):
         raise ValueError('unexpected combine value (must be "mean" or "concat")')
@@ -49,8 +50,8 @@ class ShortTextEncoder(BaseEncoder):
     def _combine_mean(self, vecs):
         return average_vectors(vecs)
 
-    def prepare(self, column_data):
-        no_null_sentences = (x if x is not None else '' for x in column_data)
+    def prepare(self, priming_data):
+        no_null_sentences = (x if x is not None else '' for x in priming_data)
         unique_tokens = set()
         max_words_per_sent = 0
         for sent in no_null_sentences:
@@ -68,6 +69,10 @@ class ShortTextEncoder(BaseEncoder):
             self._combine_fn = self._combine_mean
         else:
             self._unexpected_mode()
+
+        self._prepared = True
+        encoded = self.encode([priming_data[0]])
+        self.output_size = len(encoded[0])
 
     def encode(self, column_data: List[str]) -> torch.Tensor:
         no_null_sentences = (x if x is not None else '' for x in column_data)
