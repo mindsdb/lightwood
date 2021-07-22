@@ -186,15 +186,15 @@ class JsonAI:
     problem_definition: ProblemDefinition
     statistical_analysis: StatisticalAnalysis
     identifiers: Dict[str, str]
-    cleaner: object = None
-    splitter: object = None
-    analyzer: object = None
-    explainer: object = None
-    imports: object = None
-    timeseries_transformer: object = None
-    timeseries_analyzer: object = None
-    accuracy_functions: List[str] = None
-    phases: Dict[str, object] = None
+    cleaner: Optional[object] = None
+    splitter: Optional[object] = None
+    analyzer: Optional[object] = None
+    explainer: Optional[object] = None
+    imports: Optional[List[str]] = None
+    timeseries_transformer: Optional[object] = None
+    timeseries_analyzer: Optional[object] = None
+    accuracy_functions: Optional[List[str]] = None
+    phases: Optional[Dict[str, object]] = None
 
     @staticmethod
     def from_dict(obj: Dict) -> None:
