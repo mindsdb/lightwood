@@ -61,7 +61,11 @@ def statistical_analysis(data: pd.DataFrame,
     for col in df.columns:
         histograms[col] = None
         if type_information.dtypes[col] in (dtype.categorical, dtype.binary):
-            histograms[col] = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
+            hist = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
+            histograms[col] = {
+                'x': list(hist.keys()),
+                'y': list(hist.values())
+            }
         if type_information.dtypes[col] in (dtype.integer, dtype.float):
             histograms[col] = get_numeric_histogram(filter_nan(df[col]), type_information.dtypes[col])
 
