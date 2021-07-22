@@ -1,5 +1,5 @@
 from os import stat
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
@@ -43,11 +43,14 @@ class TypeInformation:
 @dataclass
 class StatisticalAnalysis:
     nr_rows: int
-    train_std_dev: float
+    train_std_dev: Optional[float]
     # Write proper to and from dict parsing for this than switch back to using the types bellow, dataclasses_json sucks!
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
     histograms: object  # Dict[str, Dict[str, List[object]]]
+    missing: object
+    distinct: object
+    bias: object
 
 
 @dataclass_json

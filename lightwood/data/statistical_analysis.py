@@ -6,6 +6,7 @@ from lightwood.helpers.numeric import filter_nan
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
+from scipy.stats import entropy
 
 
 def get_numeric_histogram(data, data_dtype):
@@ -24,6 +25,19 @@ def get_numeric_histogram(data, data_dtype):
     }
 
 
+def compute_entropy_biased_buckets(histogram):
+    S, biased_buckets = None, None
+    if histogram is not None:
+        hist_x = histogram['x']
+        hist_y = histogram['y']
+        nr_values = sum(hist_y)
+        S = entropy([x / nr_values for x in hist_y], base=max(2, len(hist_y)))
+        if S < 0.25:
+            pick_nr = -max(1, int(len(hist_y) / 10))
+            biased_buckets = [hist_x[i] for i in np.array(hist_y).argsort()[pick_nr:]]
+    return S, biased_buckets
+
+
 def statistical_analysis(data: pd.DataFrame,
                          type_information: TypeInformation,
                          problem_definition: ProblemDefinition) -> StatisticalAnalysis:
@@ -31,6 +45,9 @@ def statistical_analysis(data: pd.DataFrame,
     log.info('Starting statistical analysis')
     df = cleaner(data, type_information.dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, type_information.identifiers, problem_definition.target, 'train')
     
+    missing = {col: len([x for x in df[col] if x is None]) / len(df[col]) for col in df.columns}
+    distinct = {col: len(set(df[col])) / len(df[col]) for col in df.columns}
+
     nr_rows = len(df)
     target = problem_definition.target
     # get train std, used in analysis
@@ -42,6 +59,7 @@ def statistical_analysis(data: pd.DataFrame,
     histograms = {}
     # Get histograms for each column
     for col in df.columns:
+        histograms[col] = None
         if type_information.dtypes[col] in (dtype.categorical, dtype.binary):
             histograms[col] = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
         if type_information.dtypes[col] in (dtype.integer, dtype.float):
@@ -56,8 +74,15 @@ def statistical_analysis(data: pd.DataFrame,
         train_observed_classes = None  # @TODO: pending call to tags logic -> get all possible tags
     else:
         train_observed_classes = None
-    
-    get_numeric_histogram
+
+    bias = {}
+    for col in df.columns:
+        S, biased_buckets = compute_entropy_biased_buckets(histograms[col])
+        bias[col] = {
+            'entropy': S,
+            'description': """Under the assumption of uniformly distributed data (i.e., same probability for Head or Tails on a coin flip) mindsdb tries to detect potential divergences from such case, and it calls this "potential bias". Thus by our data having any potential bias mindsdb means any divergence from all categories having the same probability of being selected.""",
+            'biased_buckets': biased_buckets
+        }
 
     log.info('Finished statistical analysis')
     return StatisticalAnalysis(
@@ -65,5 +90,8 @@ def statistical_analysis(data: pd.DataFrame,
         train_std_dev=train_std,
         train_observed_classes=train_observed_classes,
         target_class_distribution=target_class_distribution,
-        histograms=histograms
+        histograms=histograms,
+        missing=missing,
+        distinct=distinct,
+        bias=bias
     )
