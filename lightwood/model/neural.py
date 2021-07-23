@@ -41,30 +41,30 @@ class Neural(BaseModel):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
             self.model = self.model.eval()
 
-            decoded_predictions = []
-            decoded_real_values = []
+            acc_dict = {}
+            for decode_log in [True, False]:
+                self.target_encoder.decode_log = decode_log
+                decoded_predictions = []
+                decoded_real_values = []
+                for data in data_arr:
+                    for X, Y in data:
+                        X = X.to(self.model.device)
+                        Y = Y.to(self.model.device)
+                        Yh = self.model(X)
 
-            for data in data_arr:
-                for X, Y in data:
-                    X = X.to(self.model.device)
-                    Y = Y.to(self.model.device)
-                    Yh = self.model(X)
+                        Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
+                        Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
 
-                    Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
-                    Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
+                        decoded_predictions.extend(self.target_encoder.decode(Yh))
+                        decoded_real_values.extend(self.target_encoder.decode(Y))
 
-                    decoded_predictions.extend(self.target_encoder.decode(Yh))
-                    decoded_real_values.extend(self.target_encoder.decode(Y))
+                    
+                    acc_dict[decode_log] = r2_score(decoded_real_values, decoded_predictions)
 
-                self.target_encoder.decode_log = True
-                log_acc = r2_score(decoded_real_values, decoded_predictions)
+            if acc_dict[True] < acc_dict[False]:
                 self.target_encoder.decode_log = False
-                lin_acc = r2_score(decoded_real_values, decoded_predictions)
-
-                if lin_acc < log_acc:
-                    self.target_encoder.decode_log = True
-                else:
-                    self.target_encoder.decode_log = False
+            else:
+                self.target_encoder.decode_log = False
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
