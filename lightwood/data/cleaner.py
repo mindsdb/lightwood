@@ -116,7 +116,8 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, 
         if name in to_drop:
             continue
         if name not in data.columns:
-            data[name] = [None] * len(data)
+            if '__mdb_ts_previous' not in name:
+                data[name] = [None] * len(data)
             continue
 
         new_data = []
