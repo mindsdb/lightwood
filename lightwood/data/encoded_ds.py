@@ -80,6 +80,14 @@ class EncodedDs(Dataset):
             raise Exception(f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor !')
         return encoded_data
 
+    def get_encoded_data(self, include_target=True) -> torch.Tensor:
+        encoded_dfs = []
+        for col in self.data_frame.columns:
+            if include_target or col != self.target:
+                encoded_dfs.append(self.get_encoded_column_data(col))
+
+        return torch.cat(encoded_dfs, 1)
+
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):
@@ -98,7 +106,7 @@ class ConcatedEncodedDs(EncodedDs):
                 return self.encoded_ds_arr[ds_idx][idx]
             else:
                 idx -= length
-        raise StopIteration()    
+        raise StopIteration()
 
     @property
     def data_frame(self):

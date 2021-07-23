@@ -45,8 +45,7 @@ def model_analyzer(
         accuracy_functions
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
-    df_arr = data
-    encoded_data = ConcatedEncodedDs(df_arr)
+    encoded_data = ConcatedEncodedDs(data)
     data = encoded_data.data_frame
     runtime_analyzer = {}
     predictions = {}
@@ -93,8 +92,7 @@ def model_analyzer(
 
         norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor, 'encoders': encoded_data.encoders}
         normalizer = SelfawareNormalizer(fit_params=norm_params)
-        normalizer.fit(df_arr, target)
-        normalizer.prediction_cache = normalizer.score(normal_predictions)
+        normalizer.fit(encoded_data, target)
 
         # instance the ICP
         nc = nc_class(model, nc_function, normalizer=normalizer)
@@ -172,7 +170,7 @@ def model_analyzer(
             for group in icps['__mdb_groups']:
                 icp_df = icps_df
                 if icps[frozenset(group)].nc_function.normalizer is not None:
-                    icp_df[f'__selfaware_{target}'] = icps[frozenset(group)].nc_function.normalizer.prediction_cache
+                    icp_df[f'__norm_{target}'] = icps[frozenset(group)].nc_function.normalizer.prediction_cache
 
                 # filter irrelevant rows for each group combination
                 for key, val in zip(group_keys, group):
@@ -183,7 +181,7 @@ def model_analyzer(
                 icps[frozenset(group)].nc_function.model.prediction_cache = pred_cache
                 icp_df, y = clean_df(icp_df, target, is_classification, runtime_analyzer.get('label_encoders', None))
                 if icps[frozenset(group)].nc_function.normalizer is not None:
-                    icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(f'__selfaware_{target}').values
+                    icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(f'__norm_{target}').values
 
                 icps[frozenset(group)].index = icp_df.columns      # important at inference time
                 icps[frozenset(group)].calibrate(icp_df.values, y)
