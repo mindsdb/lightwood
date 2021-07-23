@@ -174,6 +174,9 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     )
 
+    if problem_definition.timeseries_settings.is_timeseries and problem_definition.timeseries_settings.nr_predictions > 1:
+        output.data_dtype = dtype.array
+
     output.encoder = lookup_encoder(type_information.dtypes[target], target, True, problem_definition, False)
 
     features: Dict[str, Feature] = {}
@@ -209,10 +212,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     else:
         accuracy_functions = ['accuracy_score']
 
-    # timeseries override since the output gets converted to array later (ugly but whatever)
-    if problem_definition.timeseries_settings.nr_predictions is not None and problem_definition.timeseries_settings.nr_predictions > 1:
-        accuracy_functions = ['evaluate_array_accuracy']
-
     if problem_definition.time_aim is None and (problem_definition.seconds_per_model is None or problem_definition.seconds_per_encoder is None):
         problem_definition.time_aim = 1000 + np.log(statistical_analysis.nr_rows / 10 + 1) * np.sum([4 if x in [dtype.rich_text, dtype.short_text, dtype.array, dtype.video, dtype.audio, dtype.image] else 1 for x in type_information.dtypes.values()]) * 200
 
@@ -226,9 +225,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         else:
             problem_definition.seconds_per_encoder = int(problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders))
         problem_definition.seconds_per_model = int(problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models))
-
-    if problem_definition.timeseries_settings.is_timeseries and problem_definition.timeseries_settings.nr_predictions > 1:
-        output.data_dtype = dtype.array
 
     return JsonAI(
         cleaner=None,
