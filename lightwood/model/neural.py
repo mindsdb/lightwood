@@ -161,17 +161,17 @@ class Neural(BaseModel):
         dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
 
         scaler = GradScaler()
-        self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 20))
+        self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 10))
         
         time_for_trials = self.stop_after / 2
-        nr_trails = 20
+        nr_trails = 25
         time_per_trial = time_for_trials / nr_trails
         if time_per_trial > 5:
             def objective(trial):
                 log.debug(f'Running trial in max {time_per_trial} seconds')
                 # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
                 num_hidden = trial.suggest_int('num_hidden', 1, 2)
-                lr = trial.suggest_loguniform('lr', 0.0005, 0.1)
+                lr = trial.suggest_loguniform('lr', 0.0001, 0.1)
 
                 self.model = DefaultNet(
                     input_size=len(ds_arr[0][0][0]),
@@ -205,7 +205,7 @@ class Neural(BaseModel):
             self.lr = study.best_trial.params['lr']
         else:
             self.num_hidden = 1
-            self.lr = 0.001
+            self.lr = 0.0005
         dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
 
