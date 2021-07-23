@@ -1,16 +1,17 @@
 from typing import Dict, List
 
-from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
+import torch
 import numpy as np
 import pandas as pd
 from copy import deepcopy
 from itertools import product
 from sklearn.preprocessing import OneHotEncoder
 
-from lightwood.ensemble import BaseEnsemble
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.api import dtype
+from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.helpers.general import evaluate_accuracy
+from lightwood.ensemble import BaseEnsemble
 
 from lightwood.analysis.acc_stats import AccStats
 from lightwood.analysis.nc.norm import SelfawareNormalizer
@@ -24,17 +25,17 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 """
 Pending:
  - [] use class distribution output
- - [] global feat importance
- - [] streamline nonconformist custom implementation to cater analysis needs
- - [] introduce model-agnostic normalizer (previously known as self aware NN)
+ - [] reactivate global feat importance
+ - [] simplify nonconformist custom implementation?
  - [] reimplement caching for faster analysis?
- - confidence for T+N <- active research question
+ - [] confidence for T+N <- active research question
 """
 
 
 def model_analyzer(
         predictor: BaseEnsemble,
         data: List[EncodedDs],
+        encoded_train_data: torch.Tensor,
         stats_info: StatisticalAnalysis,
         target: str,
         ts_cfg: TimeseriesSettings,
@@ -92,7 +93,8 @@ def model_analyzer(
 
         norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor, 'encoders': encoded_data.encoders}
         normalizer = SelfawareNormalizer(fit_params=norm_params)
-        normalizer.fit(encoded_data, target)
+        normalizer.fit(encoded_train_data, target)
+        normalizer.prediction_cache = normalizer.predict(encoded_data)
 
         # instance the ICP
         nc = nc_class(model, nc_function, normalizer=normalizer)

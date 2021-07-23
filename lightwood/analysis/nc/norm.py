@@ -31,9 +31,8 @@ class SelfawareNormalizer(BaseScorer):
             truths = data.data_frame[target]
             labels = abs(preds.values.squeeze() - truths.values)
             data.data_frame[target] = labels
-            enc_data = data.get_encoded_data(include_target=False).numpy()  # @TODO: this should be the training split!
+            enc_data = data.get_encoded_data(include_target=False).numpy()
             self.model.fit(enc_data, labels)
-            self.prediction_cache = self.model.predict(enc_data)
 
     def predict(self, data: Union[ConcatedEncodedDs, torch.Tensor]) -> np.ndarray:
         if isinstance(data, ConcatedEncodedDs):
@@ -46,7 +45,7 @@ class SelfawareNormalizer(BaseScorer):
         if sa_score is None:
             sa_score = np.ones(true_input.shape[0])  # by default, normalizing factor is 1 for all predictions
         else:
-            sa_score = np.array(sa_score)  # @TODO: apply 0.5+softmax(X) depending on further testing
+            sa_score = np.array(sa_score)  # @TODO: try 0.5+softmax(x)
 
         return sa_score
 

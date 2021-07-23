@@ -183,9 +183,9 @@ def explain(data: pd.DataFrame,
                                 significances = get_categorical_conf(all_confs, conf_candidates)
                                 result.loc[X.index, 'significance'] = significances
 
-            insights['confidence'] = result['significance'].tolist()
-            insights['lower'] = result['lower']
-            insights['upper'] = result['upper']
+            insights['confidence'] = result['significance'].astype(float).tolist()
+            insights['lower'] = result['lower'].astype(float)
+            insights['upper'] = result['upper'].astype(float)
 
             # anomaly detection
             if is_anomaly_task:
