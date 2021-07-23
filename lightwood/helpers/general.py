@@ -14,7 +14,6 @@ def evaluate_accuracy(data: pd.DataFrame,
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
-        print(accuracy_function_str)
         if accuracy_function_str == 'evaluate_array_accuracy':
             nr_predictions = len(predictions.iloc[0])
             cols = [target] + [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]
@@ -24,7 +23,6 @@ def evaluate_accuracy(data: pd.DataFrame,
             true_values = data[target].tolist()
             accuracy_function = getattr(importlib.import_module('sklearn.metrics'), accuracy_function_str)
 
-        print(list(true_values), list(predictions), accuracy_function)
         score_dict[accuracy_function_str] = accuracy_function(list(true_values), list(predictions))
 
     return score_dict
