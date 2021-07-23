@@ -59,7 +59,7 @@ class Neural(BaseModel):
                         decoded_real_values.extend(self.target_encoder.decode(Y))
 
                     
-                    acc_dict[decode_log] = r2_score(decoded_real_values, decoded_predictions)
+                acc_dict[decode_log] = r2_score(decoded_real_values, decoded_predictions)
 
             if acc_dict[True] > acc_dict[False]:
                 self.target_encoder.decode_log = True
