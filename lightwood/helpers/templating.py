@@ -1,7 +1,9 @@
 from lightwood.api.types import JsonAI
 
 
+'''
 def is_allowed(v):
+    print(v)
     if v is None:
         return True
 
@@ -31,23 +33,39 @@ def is_allowed(v):
     if v in ['data', 'nfolds', 'data', 'train_data', 'test_data', 'df']:
         return True
 
-    if isinstance(v, dict):
-        for k in v:
+    try:
+        cv = dict(v)
+        for k in cv:
             ka = is_allowed(k)
-            ma = is_allowed(v[k])
+            ma = is_allowed(cv[k])
             if not ka or not ma:
                 return False
         return True
+    except Exception:
+        pass
 
-    if isinstance(v, list):
-        for m in v:
+    try:
+        cv = list(v)
+        for ma in cv:
             ma = is_allowed(m)
             if not ma:
                 return False
         return True
+    except Exception:
+        pass
 
     raise Exception(f'Possible code injection: {v}')
-    
+'''
+
+
+def is_allowed(v):
+    if '(' in str(v):
+        return False
+    if 'lambda' in str(v):
+        return False
+
+    return True
+
 
 def call(entity: dict, json_ai: JsonAI) -> str:
     args = [f'{k}={v}' for k, v in entity['args'].items() if not str(v).startswith('$') and is_allowed(v)]

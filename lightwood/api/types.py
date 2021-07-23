@@ -5,6 +5,7 @@ from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
 import json
+from copy import deepcopy
 
 
 @dataclass_json
@@ -236,7 +237,11 @@ class JsonAI:
         return JsonAI.from_dict(json.loads(data))
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
-        return _asdict(self, encode_json=encode_json)
+        as_dict =  _asdict(self, encode_json=encode_json)
+        for k in as_dict:
+            if as_dict[k] is None:
+                del as_dict[k]
+        return as_dict
 
     def to_json(self) -> Dict[str, Json]:
         return json.dumps(self.to_dict(), indent=4)
