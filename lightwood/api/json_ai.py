@@ -191,7 +191,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 dependency.append(f'__mdb_ts_previous_{target}')
 
         feature = Feature(
-            name=col_name,
             data_dtype=col_dtype,
             encoder=encoder,
             dependency=dependency
@@ -393,7 +392,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{json_ai.output.data_dtype}'"""
 
-    input_cols = ','.join([f"""'{feature.name}'""" for feature in json_ai.features.values()])
+    input_cols = ','.join([f"""'{name}'""" for name in json_ai.features])
 
     ts_transform_code = ''
     ts_analyze_code = ''

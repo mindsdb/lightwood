@@ -11,7 +11,6 @@ from copy import deepcopy
 @dataclass_json
 @dataclass
 class Feature:
-    name: str
     data_dtype: str
     dependency: List[str] = None
     encoder: str = None
@@ -238,7 +237,7 @@ class JsonAI:
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
         as_dict =  _asdict(self, encode_json=encode_json)
-        for k in as_dict:
+        for k in list(as_dict.keys()):
             if as_dict[k] is None:
                 del as_dict[k]
         return as_dict
