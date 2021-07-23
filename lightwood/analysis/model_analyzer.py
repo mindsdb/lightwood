@@ -96,6 +96,7 @@ def model_analyzer(
         normalizer.fit(encoded_train_data, target)
         normalizer.prediction_cache = normalizer.predict(encoded_data)
 
+
         # instance the ICP
         nc = nc_class(model, nc_function, normalizer=normalizer)
         icp = icp_class(nc)
@@ -104,7 +105,7 @@ def model_analyzer(
 
         # setup prediction cache to avoid additional .predict() calls
         if is_classification:
-            if False:  # config.output.returns_proba:
+            if False:  # config.output.returns_proba:  # @TODO: reactivate once models return belief distributions
                 # @TODO: models should indicate whether they predict prob beliefs. if so, use them here
                 icp.nc_function.model.prediction_cache = np.array(normal_predictions['class_distribution'])
                 icp.nc_function.model.class_map = stats_info['lightwood_class_map']

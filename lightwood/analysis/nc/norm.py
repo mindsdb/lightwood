@@ -6,6 +6,7 @@ from typing import Union
 from sklearn.linear_model import ElasticNet
 from sklearn.metrics import mean_absolute_error
 
+from lightwood.api.dtype import dtype
 from lightwood.analysis.nc.nc import BaseScorer
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
@@ -20,6 +21,7 @@ class SelfawareNormalizer(BaseScorer):
         self.base_predictor = fit_params['predictor']
         self.encoders = fit_params['encoders']
         self.target = fit_params['target']
+        self.target_dtype = fit_params['dtype_dict'][fit_params['target']]
 
         self.model = ElasticNet()
         self.prediction_cache = None
@@ -29,7 +31,7 @@ class SelfawareNormalizer(BaseScorer):
         if data and target:
             preds = self.base_predictor(data)
             truths = data.data_frame[target]
-            labels = abs(preds.values.squeeze() - truths.values)
+            labels = self.get_labels(preds.values.squeeze(), truths.values, data.encoders[self.target])
             data.data_frame[target] = labels
             enc_data = data.get_encoded_data(include_target=False).numpy()
             self.model.fit(enc_data, labels)
@@ -48,6 +50,19 @@ class SelfawareNormalizer(BaseScorer):
             sa_score = np.array(sa_score)  # @TODO: try 0.5+softmax(x)
 
         return sa_score
+
+    def get_labels(self, preds: np.ndarray, truths: np.ndarray, target_enc):
+        if self.target_dtype in [dtype.integer, dtype.float]:
+            labels = abs(preds - truths)
+        elif self.target_dtype in [dtype.binary, dtype.categorical]:
+            # @TODO: incorporate output belief so that it's a soft difference
+            preds = target_enc.encode(preds).tolist()
+            truths = target_enc.encode(truths).tolist()
+            labels = [1 if p[t.index(1)] else 0 for p, t in zip(preds, truths)]
+        else:
+            raise(Exception(f"dtype {self.target_dtype} not supported for confidence normalizer"))
+
+        return labels
 
 
 class SelfAwareNet(torch.nn.Module):
