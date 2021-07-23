@@ -63,6 +63,8 @@ def is_allowed(v):
         return False
     if 'lambda' in str(v):
         return False
+    if '__' in str(v):
+        return False
 
     return True
 
