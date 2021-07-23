@@ -1,20 +1,61 @@
 import math
 import torch
 import numpy as np
-from typing import List
+from typing import Union
+
+from sklearn.linear_model import ElasticNet
 from sklearn.metrics import mean_absolute_error
 
+from lightwood.analysis.nc.nc import BaseScorer
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.analysis.nc.nc import BaseScorer
-
-from lightwood.model.lightgbm import LightGBM
-from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
+from lightwood.data.encoded_ds import ConcatedEncodedDs
 
 
-class SelfAware(torch.nn.Module):
+class SelfawareNormalizer(BaseScorer):
+    def __init__(self, fit_params):
+        super(SelfawareNormalizer, self).__init__()
+
+        self.input_cols = list(fit_params['dtype_dict'].keys())
+        self.base_predictor = fit_params['predictor']
+        self.encoders = fit_params['encoders']
+        self.target = fit_params['target']
+
+        self.model = ElasticNet()
+        self.prediction_cache = None
+        self.error_fn = mean_absolute_error
+
+    def fit(self, data: ConcatedEncodedDs, target: str) -> None:
+        if data and target:
+            preds = self.base_predictor(data)
+            truths = data.data_frame[target]
+            labels = abs(preds.values.squeeze() - truths.values)
+            data.data_frame[target] = labels
+            enc_data = data.get_encoded_data(include_target=False).numpy()  # @TODO: this should be the training split!
+            self.model.fit(enc_data, labels)
+            self.prediction_cache = self.model.predict(enc_data)
+
+    def predict(self, data: Union[ConcatedEncodedDs, torch.Tensor]) -> np.ndarray:
+        if isinstance(data, ConcatedEncodedDs):
+            data = data.get_encoded_data(include_target=False)
+        return self.model.predict(data.numpy())
+
+    def score(self, true_input, y=None):
+        sa_score = self.prediction_cache if self.prediction_cache is not None else self.model.predict(true_input)
+
+        if sa_score is None:
+            sa_score = np.ones(true_input.shape[0])  # by default, normalizing factor is 1 for all predictions
+        else:
+            sa_score = np.array(sa_score)  # @TODO: apply 0.5+softmax(X) depending on further testing
+
+        return sa_score
+
+
+class SelfAwareNet(torch.nn.Module):
     def __init__(self, input_size, output_size):
-        super(SelfAware, self).__init__()
+        """Unused alternative to ElasticNet regression model, aims to predict
+        the error that the main predictor will yield on each prediction"""
+        super(SelfAwareNet, self).__init__()
 
         self.input_size = input_size
         self.output_size = output_size
@@ -60,45 +101,3 @@ class SelfAware(torch.nn.Module):
             aware_in = true_input
             output = self.net(aware_in)
             return output
-
-
-class SelfawareNormalizer(BaseScorer):
-    def __init__(self, fit_params):
-        super(SelfawareNormalizer, self).__init__()
-        self.input_cols = list(fit_params['dtype_dict'].keys())
-        self.target = fit_params['target']
-
-        self.base_predictor = fit_params['predictor']
-        self.encoders = fit_params['encoders']
-
-        self.model = LightGBM(stop_after=30,
-                              target=fit_params['target'],
-                              dtype_dict=fit_params['dtype_dict'],
-                              input_cols=self.input_cols,
-                              fit_on_dev=False,
-                              use_optuna=False)
-
-        self.error_fn = mean_absolute_error
-        self.prediction_cache = None
-
-    def fit(self, data: List[EncodedDs], target: str) -> None:
-        concat = ConcatedEncodedDs(data)
-        preds = self.base_predictor(concat)
-        truths = data[0].data_frame[target]
-        labels = self.error_fn(preds-truths)
-        data.data_frame[target] = labels
-
-        self.model.fit(data)
-        # self.model = SelfAware(data.shape[0], y.shape)
-        # fit self.normalizer
-
-    def score(self, true_input, y=None):  # @TODO: rm y
-        # @TODO: make sure there is no label col here
-        sa_score = self.prediction_cache if self.prediction_cache else self.model(true_input)
-
-        if sa_score is None:
-            sa_score = np.ones(true_input.shape[0])  # by default, normalizing factor is 1 for all predictions
-        else:
-            sa_score = np.array(sa_score)
-
-        return sa_score

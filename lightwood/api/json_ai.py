@@ -307,6 +307,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
                 'anomaly_cooldown': '$problem_definition.anomaly_cooldown',
                 'data': 'data',
+                'encoded_data': 'encoded_data',
                 'predictions': 'df',
                 'analysis': 'self.runtime_analyzer',
                 'ts_analysis': 'self.ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
@@ -519,6 +520,8 @@ data = {call(json_ai.cleaner, json_ai)}
 {ts_transform_code}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
+encoded_data = encoded_ds.get_encoded_data(include_target=False)
+
 df = self.ensemble(encoded_ds)
 insights = {call(json_ai.explainer, json_ai)}
 return insights

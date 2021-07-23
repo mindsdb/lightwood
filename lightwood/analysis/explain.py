@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+import torch
 import numpy as np
 import pandas as pd
 
@@ -9,23 +10,25 @@ from lightwood.api.dtype import dtype
 from lightwood.api.types import TimeseriesSettings
 
 
-def explain(data,
-            predictions,
+def explain(data: pd.DataFrame,
+            encoded_data: torch.Tensor,
+            predictions: pd.DataFrame,
             timeseries_settings: TimeseriesSettings,
-            analysis,
-            target_name,
-            target_dtype,
-            positive_domain,
-            fixed_confidence,
-            anomaly_detection,
+            analysis: dict,
+            target_name: str,
+            target_dtype: str,
+            positive_domain: bool,
+            fixed_confidence: float,
+            anomaly_detection: bool,
 
             # forces specific confidence level in ICP
-            anomaly_error_rate,
+            anomaly_error_rate: float,
 
-            # (Int) ignores anomaly detection for N steps after an
+            # ignores anomaly detection for N steps after an
             # initial anomaly triggers the cooldown period;
             # implicitly assumes series are regularly spaced
-            anomaly_cooldown,
+            anomaly_cooldown: int,
+
             ts_analysis: dict = None
             ):
 
@@ -78,7 +81,7 @@ def explain(data,
             # only one normalizer, even if it's a grouped time series task
             normalizer = analysis['icp']['__default'].nc_function.normalizer
             if normalizer:
-                normalizer.prediction_cache = insights['prediction'].get(f'{target_name}_selfaware_scores', None)
+                normalizer.prediction_cache = normalizer.predict(encoded_data)
                 icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
 
             # get ICP predictions
