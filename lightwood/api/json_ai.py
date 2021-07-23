@@ -392,7 +392,6 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{json_ai.output.data_dtype}'"""
         json_ai.features[col_name] = Feature(
-            name=col_name,
             data_dtype=json_ai.output.data_dtype,
             encoder=encoder_dict[col_name],
             dependency=[]
