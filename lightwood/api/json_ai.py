@@ -223,7 +223,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             problem_definition.seconds_per_encoder = int(problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders))
         problem_definition.seconds_per_model = int(problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models))
 
-    if problem_definition.timeseries_settings.is_timeseries and  problem_definition.timeseries_settings.nr_predictions > 1:
+    if problem_definition.timeseries_settings.is_timeseries and problem_definition.timeseries_settings.nr_predictions > 1:
         output.data_dtype = dtype.array
 
     return JsonAI(
@@ -266,7 +266,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
         'from lightwood.ensemble import BaseEnsemble',
         'from typing import Dict, List',
-        'from lightwood.helpers.parallelism import mut_method_call'
+        'from lightwood.helpers.parallelism import mut_method_call',
+        'from lightwood import ProblemDefinition'
     ]
 
     for feature in [json_ai.output, *json_ai.features.values()]:
@@ -336,9 +337,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'target_dtype': '$dtype_dict[self.target]',
             }
         }
-
-
-    
+  
     if problem_definition.timeseries_settings.is_timeseries:
         if json_ai.timeseries_transformer is None:
             json_ai.timeseries_transformer = {
