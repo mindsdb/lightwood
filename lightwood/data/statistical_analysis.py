@@ -12,6 +12,7 @@ from scipy.stats import entropy
 
 def get_numeric_histogram(data, data_dtype):
     data = [_clean_float_or_none(x) for x in data]
+    
     Y, X = np.histogram(data, bins=min(50, len(set(data))),
                         range=(min(data), max(data)), density=False)
     if data_dtype == dtype.integer:
