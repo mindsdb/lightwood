@@ -15,7 +15,6 @@ setuptools >= 21.2.1
 wheel >= 0.32.2
 scikit-learn
 pillow < 7
-mindsdb_datasources >= 1.1.0
 langdetect >= 1.0.0
 dataclasses_json >= 0.5.4
 autopep8 >= 1.5.7
