@@ -289,6 +289,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'accuracy_functions': '$accuracy_functions',
                 'predictor': 'self.ensemble',
                 'data': 'test_data',
+                'encoded_train_data': 'encoded_train_data',
                 'target': 'self.target',
                 'disable_column_importance': 'True',
                 'dtype_dict': 'self.dtype_dict',
@@ -350,7 +351,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
         'from lightwood.ensemble import BaseEnsemble',
         'from typing import Dict, List',
-        'from lightwood.helpers.parallelism import mut_method_call'
+        'from lightwood.helpers.parallelism import mut_method_call',
+        'from lightwood.data.encoded_ds import ConcatedEncodedDs'
     ]
 
     for feature in [json_ai.output, *json_ai.features.values()]:
@@ -503,6 +505,7 @@ log.info('Ensembling the model')
 self.ensemble = {call(json_ai.output.ensemble, json_ai)}
 
 log.info('Analyzing the ensemble')
+encoded_train_data = ConcatedEncodedDs(train_data)
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
 
 # Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
