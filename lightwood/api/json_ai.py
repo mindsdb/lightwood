@@ -67,7 +67,7 @@ def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defin
 
     # Set arguments for the encoder
     if encoder_dict['module'] == 'PretrainedLangEncoder' and not is_target:
-        encoder_dict['args']['output_type'] = '$output.data_dtype'
+        encoder_dict['args']['output_type'] = '$dtype_dict[$target]'
 
     if encoder_dict['module'] in trainable_encoders:
         encoder_dict['args']['stop_after'] = '$problem_definition.seconds_per_encoder'
