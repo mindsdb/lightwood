@@ -279,69 +279,13 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
     json_ai.imports.extend(imports)
 
-    json_ai.cleaner = {
-        'module': 'cleaner',
-        'args': {
-            'pct_invalid': '$problem_definition.pct_invalid',
-            'ignore_features': '$problem_definition.ignore_features',
-            'identifiers': '$identifiers',
-            'data': 'data',
-            'dtype_dict': '$dtype_dict',
-            'target': '$target',
-            'mode': '$mode'
-        }
-    }
-
-    json_ai.splitter = {
-        'module': 'splitter',
-        'args': {
-            'tss': '$problem_definition.timeseries_settings',
-            'data': 'data',
-            'k': 'nfolds'
-        }
-    }
-
-    json_ai.analyzer = {
-        'module': 'model_analyzer',
-        'args': {
-            'stats_info': '$statistical_analysis',
-            'ts_cfg': '$problem_definition.timeseries_settings',
-            'accuracy_functions': '$accuracy_functions',
-            'predictor': '$ensemble',
-            'data': 'test_data',
-            'target': '$target',
-            'disable_column_importance': 'True',
-            'dtype_dict': '$dtype_dict',
-            'fixed_significance': None,
-            'positive_domain': False,
-        }
-    }
-
-    json_ai.explainer = {
-        'module': 'explain',
-        'args': {
-            'timeseries_settings': '$problem_definition.timeseries_settings',
-            'positive_domain': '$problem_definition.positive_domain',
-            'fixed_confidence': '$problem_definition.fixed_confidence',
-            'anomaly_detection': '$problem_definition.anomaly_detection',
-            'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
-            'anomaly_cooldown': '$problem_definition.anomaly_cooldown',
-            'data': 'data',
-            'predictions': 'df',
-            'analysis': '$runtime_analyzer',
-            'ts_analysis': '$ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
-            'target_name': '$target',
-            'target_dtype': '$dtype_dict[self.target]',
-        }
-    }
-
-
-    
-    if problem_definition.timeseries_settings.is_timeseries:
-        json_ai.timeseries_transformer = {
-            'module': 'transform_timeseries',
+    if json_ai.cleaner is None:
+        json_ai.cleaner = {
+            'module': 'cleaner',
             'args': {
-                'timeseries_settings': '$problem_definition.timeseries_settings',
+                'pct_invalid': '$problem_definition.pct_invalid',
+                'ignore_features': '$problem_definition.ignore_features',
+                'identifiers': '$identifiers',
                 'data': 'data',
                 'dtype_dict': '$dtype_dict',
                 'target': '$target',
@@ -349,15 +293,76 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             }
         }
 
-        json_ai.timeseries_analyzer = {
-            'module': 'timeseries_analyzer',
+    if json_ai.splitter is None:
+        json_ai.splitter = {
+            'module': 'splitter',
             'args': {
-                'timeseries_settings': '$problem_definition.timeseries_settings',
+                'tss': '$problem_definition.timeseries_settings',
                 'data': 'data',
-                'dtype_dict': '$dtype_dict',
-                'target': '$target'
+                'k': 'nfolds'
             }
         }
+    if json_ai.analyzer is None:
+        json_ai.analyzer = {
+            'module': 'model_analyzer',
+            'args': {
+                'stats_info': '$statistical_analysis',
+                'ts_cfg': '$problem_definition.timeseries_settings',
+                'accuracy_functions': '$accuracy_functions',
+                'predictor': '$ensemble',
+                'data': 'test_data',
+                'target': '$target',
+                'disable_column_importance': 'True',
+                'dtype_dict': '$dtype_dict',
+                'fixed_significance': None,
+                'positive_domain': False,
+            }
+        }
+
+    if json_ai.explainer is None:
+        json_ai.explainer = {
+            'module': 'explain',
+            'args': {
+                'timeseries_settings': '$problem_definition.timeseries_settings',
+                'positive_domain': '$problem_definition.positive_domain',
+                'fixed_confidence': '$problem_definition.fixed_confidence',
+                'anomaly_detection': '$problem_definition.anomaly_detection',
+                'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
+                'anomaly_cooldown': '$problem_definition.anomaly_cooldown',
+                'data': 'data',
+                'predictions': 'df',
+                'analysis': '$runtime_analyzer',
+                'ts_analysis': '$ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
+                'target_name': '$target',
+                'target_dtype': '$dtype_dict[self.target]',
+            }
+        }
+
+
+    
+    if problem_definition.timeseries_settings.is_timeseries:
+        if json_ai.timeseries_transformer is None:
+            json_ai.timeseries_transformer = {
+                'module': 'transform_timeseries',
+                'args': {
+                    'timeseries_settings': '$problem_definition.timeseries_settings',
+                    'data': 'data',
+                    'dtype_dict': '$dtype_dict',
+                    'target': '$target',
+                    'mode': '$mode'
+                }
+            }
+
+        if json_ai.timeseries_analyzer is None:
+            json_ai.timeseries_analyzer = {
+                'module': 'timeseries_analyzer',
+                'args': {
+                    'timeseries_settings': '$problem_definition.timeseries_settings',
+                    'data': 'data',
+                    'dtype_dict': '$dtype_dict',
+                    'target': '$target'
+                }
+            }
 
     return json_ai
 
@@ -419,8 +424,11 @@ if encoder.is_target:
 
     dataprep_body = f"""
 # The type of each column
+self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
+self.accuracy_functions = {json_ai.accuracy_functions}
+self.identifiers = {json_ai.identifiers}
 self.dtype_dict = {inline_dict(dtype_dict)}
-self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, problem_definition)
+self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, self.problem_definition)
 self.mode = 'train'
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
