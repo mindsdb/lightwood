@@ -8,8 +8,25 @@ from lightwood.api.types import ProblemDefinition
 np.random.seed(0)
 
 
-class TestTimeseries(unittest.TestCase):
 
+class TestTimeseries(unittest.TestCase):
+    def check_ts_prediction_df(self, df: pd.DataFrame, nr_preds: int, orders: List[str]):
+        for idx, row in df.iterrows():
+            assert len(row['prediction']) == nr_preds
+
+            for oby in orders:
+                assert len(row[f'order_{oby}']) == nr_preds
+
+            for t in range(nr_preds):
+                assert row['lower'][t] <= row['prediction'][t] <= row['upper'][t]
+
+            for oby in orders:
+                assert len(row[f'order_{oby}']) == nr_preds
+
+            if row['anomaly']:
+                assert not (row['lower'][0] <= row['truth'] <= row['upper'][0])
+            else:
+                assert row['lower'][0] <= row['truth'] <= row['upper'][0]
 
     def test_0_grouped_regression_timeseries(self):
         """ Test grouped numerical predictions (forecast horizon > 1), covering most of the TS pipeline """
@@ -58,24 +75,6 @@ class TestTimeseries(unittest.TestCase):
         for idx, row in preds.iterrows():
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > latest_timestamp
-
-    def check_1_ts_prediction_df(self, df: pd.DataFrame, nr_preds: int, orders: List[str]):
-        for idx, row in df.iterrows():
-            assert len(row['prediction']) == nr_preds
-
-            for oby in orders:
-                assert len(row[f'order_{oby}']) == nr_preds
-
-            for t in range(nr_preds):
-                assert row['lower'][t] <= row['prediction'][t] <= row['upper'][t]
-
-            for oby in orders:
-                assert len(row[f'order_{oby}']) == nr_preds
-
-            if row['anomaly']:
-                assert not (row['lower'][0] <= row['truth'] <= row['upper'][0])
-            else:
-                assert row['lower'][0] <= row['truth'] <= row['upper'][0]
 
     def test_2_time_series_classification(self):
         from lightwood.api.high_level import predictor_from_problem
