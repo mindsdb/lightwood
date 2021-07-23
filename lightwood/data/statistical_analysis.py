@@ -55,6 +55,15 @@ def statistical_analysis(data: pd.DataFrame,
     # get train std, used in analysis
     if dtypes[target] in [dtype.float, dtype.integer]:
         train_std = df[target].astype(float).std()
+    elif dtypes[target] in [dtype.array]:
+        try:
+            all_vals = []
+            for x in df[target]:
+                all_vals += x
+            train_std = pd.Series(all_vals).astype(float).std()
+        except Exception as e:
+            log.warning(e)
+            train_std = None
     else:
         train_std = None
 
