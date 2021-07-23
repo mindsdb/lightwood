@@ -54,17 +54,10 @@ def call(entity: dict, json_ai: JsonAI) -> str:
 
     for k, v in entity['args'].items():
         if str(v).startswith('$'):
-            v = str(v).lstrip('$')
-            try:
-                val = json_ai
-                for item in v.split('.'):
-                    val = val.__getattribute__(item)
-                    if isinstance(val, str):
-                        val = f'"{val}"'
-                args.append(f'{k}={val}')
-            except Exception:
-                args.append(f'{k}=self.{val}')
+            v = str(v).replace('$', 'self.')
+            args.append(f'{k}={v}')
 
+    args = ','.join(args)
     return f"""{entity['module']}({args})"""
 
 
