@@ -236,9 +236,10 @@ class Neural(BaseModel):
                 self.epochs_to_best += epoch_to_best_model
 
         # Do a single training run on the test data as well
-        if self.fit_on_dev:
-            self.partial_fit(dev_ds_arr, train_ds_arr)
-        self._final_tuning(dev_ds_arr)
+        if len(ConcatedEncodedDs(dev_ds_arr)) > 0:
+            if self.fit_on_dev:
+                self.partial_fit(dev_ds_arr, train_ds_arr)
+            self._final_tuning(dev_ds_arr)
 
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly

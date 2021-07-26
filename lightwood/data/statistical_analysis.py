@@ -64,9 +64,9 @@ def statistical_analysis(data: pd.DataFrame,
             train_std = pd.Series(all_vals).astype(float).std()
         except Exception as e:
             log.warning(e)
-            train_std = None
+            train_std = 1.0
     else:
-        train_std = None
+        train_std = 1.0
 
     histograms = {}
     # Get histograms for each column

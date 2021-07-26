@@ -49,7 +49,7 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
                 for col in order_cols:
                     ts_info['data'] = pd.Series([x[-1] for x in df[col]])
                     _, subset = get_group_matches(ts_info, group)
-                    if subset.size > 0:
+                    if subset.size > 1:
                         rolling_diff = pd.Series(subset.squeeze()).rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
                         delta = rolling_diff.value_counts(ascending=False).keys()[0]
                         deltas[group][col] = delta
