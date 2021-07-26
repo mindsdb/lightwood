@@ -1,11 +1,13 @@
-from lightwood.helpers.general import evaluate_accuracy
 from typing import List
-from lightwood.model.base import BaseModel
-import pandas as pd
-from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
-from lightwood.ensemble.base import BaseEnsemble
+
 import numpy as np
+import pandas as pd
+
 from lightwood.helpers.log import log
+from lightwood.model.base import BaseModel
+from lightwood.ensemble.base import BaseEnsemble
+from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
+from lightwood.helpers.general import evaluate_accuracy
 
 
 class BestOf(BaseEnsemble):

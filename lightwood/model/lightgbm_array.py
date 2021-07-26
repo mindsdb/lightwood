@@ -44,7 +44,7 @@ class LightGBMArray(BaseModel):
 
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
-    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs]) -> pd.DataFrame:
+    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], return_proba: bool = False) -> pd.DataFrame:
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),

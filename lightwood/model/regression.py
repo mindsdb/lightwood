@@ -29,7 +29,7 @@ class Regression(BaseModel):
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         self.fit(train_data + dev_data)
 
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
         X = []
         for x, _ in ds:
             X.append(x.tolist())
