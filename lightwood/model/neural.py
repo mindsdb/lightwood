@@ -253,7 +253,7 @@ class Neural(BaseModel):
 
         self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=max(1, int(self.epochs_to_best / 3)))
     
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         

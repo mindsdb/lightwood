@@ -27,7 +27,7 @@ class Unit(BaseModel):
     ) -> None:
         pass
 
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
 
         decoded_predictions: List[object] = []
 
