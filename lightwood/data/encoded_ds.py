@@ -90,7 +90,7 @@ class ConcatedEncodedDs(EncodedDs):
         self.target = self.encoded_ds_arr[0].target
 
     def __len__(self):
-        return np.sum(self.encoded_ds_lenghts) - 2
+        return max(0, np.sum(self.encoded_ds_lenghts) - 2)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         for ds_idx, length in enumerate(self.encoded_ds_lenghts):

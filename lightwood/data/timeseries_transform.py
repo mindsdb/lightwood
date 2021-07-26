@@ -150,7 +150,6 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
     return combined_df
 
 
-
 def _ts_infer_next_row(df, ob, last_index):
     last_row = df.iloc[[-1]].copy()
     if df.shape[0] > 1:
@@ -223,7 +222,9 @@ def _ts_add_previous_target(df, target, nr_predictions, window, data_dtype, mode
         for del_index in range(0, min(timestep_index, len(next_target_value_arr))):
             del next_target_value_arr[0]
             next_target_value_arr.append(None)
-        df[f'{target}_timestep_{timestep_index}'] = next_target_value_arr
+        col_name = f'{target}_timestep_{timestep_index}'
+        df[col_name] = next_target_value_arr
+        df[col_name] = df[col_name].fillna(value=np.nan)
 
     # drop rows with incomplete target info.
     if mode == 'train':

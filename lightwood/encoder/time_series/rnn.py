@@ -333,7 +333,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
         # include autoregressive target data
         ptd = []
-        if dependency_data is not None:  #  and len(dependency_data) > 0:
+        if dependency_data is not None:
             for dep, dep_data in dependency_data.items():
                 if dep in self.grouped_by:
                     continue
