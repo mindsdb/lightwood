@@ -10,6 +10,7 @@ from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
 class LightGBMArray(BaseModel):
+    """LightGBM-based model, intended for usage in time series tasks."""
     models: List[LightGBM]
     n_ts_predictions:  int
     submodel_stop_after: float
@@ -45,6 +46,9 @@ class LightGBMArray(BaseModel):
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], return_proba: bool = False) -> pd.DataFrame:
+        if return_proba:
+            log.warning('This model cannot output probability estimates')
+
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
