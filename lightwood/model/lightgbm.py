@@ -188,7 +188,7 @@ class LightGBM(BaseModel):
         
         pass
 
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
         data = None
         for input_col in self.input_cols:
             if data is None:
@@ -204,5 +204,12 @@ class LightGBM(BaseModel):
         else:
             decoded_predictions = raw_predictions
 
-        ydf = pd.DataFrame({'prediction': decoded_predictions})
+        if return_proba and self.ordinal_encoder is not None:
+            predictions = np.hstack([raw_predictions, decoded_predictions.reshape(-1, 1)])
+            cat_labels = [f'__mdb_cat_{label}' for label in self.ordinal_encoder.categories_[0].tolist()]
+            ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])
+        else:
+            ydf = pd.DataFrame({'prediction': decoded_predictions})
+
+        print(ydf)
         return ydf

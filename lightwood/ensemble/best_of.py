@@ -32,8 +32,8 @@ class BestOf(BaseEnsemble):
 
         log.info(f'Picked best model: {type(self.models[self.best_index]).__name__}')
 
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
-        return self.models[self.best_index](ds)
+    def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
+        return self.models[self.best_index](ds, return_proba=return_proba)
 
     def improves(self, new, old, functions):
         return new > old if self.maximize else new < old

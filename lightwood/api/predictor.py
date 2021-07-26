@@ -15,6 +15,8 @@ class PredictorInterface():
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame: pass
 
+    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame: pass
+
     def save(self, file_path: str):
         with open(file_path, 'wb') as fp:
             dill.dump(self, fp)

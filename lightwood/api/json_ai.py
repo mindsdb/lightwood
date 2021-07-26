@@ -534,6 +534,20 @@ return insights
 """
     predict_body = align(predict_body, 2)
 
+    predict_proba_body = f"""
+self.mode = 'predict'
+log.info('Cleaning the data')
+data = {call(json_ai.cleaner, json_ai)}
+
+{ts_transform_code}
+
+encoded_ds = lightwood.encode(self.encoders, data, self.target)
+df = self.ensemble(encoded_ds, return_proba=True)
+insights = {call(json_ai.explainer, json_ai)}
+return insights
+"""
+    predict_proba_body = align(predict_proba_body, 2)
+
     imports = '\n'.join(json_ai.imports)
     predictor_code = f"""
 {imports}
@@ -558,6 +572,10 @@ class Predictor(PredictorInterface):
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
 {predict_body}
+
+
+    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
+{predict_proba_body}
 """
 
     if len(predictor_code) < 5000:
