@@ -1,11 +1,13 @@
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
-from typing import Dict, List
-from lightwood.encoder.base import BaseEncoder
-import pandas as pd
-from lightwood.model import BaseModel
-from lightwood.helpers.log import log
-from sklearn.linear_model import LinearRegression
+from typing import List
+
 import torch
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+from lightwood.helpers.log import log
+from lightwood.model import BaseModel
+from lightwood.encoder.base import BaseEncoder
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 
 
 class Regression(BaseModel):
@@ -30,13 +32,13 @@ class Regression(BaseModel):
         self.fit(train_data + dev_data)
 
     def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
+        if return_proba:
+            log.warning('This model cannot output probability estimates')
         X = []
         for x, _ in ds:
             X.append(x.tolist())
         
         Yh = self.model.predict(X)
-
-        decoded_predictions = []
 
         decoded_predictions = self.target_encoder.decode(torch.Tensor(Yh))
 
