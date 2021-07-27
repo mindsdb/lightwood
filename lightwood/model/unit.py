@@ -28,6 +28,9 @@ class Unit(BaseModel):
         pass
 
     def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
+        if return_proba:
+            # @TODO: depending on the target encoder, this might be enabled
+            log.warning('This model cannot output probability estimates')
 
         decoded_predictions: List[object] = []
 

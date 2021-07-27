@@ -12,7 +12,6 @@ class OneHotEncoder(BaseEncoder):
 
     def __init__(self, is_target=False, target_class_distribution=None):
         super().__init__(is_target)
-        self.predict_proba = False  # if True, we return the belief distribution
         self._lang = None
         if self.is_target:
             self.target_class_distribution = target_class_distribution
@@ -77,7 +76,7 @@ class OneHotEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data):
+    def decode(self, encoded_data, predict_proba=False):
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -90,11 +89,11 @@ class OneHotEncoder(BaseEncoder):
             ohe_index = np.argmax(vector)
             ret.append(self._lang.index2word[ohe_index])
 
-            if self.predict_proba:
+            if predict_proba:
                 del(vector[UNCOMMON_TOKEN])
                 probs.append(softmax(vector).tolist())
 
-        if self.predict_proba:
+        if predict_proba:
             # UNK not included in class_map nor belief distribution
             if UNCOMMON_TOKEN != 0:
                 raise Exception("Uncommon token should be the first assigned token in the vocabulary, aborting.")
