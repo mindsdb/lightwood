@@ -1,27 +1,29 @@
-from lightwood.encoder.base import BaseEncoder
-from typing import Dict, List
-import pandas as pd
-from torch.nn.modules.loss import MSELoss
-from lightwood.api import dtype
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 import time
-from torch import nn
-import torch
-import numpy as np
 from copy import deepcopy
-from torch.utils.data import DataLoader
-from torch.cuda.amp import GradScaler
-from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.log import log
-from lightwood.model.base import BaseModel
-from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.model.helpers.default_net import DefaultNet
-from lightwood.model.helpers.ar_net import ArNet
-import torch_optimizer as ad_optim
-from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
-from torch.optim.optimizer import Optimizer
-from sklearn.metrics import r2_score
+from typing import Dict, List
+
+import torch
 import optuna
+import numpy as np
+import pandas as pd
+from torch import nn
+import torch_optimizer as ad_optim
+from sklearn.metrics import r2_score
+from torch.cuda.amp import GradScaler
+from torch.utils.data import DataLoader
+from torch.nn.modules.loss import MSELoss
+from torch.optim.optimizer import Optimizer
+
+from lightwood.api import dtype
+from lightwood.helpers.log import log
+from lightwood.api.types import TimeseriesSettings
+from lightwood.helpers.torch import LightwoodAutocast
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
+from lightwood.model.base import BaseModel
+from lightwood.model.helpers.ar_net import ArNet
+from lightwood.model.helpers.default_net import DefaultNet
+from lightwood.encoder.base import BaseEncoder
 
 
 class Neural(BaseModel):
@@ -116,10 +118,9 @@ class Neural(BaseModel):
         running_errors = []
         best_model = self.model
 
-        train_error = None
         for epoch in range(1, return_model_after + 1):
             train_error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            #log.info(f'Train error: {round(train_error,3)}')
+            # log.info(f'Train error: {round(train_error,3)}')
             running_errors.append(self._error(dev_dl, criterion))
 
             if np.isnan(train_error) or np.isnan(running_errors[-1]) or np.isinf(train_error) or np.isinf(running_errors[-1]):
@@ -256,6 +257,8 @@ class Neural(BaseModel):
     def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
+        all_probs: List[List[float]] = []
+        rev_map = {}
         
         for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
@@ -265,12 +268,24 @@ class Neural(BaseModel):
             kwargs = {}
             for dep in self.target_encoder.dependencies:
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
-            decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
+
+            if return_proba:
+                kwargs['predict_proba'] = True
+                decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
+                all_probs.append(probs)
+            else:
+                decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
 
             if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
                 decoded_predictions.extend(decoded_prediction)
             else:
                 decoded_predictions.append(decoded_prediction)
 
-        ydf = pd.DataFrame({'prediction': decoded_predictions})
+        if return_proba:
+            predictions = np.hstack([np.array(all_probs).squeeze(), np.array(decoded_predictions).reshape(-1, 1)])
+            cat_labels = [f'__mdb_cat_{label}' for label in rev_map.values()]
+            ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])
+            ydf[cat_labels] = ydf[cat_labels].astype(float)
+        else:
+            ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf

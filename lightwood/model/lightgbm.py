@@ -211,5 +211,4 @@ class LightGBM(BaseModel):
         else:
             ydf = pd.DataFrame({'prediction': decoded_predictions})
 
-        print(ydf)
         return ydf
