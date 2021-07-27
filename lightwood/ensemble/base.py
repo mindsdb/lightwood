@@ -14,5 +14,5 @@ class BaseEnsemble:
         self.models = models
         self.best_index = 0
         
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         raise NotImplementedError()

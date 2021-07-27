@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-import torch
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -24,7 +23,6 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 
 """
 Pending:
- - [] use class distribution output
  - [] reactivate global feat importance
  - [] simplify nonconformist custom implementation?
  - [] reimplement caching for faster analysis?
@@ -35,7 +33,7 @@ Pending:
 def model_analyzer(
         predictor: BaseEnsemble,
         data: List[EncodedDs],
-        encoded_train_data: torch.Tensor,
+        encoded_train_data: ConcatedEncodedDs,
         stats_info: StatisticalAnalysis,
         target: str,
         ts_cfg: TimeseriesSettings,
@@ -46,16 +44,6 @@ def model_analyzer(
         accuracy_functions
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
-    encoded_data = ConcatedEncodedDs(data)
-    data = encoded_data.data_frame
-    runtime_analyzer = {}
-    predictions = {}
-    input_cols = list([col for col in data.columns if col != target])
-    normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
-    normal_predictions = normal_predictions.set_index(data.index)
-
-    # confidence estimation with inductive conformal predictors (ICPs)
-    runtime_analyzer['icp'] = {'__mdb_active': False}
 
     data_type = dtype_dict[target]
     data_subtype = data_type
@@ -64,13 +52,25 @@ def model_analyzer(
     is_classification = data_type in (dtype.categorical, dtype.binary)
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
 
+    encoded_data = ConcatedEncodedDs(data)
+    data = encoded_data.data_frame
+    runtime_analyzer = {}
+    predictions = {}
+    input_cols = list([col for col in data.columns if col != target])
+    normal_predictions = predictor(encoded_data) if not is_classification else predictor(encoded_data, predict_proba=True)
+    normal_predictions = normal_predictions.set_index(data.index)
+
+    # confidence estimation with inductive conformal predictors (ICPs)
+    runtime_analyzer['icp'] = {'__mdb_active': False}
+
+    all_cat_cols = [col for col in normal_predictions.columns if '__mdb_proba' in col]
+    all_classes = np.array([col.replace('__mdb_proba_', '') for col in all_cat_cols])
     fit_params = {'nr_preds': ts_cfg.nr_predictions or 0, 'columns_to_ignore': [] }
     fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
 
     # @TODO: adapters should not be needed anymore
     if is_classification:
         if data_subtype != dtype.tags:
-            all_classes = np.array(stats_info.train_observed_classes)
             enc = OneHotEncoder(sparse=False, handle_unknown='ignore')
             enc.fit(all_classes.reshape(-1, 1))
             runtime_analyzer['label_encoders'] = enc  # needed to repr cat labels inside nonconformist @TODO: remove?
@@ -96,7 +96,6 @@ def model_analyzer(
         normalizer.fit(encoded_train_data, target)
         normalizer.prediction_cache = normalizer.predict(encoded_data)
 
-
         # instance the ICP
         nc = nc_class(model, nc_function, normalizer=normalizer)
         icp = icp_class(nc)
@@ -105,16 +104,11 @@ def model_analyzer(
 
         # setup prediction cache to avoid additional .predict() calls
         if is_classification:
-            if False:  # config.output.returns_proba:  # @TODO: reactivate once models return belief distributions
-                # @TODO: models should indicate whether they predict prob beliefs. if so, use them here
-                icp.nc_function.model.prediction_cache = np.array(normal_predictions['class_distribution'])
-                icp.nc_function.model.class_map = stats_info['lightwood_class_map']
+            if predictor.models[predictor.best_index].supports_proba:
+                icp.nc_function.model.prediction_cache = normal_predictions[all_cat_cols].values
             else:
-                class_map = {i: v for i, v in enumerate(stats_info.train_observed_classes)}
                 predicted_classes = pd.get_dummies(normal_predictions['prediction']).values  # inflate to one-hot enc
-
                 icp.nc_function.model.prediction_cache = predicted_classes
-                icp.nc_function.model.class_map = class_map  # @TODO: still needed?
 
         elif is_multi_ts:
             # we fit ICPs for time series confidence bounds only at t+1 forecast
@@ -216,7 +210,6 @@ def model_analyzer(
 
         runtime_analyzer['icp']['__mdb_active'] = True
 
-    # TODO: calculate acc on other folds?
     # get accuracy metric for validation data
     score_dict = evaluate_accuracy(
         data,
@@ -252,8 +245,8 @@ def model_analyzer(
     else:
         column_importances = None
 
-
-    predictions_arr = [normal_predictions['prediction'].values.flatten().tolist()] + [x for x in empty_input_predictions_test.values()]
+    predictions_arr = [normal_predictions['prediction'].values.flatten().tolist()] + \
+                      [x for x in empty_input_predictions_test.values()]
 
     acc_stats = AccStats(dtype_dict=dtype_dict, target=target)
     acc_stats.fit(
