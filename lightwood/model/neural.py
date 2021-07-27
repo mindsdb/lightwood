@@ -1,27 +1,29 @@
-from lightwood.encoder.base import BaseEncoder
-from typing import Dict, List
-import pandas as pd
-from torch.nn.modules.loss import MSELoss
-from lightwood.api import dtype
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 import time
-from torch import nn
-import torch
-import numpy as np
 from copy import deepcopy
-from torch.utils.data import DataLoader
-from torch.cuda.amp import GradScaler
-from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.log import log
-from lightwood.model.base import BaseModel
-from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.model.helpers.default_net import DefaultNet
-from lightwood.model.helpers.ar_net import ArNet
-import torch_optimizer as ad_optim
-from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
-from torch.optim.optimizer import Optimizer
-from sklearn.metrics import r2_score
+from typing import Dict, List
+
+import torch
 import optuna
+import numpy as np
+import pandas as pd
+from torch import nn
+import torch_optimizer as ad_optim
+from sklearn.metrics import r2_score
+from torch.cuda.amp import GradScaler
+from torch.utils.data import DataLoader
+from torch.nn.modules.loss import MSELoss
+from torch.optim.optimizer import Optimizer
+
+from lightwood.api import dtype
+from lightwood.helpers.log import log
+from lightwood.api.types import TimeseriesSettings
+from lightwood.helpers.torch import LightwoodAutocast
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
+from lightwood.model.base import BaseModel
+from lightwood.model.helpers.ar_net import ArNet
+from lightwood.model.helpers.default_net import DefaultNet
+from lightwood.encoder.base import BaseEncoder
 
 
 class Neural(BaseModel):
@@ -36,35 +38,36 @@ class Neural(BaseModel):
         self.epochs_to_best = 0
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
-    
+        self.supports_proba = True
+
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
             self.model = self.model.eval()
 
-            decoded_predictions = []
-            decoded_real_values = []
+            acc_dict = {}
+            for decode_log in [True, False]:
+                self.target_encoder.decode_log = decode_log
+                decoded_predictions = []
+                decoded_real_values = []
+                for data in data_arr:
+                    for X, Y in data:
+                        X = X.to(self.model.device)
+                        Y = Y.to(self.model.device)
+                        Yh = self.model(X)
 
-            for data in data_arr:
-                for X, Y in data:
-                    X = X.to(self.model.device)
-                    Y = Y.to(self.model.device)
-                    Yh = self.model(X)
+                        Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
+                        Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
 
-                    Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
-                    Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
+                        decoded_predictions.extend(self.target_encoder.decode(Yh))
+                        decoded_real_values.extend(self.target_encoder.decode(Y))
 
-                    decoded_predictions.extend(self.target_encoder.decode(Yh))
-                    decoded_real_values.extend(self.target_encoder.decode(Y))
+                    
+                acc_dict[decode_log] = r2_score(decoded_real_values, decoded_predictions)
 
+            if acc_dict[True] > acc_dict[False]:
                 self.target_encoder.decode_log = True
-                log_acc = r2_score(decoded_real_values, decoded_predictions)
+            else:
                 self.target_encoder.decode_log = False
-                lin_acc = r2_score(decoded_real_values, decoded_predictions)
-
-                if lin_acc < log_acc:
-                    self.target_encoder.decode_log = True
-                else:
-                    self.target_encoder.decode_log = False
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
@@ -116,10 +119,9 @@ class Neural(BaseModel):
         running_errors = []
         best_model = self.model
 
-        train_error = None
         for epoch in range(1, return_model_after + 1):
             train_error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            #log.info(f'Train error: {round(train_error,3)}')
+            # log.info(f'Train error: {round(train_error,3)}')
             running_errors.append(self._error(dev_dl, criterion))
 
             if np.isnan(train_error) or np.isnan(running_errors[-1]) or np.isinf(train_error) or np.isinf(running_errors[-1]):
@@ -161,17 +163,17 @@ class Neural(BaseModel):
         dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
 
         scaler = GradScaler()
-        self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 20))
+        self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 10))
         
         time_for_trials = self.stop_after / 2
-        nr_trails = 20
+        nr_trails = 25
         time_per_trial = time_for_trials / nr_trails
         if time_per_trial > 5:
             def objective(trial):
                 log.debug(f'Running trial in max {time_per_trial} seconds')
                 # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
                 num_hidden = trial.suggest_int('num_hidden', 1, 2)
-                lr = trial.suggest_loguniform('lr', 0.0005, 0.1)
+                lr = trial.suggest_loguniform('lr', 0.0001, 0.1)
 
                 self.model = DefaultNet(
                     input_size=len(ds_arr[0][0][0]),
@@ -205,7 +207,7 @@ class Neural(BaseModel):
             self.lr = study.best_trial.params['lr']
         else:
             self.num_hidden = 1
-            self.lr = 0.001
+            self.lr = 0.0005
         dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
 
@@ -236,9 +238,10 @@ class Neural(BaseModel):
                 self.epochs_to_best += epoch_to_best_model
 
         # Do a single training run on the test data as well
-        if self.fit_on_dev:
-            self.partial_fit(dev_ds_arr, train_ds_arr)
-        self._final_tuning(dev_ds_arr)
+        if len(ConcatedEncodedDs(dev_ds_arr)) > 0:
+            if self.fit_on_dev:
+                self.partial_fit(dev_ds_arr, train_ds_arr)
+            self._final_tuning(dev_ds_arr)
 
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
@@ -252,9 +255,11 @@ class Neural(BaseModel):
 
         self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=max(1, int(self.epochs_to_best / 3)))
     
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
+        all_probs: List[List[float]] = []
+        rev_map = {}
         
         for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
@@ -264,12 +269,24 @@ class Neural(BaseModel):
             kwargs = {}
             for dep in self.target_encoder.dependencies:
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
-            decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
+
+            if predict_proba:
+                kwargs['predict_proba'] = True
+                decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
+                all_probs.append(probs)
+            else:
+                decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
 
             if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
                 decoded_predictions.extend(decoded_prediction)
             else:
                 decoded_predictions.append(decoded_prediction)
 
-        ydf = pd.DataFrame({'prediction': decoded_predictions})
+        if predict_proba:
+            predictions = np.hstack([np.array(all_probs).squeeze(), np.array(decoded_predictions).reshape(-1, 1)])
+            cat_labels = [f'__mdb_proba_{label}' for label in rev_map.values()]
+            ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])
+            ydf[cat_labels] = ydf[cat_labels].astype(float)
+        else:
+            ydf = pd.DataFrame({'prediction': decoded_predictions})
         return ydf

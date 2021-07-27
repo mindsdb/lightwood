@@ -1,3 +1,4 @@
+from typing import Dict
 from lightwood.api import TypeInformation, StatisticalAnalysis, ProblemDefinition, dtype
 import pandas as pd
 import numpy as np
@@ -11,6 +12,7 @@ from scipy.stats import entropy
 
 def get_numeric_histogram(data, data_dtype):
     data = [_clean_float_or_none(x) for x in data]
+    
     Y, X = np.histogram(data, bins=min(50, len(set(data))),
                         range=(min(data), max(data)), density=False)
     if data_dtype == dtype.integer:
@@ -39,11 +41,12 @@ def compute_entropy_biased_buckets(histogram):
 
 
 def statistical_analysis(data: pd.DataFrame,
-                         type_information: TypeInformation,
+                         dtypes: Dict[str, str],
+                         identifiers: Dict[str, object],
                          problem_definition: ProblemDefinition) -> StatisticalAnalysis:
     seed()
     log.info('Starting statistical analysis')
-    df = cleaner(data, type_information.dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, type_information.identifiers, problem_definition.target, 'train')
+    df = cleaner(data, dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, identifiers, problem_definition.target, 'train')
     
     missing = {col: len([x for x in df[col] if x is None]) / len(df[col]) for col in df.columns}
     distinct = {col: len(set(df[col])) / len(df[col]) for col in df.columns}
@@ -51,30 +54,39 @@ def statistical_analysis(data: pd.DataFrame,
     nr_rows = len(df)
     target = problem_definition.target
     # get train std, used in analysis
-    if type_information.dtypes[target] in [dtype.float, dtype.integer]:
+    if dtypes[target] in [dtype.float, dtype.integer]:
         train_std = df[target].astype(float).std()
+    elif dtypes[target] in [dtype.array]:
+        try:
+            all_vals = []
+            for x in df[target]:
+                all_vals += x
+            train_std = pd.Series(all_vals).astype(float).std()
+        except Exception as e:
+            log.warning(e)
+            train_std = 1.0
     else:
-        train_std = None
+        train_std = 1.0
 
     histograms = {}
     # Get histograms for each column
     for col in df.columns:
         histograms[col] = None
-        if type_information.dtypes[col] in (dtype.categorical, dtype.binary):
+        if dtypes[col] in (dtype.categorical, dtype.binary):
             hist = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
             histograms[col] = {
                 'x': list(hist.keys()),
                 'y': list(hist.values())
             }
-        if type_information.dtypes[col] in (dtype.integer, dtype.float):
-            histograms[col] = get_numeric_histogram(filter_nan(df[col]), type_information.dtypes[col])
+        if dtypes[col] in (dtype.integer, dtype.float):
+            histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col])
 
     # get observed classes, used in analysis
     target_class_distribution = None
-    if type_information.dtypes[target] in (dtype.categorical, dtype.binary):
+    if dtypes[target] in (dtype.categorical, dtype.binary):
         target_class_distribution = dict(df[target].value_counts().apply(lambda x: x / len(df[target])))
         train_observed_classes = list(target_class_distribution.keys())
-    elif type_information.dtypes[target] == dtype.tags:
+    elif dtypes[target] == dtype.tags:
         train_observed_classes = None  # @TODO: pending call to tags logic -> get all possible tags
     else:
         train_observed_classes = None

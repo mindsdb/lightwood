@@ -8,7 +8,7 @@ from lightwood.encoder.time_series.helpers.common import get_group_matches, gene
 def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str) -> (Dict, Dict):
     info = {
         'original_type': dtype_dict[target],
-        'data': data[target]
+        'data': data[target].values
     }
     if timeseries_settings.group_by is not None:
         info['group_info'] = {gcol: data[gcol].tolist() for gcol in timeseries_settings.group_by}  # group col values
@@ -49,7 +49,7 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
                 for col in order_cols:
                     ts_info['data'] = pd.Series([x[-1] for x in df[col]])
                     _, subset = get_group_matches(ts_info, group)
-                    if subset.size > 0:
+                    if subset.size > 1:
                         rolling_diff = pd.Series(subset.squeeze()).rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
                         delta = rolling_diff.value_counts(ascending=False).keys()[0]
                         deltas[group][col] = delta

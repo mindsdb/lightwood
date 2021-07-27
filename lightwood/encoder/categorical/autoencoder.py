@@ -18,7 +18,6 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.net = None
         self.encoder = None
         self.decoder = None
-        self.predict_proba = None  # whether to return the belief distribution as well
         self.onehot_encoder = OneHotEncoder(is_target=self.is_target)
         self.desired_error = 0.01
         self.use_autoencoder = None
@@ -101,12 +100,11 @@ class CategoricalAutoEncoder(BaseEncoder):
                 embeddings = self.encoder(oh_encoded_tensor)
                 return embeddings.to('cpu')
 
-    def decode(self, encoded_data):
-        self.onehot_encoder.predict_proba = self.predict_proba
+    def decode(self, encoded_data, predict_proba=False):
         if not self.use_autoencoder:
-            return self.onehot_encoder.decode(encoded_data)
+            return self.onehot_encoder.decode(encoded_data, predict_proba=predict_proba)
         else:
             with torch.no_grad():
                 oh_encoded_tensor = self.decoder(encoded_data)
                 oh_encoded_tensor = oh_encoded_tensor.to('cpu')
-                return self.onehot_encoder.decode(oh_encoded_tensor)
+                return self.onehot_encoder.decode(oh_encoded_tensor, predict_proba=predict_proba)

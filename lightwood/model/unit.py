@@ -18,6 +18,7 @@ class Unit(BaseModel):
     def __init__(self, stop_after: int, target_encoder: BaseEncoder):
         super().__init__(stop_after)
         self.target_encoder = target_encoder
+        self.supports_proba = False
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info("Unit Mixer just borrows from encoder")
@@ -27,7 +28,10 @@ class Unit(BaseModel):
     ) -> None:
         pass
 
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
+        if predict_proba:
+            # @TODO: depending on the target encoder, this might be enabled
+            log.warning('This model cannot output probability estimates')
 
         decoded_predictions: List[object] = []
 
