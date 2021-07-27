@@ -38,7 +38,8 @@ class Neural(BaseModel):
         self.epochs_to_best = 0
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
-    
+        self.supports_proba = True
+
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
             self.model = self.model.eval()
@@ -254,7 +255,7 @@ class Neural(BaseModel):
 
         self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=max(1, int(self.epochs_to_best / 3)))
     
-    def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         all_probs: List[List[float]] = []
@@ -269,7 +270,7 @@ class Neural(BaseModel):
             for dep in self.target_encoder.dependencies:
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
 
-            if return_proba:
+            if predict_proba:
                 kwargs['predict_proba'] = True
                 decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
                 all_probs.append(probs)
@@ -281,9 +282,9 @@ class Neural(BaseModel):
             else:
                 decoded_predictions.append(decoded_prediction)
 
-        if return_proba:
+        if predict_proba:
             predictions = np.hstack([np.array(all_probs).squeeze(), np.array(decoded_predictions).reshape(-1, 1)])
-            cat_labels = [f'__mdb_cat_{label}' for label in rev_map.values()]
+            cat_labels = [f'__mdb_proba_{label}' for label in rev_map.values()]
             ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])
             ydf[cat_labels] = ydf[cat_labels].astype(float)
         else:

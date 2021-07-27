@@ -49,6 +49,7 @@ class LightGBM(BaseModel):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
+        self.supports_proba = True
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         gpu_works = check_gpu_support()
@@ -188,7 +189,7 @@ class LightGBM(BaseModel):
         
         pass
 
-    def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         data = None
         for input_col in self.input_cols:
             if data is None:
@@ -204,10 +205,11 @@ class LightGBM(BaseModel):
         else:
             decoded_predictions = raw_predictions
 
-        if return_proba and self.ordinal_encoder is not None:
+        if predict_proba and self.ordinal_encoder is not None:
             predictions = np.hstack([raw_predictions, decoded_predictions.reshape(-1, 1)])
-            cat_labels = [f'__mdb_cat_{label}' for label in self.ordinal_encoder.categories_[0].tolist()]
+            cat_labels = [f'__mdb_proba_{label}' for label in self.ordinal_encoder.categories_[0].tolist()]
             ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])
+            ydf[cat_labels] = ydf[cat_labels].astype(float)
         else:
             ydf = pd.DataFrame({'prediction': decoded_predictions})
 

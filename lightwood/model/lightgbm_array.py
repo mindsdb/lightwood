@@ -24,6 +24,7 @@ class LightGBMArray(BaseModel):
         self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna=False)
                        for _ in range(n_ts_predictions)]
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
+        self.supports_proba = False
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting LGBM models for array prediction')
@@ -45,8 +46,8 @@ class LightGBMArray(BaseModel):
 
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
-    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], return_proba: bool = False) -> pd.DataFrame:
-        if return_proba:
+    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], predict_proba: bool = False) -> pd.DataFrame:
+        if predict_proba:
             log.warning('This model cannot output probability estimates')
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
