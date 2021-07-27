@@ -543,8 +543,7 @@ data = {call(json_ai.cleaner, json_ai)}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
 df = self.ensemble(encoded_ds, predict_proba=True)
-insights = {call(json_ai.explainer, json_ai)}
-return insights
+return df
 """
     predict_proba_body = align(predict_proba_body, 2)
 
