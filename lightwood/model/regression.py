@@ -16,6 +16,7 @@ class Regression(BaseModel):
     def __init__(self, stop_after: int, target_encoder: BaseEncoder):
         super().__init__(stop_after)
         self.target_encoder = target_encoder
+        self.supports_proba = False
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting Regression model')
@@ -31,8 +32,8 @@ class Regression(BaseModel):
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         self.fit(train_data + dev_data)
 
-    def __call__(self, ds: EncodedDs, return_proba: bool = False) -> pd.DataFrame:
-        if return_proba:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
+        if predict_proba:
             log.warning('This model cannot output probability estimates')
         X = []
         for x, _ in ds:
