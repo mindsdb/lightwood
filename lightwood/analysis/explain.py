@@ -60,12 +60,11 @@ def explain(data: pd.DataFrame,
         if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1:
             preds = [p[0] for p in preds]
 
-        icp_X[target_name] = preds
+            for col in [f'timestep_{i}' for i in range(1, timeseries_settings.nr_predictions)]:
+                if col in icp_X.columns:
+                    icp_X.pop(col)  # erase ignorable columns
 
-        # erase ignorable columns @TODO: reintroduce?
-        # for col in pdef['columns_to_ignore']:
-        #     if col in icp_X.columns:
-        #         icp_X.pop(col)
+        icp_X[target_name] = preds
 
         is_categorical = target_dtype in (dtype.binary, dtype.categorical, dtype.array)
         is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
@@ -85,7 +84,8 @@ def explain(data: pd.DataFrame,
                 icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
 
             # get ICP predictions
-            result = pd.DataFrame(index=icp_X.index, columns=['lower', 'upper', 'significance'])
+            result_cols = ['lower', 'upper', 'significance'] if is_numerical else ['significance']
+            result = pd.DataFrame(index=icp_X.index, columns=result_cols)
 
             # base ICP
             X = deepcopy(icp_X)
@@ -104,8 +104,13 @@ def explain(data: pd.DataFrame,
 
             # categorical
             else:
-                # @TODO use the real target_class_distribution
-                class_dists = pd.get_dummies(predictions['prediction']).values
+                predicted_proba = True if any(['__mdb_proba' in col for col in predictions.columns]) else False
+                if predicted_proba:
+                    all_cat_cols = [col for col in predictions.columns if '__mdb_proba' in col]
+                    class_dists = predictions[all_cat_cols].values
+                else:
+                    class_dists = pd.get_dummies(predictions['prediction']).values
+
                 analysis['icp']['__default'].nc_function.model.prediction_cache = class_dists
 
                 conf_candidates = list(range(20)) + list(range(20, 100, 10))
@@ -184,8 +189,10 @@ def explain(data: pd.DataFrame,
                                 result.loc[X.index, 'significance'] = significances
 
             insights['confidence'] = result['significance'].astype(float).tolist()
-            insights['lower'] = result['lower'].astype(float)
-            insights['upper'] = result['upper'].astype(float)
+
+            if is_numerical:
+                insights['lower'] = result['lower'].astype(float)
+                insights['upper'] = result['upper'].astype(float)
 
             # anomaly detection
             if is_anomaly_task:

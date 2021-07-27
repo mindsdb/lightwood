@@ -26,7 +26,6 @@ def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, st
     """
     # numerical
     if target_type in [dtype.integer, dtype.float, dtype.array]:
-        # and dtype.NUMERIC in typing_info['data_type_dist'].keys()):
 
         # ICP gets all possible bounds (shape: (B, 2, 99))
         all_ranges = icp.predict(X.values)
@@ -54,13 +53,9 @@ def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, st
                 return 0.9901, ranges
 
     # categorical
-    elif target_type in (dtype.binary, dtype.categorical):  # or  #
-        # (target_type == dtype.array and  # time-series w/ cat target
-        #  dtype.categorical in typing_info['data_type_dist'].keys())) and \
-        #   lmd['stats_v2'][target]['typing']['data_subtype'] != dtype.tags:  # no tag support yet
-
-        pvals = icp.predict(X.values)
-        conf = np.subtract(1, pvals.min(axis=1)).mean()
+    elif target_type in (dtype.binary, dtype.categorical):
+        pvals = icp.predict(X.values)  # p-values at which each class is included in the predicted set
+        conf = np.subtract(1, pvals.min(axis=1))
         return conf, pvals
 
     # default
