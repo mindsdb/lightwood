@@ -1,3 +1,5 @@
+from typing import Union
+
 import torch
 import pandas as pd
 import numpy as np
@@ -35,9 +37,12 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         self.output_size *= self._normalizer.output_size
         self._prepared = True
 
-    def encode(self, column_data):
+    def encode(self, column_data: Union[list, np.ndarray]) -> torch.Tensor:
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
+
+        if isinstance(column_data, pd.Series):
+            column_data = column_data.values
         data = torch.cat([self._normalizer.encode(column_data)], dim=-1)
         data[torch.isnan(data)] = 0.0
         data[torch.isinf(data)] = 0.0

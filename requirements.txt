@@ -9,16 +9,16 @@ requests >= 2.0.0
 transformers >= 4.5.0
 lightgbm >= 3.1.1
 optuna >= 2.8.0
-scipy >= 1.6.3
+scipy >= 1.5.4
 psutil >= 5.7.0
 setuptools >= 21.2.1
 wheel >= 0.32.2
 scikit-learn
 pillow < 7
-mindsdb_datasources >= 1.1.0
 langdetect >= 1.0.0
 dataclasses_json >= 0.5.4
 autopep8 >= 1.5.7
 dill == 0.3.4
 sktime[arima] >= 0.5.0
 torch_optimizer == 0.1.0
+pmdarima >= 1.8.0
