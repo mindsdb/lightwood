@@ -159,7 +159,7 @@ class LightGBM(BaseModel):
         log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
         self.params['num_iterations'] = int(self.num_iterations)
 
-        self.params['early_stopping_rounds'] = min(12, int(self.num_iterations / 8))
+        self.params['early_stopping_rounds'] = 5
 
         self.model = model_generator.train(self.params, train_dataset, valid_sets=[dev_dataset, train_dataset], valid_names=['dev', 'train'], verbose_eval=False, **kwargs)
         self.num_iterations = self.model.best_iteration

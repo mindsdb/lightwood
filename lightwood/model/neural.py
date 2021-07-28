@@ -227,7 +227,8 @@ class Neural(BaseModel):
         self._init_net(ds_arr)
         optimizer = self._select_optimizer(self.lr)
         criterion = self._select_criterion()
-
+        scaler = GradScaler()
+        
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
