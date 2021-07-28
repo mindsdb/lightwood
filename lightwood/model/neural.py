@@ -164,14 +164,15 @@ class Neural(BaseModel):
 
         self.model = self.net_class(**net_kwargs)
 
+    '''
+    Optuna optimization
     def _optimize(self, ds_arr: List[EncodedDs]):
         scaler = GradScaler()
-        self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 10))
         
         trails_started = time.time()
         nr_trails = 25
         time_per_trial = self.stop_after / (2 * nr_trails)
-        if time_per_trial > 5 and self.search_hyperparameters:
+        if time_per_trial > 5:
             def objective(trial):
                 log.debug(f'Running trial in max {time_per_trial} seconds')
                 # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
@@ -207,27 +208,32 @@ class Neural(BaseModel):
         else:
             self.num_hidden = 1
             self.lr = 0.0005
-
+        '''
 
     # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
     # @TODO: Writeup on the methodology for partial fitting
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         # ConcatedEncodedDs
+        self.batch_size = 200
         train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
         dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
-
-        self._optimize(train_ds_arr)
 
         dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
 
-        log.info(f'Found hyperparameters num_hidden:{self.num_hidden} lr:{self.lr}')
+        self.lr = 0.01
+        self.num_hidden = 1
 
         self._init_net(ds_arr)
         optimizer = self._select_optimizer(self.lr)
         criterion = self._select_criterion()
+        
+        # Find learning rate
+       
+
         scaler = GradScaler()
 
+        # Keep on training
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
