@@ -171,7 +171,7 @@ class LightGBM(BaseModel):
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         ds = ConcatedEncodedDs(train_data)
         pct_of_original = len(ds) / self.fit_data_len
-        iterations = max(1, int(self.num_iterations * pct_of_original)/2)
+        iterations = max(1, int(self.num_iterations * pct_of_original) / 2)
 
         data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'dev': {'ds': ConcatedEncodedDs(dev_data), 'data': None, 'label_data': {}}}
 
@@ -185,8 +185,6 @@ class LightGBM(BaseModel):
         self.params['num_iterations'] = int(iterations)
         self.model = lightgbm.train(self.params, train_dataset, valid_sets=[dev_dataset, train_dataset], valid_names=['dev', 'retrain'], verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
-        
-        pass
 
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         data = None
