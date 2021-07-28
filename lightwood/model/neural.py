@@ -152,39 +152,40 @@ class Neural(BaseModel):
             Yh = self.model(X)
             running_losses.append(criterion(Yh, Y).item())
         return np.mean(running_losses)
+    
+    def _init_net(self, ds_arr: List[EncodedDs]):
+        net_kwargs = {'input_size': len(ds_arr[0][0][0]),
+                      'output_size': len(ds_arr[0][0][1]),
+                      'num_hidden': self.num_hidden,
+                      'dropout': 0}
 
-    # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
-    # @TODO: Writeup on the methodology for partial fitting
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
-        # ConcatedEncodedDs
-        train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
-        dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
+        if self.net_class == ArNet:
+            net_kwargs['encoder_span'] = ds_arr[0].encoder_spans
+            net_kwargs['target_name'] = self.target
 
+        self.model = self.net_class(**net_kwargs)
+
+    def _optimize(self, ds_arr: List[EncodedDs]):
         scaler = GradScaler()
         self.batch_size = min(200, int(len(ConcatedEncodedDs(ds_arr)) / 10))
         
-        time_for_trials = self.stop_after / 2
+        trails_started = time.time()
         nr_trails = 25
-        time_per_trial = time_for_trials / nr_trails
+        time_per_trial = self.stop_after / (2 * nr_trails)
         if time_per_trial > 5:
             def objective(trial):
                 log.debug(f'Running trial in max {time_per_trial} seconds')
                 # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
-                num_hidden = trial.suggest_int('num_hidden', 1, 2)
+                self.num_hidden = trial.suggest_int('num_hidden', 1, 2)
                 lr = trial.suggest_loguniform('lr', 0.0001, 0.1)
 
-                self.model = DefaultNet(
-                    input_size=len(ds_arr[0][0][0]),
-                    output_size=len(ds_arr[0][0][1]),
-                    num_hidden=num_hidden,
-                    dropout=0
-                )
+                self._init_net(ds_arr)
                 optimizer = self._select_optimizer(lr)
                 criterion = self._select_criterion()
                 
                 # @TODO Donwscale based on training time
-                train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[0:int(len(train_ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
-                dev_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[int(len(train_ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
+                train_dl = DataLoader(ConcatedEncodedDs(ds_arr[0:int(len(ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
+                dev_dl = DataLoader(ConcatedEncodedDs(ds_arr[int(len(ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
                 try:
                     _, _, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, time_per_trial, 20000)
                 except Exception as e:
@@ -200,27 +201,30 @@ class Neural(BaseModel):
 
             log.debug(f'Best trial had a loss of : {study.best_trial.value}')
             log.debug(f'Best trial suggested parameters : {study.best_trial.params.items()}')
+            self.stop_after = self.stop_after - (time.time() - trails_started)
 
             self.num_hidden = study.best_trial.params['num_hidden']
             self.lr = study.best_trial.params['lr']
         else:
             self.num_hidden = 1
             self.lr = 0.0005
+
+
+    # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
+    # @TODO: Writeup on the methodology for partial fitting
+    def fit(self, ds_arr: List[EncodedDs]) -> None:
+        # ConcatedEncodedDs
+        train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
+        dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
+
+        self._optimize(train_ds_arr)
+
         dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
 
         log.info(f'Found hyperparameters num_hidden:{self.num_hidden} lr:{self.lr}')
 
-        net_kwargs = {'input_size': len(ds_arr[0][0][0]),
-                      'output_size': len(ds_arr[0][0][1]),
-                      'num_hidden': self.num_hidden,
-                      'dropout': 0}
-
-        if self.net_class == ArNet:
-            net_kwargs['encoder_span'] = train_ds_arr[0].encoder_spans
-            net_kwargs['target_name'] = self.target
-
-        self.model = self.net_class(**net_kwargs)
+        self._init_net(ds_arr)
         optimizer = self._select_optimizer(self.lr)
         criterion = self._select_criterion()
 
@@ -229,7 +233,7 @@ class Neural(BaseModel):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
 
                 optimizer = self._select_optimizer(0.005)
-                stop_after = (self.stop_after / 2) * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
+                stop_after = self.stop_after * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
 
                 self.model, epoch_to_best_model, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
 
