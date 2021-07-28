@@ -1,9 +1,11 @@
 import math
-import torch
-import numpy as np
 from typing import Union
 
-from sklearn.linear_model import ElasticNet
+import torch
+import numpy as np
+import pandas as pd
+from scipy.stats import entropy
+from sklearn.linear_model import ElasticNet, SGDRegressor, Ridge  # @TODO: settle on one of these
 from sklearn.metrics import mean_absolute_error
 
 from lightwood.api.dtype import dtype
@@ -23,23 +25,25 @@ class SelfawareNormalizer(BaseScorer):
         self.target = fit_params['target']
         self.target_dtype = fit_params['dtype_dict'][fit_params['target']]
 
-        self.model = ElasticNet()
+        self.model = Ridge()  # SGDRegressor()  # ElasticNet()
         self.prediction_cache = None
         self.error_fn = mean_absolute_error
 
     def fit(self, data: ConcatedEncodedDs, target: str) -> None:
         if data and target:
-            preds = self.base_predictor(data)
+            preds = self.base_predictor(data, predict_proba=True)
             truths = data.data_frame[target]
-            labels = self.get_labels(preds.values.squeeze(), truths.values, data.encoders[self.target])
-            data.data_frame[target] = labels
+            labels = self.get_labels(preds, truths.values, data.encoders[self.target])
             enc_data = data.get_encoded_data(include_target=False).numpy()
             self.model.fit(enc_data, labels)
 
     def predict(self, data: Union[ConcatedEncodedDs, torch.Tensor]) -> np.ndarray:
         if isinstance(data, ConcatedEncodedDs):
             data = data.get_encoded_data(include_target=False)
-        return self.model.predict(data.numpy())
+        raw = self.model.predict(data.numpy())
+        clipped = np.clip(raw, 0.1, 10)  # set limit deviations (@TODO: benchmark stability gains)
+        smoothed = clipped / clipped.mean()
+        return smoothed
 
     def score(self, true_input, y=None):
         sa_score = self.prediction_cache if self.prediction_cache is not None else self.model.predict(true_input)
@@ -47,18 +51,35 @@ class SelfawareNormalizer(BaseScorer):
         if sa_score is None:
             sa_score = np.ones(true_input.shape[0])  # by default, normalizing factor is 1 for all predictions
         else:
-            sa_score = np.array(sa_score)  # @TODO: try 0.5+softmax(x)
+            sa_score = np.array(sa_score)
 
         return sa_score
 
-    def get_labels(self, preds: np.ndarray, truths: np.ndarray, target_enc):
+    def get_labels(self, preds: pd.DataFrame, truths: np.ndarray, target_enc):
         if self.target_dtype in [dtype.integer, dtype.float]:
-            labels = abs(preds - truths)
+            labels = abs(preds.values.squeeze() - truths)  # @TODO: try a better fn, e.g. log or 0.5+softmax(x)
+
         elif self.target_dtype in [dtype.binary, dtype.categorical]:
-            # @TODO: incorporate output belief so that it's a soft difference
-            preds = target_enc.encode(preds).tolist()
-            truths = target_enc.encode(truths).tolist()
-            labels = [1 if p[t.index(1)] else 0 for p, t in zip(preds, truths)]
+            prob_cols = [col for col in preds.columns if '__mdb_proba' in col]
+            col_names = [col.replace('__mdb_proba_', '') for col in prob_cols]
+            if prob_cols:
+                preds = preds[prob_cols]
+                if '__mdb_proba___mdb_unknown_cat' in preds.columns:
+                    preds.pop('__mdb_proba___mdb_unknown_cat')
+                    prob_cols.remove('__mdb_proba___mdb_unknown_cat')
+                    col_names.remove('__mdb_unknown_cat')
+
+            # reorder preds to ensure classes are in same order as in target_enc
+            preds.columns = col_names
+            new_order = [v for k, v in sorted(target_enc.rev_map.items(), key=lambda x: x[0])]
+            preds = preds.reindex(columns=new_order)
+
+            # get log loss
+            preds = preds.values.squeeze()
+            preds = preds if prob_cols else target_enc.encode(preds).tolist()
+            truths = target_enc.encode(truths).numpy()
+            labels = entropy(truths, preds, axis=1)
+
         else:
             raise(Exception(f"dtype {self.target_dtype} not supported for confidence normalizer"))
 
