@@ -78,34 +78,67 @@ class Neural(BaseModel):
 
         return criterion
 
-    def _select_optimizer(self, lr) -> Optimizer:
+    def _select_optimizer(self) -> Optimizer:
+        # ad_optim.Ranger
+        # torch.optim.AdamW
         if self.timeseries_settings.is_timeseries:
-            optimizer = ad_optim.Ranger(self.model.parameters(), lr=lr)
+            optimizer = ad_optim.Ranger(self.model.parameters(), lr=self.lr)
         else:
-            optimizer = ad_optim.Ranger(self.model.parameters(), lr=lr, weight_decay=2e-2)
+            optimizer = ad_optim.Ranger(self.model.parameters(), lr=self.lr, weight_decay=2e-2)
 
         return optimizer
 
-    def _run_epoch(self, train_dl, criterion, optimizer, scaler) -> float:
-        self.model = self.model.train()
-        running_losses: List[float] = []
-        for i, (X, Y) in enumerate(train_dl):
-            X = X.to(self.model.device)
-            Y = Y.to(self.model.device)
-            with LightwoodAutocast():
-                optimizer.zero_grad()
-                Yh = self.model(X)
-                loss = criterion(Yh, Y)
-                if LightwoodAutocast.active:
-                    scaler.scale(loss).backward()
-                    scaler.step(optimizer)
-                    scaler.update()
-                else:
-                    loss.backward()
-                    optimizer.step()
-            running_losses.append(loss.item())
+    def _find_lr(self, dl):
+        optimizer = self._select_optimizer()
+        criterion = self._select_criterion()
+        scaler = GradScaler()
 
-        return np.mean(running_losses)
+        running_losses: List[float] = []
+        cum_loss = 0
+        lr_log = []
+        best_model = self.model
+        stop = False
+        for epoch in range(1, 101): 
+            if stop:
+                break
+
+            for i, (X, Y) in enumerate(dl):
+                if stop:
+                    break
+                
+                X = X.to(self.model.device)
+                Y = Y.to(self.model.device)
+                with LightwoodAutocast():
+                    optimizer.zero_grad()
+                    Yh = self.model(X)
+                    loss = criterion(Yh, Y)
+                    if LightwoodAutocast.active:
+                        scaler.scale(loss).backward()
+                        scaler.step(optimizer)
+                        scaler.update()
+                    else:
+                        loss.backward()
+                        optimizer.step()              
+                cum_loss += loss.item()
+
+                # Account for ranger lookahead update
+                if i*epoch > 0 and i*epoch % 6:
+                    lr = optimizer.param_groups[0]['lr']
+                    log.info(f'Loss of {cum_loss} with learning rate {lr}')
+                    running_losses.append(cum_loss)
+                    cum_loss = 0
+                    if len(running_losses) < 2 or np.mean(running_losses[:-1]) > np.mean(running_losses):
+                        lr_log.append(lr)
+                        optimizer.param_groups[0]['lr'] = lr * 1.5
+                        # Time saving since we don't have to start training fresh
+                        best_model = deepcopy(self.model)
+                    else:
+                        stop = True    
+
+        best_loss_lr = lr_log[np.argmin(running_losses)]
+        lr = best_loss_lr
+        log.info(f'Found learning rate of: {lr}')
+        return lr, best_model
 
     def _max_fit(self, train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after):
         started = time.time()
@@ -116,8 +149,27 @@ class Neural(BaseModel):
 
         train_error = None
         for epoch in range(1, return_model_after + 1):
-            train_error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            
+            self.model = self.model.train()
+            running_losses: List[float] = []
+            for i, (X, Y) in enumerate(train_dl):
+                X = X.to(self.model.device)
+                Y = Y.to(self.model.device)
+                with LightwoodAutocast():
+                    optimizer.zero_grad()
+                    Yh = self.model(X)
+                    loss = criterion(Yh, Y)
+                    if LightwoodAutocast.active:
+                        scaler.scale(loss).backward()
+                        scaler.step(optimizer)
+                        scaler.update()
+                    else:
+                        loss.backward()
+                        optimizer.step()
+                
+                running_losses.append(loss.item())
+
+            train_error = np.mean(running_losses)
+
             running_errors.append(self._error(dev_dl, criterion))
 
             if np.isnan(train_error) or np.isnan(running_errors[-1]) or np.isinf(train_error) or np.isinf(running_errors[-1]):
@@ -151,7 +203,7 @@ class Neural(BaseModel):
                 Yh = self.model(X)
                 running_losses.append(criterion(Yh, Y).item())
             return np.mean(running_losses)
-    
+ 
     def _init_net(self, ds_arr: List[EncodedDs]):
         net_kwargs = {'input_size': len(ds_arr[0][0][0]),
                       'output_size': len(ds_arr[0][0][1]),
@@ -221,24 +273,23 @@ class Neural(BaseModel):
         dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
 
-        self.lr = 0.01
+        self.lr = 1e-4
         self.num_hidden = 1
 
-        self._init_net(ds_arr)
-        optimizer = self._select_optimizer(self.lr)
-        criterion = self._select_criterion()
-        
         # Find learning rate
-       
-
-        scaler = GradScaler()
+        # keep the weights
+        self._init_net(ds_arr)
+        self.lr, self.model = self._find_lr(train_dl)
 
         # Keep on training
+        optimizer = self._select_optimizer()
+        criterion = self._select_criterion()
+        scaler = GradScaler()
+
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
 
-                optimizer = self._select_optimizer(0.005)
                 stop_after = self.stop_after * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
 
                 self.model, epoch_to_best_model, err = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
@@ -257,7 +308,7 @@ class Neural(BaseModel):
         dev_ds = ConcatedEncodedDs(dev_data + train_data)
         train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
         dev_dl = DataLoader(dev_ds, batch_size=self.batch_size, shuffle=True)
-        optimizer = self._select_optimizer(self.lr)
+        optimizer = self._select_optimizer()
         criterion = self._select_criterion()
         scaler = GradScaler()
 
