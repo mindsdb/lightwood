@@ -61,10 +61,7 @@ class Neural(BaseModel):
                     
                 acc_dict[decode_log] = r2_score(decoded_real_values, decoded_predictions)
 
-            if acc_dict[True] > acc_dict[False]:
-                self.target_encoder.decode_log = True
-            else:
-                self.target_encoder.decode_log = False
+            self.target_encoder.decode_log = acc_dict[True] > acc_dict[False]
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
@@ -228,7 +225,7 @@ class Neural(BaseModel):
         optimizer = self._select_optimizer(self.lr)
         criterion = self._select_criterion()
         scaler = GradScaler()
-        
+
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
