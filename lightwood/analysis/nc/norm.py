@@ -5,6 +5,7 @@ import torch
 import numpy as np
 import pandas as pd
 from scipy.stats import entropy
+from scipy.special import softmax
 from sklearn.linear_model import ElasticNet, SGDRegressor, Ridge  # @TODO: settle on one of these
 from sklearn.metrics import mean_absolute_error
 
@@ -24,6 +25,7 @@ class SelfawareNormalizer(BaseScorer):
         self.encoders = fit_params['encoders']
         self.target = fit_params['target']
         self.target_dtype = fit_params['dtype_dict'][fit_params['target']]
+        self.multi_ts_task = fit_params['is_multi_ts']
 
         self.model = Ridge()  # SGDRegressor()  # ElasticNet()
         self.prediction_cache = None
@@ -41,9 +43,9 @@ class SelfawareNormalizer(BaseScorer):
         if isinstance(data, ConcatedEncodedDs):
             data = data.get_encoded_data(include_target=False)
         raw = self.model.predict(data.numpy())
-        clipped = np.clip(raw, 0.1, 10)  # set limit deviations (@TODO: benchmark stability gains)
-        smoothed = clipped / clipped.mean()
-        return smoothed
+        clipped = np.clip(raw, 0.1, np.max(raw))  # set limit deviations (@TODO: benchmark stability)
+        # smoothed = clipped / clipped.mean()
+        return clipped
 
     def score(self, true_input, y=None):
         sa_score = self.prediction_cache if self.prediction_cache is not None else self.model.predict(true_input)
@@ -57,7 +59,19 @@ class SelfawareNormalizer(BaseScorer):
 
     def get_labels(self, preds: pd.DataFrame, truths: np.ndarray, target_enc):
         if self.target_dtype in [dtype.integer, dtype.float]:
-            labels = abs(preds.values.squeeze() - truths)  # @TODO: try a better fn, e.g. log or 0.5+softmax(x)
+
+            if not self.multi_ts_task:
+                preds = preds.values.squeeze()
+            else:
+                preds = [p[0] for p in preds.values.squeeze()]
+
+            # abs(np.min(np.log(labels))) + (np.log(labels) / np.mean(np.log(labels)))
+            # abs(np.min(diffs / np.mean(diffs))) + (diffs / np.mean(diffs))
+            # diffs = np.log(abs(preds - truths))
+            diffs = np.square(abs(preds - truths))
+            labels = diffs
+            # diffs = diffs / np.mean(diffs)
+            # labels = diffs + abs(np.min(diffs))
 
         elif self.target_dtype in [dtype.binary, dtype.categorical]:
             prob_cols = [col for col in preds.columns if '__mdb_proba' in col]
