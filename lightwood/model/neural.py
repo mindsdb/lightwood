@@ -1,4 +1,5 @@
 import time
+import inspect
 from copy import deepcopy
 from typing import Dict, List
 
@@ -260,6 +261,8 @@ class Neural(BaseModel):
         decoded_predictions: List[object] = []
         all_probs: List[List[float]] = []
         rev_map = {}
+
+        return_proba = predict_proba and 'predict_proba' in inspect.signature(self.target_encoder.decode).parameters
         
         for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
@@ -270,7 +273,7 @@ class Neural(BaseModel):
             for dep in self.target_encoder.dependencies:
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
 
-            if predict_proba:
+            if return_proba:
                 kwargs['predict_proba'] = True
                 decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
                 all_probs.append(probs)
@@ -282,7 +285,7 @@ class Neural(BaseModel):
             else:
                 decoded_predictions.append(decoded_prediction)
 
-        if predict_proba:
+        if return_proba:
             predictions = np.hstack([np.array(all_probs).squeeze(), np.array(decoded_predictions).reshape(-1, 1)])
             cat_labels = [f'__mdb_proba_{label}' for label in rev_map.values()]
             ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])

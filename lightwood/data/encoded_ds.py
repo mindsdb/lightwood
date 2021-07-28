@@ -83,7 +83,7 @@ class EncodedDs(Dataset):
     def get_encoded_data(self, include_target=True) -> torch.Tensor:
         encoded_dfs = []
         for col in self.data_frame.columns:
-            if include_target or col != self.target:
+            if (include_target or col != self.target) and self.encoders.get(col, False):
                 encoded_dfs.append(self.get_encoded_column_data(col))
 
         return torch.cat(encoded_dfs, 1)

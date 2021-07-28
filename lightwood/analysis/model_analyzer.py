@@ -91,7 +91,7 @@ def model_analyzer(
     if is_numerical or (is_classification and data_subtype != dtype.tags):
         model = adapter(predictor)
 
-        norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor, 'encoders': encoded_data.encoders}
+        norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor, 'encoders': encoded_data.encoders, 'is_multi_ts': is_multi_ts}
         normalizer = SelfawareNormalizer(fit_params=norm_params)
         normalizer.fit(encoded_train_data, target)
         normalizer.prediction_cache = normalizer.predict(encoded_data)

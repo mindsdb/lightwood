@@ -54,7 +54,7 @@ def statistical_analysis(data: pd.DataFrame,
     nr_rows = len(df)
     target = problem_definition.target
     # get train std, used in analysis
-    if dtypes[target] in [dtype.float, dtype.integer]:
+    if dtypes[target] in [dtype.float, dtype.integer, dtype.array]:
         train_std = df[target].astype(float).std()
     elif dtypes[target] in [dtype.array]:
         try:
