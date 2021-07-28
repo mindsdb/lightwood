@@ -129,13 +129,13 @@ class Neural(BaseModel):
                     cum_loss = 0
                     if len(running_losses) < 2 or np.mean(running_losses[:-1]) > np.mean(running_losses):
                         lr_log.append(lr)
-                        optimizer.param_groups[0]['lr'] = lr * 1.35
+                        optimizer.param_groups[0]['lr'] = lr * 1.4
                         # Time saving since we don't have to start training fresh
                         best_model = deepcopy(self.model)
                     else:
                         stop = True    
 
-        best_loss_lr = lr_log[np.argmin(running_losses) - 1]
+        best_loss_lr = lr_log[np.argmin(running_losses)]
         lr = best_loss_lr
         log.info(f'Found learning rate of: {lr}')
         return lr, best_model
@@ -149,6 +149,7 @@ class Neural(BaseModel):
 
         train_error = None
         for epoch in range(1, return_model_after + 1):
+            print(f'Epoch: {epoch}')
             self.model = self.model.train()
             running_losses: List[float] = []
             for i, (X, Y) in enumerate(train_dl):
