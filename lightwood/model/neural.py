@@ -117,7 +117,7 @@ class Neural(BaseModel):
         train_error = None
         for epoch in range(1, return_model_after + 1):
             train_error = self._run_epoch(train_dl, criterion, optimizer, scaler)
-            #log.info(f'Train error: {round(train_error,3)}')
+            
             running_errors.append(self._error(dev_dl, criterion))
 
             if np.isnan(train_error) or np.isnan(running_errors[-1]) or np.isinf(train_error) or np.isinf(running_errors[-1]):
@@ -144,12 +144,13 @@ class Neural(BaseModel):
     def _error(self, dev_dl, criterion) -> float:
         self.model = self.model.eval()
         running_losses: List[float] = []
-        for X, Y in dev_dl:
-            X = X.to(self.model.device)
-            Y = Y.to(self.model.device)
-            Yh = self.model(X)
-            running_losses.append(criterion(Yh, Y).item())
-        return np.mean(running_losses)
+        with torch.no_grad():
+            for X, Y in dev_dl:
+                X = X.to(self.model.device)
+                Y = Y.to(self.model.device)
+                Yh = self.model(X)
+                running_losses.append(criterion(Yh, Y).item())
+            return np.mean(running_losses)
     
     def _init_net(self, ds_arr: List[EncodedDs]):
         net_kwargs = {'input_size': len(ds_arr[0][0][0]),
@@ -234,7 +235,7 @@ class Neural(BaseModel):
                 optimizer = self._select_optimizer(0.005)
                 stop_after = self.stop_after * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
 
-                self.model, epoch_to_best_model, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
+                self.model, epoch_to_best_model, err = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
 
                 self.epochs_to_best += epoch_to_best_model
 
@@ -254,26 +255,27 @@ class Neural(BaseModel):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=max(1, int(self.epochs_to_best / 3)))
+        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, max(1, int(self.epochs_to_best / 3)))
     
     def __call__(self, ds: EncodedDs) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         
-        for idx, (X, Y) in enumerate(ds):
-            X = X.to(self.model.device)
-            Yh = self.model(X)
-            Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
+        with torch.no_grad():
+            for idx, (X, Y) in enumerate(ds):
+                X = X.to(self.model.device)
+                Yh = self.model(X)
+                Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
 
-            kwargs = {}
-            for dep in self.target_encoder.dependencies:
-                kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
-            decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
+                kwargs = {}
+                for dep in self.target_encoder.dependencies:
+                    kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
+                decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
 
-            if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
-                decoded_predictions.extend(decoded_prediction)
-            else:
-                decoded_predictions.append(decoded_prediction)
+                if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
+                    decoded_predictions.extend(decoded_prediction)
+                else:
+                    decoded_predictions.append(decoded_prediction)
 
-        ydf = pd.DataFrame({'prediction': decoded_predictions})
-        return ydf
+            ydf = pd.DataFrame({'prediction': decoded_predictions})
+            return ydf
