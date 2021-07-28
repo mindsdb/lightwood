@@ -129,13 +129,13 @@ class Neural(BaseModel):
                     cum_loss = 0
                     if len(running_losses) < 2 or np.mean(running_losses[:-1]) > np.mean(running_losses):
                         lr_log.append(lr)
-                        optimizer.param_groups[0]['lr'] = lr * 1.5
+                        optimizer.param_groups[0]['lr'] = lr * 1.35
                         # Time saving since we don't have to start training fresh
                         best_model = deepcopy(self.model)
                     else:
                         stop = True    
 
-        best_loss_lr = lr_log[np.argmin(running_losses)]
+        best_loss_lr = lr_log[np.argmin(running_losses) - 1]
         lr = best_loss_lr
         log.info(f'Found learning rate of: {lr}')
         return lr, best_model
@@ -290,7 +290,7 @@ class Neural(BaseModel):
             for subset_idx in range(len(dev_ds_arr)):
                 train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
 
-                stop_after = self.stop_after * (0.5 + subset_idx * 0.4 / len(dev_ds_arr))
+                stop_after = self.stop_after / 4
 
                 self.model, epoch_to_best_model, err = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
 
