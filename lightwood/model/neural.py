@@ -27,7 +27,7 @@ import optuna
 class Neural(BaseModel):
     model: nn.Module
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool):
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool, search_hyperparameters: bool):
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
         self.target = target
@@ -36,6 +36,7 @@ class Neural(BaseModel):
         self.epochs_to_best = 0
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
+        self.search_hyperparameters = search_hyperparameters
     
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
@@ -169,7 +170,7 @@ class Neural(BaseModel):
         trails_started = time.time()
         nr_trails = 25
         time_per_trial = self.stop_after / (2 * nr_trails)
-        if time_per_trial > 5:
+        if time_per_trial > 5 and self.search_hyperparameters:
             def objective(trial):
                 log.debug(f'Running trial in max {time_per_trial} seconds')
                 # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
