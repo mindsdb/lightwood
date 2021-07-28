@@ -110,7 +110,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     'fit_on_dev': True,
                     'stop_after': '$problem_definition.seconds_per_model',
                     'timeseries_settings': '$problem_definition.timeseries_settings',
-                    'search_hyperparameters': False
+                    'search_hyperparameters': True
                 }
 
         }]

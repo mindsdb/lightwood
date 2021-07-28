@@ -22,3 +22,4 @@ dill == 0.3.4
 sktime[arima] >= 0.5.0
 torch_optimizer == 0.1.0
 pmdarima >= 1.8.0
+torch-lr-finder >= 0.2.1
