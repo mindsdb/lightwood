@@ -125,7 +125,6 @@ class Neural(BaseModel):
                 cum_loss += loss.item()
 
                 # Account for ranger lookahead update
-                print(batches)
                 if batches >= 1200:
                     batches = 0
                     lr = optimizer.param_groups[0]['lr']
@@ -154,7 +153,6 @@ class Neural(BaseModel):
 
         train_error = None
         for epoch in range(1, return_model_after + 1):
-            print(f'Epoch: {epoch}')
             self.model = self.model.train()
             running_losses: List[float] = []
             for i, (X, Y) in enumerate(train_dl):
