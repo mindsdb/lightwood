@@ -302,7 +302,6 @@ class Neural(BaseModel):
 
                 self.epochs_to_best += epoch_to_best_model
 
-        # Do a single training run on the test data as well
         if len(con_test_ds) > 0:
             if self.fit_on_dev:
                 self.partial_fit(dev_ds_arr, train_ds_arr)
