@@ -130,6 +130,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'module': 'Regression',
                 'args': {
                     'stop_after': '$problem_definition.seconds_per_model',
+                    'target': '$target',
+                    'dtype_dict': '$dtype_dict',
                     'target_encoder': '$encoders[$target]'
                 }
             }
