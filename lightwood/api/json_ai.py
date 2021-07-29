@@ -520,7 +520,7 @@ for model in self.models:
 """
     learn_body = align(learn_body, 2)
 
-    predict_body = f"""
+    predict_common_body = f"""
 self.mode = 'predict'
 log.info('Cleaning the data')
 data = {call(json_ai.cleaner, json_ai)}
@@ -528,6 +528,10 @@ data = {call(json_ai.cleaner, json_ai)}
 {ts_transform_code}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
+"""
+    predict_common_body = align(predict_common_body, 2)
+
+    predict_body = f"""
 df = self.ensemble(encoded_ds)
 insights = {call(json_ai.explainer, json_ai)}
 return insights
@@ -535,13 +539,6 @@ return insights
     predict_body = align(predict_body, 2)
 
     predict_proba_body = f"""
-self.mode = 'predict'
-log.info('Cleaning the data')
-data = {call(json_ai.cleaner, json_ai)}
-
-{ts_transform_code}
-
-encoded_ds = lightwood.encode(self.encoders, data, self.target)
 df = self.ensemble(encoded_ds, predict_proba=True)
 return df
 """
@@ -570,10 +567,12 @@ class Predictor(PredictorInterface):
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+{predict_common_body}
 {predict_body}
 
 
     def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
+{predict_common_body}
 {predict_proba_body}
 """
 
