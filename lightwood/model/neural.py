@@ -122,13 +122,13 @@ class Neural(BaseModel):
                 cum_loss += loss.item()
 
                 # Account for ranger lookahead update
-                if i*epoch > 0 and i*epoch % 6:
+                if i*epoch > 0 and (i + 1) * epoch % 6:
                     lr = optimizer.param_groups[0]['lr']
                     log.info(f'Loss of {cum_loss} with learning rate {lr}')
                     running_losses.append(cum_loss)
+                    lr_log.append(lr)
                     cum_loss = 0
                     if len(running_losses) < 2 or np.mean(running_losses[:-1]) > np.mean(running_losses):
-                        lr_log.append(lr)
                         optimizer.param_groups[0]['lr'] = lr * 1.4
                         # Time saving since we don't have to start training fresh
                         best_model = deepcopy(self.model)
