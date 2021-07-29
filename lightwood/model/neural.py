@@ -125,7 +125,7 @@ class Neural(BaseModel):
                 cum_loss += loss.item()
 
                 # Account for ranger lookahead update
-                if batches >= 1200:
+                if (i+1)*epoch % 6:
                     batches = 0
                     lr = optimizer.param_groups[0]['lr']
                     log.info(f'Loss of {cum_loss} with learning rate {lr}')
@@ -275,9 +275,8 @@ class Neural(BaseModel):
 
         con_train_ds = ConcatedEncodedDs(train_ds_arr)
         con_test_ds = ConcatedEncodedDs(dev_ds_arr)
-        self.batch_size = 200
-        # self.batch_size = min(200, int(len(con_train_ds) / 50))
-        # self.batch_size = max(1, self.batch_size)
+        self.batch_size = min(200, int(len(con_train_ds) / 10))
+        self.batch_size = max(40, self.batch_size)
 
         dev_dl = DataLoader(con_test_ds, batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(con_train_ds, batch_size=self.batch_size, shuffle=False)
