@@ -282,11 +282,11 @@ class Neural(BaseModel):
             else:
                 decoded_predictions.append(decoded_prediction)
 
+        ydf = pd.DataFrame({'prediction': decoded_predictions})
+
         if predict_proba:
-            predictions = np.hstack([np.array(all_probs).squeeze(), np.array(decoded_predictions).reshape(-1, 1)])
-            cat_labels = [f'__mdb_proba_{label}' for label in rev_map.values()]
-            ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])
-            ydf[cat_labels] = ydf[cat_labels].astype(float)
-        else:
-            ydf = pd.DataFrame({'prediction': decoded_predictions})
+            raw_predictions = np.array(all_probs).squeeze()
+            for idx, label in enumerate(rev_map.values()):
+                ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
+
         return ydf
