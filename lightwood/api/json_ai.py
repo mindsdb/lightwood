@@ -504,7 +504,7 @@ for model in self.models:
         model.fit(train_data)
         trained_models.append(model)
     except Exception as e:
-        log.warning(f'\nExcpetion: {{e}} when training model: {{model}}\n')
+        log.warning(f'Excpetion: {{e}} when training model: {{model}}')
         if {json_ai.problem_definition.strict_mode} and model.stable:
             raise e
             
