@@ -268,12 +268,16 @@ class Neural(BaseModel):
     # @TODO: Writeup on the methodology for partial fitting
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         # ConcatedEncodedDs
-        self.batch_size = 200
         train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
         dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
 
-        dev_dl = DataLoader(ConcatedEncodedDs(dev_ds_arr), batch_size=self.batch_size, shuffle=False)
-        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=self.batch_size, shuffle=False)
+        con_train_ds = ConcatedEncodedDs(train_ds_arr)
+        con_test_ds = ConcatedEncodedDs(dev_ds_arr)
+        self.batch_size = min(200, int(len(con_train_ds) / 50))
+        self.batch_size = max(1, self.batch_size)
+
+        dev_dl = DataLoader(con_test_ds, batch_size=self.batch_size, shuffle=False)
+        train_dl = DataLoader(con_train_ds, batch_size=self.batch_size, shuffle=False)
 
         self.lr = 1e-4
         self.num_hidden = 1
@@ -299,7 +303,7 @@ class Neural(BaseModel):
                 self.epochs_to_best += epoch_to_best_model
 
         # Do a single training run on the test data as well
-        if len(ConcatedEncodedDs(dev_ds_arr)) > 0:
+        if len(con_test_ds) > 0:
             if self.fit_on_dev:
                 self.partial_fit(dev_ds_arr, train_ds_arr)
             self._final_tuning(dev_ds_arr)
