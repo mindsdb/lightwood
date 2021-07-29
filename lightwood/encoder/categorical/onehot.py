@@ -76,7 +76,7 @@ class OneHotEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data, predict_proba=False):
+    def decode(self, encoded_data, get_raw_logits=False):
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -89,11 +89,11 @@ class OneHotEncoder(BaseEncoder):
             ohe_index = np.argmax(vector)
             ret.append(self._lang.index2word[ohe_index])
 
-            if predict_proba:
+            if get_raw_logits:
                 del(vector[UNCOMMON_TOKEN])
                 probs.append(softmax(vector).tolist())
 
-        if predict_proba:
+        if get_raw_logits:
             # UNK not included in class_map nor belief distribution
             if UNCOMMON_TOKEN != 0:
                 raise Exception("Uncommon token should be the first assigned token in the vocabulary, aborting.")

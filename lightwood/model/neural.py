@@ -271,7 +271,7 @@ class Neural(BaseModel):
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
 
             if predict_proba:
-                kwargs['predict_proba'] = True
+                kwargs['get_raw_logits'] = True
                 decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
                 all_probs.append(probs)
             else:
