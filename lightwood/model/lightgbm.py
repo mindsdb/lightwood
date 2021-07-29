@@ -37,6 +37,7 @@ class LightGBM(BaseModel):
     device_str: str
     num_iterations: int
     use_optuna: bool
+    supports_proba: bool
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], fit_on_dev: bool, use_optuna: bool = True):
         super().__init__(stop_after)
