@@ -49,6 +49,7 @@ class LightGBM(BaseModel):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
+        self.stable = True
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         gpu_works = check_gpu_support()

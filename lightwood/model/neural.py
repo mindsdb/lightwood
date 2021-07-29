@@ -37,6 +37,7 @@ class Neural(BaseModel):
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
         self.search_hyperparameters = search_hyperparameters
+        self.stable = True
     
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
