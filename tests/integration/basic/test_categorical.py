@@ -19,12 +19,16 @@ class TestBasic(unittest.TestCase):
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': 'income', 'time_aim': 100}))
         predictor.learn(train)
 
-        predictions = predictor.predict(test)
-        assert 'truth' in predictions.columns
-        assert 'prediction' in predictions.columns
-        assert 'confidence' in predictions.columns
+        if hasattr(predictor, 'ensemble'):
+            for i, model in enumerate(predictor.ensemble.models):
 
-        predictions = predictor.predict_proba(test)
-        
-        for label in df[target].unique():
-            assert f'__mdb_proba_{label}' in predictions.columns
+                predictor.ensemble.best_index = i
+                predictions = predictor.predict(test)
+                assert 'truth' in predictions.columns
+                assert 'prediction' in predictions.columns
+                assert 'confidence' in predictions.columns
+
+                predictions = predictor.predict_proba(test)
+
+                for label in df[target].unique():
+                    assert f'__mdb_proba_{label}' in predictions.columns
