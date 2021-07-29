@@ -111,7 +111,7 @@ def get_numerical_conf_range(all_confs, train_std_dev=None, positive_domain=Fals
 
     if positive_domain:
         conf_ranges[conf_ranges < 0] = 0
-    return significances, conf_ranges
+    return np.array(significances), conf_ranges
 
 
 def get_categorical_conf(all_confs, conf_candidates):

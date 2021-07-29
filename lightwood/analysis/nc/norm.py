@@ -43,7 +43,7 @@ class SelfawareNormalizer(BaseScorer):
         if isinstance(data, ConcatedEncodedDs):
             data = data.get_encoded_data(include_target=False)
         raw = self.model.predict(data.numpy())
-        clipped = np.clip(raw, 0.1, np.max(raw))  # set limit deviations (@TODO: benchmark stability)
+        clipped = np.clip(raw, 0.1, 1e4)  # set limit deviations (@TODO: benchmark stability)
         # smoothed = clipped / clipped.mean()
         return clipped
 
