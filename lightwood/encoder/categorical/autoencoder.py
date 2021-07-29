@@ -100,11 +100,11 @@ class CategoricalAutoEncoder(BaseEncoder):
                 embeddings = self.encoder(oh_encoded_tensor)
                 return embeddings.to('cpu')
 
-    def decode(self, encoded_data, predict_proba=False):
+    def decode(self, encoded_data):
         if not self.use_autoencoder:
-            return self.onehot_encoder.decode(encoded_data, predict_proba=predict_proba)
+            return self.onehot_encoder.decode(encoded_data)
         else:
             with torch.no_grad():
                 oh_encoded_tensor = self.decoder(encoded_data)
                 oh_encoded_tensor = oh_encoded_tensor.to('cpu')
-                return self.onehot_encoder.decode(oh_encoded_tensor, predict_proba=predict_proba)
+                return self.onehot_encoder.decode(oh_encoded_tensor)
