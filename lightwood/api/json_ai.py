@@ -509,6 +509,7 @@ self.models = trained_models
 
 log.info('Ensembling the model')
 self.ensemble = {call(json_ai.output.ensemble, json_ai)}
+self.supports_proba = self.ensemble.supports_proba
 
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}

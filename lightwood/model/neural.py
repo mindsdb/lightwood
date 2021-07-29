@@ -28,6 +28,11 @@ from lightwood.encoder.base import BaseEncoder
 
 class Neural(BaseModel):
     model: nn.Module
+    dtype_dict: dict
+    target: str
+    epochs_to_best: int
+    fit_on_dev: bool
+    supports_proba: bool
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool):
         super().__init__(stop_after)
