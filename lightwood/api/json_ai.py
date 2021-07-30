@@ -110,6 +110,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     'fit_on_dev': True,
                     'stop_after': '$problem_definition.seconds_per_model',
                     'timeseries_settings': '$problem_definition.timeseries_settings',
+                    'search_hyperparameters': True
                 }
 
         }]
@@ -503,8 +504,10 @@ for model in self.models:
         model.fit(train_data)
         trained_models.append(model)
     except Exception as e:
-        if {json_ai.problem_definition.strict_mode} and 'regression' not in str(type(model)).lower():
+        log.warning(f'Exception: {{e}} when training model: {{model}}')
+        if {json_ai.problem_definition.strict_mode} and model.stable:
             raise e
+            
 self.models = trained_models
 
 log.info('Ensembling the model')

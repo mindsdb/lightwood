@@ -14,6 +14,7 @@ class Regression(BaseModel):
     def __init__(self, stop_after: int, target_encoder: BaseEncoder):
         super().__init__(stop_after)
         self.target_encoder = target_encoder
+        self.stable = False
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting Regression model')
