@@ -54,7 +54,7 @@ class BinaryEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data, get_raw_logits=False):
+    def decode(self, encoded_data, return_raw=False):
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -62,10 +62,10 @@ class BinaryEncoder(BaseEncoder):
         for vector in encoded_data_list:
             ret.append(self.rev_map[np.argmax(vector)])
 
-            if get_raw_logits:
+            if return_raw:
                 probs.append(softmax(vector).tolist())
 
-        if get_raw_logits:
+        if return_raw:
             return ret, probs, self.rev_map
         else:
             return ret
