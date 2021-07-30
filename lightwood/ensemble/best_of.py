@@ -32,6 +32,7 @@ class BestOf(BaseEnsemble):
                 best_score = avg_score
                 self.best_index = idx
 
+        self.supports_proba = self.models[self.best_index].supports_proba
         log.info(f'Picked best model: {type(self.models[self.best_index]).__name__}')
 
     def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:

@@ -37,6 +37,7 @@ class LightGBM(BaseModel):
     device_str: str
     num_iterations: int
     use_optuna: bool
+    supports_proba: bool
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], fit_on_dev: bool, use_optuna: bool = True):
         super().__init__(stop_after)
@@ -49,7 +50,7 @@ class LightGBM(BaseModel):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
-        self.supports_proba = True
+        self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         gpu_works = check_gpu_support()
@@ -205,12 +206,10 @@ class LightGBM(BaseModel):
         else:
             decoded_predictions = raw_predictions
 
+        ydf = pd.DataFrame({'prediction': decoded_predictions})
+
         if predict_proba and self.ordinal_encoder is not None:
-            predictions = np.hstack([raw_predictions, decoded_predictions.reshape(-1, 1)])
-            cat_labels = [f'__mdb_proba_{label}' for label in self.ordinal_encoder.categories_[0].tolist()]
-            ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])
-            ydf[cat_labels] = ydf[cat_labels].astype(float)
-        else:
-            ydf = pd.DataFrame({'prediction': decoded_predictions})
+            for idx, label in enumerate(self.ordinal_encoder.categories_[0].tolist()):
+                ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
 
         return ydf

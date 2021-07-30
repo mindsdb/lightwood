@@ -13,6 +13,7 @@ class OneHotEncoder(BaseEncoder):
     def __init__(self, is_target=False, target_class_distribution=None):
         super().__init__(is_target)
         self._lang = None
+        self.rev_map = {}
         if self.is_target:
             self.target_class_distribution = target_class_distribution
             self.index_weights = None
@@ -57,6 +58,7 @@ class OneHotEncoder(BaseEncoder):
             self.index_weights = torch.Tensor(self.index_weights)
 
         self.output_size = self._lang.n_words
+        self.rev_map = self._lang.index2word
         self._prepared = True
 
     def encode(self, column_data):
@@ -76,7 +78,7 @@ class OneHotEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data, predict_proba=False):
+    def decode(self, encoded_data, return_raw=False):
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -89,14 +91,10 @@ class OneHotEncoder(BaseEncoder):
             ohe_index = np.argmax(vector)
             ret.append(self._lang.index2word[ohe_index])
 
-            if predict_proba:
-                del(vector[UNCOMMON_TOKEN])
+            if return_raw:
                 probs.append(softmax(vector).tolist())
 
-        if predict_proba:
-            # UNK not included in class_map nor belief distribution
-            if UNCOMMON_TOKEN != 0:
-                raise Exception("Uncommon token should be the first assigned token in the vocabulary, aborting.")
-            return ret, probs, {k - 1: v for k, v in self._lang.index2word.items() if k != UNCOMMON_TOKEN}
+        if return_raw:
+            return ret, probs, self.rev_map
         else:
             return ret

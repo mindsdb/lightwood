@@ -130,6 +130,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'module': 'Regression',
                 'args': {
                     'stop_after': '$problem_definition.seconds_per_model',
+                    'target': '$target',
+                    'dtype_dict': '$dtype_dict',
                     'target_encoder': '$encoders[$target]'
                 }
             }
@@ -512,6 +514,7 @@ self.models = trained_models
 
 log.info('Ensembling the model')
 self.ensemble = {call(json_ai.output.ensemble, json_ai)}
+self.supports_proba = self.ensemble.supports_proba
 
 log.info('Analyzing the ensemble')
 encoded_train_data = ConcatedEncodedDs(train_data)
@@ -524,7 +527,7 @@ for model in self.models:
 """
     learn_body = align(learn_body, 2)
 
-    predict_body = f"""
+    predict_common_body = f"""
 self.mode = 'predict'
 log.info('Cleaning the data')
 data = {call(json_ai.cleaner, json_ai)}
@@ -532,8 +535,10 @@ data = {call(json_ai.cleaner, json_ai)}
 {ts_transform_code}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
-encoded_data = encoded_ds.get_encoded_data(include_target=False)
+"""
+    predict_common_body = align(predict_common_body, 2)
 
+    predict_body = f"""
 df = self.ensemble(encoded_ds)
 insights = {call(json_ai.explainer, json_ai)}
 return insights
@@ -541,15 +546,6 @@ return insights
     predict_body = align(predict_body, 2)
 
     predict_proba_body = f"""
-self.mode = 'predict'
-log.info('Cleaning the data')
-data = {call(json_ai.cleaner, json_ai)}
-
-{ts_transform_code}
-
-encoded_ds = lightwood.encode(self.encoders, data, self.target)
-encoded_data = encoded_ds.get_encoded_data(include_target=False)
-
 df = self.ensemble(encoded_ds, predict_proba=True)
 insights = {call(json_ai.explainer, json_ai)}
 return insights
@@ -579,10 +575,12 @@ class Predictor(PredictorInterface):
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+{predict_common_body}
 {predict_body}
 
 
     def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
+{predict_common_body}
 {predict_proba_body}
 """
 
