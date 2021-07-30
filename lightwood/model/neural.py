@@ -29,6 +29,11 @@ from lightwood.encoder.base import BaseEncoder
 
 class Neural(BaseModel):
     model: nn.Module
+    dtype_dict: dict
+    target: str
+    epochs_to_best: int
+    fit_on_dev: bool
+    supports_proba: bool
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool):
         super().__init__(stop_after)
@@ -39,7 +44,7 @@ class Neural(BaseModel):
         self.epochs_to_best = 0
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
-        self.supports_proba = True
+        self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
 
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
@@ -262,8 +267,6 @@ class Neural(BaseModel):
         all_probs: List[List[float]] = []
         rev_map = {}
 
-        return_proba = predict_proba and 'predict_proba' in inspect.signature(self.target_encoder.decode).parameters
-        
         for idx, (X, Y) in enumerate(ds):
             X = X.to(self.model.device)
             Yh = self.model(X)
@@ -273,8 +276,8 @@ class Neural(BaseModel):
             for dep in self.target_encoder.dependencies:
                 kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
 
-            if return_proba:
-                kwargs['predict_proba'] = True
+            if predict_proba and self.supports_proba:
+                kwargs['return_raw'] = True
                 decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
                 all_probs.append(probs)
             else:
@@ -285,11 +288,11 @@ class Neural(BaseModel):
             else:
                 decoded_predictions.append(decoded_prediction)
 
-        if return_proba:
-            predictions = np.hstack([np.array(all_probs).squeeze(), np.array(decoded_predictions).reshape(-1, 1)])
-            cat_labels = [f'__mdb_proba_{label}' for label in rev_map.values()]
-            ydf = pd.DataFrame(predictions, columns=cat_labels + ['prediction'])
-            ydf[cat_labels] = ydf[cat_labels].astype(float)
-        else:
-            ydf = pd.DataFrame({'prediction': decoded_predictions})
+        ydf = pd.DataFrame({'prediction': decoded_predictions})
+
+        if predict_proba and self.supports_proba:
+            raw_predictions = np.array(all_probs).squeeze()
+            for idx, label in enumerate(rev_map.values()):
+                ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
+
         return ydf
