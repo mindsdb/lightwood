@@ -23,7 +23,6 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 
 """
 Pending:
- - [] reactivate global feat importance
  - [] simplify nonconformist custom implementation?
  - [] reimplement caching for faster analysis?
  - [] confidence for T+N <- active research question
@@ -223,20 +222,29 @@ def model_analyzer(
     empty_input_accuracy = {}
     empty_input_predictions_test = {}
 
-    # @TODO: reactivate global feature importance
     if not disable_column_importance:
         ignorable_input_cols = [x for x in input_cols if (not ts_cfg.is_timeseries or
                                                                 (x not in ts_cfg.order_by and
                                                                  x not in ts_cfg.historical_columns))]
         for col in ignorable_input_cols:
-            # @TODO: fix this call to new signature
-            empty_input_predictions[col] = predictor('validate', ignore_columns=[col])
+            partial_data = deepcopy(encoded_data)
+            partial_data.clear_cache()
+            for ds in partial_data.encoded_ds_arr:
+                ds.data_frame[col].values[:] = 0
+
+            if not is_classification:
+                empty_input_predictions[col] = predictor(partial_data)
+            else:
+                empty_input_predictions[col] = predictor(partial_data, predict_proba=True)
+
             empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
                 data,
-                empty_input_predictions[col]
+                empty_input_predictions[col]['prediction'],
+                target,
+                accuracy_functions
             ).values()))
 
-        # Get some information about the importance of each column
+            # Get some information about the importance of each column
         column_importances = {}
         for col in ignorable_input_cols:
             accuracy_increase = (normal_accuracy - empty_input_accuracy[col])

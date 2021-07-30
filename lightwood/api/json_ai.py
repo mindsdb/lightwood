@@ -316,7 +316,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'data': 'test_data',
                 'encoded_train_data': 'encoded_train_data',
                 'target': '$target',
-                'disable_column_importance': 'True',
+                'disable_column_importance': 'False',
                 'dtype_dict': '$dtype_dict',
                 'fixed_significance': None,
                 'positive_domain': False,

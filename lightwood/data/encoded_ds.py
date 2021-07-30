@@ -88,6 +88,9 @@ class EncodedDs(Dataset):
 
         return torch.cat(encoded_dfs, 1)
 
+    def clear_cache(self):
+        self.cache = [None] * len(self.data_frame)
+
 
 # Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):
@@ -95,6 +98,7 @@ class ConcatedEncodedDs(EncodedDs):
         self.encoded_ds_arr = encoded_ds_arr
         self.encoded_ds_lenghts = [len(x) for x in self.encoded_ds_arr]
         self.encoders = self.encoded_ds_arr[0].encoders
+        self.encoder_spans = self.encoded_ds_arr[0].encoder_spans
         self.target = self.encoded_ds_arr[0].target
 
     def __len__(self):
@@ -119,3 +123,7 @@ class ConcatedEncodedDs(EncodedDs):
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         encoded_df_arr = [x.get_encoded_column_data(column_name) for x in self.encoded_ds_arr]
         return torch.cat(encoded_df_arr, 0)
+
+    def clear_cache(self):
+        for ds in self.encoded_ds_arr:
+            ds.clear_cache()
