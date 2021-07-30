@@ -202,7 +202,6 @@ def explain(data: pd.DataFrame,
                                           cooldown=anomaly_cooldown)
                 insights['anomaly'] = anomalies
 
-            # @TODO: add T+N confidence bounds and disaggregate into rows if nr_predictions > 1
             if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1 and is_numerical:
                 insights = add_tn_conf_bounds(insights, timeseries_settings)
 
