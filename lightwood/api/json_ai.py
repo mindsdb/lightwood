@@ -535,6 +535,7 @@ data = {call(json_ai.cleaner, json_ai)}
 {ts_transform_code}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
+encoded_data = encoded_ds.get_encoded_data(include_target=False)
 """
     predict_common_body = align(predict_common_body, 2)
 
