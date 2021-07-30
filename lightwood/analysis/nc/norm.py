@@ -29,6 +29,7 @@ class SelfawareNormalizer(BaseScorer):
 
         self.model = Ridge()  # SGDRegressor()  # ElasticNet()
         self.prediction_cache = None
+        self.bounds = (0.5, 1.5)
         self.error_fn = mean_absolute_error
 
     def fit(self, data: ConcatedEncodedDs, target: str) -> None:
@@ -49,7 +50,6 @@ class SelfawareNormalizer(BaseScorer):
 
     def score(self, true_input, y=None):
         sa_score = self.prediction_cache if self.prediction_cache is not None else self.model.predict(true_input)
-
         if sa_score is None:
             sa_score = np.ones(true_input.shape[0])  # by default, normalizing factor is 1 for all predictions
         else:
@@ -65,13 +65,8 @@ class SelfawareNormalizer(BaseScorer):
             else:
                 preds = [p[0] for p in preds.values.squeeze()]
 
-            # abs(np.min(np.log(labels))) + (np.log(labels) / np.mean(np.log(labels)))
-            # abs(np.min(diffs / np.mean(diffs))) + (diffs / np.mean(diffs))
-            # diffs = np.log(abs(preds - truths))
-            diffs = np.square(abs(preds - truths))
-            labels = diffs
-            # diffs = diffs / np.mean(diffs)
-            # labels = diffs + abs(np.min(diffs))
+            diffs = np.log(abs(preds - truths))
+            labels = np.clip(self.bounds[0] + diffs / np.max(diffs), self.bounds[0], self.bounds[1])
 
         elif self.target_dtype in [dtype.binary, dtype.categorical]:
             prob_cols = [col for col in preds.columns if '__mdb_proba' in col]
