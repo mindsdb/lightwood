@@ -43,7 +43,7 @@ class Neural(BaseModel):
         self.epochs_to_best = 0
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
-        self.supports_proba = True
+        self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
 
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
