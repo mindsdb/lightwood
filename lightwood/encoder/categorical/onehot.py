@@ -78,7 +78,7 @@ class OneHotEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data, get_raw_logits=False):
+    def decode(self, encoded_data, return_raw=False):
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -91,10 +91,10 @@ class OneHotEncoder(BaseEncoder):
             ohe_index = np.argmax(vector)
             ret.append(self._lang.index2word[ohe_index])
 
-            if get_raw_logits:
+            if return_raw:
                 probs.append(softmax(vector).tolist())
 
-        if get_raw_logits:
+        if return_raw:
             return ret, probs, self.rev_map
         else:
             return ret
