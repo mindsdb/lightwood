@@ -119,7 +119,7 @@ def model_analyzer(
 
         runtime_analyzer['icp']['__default'].fit(None, None)  # @TODO: rm fit call after v1 works, 'twas a hack from the start
         if not is_classification:
-            runtime_analyzer['train_std_dev'] = {'__default': stats_info.train_std_dev}
+            runtime_analyzer['df_std_dev'] = {'__default': stats_info.df_std_dev}
 
         # fit additional ICPs in time series tasks with grouped columns
         if ts_cfg.is_timeseries and ts_cfg.group_by:
@@ -189,7 +189,7 @@ def model_analyzer(
                     for key, val in zip(group_keys, group):
                         icp_train_df = icp_train_df[icp_train_df[key] == val]
                     y_train = icp_train_df[target].values
-                    runtime_analyzer['train_std_dev'][frozenset(group)] = y_train.std() # @TODO: check it's train indeed
+                    runtime_analyzer['df_std_dev'][frozenset(group)] = y_train.std()
 
                 # get bounds for relevant rows in validation dataset
                 conf, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], dtype_dict[target], runtime_analyzer,
