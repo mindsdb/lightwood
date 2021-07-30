@@ -18,6 +18,7 @@ class Unit(BaseModel):
     def __init__(self, stop_after: int, target_encoder: BaseEncoder):
         super().__init__(stop_after)
         self.target_encoder = target_encoder
+        self.stable = True
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info("Unit Mixer just borrows from encoder")

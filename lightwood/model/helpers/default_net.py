@@ -54,7 +54,9 @@ class DefaultNet(torch.nn.Module):
         return self
 
     def forward(self, input):
-        with LightwoodAutocast():
+        try:
+            with LightwoodAutocast():
+                output = self.net(input)
+        except Exception:
             output = self.net(input)
-
         return output
