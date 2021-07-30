@@ -127,7 +127,7 @@ class ProblemDefinition:
     strict_mode: bool
 
     @staticmethod
-    def from_dict(obj: Dict) -> None:
+    def from_dict(obj: Dict):
         target = obj['target']
         nfolds = obj.get('nfolds', 30)
         pct_invalid = obj.get('pct_invalid', 1)
@@ -196,7 +196,7 @@ class JsonAI:
     phases: Optional[Dict[str, object]] = None
 
     @staticmethod
-    def from_dict(obj: Dict) -> None:
+    def from_dict(obj: Dict):
         features = {k: Feature.from_dict(v) for k,v in obj['features'].items()} 
         output = Output.from_dict(obj['output'])
         problem_definition = ProblemDefinition.from_dict(obj['problem_definition'])
