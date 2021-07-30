@@ -24,7 +24,7 @@ from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, Conformal
 
 """
 Pending:
- - [] simplify nonconformist custom implementation?
+ - [] simplify nonconformist custom implementation to deprecate wrappers
  - [] reimplement caching for faster analysis?
  - [] confidence for T+N <- active research question
 """
@@ -68,12 +68,11 @@ def model_analyzer(
     fit_params = {'nr_preds': ts_cfg.nr_predictions or 0, 'columns_to_ignore': [] }
     fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
 
-    # @TODO: adapters should not be needed anymore
     if is_classification:
         if data_subtype != dtype.tags:
             enc = OneHotEncoder(sparse=False, handle_unknown='ignore')
             enc.fit(all_classes.reshape(-1, 1))
-            runtime_analyzer['label_encoders'] = enc  # needed to repr cat labels inside nonconformist @TODO: remove?
+            runtime_analyzer['label_encoders'] = enc  # needed to repr cat labels inside nonconformist
         else:
             runtime_analyzer['label_encoders'] = None
 
@@ -100,7 +99,7 @@ def model_analyzer(
         nc = nc_class(model, nc_function, normalizer=normalizer)
         icp = icp_class(nc)
 
-        runtime_analyzer['icp']['__default'] = icp  # @TODO: better typing for output
+        runtime_analyzer['icp']['__default'] = icp
 
         # setup prediction cache to avoid additional .predict() calls
         if is_classification:
@@ -117,7 +116,6 @@ def model_analyzer(
         else:
             icp.nc_function.model.prediction_cache = np.array(normal_predictions['prediction'])
 
-        runtime_analyzer['icp']['__default'].fit(None, None)  # @TODO: rm fit call after v1 works, 'twas a hack from the start
         if not is_classification:
             runtime_analyzer['df_std_dev'] = {'__default': stats_info.df_std_dev}
 
@@ -125,15 +123,13 @@ def model_analyzer(
         if ts_cfg.is_timeseries and ts_cfg.group_by:
 
             # create an ICP for each possible group
-            group_info = data[ts_cfg.group_by].to_dict('list')  # @TODO: should save this info from all data in timeseries_analyzer then send it here. Fow now, validation only means it can have incomplete data
+            group_info = data[ts_cfg.group_by].to_dict('list')
             all_group_combinations = list(product(*[set(x) for x in group_info.values()]))
             runtime_analyzer['icp']['__mdb_groups'] = all_group_combinations
             runtime_analyzer['icp']['__mdb_group_keys'] = [x for x in group_info.keys()]
 
             for combination in all_group_combinations:
-                # frozenset lets us hash
                 runtime_analyzer['icp'][frozenset(combination)] = deepcopy(icp)
-                runtime_analyzer['icp'][frozenset(combination)].fit(None, None)
 
         # calibrate ICP
         icp_df = deepcopy(data)
@@ -258,8 +254,6 @@ def model_analyzer(
             column_importances[col] = 10 * inc  # scores go from 0 to 10 in GUI
     else:
         column_importances = None
-
-    print(column_importances)
 
     predictions_arr = [normal_predictions['prediction'].values.flatten().tolist()] + \
                       [x for x in empty_input_predictions_test.values()]
