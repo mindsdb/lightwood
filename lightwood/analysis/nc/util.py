@@ -39,7 +39,7 @@ def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, st
                 for significance in range(99):
                     ranges = all_ranges[:, :, significance]
                     spread = np.mean(ranges[:, 1] - ranges[:, 0])
-                    tolerance = analysis_info['train_std_dev'][group] * tol
+                    tolerance = analysis_info['df_std_dev'][group] * tol
 
                     if spread <= tolerance:
                         confidence = (99 - significance) / 100
@@ -62,13 +62,13 @@ def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, st
     return 0.005, np.zeros((X.shape[0], 2))
 
 
-def get_numerical_conf_range(all_confs, train_std_dev=None, positive_domain=False, std_tol=1, group='__default', error_rate=None):
+def get_numerical_conf_range(all_confs, df_std_dev=None, positive_domain=False, std_tol=1, group='__default', error_rate=None):
     """ Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance
         error_rate: pre-determined error rate for the ICP, used in anomaly detection tasks to adjust the
         threshold sensitivity.
 
         :param all_confs: numpy.ndarray, all possible bounds depending on confidence level
-        :param train_std_dev: dict
+        :param df_std_dev: dict
         :param positive_domain: bool
         :param std_tol: int
         :param group: str
@@ -80,7 +80,7 @@ def get_numerical_conf_range(all_confs, train_std_dev=None, positive_domain=Fals
     if error_rate is None:
         significances = []
         conf_ranges = []
-        std_dev = train_std_dev[group]
+        std_dev = df_std_dev[group]
         tolerance = std_dev * std_tol
 
         for sample_idx in range(all_confs.shape[0]):

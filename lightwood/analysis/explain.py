@@ -127,7 +127,7 @@ def explain(data: pd.DataFrame,
                 else:
                     error_rate = anomaly_error_rate if is_anomaly_task else None
                     significances, confs = get_numerical_conf_range(all_confs,
-                                                                    train_std_dev=analysis['train_std_dev'],
+                                                                    df_std_dev=analysis['df_std_dev'],
                                                                     positive_domain=positive_domain,
                                                                     error_rate=error_rate)
                 result.loc[X.index, 'lower'] = confs[:, 0]
@@ -165,7 +165,7 @@ def explain(data: pd.DataFrame,
                                 all_confs = icp.predict(X.values)
                                 error_rate = anomaly_error_rate if is_anomaly_task else None
                                 significances, confs = get_numerical_conf_range(all_confs,
-                                                                                train_std_dev=analysis['train_std_dev'],
+                                                                                df_std_dev=analysis['df_std_dev'],
                                                                                 positive_domain=positive_domain,
                                                                                 group=frozenset(group),
                                                                                 error_rate=error_rate)
