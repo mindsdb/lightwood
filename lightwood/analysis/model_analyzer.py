@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+import torch
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -18,7 +19,7 @@ from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc
 from lightwood.analysis.nc.util import clean_df, set_conf_range
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
 from lightwood.analysis.nc.nc import RegressorNc, ClassifierNc, MarginErrFunc
-from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter
+from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter, t_softmax
 
 
 """
@@ -222,6 +223,7 @@ def model_analyzer(
     empty_input_accuracy = {}
     empty_input_predictions_test = {}
 
+    # compute global feature importance
     if not disable_column_importance:
         ignorable_input_cols = [x for x in input_cols if (not ts_cfg.is_timeseries or
                                                                 (x not in ts_cfg.order_by and
@@ -244,14 +246,20 @@ def model_analyzer(
                 accuracy_functions
             ).values()))
 
-            # Get some information about the importance of each column
         column_importances = {}
+        acc_increases = []
         for col in ignorable_input_cols:
             accuracy_increase = (normal_accuracy - empty_input_accuracy[col])
-            # normalize from 0 to 10
-            column_importances[col] = 10 * max(0, accuracy_increase)
+            acc_increases.append(accuracy_increase)
+
+        # low 0.2 temperature to accentuate differences
+        acc_increases = t_softmax(torch.Tensor([acc_increases]), t=0.2).tolist()[0]
+        for col, inc in zip(ignorable_input_cols, acc_increases):
+            column_importances[col] = 10 * inc  # scores go from 0 to 10 in GUI
     else:
         column_importances = None
+
+    print(column_importances)
 
     predictions_arr = [normal_predictions['prediction'].values.flatten().tolist()] + \
                       [x for x in empty_input_predictions_test.values()]
