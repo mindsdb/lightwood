@@ -23,12 +23,6 @@ def evaluate_accuracy(data: pd.DataFrame,
             true_values = data[target].tolist()
             accuracy_function = getattr(importlib.import_module('sklearn.metrics'), accuracy_function_str)
 
-            if accuracy_function_str == 'r2_score':
-                # @TODO: simplify?
-                accuracy_function = lambda x, y: max(0,
-                                                     getattr(importlib.import_module('sklearn.metrics'),
-                                                             accuracy_function_str)(x, y))
-
         score_dict[accuracy_function_str] = accuracy_function(list(true_values), list(predictions))
 
     return score_dict
