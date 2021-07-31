@@ -72,8 +72,9 @@ def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defin
     if encoder_dict['module'] == 'Rich_Text.PretrainedLangEncoder' and not is_target:
         encoder_dict['args']['output_type'] = '$dtype_dict[$target]'
 
-    if encoder_dict['module'] in trainable_encoders:
-        encoder_dict['args']['stop_after'] = '$problem_definition.seconds_per_encoder'
+    for encoder_name in trainable_encoders:
+        if encoder_name in encoder_dict['module']:
+            encoder_dict['args']['stop_after'] = '$problem_definition.seconds_per_encoder'
 
     if is_target_predicting_encoder:
         encoder_dict['args']['embed_mode'] = 'False'
@@ -171,13 +172,14 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         dependency = []
         encoder = lookup_encoder(col_dtype, col_name, False, problem_definition, is_target_predicting_encoder)
 
-        if problem_definition.timeseries_settings.is_timeseries and encoder['module'] in ts_encoders:
-            if problem_definition.timeseries_settings.group_by is not None:
-                for group in problem_definition.timeseries_settings.group_by:
-                    dependency.append(group)
+        for encoder_name in ts_encoders:
+            if problem_definition.timeseries_settings.is_timeseries and encoder_name in encoder['module']:
+                if problem_definition.timeseries_settings.group_by is not None:
+                    for group in problem_definition.timeseries_settings.group_by:
+                        dependency.append(group)
 
-            if problem_definition.timeseries_settings.use_previous_target:
-                dependency.append(f'__mdb_ts_previous_{target}')
+                if problem_definition.timeseries_settings.use_previous_target:
+                    dependency.append(f'__mdb_ts_previous_{target}')
 
         feature = Feature(
             data_dtype=col_dtype,
