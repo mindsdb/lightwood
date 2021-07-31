@@ -254,3 +254,4 @@ class ModelAnalysis:
     test_sample_size: int
     column_importances: Dict[str, float]
     confusion_matrix: object = None
+    
