@@ -217,7 +217,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         explainer=None,
         features=features,
         outputs=outputs,
-        imports=[],
+        imports=None,
         problem_definition=problem_definition,
         identifiers=type_information.identifiers,
         timeseries_transformer=None,
