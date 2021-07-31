@@ -11,9 +11,37 @@ from copy import deepcopy
 @dataclass_json
 @dataclass
 class Feature:
+    encoder: str
     data_dtype: str = None
     dependency: List[str] = None
-    encoder: str = None
+
+    @staticmethod
+    def from_dict(obj: Dict):
+        encoder = obj['encoder']
+        data_dtype = obj.get('data_dtype', None)
+        dependency = obj.get('dependency', None)
+
+        feature = Feature(
+            encoder=encoder,
+            data_dtype=data_dtype,
+            dependency=dependency
+        )
+
+        return feature
+
+    @staticmethod
+    def from_json(data: str):
+        return Feature.from_dict(json.loads(data))
+
+    def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        as_dict =  _asdict(self, encode_json=encode_json)
+        for k in list(as_dict.keys()):
+            if as_dict[k] is None:
+                del as_dict[k]
+        return as_dict
+
+    def to_json(self) -> Dict[str, Json]:
+        return json.dumps(self.to_dict(), indent=4)
 
 
 @dataclass_json
