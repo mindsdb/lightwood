@@ -153,9 +153,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'module': 'BestOf',
             'args': {
                 'accuracy_functions': '$accuracy_functions',
-                'target': '$target',
-                'data': 'test_data',
-                'models': '$models'
             }
         }
     )}
@@ -291,6 +288,11 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             models[i]['args']['target'] = models[i]['args'].get('target', '$target')
             models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
             models[i]['args']['ts_analysis'] = models[i]['args'].get('ts_analysis', '$ts_analysis')
+    
+    ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
+    ensemble['args']['target'] = ensemble['args'].get('target', '$target')
+    ensemble['args']['data'] = ensemble['args'].get('data', 'test_data')
+    ensemble['args']['models'] = ensemble['args'].get('models', '$models')
 
     # Add implicit phases
     # @TODO: Consider removing once we have a proper editor in studio
