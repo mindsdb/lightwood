@@ -182,9 +182,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     dependency.append(f'__mdb_ts_previous_{target}')
 
         feature = Feature(
-            data_dtype=col_dtype,
-            encoder=encoder,
-            dependency=dependency
+            encoder=encoder
         )
         features[col_name] = feature
 
