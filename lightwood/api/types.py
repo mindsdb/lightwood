@@ -11,7 +11,7 @@ from copy import deepcopy
 @dataclass_json
 @dataclass
 class Feature:
-    data_dtype: str
+    data_dtype: str = None
     dependency: List[str] = None
     encoder: str = None
 
