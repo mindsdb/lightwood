@@ -106,10 +106,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         models = [{
                 'module': 'Neural',
                 'args': {
-                    'net': f'"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries else f'"ArNet"',
                     'fit_on_dev': True,
                     'stop_after': '$problem_definition.seconds_per_model',
-                    'timeseries_settings': '$problem_definition.timeseries_settings',
                     'search_hyperparameters': True
                 }
 
@@ -279,7 +277,9 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             models[i]['args']['target'] = models[i]['args'].get('target', '$target')
             models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
             models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
-            models[i]['args']['timeseries_settings'] = models[i]['args'].get('timeseries_settings', '$problem_definition.seconds_per_model')
+            models[i]['args']['timeseries_settings'] = models[i]['args'].get('timeseries_settings', '$problem_definition.timeseries_settings')
+            models[i]['args']['net'] = models[i]['args'].get('net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries else '"ArNet"')
+
         elif models[i]['module'] == 'LightGBM':
             models[i]['args']['target'] = models[i]['args'].get('target', '$target')
             models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
