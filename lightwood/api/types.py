@@ -19,7 +19,6 @@ class Feature:
 @dataclass_json
 @dataclass
 class Output:
-    name: str
     data_dtype: str
     encoder: str = None
     models: List[str] = None
@@ -182,7 +181,7 @@ class ProblemDefinition:
 @dataclass
 class JsonAI:
     features: Dict[str, Feature]
-    output: Output
+    outputs: Dict[str, Output]
     problem_definition: ProblemDefinition
     identifiers: Dict[str, str]
     cleaner: Optional[object] = None
@@ -198,7 +197,7 @@ class JsonAI:
     @staticmethod
     def from_dict(obj: Dict):
         features = {k: Feature.from_dict(v) for k,v in obj['features'].items()} 
-        output = Output.from_dict(obj['output'])
+        outputs = {k: Output.from_dict(v) for k,v in obj['outputs'].items()}
         problem_definition = ProblemDefinition.from_dict(obj['problem_definition'])
         statistical_analysis = StatisticalAnalysis.from_dict(obj['statistical_analysis']) 
         identifiers = obj['identifiers']
@@ -214,7 +213,7 @@ class JsonAI:
 
         json_ai = JsonAI(
             features=features,
-            output=output,
+            outputs=outputs,
             problem_definition=problem_definition,
             statistical_analysis=statistical_analysis,
             identifiers=identifiers,
