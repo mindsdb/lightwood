@@ -1,0 +1,2 @@
+from lightwood.encoder.categorical.multihot import MultiHotEncoder
+from lightwood.encoder.text.pretrained import PretrainedLangEncoder

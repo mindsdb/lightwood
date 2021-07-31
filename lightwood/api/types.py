@@ -11,15 +11,42 @@ from copy import deepcopy
 @dataclass_json
 @dataclass
 class Feature:
-    data_dtype: str
+    encoder: str
+    data_dtype: str = None
     dependency: List[str] = None
-    encoder: str = None
+
+    @staticmethod
+    def from_dict(obj: Dict):
+        encoder = obj['encoder']
+        data_dtype = obj.get('data_dtype', None)
+        dependency = obj.get('dependency', None)
+
+        feature = Feature(
+            encoder=encoder,
+            data_dtype=data_dtype,
+            dependency=dependency
+        )
+
+        return feature
+
+    @staticmethod
+    def from_json(data: str):
+        return Feature.from_dict(json.loads(data))
+
+    def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        as_dict =  _asdict(self, encode_json=encode_json)
+        for k in list(as_dict.keys()):
+            if as_dict[k] is None:
+                del as_dict[k]
+        return as_dict
+
+    def to_json(self) -> Dict[str, Json]:
+        return json.dumps(self.to_dict(), indent=4)
 
 
 @dataclass_json
 @dataclass
 class Output:
-    name: str
     data_dtype: str
     encoder: str = None
     models: List[str] = None
@@ -182,7 +209,7 @@ class ProblemDefinition:
 @dataclass
 class JsonAI:
     features: Dict[str, Feature]
-    output: Output
+    outputs: Dict[str, Output]
     problem_definition: ProblemDefinition
     identifiers: Dict[str, str]
     cleaner: Optional[object] = None
@@ -198,7 +225,7 @@ class JsonAI:
     @staticmethod
     def from_dict(obj: Dict):
         features = {k: Feature.from_dict(v) for k,v in obj['features'].items()} 
-        output = Output.from_dict(obj['output'])
+        outputs = {k: Output.from_dict(v) for k,v in obj['outputs'].items()}
         problem_definition = ProblemDefinition.from_dict(obj['problem_definition'])
         statistical_analysis = StatisticalAnalysis.from_dict(obj['statistical_analysis']) 
         identifiers = obj['identifiers']
@@ -214,7 +241,7 @@ class JsonAI:
 
         json_ai = JsonAI(
             features=features,
-            output=output,
+            outputs=outputs,
             problem_definition=problem_definition,
             statistical_analysis=statistical_analysis,
             identifiers=identifiers,
