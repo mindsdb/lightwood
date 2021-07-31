@@ -250,7 +250,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.api import *',
         'from lightwood.model import BaseModel',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
-        'from lightwwood.encoder import Array, Binary, Categorical, Date, DateTime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags',
+        'from lightwood.encoder import Array, Binary, Categorical, Date, DateTime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags',
         'from lightwood.ensemble import BaseEnsemble',
         'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call',
@@ -259,6 +259,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
     for feature in [list(json_ai.outputs.values())[0], *json_ai.features.values()]:
         encoder_import = feature.encoder['module']
+        if '.' in encoder_import:
+            continue
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
     if problem_definition.timeseries_settings.use_previous_target:
