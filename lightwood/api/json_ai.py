@@ -13,23 +13,23 @@ ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder'
 def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defintion: ProblemDefinition, is_target_predicting_encoder: bool):
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
-        dtype.integer: 'NumericEncoder',
-        dtype.float: 'NumericEncoder',
-        dtype.binary: 'BinaryEncoder',
-        dtype.categorical: 'CategoricalAutoEncoder',
-        dtype.tags: 'MultiHotEncoder',
-        dtype.date: 'DatetimeEncoder',
-        dtype.datetime: 'DatetimeEncoder',
-        dtype.image: 'Img2VecEncoder',
-        dtype.rich_text: 'PretrainedLangEncoder',
-        dtype.short_text: 'ShortTextEncoder',
-        dtype.array: 'TimeSeriesEncoder',
-        dtype.quantity: 'NumericEncoder',
+        dtype.integer: 'Integer.NumericEncoder',
+        dtype.float: 'Float.NumericEncoder',
+        dtype.binary: 'Binary.BinaryEncoder',
+        dtype.categorical: 'Categorical.CategoricalAutoEncoder',
+        dtype.tags: 'Tags.MultiHotEncoder',
+        dtype.date: 'Date.DatetimeEncoder',
+        dtype.datetime: 'DateTime.DatetimeEncoder',
+        dtype.image: 'Image.Img2VecEncoder',
+        dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
+        dtype.short_text: 'Short_Text.ShortTextEncoder',
+        dtype.array: 'Array.TimeSeriesEncoder',
+        dtype.quantity: 'Quantity.NumericEncoder',
     }
 
     target_encoder_lookup_override = {
-        dtype.rich_text: 'VocabularyEncoder',
-        dtype.categorical: 'OneHotEncoder'
+        dtype.rich_text: 'Rich_Text.VocabularyEncoder',
+        dtype.categorical: 'Categorical.OneHotEncoder'
     }
 
     encoder_dict = {
@@ -53,20 +53,23 @@ def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defin
             encoder_dict['args']['target'] = "self.target"
             encoder_dict['args']['grouped_by'] = f"{gby}"
         if is_target:
-            if col_dtype in [dtype.integer, dtype.float]:
+            if col_dtype in [dtype.integer]:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
-                encoder_dict['module'] = 'TsNumericEncoder'
+                encoder_dict['module'] = 'Integer.TsNumericEncoder'
+            if col_dtype in [dtype.float]:
+                encoder_dict['args']['grouped_by'] = f"{gby}"
+                encoder_dict['module'] = 'Float.TsNumericEncoder'
             if tss.nr_predictions > 1:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
-                encoder_dict['module'] = 'TsArrayNumericEncoder'
+                encoder_dict['module'] = 'Array.TsArrayNumericEncoder'
         if '__mdb_ts_previous' in col_name:
             encoder_dict['module'] = 'TimeSeriesPlainEncoder'
             encoder_dict['args']['original_type'] = f'"{tss.target_type}"'
             encoder_dict['args']['window'] = f'{tss.window}'
 
     # Set arguments for the encoder
-    if encoder_dict['module'] == 'PretrainedLangEncoder' and not is_target:
+    if encoder_dict['module'] == 'Rich_Text.PretrainedLangEncoder' and not is_target:
         encoder_dict['args']['output_type'] = '$dtype_dict[$target]'
 
     if encoder_dict['module'] in trainable_encoders:
@@ -247,6 +250,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.api import *',
         'from lightwood.model import BaseModel',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
+        'from lightwwood.encoder import Array, Binary, Categorical, Date, DateTime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags'
         'from lightwood.ensemble import BaseEnsemble',
         'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call',
@@ -294,6 +298,12 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     ensemble['args']['data'] = ensemble['args'].get('data', 'test_data')
     ensemble['args']['models'] = ensemble['args'].get('models', '$models')
 
+    for name in json_ai.features:
+        if json_ai.features[name].dependency is None:
+            json_ai.features[name].dependency = []
+        if json_ai.features[name].data_dtype is None:
+            json_ai.features[name].data_dtype = json_ai.features[name].encoder['module'].split('.')[0]
+            
     # Add implicit phases
     # @TODO: Consider removing once we have a proper editor in studio
     if json_ai.cleaner is None:
@@ -408,9 +418,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
         json_ai.features[col_name] = Feature(
-            data_dtype=list(json_ai.outputs.values())[0].data_dtype,
-            encoder=encoder_dict[col_name],
-            dependency=[]
+            encoder=encoder_dict[col_name]
         )
 
     input_cols = ','.join([f"""'{name}'""" for name in json_ai.features])
