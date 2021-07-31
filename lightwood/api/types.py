@@ -8,7 +8,6 @@ import json
 from copy import deepcopy
 
 
-@dataclass_json
 @dataclass
 class Feature:
     encoder: str
@@ -34,7 +33,7 @@ class Feature:
         return Feature.from_dict(json.loads(data))
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
-        as_dict =  _asdict(self, encode_json=encode_json)
+        as_dict = _asdict(self, encode_json=encode_json)
         for k in list(as_dict.keys()):
             if as_dict[k] is None:
                 del as_dict[k]
@@ -263,8 +262,13 @@ class JsonAI:
         return JsonAI.from_dict(json.loads(data))
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
-        as_dict =  _asdict(self, encode_json=encode_json)
+        as_dict = _asdict(self, encode_json=encode_json)
         for k in list(as_dict.keys()):
+            if k == 'features':
+                feature_dict = {}
+                for name in self.features:
+                    feature_dict[name] = self.features[name].to_dict()
+                as_dict[k] = feature_dict
             if as_dict[k] is None:
                 del as_dict[k]
         return as_dict

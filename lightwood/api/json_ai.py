@@ -217,7 +217,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         explainer=None,
         features=features,
         outputs=outputs,
-        imports=[],
+        imports=None,
         problem_definition=problem_definition,
         identifiers=type_information.identifiers,
         timeseries_transformer=None,
@@ -255,6 +255,11 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood import ProblemDefinition'
     ]
 
+    if json_ai.imports is None:
+        json_ai.imports = imports
+    else:
+        json_ai.imports.extend(imports)
+
     for feature in [list(json_ai.outputs.values())[0], *json_ai.features.values()]:
         encoder_import = feature.encoder['module']
         if '.' in encoder_import:
@@ -263,8 +268,6 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
     if problem_definition.timeseries_settings.use_previous_target:
         imports.append('from lightwood.encoder import TimeSeriesPlainEncoder')
-
-    json_ai.imports.extend(imports)
 
     # Add implicit arguments
     # @TODO: Consider removing once we have a proper editor in studio
