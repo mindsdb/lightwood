@@ -48,7 +48,7 @@ def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defin
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
         if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict['module'] = 'TimeSeriesEncoder'
+            encoder_dict['module'] = col_dtype.capitalize() + '.TimeSeriesEncoder'
             encoder_dict['args']['original_type'] = f'"{col_dtype}"'
             encoder_dict['args']['target'] = "self.target"
             encoder_dict['args']['grouped_by'] = f"{gby}"
@@ -64,7 +64,7 @@ def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defin
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
                 encoder_dict['module'] = 'Array.TsArrayNumericEncoder'
         if '__mdb_ts_previous' in col_name:
-            encoder_dict['module'] = 'TimeSeriesPlainEncoder'
+            encoder_dict['module'] = col_dtype.capitalize() + '.TimeSeriesPlainEncoder'
             encoder_dict['args']['original_type'] = f'"{tss.target_type}"'
             encoder_dict['args']['window'] = f'{tss.window}'
 
@@ -307,7 +307,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         if json_ai.features[name].dependency is None:
             json_ai.features[name].dependency = []
         if json_ai.features[name].data_dtype is None:
-            json_ai.features[name].data_dtype = json_ai.features[name].encoder['module'].split('.')[0]
+            json_ai.features[name].data_dtype = json_ai.features[name].encoder['module'].split('.')[0].lower()
             
     # Add implicit phases
     # @TODO: Consider removing once we have a proper editor in studio
