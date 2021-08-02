@@ -13,23 +13,23 @@ ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder'
 def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defintion: ProblemDefinition, is_target_predicting_encoder: bool):
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
-        dtype.integer: 'NumericEncoder',
-        dtype.float: 'NumericEncoder',
-        dtype.binary: 'BinaryEncoder',
-        dtype.categorical: 'CategoricalAutoEncoder',
-        dtype.tags: 'MultiHotEncoder',
-        dtype.date: 'DatetimeEncoder',
-        dtype.datetime: 'DatetimeEncoder',
-        dtype.image: 'Img2VecEncoder',
-        dtype.rich_text: 'PretrainedLangEncoder',
-        dtype.short_text: 'ShortTextEncoder',
-        dtype.array: 'TimeSeriesEncoder',
-        dtype.quantity: 'NumericEncoder',
+        dtype.integer: 'Integer.NumericEncoder',
+        dtype.float: 'Float.NumericEncoder',
+        dtype.binary: 'Binary.BinaryEncoder',
+        dtype.categorical: 'Categorical.CategoricalAutoEncoder',
+        dtype.tags: 'Tags.MultiHotEncoder',
+        dtype.date: 'Date.DatetimeEncoder',
+        dtype.datetime: 'DateTime.DatetimeEncoder',
+        dtype.image: 'Image.Img2VecEncoder',
+        dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
+        dtype.short_text: 'Short_Text.ShortTextEncoder',
+        dtype.array: 'Array.TimeSeriesEncoder',
+        dtype.quantity: 'Quantity.NumericEncoder',
     }
 
     target_encoder_lookup_override = {
-        dtype.rich_text: 'VocabularyEncoder',
-        dtype.categorical: 'OneHotEncoder'
+        dtype.rich_text: 'Rich_Text.VocabularyEncoder',
+        dtype.categorical: 'Categorical.OneHotEncoder'
     }
 
     encoder_dict = {
@@ -48,29 +48,33 @@ def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defin
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
         if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict['module'] = 'TimeSeriesEncoder'
+            encoder_dict['module'] = col_dtype.capitalize() + '.TimeSeriesEncoder'
             encoder_dict['args']['original_type'] = f'"{col_dtype}"'
             encoder_dict['args']['target'] = "self.target"
             encoder_dict['args']['grouped_by'] = f"{gby}"
         if is_target:
-            if col_dtype in [dtype.integer, dtype.float]:
+            if col_dtype in [dtype.integer]:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
-                encoder_dict['module'] = 'TsNumericEncoder'
+                encoder_dict['module'] = 'Integer.TsNumericEncoder'
+            if col_dtype in [dtype.float]:
+                encoder_dict['args']['grouped_by'] = f"{gby}"
+                encoder_dict['module'] = 'Float.TsNumericEncoder'
             if tss.nr_predictions > 1:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
-                encoder_dict['module'] = 'TsArrayNumericEncoder'
+                encoder_dict['module'] = 'Array.TsArrayNumericEncoder'
         if '__mdb_ts_previous' in col_name:
-            encoder_dict['module'] = 'TimeSeriesPlainEncoder'
+            encoder_dict['module'] = col_dtype.capitalize() + '.TimeSeriesPlainEncoder'
             encoder_dict['args']['original_type'] = f'"{tss.target_type}"'
             encoder_dict['args']['window'] = f'{tss.window}'
 
     # Set arguments for the encoder
-    if encoder_dict['module'] == 'PretrainedLangEncoder' and not is_target:
+    if encoder_dict['module'] == 'Rich_Text.PretrainedLangEncoder' and not is_target:
         encoder_dict['args']['output_type'] = '$dtype_dict[$target]'
 
-    if encoder_dict['module'] in trainable_encoders:
-        encoder_dict['args']['stop_after'] = '$problem_definition.seconds_per_encoder'
+    for encoder_name in trainable_encoders:
+        if encoder_name in encoder_dict['module']:
+            encoder_dict['args']['stop_after'] = '$problem_definition.seconds_per_encoder'
 
     if is_target_predicting_encoder:
         encoder_dict['args']['embed_mode'] = 'False'
@@ -102,14 +106,9 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         models = [{
                 'module': 'Neural',
                 'args': {
-                    'target_encoder': '$encoders[self.target]',
-                    'target': '$target',
-                    'dtype_dict': '$dtype_dict',
-                    'input_cols': '$input_cols',
-                    'net': f'"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries else f'"ArNet"',
                     'fit_on_dev': True,
                     'stop_after': '$problem_definition.seconds_per_model',
-                    'timeseries_settings': '$problem_definition.timeseries_settings',
+                    'search_hyperparameters': True
                 }
 
         }]
@@ -120,9 +119,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'module': 'LightGBM',
                 'args': {
                     'stop_after': '$problem_definition.seconds_per_model',
-                    'target': '$target',
-                    'dtype_dict': '$dtype_dict',
-                    'input_cols': '$input_cols',
                     'fit_on_dev': True
                 }
             },
@@ -130,9 +126,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 'module': 'Regression',
                 'args': {
                     'stop_after': '$problem_definition.seconds_per_model',
-                    'target': '$target',
-                    'dtype_dict': '$dtype_dict',
-                    'target_encoder': '$encoders[$target]'
                 }
             }
         ])
@@ -140,9 +133,6 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         models.extend([{
             'module': 'LightGBMArray',
             'args': {
-                'target': '$target',
-                'dtype_dict': '$dtype_dict',
-                'input_cols': '$input_cols',
                 'fit_on_dev': True,
                 'stop_after': '$problem_definition.seconds_per_model',
                 'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions'
@@ -153,15 +143,11 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'args': {
                 'stop_after': '$problem_definition.seconds_per_model',
                 'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
-                'target': '$target',
-                'dtype_dict': '$dtype_dict',
-                'ts_analysis': '$ts_analysis'
             },
             }
         ])
 
-    output = Output(
-        name=target,
+    outputs = {target: Output(
         data_dtype=type_information.dtypes[target],
         encoder=None,
         models=models,
@@ -169,17 +155,14 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'module': 'BestOf',
             'args': {
                 'accuracy_functions': '$accuracy_functions',
-                'target': '$target',
-                'data': 'test_data',
-                'models': '$models'
             }
         }
-    )
+    )}
 
     if problem_definition.timeseries_settings.is_timeseries and problem_definition.timeseries_settings.nr_predictions > 1:
-        output.data_dtype = dtype.array
+        list(outputs.values())[0].data_dtype = dtype.array
 
-    output.encoder = lookup_encoder(type_information.dtypes[target], target, True, problem_definition, False)
+    list(outputs.values())[0].encoder = lookup_encoder(type_information.dtypes[target], target, True, problem_definition, False)
 
     features: Dict[str, Feature] = {}
     for col_name in input_cols:
@@ -187,29 +170,28 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         dependency = []
         encoder = lookup_encoder(col_dtype, col_name, False, problem_definition, is_target_predicting_encoder)
 
-        if problem_definition.timeseries_settings.is_timeseries and encoder['module'] in ts_encoders:
-            if problem_definition.timeseries_settings.group_by is not None:
-                for group in problem_definition.timeseries_settings.group_by:
-                    dependency.append(group)
+        for encoder_name in ts_encoders:
+            if problem_definition.timeseries_settings.is_timeseries and encoder_name in encoder['module']:
+                if problem_definition.timeseries_settings.group_by is not None:
+                    for group in problem_definition.timeseries_settings.group_by:
+                        dependency.append(group)
 
-            if problem_definition.timeseries_settings.use_previous_target:
-                dependency.append(f'__mdb_ts_previous_{target}')
+                if problem_definition.timeseries_settings.use_previous_target:
+                    dependency.append(f'__mdb_ts_previous_{target}')
 
         feature = Feature(
-            data_dtype=col_dtype,
-            encoder=encoder,
-            dependency=dependency
+            encoder=encoder
         )
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
-    if output.data_dtype in [dtype.integer, dtype.float]:
+    if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
         accuracy_functions = ['r2_score']
-    elif output.data_dtype == dtype.categorical:
+    elif list(outputs.values())[0].data_dtype == dtype.categorical:
         accuracy_functions = ['balanced_accuracy_score']
-    elif output.data_dtype == dtype.tags:
+    elif list(outputs.values())[0].data_dtype == dtype.tags:
         accuracy_functions = ['balanced_accuracy_score']
-    elif output.data_dtype == dtype.array:
+    elif list(outputs.values())[0].data_dtype == dtype.array:
         accuracy_functions = ['evaluate_array_accuracy']
     else:
         accuracy_functions = ['accuracy_score']
@@ -219,7 +201,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
     if problem_definition.time_aim is not None:
         nr_trainable_encoders = len([x for x in features.values() if x.encoder['module'] in trainable_encoders])
-        nr_models = len(output.models)
+        nr_models = len(list(outputs.values())[0].models)
         encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5)
 
         if nr_trainable_encoders == 0:
@@ -234,8 +216,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         analyzer=None,
         explainer=None,
         features=features,
-        output=output,
-        imports=[],
+        outputs=outputs,
+        imports=None,
         problem_definition=problem_definition,
         identifiers=type_information.identifiers,
         timeseries_transformer=None,
@@ -266,6 +248,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.api import *',
         'from lightwood.model import BaseModel',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
+        'from lightwood.encoder import Array, Binary, Categorical, Date, DateTime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags',
         'from lightwood.ensemble import BaseEnsemble',
         'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call',
@@ -273,15 +256,64 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood import ProblemDefinition'
     ]
 
-    for feature in [json_ai.output, *json_ai.features.values()]:
+    if json_ai.imports is None:
+        json_ai.imports = imports
+    else:
+        json_ai.imports.extend(imports)
+
+    for feature in [list(json_ai.outputs.values())[0], *json_ai.features.values()]:
         encoder_import = feature.encoder['module']
+        if '.' in encoder_import:
+            continue
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
     if problem_definition.timeseries_settings.use_previous_target:
         imports.append('from lightwood.encoder import TimeSeriesPlainEncoder')
 
-    json_ai.imports.extend(imports)
+    # Add implicit arguments
+    # @TODO: Consider removing once we have a proper editor in studio
+    models = json_ai.outputs[json_ai.problem_definition.target].models
+    for i in range(len(models)):
+        if models[i]['module'] == 'Unit':
+            pass
+        elif models[i]['module'] == 'Neural':
+            models[i]['args']['target_encoder'] = models[i]['args'].get('target_encoder', '$encoders[self.target]')
+            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
+            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
+            models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
+            models[i]['args']['timeseries_settings'] = models[i]['args'].get('timeseries_settings', '$problem_definition.timeseries_settings')
+            models[i]['args']['net'] = models[i]['args'].get('net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries else '"ArNet"')
 
+        elif models[i]['module'] == 'LightGBM':
+            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
+            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
+            models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
+        elif models[i]['module'] == 'Regression':
+            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
+            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
+            models[i]['args']['target_encoder'] = models[i]['args'].get('target_encoder', '$encoders[self.target]')
+        elif models[i]['module'] == 'LightGBMArray':
+            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
+            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
+            models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
+        elif models[i]['module'] == 'SkTime':
+            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
+            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
+            models[i]['args']['ts_analysis'] = models[i]['args'].get('ts_analysis', '$ts_analysis')
+    
+    ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
+    ensemble['args']['target'] = ensemble['args'].get('target', '$target')
+    ensemble['args']['data'] = ensemble['args'].get('data', 'test_data')
+    ensemble['args']['models'] = ensemble['args'].get('models', '$models')
+
+    for name in json_ai.features:
+        if json_ai.features[name].dependency is None:
+            json_ai.features[name].dependency = []
+        if json_ai.features[name].data_dtype is None:
+            json_ai.features[name].data_dtype = json_ai.features[name].encoder['module'].split('.')[0].lower()
+            
+    # Add implicit phases
+    # @TODO: Consider removing once we have a proper editor in studio
     if json_ai.cleaner is None:
         json_ai.cleaner = {
             'module': 'cleaner',
@@ -292,7 +324,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'data': 'data',
                 'dtype_dict': '$dtype_dict',
                 'target': '$target',
-                'mode': '$mode'
+                'mode': '$mode',
+                'timeseries_settings': '$problem_definition.timeseries_settings'
             }
         }
 
@@ -373,9 +406,9 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 def code_from_json_ai(json_ai: JsonAI) -> str:
     json_ai = add_implicit_values(json_ai)
 
-    encoder_dict = {json_ai.output.name: call(json_ai.output.encoder, json_ai)}
+    encoder_dict = {json_ai.problem_definition.target: call(list(json_ai.outputs.values())[0].encoder, json_ai)}
     dependency_dict = {}
-    dtype_dict = {json_ai.output.name: f"""'{json_ai.output.data_dtype}'"""}
+    dtype_dict = {json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""}
 
     for col_name, feature in json_ai.features.items():
         encoder_dict[col_name] = call(feature.encoder, json_ai)
@@ -384,9 +417,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
     if json_ai.problem_definition.timeseries_settings.use_previous_target:
-        col_name = f'__mdb_ts_previous_{json_ai.output.name}'
-        json_ai.problem_definition.timeseries_settings.target_type = json_ai.output.data_dtype
-        encoder_dict[col_name] = call(lookup_encoder(json_ai.output.data_dtype,
+        col_name = f'__mdb_ts_previous_{json_ai.problem_definition.target}'
+        json_ai.problem_definition.timeseries_settings.target_type = list(json_ai.outputs.values())[0].data_dtype
+        encoder_dict[col_name] = call(lookup_encoder(list(json_ai.outputs.values())[0].data_dtype,
                                                      col_name,
                                                      False,
                                                      json_ai.problem_definition,
@@ -394,11 +427,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      ),
                                       json_ai)
         dependency_dict[col_name] = []
-        dtype_dict[col_name] = f"""'{json_ai.output.data_dtype}'"""
+        dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
         json_ai.features[col_name] = Feature(
-            data_dtype=json_ai.output.data_dtype,
-            encoder=encoder_dict[col_name],
-            dependency=[]
+            encoder=encoder_dict[col_name]
         )
 
     input_cols = ','.join([f"""'{name}'""" for name in json_ai.features])
@@ -501,19 +532,21 @@ train_data = encoded_ds_arr[0:int(nfolds*0.9)]
 test_data = encoded_ds_arr[int(nfolds*0.9):]
 
 log.info('Training the models')
-self.models = [{', '.join([call(x, json_ai) for x in json_ai.output.models])}]
+self.models = [{', '.join([call(x, json_ai) for x in list(json_ai.outputs.values())[0].models])}]
 trained_models = []
 for model in self.models:
     try:
         model.fit(train_data)
         trained_models.append(model)
     except Exception as e:
-        if {json_ai.problem_definition.strict_mode} and 'regression' not in str(type(model)).lower():
+        log.warning(f'Exception: {{e}} when training model: {{model}}')
+        if {json_ai.problem_definition.strict_mode} and model.stable:
             raise e
+            
 self.models = trained_models
 
 log.info('Ensembling the model')
-self.ensemble = {call(json_ai.output.ensemble, json_ai)}
+self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble, json_ai)}
 self.supports_proba = self.ensemble.supports_proba
 
 log.info('Analyzing the ensemble')
@@ -568,7 +601,7 @@ class Predictor(PredictorInterface):
 
     def __init__(self):
         seed()
-        self.target = '{json_ai.output.name}'
+        self.target = '{json_ai.problem_definition.target}'
         self.mode = 'innactive'
 
     def learn(self, data: pd.DataFrame) -> None:
