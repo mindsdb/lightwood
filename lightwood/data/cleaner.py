@@ -1,4 +1,5 @@
 from copy import deepcopy
+from lightwood.api.types import TimeseriesSettings
 import re
 from typing import Dict, List
 from lightwood.api.dtype import dtype
@@ -97,7 +98,7 @@ def clean_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     return df
 
 
-def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, ignore_features: List[str], identifiers: Dict[str, str], target: str, mode: str) -> pd.DataFrame:
+def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, ignore_features: List[str], identifiers: Dict[str, str], target: str, mode: str, timeseries_settings: TimeseriesSettings) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]
@@ -106,7 +107,7 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, 
     if mode == 'train':
         data = clean_empty_targets(data, target)
     if mode == 'predict':
-        if target in data.columns:
+        if target in data.columns and not timeseries_settings.use_previous_target:
             data = data.drop(columns=[target])
 
     # Drop extra columns
