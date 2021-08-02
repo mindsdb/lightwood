@@ -43,6 +43,7 @@ class EncodedDs(Dataset):
                 return self.cache[idx]
 
         X = torch.FloatTensor()
+        Y = torch.FloatTensor()
         for col in self.data_frame:
             if self.encoders.get(col, None):
                 kwargs = {}
