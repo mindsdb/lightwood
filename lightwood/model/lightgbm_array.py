@@ -26,6 +26,7 @@ class LightGBMArray(BaseModel):
                        for _ in range(n_ts_predictions)]
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
         self.supports_proba = False
+        self.stable = True
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting LGBM models for array prediction')

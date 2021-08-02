@@ -5,6 +5,7 @@ from lightwood.data.encoded_ds import EncodedDs
 
 class BaseModel:
     fit_data_len: int
+    stable: bool
 
     def __init__(self, stop_after: int):
         self.stop_after = stop_after
