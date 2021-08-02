@@ -288,6 +288,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
             models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
         elif models[i]['module'] == 'Regression':
+            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
+            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
             models[i]['args']['target_encoder'] = models[i]['args'].get('target_encoder', '$encoders[self.target]')
         elif models[i]['module'] == 'LightGBMArray':
             models[i]['args']['target'] = models[i]['args'].get('target', '$target')
