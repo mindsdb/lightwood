@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import entropy
 from scipy.special import softmax
-from sklearn.linear_model import ElasticNet, SGDRegressor, Ridge  # @TODO: settle on one of these
+from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 
 from lightwood.api.dtype import dtype
@@ -27,7 +27,7 @@ class SelfawareNormalizer(BaseScorer):
         self.target_dtype = fit_params['dtype_dict'][fit_params['target']]
         self.multi_ts_task = fit_params['is_multi_ts']
 
-        self.model = Ridge()  # SGDRegressor()  # ElasticNet()
+        self.model = Ridge()
         self.prediction_cache = None
         self.bounds = (0.5, 1.5)
         self.error_fn = mean_absolute_error
@@ -73,10 +73,6 @@ class SelfawareNormalizer(BaseScorer):
             col_names = [col.replace('__mdb_proba_', '') for col in prob_cols]
             if prob_cols:
                 preds = preds[prob_cols]
-                if '__mdb_proba___mdb_unknown_cat' in preds.columns:
-                    preds.pop('__mdb_proba___mdb_unknown_cat')
-                    prob_cols.remove('__mdb_proba___mdb_unknown_cat')
-                    col_names.remove('__mdb_unknown_cat')
 
             # reorder preds to ensure classes are in same order as in target_enc
             preds.columns = col_names
