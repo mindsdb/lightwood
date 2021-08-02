@@ -31,6 +31,7 @@ class SkTime(BaseModel):
         self.cutoff_index = {}  # marks index at which training data stops and forecasting window starts
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.supports_proba = False
+        self.stable = True
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting sktime forecaster for array prediction')

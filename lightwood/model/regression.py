@@ -23,6 +23,7 @@ class Regression(BaseModel):
         self.target_dtype = dtype_dict[target]
         self.supports_proba = self.target_dtype in [dtype.binary, dtype.categorical]
         self.label_map = {}
+        self.stable = False
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting Regression model')
