@@ -116,6 +116,9 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, 
 
     # Standardize content
     for name, data_dtype in dtype_dict.items():
+        if mode == 'predict':
+            if name == target:
+                continue
         if name in to_drop:
             continue
         if name not in data.columns:
