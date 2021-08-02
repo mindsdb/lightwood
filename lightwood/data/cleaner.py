@@ -105,11 +105,12 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, 
     data = data.drop(columns=to_drop)
     if mode == 'train':
         data = clean_empty_targets(data, target)
+    if mode == 'predict':
+        if target in data.columns:
+            data = data.drop(columns=[target])
 
     # Drop extra columns
     for name in list(data.columns):
-        if mode == 'predict' and name == target:
-            continue
         if name not in dtype_dict and name not in exceptions:
             data = data.drop(columns=[name])
 
