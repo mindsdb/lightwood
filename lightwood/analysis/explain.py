@@ -111,6 +111,8 @@ def explain(data: pd.DataFrame,
                 if predicted_proba:
                     all_cat_cols = [col for col in predictions.columns if '__mdb_proba' in col]
                     class_dists = predictions[all_cat_cols].values
+                    for icol, cat_col in enumerate(all_cat_cols):
+                        insights.loc[X.index, cat_col] = class_dists[:, icol]
                 else:
                     class_dists = pd.get_dummies(predictions['prediction']).values
 
