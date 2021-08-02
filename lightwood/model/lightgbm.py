@@ -51,6 +51,7 @@ class LightGBM(BaseModel):
         self.params = {}
         self.fit_on_dev = fit_on_dev
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
+        self.stable = True
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
         gpu_works = check_gpu_support()
@@ -161,7 +162,7 @@ class LightGBM(BaseModel):
         log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
         self.params['num_iterations'] = int(self.num_iterations)
 
-        self.params['early_stopping_rounds'] = min(12, int(self.num_iterations / 8))
+        self.params['early_stopping_rounds'] = 5
 
         self.model = model_generator.train(self.params, train_dataset, valid_sets=[dev_dataset, train_dataset], valid_names=['dev', 'train'], verbose_eval=False, **kwargs)
         self.num_iterations = self.model.best_iteration
@@ -173,7 +174,7 @@ class LightGBM(BaseModel):
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         ds = ConcatedEncodedDs(train_data)
         pct_of_original = len(ds) / self.fit_data_len
-        iterations = max(1, int(self.num_iterations * pct_of_original)/2)
+        iterations = max(1, int(self.num_iterations * pct_of_original) / 2)
 
         data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'dev': {'ds': ConcatedEncodedDs(dev_data), 'data': None, 'label_data': {}}}
 
@@ -187,8 +188,6 @@ class LightGBM(BaseModel):
         self.params['num_iterations'] = int(iterations)
         self.model = lightgbm.train(self.params, train_dataset, valid_sets=[dev_dataset, train_dataset], valid_names=['dev', 'retrain'], verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
-        
-        pass
 
     def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         data = None

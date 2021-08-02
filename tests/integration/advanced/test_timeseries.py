@@ -47,7 +47,7 @@ class TestTimeseries(unittest.TestCase):
         nr_preds = 2
         order_by = 'T'
 
-        predictor = predictor_from_problem(train, ProblemDefinition.from_dict({'target': target,
+        prdb = ProblemDefinition.from_dict({'target': target,
             'time_aim': 30,
             'nfolds': 10,
             'anomaly_detection': True,
@@ -57,8 +57,13 @@ class TestTimeseries(unittest.TestCase):
                 'nr_predictions': nr_preds,
                 'order_by': [order_by],
                 'window': 5
-            },
-            }))
+            }
+        })
+        import json
+        from lightwood.api.high_level import json_ai_from_problem
+        json.dump(json_ai_from_problem(train, prdb).to_dict(), open('AI2_timeseries.json', 'w'))
+
+        predictor = predictor_from_problem(train, prdb)
 
         predictor.learn(train)
         preds = predictor.predict(test)

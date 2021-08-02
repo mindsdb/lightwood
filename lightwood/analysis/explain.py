@@ -36,7 +36,10 @@ def explain(data: pd.DataFrame,
     data = data.reset_index(drop=True)
 
     insights = pd.DataFrame()
-    insights['truth'] = data[target_name]
+    if target_name in data.columns:
+        insights['truth'] = data[target_name]
+    else:
+        insights['truth'] = [None] * len(predictions['prediction'])
     insights['prediction'] = predictions['prediction']
 
     if timeseries_settings.is_timeseries:
