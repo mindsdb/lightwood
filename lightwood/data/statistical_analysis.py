@@ -46,7 +46,7 @@ def statistical_analysis(data: pd.DataFrame,
                          problem_definition: ProblemDefinition) -> StatisticalAnalysis:
     seed()
     log.info('Starting statistical analysis')
-    df = cleaner(data, dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, identifiers, problem_definition.target, 'train')
+    df = cleaner(data, dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, identifiers, problem_definition.target, 'train', problem_definition.timeseries_settings)
     
     missing = {col: len([x for x in df[col] if x is None]) / len(df[col]) for col in df.columns}
     distinct = {col: len(set(df[col])) / len(df[col]) for col in df.columns}
