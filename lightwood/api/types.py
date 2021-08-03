@@ -226,7 +226,6 @@ class JsonAI:
         features = {k: Feature.from_dict(v) for k,v in obj['features'].items()} 
         outputs = {k: Output.from_dict(v) for k,v in obj['outputs'].items()}
         problem_definition = ProblemDefinition.from_dict(obj['problem_definition'])
-        statistical_analysis = StatisticalAnalysis.from_dict(obj['statistical_analysis']) 
         identifiers = obj['identifiers']
         cleaner = obj.get('cleaner', None)
         splitter = obj.get('splitter', None)
@@ -242,7 +241,6 @@ class JsonAI:
             features=features,
             outputs=outputs,
             problem_definition=problem_definition,
-            statistical_analysis=statistical_analysis,
             identifiers=identifiers,
             cleaner=cleaner,
             splitter=splitter,
