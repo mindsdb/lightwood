@@ -252,6 +252,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.ensemble import BaseEnsemble',
         'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call',
+        'from lightwood.data.encoded_ds import ConcatedEncodedDs',
         'from lightwood import ProblemDefinition'
     ]
 
@@ -346,8 +347,9 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'accuracy_functions': '$accuracy_functions',
                 'predictor': '$ensemble',
                 'data': 'test_data',
+                'train_data': 'train_data',
                 'target': '$target',
-                'disable_column_importance': 'True',
+                'disable_column_importance': 'False' if not problem_definition.timeseries_settings.is_timeseries else 'True',
                 'dtype_dict': '$dtype_dict',
                 'fixed_significance': None,
                 'positive_domain': False,
@@ -365,6 +367,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
                 'anomaly_cooldown': '$problem_definition.anomaly_cooldown',
                 'data': 'data',
+                'encoded_data': 'encoded_data',
                 'predictions': 'df',
                 'analysis': '$runtime_analyzer',
                 'ts_analysis': '$ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
@@ -563,7 +566,8 @@ data = {call(json_ai.cleaner, json_ai)}
 
 {ts_transform_code}
 
-encoded_ds = lightwood.encode(self.encoders, data, self.target)
+encoded_ds = lightwood.encode(self.encoders, data, self.target)[0]
+encoded_data = encoded_ds.get_encoded_data(include_target=False)
 """
     predict_common_body = align(predict_common_body, 2)
 
@@ -576,7 +580,8 @@ return insights
 
     predict_proba_body = f"""
 df = self.ensemble(encoded_ds, predict_proba=True)
-return df
+insights = {call(json_ai.explainer, json_ai)}
+return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
 

@@ -9,11 +9,11 @@ import torch.nn as nn
 from torch import optim
 
 from lightwood.api import dtype
+from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoder.datetime import DatetimeEncoder
-from lightwood.encoder.time_series.plain import TimeSeriesPlainEncoder
 from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerical, DecoderRNNNumerical
 from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer, get_group_matches
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, get_chunk, len_to_mask
@@ -137,7 +137,7 @@ class TimeSeriesEncoder(BaseEncoder):
         end = min(end, len(source))
         return source[start:end]
 
-    def prepare(self, priming_data, dependency_data=None, ts_analysis=None, feedback_hoop_function=print, batch_size=256):
+    def prepare(self, priming_data, dependency_data=None, ts_analysis=None, feedback_hoop_function=log.info, batch_size=256):
         """
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
         :param dependency_data: raw data from other columns

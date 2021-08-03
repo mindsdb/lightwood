@@ -6,7 +6,7 @@ from lightwood.data.encoded_ds import EncodedDs
 
 def encode(encoders: List[BaseEncoder], folds: List[pd.DataFrame], target: str) -> List[EncodedDs]:
     if isinstance(folds, pd.DataFrame):
-        return EncodedDs(encoders, folds, target)
+        folds = [folds]
 
     encoded_ds_arr: List[EncodedDs] = []
     for fold in folds:

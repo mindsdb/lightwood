@@ -30,7 +30,7 @@ def is_allowed(v):
         return True
 
     # Allowed variable names
-    if v in ['data', 'nfolds', 'data', 'train_data', 'test_data', 'df']:
+    if v in ['df', 'nfolds', 'data', 'encoded_data', 'train_data', 'encoded_train_data', 'test_data']:
         return True
 
     try:

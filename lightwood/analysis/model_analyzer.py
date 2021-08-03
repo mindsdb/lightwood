@@ -1,98 +1,78 @@
 from typing import Dict, List
 
-from torch.utils.data.dataset import ConcatDataset
-from lightwood.api.types import Feature, ModelAnalysis, Output, ProblemDefinition, StatisticalAnalysis, TimeseriesSettings
+import torch
 import numpy as np
 import pandas as pd
 from copy import deepcopy
 from itertools import product
 from sklearn.preprocessing import OneHotEncoder
 
-from lightwood.ensemble import BaseEnsemble
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.api import dtype
+from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.helpers.general import evaluate_accuracy
+from lightwood.ensemble import BaseEnsemble
 
 from lightwood.analysis.acc_stats import AccStats
-from lightwood.analysis.nc.norm import SelfawareNormalizer
+from lightwood.analysis.nc.norm import Normalizer
 from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc
 from lightwood.analysis.nc.util import clean_df, set_conf_range
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
 from lightwood.analysis.nc.nc import RegressorNc, ClassifierNc, MarginErrFunc
-from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter
+from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter, t_softmax
 
 
 """
-[31/5/21] Analyzer roadmap:
-
-- flow works for categorical and numerical with minimal adaptation to code logic, should include accStats, 
-      global feat importance and ICP confidence
-     - [DONE, 3/6/21] icp confidence
-     - [] use class distribution output
-     - [] global feat importance
-     - [partially done] accStats
-- streamline nonconformist custom implementation to cater analysis needs
-- introduce model-agnostic normalizer (previously known as self aware NN)
-- re-introduce time series (and grouped ICPs)
-    - [2/7/2021] currently working on this
+Pending:
+ - [] simplify nonconformist custom implementation to deprecate wrappers
+ - [] reimplement caching for faster analysis?
+ - [] confidence for T+N <- active research question
 """
 
 
 def model_analyzer(
         predictor: BaseEnsemble,
         data: List[EncodedDs],
+        train_data: List[EncodedDs],
         stats_info: StatisticalAnalysis,
         target: str,
         ts_cfg: TimeseriesSettings,
         dtype_dict: Dict[str, str],
-        disable_column_importance,
-        fixed_significance,
-        positive_domain,
+        disable_column_importance: bool,
+        fixed_significance: float,
+        positive_domain: bool,
         accuracy_functions
     ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
 
-    # @ TODO: reimplement time series
-    # validation_df = data.validation_df
-    # if ts_cfg.is_timeseries:
-    #     validation_df = data.validation_df[data.validation_df['__mdb_make_predictions'] == True]
-    # ... same with test and train dfs
+    data_type = dtype_dict[target]
+    data_subtype = data_type
+
+    is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
+    is_classification = data_type in (dtype.categorical, dtype.binary)
+    is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
+
     encoded_data = ConcatedEncodedDs(data)
     data = encoded_data.data_frame
     runtime_analyzer = {}
     predictions = {}
     input_cols = list([col for col in data.columns if col != target])
-    normal_predictions = predictor(encoded_data)  # TODO: this should include beliefs for categorical targets
+    normal_predictions = predictor(encoded_data) if not is_classification else predictor(encoded_data, predict_proba=True)
     normal_predictions = normal_predictions.set_index(data.index)
 
     # confidence estimation with inductive conformal predictors (ICPs)
     runtime_analyzer['icp'] = {'__mdb_active': False}
 
-    # typing_info = stats_info['typing']
-    data_type = dtype_dict[target]
-    data_subtype = data_type
-
-    is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
-                   # and dtype.numeric in typing_info['data_type_dist'].keys())
-
-    is_classification = data_type in (dtype.categorical, dtype.binary)
-                        # dtype.categorical in typing_info['data_type_dist'].keys())
-
-    is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
-
-    fit_params = {
-        'nr_preds': ts_cfg.nr_predictions or 0,
-        'columns_to_ignore': []
-    }
+    all_cat_cols = [col for col in normal_predictions.columns if '__mdb_proba' in col]
+    all_classes = np.array([col.replace('__mdb_proba_', '') for col in all_cat_cols])
+    fit_params = {'nr_preds': ts_cfg.nr_predictions or 0, 'columns_to_ignore': [] }
     fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
 
-    # @TODO: adapters should not be needed anymore
     if is_classification:
         if data_subtype != dtype.tags:
-            all_classes = np.array(stats_info.train_observed_classes)
             enc = OneHotEncoder(sparse=False, handle_unknown='ignore')
             enc.fit(all_classes.reshape(-1, 1))
-            runtime_analyzer['label_encoders'] = enc  # needed to repr cat labels inside nonconformist @TODO: remove?
+            runtime_analyzer['label_encoders'] = enc  # needed to repr cat labels inside nonconformist
         else:
             runtime_analyzer['label_encoders'] = None
 
@@ -110,51 +90,47 @@ def model_analyzer(
     if is_numerical or (is_classification and data_subtype != dtype.tags):
         model = adapter(predictor)
 
-        norm_params = {'output_column': target}
-        normalizer = SelfawareNormalizer(fit_params=norm_params)
-        normalizer.prediction_cache = normal_predictions.get('selfaware_scores', None)  # @TODO: call to .explain()
+        norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor, 'encoders': encoded_data.encoders,
+                       'is_multi_ts': is_multi_ts, 'stop_after': 1e2}
+        normalizer = Normalizer(fit_params=norm_params)
+        normalizer.fit(train_data)
+        normalizer.prediction_cache = normalizer(encoded_data)
 
         # instance the ICP
-        nc = nc_class(model, nc_function)  # , normalizer=normalizer)  # @TODO: reintroduce normalizer
+        nc = nc_class(model, nc_function, normalizer=normalizer)
         icp = icp_class(nc)
 
-        runtime_analyzer['icp']['__default'] = icp  # @TODO: better typing for output
+        runtime_analyzer['icp']['__default'] = icp
 
         # setup prediction cache to avoid additional .predict() calls
         if is_classification:
-            if False:  # config.output.returns_proba:
-                # @TODO: models should indicate whether they predict prob beliefs. if so, use them here
-                icp.nc_function.model.prediction_cache = np.array(normal_predictions['class_distribution'])
-                icp.nc_function.model.class_map = stats_info['lightwood_class_map']
+            if predictor.models[predictor.best_index].supports_proba:
+                icp.nc_function.model.prediction_cache = normal_predictions[all_cat_cols].values
             else:
-                class_map = {i: v for i, v in enumerate(stats_info.train_observed_classes)}
                 predicted_classes = pd.get_dummies(normal_predictions['prediction']).values  # inflate to one-hot enc
-
                 icp.nc_function.model.prediction_cache = predicted_classes
-                icp.nc_function.model.class_map = class_map  # @TODO: still needed?
+
         elif is_multi_ts:
             # we fit ICPs for time series confidence bounds only at t+1 forecast
             icp.nc_function.model.prediction_cache = np.array([p[0] for p in normal_predictions['prediction']])
+
         else:
             icp.nc_function.model.prediction_cache = np.array(normal_predictions['prediction'])
 
-        runtime_analyzer['icp']['__default'].fit(None, None)  # @TODO: rm fit call after v1 works, 'twas a hack from the start
         if not is_classification:
-            runtime_analyzer['train_std_dev'] = {'__default': stats_info.train_std_dev}
+            runtime_analyzer['df_std_dev'] = {'__default': stats_info.df_std_dev}
 
         # fit additional ICPs in time series tasks with grouped columns
         if ts_cfg.is_timeseries and ts_cfg.group_by:
 
             # create an ICP for each possible group
-            group_info = data[ts_cfg.group_by].to_dict('list')  # @TODO: should save this info from all data in timeseries_analyzer then send it here. Fow now, validation only means it can have incomplete data
+            group_info = data[ts_cfg.group_by].to_dict('list')
             all_group_combinations = list(product(*[set(x) for x in group_info.values()]))
             runtime_analyzer['icp']['__mdb_groups'] = all_group_combinations
             runtime_analyzer['icp']['__mdb_group_keys'] = [x for x in group_info.keys()]
 
             for combination in all_group_combinations:
-                # frozenset lets us hash
                 runtime_analyzer['icp'][frozenset(combination)] = deepcopy(icp)
-                runtime_analyzer['icp'][frozenset(combination)].fit(None, None)
 
         # calibrate ICP
         icp_df = deepcopy(data)
@@ -165,8 +141,6 @@ def model_analyzer(
         # get confidence estimation for validation dataset
         conf, ranges = set_conf_range(icp_df, icp, dtype_dict[target], runtime_analyzer, positive_domain=positive_domain, significance=fixed_significance)
         if not is_classification:
-            # @TODO previously using cached_val_df index, analyze how to replicate once again for the TS case
-            # @TODO once using normalizer, add column for confidence proper here, and return DF in categorical case too
             result_df = pd.DataFrame(index=data.index, columns=['confidence', 'lower', 'upper'], dtype=float)
             result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
             result_df.loc[icp_df.index, 'upper'] = ranges[:, 1]
@@ -180,8 +154,8 @@ def model_analyzer(
             icps = runtime_analyzer['icp']
             group_keys = icps['__mdb_group_keys']
 
-            # add all predictions to the cached DF
-            icps_df = deepcopy(data)  # @TODO: previously used cached_val_df
+            # add all predictions to DF
+            icps_df = deepcopy(data)
             if is_multi_ts:
                 icps_df[f'__predicted_{target}'] = [p[0] for p in normal_predictions['prediction']]
             else:
@@ -189,8 +163,8 @@ def model_analyzer(
 
             for group in icps['__mdb_groups']:
                 icp_df = icps_df
-                if icps[frozenset(group)].nc_function.normalizer is not None:  # @TODO: reintroduce normalizer
-                    icp_df[f'__selfaware_{target}'] = icps[frozenset(group)].nc_function.normalizer.prediction_cache
+                if icps[frozenset(group)].nc_function.normalizer is not None:
+                    icp_df[f'__norm_{target}'] = icps[frozenset(group)].nc_function.normalizer.prediction_cache
 
                 # filter irrelevant rows for each group combination
                 for key, val in zip(group_keys, group):
@@ -200,8 +174,8 @@ def model_analyzer(
                 pred_cache = icp_df.pop(f'__predicted_{target}').values
                 icps[frozenset(group)].nc_function.model.prediction_cache = pred_cache
                 icp_df, y = clean_df(icp_df, target, is_classification, runtime_analyzer.get('label_encoders', None))
-                if icps[frozenset(group)].nc_function.normalizer is not None:  # @TODO: reintroduce normalizer
-                    icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(f'__selfaware_{target}').values
+                if icps[frozenset(group)].nc_function.normalizer is not None:
+                    icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(f'__norm_{target}').values
 
                 icps[frozenset(group)].index = icp_df.columns      # important at inference time
                 icps[frozenset(group)].calibrate(icp_df.values, y)
@@ -212,7 +186,7 @@ def model_analyzer(
                     for key, val in zip(group_keys, group):
                         icp_train_df = icp_train_df[icp_train_df[key] == val]
                     y_train = icp_train_df[target].values
-                    runtime_analyzer['train_std_dev'][frozenset(group)] = y_train.std()  # @TODO: check that this is indeed train std dev
+                    runtime_analyzer['df_std_dev'][frozenset(group)] = y_train.std()
 
                 # get bounds for relevant rows in validation dataset
                 conf, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], dtype_dict[target], runtime_analyzer,
@@ -231,10 +205,8 @@ def model_analyzer(
             ranges = result_df.values
             predictions['confidence_range'] = ranges
 
-        # TODO: should we pass observed confidences in validation dataset?
         runtime_analyzer['icp']['__mdb_active'] = True
 
-    # TODO: calculate acc on other folds?
     # get accuracy metric for validation data
     score_dict = evaluate_accuracy(
         data,
@@ -248,34 +220,46 @@ def model_analyzer(
     empty_input_accuracy = {}
     empty_input_predictions_test = {}
 
-    # @TODO: reactivate global feature importance
+    # compute global feature importance
     if not disable_column_importance:
         ignorable_input_cols = [x for x in input_cols if (not ts_cfg.is_timeseries or
                                                                 (x not in ts_cfg.order_by and
                                                                  x not in ts_cfg.historical_columns))]
         for col in ignorable_input_cols:
-            empty_input_predictions[col] = predictor('validate', ignore_columns=[col])  # @TODO: add this param?
+            partial_data = deepcopy(encoded_data)
+            partial_data.clear_cache()
+            for ds in partial_data.encoded_ds_arr:
+                ds.data_frame[col].values[:] = 0
+
+            if not is_classification:
+                empty_input_predictions[col] = predictor(partial_data)
+            else:
+                empty_input_predictions[col] = predictor(partial_data, predict_proba=True)
+
             empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
                 data,
-                empty_input_predictions[col]
+                empty_input_predictions[col]['prediction'],
+                target,
+                accuracy_functions
             ).values()))
 
-        # Get some information about the importance of each column
-        # @TODO: Figure out if it's too slow
         column_importances = {}
+        acc_increases = []
         for col in ignorable_input_cols:
             accuracy_increase = (normal_accuracy - empty_input_accuracy[col])
-            # normalize from 0 to 10
-            column_importances[col] = 10 * max(0, accuracy_increase)
+            acc_increases.append(accuracy_increase)
+
+        # low 0.2 temperature to accentuate differences
+        acc_increases = t_softmax(torch.Tensor([acc_increases]), t=0.2).tolist()[0]
+        for col, inc in zip(ignorable_input_cols, acc_increases):
+            column_importances[col] = 10 * inc  # scores go from 0 to 10 in GUI
     else:
         column_importances = None
 
-    # @TODO: Training / testing data accuracy here ?
+    predictions_arr = [normal_predictions['prediction'].values.flatten().tolist()] + \
+                      [x for x in empty_input_predictions_test.values()]
 
     acc_stats = AccStats(dtype_dict=dtype_dict, target=target)
-
-    predictions_arr = [normal_predictions['prediction'].values.flatten().tolist()] + [x for x in empty_input_predictions_test.values()]
-
     acc_stats.fit(
         data,
         predictions_arr,
