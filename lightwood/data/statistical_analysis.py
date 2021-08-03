@@ -54,19 +54,19 @@ def statistical_analysis(data: pd.DataFrame,
     nr_rows = len(df)
     target = problem_definition.target
     # get train std, used in analysis
-    if dtypes[target] in [dtype.float, dtype.integer]:
-        train_std = df[target].astype(float).std()
+    if dtypes[target] in [dtype.float, dtype.integer, dtype.array]:
+        df_std = df[target].astype(float).std()
     elif dtypes[target] in [dtype.array]:
         try:
             all_vals = []
             for x in df[target]:
                 all_vals += x
-            train_std = pd.Series(all_vals).astype(float).std()
+            df_std = pd.Series(all_vals).astype(float).std()
         except Exception as e:
             log.warning(e)
-            train_std = 1.0
+            df_std = 1.0
     else:
-        train_std = 1.0
+        df_std = 1.0
 
     histograms = {}
     # Get histograms for each column
@@ -103,7 +103,7 @@ def statistical_analysis(data: pd.DataFrame,
     log.info('Finished statistical analysis')
     return StatisticalAnalysis(
         nr_rows=nr_rows,
-        train_std_dev=train_std,
+        df_std_dev=df_std,
         train_observed_classes=train_observed_classes,
         target_class_distribution=target_class_distribution,
         histograms=histograms,

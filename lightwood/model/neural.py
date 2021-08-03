@@ -1,4 +1,5 @@
 import time
+import inspect
 from copy import deepcopy
 from typing import Dict, List
 
@@ -344,7 +345,7 @@ class Neural(BaseModel):
                 for dep in self.target_encoder.dependencies:
                     kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
 
-                if predict_proba:
+                if predict_proba and self.supports_proba:
                     kwargs['return_raw'] = True
                     decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
                     all_probs.append(probs)
@@ -358,7 +359,7 @@ class Neural(BaseModel):
 
             ydf = pd.DataFrame({'prediction': decoded_predictions})
 
-            if predict_proba:
+            if predict_proba and self.supports_proba:
                 raw_predictions = np.array(all_probs).squeeze()
                 for idx, label in enumerate(rev_map.values()):
                     ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]

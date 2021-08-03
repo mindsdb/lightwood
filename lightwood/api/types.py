@@ -69,7 +69,7 @@ class TypeInformation:
 @dataclass
 class StatisticalAnalysis:
     nr_rows: int
-    train_std_dev: Optional[float]
+    df_std_dev: Optional[float]
     # Write proper to and from dict parsing for this than switch back to using the types bellow, dataclasses_json sucks!
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]

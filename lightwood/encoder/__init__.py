@@ -25,7 +25,7 @@ try:
     from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
 except Exception:
     AmplitudeTsEncoder = None
-    log.info('Unable to import AmplitudeTsEncoder, if you wish to encode audio data please install pydub and initialize lightwood again')
+    # log.debug('Unable to import AmplitudeTsEncoder, if you wish to encode audio data please install pydub and initialize lightwood again') # @TODO: figure out how to log this just once
 
 
 __ts_encoders__ = [TsNumericEncoder, TimeSeriesEncoder, TimeSeriesPlainEncoder]

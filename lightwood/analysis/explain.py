@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+import torch
 import numpy as np
 import pandas as pd
 
@@ -9,23 +10,25 @@ from lightwood.api.dtype import dtype
 from lightwood.api.types import TimeseriesSettings
 
 
-def explain(data,
-            predictions,
+def explain(data: pd.DataFrame,
+            encoded_data: torch.Tensor,
+            predictions: pd.DataFrame,
             timeseries_settings: TimeseriesSettings,
-            analysis,
-            target_name,
-            target_dtype,
-            positive_domain,
-            fixed_confidence,
-            anomaly_detection,
+            analysis: dict,
+            target_name: str,
+            target_dtype: str,
+            positive_domain: bool,
+            fixed_confidence: float,
+            anomaly_detection: bool,
 
             # forces specific confidence level in ICP
-            anomaly_error_rate,
+            anomaly_error_rate: float,
 
-            # (Int) ignores anomaly detection for N steps after an
+            # ignores anomaly detection for N steps after an
             # initial anomaly triggers the cooldown period;
             # implicitly assumes series are regularly spaced
-            anomaly_cooldown,
+            anomaly_cooldown: int,
+
             ts_analysis: dict = None
             ):
 
@@ -60,12 +63,11 @@ def explain(data,
         if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1:
             preds = [p[0] for p in preds]
 
-        icp_X[target_name] = preds
+            for col in [f'timestep_{i}' for i in range(1, timeseries_settings.nr_predictions)]:
+                if col in icp_X.columns:
+                    icp_X.pop(col)  # erase ignorable columns
 
-        # erase ignorable columns @TODO: reintroduce?
-        # for col in pdef['columns_to_ignore']:
-        #     if col in icp_X.columns:
-        #         icp_X.pop(col)
+        icp_X[target_name] = preds
 
         is_categorical = target_dtype in (dtype.binary, dtype.categorical, dtype.array)
         is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
@@ -81,11 +83,12 @@ def explain(data,
             # only one normalizer, even if it's a grouped time series task
             normalizer = analysis['icp']['__default'].nc_function.normalizer
             if normalizer:
-                normalizer.prediction_cache = analysis['prediction'].get(f'{target_name}_selfaware_scores', None)
+                normalizer.prediction_cache = normalizer(encoded_data)
                 icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
 
             # get ICP predictions
-            result = pd.DataFrame(index=icp_X.index, columns=['lower', 'upper', 'significance'])
+            result_cols = ['lower', 'upper', 'significance'] if is_numerical else ['significance']
+            result = pd.DataFrame(index=icp_X.index, columns=result_cols)
 
             # base ICP
             X = deepcopy(icp_X)
@@ -104,8 +107,15 @@ def explain(data,
 
             # categorical
             else:
-                # @TODO use the real target_class_distribution
-                class_dists = pd.get_dummies(predictions['prediction']).values
+                predicted_proba = True if any(['__mdb_proba' in col for col in predictions.columns]) else False
+                if predicted_proba:
+                    all_cat_cols = [col for col in predictions.columns if '__mdb_proba' in col]
+                    class_dists = predictions[all_cat_cols].values
+                    for icol, cat_col in enumerate(all_cat_cols):
+                        insights.loc[X.index, cat_col] = class_dists[:, icol]
+                else:
+                    class_dists = pd.get_dummies(predictions['prediction']).values
+
                 analysis['icp']['__default'].nc_function.model.prediction_cache = class_dists
 
                 conf_candidates = list(range(20)) + list(range(20, 100, 10))
@@ -122,7 +132,7 @@ def explain(data,
                 else:
                     error_rate = anomaly_error_rate if is_anomaly_task else None
                     significances, confs = get_numerical_conf_range(all_confs,
-                                                                    train_std_dev=analysis['train_std_dev'],
+                                                                    df_std_dev=analysis['df_std_dev'],
                                                                     positive_domain=positive_domain,
                                                                     error_rate=error_rate)
                 result.loc[X.index, 'lower'] = confs[:, 0]
@@ -160,7 +170,7 @@ def explain(data,
                                 all_confs = icp.predict(X.values)
                                 error_rate = anomaly_error_rate if is_anomaly_task else None
                                 significances, confs = get_numerical_conf_range(all_confs,
-                                                                                train_std_dev=analysis['train_std_dev'],
+                                                                                df_std_dev=analysis['df_std_dev'],
                                                                                 positive_domain=positive_domain,
                                                                                 group=frozenset(group),
                                                                                 error_rate=error_rate)
@@ -168,11 +178,12 @@ def explain(data,
                                 # only replace where grouped ICP is more informative (i.e. tighter)
                                 default_icp_widths = result.loc[X.index, 'upper'] - result.loc[X.index, 'lower']
                                 grouped_widths = np.subtract(confs[:, 1], confs[:, 0])
-                                insert_index = (default_icp_widths > grouped_widths)[lambda x: x==True].index
+                                insert_index = (default_icp_widths > grouped_widths)[lambda x: x == True].index
+                                conf_index = (default_icp_widths.reset_index(drop=True) > grouped_widths)[lambda x: x == True].index
 
-                                result.loc[insert_index, 'lower'] = confs[:, 0]
-                                result.loc[insert_index, 'upper'] = confs[:, 1]
-                                result.loc[insert_index, 'significance'] = significances
+                                result.loc[insert_index, 'lower'] = confs[conf_index, 0]
+                                result.loc[insert_index, 'upper'] = confs[conf_index, 1]
+                                result.loc[insert_index, 'significance'] = significances[conf_index]
 
                             else:
                                 conf_candidates = list(range(20)) + list(range(20, 100, 10))
@@ -183,9 +194,11 @@ def explain(data,
                                 significances = get_categorical_conf(all_confs, conf_candidates)
                                 result.loc[X.index, 'significance'] = significances
 
-            insights['confidence'] = result['significance'].tolist()
-            insights['lower'] = result['lower']
-            insights['upper'] = result['upper']
+            insights['confidence'] = result['significance'].astype(float).tolist()
+
+            if is_numerical:
+                insights['lower'] = result['lower'].astype(float)
+                insights['upper'] = result['upper'].astype(float)
 
             # anomaly detection
             if is_anomaly_task:
@@ -194,7 +207,6 @@ def explain(data,
                                           cooldown=anomaly_cooldown)
                 insights['anomaly'] = anomalies
 
-            # @TODO: add T+N confidence bounds and disaggregate into rows if nr_predictions > 1
             if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1 and is_numerical:
                 insights = add_tn_conf_bounds(insights, timeseries_settings)
 

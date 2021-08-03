@@ -4,7 +4,7 @@ from scipy.special import softmax
 from lightwood.encoder.text.helpers.rnn_helpers import Lang
 from lightwood.encoder.base import BaseEncoder
 
-UNCOMMON_WORD = '<UNCOMMON>'
+UNCOMMON_WORD = '__mdb_unknown_cat'
 UNCOMMON_TOKEN = 0
 
 
