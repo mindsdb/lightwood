@@ -51,6 +51,9 @@ def model_analyzer(
     is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
     is_classification = data_type in (dtype.categorical, dtype.binary)
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
+    disable_column_importance = disable_column_importance or (not ts_cfg.is_timeseries or
+                                                               dtype_dict[target] not in [dtype.short_text,
+                                                                                          dtype.rich_text])
 
     encoded_data = ConcatedEncodedDs(data)
     data = encoded_data.data_frame
