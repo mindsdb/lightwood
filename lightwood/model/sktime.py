@@ -68,7 +68,7 @@ class SkTime(BaseModel):
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], predict_proba: bool = False) -> pd.DataFrame:
         if predict_proba:
-            log.warning('This model cannot output probability estimates')
+            log.warning('This model does not output probability estimates')
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
