@@ -30,10 +30,10 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         encoded_data_1 = output_1_encoder.encode(primting_target)
         encoded_data_1 = encoded_data_1.tolist()
 
-        enc = PretrainedLangEncoder()
+        enc = PretrainedLangEncoder(stop_after=10)
 
         enc.prepare(priming_data,
-                    training_data={'targets': [
+                    encoded_target_values={'targets': [
                         {'output_type': dtype.float, 'encoded_output': encoded_data_1},
                     ]})
 
