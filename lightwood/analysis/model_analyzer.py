@@ -66,12 +66,17 @@ def model_analyzer(
     # confidence estimation with inductive conformal predictors (ICPs)
     runtime_analyzer['icp'] = {'__mdb_active': False}
 
-    all_cat_cols = [col for col in normal_predictions.columns if '__mdb_proba' in col]
-    all_classes = np.array([col.replace('__mdb_proba_', '') for col in all_cat_cols])
     fit_params = {'nr_preds': ts_cfg.nr_predictions or 0, 'columns_to_ignore': [] }
     fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
 
     if is_classification:
+        if predictor.supports_proba:
+            all_cat_cols = [col for col in normal_predictions.columns if '__mdb_proba' in col]
+            all_classes = np.array([col.replace('__mdb_proba_', '') for col in all_cat_cols])
+        else:
+            class_keys = sorted(encoded_data.encoders[target].rev_map.keys())
+            all_classes = np.array([encoded_data.encoders[target].rev_map[idx] for idx in class_keys])
+
         if data_subtype != dtype.tags:
             enc = OneHotEncoder(sparse=False, handle_unknown='ignore')
             enc.fit(all_classes.reshape(-1, 1))
