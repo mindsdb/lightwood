@@ -37,6 +37,7 @@ class LightGBM(BaseModel):
     device_str: str
     num_iterations: int
     use_optuna: bool
+    supports_proba: bool
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], fit_on_dev: bool, use_optuna: bool = True):
         super().__init__(stop_after)
@@ -49,6 +50,7 @@ class LightGBM(BaseModel):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
+        self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
         self.stable = True
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
@@ -187,7 +189,7 @@ class LightGBM(BaseModel):
         self.model = lightgbm.train(self.params, train_dataset, valid_sets=[dev_dataset, train_dataset], valid_names=['dev', 'retrain'], verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
 
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         data = None
         for input_col in self.input_cols:
             if data is None:
@@ -204,4 +206,9 @@ class LightGBM(BaseModel):
             decoded_predictions = raw_predictions
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})
+
+        if predict_proba and self.ordinal_encoder is not None:
+            for idx, label in enumerate(self.ordinal_encoder.categories_[0].tolist()):
+                ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
+
         return ydf

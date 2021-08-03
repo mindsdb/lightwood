@@ -1,31 +1,38 @@
-from lightwood.encoder.base import BaseEncoder
-from typing import Dict, List
-import pandas as pd
-from torch.nn.modules.loss import MSELoss
-from lightwood.api import dtype
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 import time
-from torch import nn
-import torch
-import numpy as np
 from copy import deepcopy
-from torch.utils.data import DataLoader
-from torch.cuda.amp import GradScaler
-from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.log import log
-from lightwood.model.base import BaseModel
-from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.model.helpers.default_net import DefaultNet
-from lightwood.model.helpers.ar_net import ArNet
-import torch_optimizer as ad_optim
-from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
-from torch.optim.optimizer import Optimizer
-from sklearn.metrics import r2_score
+from typing import Dict, List
+
+import torch
 import optuna
+import numpy as np
+import pandas as pd
+from torch import nn
+import torch_optimizer as ad_optim
+from sklearn.metrics import r2_score
+from torch.cuda.amp import GradScaler
+from torch.utils.data import DataLoader
+from torch.nn.modules.loss import MSELoss
+from torch.optim.optimizer import Optimizer
+
+from lightwood.api import dtype
+from lightwood.helpers.log import log
+from lightwood.api.types import TimeseriesSettings
+from lightwood.helpers.torch import LightwoodAutocast
+from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
+from lightwood.model.base import BaseModel
+from lightwood.model.helpers.ar_net import ArNet
+from lightwood.model.helpers.default_net import DefaultNet
+from lightwood.encoder.base import BaseEncoder
 
 
 class Neural(BaseModel):
     model: nn.Module
+    dtype_dict: dict
+    target: str
+    epochs_to_best: int
+    fit_on_dev: bool
+    supports_proba: bool
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool, search_hyperparameters: bool):
         super().__init__(stop_after)
@@ -36,9 +43,10 @@ class Neural(BaseModel):
         self.epochs_to_best = 0
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
+        self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
         self.search_hyperparameters = search_hyperparameters
         self.stable = True
-    
+
     def _final_tuning(self, data_arr):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
             self.model = self.model.eval()
@@ -151,7 +159,6 @@ class Neural(BaseModel):
         running_errors = []
         best_model = self.model
 
-        train_error = None
         for epoch in range(1, return_model_after + 1):
             self.model = self.model.train()
             running_losses: List[float] = []
@@ -321,10 +328,12 @@ class Neural(BaseModel):
 
         self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, max(1, int(self.epochs_to_best / 3)))
     
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
-        
+        all_probs: List[List[float]] = []
+        rev_map = {}
+
         with torch.no_grad():
             for idx, (X, Y) in enumerate(ds):
                 X = X.to(self.model.device)
@@ -334,7 +343,13 @@ class Neural(BaseModel):
                 kwargs = {}
                 for dep in self.target_encoder.dependencies:
                     kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
-                decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
+
+                if predict_proba:
+                    kwargs['return_raw'] = True
+                    decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
+                    all_probs.append(probs)
+                else:
+                    decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
 
                 if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
                     decoded_predictions.extend(decoded_prediction)
@@ -342,4 +357,10 @@ class Neural(BaseModel):
                     decoded_predictions.append(decoded_prediction)
 
             ydf = pd.DataFrame({'prediction': decoded_predictions})
+
+            if predict_proba:
+                raw_predictions = np.array(all_probs).squeeze()
+                for idx, label in enumerate(rev_map.values()):
+                    ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
+
             return ydf

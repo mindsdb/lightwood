@@ -10,7 +10,6 @@ class BinaryEncoder(BaseEncoder):
     def __init__(self, is_target=False, target_class_distribution=None):
         super().__init__(is_target)
         self.map = {}
-        self.predict_proba = False
         self.rev_map = {}
         self.output_size = 2
         if self.is_target:
@@ -55,7 +54,7 @@ class BinaryEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data):
+    def decode(self, encoded_data, return_raw=False):
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -63,10 +62,10 @@ class BinaryEncoder(BaseEncoder):
         for vector in encoded_data_list:
             ret.append(self.rev_map[np.argmax(vector)])
 
-            if self.predict_proba:
+            if return_raw:
                 probs.append(softmax(vector).tolist())
 
-        if self.predict_proba:
+        if return_raw:
             return ret, probs, self.rev_map
         else:
             return ret

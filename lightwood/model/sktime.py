@@ -17,6 +17,7 @@ class SkTime(BaseModel):
     forecaster: str
     n_ts_predictions: int
     target: str
+    supports_proba: bool
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], n_ts_predictions: int, ts_analysis: Dict):
         super().__init__(stop_after)
@@ -29,6 +30,7 @@ class SkTime(BaseModel):
         self.forecasting_horizon = np.arange(1, self.n_ts_predictions)
         self.cutoff_index = {}  # marks index at which training data stops and forecasting window starts
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
+        self.supports_proba = False
         self.stable = True
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
@@ -64,7 +66,10 @@ class SkTime(BaseModel):
             if self.grouped_by == ['__default']:
                 break
 
-    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs]) -> pd.DataFrame:
+    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], predict_proba: bool = False) -> pd.DataFrame:
+        if predict_proba:
+            log.warning('This model cannot output probability estimates')
+
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),

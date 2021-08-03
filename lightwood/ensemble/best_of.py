@@ -1,11 +1,13 @@
-from lightwood.helpers.general import evaluate_accuracy
 from typing import List
-from lightwood.model.base import BaseModel
-import pandas as pd
-from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
-from lightwood.ensemble.base import BaseEnsemble
+
 import numpy as np
+import pandas as pd
+
 from lightwood.helpers.log import log
+from lightwood.model.base import BaseModel
+from lightwood.ensemble.base import BaseEnsemble
+from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
+from lightwood.helpers.general import evaluate_accuracy
 
 
 class BestOf(BaseEnsemble):
@@ -30,10 +32,11 @@ class BestOf(BaseEnsemble):
                 best_score = avg_score
                 self.best_index = idx
 
+        self.supports_proba = self.models[self.best_index].supports_proba
         log.info(f'Picked best model: {type(self.models[self.best_index]).__name__}')
 
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
-        return self.models[self.best_index](ds)
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
+        return self.models[self.best_index](ds, predict_proba=predict_proba)
 
     def improves(self, new, old, functions):
         return new > old if self.maximize else new < old
