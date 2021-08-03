@@ -1,3 +1,4 @@
+import time
 from math import gcd
 from typing import List
 from copy import deepcopy
@@ -150,6 +151,8 @@ class TimeSeriesEncoder(BaseEncoder):
         else:
             self.setup_nn(ts_analysis, dependency_data)
 
+        started = time.time()
+
         # Convert to array and determine max length
         priming_data, lengths_data = self._prepare_raw_data(priming_data)
         self._max_ts_length = int(lengths_data.max())
@@ -250,6 +253,8 @@ class TimeSeriesEncoder(BaseEncoder):
                     average_loss=average_loss))
 
             if bad_epochs > self._stop_on_n_bad_epochs:
+                break
+            elif (time.time() - started) > self.stop_after:
                 break
 
         self._prepared = True

@@ -47,7 +47,7 @@ class TestRnnEncoder(unittest.TestCase):
         timesteps = 6
         batch_size = 1
 
-        encoder = TimeSeriesEncoder(encoded_vector_size=15, train_iters=10, encoder_class=EncoderRNNNumerical)
+        encoder = TimeSeriesEncoder(stop_after=10)
         encoder.prepare(data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         encoded = encoder.encode(data)
         decoded = encoder.decode(encoded, steps=timesteps).tolist()
