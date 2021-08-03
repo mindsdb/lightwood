@@ -11,7 +11,7 @@ from lightwood.model.helpers.default_net import DefaultNet
 
 
 class CategoricalAutoEncoder(BaseEncoder):
-    def __init__(self, stop_after: int, is_target=False, max_encoded_length=100):
+    def __init__(self, stop_after: int=3600, is_target=False, max_encoded_length=100):
         super().__init__(is_target)
         self._prepared = False
         self.name = 'Categorical Autoencoder'
@@ -21,11 +21,14 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.onehot_encoder = OneHotEncoder(is_target=self.is_target)
         self.desired_error = 0.01
         self.use_autoencoder = None
-        self.max_encoded_length = max_encoded_length
         self.stop_after = stop_after
         # @TODO stop using instead of ONEHOT !!!@!
         self.is_nn_encoder = True
         self.output_size = None
+        if self.is_target:
+            self.max_encoded_length = None
+        else:
+            self.max_encoded_length = max_encoded_length
 
     def _train_callback(self, error, real_buff, predicted_buff):
         log.info(f'{self.name} reached a loss of {error} while training !')
@@ -105,6 +108,7 @@ class CategoricalAutoEncoder(BaseEncoder):
             return self.onehot_encoder.decode(encoded_data)
         else:
             with torch.no_grad():
+                encoded_data = encoded_data.to(self.net.device)
                 oh_encoded_tensor = self.decoder(encoded_data)
                 oh_encoded_tensor = oh_encoded_tensor.to('cpu')
                 return self.onehot_encoder.decode(oh_encoded_tensor)
