@@ -54,16 +54,14 @@ class TestTransformerEncoder(unittest.TestCase):
 
     def test_overfit(self):
         logging.basicConfig(level=logging.DEBUG)
-        params = {"encoded_vector_size": 16, "train_iters": 10, "learning_rate": 0.001,
-                  "encoder_class": TransformerEncoder}
 
         data = [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
                 [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0],
                 [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]] * 10000
         timesteps = len(data[0])
         example = copy.deepcopy(data)
-        params["train_iters"] = 10
-        encoder = TimeSeriesEncoder(**params)
+        encoder = TimeSeriesEncoder(stop_after=10)
+        encoder.encoder_class = TransformerEncoder
         encoder._transformer_hidden_size = 32
         encoder.prepare(data, feedback_hoop_function=print)
 
