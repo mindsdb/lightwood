@@ -113,39 +113,39 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
         }]
 
-    if not problem_definition.timeseries_settings.is_timeseries or \
-            problem_definition.timeseries_settings.nr_predictions <= 1:
-        models.extend([{
-                'module': 'LightGBM',
+        if not problem_definition.timeseries_settings.is_timeseries or \
+                problem_definition.timeseries_settings.nr_predictions <= 1:
+            models.extend([{
+                    'module': 'LightGBM',
+                    'args': {
+                        'stop_after': '$problem_definition.seconds_per_model',
+                        'fit_on_dev': True
+                    }
+                },
+                {
+                    'module': 'Regression',
+                    'args': {
+                        'stop_after': '$problem_definition.seconds_per_model',
+                    }
+                }
+            ])
+        elif problem_definition.timeseries_settings.nr_predictions > 1:
+            models.extend([{
+                'module': 'LightGBMArray',
                 'args': {
+                    'fit_on_dev': True,
                     'stop_after': '$problem_definition.seconds_per_model',
-                    'fit_on_dev': True
+                    'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions'
                 }
             },
-            {
-                'module': 'Regression',
+                {
+                'module': 'SkTime',
                 'args': {
                     'stop_after': '$problem_definition.seconds_per_model',
+                    'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
+                },
                 }
-            }
-        ])
-    elif problem_definition.timeseries_settings.nr_predictions > 1:
-        models.extend([{
-            'module': 'LightGBMArray',
-            'args': {
-                'fit_on_dev': True,
-                'stop_after': '$problem_definition.seconds_per_model',
-                'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions'
-            }
-        },
-            {
-            'module': 'SkTime',
-            'args': {
-                'stop_after': '$problem_definition.seconds_per_model',
-                'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
-            },
-            }
-        ])
+            ])
 
     outputs = {target: Output(
         data_dtype=type_information.dtypes[target],
