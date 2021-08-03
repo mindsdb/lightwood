@@ -83,7 +83,7 @@ def explain(data: pd.DataFrame,
             # only one normalizer, even if it's a grouped time series task
             normalizer = analysis['icp']['__default'].nc_function.normalizer
             if normalizer:
-                normalizer.prediction_cache = normalizer.predict(encoded_data)
+                normalizer.prediction_cache = normalizer(encoded_data)
                 icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
 
             # get ICP predictions

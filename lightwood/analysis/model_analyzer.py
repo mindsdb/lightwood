@@ -14,7 +14,7 @@ from lightwood.helpers.general import evaluate_accuracy
 from lightwood.ensemble import BaseEnsemble
 
 from lightwood.analysis.acc_stats import AccStats
-from lightwood.analysis.nc.norm import SelfawareNormalizer
+from lightwood.analysis.nc.norm import Normalizer
 from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc
 from lightwood.analysis.nc.util import clean_df, set_conf_range
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
@@ -33,7 +33,7 @@ Pending:
 def model_analyzer(
         predictor: BaseEnsemble,
         data: List[EncodedDs],
-        encoded_train_data: ConcatedEncodedDs,
+        train_data: List[EncodedDs],
         stats_info: StatisticalAnalysis,
         target: str,
         ts_cfg: TimeseriesSettings,
@@ -90,10 +90,11 @@ def model_analyzer(
     if is_numerical or (is_classification and data_subtype != dtype.tags):
         model = adapter(predictor)
 
-        norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor, 'encoders': encoded_data.encoders, 'is_multi_ts': is_multi_ts}
-        normalizer = SelfawareNormalizer(fit_params=norm_params)
-        normalizer.fit(encoded_train_data, target)
-        normalizer.prediction_cache = normalizer.predict(encoded_data)
+        norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor, 'encoders': encoded_data.encoders,
+                       'is_multi_ts': is_multi_ts, 'stop_after': 1e2}
+        normalizer = Normalizer(fit_params=norm_params)
+        normalizer.fit(train_data)
+        normalizer.prediction_cache = normalizer(encoded_data)
 
         # instance the ICP
         nc = nc_class(model, nc_function, normalizer=normalizer)

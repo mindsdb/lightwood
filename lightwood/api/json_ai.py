@@ -347,7 +347,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'accuracy_functions': '$accuracy_functions',
                 'predictor': '$ensemble',
                 'data': 'test_data',
-                'encoded_train_data': 'encoded_train_data',
+                'train_data': 'train_data',
                 'target': '$target',
                 'disable_column_importance': 'False' if not problem_definition.timeseries_settings.is_timeseries else 'True',
                 'dtype_dict': '$dtype_dict',
@@ -550,7 +550,6 @@ self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble, json_ai)}
 self.supports_proba = self.ensemble.supports_proba
 
 log.info('Analyzing the ensemble')
-encoded_train_data = ConcatedEncodedDs(train_data)
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
 
 # Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
