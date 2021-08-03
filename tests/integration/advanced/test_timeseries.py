@@ -8,7 +8,6 @@ from lightwood.api.types import ProblemDefinition
 np.random.seed(0)
 
 
-
 class TestTimeseries(unittest.TestCase):
     def check_ts_prediction_df(self, df: pd.DataFrame, nr_preds: int, orders: List[str]):
         for idx, row in df.iterrows():

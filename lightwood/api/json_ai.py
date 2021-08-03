@@ -288,6 +288,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
             models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
         elif models[i]['module'] == 'Regression':
+            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
+            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
             models[i]['args']['target_encoder'] = models[i]['args'].get('target_encoder', '$encoders[self.target]')
         elif models[i]['module'] == 'LightGBMArray':
             models[i]['args']['target'] = models[i]['args'].get('target', '$target')
@@ -542,6 +544,7 @@ self.models = trained_models
 
 log.info('Ensembling the model')
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble, json_ai)}
+self.supports_proba = self.ensemble.supports_proba
 
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
@@ -553,7 +556,7 @@ for model in self.models:
 """
     learn_body = align(learn_body, 2)
 
-    predict_body = f"""
+    predict_common_body = f"""
 self.mode = 'predict'
 log.info('Cleaning the data')
 data = {call(json_ai.cleaner, json_ai)}
@@ -561,11 +564,21 @@ data = {call(json_ai.cleaner, json_ai)}
 {ts_transform_code}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)
+"""
+    predict_common_body = align(predict_common_body, 2)
+
+    predict_body = f"""
 df = self.ensemble(encoded_ds)
 insights = {call(json_ai.explainer, json_ai)}
 return insights
 """
     predict_body = align(predict_body, 2)
+
+    predict_proba_body = f"""
+df = self.ensemble(encoded_ds, predict_proba=True)
+return df
+"""
+    predict_proba_body = align(predict_proba_body, 2)
 
     imports = '\n'.join(json_ai.imports)
     predictor_code = f"""
@@ -590,7 +603,13 @@ class Predictor(PredictorInterface):
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+{predict_common_body}
 {predict_body}
+
+
+    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
+{predict_common_body}
+{predict_proba_body}
 """
 
     if len(predictor_code) < 5000:
