@@ -63,10 +63,18 @@ class Normalizer(BaseModel):
             labels = np.clip(self.bounds[0] + diffs / np.max(diffs), self.bounds[0], self.bounds[1])
 
         elif self.target_dtype in [dtype.binary, dtype.categorical]:
-            prob_cols = [col for col in preds.columns if '__mdb_proba' in col]
-            col_names = [col.replace('__mdb_proba_', '') for col in prob_cols]
-            if prob_cols:
+
+            if self.base_predictor.supports_proba:
+                prob_cols = [col for col in preds.columns if '__mdb_proba' in col]
+                col_names = [col.replace('__mdb_proba_', '') for col in prob_cols]
                 preds = preds[prob_cols]
+            else:
+                prob_cols = col_names = target_enc.map.keys()
+                ohe_preds = pd.get_dummies(preds['prediction'], columns=col_names)
+                for col in col_names:
+                    if col not in ohe_preds.columns:
+                        ohe_preds[col] = np.zeros(ohe_preds.shape[0])
+                preds = ohe_preds
 
             # reorder preds to ensure classes are in same order as in target_enc
             preds.columns = col_names
@@ -76,6 +84,7 @@ class Normalizer(BaseModel):
             # get log loss
             preds = preds.values.squeeze()
             preds = preds if prob_cols else target_enc.encode(preds).tolist()
+            preds = np.clip(preds, 0.001, 0.999)  # avoid inf
             truths = target_enc.encode(truths).numpy()
             labels = entropy(truths, preds, axis=1)
 
