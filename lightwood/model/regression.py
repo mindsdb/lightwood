@@ -1,4 +1,5 @@
 from typing import List
+from numpy import integer
 
 import torch
 import pandas as pd
@@ -26,7 +27,9 @@ class Regression(BaseModel):
         self.stable = False
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
-        log.info('Started fitting Regression model')
+        if self.target_dtype not in (dtype.float, dtype.integer):
+            raise Exception(f'Unspported {self.target_dtype} type for regression')
+        log.info('Fitting Linear Regression model')
         X = []
         Y = []
         for x, y in ConcatedEncodedDs(ds_arr):
