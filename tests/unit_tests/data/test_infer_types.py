@@ -13,13 +13,8 @@ from tests.utils.data_generation import (
     generate_rich_sentences,
     VOCAB,
 )
-import math
 
 
-def f():
-    a = {1: 3, 5: 2}
-    print(124124124, 12412412412412, 124124124, 12412412412412, 124124124, 12412412412412, 124124124, 12412412412412, 124124124, 12412412412412, 124124124, 12412412412412, 124124124, 12412412412412, 124124124, 12412412412412, 124124124, 12412412412412)
-    
 class TestInferTypes(unittest.TestCase):
     def test_infer_types_on_home_rentlas(self):
         datasource = FileDS(
@@ -27,19 +22,26 @@ class TestInferTypes(unittest.TestCase):
         )
         type_information = infer_types(datasource.df, pct_invalid=0)
 
-        self.assertTrue(type_information.dtypes["number_of_rooms"] == dtype.categorical)
-        self.assertTrue(type_information.dtypes["number_of_bathrooms"] == dtype.binary)
+        self.assertTrue(
+            type_information.dtypes["number_of_rooms"] == dtype.categorical)
+        self.assertTrue(
+            type_information.dtypes["number_of_bathrooms"] == dtype.binary)
         self.assertTrue(type_information.dtypes["sqft"] == dtype.integer)
-        self.assertTrue(type_information.dtypes["location"] == dtype.categorical)
-        self.assertTrue(type_information.dtypes["days_on_market"] == dtype.integer)
-        self.assertTrue(type_information.dtypes["initial_price"] == dtype.integer)
-        self.assertTrue(type_information.dtypes["neighborhood"] == dtype.categorical)
+        self.assertTrue(
+            type_information.dtypes["location"] == dtype.categorical)
+        self.assertTrue(
+            type_information.dtypes["days_on_market"] == dtype.integer)
+        self.assertTrue(
+            type_information.dtypes["initial_price"] == dtype.integer)
+        self.assertTrue(
+            type_information.dtypes["neighborhood"] == dtype.categorical)
         # This has a .0 after every price, so we should detect it as float
         self.assertTrue(type_information.dtypes["rental_price"] == dtype.float)
 
         # There should be no ambiguity in the type detection for this dataset
         for k in type_information.additional_info:
-            self.assertTrue(len(type_information.additional_info[k]["dtype_dist"]) == 1)
+            self.assertTrue(
+                len(type_information.additional_info[k]["dtype_dist"]) == 1)
 
         # None of the columns are identifiers
         for k in type_information.identifiers:
@@ -102,7 +104,7 @@ class TestInferTypes(unittest.TestCase):
         """Tests that basic cases of type deduction work correctly"""
         predictor = Predictor(name='test_deduce_foreign_key')
         predictor.breakpoint = 'DataAnalyzer'
-  
+
         n_points = 100
 
         df = pd.DataFrame({
@@ -158,7 +160,7 @@ class TestInferTypes(unittest.TestCase):
     def test_type_mix(self):
         predictor = Predictor(name='test_type_mix')
         predictor.breakpoint = 'TypeDeductor'
-       
+
         n_points = 100
         df = pd.DataFrame({
             'numeric_float_1': np.linspace(0, n_points, n_points),
