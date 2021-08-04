@@ -6,7 +6,7 @@ from lightwood.api.types import ProblemDefinition
 
 
 class TestModelSelection(unittest.TestCase):
-    def get_models(self, df: pd.DataFrame, target: str, prob_kwargs: dict=None):
+    def get_models(self, df: pd.DataFrame, target: str, prob_kwargs: dict = None):
         prob_kwargs = {'target': target} if not prob_kwargs else {'target': target, **prob_kwargs}
         prdb = ProblemDefinition.from_dict(prob_kwargs)
         json_ai = json_ai_from_problem(df, prdb).to_dict()

@@ -54,7 +54,7 @@ class RegressionErrFunc(object):
         super(RegressionErrFunc, self).__init__()
 
     @abc.abstractmethod
-    def apply(self, prediction, y):#, norm=None, beta=0):
+    def apply(self, prediction, y):  # , norm=None, beta=0):
         """Apply the nonconformity function.
 
         Parameters
@@ -73,7 +73,7 @@ class RegressionErrFunc(object):
         pass
 
     @abc.abstractmethod
-    def apply_inverse(self, nc, significance):#, norm=None, beta=0):
+    def apply_inverse(self, nc, significance):  # , norm=None, beta=0):
         """Apply the inverse of the nonconformity function (i.e.,
         calculate prediction interval).
 
@@ -166,6 +166,7 @@ class BoostedAbsErrorErrFunc(RegressionErrFunc):
     """ Calculates absolute error nonconformity for regression problems. Applies linear interpolation
     for nonconformity scores when we have less than 100 samples in the validation dataset.
     """
+
     def __init__(self):
         super(BoostedAbsErrorErrFunc, self).__init__()
 
@@ -178,7 +179,7 @@ class BoostedAbsErrorErrFunc(RegressionErrFunc):
         if 1 < nc.size < 100:
             x = np.arange(nc.shape[0])
             interp = interp1d(x, nc)
-            nc = interp(np.linspace(0, nc.size-1, 100))
+            nc = interp(np.linspace(0, nc.size - 1, 100))
         border = min(max(border, 0), nc.size - 1)
         return np.vstack([nc[border], nc[border]])
 
@@ -242,7 +243,7 @@ class RegressorNormalizer(BaseScorer):
     def fit(self, x, y):
         residual_prediction = self.base_model.predict(x)
         residual_error = np.abs(self.err_func.apply(residual_prediction, y))
-        residual_error += 0.00001 # Add small term to avoid log(0)
+        residual_error += 0.00001  # Add small term to avoid log(0)
         log_err = np.log(residual_error)
         self.normalizer_model.fit(x, log_err)
 
@@ -271,6 +272,7 @@ class BaseModelNc(BaseScorer):
         the normalized nonconformity function approaches a non-normalized
         equivalent.
     """
+
     def __init__(self, model, err_func, normalizer=None, beta=0):
         super(BaseModelNc, self).__init__()
         self.err_func = err_func
@@ -367,6 +369,7 @@ class ClassifierNc(BaseModelNc):
     err_func : ClassificationErrFunc
         Scorer function used to calculate nonconformity scores.
     """
+
     def __init__(self,
                  model,
                  err_func=MarginErrFunc(),
@@ -408,6 +411,7 @@ class RegressorNc(BaseModelNc):
     err_func : RegressionErrFunc
         Scorer function used to calculate nonconformity scores.
     """
+
     def __init__(self,
                  model,
                  err_func=AbsErrorErrFunc(),

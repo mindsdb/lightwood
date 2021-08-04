@@ -49,5 +49,3 @@ class TestBasic(unittest.TestCase):
 
         self.assertTrue(balanced_accuracy_score(df[target].astype(int), predictions['prediction'].astype(int)) > 0.9)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
-
-

@@ -31,18 +31,18 @@ Pending:
 
 
 def model_analyzer(
-        predictor: BaseEnsemble,
-        data: List[EncodedDs],
-        train_data: List[EncodedDs],
-        stats_info: StatisticalAnalysis,
-        target: str,
-        ts_cfg: TimeseriesSettings,
-        dtype_dict: Dict[str, str],
-        disable_column_importance: bool,
-        fixed_significance: float,
-        positive_domain: bool,
-        accuracy_functions
-    ):
+    predictor: BaseEnsemble,
+    data: List[EncodedDs],
+    train_data: List[EncodedDs],
+    stats_info: StatisticalAnalysis,
+    target: str,
+    ts_cfg: TimeseriesSettings,
+    dtype_dict: Dict[str, str],
+    disable_column_importance: bool,
+    fixed_significance: float,
+    positive_domain: bool,
+    accuracy_functions
+):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
 
     data_type = dtype_dict[target]
@@ -52,21 +52,22 @@ def model_analyzer(
     is_classification = data_type in (dtype.categorical, dtype.binary)
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
     disable_column_importance = disable_column_importance or (not ts_cfg.is_timeseries or
-                                                               dtype_dict[target] not in [dtype.short_text,
-                                                                                          dtype.rich_text])
+                                                              dtype_dict[target] not in [dtype.short_text,
+                                                                                         dtype.rich_text])
 
     encoded_data = ConcatedEncodedDs(data)
     data = encoded_data.data_frame
     runtime_analyzer = {}
     predictions = {}
     input_cols = list([col for col in data.columns if col != target])
-    normal_predictions = predictor(encoded_data) if not is_classification else predictor(encoded_data, predict_proba=True)
+    normal_predictions = predictor(encoded_data) if not is_classification else predictor(
+        encoded_data, predict_proba=True)
     normal_predictions = normal_predictions.set_index(data.index)
 
     # confidence estimation with inductive conformal predictors (ICPs)
     runtime_analyzer['icp'] = {'__mdb_active': False}
 
-    fit_params = {'nr_preds': ts_cfg.nr_predictions or 0, 'columns_to_ignore': [] }
+    fit_params = {'nr_preds': ts_cfg.nr_predictions or 0, 'columns_to_ignore': []}
     fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
 
     if is_classification:
@@ -98,8 +99,8 @@ def model_analyzer(
     if is_numerical or (is_classification and data_subtype != dtype.tags):
         model = adapter(predictor)
 
-        norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor, 'encoders': encoded_data.encoders,
-                       'is_multi_ts': is_multi_ts, 'stop_after': 1e2}
+        norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor,
+                       'encoders': encoded_data.encoders, 'is_multi_ts': is_multi_ts, 'stop_after': 1e2}
         normalizer = Normalizer(fit_params=norm_params)
         normalizer.fit(train_data)
         normalizer.prediction_cache = normalizer(encoded_data)
@@ -147,7 +148,9 @@ def model_analyzer(
         runtime_analyzer['icp']['__default'].calibrate(icp_df.values, y)
 
         # get confidence estimation for validation dataset
-        conf, ranges = set_conf_range(icp_df, icp, dtype_dict[target], runtime_analyzer, positive_domain=positive_domain, significance=fixed_significance)
+        conf, ranges = set_conf_range(
+            icp_df, icp, dtype_dict[target],
+            runtime_analyzer, positive_domain=positive_domain, significance=fixed_significance)
         if not is_classification:
             result_df = pd.DataFrame(index=data.index, columns=['confidence', 'lower', 'upper'], dtype=float)
             result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
@@ -183,7 +186,8 @@ def model_analyzer(
                 icps[frozenset(group)].nc_function.model.prediction_cache = pred_cache
                 icp_df, y = clean_df(icp_df, target, is_classification, runtime_analyzer.get('label_encoders', None))
                 if icps[frozenset(group)].nc_function.normalizer is not None:
-                    icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(f'__norm_{target}').values
+                    icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(
+                        f'__norm_{target}').values
 
                 icps[frozenset(group)].index = icp_df.columns      # important at inference time
                 icps[frozenset(group)].calibrate(icp_df.values, y)
@@ -197,10 +201,11 @@ def model_analyzer(
                     runtime_analyzer['df_std_dev'][frozenset(group)] = y_train.std()
 
                 # get bounds for relevant rows in validation dataset
-                conf, group_ranges = set_conf_range(icp_df, icps[frozenset(group)], dtype_dict[target], runtime_analyzer,
-                                                    group=frozenset(group),
-                                                    positive_domain=positive_domain,
-                                                    significance=fixed_significance)
+                conf, group_ranges = set_conf_range(
+                    icp_df, icps[frozenset(group)],
+                    dtype_dict[target],
+                    runtime_analyzer, group=frozenset(group),
+                    positive_domain=positive_domain, significance=fixed_significance)
                 # save group bounds
                 if not is_classification:
                     result_df.loc[icp_df.index, 'lower'] = group_ranges[:, 0]
@@ -231,8 +236,8 @@ def model_analyzer(
     # compute global feature importance
     if not disable_column_importance:
         ignorable_input_cols = [x for x in input_cols if (not ts_cfg.is_timeseries or
-                                                                (x not in ts_cfg.order_by and
-                                                                 x not in ts_cfg.historical_columns))]
+                                                          (x not in ts_cfg.order_by and
+                                                           x not in ts_cfg.historical_columns))]
         for col in ignorable_input_cols:
             partial_data = deepcopy(encoded_data)
             partial_data.clear_cache()

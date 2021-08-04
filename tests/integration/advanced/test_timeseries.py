@@ -48,17 +48,17 @@ class TestTimeseries(unittest.TestCase):
         order_by = 'T'
 
         prdb = ProblemDefinition.from_dict({'target': target,
-            'time_aim': 30,
-            'nfolds': 10,
-            'anomaly_detection': True,
-            'timeseries_settings': {
-                'use_previous_target': True,
-                'group_by': ['Country'],
-                'nr_predictions': nr_preds,
-                'order_by': [order_by],
-                'window': 5
-            }
-        })
+                                            'time_aim': 30,
+                                            'nfolds': 10,
+                                            'anomaly_detection': True,
+                                            'timeseries_settings': {
+                                                'use_previous_target': True,
+                                                'group_by': ['Country'],
+                                                'nr_predictions': nr_preds,
+                                                'order_by': [order_by],
+                                                'window': 5
+                                            }
+                                            })
         import json
         from lightwood.api.high_level import json_ai_from_problem
         json.dump(json_ai_from_problem(train, prdb).to_dict(), open('AI2_timeseries.json', 'w'))

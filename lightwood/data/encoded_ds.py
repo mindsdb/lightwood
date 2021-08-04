@@ -51,7 +51,8 @@ class EncodedDs(Dataset):
                     kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
                                                  for dep in self.encoders[col].dependencies}
                 if hasattr(self.encoders[col], 'data_window'):
-                    cols = [self.target] + [f'{self.target}_timestep_{i}' for i in range(1, self.encoders[col].data_window)]
+                    cols = [self.target] + [f'{self.target}_timestep_{i}'
+                                            for i in range(1, self.encoders[col].data_window)]
                 else:
                     cols = [col]
 
@@ -76,9 +77,10 @@ class EncodedDs(Dataset):
             kwargs['dependency_data'] = {dep: self.data_frame[dep].tolist()
                                          for dep in self.encoders[column_name].dependencies}
         encoded_data = self.encoders[column_name].encode(self.data_frame[column_name], **kwargs)
-        
+
         if not isinstance(encoded_data, torch.Tensor):
-            raise Exception(f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor !')
+            raise Exception(
+                f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor !')
         return encoded_data
 
     def get_encoded_data(self, include_target=True) -> torch.Tensor:

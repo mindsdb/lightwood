@@ -29,4 +29,8 @@ except Exception:
 
 
 __ts_encoders__ = [TsNumericEncoder, TimeSeriesEncoder, TimeSeriesPlainEncoder]
-__all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder', 'TsNumericEncoder', 'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'MultiHotEncoder', 'PretrainedLangEncoder', 'AmplitudeTsEncoder', 'BinaryEncoder', 'Array', 'Binary', 'Categorical', 'Date', 'DateTime', 'Float', 'Image', 'Integer', 'Quantity', 'Rich_Text', 'Short_Text', 'Tags']
+__all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder', 'TsNumericEncoder',
+           'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder',
+           'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'MultiHotEncoder',
+           'PretrainedLangEncoder', 'AmplitudeTsEncoder', 'BinaryEncoder', 'Array', 'Binary', 'Categorical', 'Date',
+           'DateTime', 'Float', 'Image', 'Integer', 'Quantity', 'Rich_Text', 'Short_Text', 'Tags']

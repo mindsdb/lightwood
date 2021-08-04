@@ -15,7 +15,9 @@ from lightwood.helpers.log import log
 from lightwood.api import dtype
 
 
-def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
+def transform_timeseries(
+        data: pd.DataFrame, dtype_dict: Dict[str, str],
+        timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
     tss = timeseries_settings
     original_df = copy.deepcopy(data)
     gb_arr = tss.group_by if tss.group_by is not None else []
@@ -23,9 +25,11 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
     window = tss.window
 
     if '__mdb_make_predictions' in original_df.columns:
-        index = original_df[original_df['__mdb_make_predictions'].map({'True': True, 'False': False, True: True, False: False}) == True]
+        index = original_df[original_df['__mdb_make_predictions'].map(
+            {'True': True, 'False': False, True: True, False: False}) == True]
         infer_mode = index.shape[0] == 0  # condition to trigger: __mdb_make_predictions is set to False everywhere
-        original_df = original_df.reset_index(drop=True) if infer_mode else original_df  # @TODO: dont drop and use instead of original_index?
+        # @TODO: dont drop and use instead of original_index?
+        original_df = original_df.reset_index(drop=True) if infer_mode else original_df
     else:
         infer_mode = False
 
@@ -94,19 +98,31 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
         df_arr = pool.map(partial(_ts_to_obj, historical_columns=ob_arr + tss.historical_columns), df_arr)
-        df_arr = pool.map(partial(_ts_order_col_to_cell_lists, historical_columns=ob_arr + tss.historical_columns), df_arr)
-        df_arr = pool.map(partial(_ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window), df_arr)
+        df_arr = pool.map(partial(_ts_order_col_to_cell_lists,
+                          historical_columns=ob_arr + tss.historical_columns), df_arr)
+        df_arr = pool.map(
+            partial(
+                _ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window),
+            df_arr)
         if tss.use_previous_target:
-            df_arr = pool.map(partial(_ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type, mode=mode), df_arr)
+            df_arr = pool.map(
+                partial(
+                    _ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions,
+                    window=tss.window, data_dtype=tss.target_type, mode=mode),
+                df_arr)
         pool.close()
         pool.join()
     else:
         for i in range(len(df_arr)):
             df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
-            df_arr[i] = _ts_add_previous_rows(df_arr[i], historical_columns=ob_arr + tss.historical_columns, window=window)
+            df_arr[i] = _ts_add_previous_rows(df_arr[i],
+                                              historical_columns=ob_arr + tss.historical_columns, window=window)
             if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type, mode=mode)
+                df_arr[i] = _ts_add_previous_target(
+                    df_arr[i],
+                    target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type,
+                    mode=mode)
 
     combined_df = pd.concat(df_arr)
 
@@ -130,7 +146,9 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
     if df_gb_map is None:
         for _, row in combined_df.iterrows():
             if not infer_mode:
-                timeseries_row_mapping[idx] = int(row['original_index']) if row['original_index'] is not None and not np.isnan(row['original_index']) else None
+                timeseries_row_mapping[idx] = int(
+                    row['original_index']) if row['original_index'] is not None and not np.isnan(
+                    row['original_index']) else None
             else:
                 timeseries_row_mapping[idx] = idx
             idx += 1
@@ -138,7 +156,9 @@ def transform_timeseries(data: pd.DataFrame, dtype_dict: Dict[str, str], timeser
         for gb in df_gb_map:
             for _, row in df_gb_map[gb].iterrows():
                 if not infer_mode:
-                    timeseries_row_mapping[idx] = int(row['original_index']) if row['original_index'] is not None and not np.isnan(row['original_index']) else None
+                    timeseries_row_mapping[idx] = int(
+                        row['original_index']) if row['original_index'] is not None and not np.isnan(
+                        row['original_index']) else None
                 else:
                     timeseries_row_mapping[idx] = idx
 
@@ -245,7 +265,7 @@ def get_nr_procs(df=None, max_processes=None, max_per_proc_usage=None):
             try:
                 import mindsdb_worker
                 import ray
-                max_per_proc_usage = 0.2 * pow(10,9)
+                max_per_proc_usage = 0.2 * pow(10, 9)
             except:
                 max_per_proc_usage = 3 * pow(10, 9)
             if df is not None:

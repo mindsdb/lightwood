@@ -11,6 +11,7 @@ class TsNumericEncoder(NumericEncoder):
     """
     Variant of vanilla numerical encoder, supports dynamic mean re-scaling
     """
+
     def __init__(self, is_target=False, grouped_by=None):
         super(TsNumericEncoder, self).__init__(is_target=is_target)
         # time series normalization params
@@ -33,7 +34,7 @@ class TsNumericEncoder(NumericEncoder):
                 real = float(real)
             except:
                 try:
-                    real = float(real.replace(',','.'))
+                    real = float(real.replace(',', '.'))
                 except:
                     real = None
             if self.is_target:
@@ -58,7 +59,7 @@ class TsNumericEncoder(NumericEncoder):
                     if real is not None:
                         vector[0] = 1
                         vector[1] = 1 if real < 0 and not self.positive_domain else 0
-                        vector[2] = real/self._abs_mean
+                        vector[2] = real / self._abs_mean
                 except Exception as e:
                     log.error(f'Can\'t encode input value: {real}, exception: {e}')
 
@@ -90,7 +91,7 @@ class TsNumericEncoder(NumericEncoder):
                         try:
                             real_value = math.exp(vector[1]) * sign
                         except OverflowError as e:
-                            real_value = pow(10,63) * sign
+                            real_value = pow(10, 63) * sign
                     else:
                         if group is not None and self.normalizers is not None:
                             try:

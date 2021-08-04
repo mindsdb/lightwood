@@ -8,7 +8,7 @@ from lightwood.encoder.base import BaseEncoder
 class TfidfEncoder(BaseEncoder):
     def __init__(self, is_target=False):
         super().__init__(is_target)
-        self.ngram_range = (1,5)
+        self.ngram_range = (1, 5)
         self.max_features = 500
 
     def prepare(self, priming_data, training_data=None):

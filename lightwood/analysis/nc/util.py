@@ -20,7 +20,8 @@ def clean_df(df, target, is_classification, label_encoders):
     return df, y
 
 
-def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, std_tol=1, group='__default', significance=None):
+def set_conf_range(
+        X, icp, target_type, analysis_info, positive_domain=False, std_tol=1, group='__default', significance=None):
     """ Sets confidence level and returns it plus predictions regions
     significance: desired confidence level. can be preset 0 < x <= 0.99
     """
@@ -32,7 +33,7 @@ def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, st
 
         # iterate over confidence levels until spread >= a multiplier of the dataset stddev
         if significance is not None:
-            conf = int(100*(1-significance))
+            conf = int(100 * (1 - significance))
             return significance, all_ranges[:, :, conf]
         else:
             for tol in [std_tol, std_tol + 1, std_tol + 2]:
@@ -62,7 +63,8 @@ def set_conf_range(X, icp, target_type, analysis_info, positive_domain=False, st
     return 0.005, np.zeros((X.shape[0], 2))
 
 
-def get_numerical_conf_range(all_confs, df_std_dev=None, positive_domain=False, std_tol=1, group='__default', error_rate=None):
+def get_numerical_conf_range(
+        all_confs, df_std_dev=None, positive_domain=False, std_tol=1, group='__default', error_rate=None):
     """ Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance
         error_rate: pre-determined error rate for the ICP, used in anomaly detection tasks to adjust the
         threshold sensitivity.
@@ -105,7 +107,7 @@ def get_numerical_conf_range(all_confs, df_std_dev=None, positive_domain=False, 
         # fixed error rate
         error_rate = max(0.01, min(1.0, error_rate))
         conf = 1 - error_rate
-        conf_idx = int(100*error_rate) - 1
+        conf_idx = int(100 * error_rate) - 1
         conf_ranges = all_confs[:, :, conf_idx]
         significances = [conf for _ in range(conf_ranges.shape[0])]
 

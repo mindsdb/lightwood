@@ -27,10 +27,10 @@ class ShortTextEncoder(BaseEncoder):
         else:
             if mode not in ['concat', 'mean']:
                 self._unexpected_mode()
-            
+
             if is_target and mode != 'concat':
                 raise ValueError('mode must be "concat" when is_target=True')
-            
+
             self._mode = mode
 
         # Defined in self.prepare()
@@ -39,7 +39,7 @@ class ShortTextEncoder(BaseEncoder):
         self.is_nn_encoder = True
         self.cae = CategoricalAutoEncoder(is_target=is_target, max_encoded_length=100)
         self._prepared = False
-    
+
     def _unexpected_mode(self):
         raise ValueError('unexpected combine value (must be "mean" or "concat")')
 

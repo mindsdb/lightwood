@@ -6,6 +6,7 @@ Basic helper functions for PretrainedLangEncoder
 import torch
 from transformers import AdamW
 
+
 class TextEmbed(torch.utils.data.Dataset):
     """
     Dataset class for quick embedding/label retrieval.
@@ -13,6 +14,7 @@ class TextEmbed(torch.utils.data.Dataset):
 
     If the labels provided are not in torch form, will convert them.
     """
+
     def __init__(self, encodings, labels):
         self.encodings = encodings
         self.labels = labels
@@ -29,7 +31,7 @@ class TextEmbed(torch.utils.data.Dataset):
 def train_model(model, dataset, device, scheduler=None, log=None, optim=None, n_epochs=4):
     """
     Generic training function, given an arbitrary model.
-    
+
     Given a model, train for n_epochs.
 
     model - torch.nn model;
@@ -48,7 +50,7 @@ def train_model(model, dataset, device, scheduler=None, log=None, optim=None, n_
     for epoch in range(n_epochs):
         total_loss = 0
         for batch in dataset:
-            optim.zero_grad() 
+            optim.zero_grad()
 
             inpids = batch['input_ids'].to(device)
             attn = batch['attention_mask'].to(device)
@@ -57,12 +59,12 @@ def train_model(model, dataset, device, scheduler=None, log=None, optim=None, n_
             loss = outputs[0]
 
             total_loss += loss.item()
-            
+
             loss.backward()
             optim.step()
 
             if scheduler is not None:
                 scheduler.step()
 
-        print("Epoch", epoch+1, "Loss", total_loss)
+        print("Epoch", epoch + 1, "Loss", total_loss)
     return model, losses

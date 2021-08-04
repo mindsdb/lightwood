@@ -549,7 +549,9 @@ def tensorsFromPair(pair, input_lang, output_lang):
 teacher_forcing_ratio = 0.5
 
 
-def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, max_length=MAX_LENGTH):
+def train(
+        input_tensor, target_tensor, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion,
+        max_length=MAX_LENGTH):
     encoder_hidden = encoder.initHidden()
 
     encoder_optimizer.zero_grad()
@@ -642,7 +644,8 @@ def timeSince(since, percent):
 # of examples, time so far, estimated time) and average loss.
 #
 
-def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, loss_breakpoint=0.0001, max_length=MAX_LENGTH):
+def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000,
+               plot_every=100, learning_rate=0.01, loss_breakpoint=0.0001, max_length=MAX_LENGTH):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -653,8 +656,8 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
 
     random_index = random.randint(0, len(input_rows))
 
-    training_pairs = [[tensorFromSentence(input_lang, input_rows[random_index]), tensorFromSentence(output_lang, output_rows[random_index])]
-                      for i in range(n_iters)]
+    training_pairs = [[tensorFromSentence(input_lang, input_rows[random_index]), tensorFromSentence(
+        output_lang, output_rows[random_index])] for i in range(n_iters)]
     criterion = nn.NLLLoss()
 
     for iter in range(1, n_iters + 1):

@@ -13,6 +13,7 @@ def remove_requirements(requirements, name, replace=''):
             new_requirements.append(replace)
     return new_requirements
 
+
 sys_platform = sys.platform
 
 about = {}
@@ -27,10 +28,10 @@ with open('requirements.txt') as req_file:
 
 
 # Windows specific requirements
-if sys_platform in ['win32','cygwin','windows']:
+if sys_platform in ['win32', 'cygwin', 'windows']:
     # These have to be installed manually or via the installers in windows
-    requirements = remove_requirements(requirements,'torch')
-    requirements = remove_requirements(requirements,'torchvision')
+    requirements = remove_requirements(requirements, 'torch')
+    requirements = remove_requirements(requirements, 'torchvision')
 
 
 setuptools.setup(

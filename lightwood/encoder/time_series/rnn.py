@@ -22,7 +22,8 @@ from lightwood.encoder.time_series.helpers.transformer_helpers import Transforme
 
 class TimeSeriesEncoder(BaseEncoder):
 
-    def __init__(self, stop_after: int, is_target=False, original_type: str=None, target: str=None, grouped_by: List[str] = []):
+    def __init__(self, stop_after: int, is_target=False, original_type: str = None, target: str = None,
+                 grouped_by: List[str] = []):
         super().__init__(is_target)
         self.device, _ = get_devices()
         self.target = target
@@ -67,7 +68,8 @@ class TimeSeriesEncoder(BaseEncoder):
                 if dep_name in self.grouped_by:
                     continue  # we only use group column for indexing and selecting rows
 
-                assert dep['original_type'] in (dtype.categorical, dtype.binary, dtype.integer, dtype.float, dtype.array)
+                assert dep['original_type'] in (dtype.categorical, dtype.binary,
+                                                dtype.integer, dtype.float, dtype.array)
 
                 if f'__mdb_ts_previous_{self.target}' == dep_name:
                     self.dep_norms[dep_name] = ts_analysis['target_normalizers']
@@ -79,7 +81,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     if dep['original_type'] in (dtype.categorical, dtype.binary):
                         self.dep_norms[dep_name]['__default'] = CatNormalizer()
                     else:
-                        self.dep_norms[dep_name]['__default']  = MinMaxNormalizer()
+                        self.dep_norms[dep_name]['__default'] = MinMaxNormalizer()
 
                     self.dep_norms[dep_name]['__default'].prepare(dep['data'])
                     self._group_combinations = {'__default': None}
@@ -87,7 +89,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 # add descriptor size to the total encoder output dimensionality
                 if dep['original_type'] in (dtype.categorical, dtype.binary):
                     total_dims += len(self.dep_norms[dep_name]['__default'].scaler.categories_[0])
-                elif dep['original_type'] in  (dtype.integer, dtype.float, dtype.array):
+                elif dep['original_type'] in (dtype.integer, dtype.float, dtype.array):
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
@@ -184,7 +186,6 @@ class TimeSeriesEncoder(BaseEncoder):
                         subset = [dep_data['data'][idx] for idx in list(all_idxs)]
                         data[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1)
 
-
                 else:
                     # categorical has only one normalizer at all times
                     normalizer = self.dep_norms[dep_name]['__default']
@@ -216,19 +217,21 @@ class TimeSeriesEncoder(BaseEncoder):
                 with LightwoodAutocast():
                     if self.encoder_class == TransformerEncoder:
                         # pack batch length info tensor
-                        len_batch = self._get_batch(lengths_data, batch_idx, min(batch_idx + batch_size, len(priming_data)))
+                        len_batch = self._get_batch(lengths_data, batch_idx, min(
+                            batch_idx + batch_size, len(priming_data)))
                         batch = batch, len_batch
 
-                        next_tensor, hidden_state, dec_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
+                        next_tensor, hidden_state, dec_loss = self._encoder.bptt(
+                            batch, self._enc_criterion, self.device)
                         loss += dec_loss
 
                     else:
-                        next_tensor, hidden_state, enc_loss = self._encoder.bptt(batch, self._enc_criterion, self.device)
+                        next_tensor, hidden_state, enc_loss = self._encoder.bptt(
+                            batch, self._enc_criterion, self.device)
                         loss += enc_loss
 
-                        next_tensor, hidden_state, dec_loss = self._decoder.decode(batch, next_tensor, self._dec_criterion,
-                                                                                   self.device,
-                                                                                   hidden_state=hidden_state)
+                        next_tensor, hidden_state, dec_loss = self._decoder.decode(
+                            batch, next_tensor, self._dec_criterion, self.device, hidden_state=hidden_state)
                         loss += dec_loss
 
                 loss.backward()
@@ -247,10 +250,9 @@ class TimeSeriesEncoder(BaseEncoder):
             running_losses[-1] = average_loss
 
             if feedback_hoop_function is not None:
-                feedback_hoop_function("time series encoder epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
-                    epoch_n=epoch+1,
-                    total=self._epochs,
-                    average_loss=average_loss))
+                feedback_hoop_function(
+                    "time series encoder epoch [{epoch_n}/{total}] average_loss = {average_loss}".format(
+                        epoch_n=epoch + 1, total=self._epochs, average_loss=average_loss))
 
             if bad_epochs > self._stop_on_n_bad_epochs:
                 break
@@ -364,7 +366,8 @@ class TimeSeriesEncoder(BaseEncoder):
                     if all_idxs:
                         default_norm = self.dep_norms[dep]['__default']
                         subset = [dep_data[idx] for idx in all_idxs]
-                        tensor[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1).to(self.device)
+                        tensor[list(all_idxs), :, :] = torch.Tensor(
+                            default_norm.encode(subset)).unsqueeze(-1).to(self.device)
                         tensor[torch.isnan(tensor)] = 0.0
 
                 # normalize categorical target

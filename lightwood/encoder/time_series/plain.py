@@ -19,7 +19,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
         self.stop_after = stop_after
         self.original_type = original_type
         self._normalizer = None
-        self.output_size = window+1
+        self.output_size = window + 1
 
     def prepare(self, priming_data):
         if self._prepared:

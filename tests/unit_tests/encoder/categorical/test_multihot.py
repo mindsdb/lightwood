@@ -61,4 +61,3 @@ class TestMultiHotEncoder(unittest.TestCase):
         decoded_data = enc.decode(encoded_data)
         assert (np.array(encoded_data[0]) == 0).all()
         assert decoded_data[0] == []
-

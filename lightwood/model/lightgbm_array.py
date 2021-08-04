@@ -12,14 +12,17 @@ from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 class LightGBMArray(BaseModel):
     """LightGBM-based model, intended for usage in time series tasks."""
     models: List[LightGBM]
-    n_ts_predictions:  int
+    n_ts_predictions: int
     submodel_stop_after: float
     target: str
     supports_proba: bool
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], n_ts_predictions: int, fit_on_dev: bool):
+    def __init__(
+            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            input_cols: List[str],
+            n_ts_predictions: int, fit_on_dev: bool):
         super().__init__(stop_after)
-        self.submodel_stop_after = stop_after/n_ts_predictions
+        self.submodel_stop_after = stop_after / n_ts_predictions
         self.target = target
         dtype_dict[target] = dtype.float
         self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna=False)

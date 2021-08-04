@@ -73,7 +73,7 @@ class Img2VecEncoder(BaseEncoder):
         self.model.eval()
         with torch.no_grad():
             for img_tensor in img_tensors:
-                vec = self.model(img_tensor.unsqueeze(0),batch=False)
+                vec = self.model(img_tensor.unsqueeze(0), batch=False)
                 vec_arr.append(vec)
         return torch.stack(vec_arr)
 
