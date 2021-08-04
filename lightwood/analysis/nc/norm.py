@@ -89,14 +89,14 @@ class Normalizer(BaseModel):
         return labels
 
     @staticmethod
-    def compute_numerical_labels(self, preds: np.ndarray, truths: np.ndarray, bounds: list) -> np.ndarray:
+    def compute_numerical_labels(preds: np.ndarray, truths: np.ndarray, bounds: list) -> np.ndarray:
         diffs = np.log(abs(preds - truths))
         diffs = diffs / np.max(diffs) if np.max(diffs) > 0 else diffs
         labels = np.clip(bounds[0] + diffs, bounds[0], bounds[1])
         return labels
 
     @staticmethod
-    def compute_categorical_labels(self, preds: np.ndarray, truths: np.ndarray) -> np.ndarray:
+    def compute_categorical_labels(preds: np.ndarray, truths: np.ndarray) -> np.ndarray:
         preds = np.clip(preds, 0.001, 0.999)  # avoid inf
         labels = entropy(truths, preds, axis=1)
         return labels
