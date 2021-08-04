@@ -40,9 +40,9 @@ jobs:
       shell: bash
       env:
         CHECK_FOR_UPDATES: False
-    - name: Lint with flake8
-      run: |
-        flake8 . --statistics
+    # - name: Lint with flake8
+    #   run: |
+    #     flake8 . --statistics
     - name: Test with unittest
       run: |
         python -m unittest discover tests
