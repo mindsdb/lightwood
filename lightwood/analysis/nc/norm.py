@@ -53,18 +53,14 @@ class Normalizer(BaseModel):
 
     def get_labels(self, preds: pd.DataFrame, truths: np.ndarray, target_enc) -> np.ndarray:
         if self.target_dtype in [dtype.integer, dtype.float]:
-
             if not self.multi_ts_task:
                 preds = preds.values.squeeze()
             else:
                 preds = [p[0] for p in preds.values.squeeze()]
 
-            diffs = np.log(abs(preds - truths))
-            diffs = diffs / np.max(diffs) if np.max(diffs) > 0 else diffs
-            labels = np.clip(self.bounds[0] + diffs, self.bounds[0], self.bounds[1])
+            labels = self.compute_numerical_labels(preds, truths, self.bounds)
 
         elif self.target_dtype in [dtype.binary, dtype.categorical]:
-
             if self.base_predictor.supports_proba:
                 prob_cols = [col for col in preds.columns if '__mdb_proba' in col]
                 col_names = [col.replace('__mdb_proba_', '') for col in prob_cols]
@@ -81,15 +77,26 @@ class Normalizer(BaseModel):
             preds.columns = col_names
             new_order = [v for k, v in sorted(target_enc.rev_map.items(), key=lambda x: x[0])]
             preds = preds.reindex(columns=new_order)
-
-            # get log loss
             preds = preds.values.squeeze()
             preds = preds if prob_cols else target_enc.encode(preds).tolist()
-            preds = np.clip(preds, 0.001, 0.999)  # avoid inf
             truths = target_enc.encode(truths).numpy()
-            labels = entropy(truths, preds, axis=1)
+
+            labels = self.compute_categorical_labels(preds, truths)
 
         else:
             raise(Exception(f"dtype {self.target_dtype} not supported for confidence normalizer"))
 
+        return labels
+
+    @staticmethod
+    def compute_numerical_labels(preds: np.ndarray, truths: np.ndarray, bounds: list) -> np.ndarray:
+        diffs = np.log(abs(preds - truths))
+        diffs = diffs / np.max(diffs) if np.max(diffs) > 0 else diffs
+        labels = np.clip(bounds[0] + diffs, bounds[0], bounds[1])
+        return labels
+
+    @staticmethod
+    def compute_categorical_labels(preds: np.ndarray, truths: np.ndarray) -> np.ndarray:
+        preds = np.clip(preds, 0.001, 0.999)  # avoid inf
+        labels = entropy(truths, preds, axis=1)
         return labels
