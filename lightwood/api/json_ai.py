@@ -22,7 +22,7 @@ def lookup_encoder(col_dtype: str, col_name: str, is_target: bool, problem_defin
         dtype.datetime: 'DateTime.DatetimeEncoder',
         dtype.image: 'Image.Img2VecEncoder',
         dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
-        dtype.short_text: 'Short_Text.ShortTextEncoder',
+        dtype.short_text: 'Short_Text.CategoricalAutoEncoder',
         dtype.array: 'Array.TimeSeriesEncoder',
         dtype.quantity: 'Quantity.NumericEncoder',
     }
