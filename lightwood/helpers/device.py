@@ -4,7 +4,7 @@ from random import randint
 
 
 def get_devices():
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and float(torch.version.cuda) >= 9:
         device_str = "cuda"
         available_devices = torch.cuda.device_count()
 

@@ -143,5 +143,5 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, 
             raise Exception(err)
 
         data[name] = new_data
-
+        
     return data
