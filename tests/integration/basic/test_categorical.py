@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
 import pandas as pd
+from sklearn.metrics import balanced_accuracy_score
+
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import predictor_from_problem
 np.random.seed(42)
@@ -28,13 +30,24 @@ class TestBasic(unittest.TestCase):
 
                 for label in df[target].unique():
                     assert f'__mdb_proba_{label}' in predictions.columns
+        return predictor
 
     def test_0_binary(self):
         df = pd.read_csv('tests/data/adult.csv')[:300]
         target = 'income'
-        self.setup_predictor(df, target)
+        predictor = self.setup_predictor(df, target)
+        predictions = predictor.predict(df)
+
+        self.assertTrue(balanced_accuracy_score(df[target], predictions['prediction']) > 0.7)
+        self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
 
     def test_1_categorical(self):
         df = pd.read_csv('tests/data/hdi.csv')
         target = 'Development Index'
-        self.setup_predictor(df, target)
+        predictor = self.setup_predictor(df, target)
+        predictions = predictor.predict(df)
+
+        self.assertTrue(balanced_accuracy_score(df[target].astype(int), predictions['prediction'].astype(int)) > 0.9)
+        self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
+
+
