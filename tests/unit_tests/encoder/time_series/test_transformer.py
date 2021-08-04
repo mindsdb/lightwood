@@ -20,7 +20,7 @@ class TestTransformerEncoder(unittest.TestCase):
 
         # check length vector is correct
         assert lengths.shape[0] == batch_size
-        assert lengths.numpy()[0] == seq_len-1
+        assert lengths.numpy()[0] == seq_len - 1
 
         # check data and target
         chunk_size = min(start + step, batch_size) - start

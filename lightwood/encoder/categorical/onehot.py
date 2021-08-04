@@ -43,7 +43,7 @@ class OneHotEncoder(BaseEncoder):
                     break
 
             self._lang.removeWord(word_to_remove)
-        
+
         if self.is_target:
             self.index_weights = [None] * self._lang.n_words
             if self.target_class_distribution is not None:

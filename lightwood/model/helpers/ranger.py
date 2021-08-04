@@ -4,7 +4,9 @@ from torch.optim.optimizer import Optimizer
 
 
 class Ranger(Optimizer):
-    def __init__(self, params, lr=0.0005, alpha=0.5, k=5, N_sma_threshold=5, betas=(0.9, 0.999), eps=1e-5, weight_decay=0.000):
+    def __init__(
+            self, params, lr=0.0005, alpha=0.5, k=5, N_sma_threshold=5, betas=(0.9, 0.999),
+            eps=1e-5, weight_decay=0.000):
         # parameter checks
         if not 0.0 <= alpha <= 1.0:
             raise ValueError(f'Invalid slow update rate: {alpha}')

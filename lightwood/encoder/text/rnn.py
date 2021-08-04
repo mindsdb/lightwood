@@ -24,8 +24,8 @@ class RnnEncoder(BaseEncoder):
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         no_null_sentences = [x if x is not None else '' for x in priming_data]
-        estimated_time = 1/937*self._train_iters*len(no_null_sentences)
-        log_every = math.ceil(self._train_iters/100)
+        estimated_time = 1 / 937 * self._train_iters * len(no_null_sentences)
+        log_every = math.ceil(self._train_iters / 100)
         log.info('We will train an encoder for this text, on a CPU it will take about {min} minutes'.format(
             min=estimated_time))
 
@@ -42,8 +42,9 @@ class RnnEncoder(BaseEncoder):
         self._encoder = EncoderRNN(self._input_lang.n_words, hidden_size).to(device)
         self._decoder = DecoderRNN(hidden_size, self._output_lang.n_words).to(device)
 
-        trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, no_null_sentences, no_null_sentences, self._train_iters, int(log_every), self._learning_rate, self._stop_on_error,
-                   max_length)
+        trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, no_null_sentences,
+                   no_null_sentences, self._train_iters, int(log_every),
+                   self._learning_rate, self._stop_on_error, max_length)
 
         self._prepared = True
 

@@ -127,12 +127,12 @@ class PretrainedLangEncoder(BaseEncoder):
         self.device, _ = get_devices()
         self.is_nn_encoder = True
         self.stop_after = stop_after
- 
+
         self.embed_mode = embed_mode
         self.uses_target = True
         self.output_size = None
-        
-        ## DEBUGGING!!!
+
+        # DEBUGGING!!!
         if self.embed_mode:
             log.info("Embedding mode on. [CLS] embedding dim output of encode()")
         else:
@@ -341,14 +341,14 @@ class PretrainedLangEncoder(BaseEncoder):
                     text, truncation=True, return_tensors="pt"
                 ).to(self.device)
 
-                if self.embed_mode: #Embedding mode ON; return [CLS]
+                if self.embed_mode:  # Embedding mode ON; return [CLS]
                     output = self._model.base_model(inp).last_hidden_state[:, 0]
 
                     # If the model has a pre-classifier layer, use this embedding.
                     if hasattr(self._model, "pre_classifier"):
                         output = self._model.pre_classifier(output)
 
-                else: #Embedding mode off; return classes
+                else:  # Embedding mode off; return classes
                     output = self._model(inp).logits
 
                 encoded_representation.append(output.detach())

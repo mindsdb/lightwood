@@ -19,7 +19,9 @@ class SkTime(BaseModel):
     target: str
     supports_proba: bool
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], n_ts_predictions: int, ts_analysis: Dict):
+    def __init__(
+            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            n_ts_predictions: int, ts_analysis: Dict):
         super().__init__(stop_after)
         self.target = target
         dtype_dict[target] = dtype.float
@@ -99,10 +101,9 @@ class SkTime(BaseModel):
                 for idx, _ in enumerate(series.iteritems()):
                     ydf['prediction'].iloc[series_idxs[idx]] = self.models[group].predict(
                         np.arange(idx,  # +cutoff
-                                  idx+self.n_ts_predictions)).tolist()  # +cutoff
+                                  idx + self.n_ts_predictions)).tolist()  # +cutoff
 
             if self.grouped_by == ['__default']:
                 break
-
 
         return ydf[['prediction']]

@@ -19,7 +19,7 @@ class BinaryEncoder(BaseEncoder):
     def prepare(self, priming_data):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
-        
+
         for x in priming_data:
             x = str(x)
             if x not in self.map:
@@ -28,7 +28,7 @@ class BinaryEncoder(BaseEncoder):
 
             if len(self.map) == 2:
                 break
-        
+
         if self.is_target:
             self.index_weights = [None, None]
             for word in self.map:
@@ -36,7 +36,7 @@ class BinaryEncoder(BaseEncoder):
                     self.index_weights[self.map[word]] = 1 / self.target_class_distribution[word]
                 else:
                     self.index_weights[self.map[word]] = 1
-                    
+
             self.index_weights = torch.Tensor(self.index_weights)
 
         self._prepared = True
@@ -48,9 +48,9 @@ class BinaryEncoder(BaseEncoder):
 
         for word in column_data:
             index = self.map.get(word, None)
-            ret.append([0,0])
+            ret.append([0, 0])
             if index is not None:
-                ret[-1][index] = 1  
+                ret[-1][index] = 1
 
         return torch.Tensor(ret)
 

@@ -13,10 +13,11 @@ class TestAutoencoder(unittest.TestCase):
         log.setLevel(logging.DEBUG)
 
         random.seed(2)
-        cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(7,8))) for x in range(500)]
+        cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits,
+                              k=random.randint(7, 8))) for x in range(500)]
         for i in range(len(cateogries)):
             if i % 10 == 0:
-                cateogries[i] = random.randint(1,20)
+                cateogries[i] = random.randint(1, 20)
 
         priming_data = []
         test_data = []
@@ -37,6 +38,6 @@ class TestAutoencoder(unittest.TestCase):
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
 
-        encoder_accuracy = accuracy_score(list(map(str,test_data)), list(map(str,decoded_data)))
+        encoder_accuracy = accuracy_score(list(map(str, test_data)), list(map(str, decoded_data)))
         print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
         self.assertTrue(encoder_accuracy > 0.80)

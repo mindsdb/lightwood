@@ -4,7 +4,8 @@ import torch
 import numpy as np
 import pandas as pd
 
-from lightwood.analysis.nc.util import get_numerical_conf_range, get_categorical_conf, get_anomalies  #  restore_icp_state, clear_icp_state
+# restore_icp_state, clear_icp_state
+from lightwood.analysis.nc.util import get_numerical_conf_range, get_categorical_conf, get_anomalies
 from lightwood.helpers.ts import get_inferred_timestamps, add_tn_conf_bounds
 from lightwood.api.dtype import dtype
 from lightwood.api.types import TimeseriesSettings
@@ -52,7 +53,8 @@ def explain(data: pd.DataFrame,
             insights[f'order_{col}'] = data[col]
 
         for col in timeseries_settings.order_by:
-            insights[f'order_{col}'] = get_inferred_timestamps(insights, col, ts_analysis['deltas'], timeseries_settings)
+            insights[f'order_{col}'] = get_inferred_timestamps(
+                insights, col, ts_analysis['deltas'], timeseries_settings)
 
     # confidence estimation using calibrated inductive conformal predictors (ICPs)
     if analysis['icp']['__mdb_active']:
@@ -128,7 +130,7 @@ def explain(data: pd.DataFrame,
             if is_numerical:
                 significances = fixed_confidence
                 if significances is not None:
-                    confs = all_confs[:, :, int(100*(1-significances))-1]
+                    confs = all_confs[:, :, int(100 * (1 - significances)) - 1]
                 else:
                     error_rate = anomaly_error_rate if is_anomaly_task else None
                     significances, confs = get_numerical_conf_range(all_confs,
@@ -179,7 +181,8 @@ def explain(data: pd.DataFrame,
                                 default_icp_widths = result.loc[X.index, 'upper'] - result.loc[X.index, 'lower']
                                 grouped_widths = np.subtract(confs[:, 1], confs[:, 0])
                                 insert_index = (default_icp_widths > grouped_widths)[lambda x: x == True].index
-                                conf_index = (default_icp_widths.reset_index(drop=True) > grouped_widths)[lambda x: x == True].index
+                                conf_index = (default_icp_widths.reset_index(drop=True) >
+                                              grouped_widths)[lambda x: x == True].index
 
                                 result.loc[insert_index, 'lower'] = confs[conf_index, 0]
                                 result.loc[insert_index, 'upper'] = confs[conf_index, 1]

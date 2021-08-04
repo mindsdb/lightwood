@@ -19,6 +19,7 @@ from lightwood.analysis.nc.base import RegressorMixin, ClassifierMixin
 class BaseIcp(BaseEstimator):
     """Base class for inductive conformal predictors.
     """
+
     def __init__(self, nc_function, condition=None):
         self.cal_x, self.cal_y = None, None
         self.nc_function = nc_function
@@ -26,7 +27,7 @@ class BaseIcp(BaseEstimator):
         # Check if condition-parameter is the default function (i.e.,
         # lambda x: 0). This is so we can safely clone the object without
         # the clone accidentally having self.conditional = True.
-        default_condition = lambda x: 0
+        def default_condition(x): return 0
         is_default = (callable(condition) and
                       (condition.__code__.co_code ==
                        default_condition.__code__.co_code))
@@ -153,6 +154,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         intervals with regression neural networks. Neural Networks, 24(8),
         842-851.
     """
+
     def __init__(self, nc_function, condition=None, smoothing=True):
         super(IcpClassifier, self).__init__(nc_function, condition)
         self.classes = None
@@ -286,6 +288,7 @@ class IcpRegressor(BaseIcp, RegressorMixin):
         intervals with regression neural networks. Neural Networks, 24(8),
         842-851.
     """
+
     def __init__(self, nc_function, condition=None):
         super(IcpRegressor, self).__init__(nc_function, condition)
 

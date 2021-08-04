@@ -9,11 +9,11 @@ class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
     def forward(self, input):
         with LightwoodAutocast():
             n, c, _, _ = input.size()
-            input = input.view(n,c,1).permute(0,2,1)
-            pooled =  torch.nn.functional.adaptive_avg_pool1d(input, self.output_size)
+            input = input.view(n, c, 1).permute(0, 2, 1)
+            pooled = torch.nn.functional.adaptive_avg_pool1d(input, self.output_size)
             _, _, c = pooled.size()
-            pooled = pooled.permute(0,2,1)
-            return pooled.view(n,c)
+            pooled = pooled.permute(0, 2, 1)
+            return pooled.view(n, c)
 
 
 class Img2Vec(nn.Module):
@@ -52,7 +52,9 @@ class Img2Vec(nn.Module):
             model = torch.nn.Sequential(*list(models.resnet18(pretrained=True).children())[:-1])
 
         elif self.model_name == 'resnext-50-small':
-            model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1] , ChannelPoolAdaptiveAvg1d(output_size=512))
+            model = torch.nn.Sequential(
+                *list(models.resnext50_32x4d(pretrained=True).children())[: -1],
+                ChannelPoolAdaptiveAvg1d(output_size=512))
 
         elif self.model_name == 'resnext-50':
             model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1])

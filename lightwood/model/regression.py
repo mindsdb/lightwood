@@ -17,7 +17,7 @@ class Regression(BaseModel):
     model: LinearRegression
     label_map: dict
     supports_proba: bool
-    
+
     def __init__(self, stop_after: int, target_encoder: BaseEncoder, dtype_dict: dict, target: str):
         super().__init__(stop_after)
         self.target_encoder = target_encoder
@@ -49,7 +49,7 @@ class Regression(BaseModel):
         X = []
         for x, _ in ds:
             X.append(x.tolist())
-        
+
         Yh = self.model.predict(X)
 
         decoded_predictions = self.target_encoder.decode(torch.Tensor(Yh))

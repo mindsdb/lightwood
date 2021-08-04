@@ -29,15 +29,15 @@ def get_quantity_col_info(col_data: List[object]) -> str:
         val = str(val)
         char_part = re.sub("[0-9.,]", '', val)
         numeric_bit = re.sub("[^0-9.,]", '', val).replace(',', '.')
-        
+
         if len(char_part) == 0:
             char_part = None
-        
+
         if len(re.sub("[^0-9]", '', numeric_bit)) == 0 or numeric_bit.count('.') > 1:
             numeric_bit = None
         else:
             numeric_bit = float(numeric_bit)
-        
+
         if numeric_bit is None:
             return False, None
         else:
@@ -45,10 +45,10 @@ def get_quantity_col_info(col_data: List[object]) -> str:
 
         if char_const is None:
             char_const = char_part
-        
+
         if char_part is None or char_part != char_const:
             return False, None
-    
+
     if len(nr_map) > 20 and len(nr_map) > len(col_data) / 200:
         return True, {char_const: {
             'multiplier': 1
@@ -233,7 +233,7 @@ def get_column_data_type(arg_tup):
             is_categorical = nr_distinct_vals < 10
         else:
             is_categorical = nr_distinct_vals < min(max((nr_vals / 100), 10), 3000)
-        
+
         if is_categorical:
             if curr_dtype is not None:
                 additional_info['other_potential_dtypes'].append(curr_dtype)
@@ -266,7 +266,7 @@ def get_column_data_type(arg_tup):
 
     if curr_dtype in [dtype.categorical, dtype.rich_text, dtype.short_text]:
         known_dtype_dist = {curr_dtype: len(data)}
-    
+
     if nr_distinct_vals < 3 and curr_dtype == dtype.categorical:
         curr_dtype = dtype.binary
         known_dtype_dist[dtype.binary] = known_dtype_dist[dtype.categorical]
@@ -354,7 +354,8 @@ def infer_types(data: pd.DataFrame, pct_invalid: float) -> TypeInformation:
     sample_size = len(sample_df)
     population_size = len(data)
     log.info(f'Analyzing a sample of {sample_size}')
-    log.info(f'from a total population of {population_size}, this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.')
+    log.info(
+        f'from a total population of {population_size}, this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.')
 
     nr_procs = get_nr_procs(data)
     if nr_procs > 1:

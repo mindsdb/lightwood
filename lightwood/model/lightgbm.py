@@ -39,7 +39,10 @@ class LightGBM(BaseModel):
     use_optuna: bool
     supports_proba: bool
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], fit_on_dev: bool, use_optuna: bool = True):
+    def __init__(
+            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            input_cols: List[str],
+            fit_on_dev: bool, use_optuna: bool = True):
         super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
@@ -64,12 +67,13 @@ class LightGBM(BaseModel):
             self.device_str = 'gpu'
 
         self.max_bin = 255
-    
+
     def _to_dataset(self, data, output_dtype):
         for subset_name in data.keys():
             for input_col in self.input_cols:
                 if data[subset_name]['data'] is None:
-                    data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(input_col).to(self.device)
+                    data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(
+                        input_col).to(self.device)
                 else:
                     enc_col = data[subset_name]['ds'].get_encoded_column_data(input_col)
                     data[subset_name]['data'] = torch.cat((data[subset_name]['data'], enc_col.to(self.device)), 1)
@@ -135,14 +139,16 @@ class LightGBM(BaseModel):
         # Determine time per iterations
         start = time.time()
         self.params['num_iterations'] = 1
-        self.model = lightgbm.train(self.params, lightgbm.Dataset(data['train']['data'], label=data['train']['label_data']), verbose_eval=False)
+        self.model = lightgbm.train(self.params, lightgbm.Dataset(
+            data['train']['data'],
+            label=data['train']['label_data']),
+            verbose_eval=False)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
         # Determine nr of iterations
         log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
         self.num_iterations = int(self.stop_after * 0.8 / seconds_for_one_iteration)
-
 
         # Turn on grid search if training doesn't take too long using it
         kwargs = {}
@@ -159,12 +165,16 @@ class LightGBM(BaseModel):
         dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'])
 
         # Train the models
-        log.info(f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
+        log.info(
+            f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
         self.params['num_iterations'] = int(self.num_iterations)
 
         self.params['early_stopping_rounds'] = 5
 
-        self.model = model_generator.train(self.params, train_dataset, valid_sets=[dev_dataset, train_dataset], valid_names=['dev', 'train'], verbose_eval=False, **kwargs)
+        self.model = model_generator.train(
+            self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
+            valid_names=['dev', 'train'],
+            verbose_eval=False, **kwargs)
         self.num_iterations = self.model.best_iteration
         log.info(f'Lightgbm model contains {self.model.num_trees()} weak estimators')
 
@@ -176,17 +186,21 @@ class LightGBM(BaseModel):
         pct_of_original = len(ds) / self.fit_data_len
         iterations = max(1, int(self.num_iterations * pct_of_original) / 2)
 
-        data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'dev': {'ds': ConcatedEncodedDs(dev_data), 'data': None, 'label_data': {}}}
+        data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'dev': {
+            'ds': ConcatedEncodedDs(dev_data), 'data': None, 'label_data': {}}}
 
         output_dtype = self.dtype_dict[self.target]
         data = self._to_dataset(data, output_dtype)
-        
+
         train_dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
         dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'])
 
         log.info(f'Updating lightgbm model with {iterations} iterations')
         self.params['num_iterations'] = int(iterations)
-        self.model = lightgbm.train(self.params, train_dataset, valid_sets=[dev_dataset, train_dataset], valid_names=['dev', 'retrain'], verbose_eval=False, init_model=self.model)
+        self.model = lightgbm.train(
+            self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
+            valid_names=['dev', 'retrain'],
+            verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
 
     def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
@@ -201,7 +215,8 @@ class LightGBM(BaseModel):
         raw_predictions = self.model.predict(data)
 
         if self.ordinal_encoder is not None:
-            decoded_predictions = self.ordinal_encoder.inverse_transform(np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
+            decoded_predictions = self.ordinal_encoder.inverse_transform(
+                np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
         else:
             decoded_predictions = raw_predictions
 

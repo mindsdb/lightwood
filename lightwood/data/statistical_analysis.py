@@ -12,7 +12,7 @@ from scipy.stats import entropy
 
 def get_numeric_histogram(data, data_dtype):
     data = [_clean_float_or_none(x) for x in data]
-    
+
     Y, X = np.histogram(data, bins=min(50, len(set(data))),
                         range=(min(data), max(data)), density=False)
     if data_dtype == dtype.integer:
@@ -46,8 +46,9 @@ def statistical_analysis(data: pd.DataFrame,
                          problem_definition: ProblemDefinition) -> StatisticalAnalysis:
     seed()
     log.info('Starting statistical analysis')
-    df = cleaner(data, dtypes, problem_definition.pct_invalid, problem_definition.ignore_features, identifiers, problem_definition.target, 'train', problem_definition.timeseries_settings)
-    
+    df = cleaner(data, dtypes, problem_definition.pct_invalid, problem_definition.ignore_features,
+                 identifiers, problem_definition.target, 'train', problem_definition.timeseries_settings)
+
     missing = {col: len([x for x in df[col] if x is None]) / len(df[col]) for col in df.columns}
     distinct = {col: len(set(df[col])) / len(df[col]) for col in df.columns}
 

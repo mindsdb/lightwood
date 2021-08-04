@@ -35,7 +35,11 @@ class Neural(BaseModel):
     fit_on_dev: bool
     supports_proba: bool
 
-    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str], timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool, search_hyperparameters: bool):
+    def __init__(
+            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            input_cols: List[str],
+            timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
+            search_hyperparameters: bool):
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
         self.target = target
@@ -69,7 +73,6 @@ class Neural(BaseModel):
                         decoded_predictions.extend(self.target_encoder.decode(Yh))
                         decoded_real_values.extend(self.target_encoder.decode(Y))
 
-                    
                 acc_dict[decode_log] = r2_score(decoded_real_values, decoded_predictions)
 
             self.target_encoder.decode_log = acc_dict[True] > acc_dict[False]
@@ -109,14 +112,14 @@ class Neural(BaseModel):
         best_model = self.model
         stop = False
         batches = 0
-        for epoch in range(1, 101): 
+        for epoch in range(1, 101):
             if stop:
                 break
 
             for i, (X, Y) in enumerate(dl):
                 if stop:
                     break
-                
+
                 batches += len(X)
                 X = X.to(self.model.device)
                 Y = Y.to(self.model.device)
@@ -130,11 +133,11 @@ class Neural(BaseModel):
                         scaler.update()
                     else:
                         loss.backward()
-                        optimizer.step()              
+                        optimizer.step()
                 cum_loss += loss.item()
 
                 # Account for ranger lookahead update
-                if (i+1)*epoch % 6:
+                if (i + 1) * epoch % 6:
                     batches = 0
                     lr = optimizer.param_groups[0]['lr']
                     log.info(f'Loss of {cum_loss} with learning rate {lr}')
@@ -146,7 +149,7 @@ class Neural(BaseModel):
                         # Time saving since we don't have to start training fresh
                         best_model = deepcopy(self.model)
                     else:
-                        stop = True    
+                        stop = True
 
         best_loss_lr = lr_log[np.argmin(running_losses)]
         lr = best_loss_lr
@@ -177,14 +180,16 @@ class Neural(BaseModel):
                     else:
                         loss.backward()
                         optimizer.step()
-                
+
                 running_losses.append(loss.item())
 
             train_error = np.mean(running_losses)
 
             running_errors.append(self._error(dev_dl, criterion))
 
-            if np.isnan(train_error) or np.isnan(running_errors[-1]) or np.isinf(train_error) or np.isinf(running_errors[-1]):
+            if np.isnan(train_error) or np.isnan(
+                    running_errors[-1]) or np.isinf(train_error) or np.isinf(
+                    running_errors[-1]):
                 break
 
             if best_dev_error > running_errors[-1]:
@@ -193,7 +198,8 @@ class Neural(BaseModel):
                 epochs_to_best = epoch
 
             if len(running_errors) >= 5:
-                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i] for i in range(1, len(running_errors[-5:]))])
+                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i]
+                                     for i in range(1, len(running_errors[-5:]))])
                 if delta_mean <= 0:
                     break
             elif (time.time() - started) > stop_after:
@@ -215,7 +221,7 @@ class Neural(BaseModel):
                 Yh = self.model(X)
                 running_losses.append(criterion(Yh, Y).item())
             return np.mean(running_losses)
- 
+
     def _init_net(self, ds_arr: List[EncodedDs]):
         net_kwargs = {'input_size': len(ds_arr[0][0][0]),
                       'output_size': len(ds_arr[0][0][1]),
@@ -304,11 +310,14 @@ class Neural(BaseModel):
 
         for subset_itt in (0, 1):
             for subset_idx in range(len(dev_ds_arr)):
-                train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr[subset_idx * 9:(subset_idx + 1) * 9]), batch_size=200, shuffle=True)
+                train_dl = DataLoader(
+                    ConcatedEncodedDs(train_ds_arr[subset_idx * 9: (subset_idx + 1) * 9]),
+                    batch_size=200, shuffle=True)
 
                 stop_after = self.stop_after / 4
 
-                self.model, epoch_to_best_model, err = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
+                self.model, epoch_to_best_model, err = self._max_fit(
+                    train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
 
                 self.epochs_to_best += epoch_to_best_model
 
@@ -327,8 +336,9 @@ class Neural(BaseModel):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, max(1, int(self.epochs_to_best / 3)))
-    
+        self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler,
+                                         self.stop_after, max(1, int(self.epochs_to_best / 3)))
+
     def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []

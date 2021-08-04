@@ -11,7 +11,7 @@ from lightwood.model.helpers.default_net import DefaultNet
 
 
 class CategoricalAutoEncoder(BaseEncoder):
-    def __init__(self, stop_after: int=3600, is_target=False, max_encoded_length=100):
+    def __init__(self, stop_after: int = 3600, is_target=False, max_encoded_length=100):
         super().__init__(is_target)
         self._prepared = False
         self.name = 'Categorical Autoencoder'
@@ -70,7 +70,9 @@ class CategoricalAutoEncoder(BaseEncoder):
             batch_size = min(200, int(len(priming_data) / 50))
 
             priming_data_str = [str(x) for x in priming_data]
-            train_data_loader = DataLoader(list(zip(priming_data_str,priming_data_str)), batch_size=batch_size, shuffle=True)
+            train_data_loader = DataLoader(
+                list(zip(priming_data_str, priming_data_str)),
+                batch_size=batch_size, shuffle=True)
 
             test_data_loader = None
 

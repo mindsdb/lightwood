@@ -9,46 +9,55 @@ class TestNestedDataset(unittest.TestCase):
     def test_nested_json(self):
         sample_json = {
             "Airport": {
-              "Code": "ATL",
-              "Name": "Atlanta, GA: Hartsfield-Jackson Atlanta International"
+                "Code": "ATL",
+                "Name": "Atlanta, GA: Hartsfield-Jackson Atlanta International"
             },
             "Time": {
-              "Label": "2003/06",
-              "Month": 6,
-              "Month Name": "June",
-              "Year": 2003
+                "Label": "2003/06",
+                "Month": 6,
+                "Month Name": "June",
+                "Year": 2003
             },
             "Statistics": {
-              "# of Delays": {
-                "Carrier": 1009,
-                "Late Aircraft": 1275,
-                "National Aviation System": 3217,
-                "Security": 17,
-                "Weather": 328
-              },
-              "Carriers": {
-                "Names": "American Airlines Inc.,JetBlue Airways,Continental Air Lines Inc.,Delta Air Lines Inc.,Atlantic Southeast Airlines,AirTran Airways Corporation,America West Airlines Inc.,Northwest Airlines Inc.,ExpressJet Airlines Inc.,United Air Lines Inc.,US Airways Inc.",
-                "Total": 11
-              },
-              "Flights": {
-                "Cancelled": 216,
-                "Delayed": 5843,
-                "Diverted": 27,
-                "On Time": 23974,
-                "Total": 30060
-              },
-              "Minutes Delayed": {
-                "Carrier": 61606,
-                "Late Aircraft": 68335,
-                "National Aviation System": 118831,
-                "Security": 518,
-                "Total": 268764,
-                "Weather": 19474
-              }
+                "# of Delays": {
+                    "Carrier": 1009,
+                    "Late Aircraft": 1275,
+                    "National Aviation System": 3217,
+                    "Security": 17,
+                    "Weather": 328
+                },
+                "Carriers": {
+                    "Names": "American Airlines Inc.,JetBlue Airways,Continental Air Lines Inc.,Delta Air Lines Inc.,Atlantic Southeast Airlines,AirTran Airways Corporation,America West Airlines Inc.,Northwest Airlines Inc.,ExpressJet Airlines Inc.,United Air Lines Inc.,US Airways Inc.",
+                    "Total": 11
+                },
+                "Flights": {
+                    "Cancelled": 216,
+                    "Delayed": 5843,
+                    "Diverted": 27,
+                    "On Time": 23974,
+                    "Total": 30060
+                },
+                "Minutes Delayed": {
+                    "Carrier": 61606,
+                    "Late Aircraft": 68335,
+                    "National Aviation System": 118831,
+                    "Security": 518,
+                    "Total": 268764,
+                    "Weather": 19474
+                }
             }
-         }
+        }
 
-        expected_columns = ['Statistics.Minutes Delayed.Security', 'Statistics.# of Delays.Security', 'Statistics.# of Delays.Weather', 'Statistics.Minutes Delayed.Late Aircraft', 'Statistics.Flights.Total', 'Statistics.Flights.Diverted', 'Time.Month Name', 'Statistics.Flights.Delayed', 'Time.Month', 'Statistics.# of Delays.Carrier', 'Statistics.Flights.On Time', 'Time.Label', 'Airport.Name', 'Statistics.Minutes Delayed.National Aviation System', 'Airport.Code', 'Statistics.Carriers.Total', 'Statistics.Minutes Delayed.Weather', 'Time.Year', 'Statistics.# of Delays.National Aviation System', 'Statistics.Flights.Cancelled', 'Statistics.# of Delays.Late Aircraft', 'Statistics.Carriers.Names', 'Statistics.Minutes Delayed.Total', 'Statistics.Minutes Delayed.Carrier']
+        expected_columns = ['Statistics.Minutes Delayed.Security', 'Statistics.# of Delays.Security',
+                            'Statistics.# of Delays.Weather', 'Statistics.Minutes Delayed.Late Aircraft',
+                            'Statistics.Flights.Total', 'Statistics.Flights.Diverted', 'Time.Month Name',
+                            'Statistics.Flights.Delayed', 'Time.Month', 'Statistics.# of Delays.Carrier',
+                            'Statistics.Flights.On Time', 'Time.Label', 'Airport.Name',
+                            'Statistics.Minutes Delayed.National Aviation System', 'Airport.Code',
+                            'Statistics.Carriers.Total', 'Statistics.Minutes Delayed.Weather', 'Time.Year',
+                            'Statistics.# of Delays.National Aviation System', 'Statistics.Flights.Cancelled',
+                            'Statistics.# of Delays.Late Aircraft', 'Statistics.Carriers.Names',
+                            'Statistics.Minutes Delayed.Total', 'Statistics.Minutes Delayed.Carrier']
 
         ds = FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json')
         pred = predictor_from_problem(ds, {'target': 'Statistics.Flights.Delayed'})
@@ -65,7 +74,8 @@ class TestNestedDataset(unittest.TestCase):
         for v in predictions['prediction']:
             assert isinstance(v, int)
 
-        predictions = pred.predict(FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json').df)
+        predictions = pred.predict(
+            FileDS('https://raw.githubusercontent.com/mindsdb/benchmarks/main/datasets/airline_delays/data.json').df)
         for v in predictions['prediction']:
             assert isinstance(v, int)
 

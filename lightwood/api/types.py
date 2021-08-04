@@ -121,7 +121,7 @@ class TimeseriesSettings:
             timeseries_settings = TimeseriesSettings(is_timeseries=False)
 
         return timeseries_settings
-    
+
     @staticmethod
     def from_json(data: str):
         return TimeseriesSettings.from_dict(json.loads(data))
@@ -131,6 +131,7 @@ class TimeseriesSettings:
 
     def to_json(self) -> Dict[str, Json]:
         return json.dumps(self.to_dict())
+
 
 @dataclass
 class ProblemDefinition:
@@ -223,8 +224,8 @@ class JsonAI:
 
     @staticmethod
     def from_dict(obj: Dict):
-        features = {k: Feature.from_dict(v) for k,v in obj['features'].items()} 
-        outputs = {k: Output.from_dict(v) for k,v in obj['outputs'].items()}
+        features = {k: Feature.from_dict(v) for k, v in obj['features'].items()}
+        outputs = {k: Output.from_dict(v) for k, v in obj['outputs'].items()}
         problem_definition = ProblemDefinition.from_dict(obj['problem_definition'])
         identifiers = obj['identifiers']
         cleaner = obj.get('cleaner', None)
@@ -283,4 +284,3 @@ class ModelAnalysis:
     test_sample_size: int
     column_importances: Dict[str, float]
     confusion_matrix: object = None
-    

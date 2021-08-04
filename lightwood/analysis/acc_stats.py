@@ -71,8 +71,8 @@ class AccStats:
                     predicted_value_b = predicted_value
                     real_value_b = real_value
 
-                has_confidence_range = self.col_stats[self.target] in [dtype.integer, dtype.float] # \
-                                       # and f'{self.target}_confidence_range' in predictions_arr[n]
+                has_confidence_range = self.col_stats[self.target] in [dtype.integer, dtype.float]  # \
+                # and f'{self.target}_confidence_range' in predictions_arr[n]
 
                 # predicted_range = predictions_arr[n][f'{self.target}_confidence_range'][m] if has_confidence_range else (None, None)
                 predicted_range = (None, None)
@@ -99,12 +99,13 @@ class AccStats:
                     bucket_acc_counts[bucket] = []
 
                 if len(self.numerical_samples_arr) != 0:
-                    bucket_acc_counts[bucket].append(self.numerical_samples_arr[i][1][0] < self.numerical_samples_arr[i][0] < self.numerical_samples_arr[i][1][1])
+                    bucket_acc_counts[bucket].append(self.numerical_samples_arr[i][1][0] <
+                                                     self.numerical_samples_arr[i][0] < self.numerical_samples_arr[i][1][1])
                 else:
                     bucket_acc_counts[bucket].append(1 if bucket == self.real_values_bucketized[i] else 0)
 
             for bucket in bucket_acc_counts:
-                bucket_accuracy[bucket] = sum(bucket_acc_counts[bucket])/len(bucket_acc_counts[bucket])
+                bucket_accuracy[bucket] = sum(bucket_acc_counts[bucket]) / len(bucket_acc_counts[bucket])
 
             accuracy_count = []
             for counts in list(bucket_acc_counts.values()):
@@ -193,9 +194,9 @@ def closest(arr, value):
     if value is None:
         return -1
 
-    for i,ele in enumerate(arr):
+    for i, ele in enumerate(arr):
         value = float(str(value).replace(',', '.'))
         if ele > value:
             return i - 1
 
-    return len(arr)-1
+    return len(arr) - 1

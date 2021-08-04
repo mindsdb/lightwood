@@ -63,7 +63,7 @@ def _clean_float_or_none(element):
 def _clean_value(element: object, data_dtype: str):
     if data_dtype in (dtype.date):
         element = _standardize_date(element)
-    
+
     if data_dtype in (dtype.datetime):
         element = _standardize_datetime(element)
 
@@ -93,12 +93,17 @@ def clean_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     len_after = len(df)
     nr_removed = len_before - len_after
     if nr_removed != 0:
-        log.warning(f'Removed {nr_removed} rows due to the target value missing. Training with rows without a target value makes no sense, please avoid this!')
-        
+        log.warning(
+            f'Removed {nr_removed} rows due to the target value missing. Training with rows without a target value makes no sense, please avoid this!')
+
     return df
 
 
-def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, ignore_features: List[str], identifiers: Dict[str, str], target: str, mode: str, timeseries_settings: TimeseriesSettings) -> pd.DataFrame:
+def cleaner(
+        data: pd.DataFrame, dtype_dict: Dict[str, str],
+        pct_invalid: float, ignore_features: List[str],
+        identifiers: Dict[str, str],
+        target: str, mode: str, timeseries_settings: TimeseriesSettings) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]
@@ -138,7 +143,8 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, 
                 new_data.append(_clean_value(element, data_dtype))
             except Exception as e:
                 new_data.append(None)
-                log.warning(f'Unable to parse elemnt: {element} or type {data_dtype} from column {name}. Excetpion: {e}')
+                log.warning(
+                    f'Unable to parse elemnt: {element} or type {data_dtype} from column {name}. Excetpion: {e}')
 
         pct_invalid = 100 * (len(new_data) - len([x for x in new_data if x is not None])) / len(new_data)
 
@@ -148,5 +154,5 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, 
             raise Exception(err)
 
         data[name] = new_data
-        
+
     return data

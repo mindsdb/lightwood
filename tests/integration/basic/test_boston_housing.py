@@ -14,7 +14,8 @@ class TestBasic(unittest.TestCase):
         df = pd.read_csv('tests/data/boston.csv')
         target = 'MEDV'
 
-        json.dump(json_ai_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 200})).to_dict(), open('AI2.json', 'w'))
+        json.dump(json_ai_from_problem(df, ProblemDefinition.from_dict(
+            {'target': target, 'time_aim': 200})).to_dict(), open('AI2.json', 'w'))
 
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 200}))
         predictor.learn(df)

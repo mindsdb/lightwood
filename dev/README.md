@@ -7,5 +7,5 @@
 * Go to `Python > Lint: Enabled` and disable everything *but* flake8
 * Set `python.linting.flake8Path` to the full path to flake8 (which flake8)
 * Set `Python › Formatting: Provider` to autopep8
-* Add `--global-config=/home/george/lightwood/.flake8` and `--experimental` to `Python › Formatting: Autopep8 Args`
+* Add `--global-config=<path_to>/lightwood/.flake8` and `--experimental` to `Python › Formatting: Autopep8 Args`
 * Install live share and live share whiteboard

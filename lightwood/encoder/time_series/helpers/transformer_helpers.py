@@ -28,7 +28,7 @@ def get_chunk(source, source_lengths, start, step):
     # This is necessary for MultiHeadedAttention to work
     end = min(start + step, trunc_seq_len)
     data = source[:, start:end, :]
-    target = source[:, start+1:end+1, :]
+    target = source[:, start + 1:end + 1, :]
 
     return data, target, lengths
 
@@ -47,7 +47,7 @@ class PositionalEncoding(nn.Module):
         if not d_model % 2:
             pe[:, 1::2] = torch.cos(position * div_term)
         else:
-            pe[:, 1::2] = torch.cos(position * div_term)[:, :d_model//2]
+            pe[:, 1::2] = torch.cos(position * div_term)[:, :d_model // 2]
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer("pe", pe)
 

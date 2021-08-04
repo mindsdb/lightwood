@@ -19,7 +19,7 @@ class AmplitudeTsEncoder(BaseEncoder):
 
     def encode(self, column_data):
         encoded_audio_arr = []
-        for path in  column_data:
+        for path in column_data:
             if path.startswith('http'):
                 response = requests.get(path)
                 with open(path.split('/')[-1], 'wb') as f:
@@ -36,11 +36,12 @@ class AmplitudeTsEncoder(BaseEncoder):
             audio = audio.set_channels(1)
 
             original_frame_rate = audio.frame_rate
-            new_frame_rate = int(original_frame_rate/(len(audio.get_array_of_samples())/self._max_samples))
+            new_frame_rate = int(original_frame_rate / (len(audio.get_array_of_samples()) / self._max_samples))
 
             if new_frame_rate < original_frame_rate:
                 audio = audio.set_frame_rate(new_frame_rate)
-                log.info(f'Lowering audio frame rate from {original_frame_rate} to {new_frame_rate} for ease of processing !')
+                log.info(
+                    f'Lowering audio frame rate from {original_frame_rate} to {new_frame_rate} for ease of processing !')
 
             audio_arr = list(np.array(audio.get_array_of_samples()))
 

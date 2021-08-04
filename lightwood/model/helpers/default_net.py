@@ -21,7 +21,7 @@ class DefaultNet(torch.nn.Module):
             self.output_size = output_size
             hidden_size = max([self.input_size * 2, self.output_size * 2, 400])
             shape = [self.input_size] + [hidden_size] * num_hidden + [self.output_size]
-            
+
             # If the network is too big, shrink it
             if np.sum([shape[i] * shape[i + 1] for i in range(len(shape) - 1)]) > max_params:
                 log.warning('Shrinking network!')
@@ -47,7 +47,8 @@ class DefaultNet(torch.nn.Module):
 
     def to(self, device: torch.device) -> torch.nn.Module:
         if 'cuda' not in str(torch.device) == 0:
-            log.warning('Creating neural network on CPU, it will be significantly slower than using a GPU, consider using a GPU instead')
+            log.warning(
+                'Creating neural network on CPU, it will be significantly slower than using a GPU, consider using a GPU instead')
         self.net = self.net.to(device)
 
         self.device = device

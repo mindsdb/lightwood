@@ -12,7 +12,6 @@ import sys
 import random
 import string
 import gc
-import sys
 
 
 def _module_from_code(code, module_name):
@@ -41,7 +40,8 @@ def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
     problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0])})
 
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
-    statistical_analysis = lightwood.data.statistical_analysis(df, type_information.dtypes, type_information.identifiers, problem_definition)
+    statistical_analysis = lightwood.data.statistical_analysis(
+        df, type_information.dtypes, type_information.identifiers, problem_definition)
 
     return DataAnalysis(
         type_information=type_information,
@@ -54,8 +54,11 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
-    statistical_analysis = lightwood.data.statistical_analysis(df, type_information.dtypes, type_information.identifiers, problem_definition)
-    json_ai = generate_json_ai(type_information=type_information, statistical_analysis=statistical_analysis, problem_definition=problem_definition)
+    statistical_analysis = lightwood.data.statistical_analysis(
+        df, type_information.dtypes, type_information.identifiers, problem_definition)
+    json_ai = generate_json_ai(
+        type_information=type_information, statistical_analysis=statistical_analysis,
+        problem_definition=problem_definition)
 
     return json_ai
 
@@ -80,8 +83,9 @@ def predictor_from_state(state_file: str, code: str = None) -> PredictorInterfac
     except Exception as e:
         module_name = str(e).lstrip("No module named '").split("'")[0]
         if code is None:
-            raise Exception('You need to provide the code if trying to load a predictor from outside the scope/script it was created in!')
-    
+            raise Exception(
+                'Provide code when loading a predictor from outside the scope/script it was created in!')
+
     if module_name is not None:
         try:
             del sys.modules[module_name]
@@ -93,7 +97,6 @@ def predictor_from_state(state_file: str, code: str = None) -> PredictorInterfac
             predictor = dill.load(fp)
 
     return predictor
-
 
 
 def predictor_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> PredictorInterface:

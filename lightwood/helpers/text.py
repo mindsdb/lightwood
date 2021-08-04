@@ -114,7 +114,7 @@ def cast_string_to_python_type(string):
     """ Returns None, an integer, float or a string from a string"""
     if string is None or string == '':
         return None
-    
+
     if string.isnumeric():
         # Did you know you can write fractions in unicode, and they are numeric but can't be cast to integers !?
         try:
@@ -135,7 +135,7 @@ def splitRecursive(word, tokens):
         for word in words:
             new_split += word.split(token)
         words = new_split
-    words = [word for word in words if word not in ['', None] ]
+    words = [word for word in words if word not in ['', None]]
     return words
 
 
@@ -146,7 +146,7 @@ def hashtext(cell):
 
 def _is_foreign_key_name(name):
     for endings in ['id', 'ID', 'Id']:
-        for add in ['-','_', ' ']:
+        for add in ['-', '_', ' ']:
             if name.endswith(add + endings):
                 return True
     for endings in ['ID', 'Id']:
@@ -190,15 +190,17 @@ def get_pct_auto_increment(data):
             increase_by_one += 1
         prev_nr = nr
 
-    return increase_by_one/(len(data) - 1)
+    return increase_by_one / (len(data) - 1)
+
 
 def get_identifier_description_mp(arg_tup):
     data, column_name, data_dtype = arg_tup
     return get_identifier_description(data, column_name, data_dtype)
 
+
 def get_identifier_description(data, column_name, data_dtype):
     data = list(data)
-    unquie_pct = len(set(data))/len(data)
+    unquie_pct = len(set(data)) / len(data)
 
     lenghts = [len(str(x)) for x in data]
     mean_len = np.mean(lenghts)
@@ -281,6 +283,7 @@ def get_identifier_description(data, column_name, data_dtype):
         return 'Unknown identifier'
 
     return None
+
 
 import nltk
 import re
