@@ -2,7 +2,6 @@ from mindsdb_datasources import FileDS
 from lightwood import infer_types
 from lightwood.api import dtype
 import unittest
-import json
 from itertools import cycle
 import random
 import unittest
