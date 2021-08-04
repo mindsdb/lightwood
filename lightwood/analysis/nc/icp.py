@@ -338,37 +338,3 @@ class IcpRegressor(BaseIcp, RegressorMixin):
                     prediction[idx, :] = p
 
         return prediction
-
-
-class OobCpClassifier(IcpClassifier):
-    def __init__(self,
-                 nc_function,
-                 condition=None,
-                 smoothing=True):
-        super(OobCpClassifier, self).__init__(nc_function,
-                                              condition,
-                                              smoothing)
-
-    def fit(self, x, y):
-        super(OobCpClassifier, self).fit(x, y)
-        super(OobCpClassifier, self).calibrate(x, y, False)
-
-    def calibrate(self, x, y, increment=False):
-        # Should throw exception (or really not be implemented for oob)
-        pass
-
-
-class OobCpRegressor(IcpRegressor):
-    def __init__(self,
-                 nc_function,
-                 condition=None):
-        super(OobCpRegressor, self).__init__(nc_function,
-                                             condition)
-
-    def fit(self, x, y):
-        super(OobCpRegressor, self).fit(x, y)
-        super(OobCpRegressor, self).calibrate(x, y, False)
-
-    def calibrate(self, x, y, increment=False):
-        # Should throw exception (or really not be implemented for oob)
-        pass
