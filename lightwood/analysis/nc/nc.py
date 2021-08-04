@@ -10,7 +10,6 @@ import sklearn.base
 from scipy.interpolate import interp1d
 
 from lightwood.analysis.nc.base import ClassifierAdapter, RegressorAdapter
-from lightwood.analysis.nc.base import OobClassifierAdapter, OobRegressorAdapter
 
 
 # -----------------------------------------------------------------------------
@@ -250,61 +249,6 @@ class RegressorNormalizer(BaseScorer):
     def score(self, x, y=None):
         norm = np.exp(self.normalizer_model.predict(x))
         return norm
-
-
-class NcFactory(object):
-    @staticmethod
-    def create_nc(model, err_func=None, normalizer_model=None, oob=False):
-        if normalizer_model is not None:
-            normalizer_adapter = RegressorAdapter(normalizer_model)
-        else:
-            normalizer_adapter = None
-
-        if isinstance(model, sklearn.base.ClassifierMixin):
-            err_func = MarginErrFunc() if err_func is None else err_func
-            if oob:
-                c = sklearn.base.clone(model)
-                c.fit([[0], [1]], [0, 1])
-                if hasattr(c, 'oob_decision_function_'):
-                    adapter = OobClassifierAdapter(model)
-                else:
-                    raise AttributeError('Cannot use out-of-bag '
-                                         'calibration with {}'.format(
-                        model.__class__.__name__
-                    ))
-            else:
-                adapter = ClassifierAdapter(model)
-
-            if normalizer_adapter is not None:
-                normalizer = RegressorNormalizer(adapter,
-                                                 normalizer_adapter,
-                                                 err_func)
-                return ClassifierNc(adapter, err_func, normalizer)
-            else:
-                return ClassifierNc(adapter, err_func)
-
-        elif isinstance(model, sklearn.base.RegressorMixin):
-            err_func = AbsErrorErrFunc() if err_func is None else err_func
-            if oob:
-                c = sklearn.base.clone(model)
-                c.fit([[0], [1]], [0, 1])
-                if hasattr(c, 'oob_prediction_'):
-                    adapter = OobRegressorAdapter(model)
-                else:
-                    raise AttributeError('Cannot use out-of-bag '
-                                         'calibration with {}'.format(
-                        model.__class__.__name__
-                    ))
-            else:
-                adapter = RegressorAdapter(model)
-
-            if normalizer_adapter is not None:
-                normalizer = RegressorNormalizer(adapter,
-                                                 normalizer_adapter,
-                                                 err_func)
-                return RegressorNc(adapter, err_func, normalizer)
-            else:
-                return RegressorNc(adapter, err_func)
 
 
 class BaseModelNc(BaseScorer):
