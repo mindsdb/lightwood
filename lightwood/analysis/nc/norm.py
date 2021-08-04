@@ -59,8 +59,9 @@ class Normalizer(BaseModel):
             else:
                 preds = [p[0] for p in preds.values.squeeze()]
 
-            diffs = np.log(np.clip(abs(preds - truths), 1e-10, None))
-            labels = np.clip(self.bounds[0] + diffs / np.max(diffs), self.bounds[0], self.bounds[1])
+            diffs = np.log(abs(preds - truths))
+            diffs = diffs / np.max(diffs) if np.max(diffs) > 0 else diffs
+            labels = np.clip(self.bounds[0] + diffs, self.bounds[0], self.bounds[1])
 
         elif self.target_dtype in [dtype.binary, dtype.categorical]:
 
