@@ -10,7 +10,6 @@ import sklearn.base
 from scipy.interpolate import interp1d
 
 from lightwood.analysis.nc.base import ClassifierAdapter, RegressorAdapter
-from lightwood.analysis.nc.base import OobClassifierAdapter, OobRegressorAdapter
 
 
 # -----------------------------------------------------------------------------
