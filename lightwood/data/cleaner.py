@@ -103,7 +103,12 @@ def cleaner(data: pd.DataFrame, dtype_dict: Dict[str, str], pct_invalid: float, 
     data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]
     exceptions = ['__mdb_make_predictions']
-    data = data.drop(columns=to_drop)
+    for col in to_drop:
+        try:
+            data = data.drop(columns=[col])
+        except Exception:
+            pass
+
     if mode == 'train':
         data = clean_empty_targets(data, target)
     if mode == 'predict':
