@@ -2,9 +2,8 @@ from io import BytesIO
 import logging
 
 import torch
-import torch.nn as nn
 import torchvision.transforms as transforms
-from PIL import Image, TiffImagePlugin, PngImagePlugin
+from PIL import Image
 import requests
 
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
@@ -35,28 +34,6 @@ class Img2VecEncoder(BaseEncoder):
         if self.model is None:
             self.model = Img2Vec(model='resnext-50-small')
         self._prepared = True
-
-    def prepare(self, images):
-        img_tensor_arr = []
-        for image in images:
-            if image is not None:
-                if image.startswith('http'):
-                    response = requests.get(image)
-                    img = Image.open(BytesIO(response.content))
-                else:
-                    img = Image.open(image)
-
-                # In order for Normalize to work with 4-channel pngs and grayscale
-                img = img.convert('RGB')
-
-                img_tensor = self._scaler(img)
-                img_tensor = self._to_tensor(img_tensor)
-                img_tensor = self._normalize(img_tensor)
-                img_tensor_arr.append(img_tensor)
-            else:
-                raise Exception('Can\'t work with images that are None')
-
-        return torch.stack(img_tensor_arr)
 
     def encode(self, images):
         """

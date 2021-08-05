@@ -1,6 +1,5 @@
 from typing import List
 import torch
-from torch.nn.functional import pad
 from lightwood.encoder import BaseEncoder
 from lightwood.encoder.categorical import CategoricalAutoEncoder
 from lightwood.helpers.text import tokenize_text

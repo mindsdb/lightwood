@@ -1,11 +1,9 @@
-from os import stat
 from typing import Dict, List, Optional, Union
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
 import json
-from copy import deepcopy
 
 
 @dataclass
