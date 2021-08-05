@@ -9,7 +9,6 @@ import optuna
 import torch
 import time
 from lightwood.helpers.log import log
-from lightwood.helpers.device import get_devices
 from sklearn.preprocessing import OrdinalEncoder
 from lightwood.model.base import BaseModel
 
@@ -56,12 +55,12 @@ class LightGBM(BaseModel):
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
         self.stable = True
 
-        # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later
+        # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later # noqa
         gpu_works = check_gpu_support()
         if not gpu_works:
             self.device = torch.device('cpu')
             self.device_str = 'cpu'
-            log.warning('LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead')
+            log.warning('LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead') # noqa
         else:
             self.device = torch.device('cuda')
             self.device_str = 'gpu'
@@ -166,7 +165,7 @@ class LightGBM(BaseModel):
 
         # Train the models
         log.info(
-            f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')
+            f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint') # noqa
         self.params['num_iterations'] = int(self.num_iterations)
 
         self.params['early_stopping_rounds'] = 5

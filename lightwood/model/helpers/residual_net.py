@@ -1,11 +1,6 @@
-from logging import exception
-import math
 from typing import List
 import torch
 from torch import nn
-from functools import reduce
-
-from torch.nn.modules.activation import SELU
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.log import log
@@ -39,8 +34,11 @@ class ResidualModule(nn.Module):
 
 
 class ResidualNet(torch.nn.Module):
-    def __init__(
-            self, input_size: int = None, output_size: int = None, shape: List[int] = None, max_params: int = int(3e5)) -> None:
+    def __init__(self,
+                 input_size: int = None,
+                 output_size: int = None,
+                 shape: List[int] = None,
+                 max_params: int = int(3e5)) -> None:
         super(ResidualNet, self).__init__()
         self.net = torch.nn.Sequential(
             *

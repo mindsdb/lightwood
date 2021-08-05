@@ -1,7 +1,5 @@
-import os
 import sys
 import setuptools
-import subprocess
 
 
 def remove_requirements(requirements, name, replace=''):

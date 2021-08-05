@@ -94,7 +94,7 @@ def clean_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     nr_removed = len_before - len_after
     if nr_removed != 0:
         log.warning(
-            f'Removed {nr_removed} rows due to the target value missing. Training with rows without a target value makes no sense, please avoid this!')
+            f'Removed {nr_removed} rows due to the target value missing. Training with rows without a target value makes no sense, please avoid this!') # noqa
 
     return df
 

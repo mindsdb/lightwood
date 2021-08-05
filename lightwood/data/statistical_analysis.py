@@ -1,5 +1,5 @@
 from typing import Dict
-from lightwood.api import TypeInformation, StatisticalAnalysis, ProblemDefinition, dtype
+from lightwood.api import StatisticalAnalysis, ProblemDefinition, dtype
 import pandas as pd
 import numpy as np
 from lightwood.data.cleaner import _clean_float_or_none
@@ -97,7 +97,7 @@ def statistical_analysis(data: pd.DataFrame,
         S, biased_buckets = compute_entropy_biased_buckets(histograms[col])
         bias[col] = {
             'entropy': S,
-            'description': """Under the assumption of uniformly distributed data (i.e., same probability for Head or Tails on a coin flip) mindsdb tries to detect potential divergences from such case, and it calls this "potential bias". Thus by our data having any potential bias mindsdb means any divergence from all categories having the same probability of being selected.""",
+            'description': """Under the assumption of uniformly distributed data (i.e., same probability for Head or Tails on a coin flip) mindsdb tries to detect potential divergences from such case, and it calls this "potential bias". Thus by our data having any potential bias mindsdb means any divergence from all categories having the same probability of being selected.""", # noqa
             'biased_buckets': biased_buckets
         }
 

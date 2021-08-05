@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Set, Union
+from typing import Dict, List, Union
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log

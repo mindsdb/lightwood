@@ -1,11 +1,6 @@
-from io import BytesIO
 import logging
-
 import torch
 import torchvision.transforms as transforms
-from PIL import Image
-import requests
-
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
 from lightwood.encoder.base import BaseEncoder
 
@@ -20,7 +15,6 @@ class Img2VecEncoder(BaseEncoder):
         self._prepared = False
 
         self._scaler = transforms.Scale((224, 224))
-        # @TODO Magic numbers with no idea left of how they got here, we should at least have the decency of citing some paper that used these as magic numbers :P
         self._normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self._to_tensor = transforms.ToTensor()
 

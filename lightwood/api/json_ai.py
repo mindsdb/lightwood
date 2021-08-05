@@ -3,7 +3,8 @@ from lightwood.helpers.templating import call, inline_dict, align
 import autopep8
 from lightwood.api import dtype
 import numpy as np
-from lightwood.api.types import JsonAI, TypeInformation, StatisticalAnalysis, Feature, Output, ProblemDefinition, TimeseriesSettings
+from lightwood.api.types import (JsonAI, TypeInformation, StatisticalAnalysis, Feature,
+                                 Output, ProblemDefinition)
 
 
 trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder')
@@ -166,7 +167,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     )}
 
-    if problem_definition.timeseries_settings.is_timeseries and problem_definition.timeseries_settings.nr_predictions > 1:
+    if (problem_definition.timeseries_settings.is_timeseries and
+            problem_definition.timeseries_settings.nr_predictions > 1):
         list(outputs.values())[0].data_dtype = dtype.array
 
     list(
@@ -256,7 +258,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.helpers.seed import seed', 'from lightwood.helpers.log import log', 'import lightwood',
         'from lightwood.api import *', 'from lightwood.model import BaseModel',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
-        'from lightwood.encoder import Array, Binary, Categorical, Date, DateTime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags',
+        'from lightwood.encoder import Array, Binary, Categorical, Date, DateTime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
         'from lightwood.ensemble import BaseEnsemble', 'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call',
         'from lightwood.data.encoded_ds import ConcatedEncodedDs', 'from lightwood import ProblemDefinition']
@@ -474,7 +476,8 @@ self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definitio
 self.accuracy_functions = {json_ai.accuracy_functions}
 self.identifiers = {json_ai.identifiers}
 self.dtype_dict = {inline_dict(dtype_dict)}
-self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, self.problem_definition)
+self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers},
+                                                                self.problem_definition)
 self.mode = 'train'
 # How columns are encoded
 self.encoders = {inline_dict(encoder_dict)}
@@ -521,7 +524,7 @@ for col_name, encoder in self.encoders.items():
                     'data': priming_data[col]
                 }}
             {align(ts_encoder_code, 3)}
-        
+
         # This assumes target  encoders are also prepared in parallel, might not be true
         if hasattr(encoder, 'uses_target'):
             kwargs['encoded_target_values'] = parallel_preped_encoders[self.target].encode(priming_data[self.target])
@@ -549,7 +552,7 @@ for model in self.models:
         log.warning(f'Exception: {{e}} when training model: {{model}}')
         if {json_ai.problem_definition.strict_mode} and model.stable:
             raise e
-            
+
 self.models = trained_models
 
 log.info('Ensembling the model')
