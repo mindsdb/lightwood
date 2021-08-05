@@ -1,10 +1,29 @@
 import torch
 import os
 from random import randint
+from torch.cuda import device_count, get_device_capability
+
+
+def is_cuda_compatible():
+    if torch.version.cuda is not None:
+        compatible_device_count = 0
+        for d in range(device_count()):
+            capability = get_device_capability(d)
+            major = capability[0]
+            minor = capability[1]
+            current_arch = major * 10 + minor
+            min_arch = min((int(arch.split("_")[1]) for arch in torch.cuda.get_arch_list()), default=35)
+            if (not current_arch < min_arch
+                    and not torch._C._cuda_getCompiledVersion() <= 9000
+                    and not major >= 7 and not minor >= 5):
+                compatible_device_count += 1
+
+        return True
+    return False
 
 
 def get_devices():
-    if torch.cuda.is_available() and float(torch.version.cuda) >= 9:
+    if torch.cuda.is_available() and is_cuda_compatible():
         device_str = "cuda"
         available_devices = torch.cuda.device_count()
 
