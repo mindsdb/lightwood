@@ -1,6 +1,4 @@
 import math
-import sys
-
 import torch
 import numpy as np
 from lightwood.encoder.base import BaseEncoder
@@ -25,7 +23,7 @@ class NumericEncoder(BaseEncoder):
         for number in priming_data:
             try:
                 number = float(number)
-            except:
+            except Exception:
                 continue
 
             if np.isnan(number):

@@ -30,10 +30,10 @@ class TsNumericEncoder(NumericEncoder):
         for real, group in zip(data, list(zip(*dependency_data.values()))):
             try:
                 real = float(real)
-            except:
+            except Exception:
                 try:
                     real = float(real.replace(',', '.'))
-                except:
+                except Exception:
                     real = None
             if self.is_target:
                 vector = [0] * 2
@@ -75,7 +75,7 @@ class TsNumericEncoder(NumericEncoder):
         ret = []
         if not dependency_data:
             dependency_data = {'__default': [None] * len(encoded_values)}
-        if type(encoded_values) != type([]):
+        if isinstance(encoded_values, list):
             encoded_values = encoded_values.tolist()
 
         for vector, group in zip(encoded_values, list(zip(*dependency_data.values()))):
@@ -88,7 +88,7 @@ class TsNumericEncoder(NumericEncoder):
                         sign = -1 if vector[0] > 0.5 else 1
                         try:
                             real_value = math.exp(vector[1]) * sign
-                        except OverflowError as e:
+                        except OverflowError:
                             real_value = pow(10, 63) * sign
                     else:
                         if group is not None and self.normalizers is not None:
