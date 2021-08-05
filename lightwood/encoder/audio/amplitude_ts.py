@@ -11,7 +11,7 @@ class AmplitudeTsEncoder(BaseEncoder):
 
     def __init__(self, is_target=False):
         super().__init__(is_target)
-        self._ts_encoder = RnnEncoder()
+        self._ts_encoder = TimeSeriesEncoder()
         self._max_samples = 2000
 
     def encode(self, column_data):
