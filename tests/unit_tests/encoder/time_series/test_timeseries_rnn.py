@@ -1,8 +1,8 @@
 import unittest
-
+import numpy as np
+import torch
 from lightwood.encoder.time_series import TimeSeriesEncoder
-from lightwood.encoder.time_series.helpers.common import *
-from lightwood.encoder.time_series.helpers.rnn_helpers import *
+from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
 
 
 class TestRnnEncoder(unittest.TestCase):

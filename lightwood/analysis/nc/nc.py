@@ -7,9 +7,7 @@ Nonconformity functions.
 import abc
 import numpy as np
 import sklearn.base
-from scipy.interpolate import interp1d
-
-from lightwood.analysis.nc.base import ClassifierAdapter, RegressorAdapter
+from scipy.interpolate import interp1d=
 
 
 # -----------------------------------------------------------------------------
@@ -17,7 +15,7 @@ from lightwood.analysis.nc.base import ClassifierAdapter, RegressorAdapter
 # -----------------------------------------------------------------------------
 class ClassificationErrFunc(object):
     """Base class for classification model error functions.
-    """
+    """ # noqa
 
     __metaclass__ = abc.ABCMeta
 
@@ -40,13 +38,13 @@ class ClassificationErrFunc(object):
         -------
         nc : numpy array of shape [n_samples]
             Nonconformity scores of the samples.
-        """
+        """ # noqa
         pass
 
 
 class RegressionErrFunc(object):
     """Base class for regression model error functions.
-    """
+    """ # noqa
 
     __metaclass__ = abc.ABCMeta
 
@@ -69,7 +67,7 @@ class RegressionErrFunc(object):
         -------
         nc : numpy array of shape [n_samples]
             Nonconformity scores of the samples.
-        """
+        """ # noqa
         pass
 
     @abc.abstractmethod
@@ -89,7 +87,7 @@ class RegressionErrFunc(object):
         -------
         interval : numpy array of shape [n_samples, 2]
             Minimum and maximum interval boundaries for each prediction.
-        """
+        """ # noqa
         pass
 
 
@@ -100,7 +98,7 @@ class InverseProbabilityErrFunc(ClassificationErrFunc):
 
     .. math::
         1 - \hat{P}(y_i | x) \, .
-    """
+    """ # noqa
 
     def __init__(self):
         super(InverseProbabilityErrFunc, self).__init__()
@@ -123,7 +121,7 @@ class MarginErrFunc(ClassificationErrFunc):
 
     .. math::
         0.5 - \dfrac{\hat{P}(y_i | x) - max_{y \, != \, y_i} \hat{P}(y | x)}{2}
-    """
+    """ # noqa
 
     def __init__(self):
         super(MarginErrFunc, self).__init__()
@@ -146,7 +144,7 @@ class AbsErrorErrFunc(RegressionErrFunc):
 
         .. math::
             | y_i - \hat{y}_i |
-    """
+    """ # noqa
 
     def __init__(self):
         super(AbsErrorErrFunc, self).__init__()
@@ -165,7 +163,7 @@ class AbsErrorErrFunc(RegressionErrFunc):
 class BoostedAbsErrorErrFunc(RegressionErrFunc):
     """ Calculates absolute error nonconformity for regression problems. Applies linear interpolation
     for nonconformity scores when we have less than 100 samples in the validation dataset.
-    """
+    """ # noqa
 
     def __init__(self):
         super(BoostedAbsErrorErrFunc, self).__init__()
@@ -197,7 +195,7 @@ class SignErrorErrFunc(RegressionErrFunc):
     .. [1] Linusson, Henrik, Ulf Johansson, and Tuve Lofstrom.
         Signed-error conformal regression. Pacific-Asia Conference on Knowledge
         Discovery and Data Mining. Springer International Publishing, 2014.
-    """
+    """ # noqa
 
     def __init__(self):
         super(SignErrorErrFunc, self).__init__()
@@ -271,7 +269,7 @@ class BaseModelNc(BaseScorer):
         Normalization smoothing parameter. As the beta-value increases,
         the normalized nonconformity function approaches a non-normalized
         equivalent.
-    """
+    """ # noqa
 
     def __init__(self, model, err_func, normalizer=None, beta=0):
         super(BaseModelNc, self).__init__()
@@ -305,7 +303,7 @@ class BaseModelNc(BaseScorer):
         Returns
         -------
         None
-        """
+        """ # noqa
         self.model.fit(x, y)
         if self.normalizer is not None:
             self.normalizer.fit(x, y)
@@ -326,7 +324,7 @@ class BaseModelNc(BaseScorer):
         -------
         nc : numpy array of shape [n_samples]
             Nonconformity scores of samples.
-        """
+        """ # noqa
         prediction = self.model.predict(x)
         n_test = x.shape[0]
         if self.normalizer is not None:
@@ -368,7 +366,7 @@ class ClassifierNc(BaseModelNc):
 
     err_func : ClassificationErrFunc
         Scorer function used to calculate nonconformity scores.
-    """
+    """ # noqa
 
     def __init__(self,
                  model,
@@ -410,7 +408,7 @@ class RegressorNc(BaseModelNc):
 
     err_func : RegressionErrFunc
         Scorer function used to calculate nonconformity scores.
-    """
+    """ # noqa
 
     def __init__(self,
                  model,
@@ -449,7 +447,7 @@ class RegressorNc(BaseModelNc):
             0 and 1, then p contains the prediction intervals (minimum and
             maximum	boundaries) for the set of test patterns at the chosen
             significance level.
-        """
+        """ # noqa
         n_test = x.shape[0]
         prediction = self.model.predict(x)
         if self.normalizer is not None:

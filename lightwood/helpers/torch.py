@@ -1,5 +1,4 @@
 import functools
-import warnings
 import torch
 from torch.nn.functional import pad
 from lightwood.helpers.device import get_devices

@@ -26,7 +26,7 @@ class AccStats:
         :param real_df: A dataframe with the real inputs and outputs for every row
         :param predictions_arr: An array containing arrays of predictions, one containing the "normal" predictions and the rest containing predictions with various missing column
         :param missing_col_arr: The missing columns for each of the prediction arrays, same order as the arrays in `predictions_arr`, starting from the second element of `predictions_arr` (The first is assumed to have no missing columns)
-        """
+        """ # noqa
         self.real_values_bucketized = []
         self.normal_predictions_bucketized = []
         self.numerical_samples_arr = []
@@ -74,7 +74,7 @@ class AccStats:
                 has_confidence_range = self.col_stats[self.target] in [dtype.integer, dtype.float]  # \
                 # and f'{self.target}_confidence_range' in predictions_arr[n]
 
-                # predicted_range = predictions_arr[n][f'{self.target}_confidence_range'][m] if has_confidence_range else (None, None)
+                # predicted_range = predictions_arr[n][f'{self.target}_confidence_range'][m] if has_confidence_range else (None, None) # noqa
                 predicted_range = (None, None)
 
                 if n == 0:
@@ -100,7 +100,7 @@ class AccStats:
 
                 if len(self.numerical_samples_arr) != 0:
                     bucket_acc_counts[bucket].append(self.numerical_samples_arr[i][1][0] <
-                                                     self.numerical_samples_arr[i][0] < self.numerical_samples_arr[i][1][1])
+                                                     self.numerical_samples_arr[i][0] < self.numerical_samples_arr[i][1][1]) # noqa
                 else:
                     bucket_acc_counts[bucket].append(1 if bucket == self.real_values_bucketized[i] else 0)
 
@@ -116,12 +116,12 @@ class AccStats:
             for bucket in range(len(self.buckets)):
                 if bucket not in bucket_accuracy:
                     if bucket in self.real_values_bucketized:
-                        # If it was never predicted, but it did exist as a real value, then assume 0% confidence when it does get predicted
+                        # If it was never predicted, but it did exist as a real value, then assume 0% confidence when it does get predicted # noqa
                         bucket_accuracy[bucket] = 0
 
             for bucket in range(len(self.buckets)):
                 if bucket not in bucket_accuracy:
-                    # If it wasn't seen either in the real values or in the predicted values, assume average confidence (maybe should be 0 instead ?)
+                    # If it wasn't seen either in the real values or in the predicted values, assume average confidence (maybe should be 0 instead ?) # noqa
                     bucket_accuracy[bucket] = overall_accuracy
 
             accuracy_histogram = {

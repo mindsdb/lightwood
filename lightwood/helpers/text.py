@@ -18,7 +18,6 @@ import langdetect
 import nltk
 from nltk.corpus import stopwords
 from lightwood.api.dtype import dtype
-from lightwood.api.predictor import PredictorInterface
 
 
 def get_language_dist(data):
@@ -28,7 +27,7 @@ def get_language_dist(data):
     lang_probs_cache = dict()
     for text in data:
         text = str(text)
-        text = ''.join([c for c in text if not c in string.punctuation])
+        text = ''.join([c for c in text if c not in string.punctuation])
         if text not in lang_probs_cache:
             try:
                 lang_probs = langdetect.detect_langs(text)
@@ -202,10 +201,6 @@ def get_identifier_description(data, column_name, data_dtype):
     data = list(data)
     unquie_pct = len(set(data)) / len(data)
 
-    lenghts = [len(str(x)) for x in data]
-    mean_len = np.mean(lenghts)
-    max_len = np.max(lenghts)
-
     spaces = [len(str(x).split(' ')) - 1 for x in data]
     mean_spaces = np.mean(spaces)
 
@@ -285,7 +280,6 @@ def get_identifier_description(data, column_name, data_dtype):
     return None
 
 
-import nltk
 import re
 
 

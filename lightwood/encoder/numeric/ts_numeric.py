@@ -1,6 +1,4 @@
 import math
-import sys
-
 import torch
 import numpy as np
 from lightwood.encoder.numeric import NumericEncoder

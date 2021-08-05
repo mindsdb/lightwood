@@ -2,8 +2,6 @@ import copy
 import logging
 import torch
 import unittest
-
-from lightwood.helpers.device import get_devices
 from lightwood.encoder.time_series import TimeSeriesEncoder
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, len_to_mask, get_chunk
 

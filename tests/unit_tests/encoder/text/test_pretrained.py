@@ -49,7 +49,7 @@ class TestPretrainedLangEncoder(unittest.TestCase):
             for i in range(len(pred)):
                 try:
                     float(pred[i])
-                except:
+                except Exception:
                     pred[i] = 0
 
             print(real[0:25], '\n', pred[0:25])

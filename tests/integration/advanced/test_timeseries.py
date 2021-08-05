@@ -104,4 +104,4 @@ class TestTimeseries(unittest.TestCase):
                                                                         }))
 
         predictor.learn(train)
-        predictions = predictor.predict(test)
+        predictor.predict(test)

@@ -1,12 +1,7 @@
-import math
-import sys
-
 import torch
-import numpy as np
 import torch.nn.functional as F
 from lightwood.encoder import BaseEncoder
 from lightwood.encoder.numeric import TsNumericEncoder
-from lightwood.helpers.log import log
 
 
 class TsArrayNumericEncoder(BaseEncoder):
