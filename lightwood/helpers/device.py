@@ -14,8 +14,8 @@ def is_cuda_compatible():
             current_arch = major * 10 + minor
             min_arch = min((int(arch.split("_")[1]) for arch in torch.cuda.get_arch_list()), default=35)
             if (not current_arch < min_arch
-                    and not torch._C._cuda_getCompiledVersion() <= 9000
-                    and not major >= 7 and not minor >= 5):
+                    or not torch._C._cuda_getCompiledVersion() <= 9000
+                    or not major >= 7 or not minor >= 5):
                 compatible_device_count += 1
 
         return True
