@@ -59,7 +59,6 @@ def evaluate_array_accuracy(
 ) -> float:
 
     aggregate = 0
-    nr_predictions = len(predictions[0])
 
     for i in range(len(predictions)):
         try:

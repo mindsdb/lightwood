@@ -1,4 +1,4 @@
-from tests.integration.helpers import ClickhouseTest, break_dataset
+from tests.integration.helpers import ClickhouseTest
 
 
 class TestTagsTarget(ClickhouseTest):

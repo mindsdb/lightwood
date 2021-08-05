@@ -27,7 +27,8 @@ class BaseIcp(BaseEstimator):
         # Check if condition-parameter is the default function (i.e.,
         # lambda x: 0). This is so we can safely clone the object without
         # the clone accidentally having self.conditional = True.
-        def default_condition(x): return 0
+        def default_condition(x): 
+            return 0
         is_default = (callable(condition) and
                       (condition.__code__.co_code ==
                        default_condition.__code__.co_code))

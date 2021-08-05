@@ -180,9 +180,9 @@ def explain(data: pd.DataFrame,
                                 # only replace where grouped ICP is more informative (i.e. tighter)
                                 default_icp_widths = result.loc[X.index, 'upper'] - result.loc[X.index, 'lower']
                                 grouped_widths = np.subtract(confs[:, 1], confs[:, 0])
-                                insert_index = (default_icp_widths > grouped_widths)[lambda x: x == True].index
+                                insert_index = (default_icp_widths > grouped_widths)[lambda x: x is True].index
                                 conf_index = (default_icp_widths.reset_index(drop=True) >
-                                              grouped_widths)[lambda x: x == True].index
+                                              grouped_widths)[lambda x: x is True].index
 
                                 result.loc[insert_index, 'lower'] = confs[conf_index, 0]
                                 result.loc[insert_index, 'upper'] = confs[conf_index, 1]

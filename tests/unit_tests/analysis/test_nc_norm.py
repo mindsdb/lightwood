@@ -1,7 +1,5 @@
 import unittest
 import numpy as np
-
-from lightwood.api.dtype import dtype
 from lightwood.analysis.nc.norm import Normalizer
 
 

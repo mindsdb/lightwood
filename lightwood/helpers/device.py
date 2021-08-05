@@ -18,7 +18,6 @@ def is_cuda_compatible():
                     and not (major >= 7 and minor >= 5)):
                 compatible_device_count += 1
 
-            
     if compatible_device_count > 0:
         return True
     return False

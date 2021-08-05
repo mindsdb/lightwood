@@ -49,10 +49,10 @@ class NumericEncoder(BaseEncoder):
         for real in data:
             try:
                 real = float(real)
-            except:
+            except Exception:
                 try:
                     real = float(real.replace(',', '.'))
-                except:
+                except Exception:
                     real = None
             if self.is_target:
                 vector = [0] * 3
@@ -89,7 +89,7 @@ class NumericEncoder(BaseEncoder):
             decode_log = self.decode_log
 
         ret = []
-        if type(encoded_values) != type([]):
+        if isinstance(encoded_values, list):
             encoded_values = encoded_values.tolist()
 
         for vector in encoded_values:
@@ -105,7 +105,7 @@ class NumericEncoder(BaseEncoder):
                         sign = -1 if vector[0] > 0.5 else 1
                         try:
                             real_value = math.exp(vector[1]) * sign
-                        except OverflowError as e:
+                        except OverflowError:
                             real_value = pow(10, 63) * sign
                     else:
                         real_value = vector[2] * self._abs_mean
