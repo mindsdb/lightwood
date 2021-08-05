@@ -15,9 +15,8 @@ from lightwood.encoder.time_series.rnn import TimeSeriesEncoder
 from lightwood.encoder.time_series.plain import TimeSeriesPlainEncoder
 from lightwood.encoder.categorical.multihot import MultiHotEncoder
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
-from lightwood.helpers.log import log
-
-from lightwood.encoder.type_encoder_maps import Array, Binary, Categorical, Date, DateTime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags
+from lightwood.encoder.type_encoder_maps import (Array, Binary, Categorical, Date, DateTime, Float, Image, Integer,
+                                                 Quantity, Rich_Text, Short_Text, Tags)
 
 
 # Encoders that depend on optiona dependencies
@@ -25,7 +24,6 @@ try:
     from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
 except Exception:
     AmplitudeTsEncoder = None
-    # log.debug('Unable to import AmplitudeTsEncoder, if you wish to encode audio data please install pydub and initialize lightwood again') # @TODO: figure out how to log this just once
 
 
 __ts_encoders__ = [TsNumericEncoder, TimeSeriesEncoder, TimeSeriesPlainEncoder]

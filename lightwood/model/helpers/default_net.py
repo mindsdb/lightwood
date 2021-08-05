@@ -48,7 +48,7 @@ class DefaultNet(torch.nn.Module):
     def to(self, device: torch.device) -> torch.nn.Module:
         if 'cuda' not in str(torch.device) == 0:
             log.warning(
-                'Creating neural network on CPU, it will be significantly slower than using a GPU, consider using a GPU instead')
+                'Creating neural network on CPU, it will be significantly slower than using a GPU, consider using a GPU instead') # noqa
         self.net = self.net.to(device)
 
         self.device = device

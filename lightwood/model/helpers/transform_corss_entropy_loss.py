@@ -2,7 +2,7 @@ import torch
 from lightwood.helpers.torch import LightwoodAutocast
 
 
-# Basically cross entropy loss that does the one hot decoding of the targets inside of it... useful for code-logic reasons to have it setup like this
+# Basically cross entropy loss that does the one hot decoding of the targets inside of it... useful for code-logic reasons to have it setup like this # noqa
 class TransformCrossEntropyLoss(torch.nn.Module):
     def __init__(self, **kwargs):
         super().__init__()

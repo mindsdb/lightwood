@@ -1,10 +1,7 @@
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Union
-from sktime.forecasting.theta import ThetaForecaster
 from sktime.forecasting.arima import AutoARIMA
-from sktime.forecasting.ets import AutoETS
-from sktime.forecasting.naive import NaiveForecaster
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
@@ -96,7 +93,6 @@ class SkTime(BaseModel):
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
-                cutoff = self.cutoff_index[group]
 
                 for idx, _ in enumerate(series.iteritems()):
                     ydf['prediction'].iloc[series_idxs[idx]] = self.models[group].predict(

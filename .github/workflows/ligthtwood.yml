@@ -42,7 +42,7 @@ jobs:
         CHECK_FOR_UPDATES: False
     - name: Lint with flake8
       run: |
-        flake8 . --statistics
+        flake8 .
     - name: Test with unittest
       run: |
         python -m unittest discover tests

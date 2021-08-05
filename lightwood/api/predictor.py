@@ -7,15 +7,20 @@ import pandas as pd
 class PredictorInterface():
     model_analysis: ModelAnalysis = None
 
-    def __init__(self): pass
+    def __init__(self):
+        pass
 
-    def learn(self, data: pd.DataFrame) -> None: pass
+    def learn(self, data: pd.DataFrame) -> None:
+        pass
 
-    def adjust(self, data: pd.DataFrame) -> None: pass
+    def adjust(self, data: pd.DataFrame) -> None:
+        pass
 
-    def predict(self, data: pd.DataFrame) -> pd.DataFrame: pass
+    def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+        pass
 
-    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame: pass
+    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
+        pass
 
     def save(self, file_path: str):
         with open(file_path, 'wb') as fp:

@@ -1,10 +1,8 @@
 import time
-import inspect
 from copy import deepcopy
 from typing import Dict, List
 
 import torch
-import optuna
 import numpy as np
 import pandas as pd
 from torch import nn
@@ -82,7 +80,8 @@ class Neural(BaseModel):
             criterion = TransformCrossEntropyLoss(weight=self.target_encoder.index_weights.to(self.model.device))
         elif self.dtype_dict[self.target] in (dtype.tags):
             criterion = nn.BCEWithLogitsLoss()
-        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.array) and self.timeseries_settings.is_timeseries:
+        elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.array)
+                and self.timeseries_settings.is_timeseries):
             criterion = nn.L1Loss()
         elif self.dtype_dict[self.target] in (dtype.integer, dtype.float):
             criterion = MSELoss()
@@ -234,52 +233,6 @@ class Neural(BaseModel):
 
         self.model = self.net_class(**net_kwargs)
 
-    '''
-    Optuna optimization
-    def _optimize(self, ds_arr: List[EncodedDs]):
-        scaler = GradScaler()
-        
-        trails_started = time.time()
-        nr_trails = 25
-        time_per_trial = self.stop_after / (2 * nr_trails)
-        if time_per_trial > 5:
-            def objective(trial):
-                log.debug(f'Running trial in max {time_per_trial} seconds')
-                # For trail options see: https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest_int
-                self.num_hidden = trial.suggest_int('num_hidden', 1, 2)
-                lr = trial.suggest_loguniform('lr', 0.0001, 0.1)
-
-                self._init_net(ds_arr)
-                optimizer = self._select_optimizer(lr)
-                criterion = self._select_criterion()
-                
-                # @TODO Donwscale based on training time
-                train_dl = DataLoader(ConcatedEncodedDs(ds_arr[0:int(len(ds_arr) * 0.7)]), batch_size=self.batch_size, shuffle=False)
-                dev_dl = DataLoader(ConcatedEncodedDs(ds_arr[int(len(ds_arr) * 0.7):]), batch_size=self.batch_size, shuffle=False)
-                try:
-                    _, _, best_error = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler, time_per_trial, 20000)
-                except Exception as e:
-                    log.error(e)
-                    return pow(2, 32)
-
-                return best_error
-
-            log.info('Running hyperparameter search!')
-            sampler = optuna.samplers.RandomSampler(seed=len(ds_arr[0][0][0]))
-            study = optuna.create_study(direction='minimize', sampler=sampler)
-            study.optimize(objective, n_trials=nr_trails)
-
-            log.debug(f'Best trial had a loss of : {study.best_trial.value}')
-            log.debug(f'Best trial suggested parameters : {study.best_trial.params.items()}')
-            self.stop_after = self.stop_after - (time.time() - trails_started)
-
-            self.num_hidden = study.best_trial.params['num_hidden']
-            self.lr = study.best_trial.params['lr']
-        else:
-            self.num_hidden = 1
-            self.lr = 0.0005
-        '''
-
     # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
     # @TODO: Writeup on the methodology for partial fitting
     def fit(self, ds_arr: List[EncodedDs]) -> None:
@@ -327,7 +280,7 @@ class Neural(BaseModel):
             self._final_tuning(dev_ds_arr)
 
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
-        # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly
+        # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly # noqa
         train_ds = ConcatedEncodedDs(train_data)
         dev_ds = ConcatedEncodedDs(dev_data + train_data)
         train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)

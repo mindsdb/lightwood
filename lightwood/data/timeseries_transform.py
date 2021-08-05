@@ -1,15 +1,12 @@
-import os
 import copy
-import psutil
 import datetime
 import dateutil
 import numpy as np
 import pandas as pd
 import multiprocessing as mp
-
+from lightwood.helpers.parallelism import get_nr_procs
 from functools import partial
 from typing import Dict
-
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.log import log
 from lightwood.api import dtype
@@ -26,7 +23,7 @@ def transform_timeseries(
 
     if '__mdb_make_predictions' in original_df.columns:
         index = original_df[original_df['__mdb_make_predictions'].map(
-            {'True': True, 'False': False, True: True, False: False}) == True]
+            {'True': True, 'False': False, True: True, False: False}) is True]
         infer_mode = index.shape[0] == 0  # condition to trigger: __mdb_make_predictions is set to False everywhere
         # @TODO: dont drop and use instead of original_index?
         original_df = original_df.reset_index(drop=True) if infer_mode else original_df
@@ -127,11 +124,11 @@ def transform_timeseries(
     combined_df = pd.concat(df_arr)
 
     if '__mdb_make_predictions' in combined_df.columns:
-        combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool) == True])
+        combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool) is True])
         del combined_df['__mdb_make_predictions']
 
     if len(combined_df) == 0:
-        raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size. If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` advanced argument to `True`, but this might lead to subpar predictions.')
+        raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size. If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` advanced argument to `True`, but this might lead to subpar predictions.') # noqa
 
     df_gb_map = None
     if len(df_arr) > 1:  # @TODO: and (transaction.lmd['quick_learn'] or transaction.lmd['quick_predict']):
@@ -254,23 +251,3 @@ def _ts_add_previous_target(df, target, nr_predictions, window, data_dtype, mode
             df.loc[df[col].isna(), ['__mdb_make_predictions']] = False
 
     return df
-
-
-def get_nr_procs(df=None, max_processes=None, max_per_proc_usage=None):
-    if os.name == 'nt':
-        return 1
-    else:
-        available_mem = psutil.virtual_memory().available
-        if max_per_proc_usage is None or type(max_per_proc_usage) not in (int, float):
-            try:
-                import mindsdb_worker
-                import ray
-                max_per_proc_usage = 0.2 * pow(10, 9)
-            except:
-                max_per_proc_usage = 3 * pow(10, 9)
-            if df is not None:
-                max_per_proc_usage += df.memory_usage(index=True, deep=True).sum()
-        proc_count = int(min(mp.cpu_count(), available_mem // max_per_proc_usage)) - 1
-        if isinstance(max_processes, int):
-            proc_count = min(proc_count, max_processes)
-        return max(proc_count, 1)

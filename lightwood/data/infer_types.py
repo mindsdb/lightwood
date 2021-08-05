@@ -1,5 +1,4 @@
 from collections import Counter
-import math
 import random
 from typing import List
 import dateutil
@@ -12,7 +11,8 @@ import multiprocessing as mp
 from lightwood.api.types import TypeInformation
 from lightwood.api.dtype import dtype
 from lightwood.helpers.parallelism import get_nr_procs
-from lightwood.helpers.text import get_identifier_description_mp, cast_string_to_python_type, get_language_dist, analyze_sentences
+from lightwood.helpers.text import (get_identifier_description_mp, cast_string_to_python_type, get_language_dist,
+                                    analyze_sentences)
 from lightwood.helpers.log import log
 import re
 from lightwood.helpers.numeric import can_be_nan_numeric
@@ -20,7 +20,7 @@ from lightwood.helpers.seed import seed
 
 
 # @TODO: hardcode for distance, time, subunits of currency (e.g. cents) and other common units
-# @TODO: The json ml will contain the pattern we want to extract out of our quantity column, for the user modify (unit+multiplier)
+# @TODO: The json ml will contain the pattern we want to extract out of our quantity column, for the user modify (unit+multiplier) # noqa
 # @TODO: Add tests with plenty of examples
 def get_quantity_col_info(col_data: List[object]) -> str:
     char_const = None
@@ -223,8 +223,10 @@ def get_column_data_type(arg_tup):
                 lengths.append(len(item_tags))
                 unique_tokens = unique_tokens.union(set(item_tags))
 
-        # If more than 30% of the samples contain more than 1 category and there's more than 6 of them and they are shared between the various cells
-        if can_be_tags and np.mean(lengths) > 1.3 and len(unique_tokens) >= 6 and len(unique_tokens) / np.mean(lengths) < (len(data) / 4):
+        # If more than 30% of the samples contain more than 1 category and there's more than 6 of them and they are shared between the various cells # noqa
+        if (can_be_tags and np.mean(lengths) > 1.3 and
+                len(unique_tokens) >= 6 and
+                len(unique_tokens) / np.mean(lengths) < (len(data) / 4)):
             curr_dtype = dtype.tags
 
     # Categorical based on unique values
@@ -355,7 +357,7 @@ def infer_types(data: pd.DataFrame, pct_invalid: float) -> TypeInformation:
     population_size = len(data)
     log.info(f'Analyzing a sample of {sample_size}')
     log.info(
-        f'from a total population of {population_size}, this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.')
+        f'from a total population of {population_size}, this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.') # noqa
 
     nr_procs = get_nr_procs(data)
     if nr_procs > 1:
