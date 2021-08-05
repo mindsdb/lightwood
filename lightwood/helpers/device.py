@@ -5,8 +5,8 @@ from torch.cuda import device_count, get_device_capability
 
 
 def is_cuda_compatible():
+    compatible_device_count = 0
     if torch.version.cuda is not None:
-        compatible_device_count = 0
         for d in range(device_count()):
             capability = get_device_capability(d)
             major = capability[0]
@@ -18,6 +18,8 @@ def is_cuda_compatible():
                     or not (major >= 7 and minor >= 5)):
                 compatible_device_count += 1
 
+            
+    if compatible_device_count > 0:
         return True
     return False
 
