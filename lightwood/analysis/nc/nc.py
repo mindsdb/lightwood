@@ -97,7 +97,7 @@ class InverseProbabilityErrFunc(ClassificationErrFunc):
     For each correct output in ``y``, nonconformity is defined as
 
     .. math::
-        1 - \hat{P}(y_i | x) \, .
+        1 - hat{P}(y_i | x) , .
     """ # noqa
 
     def __init__(self):
@@ -120,7 +120,7 @@ class MarginErrFunc(ClassificationErrFunc):
     For each correct output in ``y``, nonconformity is defined as
 
     .. math::
-        0.5 - \dfrac{\hat{P}(y_i | x) - max_{y \, != \, y_i} \hat{P}(y | x)}{2}
+        0.5 - frac{hat{P}(y_i | x) - max_{y , != , y_i} hat{P}(y | x)}{2}
     """ # noqa
 
     def __init__(self):
@@ -143,7 +143,7 @@ class AbsErrorErrFunc(RegressionErrFunc):
         For each correct output in ``y``, nonconformity is defined as
 
         .. math::
-            | y_i - \hat{y}_i |
+            | y_i - hat{y}_i |
     """ # noqa
 
     def __init__(self):
@@ -188,7 +188,7 @@ class SignErrorErrFunc(RegressionErrFunc):
     For each correct output in ``y``, nonconformity is defined as
 
     .. math::
-        y_i - \hat{y}_i
+        y_i - hat{y}_i
 
     References
     ----------
