@@ -140,7 +140,8 @@ class TimeSeriesEncoder(BaseEncoder):
         end = min(end, len(source))
         return source[start:end]
 
-    def prepare(self, priming_data, dependency_data=None, ts_analysis=None, feedback_hoop_function=log.info, batch_size=256):
+    def prepare(self, priming_data, dependency_data=None, ts_analysis=None,
+                feedback_hoop_function=log.info, batch_size=256):
         """
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
         :param dependency_data: raw data from other columns

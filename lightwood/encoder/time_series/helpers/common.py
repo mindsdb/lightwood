@@ -22,7 +22,7 @@ class MinMaxNormalizer:
             x = np.expand_dims(x, axis=1)
 
         x = x.astype(float)
-        x[x == None] = 0
+        x[x is None] = 0
         self.abs_mean = np.mean(np.abs(x))
         self.scaler.fit(x)
 
