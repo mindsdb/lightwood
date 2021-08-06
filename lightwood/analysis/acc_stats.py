@@ -1,4 +1,8 @@
 import random
+from typing import Union
+
+import numpy as np
+import pandas as pd
 from sklearn.metrics import confusion_matrix
 from lightwood.api.dtype import dtype
 
@@ -8,150 +12,110 @@ class AccStats:
     Computes accuracy stats and a confusion matrix for the validation dataset
     """
 
-    def __init__(self, dtype_dict, target):
-        """
-        Chose the algorithm to use for the rest of the model
-        As of right now we go with BernoulliNB
-        """
+    def __init__(self, dtype_dict: dict, target: str, buckets: Union[None, dict]):
         self.col_stats = dtype_dict
         self.target = target
-        self.input_cols = [col for col in dtype_dict]
+        self.input_cols = list(dtype_dict.keys())
+        self.buckets = buckets if buckets else {}
 
-        self.buckets = None
-        # if 'percentage_buckets' in dtype_dict:  # @TODO: add these
-        #    self.buckets = dtype_dict['percentage_buckets']
-
-    def fit(self, real_df, predictions_arr, missing_col_arr, hmd=None):
-        """
-        :param real_df: A dataframe with the real inputs and outputs for every row
-        :param predictions_arr: An array containing arrays of predictions, one containing the "normal" predictions and the rest containing predictions with various missing column
-        :param missing_col_arr: The missing columns for each of the prediction arrays, same order as the arrays in `predictions_arr`, starting from the second element of `predictions_arr` (The first is assumed to have no missing columns)
-        """ # noqa
-        self.real_values_bucketized = []
         self.normal_predictions_bucketized = []
+        self.real_values_bucketized = []
         self.numerical_samples_arr = []
 
+    def fit(self, input_df: pd.DataFrame, predictions: pd.DataFrame, conf=Union[None, np.ndarray]):
         column_indexes = {}
         for i, col in enumerate(self.input_cols):
             column_indexes[col] = i
 
         real_present_inputs_arr = []
-        for _, row in real_df.iterrows():
+        for _, row in input_df.iterrows():
             present_inputs = [1] * len(self.input_cols)
             for i, col in enumerate(self.input_cols):
                 if str(row[col]) in ('None', 'nan', '', 'Nan', 'NAN', 'NaN'):
                     present_inputs[i] = 0
             real_present_inputs_arr.append(present_inputs)
 
-        for n in range(len(predictions_arr)):
-            for m in range(len(predictions_arr[n])):
-                row = real_df.iloc[m]
+        for n in range(len(predictions)):
+            row = input_df.iloc[n]
+            real_value = row[self.target]
+            predicted_value = predictions.iloc[n]['prediction']
 
-                real_value = row[self.target]
-                predicted_value = predictions_arr[n][m]
+            predicted_value = predicted_value \
+                if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
+                else float(predicted_value)
 
-                try:
-                    predicted_value = predicted_value \
-                        if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
-                        else float(predicted_value)
-                except Exception:
-                    predicted_value = None
+            real_value = real_value \
+                if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
+                else float(real_value)
 
-                try:
-                    real_value = real_value \
-                        if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
-                        else float(real_value)
-                except Exception:
-                    real_value = None
+            if self.buckets:
+                bucket = self.buckets[self.target]
+                predicted_value_b = get_value_bucket(predicted_value, bucket, self.col_stats[self.target])
+                real_value_b = get_value_bucket(real_value, bucket, self.col_stats[self.target])
+            else:
+                predicted_value_b = predicted_value
+                real_value_b = real_value
 
-                if self.buckets is not None:
-                    predicted_value_b = get_value_bucket(predicted_value, self.buckets, self.col_stats, self.target)
-                    real_value_b = get_value_bucket(real_value, self.buckets, self.col_stats, self.target)
-                else:
-                    predicted_value_b = predicted_value
-                    real_value_b = real_value
+            if conf is not None:
+                predicted_range = conf.iloc[n][['lower', 'upper']].tolist()
+            else:
+                predicted_range = (predicted_value_b, predicted_value_b)
 
-                has_confidence_range = self.col_stats[self.target] in [dtype.integer, dtype.float]  # \
-                # and f'{self.target}_confidence_range' in predictions_arr[n]
-
-                # predicted_range = predictions_arr[n][f'{self.target}_confidence_range'][m] if has_confidence_range else (None, None) # noqa
-                predicted_range = (None, None)
-
-                if n == 0:
-                    self.real_values_bucketized.append(real_value_b)
-                    self.normal_predictions_bucketized.append(predicted_value_b)
-                    if has_confidence_range:
-                        self.numerical_samples_arr.append((real_value, predicted_range))
-
-                feature_existance = real_present_inputs_arr[m]
-                if n > 0:
-                    for missing_col in missing_col_arr[n - 1]:
-                        feature_existance[self.input_cols.index(missing_col)] = 0
+            self.real_values_bucketized.append(real_value_b)
+            self.normal_predictions_bucketized.append(predicted_value_b)
+            if conf is not None:
+                self.numerical_samples_arr.append((real_value, predicted_range))
 
     def get_accuracy_stats(self):
+        bucket_accuracy = {}
+        bucket_acc_counts = {}
+        for i, bucket in enumerate(self.normal_predictions_bucketized):
+            if bucket not in bucket_acc_counts:
+                bucket_acc_counts[bucket] = []
 
-        # @TODO: reintroduce once statistical analysis does buckets
-        if False:
-            bucket_accuracy = {}
-            bucket_acc_counts = {}
-            for i, bucket in enumerate(self.normal_predictions_bucketized):
-                if bucket not in bucket_acc_counts:
-                    bucket_acc_counts[bucket] = []
+            if len(self.numerical_samples_arr) != 0:
+                bucket_acc_counts[bucket].append(self.numerical_samples_arr[i][1][0] <
+                                                 self.numerical_samples_arr[i][0] < self.numerical_samples_arr[i][1][1]) # noqa
+            else:
+                bucket_acc_counts[bucket].append(1 if bucket == self.real_values_bucketized[i] else 0)
 
-                if len(self.numerical_samples_arr) != 0:
-                    bucket_acc_counts[bucket].append(self.numerical_samples_arr[i][1][0] <
-                                                     self.numerical_samples_arr[i][0] < self.numerical_samples_arr[i][1][1]) # noqa
-                else:
-                    bucket_acc_counts[bucket].append(1 if bucket == self.real_values_bucketized[i] else 0)
+        for bucket in bucket_acc_counts:
+            bucket_accuracy[bucket] = sum(bucket_acc_counts[bucket]) / len(bucket_acc_counts[bucket])
 
-            for bucket in bucket_acc_counts:
-                bucket_accuracy[bucket] = sum(bucket_acc_counts[bucket]) / len(bucket_acc_counts[bucket])
+        accuracy_count = []
+        for counts in list(bucket_acc_counts.values()):
+            accuracy_count += counts
 
-            accuracy_count = []
-            for counts in list(bucket_acc_counts.values()):
-                accuracy_count += counts
+        overall_accuracy = sum(accuracy_count) / len(accuracy_count)
 
-            overall_accuracy = sum(accuracy_count) / len(accuracy_count)
+        for bucket in range(len(self.buckets)):
+            if bucket not in bucket_accuracy:
+                if bucket in self.real_values_bucketized:
+                    # If it was never predicted, but it did exist as a real value, then assume 0% confidence when it does get predicted # noqa
+                    bucket_accuracy[bucket] = 0
 
-            for bucket in range(len(self.buckets)):
-                if bucket not in bucket_accuracy:
-                    if bucket in self.real_values_bucketized:
-                        # If it was never predicted, but it did exist as a real value, then assume 0% confidence when it does get predicted # noqa
-                        bucket_accuracy[bucket] = 0
+        for bucket in range(len(self.buckets)):
+            if bucket not in bucket_accuracy:
+                # If it wasn't seen either in the real values or in the predicted values, assume average confidence (maybe should be 0 instead ?) # noqa
+                bucket_accuracy[bucket] = overall_accuracy
 
-            for bucket in range(len(self.buckets)):
-                if bucket not in bucket_accuracy:
-                    # If it wasn't seen either in the real values or in the predicted values, assume average confidence (maybe should be 0 instead ?) # noqa
-                    bucket_accuracy[bucket] = overall_accuracy
+        accuracy_histogram = {
+            'buckets': list(bucket_accuracy.keys()),
+            'accuracies': list(bucket_accuracy.values())
+        }
 
-            accuracy_histogram = {
-                'buckets': list(bucket_accuracy.keys()),
-                'accuracies': list(bucket_accuracy.values())
-            }
+        labels = list(set([*self.real_values_bucketized, *self.normal_predictions_bucketized]))
+        matrix = confusion_matrix(self.real_values_bucketized, self.normal_predictions_bucketized, labels=labels)
+        matrix = [[int(y) if str(y) != 'nan' else 0 for y in x] for x in matrix]
 
-            labels = list(set([*self.real_values_bucketized, *self.normal_predictions_bucketized]))
-            matrix = confusion_matrix(self.real_values_bucketized, self.normal_predictions_bucketized, labels=labels)
-            matrix = [[int(y) if str(y) != 'nan' else 0 for y in x] for x in matrix]
+        target_bucket = self.buckets[self.target]
+        bucket_values = [target_bucket[i] if i < len(target_bucket) else None for i in labels]
 
-            bucket_values = [self.buckets[i] if i < len(self.buckets) else None for i in labels]
-
-            cm = {
-                'matrix': matrix,
-                'predicted': bucket_values,
-                'real': bucket_values
-            }
-        else:
-            # empty placeholders
-            accuracy_histogram = {
-                'buckets': [],
-                'accuracies': []
-            }
-            cm = {
-                'matrix': [[]],
-                'predicted': [],
-                'real': []
-            }
-            overall_accuracy = 0.000123456  # sum(accuracy_count) / len(accuracy_count)
+        cm = {
+            'matrix': matrix,
+            'predicted': bucket_values,
+            'real': bucket_values
+        }
 
         accuracy_samples = None
         if len(self.numerical_samples_arr) > 0:
@@ -165,21 +129,20 @@ class AccStats:
         return overall_accuracy, accuracy_histogram, cm, accuracy_samples
 
 
-# @TODO not pass huge dicts of stats to this function, just pass the data type
-def get_value_bucket(value, buckets, col_stats, target):
+def get_value_bucket(value, buckets, target_dtype):
     """
     :return: The bucket in the `histogram` in which our `value` falls
     """
     if buckets is None:
         return None
 
-    if col_stats[target] in (dtype.SINGLE, dtype.MULTIPLE):
+    if target_dtype == dtype.categorical:
         if value in buckets:
             bucket = buckets.index(value)
         else:
             bucket = len(buckets)  # for null values
 
-    elif col_stats[target] in (dtype.binary, dtype.integer, dtype.float):
+    elif target_dtype in (dtype.binary, dtype.integer, dtype.float):
         bucket = closest(buckets, value)
     else:
         bucket = len(buckets)  # for null values

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from itertools import product
+from sklearn.metrics import r2_score
 from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api import dtype
@@ -51,11 +52,12 @@ def model_analyzer(
     is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
     is_classification = data_type in (dtype.categorical, dtype.binary)
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
-    disable_column_importance = disable_column_importance or (not ts_cfg.is_timeseries or
-                                                              dtype_dict[target] not in [dtype.short_text,
-                                                                                         dtype.rich_text])
+    disable_column_importance = disable_column_importance or (ts_cfg.is_timeseries or
+                                                              dtype_dict[target] in [dtype.short_text, dtype.rich_text])
 
+    encoded_train_data = ConcatedEncodedDs(train_data)
     encoded_data = ConcatedEncodedDs(data)
+
     data = encoded_data.data_frame
     runtime_analyzer = {}
     predictions = {}
@@ -229,12 +231,9 @@ def model_analyzer(
     )
     normal_accuracy = np.mean(list(score_dict.values()))
 
-    empty_input_predictions = {}
-    empty_input_accuracy = {}
-    empty_input_predictions_test = {}
-
     # compute global feature importance
     if not disable_column_importance:
+        empty_input_accuracy = {}
         ignorable_input_cols = [x for x in input_cols if (not ts_cfg.is_timeseries or
                                                           (x not in ts_cfg.order_by and
                                                            x not in ts_cfg.historical_columns))]
@@ -245,13 +244,13 @@ def model_analyzer(
                 ds.data_frame[col].values[:] = 0
 
             if not is_classification:
-                empty_input_predictions[col] = predictor(partial_data)
+                empty_input_preds = predictor(partial_data)
             else:
-                empty_input_predictions[col] = predictor(partial_data, predict_proba=True)
+                empty_input_preds = predictor(partial_data, predict_proba=True)
 
             empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
                 data,
-                empty_input_predictions[col]['prediction'],
+                empty_input_preds['prediction'],
                 target,
                 accuracy_functions
             ).values()))
@@ -269,15 +268,8 @@ def model_analyzer(
     else:
         column_importances = None
 
-    predictions_arr = [normal_predictions['prediction'].values.flatten().tolist()] + \
-                      [x for x in empty_input_predictions_test.values()]
-
-    acc_stats = AccStats(dtype_dict=dtype_dict, target=target)
-    acc_stats.fit(
-        data,
-        predictions_arr,
-        [[ignored_column] for ignored_column in empty_input_predictions_test]
-    )
+    acc_stats = AccStats(dtype_dict=dtype_dict, target=target, buckets=stats_info.buckets)
+    acc_stats.fit(data, normal_predictions, conf=result_df)
 
     overall_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats()
 
@@ -287,14 +279,13 @@ def model_analyzer(
     runtime_analyzer['accuracy_samples'] = accuracy_samples
 
     runtime_analyzer['validation_set_accuracy'] = normal_accuracy
-    if target in [dtype.integer, dtype.float]:
-        runtime_analyzer['validation_set_accuracy_r2'] = normal_accuracy
+    if dtype_dict[target] in [dtype.integer, dtype.float]:
+        runtime_analyzer['validation_set_accuracy_r2'] = r2_score(data[target], normal_predictions['prediction'])
 
-    # TODO Properly set train_sample_size and test_sample_size
     model_analysis = ModelAnalysis(
         accuracies=score_dict,
-        train_sample_size=0,
-        test_sample_size=0,
+        train_sample_size=len(encoded_train_data),
+        test_sample_size=len(encoded_data),
         confusion_matrix=cm,
         column_importances=column_importances
     )
