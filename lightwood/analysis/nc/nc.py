@@ -327,10 +327,13 @@ class BaseModelNc(BaseScorer):
         """ # noqa
         prediction = self.model.predict(x)
         n_test = x.shape[0]
+
+        norm = np.ones(n_test)
         if self.normalizer is not None:
-            norm = self.normalizer.score(x) + self.beta
-        else:
-            norm = np.ones(n_test)
+            try:
+                norm = self.normalizer.score(x) + self.beta
+            except Exception:
+                pass
 
         return self.err_func.apply(prediction, y) / norm
 
@@ -450,10 +453,13 @@ class RegressorNc(BaseModelNc):
         """ # noqa
         n_test = x.shape[0]
         prediction = self.model.predict(x)
+        
+        norm = np.ones(n_test)
         if self.normalizer is not None:
-            norm = self.normalizer.score(x) + self.beta
-        else:
-            norm = np.ones(n_test)
+            try:
+                norm = self.normalizer.score(x) + self.beta
+            except Exception:
+                pass
 
         if significance:
             intervals = np.zeros((x.shape[0], 2))
