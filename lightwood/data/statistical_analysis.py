@@ -1,13 +1,15 @@
 from typing import Dict
-from lightwood.api import StatisticalAnalysis, ProblemDefinition, dtype
 import pandas as pd
 import numpy as np
-from lightwood.data.cleaner import _clean_float_or_none
+
+from lightwood.api import StatisticalAnalysis, ProblemDefinition
 from lightwood.helpers.numeric import filter_nan
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
+from lightwood.api.dtype import dtype
 from scipy.stats import entropy
+from lightwood.data.cleaner import _clean_float_or_none
 
 
 def get_numeric_histogram(data, data_dtype):
@@ -70,17 +72,21 @@ def statistical_analysis(data: pd.DataFrame,
         df_std = 1.0
 
     histograms = {}
+    buckets = {}
     # Get histograms for each column
     for col in df.columns:
         histograms[col] = None
+        buckets[col] = None
         if dtypes[col] in (dtype.categorical, dtype.binary):
             hist = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
             histograms[col] = {
                 'x': list(hist.keys()),
                 'y': list(hist.values())
             }
+            buckets[col] = histograms[col]['x']
         if dtypes[col] in (dtype.integer, dtype.float):
             histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col])
+            buckets[col] = histograms[col]['x']
 
     # get observed classes, used in analysis
     target_class_distribution = None
@@ -118,6 +124,7 @@ def statistical_analysis(data: pd.DataFrame,
         train_observed_classes=train_observed_classes,
         target_class_distribution=target_class_distribution,
         histograms=histograms,
+        buckets=buckets,
         missing=missing,
         distinct=distinct,
         bias=bias,

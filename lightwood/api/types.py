@@ -72,6 +72,7 @@ class StatisticalAnalysis:
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
     histograms: object  # Dict[str, Dict[str, List[object]]]
+    buckets: object  # Dict[str, Dict[str, List[object]]]
     missing: object
     distinct: object
     bias: object
