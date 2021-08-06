@@ -75,7 +75,7 @@ class TsNumericEncoder(NumericEncoder):
         ret = []
         if not dependency_data:
             dependency_data = {'__default': [None] * len(encoded_values)}
-        if isinstance(encoded_values, list):
+        if isinstance(encoded_values, torch.Tensor):
             encoded_values = encoded_values.tolist()
 
         for vector, group in zip(encoded_values, list(zip(*dependency_data.values()))):

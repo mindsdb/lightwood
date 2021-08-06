@@ -79,7 +79,7 @@ class NumericEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_values: torch.Tensor, decode_log=None) -> list:
+    def decode(self, encoded_values, decode_log=None) -> list:
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
@@ -87,7 +87,7 @@ class NumericEncoder(BaseEncoder):
             decode_log = self.decode_log
 
         ret = []
-        if isinstance(encoded_values, list):
+        if isinstance(encoded_values, torch.Tensor):
             encoded_values = encoded_values.tolist()
 
         for vector in encoded_values:
