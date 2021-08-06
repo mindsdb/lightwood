@@ -24,31 +24,44 @@ class Normalizer(BaseModel):
         self.multi_ts_task = fit_params['is_multi_ts']
 
         self.model = Ridge()
+        self.prepared = False
         self.prediction_cache = None
         self.bounds = (0.5, 1.5)
         self.error_fn = mean_absolute_error
 
     def fit(self, data: List[EncodedDs]) -> None:
-        data = ConcatedEncodedDs(data)
-        preds = self.base_predictor(data, predict_proba=True)
-        truths = data.data_frame[self.target]
-        labels = self.get_labels(preds, truths.values, data.encoders[self.target])
-        enc_data = data.get_encoded_data(include_target=False).numpy()
-        self.model.fit(enc_data, labels)
+        try:
+            data = ConcatedEncodedDs(data)
+            preds = self.base_predictor(data, predict_proba=True)
+            truths = data.data_frame[self.target]
+            labels = self.get_labels(preds, truths.values, data.encoders[self.target])
+            enc_data = data.get_encoded_data(include_target=False).numpy()
+            self.model.fit(enc_data, labels)
+            self.prepared = True
+        except Exception:
+            pass
 
     def __call__(self, ds: Union[ConcatedEncodedDs, torch.Tensor], predict_proba: bool = False) -> np.ndarray:
         if isinstance(ds, ConcatedEncodedDs):
             ds = ds.get_encoded_data(include_target=False)
-        raw = self.model.predict(ds.numpy())
-        clipped = np.clip(raw, 0.1, 1e4)  # set limit deviations (@TODO: benchmark stability)
-        # smoothed = clipped / clipped.mean()
-        return clipped
+
+        if self.prepared:
+            raw = self.model.predict(ds.numpy())
+            scores = np.clip(raw, 0.1, 1e4)  # set limit deviations (@TODO: benchmark stability)
+            # smoothed = clipped / clipped.mean()
+        else:
+            scores = np.ones(ds.shape[0])
+
+        return scores
 
     def score(self, data) -> np.ndarray:
-        scores = self.prediction_cache if self.prediction_cache is not None else self.model.predict(data)
-
-        if scores is None:
+        if not self.prepared:
             scores = np.ones(data.shape[0])  # by default, normalizing factor is 1 for all predictions
+        elif self.prediction_cache is not None:
+            scores = self.prediction_cache
+        else:
+            scores = self.model.predict(data)
+
         return scores
 
     def get_labels(self, preds: pd.DataFrame, truths: np.ndarray, target_enc) -> np.ndarray:
