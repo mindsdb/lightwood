@@ -453,7 +453,7 @@ class RegressorNc(BaseModelNc):
         """ # noqa
         n_test = x.shape[0]
         prediction = self.model.predict(x)
-        
+
         norm = np.ones(n_test)
         if self.normalizer is not None:
             try:
