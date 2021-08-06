@@ -56,14 +56,14 @@ class AccStats:
                 predicted_value_b = predicted_value
                 real_value_b = real_value
 
-            if conf is not None:
+            if conf is not None and self.col_stats[self.target] in [dtype.integer, dtype.float]:
                 predicted_range = conf.iloc[n][['lower', 'upper']].tolist()
             else:
                 predicted_range = (predicted_value_b, predicted_value_b)
 
             self.real_values_bucketized.append(real_value_b)
             self.normal_predictions_bucketized.append(predicted_value_b)
-            if conf is not None:
+            if conf is not None and self.col_stats[self.target] in [dtype.integer, dtype.float]:
                 self.numerical_samples_arr.append((real_value, predicted_range))
 
     def get_accuracy_stats(self):
@@ -136,13 +136,13 @@ def get_value_bucket(value, buckets, target_dtype):
     if buckets is None:
         return None
 
-    if target_dtype == dtype.categorical:
+    if target_dtype in (dtype.binary, dtype.categorical):
         if value in buckets:
             bucket = buckets.index(value)
         else:
             bucket = len(buckets)  # for null values
 
-    elif target_dtype in (dtype.binary, dtype.integer, dtype.float):
+    elif target_dtype in (dtype.integer, dtype.float):
         bucket = closest(buckets, value)
     else:
         bucket = len(buckets)  # for null values
