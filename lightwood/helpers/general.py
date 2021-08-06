@@ -1,6 +1,6 @@
 import math
 import importlib
-from typing import List, Union
+from typing import List, Union, Dict
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,7 @@ from sklearn.metrics import r2_score, f1_score, mean_absolute_error
 def evaluate_accuracy(data: pd.DataFrame,
                       predictions: pd.Series,
                       target: str,
-                      accuracy_functions: List[str]) -> float:
+                      accuracy_functions: List[str]) -> Dict[str, float]:
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
@@ -42,13 +42,8 @@ def evaluate_regression_accuracy(
         return max(r2, 0)
 
 
-# This is ugly because it uses the encoders, figure out how to do it without them
-# Maybe literally one-hot encode inside the accuracy functions
-def evaluate_multilabel_accuracy(column, predictions, true_values, backend, **kwargs):
-    # @TODO: use new API
-    encoder = backend.predictor._mixer.encoders[column]
-    pred_values = encoder.encode(predictions['prediction'])
-    true_values = encoder.encode(true_values)
+def evaluate_multilabel_accuracy(true_values, predictions, **kwargs):
+    pred_values = predictions['prediction']
     return f1_score(true_values, pred_values, average='weighted')
 
 
