@@ -79,7 +79,7 @@ class NumericEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_values, decode_log=None):
+    def decode(self, encoded_values: torch.Tensor, decode_log=None) -> list:
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
@@ -124,5 +124,7 @@ class NumericEncoder(BaseEncoder):
                 if self._type == 'int':
                     real_value = round(real_value)
 
+            if isinstance(real_value, torch.Tensor):
+                real_value = real_value.item()
             ret.append(real_value)
         return ret
