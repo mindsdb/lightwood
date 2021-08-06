@@ -57,7 +57,7 @@ class Normalizer(BaseModel):
                 preds = preds.values.squeeze()
             else:
                 preds = [p[0] for p in preds.values.squeeze()]
-
+            preds = preds.astype(float)
             labels = self.compute_numerical_labels(preds, truths, self.bounds)
 
         elif self.target_dtype in [dtype.binary, dtype.categorical]:
