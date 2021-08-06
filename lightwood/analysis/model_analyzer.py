@@ -13,6 +13,7 @@ from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSe
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.helpers.general import evaluate_accuracy
 from lightwood.ensemble import BaseEnsemble
+from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 
 from lightwood.analysis.acc_stats import AccStats
 from lightwood.analysis.nc.norm import Normalizer
@@ -52,11 +53,13 @@ def model_analyzer(
     is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
     is_classification = data_type in (dtype.categorical, dtype.binary)
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
-    disable_column_importance = disable_column_importance or (ts_cfg.is_timeseries or
-                                                              dtype_dict[target] in [dtype.short_text, dtype.rich_text])
 
     encoded_train_data = ConcatedEncodedDs(train_data)
     encoded_data = ConcatedEncodedDs(data)
+
+    has_pretrained_text_enc = any([isinstance(enc, PretrainedLangEncoder)
+                                   for enc in encoded_train_data.encoders.values()])
+    disable_column_importance = disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
 
     data = encoded_data.data_frame
     runtime_analyzer = {}
