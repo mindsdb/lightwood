@@ -101,6 +101,16 @@ def statistical_analysis(data: pd.DataFrame,
             'biased_buckets': biased_buckets
         }
 
+    avg_words_per_sentence = {}
+    for col in df.columns:
+        if dtypes[col] in (dtype.rich_text, dtype.short_text):
+            words_per_sentence = []
+            for item in df[col]:
+                words_per_sentence.append(len(item.split(' ')))
+            avg_words_per_sentence[col] = int(np.mean(words_per_sentence))
+        else:
+            avg_words_per_sentence[col] = None
+
     log.info('Finished statistical analysis')
     return StatisticalAnalysis(
         nr_rows=nr_rows,
@@ -110,5 +120,6 @@ def statistical_analysis(data: pd.DataFrame,
         histograms=histograms,
         missing=missing,
         distinct=distinct,
-        bias=bias
+        bias=bias,
+        avg_words_per_sentence=avg_words_per_sentence
     )

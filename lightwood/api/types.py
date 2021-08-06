@@ -75,6 +75,7 @@ class StatisticalAnalysis:
     missing: object
     distinct: object
     bias: object
+    avg_words_per_sentence: object
 
 
 @dataclass_json
