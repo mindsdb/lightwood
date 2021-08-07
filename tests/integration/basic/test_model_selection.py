@@ -7,7 +7,7 @@ from lightwood.api.types import ProblemDefinition
 
 class TestModelSelection(unittest.TestCase):
     def get_models(self, df: pd.DataFrame, target: str, prob_kwargs: dict = None):
-        prob_kwargs = {'target': target} if not prob_kwargs else {'target': target, **prob_kwargs}
+        prob_kwargs = {'target': target, 'time_aim': 15} if not prob_kwargs else {'target': target, **prob_kwargs}
         prdb = ProblemDefinition.from_dict(prob_kwargs)
         json_ai = json_ai_from_problem(df, prdb).to_dict()
         models = [model['module'] for model in json_ai['outputs'][target]['models']]
@@ -46,6 +46,7 @@ class TestModelSelection(unittest.TestCase):
         target = 'Traffic'
         prob_kwargs = {
             'timeseries_settings': {
+                'time_aim': 15,
                 'group_by': ['Country'],
                 'nr_predictions': 1,
                 'order_by': ['T'],
@@ -60,6 +61,7 @@ class TestModelSelection(unittest.TestCase):
         df = pd.read_csv('tests/data/arrivals.csv')
         target = 'Traffic'
         prob_kwargs = {
+            'time_aim': 15,
             'timeseries_settings': {
                 'group_by': ['Country'],
                 'nr_predictions': 3,
