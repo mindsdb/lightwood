@@ -25,6 +25,8 @@ jobs:
         pip install --no-cache-dir -e .
         pip install flake8
         pip install -r tests/requirements.txt
+        echo "$DATABASE_CREDENTIALS" > ~/.mindsdb_credentials.json
+        sudo chmod 644 ~/.mindsdb_credentials.json
     - name: Install dependencies Windows
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then
