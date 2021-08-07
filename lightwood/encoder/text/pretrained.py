@@ -53,6 +53,7 @@ of the output embedding
 + Look into regression tuning (will require grad. clipping)
 + Look into tuning to the encoded space of output.
 """
+import time
 import torch
 from torch.utils.data import DataLoader
 import os
@@ -282,8 +283,11 @@ class PretrainedLangEncoder(BaseEncoder):
         else:
             log.info("Scheduler provided.")
 
+        started = time.time()
         for epoch in range(n_epochs):
             total_loss = 0
+            if time.time() - started > self.stop_after:
+                break
 
             for batch in dataset:
                 optim.zero_grad()
