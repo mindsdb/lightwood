@@ -84,7 +84,7 @@ def statistical_analysis(data: pd.DataFrame,
                 'y': list(hist.values())
             }
             buckets[col] = histograms[col]['x']
-        if dtypes[col] in (dtype.integer, dtype.float):
+        if dtypes[col] in (dtype.integer, dtype.float, dtype.array):
             histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col])
             buckets[col] = histograms[col]['x']
 

@@ -23,7 +23,7 @@ def transform_timeseries(
 
     if '__mdb_make_predictions' in original_df.columns:
         index = original_df[original_df['__mdb_make_predictions'].map(
-            {'True': True, 'False': False, True: True, False: False}) is True]
+            {'True': True, 'False': False, True: True, False: False}).isin([True])]
         infer_mode = index.shape[0] == 0  # condition to trigger: __mdb_make_predictions is set to False everywhere
         # @TODO: dont drop and use instead of original_index?
         original_df = original_df.reset_index(drop=True) if infer_mode else original_df
@@ -124,7 +124,7 @@ def transform_timeseries(
     combined_df = pd.concat(df_arr)
 
     if '__mdb_make_predictions' in combined_df.columns:
-        combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool) is True])
+        combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool).isin([True])])
         del combined_df['__mdb_make_predictions']
 
     if len(combined_df) == 0:

@@ -40,6 +40,10 @@ class AccStats:
             real_value = row[self.target]
             predicted_value = predictions.iloc[n]['prediction']
 
+            if isinstance(predicted_value, list):
+                # T+N time series, for now we compare the T+1 prediction only @TODO: generalize
+                predicted_value = predicted_value[0]
+
             predicted_value = predicted_value \
                 if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
                 else float(predicted_value)
