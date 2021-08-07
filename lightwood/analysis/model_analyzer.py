@@ -282,7 +282,7 @@ def model_analyzer(
     runtime_analyzer['accuracy_samples'] = accuracy_samples
 
     runtime_analyzer['validation_set_accuracy'] = normal_accuracy
-    if dtype_dict[target] in [dtype.integer, dtype.float]:
+    if dtype_dict[target] in [dtype.integer, dtype.float] and not is_multi_ts:
         runtime_analyzer['validation_set_accuracy_r2'] = r2_score(data[target], normal_predictions['prediction'])
 
     model_analysis = ModelAnalysis(
