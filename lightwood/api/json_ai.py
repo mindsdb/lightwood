@@ -361,6 +361,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'disable_column_importance': 'False',
                 'dtype_dict': '$dtype_dict',
                 'fixed_significance': None,
+                'confidence_normalizer': False,
                 'positive_domain': False,
             }
         }

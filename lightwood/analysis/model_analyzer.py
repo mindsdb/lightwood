@@ -43,6 +43,7 @@ def model_analyzer(
     disable_column_importance: bool,
     fixed_significance: float,
     positive_domain: bool,
+    confidence_normalizer: bool,
     accuracy_functions
 ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
@@ -106,9 +107,12 @@ def model_analyzer(
 
         norm_params = {'target': target, 'dtype_dict': dtype_dict, 'predictor': predictor,
                        'encoders': encoded_data.encoders, 'is_multi_ts': is_multi_ts, 'stop_after': 1e2}
-        normalizer = Normalizer(fit_params=norm_params)
-        normalizer.fit(train_data)
-        normalizer.prediction_cache = normalizer(encoded_data)
+        if confidence_normalizer:
+            normalizer = Normalizer(fit_params=norm_params)
+            normalizer.fit(train_data)
+            normalizer.prediction_cache = normalizer(encoded_data)
+        else:
+            normalizer = None
 
         # instance the ICP
         nc = nc_class(model, nc_function, normalizer=normalizer)
