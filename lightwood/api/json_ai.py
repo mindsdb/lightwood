@@ -76,7 +76,7 @@ def lookup_encoder(
         encoder_dict['args']['output_type'] = '$dtype_dict[$target]'
 
     for encoder_name in trainable_encoders:
-        if encoder_name in encoder_dict['module'].split('.')[1]:
+        if encoder_name == encoder_dict['module'].split('.')[1]:
             encoder_dict['args']['stop_after'] = '$problem_definition.seconds_per_encoder'
 
     if is_target_predicting_encoder:
@@ -183,17 +183,23 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         encoder = lookup_encoder(col_dtype, col_name, False, problem_definition, is_target_predicting_encoder)
 
         for encoder_name in ts_encoders:
-            if problem_definition.timeseries_settings.is_timeseries and encoder_name in encoder['module'].split('.')[1]:
+            if problem_definition.timeseries_settings.is_timeseries and encoder_name == encoder['module'].split('.')[1]:
                 if problem_definition.timeseries_settings.group_by is not None:
                     for group in problem_definition.timeseries_settings.group_by:
                         dependency.append(group)
 
                 if problem_definition.timeseries_settings.use_previous_target:
                     dependency.append(f'__mdb_ts_previous_{target}')
-
-        feature = Feature(
-            encoder=encoder
-        )
+        
+        if len(dependency) > 0:
+            feature = Feature(
+                encoder=encoder,
+                dependency=dependency
+            )
+        else:
+            feature = Feature(
+                encoder=encoder
+            )
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
