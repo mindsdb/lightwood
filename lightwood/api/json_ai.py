@@ -190,7 +190,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
                 if problem_definition.timeseries_settings.use_previous_target:
                     dependency.append(f'__mdb_ts_previous_{target}')
-        
+
         if len(dependency) > 0:
             feature = Feature(
                 encoder=encoder,
@@ -223,7 +223,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
              for x in type_information.dtypes.values()]) * 200
 
     if problem_definition.time_aim is not None:
-        nr_trainable_encoders = len([x for x in features.values() if x.encoder['module'].split('.')[1] 
+        nr_trainable_encoders = len([x for x in features.values() if x.encoder['module'].split('.')[1]
                                     in trainable_encoders])
         nr_models = len(list(outputs.values())[0].models)
         encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5)
