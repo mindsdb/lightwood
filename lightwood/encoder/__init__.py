@@ -15,7 +15,7 @@ from lightwood.encoder.time_series.rnn import TimeSeriesEncoder
 from lightwood.encoder.time_series.plain import TimeSeriesPlainEncoder
 from lightwood.encoder.categorical.multihot import MultiHotEncoder
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
-from lightwood.encoder.type_encoder_maps import (Array, Binary, Categorical, Date, DateTime, Float, Image, Integer,
+from lightwood.encoder.type_encoder_maps import (Array, Binary, Categorical, Date, Datetime, Float, Image, Integer,
                                                  Quantity, Rich_Text, Short_Text, Tags)
 
 
@@ -31,4 +31,4 @@ __all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder',
            'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder',
            'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'MultiHotEncoder',
            'PretrainedLangEncoder', 'AmplitudeTsEncoder', 'BinaryEncoder', 'Array', 'Binary', 'Categorical', 'Date',
-           'DateTime', 'Float', 'Image', 'Integer', 'Quantity', 'Rich_Text', 'Short_Text', 'Tags']
+           'Datetime', 'Float', 'Image', 'Integer', 'Quantity', 'Rich_Text', 'Short_Text', 'Tags']
