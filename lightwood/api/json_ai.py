@@ -190,7 +190,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
                 if problem_definition.timeseries_settings.use_previous_target:
                     dependency.append(f'__mdb_ts_previous_{target}')
-        
+
         if len(dependency) > 0:
             feature = Feature(
                 encoder=encoder,
@@ -223,7 +223,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
              for x in type_information.dtypes.values()]) * 200
 
     if problem_definition.time_aim is not None:
-        nr_trainable_encoders = len([x for x in features.values() if x.encoder['module'].split('.')[1] 
+        nr_trainable_encoders = len([x for x in features.values() if x.encoder['module'].split('.')[1]
                                     in trainable_encoders])
         nr_models = len(list(outputs.values())[0].models)
         encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5)
@@ -428,9 +428,10 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     dtype_dict = {json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""}
 
     for col_name, feature in json_ai.features.items():
-        encoder_dict[col_name] = call(feature.encoder, json_ai)
-        dependency_dict[col_name] = feature.dependency
-        dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
+        if col_name not in json_ai.problem_definition.ignore_features:
+            encoder_dict[col_name] = call(feature.encoder, json_ai)
+            dependency_dict[col_name] = feature.dependency
+            dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
     # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
     if json_ai.problem_definition.timeseries_settings.use_previous_target:
@@ -449,7 +450,8 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
             encoder=encoder_dict[col_name]
         )
 
-    input_cols = ','.join([f"""'{name}'""" for name in json_ai.features])
+    ignored_cols = json_ai.problem_definition.ignore_features
+    input_cols = ','.join([f"""'{name}'""" for name in json_ai.features if name not in ignored_cols])
 
     ts_transform_code = ''
     ts_analyze_code = ''
