@@ -216,7 +216,7 @@ def get_identifier_description(data, column_name, data_dtype):
     all_uuid_charset = all(set(str(x)).issubset(uuid_charset) for x in data)
     is_uuid = all_uuid_charset and all_same_length
 
-    if all_same_length and len(data) == len(set(data)) and data_dtype not in (dtype.np.integer, dtype.float):
+    if all_same_length and len(data) == len(set(data)) and data_dtype not in (dtype.integer, dtype.float):
         str_data = [str(x) for x in data]
         randomness_per_index = []
         for i, _ in enumerate(str_data[0]):
