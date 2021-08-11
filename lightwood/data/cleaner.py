@@ -81,7 +81,7 @@ def _clean_value(element: object, data_dtype: str):
     if data_dtype in (dtype.quantity):
         element = float(re.sub("[^0-9.,]", '', element).replace(',', '.'))
 
-    if data_dtype in (dtype.short_text, dtype.rich_text, dtype.categorical, dtype.binary):
+    if data_dtype in (dtype.short_text, dtype.rich_text, dtype.categorical, dtype.binary, dtype.tags):
         element = str(element)
 
     return element
