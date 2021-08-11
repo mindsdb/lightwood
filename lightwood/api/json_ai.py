@@ -22,7 +22,7 @@ def lookup_encoder(
         dtype.categorical: 'Categorical.CategoricalAutoEncoder',
         dtype.tags: 'Tags.MultiHotEncoder',
         dtype.date: 'Date.DatetimeEncoder',
-        dtype.datetime: 'DateTime.DatetimeEncoder',
+        dtype.datetime: 'Datetime.DatetimeEncoder',
         dtype.image: 'Image.Img2VecEncoder',
         dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
         dtype.short_text: 'Short_Text.CategoricalAutoEncoder',
@@ -265,7 +265,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.helpers.seed import seed', 'from lightwood.helpers.log import log', 'import lightwood',
         'from lightwood.api import *', 'from lightwood.model import BaseModel',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
-        'from lightwood.encoder import Array, Binary, Categorical, Date, DateTime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
+        'from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
         'from lightwood.ensemble import BaseEnsemble', 'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call',
         'from lightwood.data.encoded_ds import ConcatedEncodedDs', 'from lightwood import ProblemDefinition']
