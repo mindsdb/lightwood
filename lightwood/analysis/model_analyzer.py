@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from itertools import product
-from sklearn.metrics import r2_score
 from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api import dtype

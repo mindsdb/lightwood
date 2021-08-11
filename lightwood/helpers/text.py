@@ -240,7 +240,8 @@ def get_identifier_description(data, column_name, data_dtype):
                 return 'Unknown identifier'
 
     # Everything is unique and it's too short to be rich text
-    if data_dtype in (dtype.categorical, dtype.short_text, dtype.rich_text) and unquie_pct > 0.99999 and mean_spaces < 1:
+    if data_dtype in (dtype.categorical, dtype.short_text, dtype.rich_text) and \
+            unquie_pct > 0.99999 and mean_spaces < 1:
         return 'Unknown identifier'
 
     return None
