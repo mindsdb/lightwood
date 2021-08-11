@@ -205,9 +205,10 @@ def get_identifier_description(data, column_name, data_dtype):
     mean_spaces = np.mean(spaces)
 
     # Detect auto incrementing index
-    if data_dtype == dtype.integer:
-        if get_pct_auto_increment(data) > 0.98 and unquie_pct > 0.99:
-            return 'Auto-incrementing identifier'
+    # -- some cases where I guess people do want to use this for learning, so ignoring this check for now...
+    # if data_dtype == dtype.integer:
+    #    if get_pct_auto_increment(data) > 0.98 and unquie_pct > 0.99:
+    #        return 'Auto-incrementing identifier'
 
     # Detect hash
     all_same_length = all(len(str(data[0])) == len(str(x)) for x in data)
@@ -217,41 +218,6 @@ def get_identifier_description(data, column_name, data_dtype):
 
     if all_same_length and len(data) == len(set(data)):
         str_data = [str(x) for x in data]
-        # If all data points are strings of equal length
-        # then compute entropy per each index through all data
-        #
-        # Example:
-        #
-        #   column
-        # 1 'wqk5'
-        # 2 'wq6z'
-        # 3 'wqv7'
-        # 4 'eq8O'
-        # 5 'eqkO'
-        # 6 'eqyS'
-        # 7 'eqAe'
-        #    ||||
-        #    ||||-------------------- index 3
-        #    |||                      Counter({5: 1, z: 1, 7: 1, O: 2, s: 1, e: 1})
-        #    |||                      S = entropy[1, 1, 1, 2, 1, 1]
-        #    |||                      randomness = S / np.log(6) <----- 6 unique values at this index
-        #    |||
-        #    |||--------------------- index 2
-        #    ||                       Counter({k: 2, 6: 1, v: 1, 8: 1, Y: 1, A: 1})
-        #    ||                       S = entropy[2, 1, 1, 1, 1, 1]
-        #    ||                       randomness = S / np.log(6) <----- 6 unique values at this index
-        #    ||
-        #    ||---------------------- index 1
-        #    |                        Counter({q: 7})
-        #    |                        S = entropy[7]
-        #    |                        randomness = S / np.log(1) <----- 1 unique value at this index
-        #    |
-        #    |----------------------- index 0
-        #                             Counter({w: 3, e: 4})
-        #                             S = entropy[3, 4]
-        #                             randomness = S / np.log(2) <----- 2 unique values at this index
-        #
-        # Scaling entropy by np.log(num_of_unique_values) produces a number in range [0, 1]
         randomness_per_index = []
         for i, _ in enumerate(str_data[0]):
             N = len(set(x[i] for x in str_data))
@@ -274,7 +240,7 @@ def get_identifier_description(data, column_name, data_dtype):
                 return 'Unknown identifier'
 
     # Everything is unique and it's too short to be rich text
-    if data_dtype in (dtype.categorical, dtype.short_text, dtype.rich_text) and unquie_pct > 0.999 and mean_spaces < 1:
+    if data_dtype in (dtype.categorical, dtype.short_text, dtype.rich_text) and unquie_pct > 0.99999 and mean_spaces < 1:
         return 'Unknown identifier'
 
     return None
