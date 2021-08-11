@@ -277,20 +277,13 @@ def model_analyzer(
 
     acc_stats = AccStats(dtype_dict=dtype_dict, target=target, buckets=stats_info.buckets)
     acc_stats.fit(data, normal_predictions, conf=result_df)
-
-    overall_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats()
-
-    runtime_analyzer['overall_accuracy'] = overall_accuracy
-    runtime_analyzer['accuracy_histogram'] = accuracy_histogram
-    runtime_analyzer['confusion_matrices'] = cm
-    runtime_analyzer['accuracy_samples'] = accuracy_samples
-
-    runtime_analyzer['validation_set_accuracy'] = normal_accuracy
-    if dtype_dict[target] in [dtype.integer, dtype.float] and not is_multi_ts:
-        runtime_analyzer['validation_set_accuracy_r2'] = r2_score(data[target], normal_predictions['prediction'])
+    bucket_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats()
+    runtime_analyzer['bucket_accuracy'] = bucket_accuracy
 
     model_analysis = ModelAnalysis(
         accuracies=score_dict,
+        accuracy_histogram=accuracy_histogram,
+        accuracy_samples=accuracy_samples,
         train_sample_size=len(encoded_train_data),
         test_sample_size=len(encoded_data),
         confusion_matrix=cm,

@@ -280,6 +280,8 @@ class JsonAI:
 @dataclass
 class ModelAnalysis:
     accuracies: Dict[str, float]
+    accuracy_histogram: Dict[str, list]
+    accuracy_samples: Dict[str, list]
     train_sample_size: int
     test_sample_size: int
     column_importances: Dict[str, float]
