@@ -248,7 +248,7 @@ def model_analyzer(
             partial_data = deepcopy(encoded_data)
             partial_data.clear_cache()
             for ds in partial_data.encoded_ds_arr:
-                ds.data_frame[col].values[:] = 0
+                ds.data_frame[col] = [None] * len(ds.data_frame[col])
 
             if not is_classification:
                 empty_input_preds = predictor(partial_data)
