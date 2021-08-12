@@ -51,7 +51,7 @@ class TestDatetimeEncoder(unittest.TestCase):
                     continue
                 else:
                     vector = normalizer.encode(data)
-                    vector[:, i] = limit['corruption']
+                    vector[:, :, i] = limit['corruption']
                     recons = datetime.fromtimestamp(normalizer.decode(vector)[0])
 
                     # decoding correctly caps the invalid vector component
