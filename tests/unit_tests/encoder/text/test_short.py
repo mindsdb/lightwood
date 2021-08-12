@@ -151,7 +151,7 @@ class TestShortTextEncoder(unittest.TestCase):
             enc.decode(encoded_data)
 
     def test_non_smallvocab_non_target_auto_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=800)
+        priming_data = generate_sentences(2, 6, vocab_size=101)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=False)
@@ -193,7 +193,7 @@ class TestShortTextEncoder(unittest.TestCase):
             assert x_sent == y_sent
 
     def test_non_smallvocab_non_target_manual_mode(self):
-        priming_data = generate_sentences(2, 6, vocab_size=800)
+        priming_data = generate_sentences(2, 6, vocab_size=101)
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=False, mode='concat')

@@ -9,7 +9,7 @@ class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
         from lightwood.api.high_level import predictor_from_problem
 
-        df = pd.read_csv('tests/data/boston.csv')
+        df = pd.read_csv('tests/data/boston.csv')[:500]
         target = 'MEDV'
 
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 200}))

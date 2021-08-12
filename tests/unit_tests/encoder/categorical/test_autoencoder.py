@@ -31,7 +31,7 @@ class TestAutoencoder(unittest.TestCase):
         random.shuffle(priming_data)
         random.shuffle(test_data)
 
-        enc = CategoricalAutoEncoder(stop_after=30)
+        enc = CategoricalAutoEncoder(stop_after=10)
         enc.desired_error = 3
 
         enc.prepare(priming_data)

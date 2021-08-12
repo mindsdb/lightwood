@@ -43,7 +43,7 @@ class TestRnnEncoder(unittest.TestCase):
         example = ([[1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6]],  # query
                    [4, 5, 6, 7])                                    # answer
 
-        data = series * 100
+        data = series * 50
         timesteps = 6
         batch_size = 1
 
