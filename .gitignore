@@ -1,30 +1,16 @@
-docs/site
-docs/scraps
-__pycache__
 *.pth
 *.vec
 *.pkl
 *.dill
-integration_testing/*.csv
-integration_testing/*.tsv
-integration_testing/*.sql
-integration_testing/__*
-test_data.csv
-train_data.csv
 *.ipy*
 *.test.*
 .cache*
-storage/*
-mindsdb_storage/*
-config/personal_config.py
 *.jar
-data/*
 mindsdb.egg-info
-clean_data
 .pypirc
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
+*__pycache__*
 *.py[cod]
 *$py.class
 
@@ -65,10 +51,9 @@ ENV/
 pip-log.txt
 pip-delete-this-directory.txt
 
-docs/_build
-docs/_static
-docs/_templates
-docs/index.rst
-docs/make.bat
-docs/Makefile
-docs/source
+# Temporary
+dynamic_predictor.py
+
+test.pickle
+AI.json
+AI2.json

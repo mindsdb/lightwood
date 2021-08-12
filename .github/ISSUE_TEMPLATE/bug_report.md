@@ -1,14 +1,15 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-labels: 
+labels:
 ---
 
-**Your Environment**
-
+## Your Environment
 * Python version:
 * Operating system:
 * Lightwood version:
-* Additional info if applicable:
 
-**Please describe your issue and how we can replicate it**
+## Describe your issue
+
+
+## How can we replicate it?
