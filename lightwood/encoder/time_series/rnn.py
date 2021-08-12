@@ -388,7 +388,7 @@ class TimeSeriesEncoder(BaseEncoder):
 
         for i, val in enumerate(data):
             if get_next_count is None:
-                if dependency_data is not None and len(dependency_data) > 0:
+                if dependency_data is not None and len(dependency_data) > 0 and len(ptd) > 0:
                     encoded = self._encode_one(val, previous=[values[i] for values in ptd])
                 else:
                     encoded = self._encode_one(val)
