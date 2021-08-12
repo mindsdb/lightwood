@@ -73,8 +73,8 @@ class EncodedDs(Dataset):
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
         kwargs = {}
         if 'dependency_data' in inspect.signature(self.encoders[column_name].encode).parameters:
-            kwargs['dependency_data'] = {dep: self.data_frame[dep].tolist()
-                                         for dep in self.encoders[column_name].dependencies}
+            deps = [dep for dep in self.encoders[column_name].dependencies if dep in self.data_frame.columns]
+            kwargs['dependency_data'] = {dep: self.data_frame[dep].tolist() for dep in deps}
         encoded_data = self.encoders[column_name].encode(self.data_frame[column_name], **kwargs)
 
         if not isinstance(encoded_data, torch.Tensor):
