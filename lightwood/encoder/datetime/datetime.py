@@ -73,34 +73,37 @@ class DatetimeEncoder(BaseEncoder):
 
     def decode(self, encoded_data, return_as_datetime=False):
         ret = []
+        if len(encoded_data.shape) > 2 and encoded_data.shape[0] == 1:
+            encoded_data = encoded_data.squeeze(0)
+
         for vector in encoded_data.tolist():
-
-            if sum(vector) == 0:
-                ret.append(None)
-
-            else:
-                if self.sinusoidal:
-                    vector = list(map(lambda x: np.arcsin(x), vector))[::2]
-                c = self.constants
-
-                year = max(0, round(vector[0] * c['year']))
-                month = max(1, min(12, round(vector[1] * c['month'])))
-                day_constant = calendar.monthrange(year, month)[-1]
-                day = max(1, min(round(vector[2] * day_constant), day_constant))
-                hour = max(0, min(23, round(vector[4] * c['hour'])))
-                minute = max(0, min(59, round(vector[5] * c['minute'])))
-                second = max(0, min(59, round(vector[6] * c['second'])))
-
-                dt = datetime.datetime(year=year, month=month, day=day, hour=hour,
-                                       minute=minute, second=second)
-
-                if return_as_datetime is True:
-                    ret.append(dt)
-                else:
-                    ret.append(
-                        round(dt.timestamp())
-                    )
+            ret.append(self.decode_one(vector, return_as_datetime=return_as_datetime))
 
         return ret
 
-    # @TODO: decode_one here
+    def decode_one(self, vector, return_as_datetime=False):
+        if sum(vector) == 0:
+            decoded = None
+
+        else:
+            if self.sinusoidal:
+                vector = list(map(lambda x: np.arcsin(x), vector))[::2]
+            c = self.constants
+
+            year = max(0, round(vector[0] * c['year']))
+            month = max(1, min(12, round(vector[1] * c['month'])))
+            day_constant = calendar.monthrange(year, month)[-1]
+            day = max(1, min(round(vector[2] * day_constant), day_constant))
+            hour = max(0, min(23, round(vector[4] * c['hour'])))
+            minute = max(0, min(59, round(vector[5] * c['minute'])))
+            second = max(0, min(59, round(vector[6] * c['second'])))
+
+            dt = datetime.datetime(year=year, month=month, day=day, hour=hour,
+                                   minute=minute, second=second)
+
+            if return_as_datetime is True:
+                decoded = dt
+            else:
+                decoded = round(dt.timestamp())
+
+        return decoded
