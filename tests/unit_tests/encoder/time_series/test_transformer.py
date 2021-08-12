@@ -55,7 +55,7 @@ class TestTransformerEncoder(unittest.TestCase):
 
         data = [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
                 [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0],
-                [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]] * 10000
+                [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]] * 1000
         timesteps = len(data[0])
         example = copy.deepcopy(data)
         encoder = TimeSeriesEncoder(stop_after=10)
