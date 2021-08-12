@@ -16,10 +16,11 @@ class MinMaxNormalizer:
         self.output_size = 1
 
     def prepare(self, x: np.ndarray) -> None:
+        # @TODO: streamline input type
         if isinstance(x[0], list):
             x = np.vstack(x)
         if isinstance(x[0], torch.Tensor):
-            x = torch.stack(x)
+            x = torch.stack(x).numpy()
         if len(x.shape) < 2:
             x = np.expand_dims(x, axis=1)
 
@@ -31,6 +32,8 @@ class MinMaxNormalizer:
     def encode(self, y: np.ndarray) -> torch.Tensor:
         if isinstance(y[0], list):
             y = np.vstack(y)
+        if isinstance(y[0], torch.Tensor):
+            y = torch.stack(y).numpy()
         if len(y.shape) < 2:
             y = np.expand_dims(y, axis=1)
 

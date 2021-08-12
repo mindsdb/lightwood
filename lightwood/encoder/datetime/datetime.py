@@ -40,7 +40,7 @@ class DatetimeEncoder(BaseEncoder):
 
         ret = [self.encode_one(row) for row in data]
 
-        return torch.Tensor(ret).squeeze(0)
+        return torch.Tensor(ret)
 
     def encode_one(self, data):
         """

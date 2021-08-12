@@ -163,6 +163,8 @@ class TimeSeriesEncoder(BaseEncoder):
         if self._normalizer:
             self._normalizer.prepare(priming_data)
             priming_data = self._normalizer.encode(priming_data).to(self.device)
+            if len(priming_data.shape) < 3:
+                priming_data = priming_data.unsqueeze(-1)
         else:
             priming_data = torch.stack([d for d in priming_data]).unsqueeze(-1).to(self.device)
 
@@ -279,7 +281,9 @@ class TimeSeriesEncoder(BaseEncoder):
             self._max_ts_length = int(lengths_data.max())
 
             if self._normalizer:
-                data = self._normalizer.encode(data).unsqueeze(0).to(self.device)
+                data = self._normalizer.encode(data).to(self.device)
+                if len(data.shape) < 3:
+                    data = data.unsqueeze(-1)
             else:
                 data = torch.stack([d for d in data]).unsqueeze(-1).to(self.device)
 
@@ -346,7 +350,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 if dep in self.grouped_by:
                     continue
                 # normalize numerical target per group-by
-                if self._target_type in (dtype.integer, dtype.float):
+                if self._target_type in (dtype.integer, dtype.float, dtype.array):
                     dep_info = {
                         'group_info': {group: dependency_data[group] for group in self.grouped_by},
                         'data': dep_data
