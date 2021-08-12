@@ -15,7 +15,6 @@ from lightwood.api import dtype
 def transform_timeseries(
         data: pd.DataFrame, dtype_dict: Dict[str, str],
         timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
-    print(f'ORIGINAL DATA: {data}')
     tss = timeseries_settings
     original_df = copy.deepcopy(data)
     gb_arr = tss.group_by if tss.group_by is not None else []
@@ -165,7 +164,6 @@ def transform_timeseries(
     del combined_df['original_index']
 
     # return combined_df, secondary_type_dict, timeseries_row_mapping, df_gb_map
-    print(f'COMBINED DF: {combined_df}')
     return combined_df
 
 
