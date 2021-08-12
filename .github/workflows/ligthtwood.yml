@@ -11,9 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # macos-latest disabled for now, SegFaults (error 11) suspected OOM issue
-        os: [ubuntu-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest]
+        python-version: [3.7,3.8,3.9]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -24,6 +23,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir -e .
+        pip install flake8
+        pip install -r tests/requirements.txt
+        echo "$DATABASE_CREDENTIALS" > ~/.mindsdb_credentials.json
+        sudo chmod 644 ~/.mindsdb_credentials.json
     - name: Install dependencies Windows
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then
@@ -42,16 +45,10 @@ jobs:
         CHECK_FOR_UPDATES: False
     - name: Lint with flake8
       run: |
-        # IMPLEMENT THIS AFTER WE HAVE ALL PEP8 styles
-        # stop the build if there are Python syntax errors or undefined names
-        #flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        #flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        python -m flake8 .
     - name: Test with unittest
       run: |
-        cd tests/unit_tests
-        python -m unittest
-        cd ../..
+        python -m unittest discover tests
 
   deploy:
     runs-on: ubuntu-latest
