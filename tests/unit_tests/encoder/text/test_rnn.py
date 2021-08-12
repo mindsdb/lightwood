@@ -3,6 +3,7 @@ from lightwood.encoder.text import RnnEncoder
 
 
 class TestRnnEncoder(unittest.TestCase):
+    @unittest.skip("Currently not using this encoder.")
     def test_encode_and_decode(self):
         sentences = ["Everyone really likes the newest benefits",
                      "The Government Executive articles housed on the website are not able to be searched",
