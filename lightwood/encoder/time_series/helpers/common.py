@@ -18,6 +18,8 @@ class MinMaxNormalizer:
     def prepare(self, x: np.ndarray) -> None:
         if isinstance(x[0], list):
             x = np.vstack(x)
+        if isinstance(x[0], torch.Tensor):
+            x = torch.stack(x)
         if len(x.shape) < 2:
             x = np.expand_dims(x, axis=1)
 
