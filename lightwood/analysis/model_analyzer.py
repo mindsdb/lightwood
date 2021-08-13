@@ -287,7 +287,9 @@ def model_analyzer(
         train_sample_size=len(encoded_train_data),
         test_sample_size=len(encoded_data),
         confusion_matrix=cm,
-        column_importances=column_importances
+        column_importances=column_importances,
+        histograms=stats_info.histograms,
+        dtypes=dtype_dict
     )
 
     return model_analysis, runtime_analyzer
