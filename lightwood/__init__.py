@@ -1,26 +1,12 @@
-import torchvision
-import numpy as np
-import torch
-import sys
-
-
-if sys.version_info < (3, 6):
-    sys.exit('Sorry, For Lightwood Python < 3.6 is not supported')
-
+import os
+import logging
+logging.getLogger('matplotlib').setLevel(level=logging.WARNING)
+from lightwood.api import __all__ as api_all_list
+from lightwood.api import * # noqa
+import lightwood.data as data
+from lightwood.data import infer_types, statistical_analysis
 from lightwood.__about__ import __package_name__ as name, __version__
-from lightwood.api.predictor import Predictor
-import lightwood.model_building
-import lightwood.constants.lightwood as CONST
-from lightwood.helpers.device import get_devices
-from lightwood.config.config import CONFIG
 
 
-COLUMN_DATA_TYPES = CONST.COLUMN_DATA_TYPES
-
-# fix random seed for reproducibility
-seed = 42
-np.random.seed(seed)
-torch.manual_seed(seed)
-if CONFIG.USE_CUDA:
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+os.environ['TOKENIZERS_PARALLELISM'] = 'true'
+__all__ = ['data', 'infer_types', 'statistical_analysis', 'name', '__version__', *api_all_list]

@@ -52,7 +52,7 @@ class LightwoodEnsemble:
         return formatted_predictions
 
     def save(self, path_to):
-        # TODO: potentially save predictors inside ensemble pickle, though there's the issue of nonpersistent stuff with torch.save()
+        # TODO: potentially save predictors inside ensemble pickle, though there's the issue of nonpersistent stuff with torch.save() # noqa
         path_list = []
         for i, model in enumerate(self.ensemble):
             path = os.path.join(path_to, f'lightwood_predictor_{i}')
