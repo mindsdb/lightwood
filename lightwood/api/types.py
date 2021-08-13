@@ -285,6 +285,6 @@ class ModelAnalysis:
     train_sample_size: int
     test_sample_size: int
     column_importances: Dict[str, float]
-    confusion_matrix: object = None
-    histograms: object = None
-    dtypes: object = None
+    confusion_matrix: object
+    histograms: object
+    dtypes: object
