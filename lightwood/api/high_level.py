@@ -12,11 +12,12 @@ import sys
 import random
 import string
 import gc
+import time
 
 
 def _module_from_code(code, module_name):
     dirname = tempfile.gettempdir()
-    filename = os.urandom(24).hex() + '.py'
+    filename = os.urandom(24).hex() + str(time.time()).replace('.', '') + '.py'
     path = os.path.join(dirname, filename)
     if 'LIGHTWOOD_DEV_SAVE_TO' in os.environ:
         path = os.environ['LIGHTWOOD_DEV_SAVE_TO']
@@ -71,6 +72,7 @@ def code_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -
 
 def predictor_from_code(code: str) -> PredictorInterface:
     module_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+    module_name += str(time.time()).replace('.', '')
     predictor = _module_from_code(code, module_name).Predictor()
     return predictor
 
