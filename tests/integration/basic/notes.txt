@@ -1,0 +1,6 @@
+
+Notes:
+-> Code generation templates + functions that generate code from templates + variables (look into templating libraries for python)
+-> Make dynamic predictor easier to read (document the various steps ) + hide away some less relevant logic stuff in methods
+-> Add parallelization whever it can fit (important: encoder preping)
+-> Look into Caffe syntax (and js conv net by karapthy)
