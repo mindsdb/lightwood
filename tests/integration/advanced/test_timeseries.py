@@ -47,6 +47,13 @@ class TestTimeseries(unittest.TestCase):
         nr_preds = 2
         order_by = 'T'
 
+        # Test multiple predictors playing along together
+        a = {}
+        a[1] = predictor_from_problem(pd.read_csv('tests/data/hdi.csv'), ProblemDefinition.from_dict(
+            {'target': 'Development Index', 'time_aim': 10}))
+        a[1].learn(pd.read_csv('tests/data/hdi.csv'))
+        a[1].predict(pd.read_csv('tests/data/hdi.csv').iloc[0:10])
+
         prdb = ProblemDefinition.from_dict({'target': target,
                                             'time_aim': 30,
                                             'nfolds': 10,
@@ -60,15 +67,15 @@ class TestTimeseries(unittest.TestCase):
                                             }
                                             })
 
-        predictor = predictor_from_problem(train, prdb)
+        a[2] = predictor_from_problem(train, prdb)
 
-        predictor.learn(train)
-        preds = predictor.predict(test)
+        a[2].learn(train)
+        preds = a[2].predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # test inferring mode
         test['__mdb_make_predictions'] = False
-        preds = predictor.predict(test)
+        preds = a[2].predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # Additionally, check timestamps are further into the future than test dates
