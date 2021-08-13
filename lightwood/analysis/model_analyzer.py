@@ -276,7 +276,8 @@ def model_analyzer(
 
     acc_stats = AccStats(dtype_dict=dtype_dict, target=target, buckets=stats_info.buckets)
     acc_stats.fit(data, normal_predictions, conf=result_df)
-    bucket_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats()
+    bucket_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats(
+        is_classification=is_classification, is_numerical=is_numerical)
     runtime_analyzer['bucket_accuracy'] = bucket_accuracy
 
     model_analysis = ModelAnalysis(

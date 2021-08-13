@@ -70,7 +70,7 @@ class AccStats:
             if conf is not None and self.col_stats[self.target] in [dtype.integer, dtype.float]:
                 self.numerical_samples_arr.append((real_value, predicted_range))
 
-    def get_accuracy_stats(self):
+    def get_accuracy_stats(self, is_classification=None, is_numerical=None):
         bucket_accuracy = {}
         bucket_acc_counts = {}
         for i, bucket in enumerate(self.normal_predictions_bucketized):
@@ -105,7 +105,9 @@ class AccStats:
 
         accuracy_histogram = {
             'buckets': list(bucket_accuracy.keys()),
-            'accuracies': list(bucket_accuracy.values())
+            'accuracies': list(bucket_accuracy.values()),
+            'is_classification': is_classification,
+            'is_numerical': is_numerical
         }
 
         labels = list(set([*self.real_values_bucketized, *self.normal_predictions_bucketized]))
