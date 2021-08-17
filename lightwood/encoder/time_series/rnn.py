@@ -23,12 +23,11 @@ from lightwood.encoder.time_series.helpers.transformer_helpers import Transforme
 class TimeSeriesEncoder(BaseEncoder):
 
     def __init__(self, stop_after: int, is_target=False, original_type: str = None, target: str = None,
-                 grouped_by: List[str] = []):
+                 grouped_by: List[str] = [], encoder_type='rnn'):
         super().__init__(is_target)
         self.device, _ = get_devices()
         self.target = target
         self.grouped_by = grouped_by
-        self.encoder_class = EncoderRNNNumerical
         self._learning_rate = 0.01
         self.output_size = 128
         self._transformer_hidden_size = None
@@ -49,6 +48,10 @@ class TimeSeriesEncoder(BaseEncoder):
         self.original_type = original_type
         self.stop_after = stop_after
         self.is_nn_encoder = True
+        if encoder_type.lower() == 'rnn':
+            self.encoder_class = EncoderRNNNumerical
+        elif encoder_type.lower() == 'transformer':
+            self.encoder_class = TransformerEncoder
 
     def setup_nn(self, ts_analysis, dependencies=None):
         """This method must be executed after initializing, else types are unassigned"""
@@ -108,6 +111,8 @@ class TimeSeriesEncoder(BaseEncoder):
                                                nhead=gcd(dec_hsize, total_dims),
                                                nhid=self._transformer_hidden_size,
                                                nlayers=1).to(self.device)
+        else:
+            raise Exception(f"Time series encoder class not supported: {self.encoder_class}")
 
         self._decoder = DecoderRNNNumerical(output_size=total_dims, hidden_size=dec_hsize).to(self.device)
         self._parameters = list(self._encoder.parameters()) + list(self._decoder.parameters())
