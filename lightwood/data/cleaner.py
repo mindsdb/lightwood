@@ -116,9 +116,6 @@ def cleaner(
 
     if mode == 'train':
         data = clean_empty_targets(data, target)
-    if mode == 'predict':
-        if target in data.columns and not timeseries_settings.use_previous_target:
-            data = data.drop(columns=[target])
 
     # Drop extra columns
     for name in list(data.columns):

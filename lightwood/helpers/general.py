@@ -17,7 +17,7 @@ def evaluate_accuracy(data: pd.DataFrame,
         if accuracy_function_str == 'evaluate_array_accuracy':
             nr_predictions = len(predictions.iloc[0])
             cols = [target] + [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]
-            true_values = data[cols].values.tolist()
+            true_values = data[cols].astype(float).values.tolist()
             accuracy_function = evaluate_array_accuracy
         else:
             true_values = data[target].tolist()
@@ -52,7 +52,6 @@ def evaluate_array_accuracy(
         predictions: List[List[Union[int, float]]],
         **kwargs
 ) -> float:
-
     aggregate = 0
 
     for i in range(len(predictions)):

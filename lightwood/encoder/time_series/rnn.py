@@ -145,7 +145,7 @@ class TimeSeriesEncoder(BaseEncoder):
         end = min(end, len(source))
         return source[start:end]
 
-    def prepare(self, priming_data, dependency_data=None, ts_analysis=None,
+    def prepare(self, priming_data, dependency_data={}, ts_analysis=None,
                 feedback_hoop_function=log.info, batch_size=256):
         """
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
@@ -174,35 +174,35 @@ class TimeSeriesEncoder(BaseEncoder):
             priming_data = torch.stack([d for d in priming_data]).unsqueeze(-1).to(self.device)
 
         # merge all normalized data into a training batch
-        if dependency_data is not None:
-            normalized_tensors = []
-            for dep_name, dep_data in dependency_data.items():
-                if dep_name in self.grouped_by:
-                    continue
-                if dep_data['original_type'] in (dtype.integer, dtype.float):
-                    dep_data['group_info'] = {group: dependency_data[group]['data'] for group in self.grouped_by}
-                    data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
-                    all_idxs = set(range(len(data)))
-                    for group_name, normalizer in self.dep_norms[dep_name].items():
-                        if group_name != '__default':
-                            idxs, subset = get_group_matches(dep_data, normalizer.combination)
-                            normalized = normalizer.encode(subset).unsqueeze(-1)
-                            data[idxs, :, :] = normalized
-                            all_idxs -= set(idxs)
-                    if len(all_idxs) > 0 and '__default' in self.dep_norms[dep_name].keys():
-                        default_norm = self.dep_norms[dep_name]['__default']
-                        subset = [dep_data['data'][idx] for idx in list(all_idxs)]
-                        data[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1)
+        normalized_tensors = []
+        for dep_name, dep_data in dependency_data.items():
+            if dep_name in self.grouped_by:
+                continue
+            if dep_data['original_type'] in (dtype.integer, dtype.float):
+                dep_data['group_info'] = {group: dependency_data[group]['data'] for group in self.grouped_by}
+                data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
+                all_idxs = set(range(len(data)))
+                for group_name, normalizer in self.dep_norms[dep_name].items():
+                    if group_name != '__default':
+                        idxs, subset = get_group_matches(dep_data, normalizer.combination)
+                        normalized = normalizer.encode(subset).unsqueeze(-1)
+                        data[idxs, :, :] = normalized
+                        all_idxs -= set(idxs)
+                if len(all_idxs) > 0 and '__default' in self.dep_norms[dep_name].keys():
+                    default_norm = self.dep_norms[dep_name]['__default']
+                    subset = [dep_data['data'][idx] for idx in list(all_idxs)]
+                    data[list(all_idxs), :, :] = torch.Tensor(default_norm.encode(subset)).unsqueeze(-1)
 
-                else:
-                    # categorical has only one normalizer at all times
-                    normalizer = self.dep_norms[dep_name]['__default']
-                    data = normalizer.encode(dep_data['data'].values)
-                    if len(data.shape) < 3:
-                        data = data.unsqueeze(-1)  # add feature dimension
-                data[torch.isnan(data)] = 0.0
-                normalized_tensors.append(data)
+            else:
+                # categorical has only one normalizer at all times
+                normalizer = self.dep_norms[dep_name]['__default']
+                data = normalizer.encode(dep_data['data'].values)
+                if len(data.shape) < 3:
+                    data = data.unsqueeze(-1)  # add feature dimension
+            data[torch.isnan(data)] = 0.0
+            normalized_tensors.append(data)
 
+        if normalized_tensors:
             normalized_data = torch.cat(normalized_tensors, dim=-1).to(self.device)
             priming_data = torch.cat([priming_data, normalized_data], dim=-1)
 
