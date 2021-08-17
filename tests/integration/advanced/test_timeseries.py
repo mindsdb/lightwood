@@ -4,6 +4,7 @@ import pandas as pd
 from typing import List
 
 from lightwood.api.types import ProblemDefinition
+from lightwood.api.high_level import predictor_from_problem
 
 np.random.seed(0)
 
@@ -28,8 +29,7 @@ class TestTimeseries(unittest.TestCase):
                 assert row['lower'][0] <= row['truth'] <= row['upper'][0]
 
     def test_0_grouped_regression_timeseries(self):
-        """ Test grouped numerical predictions (forecast horizon > 1), covering most of the TS pipeline """
-        from lightwood.api.high_level import predictor_from_problem
+        """ Test grouped numerical predictions, covering most of the TS pipeline """
 
         data = pd.read_csv('tests/data/arrivals.csv')
         group = 'Country'
@@ -48,34 +48,41 @@ class TestTimeseries(unittest.TestCase):
         order_by = 'T'
 
         # Test multiple predictors playing along together
-        a = {}
-        a[1] = predictor_from_problem(pd.read_csv('tests/data/hdi.csv'), ProblemDefinition.from_dict(
-            {'target': 'Development Index', 'time_aim': 10}))
-        a[1].learn(pd.read_csv('tests/data/hdi.csv'))
-        a[1].predict(pd.read_csv('tests/data/hdi.csv').iloc[0:10])
+        pred_arr = {}
+        pred_arr[1] = predictor_from_problem(data,
+                                             ProblemDefinition.from_dict({'target': target,
+                                                                          'nfolds': 10,
+                                                                          'anomaly_detection': False,
+                                                                          'timeseries_settings': {
+                                                                              'use_previous_target': False,
+                                                                              'nr_predictions': 1,
+                                                                              'order_by': [order_by],
+                                                                              'window': 5}
+                                                                          }))
+        pred_arr[1].learn(data)
+        pred_arr[1].predict(data[0:10])
 
-        prdb = ProblemDefinition.from_dict({'target': target,
-                                            'time_aim': 30,
-                                            'nfolds': 10,
-                                            'anomaly_detection': True,
-                                            'timeseries_settings': {
-                                                'use_previous_target': True,
-                                                'group_by': ['Country'],
-                                                'nr_predictions': nr_preds,
-                                                'order_by': [order_by],
-                                                'window': 5
-                                            }
-                                            })
+        pred_arr[2] = predictor_from_problem(train,
+                                             ProblemDefinition.from_dict({'target': target,
+                                                                          'time_aim': 30,
+                                                                          'nfolds': 10,
+                                                                          'anomaly_detection': True,
+                                                                          'timeseries_settings': {
+                                                                              'use_previous_target': True,
+                                                                              'group_by': ['Country'],
+                                                                              'nr_predictions': nr_preds,
+                                                                              'order_by': [order_by],
+                                                                              'window': 5
+                                                                          }
+                                                                          }))
 
-        a[2] = predictor_from_problem(train, prdb)
-
-        a[2].learn(train)
-        preds = a[2].predict(test)
+        pred_arr[2].learn(train)
+        preds = pred_arr[2].predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # test inferring mode
         test['__mdb_make_predictions'] = False
-        preds = a[2].predict(test)
+        preds = pred_arr[2].predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # Additionally, check timestamps are further into the future than test dates

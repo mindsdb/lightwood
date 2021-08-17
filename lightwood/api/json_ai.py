@@ -145,15 +145,18 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     'stop_after': '$problem_definition.seconds_per_model',
                     'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions'
                 }
-            },
-                {
-                'module': 'SkTime',
-                'args': {
-                    'stop_after': '$problem_definition.seconds_per_model',
-                    'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
-                },
-            }
-            ])
+            }])
+
+            if problem_definition.timeseries_settings.use_previous_target:
+                models.extend([
+                    {
+                    'module': 'SkTime',
+                    'args': {
+                        'stop_after': '$problem_definition.seconds_per_model',
+                        'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
+                    },
+                }
+                ])
 
     outputs = {target: Output(
         data_dtype=type_information.dtypes[target],
@@ -298,7 +301,9 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             models[i]['args']['timeseries_settings'] = models[i]['args'].get(
                 'timeseries_settings', '$problem_definition.timeseries_settings')
             models[i]['args']['net'] = models[i]['args'].get(
-                'net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries else '"ArNet"')
+                'net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries
+                                         or not problem_definition.timeseries_settings.use_previous_target
+                else '"ArNet"')
 
         elif models[i]['module'] == 'LightGBM':
             models[i]['args']['target'] = models[i]['args'].get('target', '$target')

@@ -101,12 +101,11 @@ def transform_timeseries(
             partial(
                 _ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window),
             df_arr)
-        if tss.use_previous_target:
-            df_arr = pool.map(
-                partial(
-                    _ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions,
-                    window=tss.window, data_dtype=tss.target_type, mode=mode),
-                df_arr)
+        df_arr = pool.map(
+            partial(
+                _ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions,
+                window=tss.window, data_dtype=tss.target_type, mode=mode),
+            df_arr)
         pool.close()
         pool.join()
     else:
@@ -115,11 +114,10 @@ def transform_timeseries(
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
                                               historical_columns=ob_arr + tss.historical_columns, window=window)
-            if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(
-                    df_arr[i],
-                    target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type,
-                    mode=mode)
+            df_arr[i] = _ts_add_previous_target(
+                df_arr[i],
+                target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type,
+                mode=mode)
 
     combined_df = pd.concat(df_arr)
 
