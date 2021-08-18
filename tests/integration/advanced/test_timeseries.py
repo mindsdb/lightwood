@@ -12,24 +12,23 @@ np.random.seed(0)
 class TestTimeseries(unittest.TestCase):
     def check_ts_prediction_df(self, df: pd.DataFrame, nr_preds: int, orders: List[str]):
         for idx, row in df.iterrows():
-            assert len(row['prediction']) == nr_preds
+            lower = [row['lower']] if nr_preds == 1 else row['lower']
+            upper = [row['upper']] if nr_preds == 1 else row['upper']
+            prediction = [row['prediction']] if nr_preds == 1 else row['prediction']
+
+            assert len(prediction) == nr_preds
 
             for oby in orders:
                 assert len(row[f'order_{oby}']) == nr_preds
 
             for t in range(nr_preds):
-                assert row['lower'][t] <= row['prediction'][t] <= row['upper'][t]
+                assert lower[t] <= prediction[t] <= upper[t]
 
-            for oby in orders:
-                assert len(row[f'order_{oby}']) == nr_preds
-
-            if row['anomaly']:
-                assert not (row['lower'][0] <= row['truth'] <= row['upper'][0])
-            else:
-                assert row['lower'][0] <= row['truth'] <= row['upper'][0]
+            if row.get('anomaly', False):
+                assert not (lower[0] <= row['truth'] <= upper[0])
 
     def test_0_grouped_regression_timeseries(self):
-        """ Test grouped numerical predictions, covering most of the TS pipeline """
+        """Test grouped numerical predictions, covering most of the TS pipeline """
 
         data = pd.read_csv('tests/data/arrivals.csv')
         group = 'Country'
@@ -44,24 +43,31 @@ class TestTimeseries(unittest.TestCase):
             test = test.append(subframe[int(length * train_ratio):])
 
         target = 'Traffic'
-        nr_preds = 2
         order_by = 'T'
 
         # Test multiple predictors playing along together
         pred_arr = {}
+        nr_preds = 1
         pred_arr[1] = predictor_from_problem(data,
                                              ProblemDefinition.from_dict({'target': target,
                                                                           'nfolds': 10,
                                                                           'anomaly_detection': False,
                                                                           'timeseries_settings': {
                                                                               'use_previous_target': False,
-                                                                              'nr_predictions': 1,
+                                                                              'nr_predictions': nr_preds,
                                                                               'order_by': [order_by],
                                                                               'window': 5}
                                                                           }))
         pred_arr[1].learn(data)
-        pred_arr[1].predict(data[0:10])
+        preds = pred_arr[1].predict(data[0:10])
+        self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
+        # test inferring mode
+        test['__mdb_make_predictions'] = False
+        preds = pred_arr[1].predict(test)
+        self.check_ts_prediction_df(preds, nr_preds, [order_by])
+
+        nr_preds = 2
         pred_arr[2] = predictor_from_problem(train,
                                              ProblemDefinition.from_dict({'target': target,
                                                                           'time_aim': 30,
