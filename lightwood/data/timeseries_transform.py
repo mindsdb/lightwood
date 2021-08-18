@@ -109,8 +109,8 @@ def transform_timeseries(
         if tss.use_previous_target:
             df_arr = pool.map(
                 partial(
-                    _ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions,
-                    window=tss.window, data_dtype=tss.target_type, mode=mode),
+                    _ts_add_previous_target, target=target,
+                    window=tss.window, data_dtype=tss.target_type),
                 df_arr)
         pool.close()
         pool.join()
