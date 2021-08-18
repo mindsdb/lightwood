@@ -346,7 +346,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'dtype_dict': '$dtype_dict',
                 'target': '$target',
                 'mode': '$mode',
-                'timeseries_settings': '$problem_definition.timeseries_settings'
+                'timeseries_settings': '$problem_definition.timeseries_settings',
+                'anomaly_detection': '$problem_definition.anomaly_detection'
             }
         }
 
