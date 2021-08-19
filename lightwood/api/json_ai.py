@@ -158,6 +158,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     }
                 ])
 
+    models = [models[1]]
+
     outputs = {target: Output(
         data_dtype=type_information.dtypes[target],
         encoder=None,

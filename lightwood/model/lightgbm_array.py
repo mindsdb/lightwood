@@ -25,43 +25,41 @@ class LightGBMArray(BaseModel):
         self.submodel_stop_after = stop_after / n_ts_predictions
         self.target = target
         dtype_dict[target] = dtype.float
-        self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna=False)
-                       for _ in range(n_ts_predictions)]
+        self.model = LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna=False)
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
         self.supports_proba = False
         self.stable = True
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting LGBM models for array prediction')
-
-        for timestep in range(self.n_ts_predictions):
-            if timestep > 0:
-                for fold in range(len(ds_arr)):
-                    ds_arr[fold].data_frame[self.target] = ds_arr[fold].data_frame[f'{self.target}_timestep_{timestep}']
-            self.models[timestep].fit(ds_arr)  # @TODO: this call could be parallelized
+        self.model.fit(ds_arr)
 
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         log.info('Updating array of LGBM models...')
-
-        for timestep in range(self.n_ts_predictions):
-            if timestep > 0:
-                for data in train_data, dev_data:
-                    for fold in range(len(data)):
-                        data[fold].data_frame[self.target] = data[fold].data_frame[f'{self.target}_timestep_{timestep}']
-
-            self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
+        self.model.partial_fit(train_data, dev_data)
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], predict_proba: bool = False) -> pd.DataFrame:
         if predict_proba:
             log.warning('This model does not output probability estimates')
 
-        length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+        ds = ConcatedEncodedDs([ds]) if isinstance(ds, EncodedDs) else ds
+        length = sum(ds.encoded_ds_lenghts)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
                            columns=[f'prediction_{i}' for i in range(self.n_ts_predictions)])
 
         for timestep in range(self.n_ts_predictions):
-            ydf[f'prediction_{timestep}'] = self.models[timestep](ds)
+            preds = self.model(ds)
+            ydf[f'prediction_{timestep}'] = preds
+            self._offset_prev_values(ds, preds)
 
         ydf['prediction'] = ydf.values.tolist()
         return ydf[['prediction']]
+
+    def _offset_prev_values(self, ds: ConcatedEncodedDs, preds: pd.DataFrame):
+        for (_, pred), (i, row) in zip(preds.iterrows(), ds.data_frame.iterrows()):
+            delta = (row['Date'][-1] - row['Date'][-2])
+            row['Date'] = row['Date'][1:] + [row['Date'][-1] + delta]
+            row[f'__mdb_ts_previous_{self.target}'] = row[f'__mdb_ts_previous_{self.target}'][1:] + [pred['prediction']]
+            ds.data_frame.loc[i] = row
+        return ds
