@@ -1,4 +1,5 @@
 import random
+from typing import Union
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -11,7 +12,8 @@ from lightwood.model.helpers.default_net import DefaultNet
 
 
 class CategoricalAutoEncoder(BaseEncoder):
-    def __init__(self, stop_after: int = 3600, is_target=False, max_encoded_length=100, use_autoencoder=None):
+    def __init__(self, stop_after: int = 3600, is_target: bool = False, max_encoded_length: int = 100,
+                 use_autoencoder: Union[bool, None] = None):
         super().__init__(is_target)
         self._prepared = False
         self.name = 'Categorical Autoencoder'
