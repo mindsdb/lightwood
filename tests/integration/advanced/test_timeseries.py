@@ -45,50 +45,49 @@ class TestTimeseries(unittest.TestCase):
         target = 'Traffic'
         order_by = 'T'
 
-        # Test multiple predictors playing along together
-        pred_arr = {}
+        # Predictor #1: no anomalies + no autoregressiveness
         nr_preds = 1
-        pred_arr[1] = predictor_from_problem(data,
-                                             ProblemDefinition.from_dict({'target': target,
-                                                                          'nfolds': 10,
-                                                                          'anomaly_detection': False,
-                                                                          'timeseries_settings': {
-                                                                              'use_previous_target': False,
-                                                                              'nr_predictions': nr_preds,
-                                                                              'order_by': [order_by],
-                                                                              'window': 5}
-                                                                          }))
-        pred_arr[1].learn(data)
-        preds = pred_arr[1].predict(data[0:10])
+        pred = predictor_from_problem(data,
+                                      ProblemDefinition.from_dict({'target': target,
+                                                                   'nfolds': 10,
+                                                                   'anomaly_detection': False,
+                                                                   'timeseries_settings': {
+                                                                       'use_previous_target': False,
+                                                                       'nr_predictions': nr_preds,
+                                                                       'order_by': [order_by],
+                                                                       'window': 5}
+                                                                   }))
+        pred.learn(data)
+        preds = pred.predict(data[0:10])
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # test inferring mode
         test['__mdb_make_predictions'] = False
-        preds = pred_arr[1].predict(test)
+        preds = pred.predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
+        # Predictor #2: anomalies + autoregressiveness + forecast horizon > 1
         nr_preds = 2
-        pred_arr[2] = predictor_from_problem(train,
-                                             ProblemDefinition.from_dict({'target': target,
-                                                                          'time_aim': 30,
-                                                                          'nfolds': 10,
-                                                                          'anomaly_detection': True,
-                                                                          'timeseries_settings': {
-                                                                              'use_previous_target': True,
-                                                                              'group_by': ['Country'],
-                                                                              'nr_predictions': nr_preds,
-                                                                              'order_by': [order_by],
-                                                                              'window': 5
-                                                                          }
-                                                                          }))
+        pred = predictor_from_problem(train,
+                                      ProblemDefinition.from_dict({'target': target,
+                                                                   'time_aim': 30,
+                                                                   'nfolds': 10,
+                                                                   'anomaly_detection': True,
+                                                                   'timeseries_settings': {
+                                                                       'use_previous_target': True,
+                                                                       'group_by': ['Country'],
+                                                                       'nr_predictions': nr_preds,
+                                                                       'order_by': [order_by],
+                                                                       'window': 5
+                                                                   }}))
 
-        pred_arr[2].learn(train)
-        preds = pred_arr[2].predict(test)
+        pred.learn(train)
+        preds = pred.predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # test inferring mode
         test['__mdb_make_predictions'] = False
-        preds = pred_arr[2].predict(test)
+        preds = pred.predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # Additionally, check timestamps are further into the future than test dates
