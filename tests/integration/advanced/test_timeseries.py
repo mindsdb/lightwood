@@ -27,26 +27,64 @@ class TestTimeseries(unittest.TestCase):
             if row.get('anomaly', False):
                 assert not (lower[0] <= row['truth'] <= upper[0])
 
-    def test_0_grouped_regression_timeseries(self):
-        """Test grouped numerical predictions, covering most of the TS pipeline """
-
-        data = pd.read_csv('tests/data/arrivals.csv')
-        group = 'Country'
-        train = pd.DataFrame(columns=data.columns)
-        test = pd.DataFrame(columns=data.columns)
-
+    def split_arrivals(self, data: pd.DataFrame, grouped: bool) -> (pd.DataFrame, pd.DataFrame):
         train_ratio = 0.8
-        for g in data[group].unique():
-            subframe = data[data[group] == g]
-            length = subframe.shape[0]
-            train = train.append(subframe[:int(length * train_ratio)])
-            test = test.append(subframe[int(length * train_ratio):])
 
+        if grouped:
+            group = 'Country'
+            train = pd.DataFrame(columns=data.columns)
+            test = pd.DataFrame(columns=data.columns)
+            for g in data[group].unique():
+                subframe = data[data[group] == g]
+                length = subframe.shape[0]
+                train = train.append(subframe[:int(length * train_ratio)])
+                test = test.append(subframe[int(length * train_ratio):])
+        else:
+            train = data[:int(data.shape[0] * train_ratio)]
+            test = data[int(data.shape[0] * train_ratio):]
+
+        return train, test
+
+    def test_0_time_series_grouped_regression(self):
+        """Test grouped numerical predictions, with anomalies and forecast horizon > 1 """
+        data = pd.read_csv('tests/data/arrivals.csv')
+        train, test = self.split_arrivals(data, grouped=True)
         target = 'Traffic'
         order_by = 'T'
+        nr_preds = 2
+        pred = predictor_from_problem(train,
+                                      ProblemDefinition.from_dict({'target': target,
+                                                                   'time_aim': 30,
+                                                                   'nfolds': 10,
+                                                                   'anomaly_detection': True,
+                                                                   'timeseries_settings': {
+                                                                       'use_previous_target': True,
+                                                                       'group_by': ['Country'],
+                                                                       'nr_predictions': nr_preds,
+                                                                       'order_by': [order_by],
+                                                                       'window': 5
+                                                                   }}))
+        pred.learn(train)
+        preds = pred.predict(test)
+        self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
-        # Predictor #1: no anomalies + no autoregressiveness
-        nr_preds = 1
+        # test inferring mode
+        test['__mdb_make_predictions'] = False
+        preds = pred.predict(test)
+        self.check_ts_prediction_df(preds, nr_preds, [order_by])
+
+        # Additionally, check timestamps are further into the future than test dates
+        latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
+        for idx, row in preds.iterrows():
+            for timestamp in row[f'order_{order_by}']:
+                assert timestamp > latest_timestamp
+
+    def test_1_time_series_regression(self):
+        data = pd.read_csv('tests/data/arrivals.csv')
+        train, test = self.split_arrivals(data, grouped=False)
+        target = 'Traffic'
+        order_by = 'T'
+        nr_preds = 2
         pred = predictor_from_problem(data,
                                       ProblemDefinition.from_dict({'target': target,
                                                                    'nfolds': 10,
@@ -65,36 +103,6 @@ class TestTimeseries(unittest.TestCase):
         test['__mdb_make_predictions'] = False
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
-
-        # Predictor #2: anomalies + autoregressiveness + forecast horizon > 1
-        nr_preds = 2
-        pred = predictor_from_problem(train,
-                                      ProblemDefinition.from_dict({'target': target,
-                                                                   'time_aim': 30,
-                                                                   'nfolds': 10,
-                                                                   'anomaly_detection': True,
-                                                                   'timeseries_settings': {
-                                                                       'use_previous_target': True,
-                                                                       'group_by': ['Country'],
-                                                                       'nr_predictions': nr_preds,
-                                                                       'order_by': [order_by],
-                                                                       'window': 5
-                                                                   }}))
-
-        pred.learn(train)
-        preds = pred.predict(test)
-        self.check_ts_prediction_df(preds, nr_preds, [order_by])
-
-        # test inferring mode
-        test['__mdb_make_predictions'] = False
-        preds = pred.predict(test)
-        self.check_ts_prediction_df(preds, nr_preds, [order_by])
-
-        # Additionally, check timestamps are further into the future than test dates
-        latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
-        for idx, row in preds.iterrows():
-            for timestamp in row[f'order_{order_by}']:
-                assert timestamp > latest_timestamp
 
     def test_2_time_series_classification(self):
         from lightwood.api.high_level import predictor_from_problem
