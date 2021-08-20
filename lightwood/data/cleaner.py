@@ -155,4 +155,9 @@ def cleaner(
 
         data[name] = new_data
 
+        if data_dtype == dtype.integer:
+            data[name] = data[name].astype(int)
+        elif data_dtype in (dtype.float, dtype.array):
+            data[name] = data[name].astype(float)
+
     return data

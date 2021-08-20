@@ -227,8 +227,6 @@ def _ts_add_previous_rows(df, historical_columns, window):
 def _ts_add_previous_target(df, target, window, data_dtype):
     if target not in df:
         return df
-    if data_dtype in (dtype.integer, dtype.float, dtype.array):
-        df[target] = df[target].astype(float)
     previous_target_values = list(df[target])
     del previous_target_values[-1]
     previous_target_values = [None] + previous_target_values
