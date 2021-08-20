@@ -103,8 +103,7 @@ def cleaner(
         data: pd.DataFrame, dtype_dict: Dict[str, str],
         pct_invalid: float, ignore_features: List[str],
         identifiers: Dict[str, str],
-        target: str, mode: str, timeseries_settings: TimeseriesSettings,
-        anomaly_detection: bool) -> pd.DataFrame:
+        target: str, mode: str, timeseries_settings: TimeseriesSettings, anomaly_detection: bool) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]
