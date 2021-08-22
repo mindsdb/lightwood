@@ -38,7 +38,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
 def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
     # @TODO Add missing value % and warning flags
-    problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0z])})
+    problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0])})
 
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
     statistical_analysis = lightwood.data.statistical_analysis(
