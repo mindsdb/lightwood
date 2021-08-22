@@ -38,16 +38,18 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
 def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
     # @TODO Add missing value % and warning flags
-    problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0])})
+    # We itterate because some columns can't be target... will add extra time for a few datasets but it's the cleanest way to do this
+    for i in range(len(df.columns)):
+        problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[i])})
 
-    type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
-    statistical_analysis = lightwood.data.statistical_analysis(
-        df, type_information.dtypes, type_information.identifiers, problem_definition)
+        type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
+        statistical_analysis = lightwood.data.statistical_analysis(
+            df, type_information.dtypes, type_information.identifiers, problem_definition)
 
-    return DataAnalysis(
-        type_information=type_information,
-        statistical_analysis=statistical_analysis
-    )
+        return DataAnalysis(
+            type_information=type_information,
+            statistical_analysis=statistical_analysis
+        )
 
 
 def json_ai_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> JsonAI:
