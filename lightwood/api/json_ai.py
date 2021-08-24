@@ -41,12 +41,14 @@ def lookup_encoder(
     }
 
     if is_target:
-        encoder_dict['args'] = {'is_target': 'True', 'positive_domain': '$statistical_analysis.positive_domain'}
+        encoder_dict['args'] = {'is_target': 'True'}
         if col_dtype in target_encoder_lookup_override:
             encoder_dict['module'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
                 encoder_dict['args'] = {'target_class_distribution': '$statistical_analysis.target_class_distribution'}
+        if col_dtype in (dtype.integer, dtype.float, dtype.array):
+            encoder_dict['args']['positive_domain'] = '$statistical_analysis.positive_domain'
 
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
