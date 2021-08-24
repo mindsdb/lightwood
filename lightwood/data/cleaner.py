@@ -106,7 +106,7 @@ def cleaner(
         target: str, mode: str, timeseries_settings: TimeseriesSettings) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
-    to_drop = [*ignore_features, *list(identifiers.keys())]
+    to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target]]
     exceptions = ['__mdb_make_predictions']
     for col in to_drop:
         try:
