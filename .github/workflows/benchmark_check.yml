@@ -1,0 +1,17 @@
+name: Benchmark results check
+
+on:
+  pull_request:
+    branches:
+      - stable
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - git clone https://github.com/torokmark/assert.sh.git; cd assert.sh; source assert.sh; cd ..
+      - commit=$(git rev-parse HEAD)
+      - against="best"
+      - status=$(curl -X GET http://benchmarks.mindsdb.com:9107/compare/$against/$commit?release_only=True)
+      - echo Got benchmark status $status between $commit and $against
+      - assert_eq "$status" "Yes" && echo 'Good to go!'
