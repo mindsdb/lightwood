@@ -7,11 +7,11 @@ from lightwood.helpers.log import log
 
 class NumericEncoder(BaseEncoder):
 
-    def __init__(self, data_type=None, is_target=False):
+    def __init__(self, data_type=None, is_target: bool = False, positive_domain: bool = False):
         super().__init__(is_target)
         self._type = data_type
         self._abs_mean = None
-        self.positive_domain = False
+        self.positive_domain = positive_domain
         self.decode_log = False
         self.output_size = 4 if not self.is_target else 3
 

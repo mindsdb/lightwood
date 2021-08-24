@@ -41,7 +41,7 @@ def lookup_encoder(
     }
 
     if is_target:
-        encoder_dict['args'] = {'is_target': 'True'}
+        encoder_dict['args'] = {'is_target': 'True', 'positive_domain': '$statistical_analysis.positive_domain'}
         if col_dtype in target_encoder_lookup_override:
             encoder_dict['module'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
@@ -369,7 +369,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'dtype_dict': '$dtype_dict',
                 'fixed_significance': None,
                 'confidence_normalizer': False,
-                'positive_domain': False,
+                'positive_domain': '$statistical_analysis.positive_domain',
             }
         }
 
@@ -378,7 +378,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'module': 'explain',
             'args': {
                 'timeseries_settings': '$problem_definition.timeseries_settings',
-                'positive_domain': '$problem_definition.positive_domain',
+                'positive_domain': '$statistical_analysis.positive_domain',
                 'fixed_confidence': '$problem_definition.fixed_confidence',
                 'anomaly_detection': '$problem_definition.anomaly_detection',
                 'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
