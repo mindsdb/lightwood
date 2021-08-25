@@ -11,10 +11,8 @@ jobs:
     steps:
       - name: Assert benchmarks ran and this version is better
         run: |
-          git clone 'https://github.com/torokmark/assert.sh' ass
-          cd ass
+          wget https://raw.githubusercontent.com/torokmark/assert.sh/main/assert.sh
           source assert.sh
-          cd ..
           commit=$(git rev-parse HEAD)
           against="best"
           status=$(curl -X GET http://benchmarks.mindsdb.com:9107/compare/$against/$commit?release_only=True)
