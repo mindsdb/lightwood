@@ -130,7 +130,6 @@ def model_analyzer(
         elif is_multi_ts:
             # we fit ICPs for time series confidence bounds only at t+1 forecast
             icp.nc_function.model.prediction_cache = np.array([p[0] for p in normal_predictions['prediction']])
-
         else:
             icp.nc_function.model.prediction_cache = np.array(normal_predictions['prediction'])
 
