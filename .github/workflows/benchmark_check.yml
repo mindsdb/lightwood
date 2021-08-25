@@ -9,6 +9,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Assert benchmarks ran and this version is better
         run: |
           wget https://raw.githubusercontent.com/torokmark/assert.sh/main/assert.sh
