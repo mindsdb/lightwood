@@ -57,3 +57,5 @@ dynamic_predictor.py
 test.pickle
 AI.json
 AI2.json
+
+assert.sh
