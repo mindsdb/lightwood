@@ -11,8 +11,8 @@ jobs:
     steps:
       - name: Assert benchmarks ran and this version is better
         run: |
-          git clone 'https://github.com/torokmark/assert.sh'
-          cd assert.sh
+          git clone 'https://github.com/torokmark/assert.sh' ass
+          cd ass
           source assert.sh
           cd ..
           commit=$(git rev-parse HEAD)
