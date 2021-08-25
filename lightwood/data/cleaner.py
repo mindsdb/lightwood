@@ -103,7 +103,7 @@ def cleaner(
         data: pd.DataFrame, dtype_dict: Dict[str, str],
         pct_invalid: float, ignore_features: List[str],
         identifiers: Dict[str, str],
-        target: str, mode: str, timeseries_settings: TimeseriesSettings) -> pd.DataFrame:
+        target: str, mode: str, timeseries_settings: TimeseriesSettings, anomaly_detection: bool) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
     to_drop = [*ignore_features, *list(identifiers.keys())]
@@ -117,7 +117,7 @@ def cleaner(
     if mode == 'train':
         data = clean_empty_targets(data, target)
     if mode == 'predict':
-        if target in data.columns and not timeseries_settings.use_previous_target:
+        if target in data.columns and not timeseries_settings.use_previous_target and not anomaly_detection:
             data = data.drop(columns=[target])
 
     # Drop extra columns
@@ -154,5 +154,10 @@ def cleaner(
             raise Exception(err)
 
         data[name] = new_data
+
+        if data_dtype == dtype.integer:
+            data[name] = data[name].astype(int)
+        elif data_dtype in (dtype.float, dtype.array):
+            data[name] = data[name].astype(float)
 
     return data
