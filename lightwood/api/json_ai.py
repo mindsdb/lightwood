@@ -47,6 +47,8 @@ def lookup_encoder(
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
                 encoder_dict['args'] = {'target_class_distribution': '$statistical_analysis.target_class_distribution'}
+        if col_dtype in (dtype.integer, dtype.float, dtype.array):
+            encoder_dict['args']['positive_domain'] = '$statistical_analysis.positive_domain'
 
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
@@ -369,7 +371,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'dtype_dict': '$dtype_dict',
                 'fixed_significance': None,
                 'confidence_normalizer': False,
-                'positive_domain': False,
+                'positive_domain': '$statistical_analysis.positive_domain',
             }
         }
 
@@ -378,7 +380,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'module': 'explain',
             'args': {
                 'timeseries_settings': '$problem_definition.timeseries_settings',
-                'positive_domain': '$problem_definition.positive_domain',
+                'positive_domain': '$statistical_analysis.positive_domain',
                 'fixed_confidence': '$problem_definition.fixed_confidence',
                 'anomaly_detection': '$problem_definition.anomaly_detection',
                 'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
