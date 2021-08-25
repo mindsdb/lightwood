@@ -9,14 +9,15 @@ class TsArrayNumericEncoder(BaseEncoder):
     Variant of vanilla numerical encoder, supports dynamic mean re-scaling
     """
 
-    def __init__(self, timesteps, is_target=False, grouped_by=None):
+    def __init__(self, timesteps: int, is_target: bool = False, positive_domain: bool = False, grouped_by=None):
         super(TsArrayNumericEncoder, self).__init__(is_target=is_target)
         # time series normalization params
         self.normalizers = None
-        self.sub_encoder = TsNumericEncoder(is_target=is_target, grouped_by=grouped_by)
         self.group_combinations = None
         self.dependencies = grouped_by
         self.data_window = timesteps
+        self.positive_domain = positive_domain
+        self.sub_encoder = TsNumericEncoder(is_target=is_target, positive_domain=positive_domain, grouped_by=grouped_by)
         self.output_size = self.data_window * self.sub_encoder.output_size
 
     def prepare(self, priming_data):
