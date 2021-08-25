@@ -52,7 +52,6 @@ def evaluate_array_accuracy(
         predictions: List[List[Union[int, float]]],
         **kwargs
 ) -> float:
-
     # @TODO: ideally MASE here
     base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
     aggregate = 0
