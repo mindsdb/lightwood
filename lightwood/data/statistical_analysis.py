@@ -61,7 +61,7 @@ def statistical_analysis(data: pd.DataFrame,
     # get train std, used in analysis
     if dtypes[target] in [dtype.float, dtype.integer, dtype.array]:
         df_std = df[target].astype(float).std()
-        if min(data[target]) >= 0:
+        if min(df[target]) >= 0:
             positive_domain = True
     elif dtypes[target] in [dtype.array]:
         try:
