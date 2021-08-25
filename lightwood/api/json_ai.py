@@ -47,6 +47,8 @@ def lookup_encoder(
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
                 encoder_dict['args'] = {'target_class_distribution': '$statistical_analysis.target_class_distribution'}
+        if col_dtype in (dtype.integer, dtype.float, dtype.array):
+            encoder_dict['args']['positive_domain'] = '$statistical_analysis.positive_domain'
 
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
@@ -145,15 +147,18 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     'stop_after': '$problem_definition.seconds_per_model',
                     'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions'
                 }
-            },
-                {
-                'module': 'SkTime',
-                'args': {
-                    'stop_after': '$problem_definition.seconds_per_model',
-                    'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
-                },
-            }
-            ])
+            }])
+
+            if problem_definition.timeseries_settings.use_previous_target:
+                models.extend([
+                    {
+                        'module': 'SkTime',
+                        'args': {
+                            'stop_after': '$problem_definition.seconds_per_model',
+                            'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
+                        },
+                    }
+                ])
 
     outputs = {target: Output(
         data_dtype=type_information.dtypes[target],
@@ -298,7 +303,9 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             models[i]['args']['timeseries_settings'] = models[i]['args'].get(
                 'timeseries_settings', '$problem_definition.timeseries_settings')
             models[i]['args']['net'] = models[i]['args'].get(
-                'net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries else '"ArNet"')
+                'net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries
+                or not problem_definition.timeseries_settings.use_previous_target
+                else '"ArNet"')
 
         elif models[i]['module'] == 'LightGBM':
             models[i]['args']['target'] = models[i]['args'].get('target', '$target')
@@ -341,7 +348,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'dtype_dict': '$dtype_dict',
                 'target': '$target',
                 'mode': '$mode',
-                'timeseries_settings': '$problem_definition.timeseries_settings'
+                'timeseries_settings': '$problem_definition.timeseries_settings',
+                'anomaly_detection': '$problem_definition.anomaly_detection'
             }
         }
 
@@ -369,7 +377,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'dtype_dict': '$dtype_dict',
                 'fixed_significance': None,
                 'confidence_normalizer': False,
-                'positive_domain': False,
+                'positive_domain': '$statistical_analysis.positive_domain',
             }
         }
 
@@ -378,7 +386,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'module': 'explain',
             'args': {
                 'timeseries_settings': '$problem_definition.timeseries_settings',
-                'positive_domain': '$problem_definition.positive_domain',
+                'positive_domain': '$statistical_analysis.positive_domain',
                 'fixed_confidence': '$problem_definition.fixed_confidence',
                 'anomaly_detection': '$problem_definition.anomaly_detection',
                 'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
