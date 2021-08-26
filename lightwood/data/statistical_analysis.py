@@ -31,7 +31,7 @@ def get_numeric_histogram(data, data_dtype):
 
 def compute_entropy_biased_buckets(histogram):
     S, biased_buckets = None, None
-    if histogram is not None:
+    if histogram is not None and len(histogram) > 0:
         hist_x = histogram['x']
         hist_y = histogram['y']
         nr_values = sum(hist_y)
