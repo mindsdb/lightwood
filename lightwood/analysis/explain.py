@@ -213,4 +213,16 @@ def explain(data: pd.DataFrame,
             if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1 and is_numerical:
                 insights = add_tn_conf_bounds(insights, timeseries_settings)
 
+    # Make sure the target and realted values are of an appropriate type
+    if target_dtype in (dtype.integer):
+        insights[target_name] = insights[target_name].astype(int)
+        insights['upper'] = insights['upper'].astype(int)
+        insights['lower'] = insights['lower'].astype(int)
+    elif target_dtype in (dtype.float):
+        insights[target_name] = insights[target_name].astype(float)
+        insights['upper'] = insights['upper'].astype(float)
+        insights['lower'] = insights['lower'].astype(float)
+    elif target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
+        insights[target_name] = insights[target_name].astype(str)
+
     return insights
