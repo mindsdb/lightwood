@@ -103,11 +103,10 @@ def cleaner(
         data: pd.DataFrame, dtype_dict: Dict[str, str],
         pct_invalid: float, ignore_features: List[str],
         identifiers: Dict[str, str],
-        target: str, mode: str, timeseries_settings: TimeseriesSettings,
-        anomaly_detection: bool) -> pd.DataFrame:
+        target: str, mode: str, timeseries_settings: TimeseriesSettings, anomaly_detection: bool) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
-    to_drop = [*ignore_features, *list(identifiers.keys())]
+    to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target]]
     exceptions = ['__mdb_make_predictions']
     for col in to_drop:
         try:
@@ -155,5 +154,10 @@ def cleaner(
             raise Exception(err)
 
         data[name] = new_data
+
+        if data_dtype == dtype.integer:
+            data[name] = data[name].astype(int)
+        elif data_dtype in (dtype.float, dtype.array):
+            data[name] = data[name].astype(float)
 
     return data

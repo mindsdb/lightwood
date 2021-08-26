@@ -57,14 +57,19 @@ def statistical_analysis(data: pd.DataFrame,
 
     nr_rows = len(df)
     target = problem_definition.target
+    positive_domain = False
     # get train std, used in analysis
     if dtypes[target] in [dtype.float, dtype.integer, dtype.array]:
         df_std = df[target].astype(float).std()
+        if min(df[target]) >= 0:
+            positive_domain = True
     elif dtypes[target] in [dtype.array]:
         try:
             all_vals = []
             for x in df[target]:
                 all_vals += x
+            if min(all_vals) >= 0:
+                positive_domain = True
             df_std = pd.Series(all_vals).astype(float).std()
         except Exception as e:
             log.warning(e)
@@ -124,6 +129,7 @@ def statistical_analysis(data: pd.DataFrame,
         df_std_dev=df_std,
         train_observed_classes=train_observed_classes,
         target_class_distribution=target_class_distribution,
+        positive_domain=positive_domain,
         histograms=histograms,
         buckets=buckets,
         missing=missing,

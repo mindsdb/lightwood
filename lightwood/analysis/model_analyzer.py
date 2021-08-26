@@ -62,7 +62,6 @@ def model_analyzer(
     disable_column_importance = disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
 
     data = encoded_data.data_frame
-    tr_data = encoded_train_data.data_frame
     runtime_analyzer = {}
     predictions = {}
     input_cols = list([col for col in data.columns if col != target])
@@ -135,8 +134,6 @@ def model_analyzer(
             icp.nc_function.model.prediction_cache = np.array(normal_predictions['prediction'])
 
         if not is_classification:
-            data[target] = data[target].astype(float)
-            tr_data[target] = tr_data[target].astype(float)
             runtime_analyzer['df_std_dev'] = {'__default': stats_info.df_std_dev}
 
         # fit additional ICPs in time series tasks with grouped columns

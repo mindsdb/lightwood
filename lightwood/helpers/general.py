@@ -4,7 +4,7 @@ from typing import List, Union, Dict
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import r2_score, f1_score, mean_absolute_error
+from sklearn.metrics import r2_score, f1_score
 
 
 def evaluate_accuracy(data: pd.DataFrame,
@@ -17,7 +17,7 @@ def evaluate_accuracy(data: pd.DataFrame,
         if accuracy_function_str == 'evaluate_array_accuracy':
             nr_predictions = len(predictions.iloc[0])
             cols = [target] + [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]
-            true_values = data[cols].astype(float).values.tolist()
+            true_values = data[cols].values.tolist()
             accuracy_function = evaluate_array_accuracy
         else:
             true_values = data[target].tolist()
@@ -52,6 +52,8 @@ def evaluate_array_accuracy(
         predictions: List[List[Union[int, float]]],
         **kwargs
 ) -> float:
+    # @TODO: ideally MASE here
+    base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
     aggregate = 0
 
     for i in range(len(predictions)):
@@ -60,7 +62,6 @@ def evaluate_array_accuracy(
         except ValueError:
             valid_horizon = len(true_values[i])
 
-        aggregate += mean_absolute_error(predictions[i][:valid_horizon],
-                                         true_values[i][:valid_horizon])
+        aggregate += base_acc_fn(true_values[i][:valid_horizon], predictions[i][:valid_horizon])
 
     return aggregate / len(predictions)
