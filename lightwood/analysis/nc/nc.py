@@ -8,6 +8,7 @@ import abc
 import numpy as np
 import sklearn.base
 from scipy.interpolate import interp1d
+from copy import deepcopy
 
 
 # -----------------------------------------------------------------------------
@@ -337,6 +338,14 @@ class BaseModelNc(BaseScorer):
 
         return self.err_func.apply(prediction, y) / norm
 
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if k != 'model':  # @TODO: check
+                setattr(result, k, deepcopy(v, memo))
+        return result
 
 # -----------------------------------------------------------------------------
 # Classification nonconformity scorers

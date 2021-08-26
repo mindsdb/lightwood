@@ -9,30 +9,47 @@ from lightwood.model.lightgbm import LightGBM
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
-class LightGBMArray(BaseModel):
-    """LightGBM-based model, intended for usage in time series tasks."""
-    models: List[LightGBM]
+class LightGBMArray(LightGBM):
+    """LightGBM-based model, intended for usage in time series tasks. It is trained for t+1 using all
+    available data, then partially fit using its own output for longer time horizons."""
     n_ts_predictions: int
-    submodel_stop_after: float
     target: str
     supports_proba: bool
 
-    def __init__(
-            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
-            input_cols: List[str],
-            n_ts_predictions: int, fit_on_dev: bool):
-        super().__init__(stop_after)
-        self.submodel_stop_after = stop_after / n_ts_predictions
-        self.target = target
-        dtype_dict[target] = dtype.float
-        self.model = LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna=False)
+    def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str],
+                 n_ts_predictions: int, fit_on_dev: bool, use_optuna: bool = True):
+        super().__init__(stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna)
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
-        self.supports_proba = False
         self.stable = True
+
+    # fit should be different: do the displacement and train on all timesteps using the lgbm output as well
+    # partial fit? disable
+    # call: same, displace
+    # should have a method for displacing
+
+    def _displace_ds(self, data: EncodedDs, predictions: pd.DataFrame):
+        # we have predictions that will be incorporated autoregressively
+        return data
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting LGBM models for array prediction')
-        self.model.fit(ds_arr)
+
+        # fit as normal
+        log.info('Fitting T+1')
+        super().fit(ds_arr)
+
+        # fit t+n using t+1 predictions
+        for timestep in range(1, self.n_ts_predictions):
+            new_ds_arr = []
+            for ds in ds_arr:
+                predictions = self(ds)
+                new_ds = self._displace_ds(ds, predictions)
+                new_ds_arr.append(new_ds)
+
+            log.info(f'Fitting T+{timestep}')
+            super().fit(new_ds_arr)
+
+
 
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
         log.info('Updating array of LGBM models...')
