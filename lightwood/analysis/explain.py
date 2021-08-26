@@ -215,14 +215,14 @@ def explain(data: pd.DataFrame,
 
     # Make sure the target and realted values are of an appropriate type
     if target_dtype in (dtype.integer):
-        insights[target_name] = insights[target_name].astype(int)
+        insights['prediction'] = insights['prediction'].astype(int)
         insights['upper'] = insights['upper'].astype(int)
         insights['lower'] = insights['lower'].astype(int)
     elif target_dtype in (dtype.float):
-        insights[target_name] = insights[target_name].astype(float)
+        insights['prediction'] = insights['prediction'].astype(float)
         insights['upper'] = insights['upper'].astype(float)
         insights['lower'] = insights['lower'].astype(float)
     elif target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
-        insights[target_name] = insights[target_name].astype(str)
+        insights['prediction'] = insights['prediction'].astype(str)
 
     return insights
