@@ -56,6 +56,9 @@ class CategoricalAutoEncoder(BaseEncoder):
             self.use_autoencoder = self.max_encoded_length is not None and input_len > self.max_encoded_length
 
         if self.use_autoencoder:
+            if self.is_target:
+                log.warning('You are trying to use an autoencoder for the target value! \
+                This is very likely a bad idea')
             log.info('Preparing a categorical autoencoder, this might take a while')
 
             embeddings_layer_len = self.max_encoded_length
@@ -95,7 +98,9 @@ class CategoricalAutoEncoder(BaseEncoder):
             self.decoder = torch.nn.Sequential(*modules[2:3]).eval()
             log.info('Categorical autoencoder ready')
 
-        self.output_size = min(self.onehot_encoder._lang.n_words, self.max_encoded_length)
+        self.output_size = self.onehot_encoder._lang.n_words
+        if self.use_autoencoder:
+            self.output_size = self.max_encoded_length
         self._prepared = True
 
     def encode(self, column_data):
