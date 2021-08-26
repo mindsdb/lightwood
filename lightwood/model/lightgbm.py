@@ -114,12 +114,12 @@ class LightGBM(BaseModel):
 
         data = self._to_dataset(data, output_dtype)
 
-        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary):
+        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary, dtype.array):
             log.error(f'Lightgbm mixer not supported for type: {output_dtype}')
             raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
-            objective = 'regression' if output_dtype in (dtype.integer, dtype.float) else 'multiclass'
-            metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'
+            objective = 'regression' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multiclass'
+            metric = 'l2' if output_dtype in (dtype.integer, dtype.float, dtype.array) else 'multi_logloss'
 
         self.params = {
             'objective': objective,
