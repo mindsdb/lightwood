@@ -31,7 +31,7 @@ def get_numeric_histogram(data, data_dtype):
 
 def compute_entropy_biased_buckets(histogram):
     S, biased_buckets = None, None
-    if histogram is not None and len(histogram) > 0:
+    if histogram is not None or len(histogram['x']) == 0:
         hist_x = histogram['x']
         hist_y = histogram['y']
         nr_values = sum(hist_y)
@@ -94,7 +94,7 @@ def statistical_analysis(data: pd.DataFrame,
             histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col])
             buckets[col] = histograms[col]['x']
         else:
-            histograms[col] = {}
+            histograms[col] = {'x': [], 'y': []}
             buckets[col] = []
 
     # get observed classes, used in analysis
