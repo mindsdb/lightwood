@@ -117,11 +117,11 @@ def type_check_sequence(element: object) -> str:
 
 def type_check_date(element: object) -> str:
     try:
-        dt = dateutil.parser.parse(element)
+        dt = dateutil.parser.parse(str(element))
 
         # Not accurate 100% for a single datetime str,
         # but should work in aggregate
-        if dt.hour == 0 and dt.minute == 0 and dt.second == 0 and len(element) <= 16:
+        if dt.hour == 0 and dt.minute == 0 and dt.second == 0 and len(str(element)) <= 16:
             return dtype.date
         else:
             return dtype.datetime
