@@ -352,6 +352,8 @@ class BaseModelNc(BaseScorer):
 # -----------------------------------------------------------------------------
 # Classification nonconformity scorers
 # -----------------------------------------------------------------------------
+
+
 class ClassifierNc(BaseModelNc):
     """Nonconformity scorer using an underlying class probability estimating
     model.

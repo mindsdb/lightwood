@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Union
 
-from lightwood.api import dtype
 from lightwood.helpers.log import log
-from lightwood.model.base import BaseModel
 from lightwood.model.lightgbm import LightGBM
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
@@ -32,7 +30,7 @@ class LightGBMArray(LightGBM):
         for idx, row in data.data_frame.iterrows():
             data.data_frame.at[idx,
                                f'__mdb_ts_previous_{self.target}'] = row.get(f'__mdb_ts_previous_{self.target}')[1:] \
-                                                      + [row.get('__mdb_predictions')]
+                + [row.get('__mdb_predictions')]
 
             for col in self.ts_analysis['tss'].order_by:
                 if col in data.data_frame.columns:
@@ -41,7 +39,7 @@ class LightGBMArray(LightGBM):
                     delta = deltas.get(group,
                                        deltas['__default']  # used w/novel group
                                        )[col]
-                    data.data_frame.at[idx, col] = row.get(col)[1:] + [row.get(col)[-1]+delta]
+                    data.data_frame.at[idx, col] = row.get(col)[1:] + [row.get(col)[-1] + delta]
 
         # change target
         data.data_frame[self.target] = data.data_frame[f'{self.target}_timestep_{timestep}']
@@ -88,8 +86,8 @@ class LightGBMArray(LightGBM):
             for i, ds in enumerate(ds_arr):
                 predictions = super().__call__(ds, predict_proba)
                 all_predictions.append(predictions)
-                if timestep+1 < self.n_ts_predictions:
-                    ds_arr[i] = self._displace_ds(ds, predictions, timestep+1)
+                if timestep + 1 < self.n_ts_predictions:
+                    ds_arr[i] = self._displace_ds(ds, predictions, timestep + 1)
 
             all_predictions = pd.concat(all_predictions).reset_index(drop=True)
             ydf[f'prediction_{timestep}'] = all_predictions
