@@ -338,13 +338,15 @@ class BaseModelNc(BaseScorer):
 
         return self.err_func.apply(prediction, y) / norm
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo={}):
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():
-            if k != 'model':  # @TODO: check
+            if k != 'model':  # model should not be copied
                 setattr(result, k, deepcopy(v, memo))
+            else:
+                setattr(result, k, v)
         return result
 
 # -----------------------------------------------------------------------------
