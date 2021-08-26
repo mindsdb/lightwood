@@ -214,7 +214,11 @@ def explain(data: pd.DataFrame,
                 insights = add_tn_conf_bounds(insights, timeseries_settings)
 
     # Make sure the target and realted values are of an appropriate type
-    if target_dtype in (dtype.integer):
+    if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1:
+        # Array output that are not of type <array> originally are odd and I'm not sure how to handle them
+        # Or if they even need handling yet
+        pass
+    elif target_dtype in (dtype.integer):
         insights['prediction'] = insights['prediction'].astype(int)
         insights['upper'] = insights['upper'].astype(int)
         insights['lower'] = insights['lower'].astype(int)
