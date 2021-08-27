@@ -1,17 +1,23 @@
 import datetime
 import calendar
-from typing import Optional
+import numpy as np
+import pandas as pd  # @TODO: remove?
 import torch
 from lightwood.encoder.base import BaseEncoder
+from collections.abc import Iterable
 
 
-class DatetimeEncoder(BaseEncoder):
-    def __init__(self, is_target: bool = False):
+class DatetimeNormalizerEncoder(BaseEncoder):
+    def __init__(self, is_target: bool = False, sinusoidal: bool = False):
         super().__init__(is_target)
+        self.sinusoidal = sinusoidal
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']
         self.constants = {'year': 3000.0, 'month': 12.0, 'weekday': 7.0,
                           'hour': 24.0, 'minute': 60.0, 'second': 60.0}
-        self.output_size = 7
+        if self.sinusoidal:
+            self.output_size = 2
+        else:
+            self.output_size = 7
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -27,26 +33,43 @@ class DatetimeEncoder(BaseEncoder):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
-        ret = [self.encode_one(unix_timestamp) for unix_timestamp in data]
+        if isinstance(data, pd.Series):
+            data = data.values
+        if not isinstance(data[0], Iterable):
+            data = [data]
+
+        ret = [self.encode_one(row) for row in data]
 
         return torch.Tensor(ret)
 
-    def encode_one(self, unix_timestamp: Optional[float]):
+    def encode_one(self, data):
         """
         Encodes a list of unix_timestamps, or a list of tensors with unix_timestamps
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
         :return: a list of vectors
         """
-        if unix_timestamp is None:
-            vector = [0] * len(self.fields)
-        else:
-            c = self.constants
-            date = datetime.datetime.fromtimestamp(unix_timestamp)
-            day_constant = calendar.monthrange(date.year, date.month)[1]
-            vector = [date.year / c['year'], date.month / c['month'], date.day / day_constant,
-                      date.weekday() / c['weekday'], date.hour / c['hour'],
-                      date.minute / c['minute'], date.second / c['second']]
-        return vector
+        ret = []
+        for unix_timestamp in data:
+            if unix_timestamp is None:
+                if self.sinusoidal:
+                    vector = [0, 1] * len(self.fields)
+                else:
+                    vector = [0] * len(self.fields)
+            else:
+                c = self.constants
+                if isinstance(unix_timestamp, torch.Tensor):
+                    unix_timestamp = unix_timestamp.item()
+                date = datetime.datetime.fromtimestamp(unix_timestamp)
+                day_constant = calendar.monthrange(date.year, date.month)[1]
+                vector = [date.year / c['year'], date.month / c['month'], date.day / day_constant,
+                          date.weekday() / c['weekday'], date.hour / c['hour'],
+                          date.minute / c['minute'], date.second / c['second']]
+                if self.sinusoidal:
+                    vector = np.array([(np.sin(n), np.cos(n)) for n in vector]).flatten()
+
+            ret.append(vector)
+
+        return ret
 
     def decode(self, encoded_data, return_as_datetime=False):
         ret = []
@@ -63,6 +86,8 @@ class DatetimeEncoder(BaseEncoder):
             decoded = None
 
         else:
+            if self.sinusoidal:
+                vector = list(map(lambda x: np.arcsin(x), vector))[::2]
             c = self.constants
 
             year = max(0, round(vector[0] * c['year']))
