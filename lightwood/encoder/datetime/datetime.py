@@ -5,7 +5,7 @@ from lightwood.encoder.base import BaseEncoder
 
 
 class DatetimeEncoder(BaseEncoder):
-    def __init__(self, is_target=False):
+    def __init__(self, is_target: bool = False):
         super().__init__(is_target)
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']
         self.constants = {'year': 3000.0, 'month': 12.0, 'weekday': 7.0,
