@@ -14,7 +14,7 @@ from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.encoder.datetime import DatetimeEncoder
+from lightwood.encoder.datetime import DatetimeSinNormalizerEncoder
 from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerical, DecoderRNNNumerical
 from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer, get_group_matches
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, get_chunk, len_to_mask
