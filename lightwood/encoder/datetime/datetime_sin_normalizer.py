@@ -7,8 +7,8 @@ from lightwood.encoder.base import BaseEncoder
 from collections.abc import Iterable
 
 
-class DatetimeSinNormalizerEncoder(BaseEncoder):
-    def __init__(self, is_target=False, sinusoidal=False):
+class DatetimeNormalizerEncoder(BaseEncoder):
+    def __init__(self, is_target: bool = False, sinusoidal: bool = False):
         super().__init__(is_target)
         self.sinusoidal = sinusoidal
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']

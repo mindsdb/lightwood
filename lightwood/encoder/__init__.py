@@ -1,7 +1,7 @@
 # Encoders which should always work
 from lightwood.encoder.base import BaseEncoder
 from lightwood.encoder.datetime.datetime import DatetimeEncoder
-from lightwood.encoder.datetime.datetime_sin_normalizer import DatetimeSinNormalizerEncoder
+from lightwood.encoder.datetime.datetime_sin_normalizer import DatetimeNormalizerEncoder
 from lightwood.encoder.image.img_2_vec import Img2VecEncoder
 from lightwood.encoder.numeric.numeric import NumericEncoder
 from lightwood.encoder.numeric.ts_numeric import TsNumericEncoder
@@ -31,6 +31,6 @@ __ts_encoders__ = [TsNumericEncoder, TimeSeriesEncoder, TimeSeriesPlainEncoder]
 __all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder', 'TsNumericEncoder',
            'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder',
            'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'MultiHotEncoder',
-           'PretrainedLangEncoder', 'AmplitudeTsEncoder', 'BinaryEncoder', 'DatetimeSinNormalizerEncoder',
+           'PretrainedLangEncoder', 'AmplitudeTsEncoder', 'BinaryEncoder', 'DatetimeNormalizerEncoder',
            'Array', 'Binary', 'Categorical', 'Date', 'Datetime', 'Float', 'Image', 'Integer',
            'Quantity', 'Rich_Text', 'Short_Text', 'Tags']
