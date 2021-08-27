@@ -1,23 +1,16 @@
 import datetime
 import calendar
-import numpy as np
-import pandas as pd  # @TODO: remove?
 import torch
 from lightwood.encoder.base import BaseEncoder
-from collections.abc import Iterable
 
 
 class DatetimeEncoder(BaseEncoder):
-    def __init__(self, is_target=False, sinusoidal=False):
+    def __init__(self, is_target=False):
         super().__init__(is_target)
-        self.sinusoidal = sinusoidal
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']
         self.constants = {'year': 3000.0, 'month': 12.0, 'weekday': 7.0,
                           'hour': 24.0, 'minute': 60.0, 'second': 60.0}
-        if self.sinusoidal:
-            self.output_size = 2
-        else:
-            self.output_size = 7
+        self.output_size = 7
 
     def prepare(self, priming_data):
         if self._prepared:
@@ -44,22 +37,14 @@ class DatetimeEncoder(BaseEncoder):
         :return: a list of vectors
         """
         if unix_timestamp is None:
-            if self.sinusoidal:
-                vector = [0, 1] * len(self.fields)
-            else:
-                vector = [0] * len(self.fields)
+            vector = [0] * len(self.fields)
         else:
             c = self.constants
-            if isinstance(unix_timestamp, torch.Tensor):
-                unix_timestamp = unix_timestamp.item()
             date = datetime.datetime.fromtimestamp(unix_timestamp)
             day_constant = calendar.monthrange(date.year, date.month)[1]
             vector = [date.year / c['year'], date.month / c['month'], date.day / day_constant,
-                        date.weekday() / c['weekday'], date.hour / c['hour'],
-                        date.minute / c['minute'], date.second / c['second']]
-            if self.sinusoidal:
-                vector = np.array([(np.sin(n), np.cos(n)) for n in vector]).flatten()
-
+                      date.weekday() / c['weekday'], date.hour / c['hour'],
+                      date.minute / c['minute'], date.second / c['second']]
         return vector
 
     def decode(self, encoded_data, return_as_datetime=False):
@@ -77,8 +62,6 @@ class DatetimeEncoder(BaseEncoder):
             decoded = None
 
         else:
-            if self.sinusoidal:
-                vector = list(map(lambda x: np.arcsin(x), vector))[::2]
             c = self.constants
 
             year = max(0, round(vector[0] * c['year']))
