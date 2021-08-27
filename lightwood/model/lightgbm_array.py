@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from copy import deepcopy
 from typing import Dict, List, Union
 
 from lightwood.helpers.log import log
@@ -28,21 +29,24 @@ class LightGBMArray(LightGBM):
 
         # add prediction to history and displace order by column
         for idx, row in data.data_frame.iterrows():
-            data.data_frame.at[idx,
-                               f'__mdb_ts_previous_{self.target}'] = row.get(f'__mdb_ts_previous_{self.target}')[1:] \
-                + [row.get('__mdb_predictions')]
+            histcol = f'__mdb_ts_previous_{self.target}'
+            if histcol in data.data_frame.columns:
+                data.data_frame.at[idx, histcol] = row.get(histcol)[1:] + [row.get('__mdb_predictions')]
 
             for col in self.ts_analysis['tss'].order_by:
                 if col in data.data_frame.columns:
                     deltas = self.ts_analysis['deltas']
-                    group = frozenset(row[self.ts_analysis['tss'].group_by])
-                    delta = deltas.get(group,
-                                       deltas['__default']  # used w/novel group
-                                       )[col]
+                    group = frozenset(row[self.ts_analysis['tss'].group_by]) \
+                        if self.ts_analysis['tss'].group_by \
+                        else '__default'  # used w/novel group
+
+                    delta = deltas[group][col]
                     data.data_frame.at[idx, col] = row.get(col)[1:] + [row.get(col)[-1] + delta]
 
-        # change target
-        data.data_frame[self.target] = data.data_frame[f'{self.target}_timestep_{timestep}']
+        # change target if training
+        if f'{self.target}_timestep_{timestep}' in data.data_frame.columns:
+            data.data_frame[self.target] = data.data_frame[f'{self.target}_timestep_{timestep}']
+
         data.data_frame.pop('__mdb_predictions')  # drop temporal column
         return data
 
@@ -53,7 +57,10 @@ class LightGBMArray(LightGBM):
         super().fit(ds_arr)  # fit as normal
 
         # fit t+n using t+(n-1) predictions as historical context
-        original_dfs = [ds.data_frame.copy() for ds in ds_arr]
+        use_optuna = self.use_optuna
+        self.use_optuna = False
+
+        original_dfs = [deepcopy(ds.data_frame) for ds in ds_arr]
         for timestep in range(1, self.n_ts_predictions):
             new_ds_arr = []
             for ds in ds_arr:
@@ -63,6 +70,8 @@ class LightGBMArray(LightGBM):
 
             log.info(f'Fitting T+{timestep}')
             super().fit(new_ds_arr)
+
+        self.use_optuna = use_optuna
 
         # restore ds_arr dataframes' original states
         for i, ds in enumerate(ds_arr):
@@ -74,7 +83,7 @@ class LightGBMArray(LightGBM):
 
         # force list of EncodedDs, as ConcatedEncodedDs does not support modifying its dataframe
         ds_arr = ds.encoded_ds_arr if isinstance(ds, ConcatedEncodedDs) else [ds]
-        original_dfs = [ds.data_frame.copy() for ds in ds_arr]
+        original_dfs = [deepcopy(ds.data_frame) for ds in ds_arr]
         length = sum([len(d) for d in ds_arr])
 
         ydf = pd.DataFrame(0,
