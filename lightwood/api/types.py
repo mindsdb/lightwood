@@ -193,7 +193,8 @@ class ProblemDefinition:
             anomaly_cooldown=anomaly_cooldown,
             ignore_features=ignore_features,
             fit_on_validation=fit_on_validation,
-            strict_mode=strict_mode
+            strict_mode=strict_mode,
+            seed_nr=seed_nr
         )
 
         return problem_definition
