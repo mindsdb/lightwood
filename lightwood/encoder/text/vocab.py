@@ -5,7 +5,7 @@ from lightwood.encoder.base import BaseEncoder
 
 
 class VocabularyEncoder(BaseEncoder):
-    def __init__(self, is_target=False):
+    def __init__(self, is_target: bool = False):
         super().__init__(is_target)
         self._tokenizer_class = DistilBertTokenizer
         self._pretrained_model_name = 'distilbert-base-uncased'
