@@ -16,10 +16,12 @@ class LightGBMArray(LightGBM):
     supports_proba: bool
 
     def __init__(self, stop_after: int, target: str, dtype_dict: Dict[str, str], input_cols: List[str],
-                 n_ts_predictions: int, ts_analysis: Dict, fit_on_dev: bool, use_optuna: bool = True):
+                 n_ts_predictions: int, ts_analysis: Dict, fit_on_dev: bool, use_optuna: bool = True,
+                 exhaustive_fitting: bool = False):
         super().__init__(stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna)
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
         self.ts_analysis = ts_analysis
+        self.exhaustive_fitting = exhaustive_fitting
         self.stable = True
 
     def _displace_ds(self, data: EncodedDs, predictions: pd.DataFrame, timestep: int):
@@ -40,7 +42,7 @@ class LightGBMArray(LightGBM):
                         if self.ts_analysis['tss'].group_by \
                         else '__default'  # used w/novel group
 
-                    delta = deltas[group][col]
+                    delta = deltas.get(group, deltas['__default'])[col]
                     data.data_frame.at[idx, col] = row.get(col)[1:] + [row.get(col)[-1] + delta]
 
         # change target if training
@@ -51,31 +53,31 @@ class LightGBMArray(LightGBM):
         return data
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
-        log.info('Started fitting LGBM models for array prediction')
-
-        log.info('Fitting T+1')
+        log.info('Started fitting LGBM model for array prediction')
+        log.info(f'Exhaustive mode: {"enabled" if self.exhaustive_fitting else "disabled"}')
         super().fit(ds_arr)  # fit as normal
 
-        # fit t+n using t+(n-1) predictions as historical context
-        use_optuna = self.use_optuna
-        self.use_optuna = False
+        if self.exhaustive_fitting:
+            # fit t+n using t+(n-1) predictions as historical context
+            use_optuna = self.use_optuna
+            self.use_optuna = False
 
-        original_dfs = [deepcopy(ds.data_frame) for ds in ds_arr]
-        for timestep in range(1, self.n_ts_predictions):
-            new_ds_arr = []
-            for ds in ds_arr:
-                predictions = super().__call__(ds)
-                new_ds = self._displace_ds(ds, predictions, timestep)
-                new_ds_arr.append(new_ds)
+            original_dfs = [deepcopy(ds.data_frame) for ds in ds_arr]
+            for timestep in range(1, self.n_ts_predictions):
+                new_ds_arr = []
+                for ds in ds_arr:
+                    predictions = super().__call__(ds)
+                    new_ds = self._displace_ds(ds, predictions, timestep)
+                    new_ds_arr.append(new_ds)
 
-            log.info(f'Fitting T+{timestep}')
-            super().fit(new_ds_arr)
+                log.info(f'Fitting T+{timestep+1}')
+                super().fit(new_ds_arr)
 
-        self.use_optuna = use_optuna
+            self.use_optuna = use_optuna
 
-        # restore ds_arr dataframes' original states
-        for i, ds in enumerate(ds_arr):
-            ds.data_frame = original_dfs[i]
+            # restore ds_arr dataframes' original states
+            for i, ds in enumerate(ds_arr):
+                ds.data_frame = original_dfs[i]
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], predict_proba: bool = False) -> pd.DataFrame:
         if predict_proba:
