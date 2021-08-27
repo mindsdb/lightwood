@@ -33,43 +33,34 @@ class DatetimeEncoder(BaseEncoder):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
-        if isinstance(data, pd.Series):
-            data = data.values
-        if not isinstance(data[0], Iterable):
-            data = [data]
-
-        ret = [self.encode_one(row) for row in data]
+        ret = [self.encode_one(unix_timestamp) for unix_timestamp in data]
 
         return torch.Tensor(ret)
 
-    def encode_one(self, data):
+    def encode_one(self, unix_timestamp):
         """
         Encodes a list of unix_timestamps, or a list of tensors with unix_timestamps
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
         :return: a list of vectors
         """
-        ret = []
-        for unix_timestamp in data:
-            if unix_timestamp is None:
-                if self.sinusoidal:
-                    vector = [0, 1] * len(self.fields)
-                else:
-                    vector = [0] * len(self.fields)
+        if unix_timestamp is None:
+            if self.sinusoidal:
+                vector = [0, 1] * len(self.fields)
             else:
-                c = self.constants
-                if isinstance(unix_timestamp, torch.Tensor):
-                    unix_timestamp = unix_timestamp.item()
-                date = datetime.datetime.fromtimestamp(unix_timestamp)
-                day_constant = calendar.monthrange(date.year, date.month)[1]
-                vector = [date.year / c['year'], date.month / c['month'], date.day / day_constant,
-                          date.weekday() / c['weekday'], date.hour / c['hour'],
-                          date.minute / c['minute'], date.second / c['second']]
-                if self.sinusoidal:
-                    vector = np.array([(np.sin(n), np.cos(n)) for n in vector]).flatten()
+                vector = [0] * len(self.fields)
+        else:
+            c = self.constants
+            if isinstance(unix_timestamp, torch.Tensor):
+                unix_timestamp = unix_timestamp.item()
+            date = datetime.datetime.fromtimestamp(unix_timestamp)
+            day_constant = calendar.monthrange(date.year, date.month)[1]
+            vector = [date.year / c['year'], date.month / c['month'], date.day / day_constant,
+                        date.weekday() / c['weekday'], date.hour / c['hour'],
+                        date.minute / c['minute'], date.second / c['second']]
+            if self.sinusoidal:
+                vector = np.array([(np.sin(n), np.cos(n)) for n in vector]).flatten()
 
-            ret.append(vector)
-
-        return ret
+        return vector
 
     def decode(self, encoded_data, return_as_datetime=False):
         ret = []
