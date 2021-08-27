@@ -56,7 +56,7 @@ class TimeSeriesEncoder(BaseEncoder):
     def setup_nn(self, ts_analysis, dependencies=None):
         """This method must be executed after initializing, else types are unassigned"""
         if self.original_type in (dtype.datetime, dtype.date):
-            self._normalizer = DatetimeEncoder(sinusoidal=True)
+            self._normalizer = DatetimeSinNormalizerEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields) * 2  # sinusoidal datetime components
         elif self.original_type in (dtype.float, dtype.integer):
             self._normalizer = MinMaxNormalizer()
