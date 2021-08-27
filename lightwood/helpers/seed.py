@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 
-def seed(seed_nr=420):
+def seed(seed_nr):
     torch.manual_seed(seed_nr)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
