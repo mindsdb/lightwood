@@ -1,5 +1,6 @@
 import datetime
 import calendar
+from typing import Optional
 import torch
 from lightwood.encoder.base import BaseEncoder
 
@@ -30,7 +31,7 @@ class DatetimeEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def encode_one(self, unix_timestamp):
+    def encode_one(self, unix_timestamp: Optional[float]):
         """
         Encodes a list of unix_timestamps, or a list of tensors with unix_timestamps
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
