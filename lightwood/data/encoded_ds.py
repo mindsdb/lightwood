@@ -57,7 +57,6 @@ class EncodedDs(Dataset):
 
                 data = self.data_frame[cols].iloc[idx].tolist()
                 encoded_tensor = self.encoders[col].encode(data, **kwargs)[0]
-                print(encoded_tensor, col)
                 if col != self.target:
                     X = torch.cat([X, encoded_tensor])
                 else:
