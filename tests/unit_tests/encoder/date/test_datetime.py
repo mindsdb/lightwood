@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 from dateutil.parser import parse as parse_datetime
 from lightwood.encoder.datetime.datetime import DatetimeEncoder
-from lightwood.encoder.datetime.datetime_sin_normalizer import DatetimeSinNormalizerEncoder
+from lightwood.encoder.datetime.datetime_sin_normalizer import DatetimeNormalizerEncoder
 
 
 class TestDatetimeEncoder(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestDatetimeEncoder(unittest.TestCase):
         dates = [parse_datetime(d) for d in dates]
         data = [d.timestamp() for d in dates]
 
-        normalizer = DatetimeSinNormalizerEncoder(sinusoidal=True)
+        normalizer = DatetimeNormalizerEncoder(sinusoidal=True)
         normalizer.prepare([])
 
         results = normalizer.encode(data)
@@ -43,7 +43,7 @@ class TestDatetimeEncoder(unittest.TestCase):
             'upper': {'month': 12, 'day': 31, 'hour': 23, 'minute': 59, 'second': 59, 'corruption': 1.5}
         }
 
-        normalizer = DatetimeSinNormalizerEncoder()
+        normalizer = DatetimeNormalizerEncoder()
         normalizer.prepare([])
 
         # change descriptor to invalid values in each dimension (out of 0-1 range)
