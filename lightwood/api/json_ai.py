@@ -68,6 +68,8 @@ def lookup_encoder(
                 encoder_dict['args']['grouped_by'] = f"{gby}"
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
                 encoder_dict['module'] = 'Array.TsArrayNumericEncoder'
+            if tss.use_previous_target:
+                encoder_dict['args']['prev_target'] = f"'{col_name}'"
         if '__mdb_ts_previous' in col_name:
             encoder_dict['module'] = col_dtype.capitalize() + '.TimeSeriesPlainEncoder'
             encoder_dict['args']['original_type'] = f'"{tss.target_type}"'

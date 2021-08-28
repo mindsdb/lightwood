@@ -51,6 +51,7 @@ class Neural(BaseModel):
         self.stable = True
 
     def _final_tuning(self, data_arr):
+        # @TODO: check why TS dependencies are not arriving here?
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
             self.model = self.model.eval()
             with torch.no_grad():
@@ -306,7 +307,10 @@ class Neural(BaseModel):
 
                 kwargs = {}
                 for dep in self.target_encoder.dependencies:
-                    kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
+                    if not kwargs.get('dependency_data', False):
+                        kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
+                    else:
+                        kwargs['dependency_data'][dep] = ds.data_frame.iloc[idx][[dep]].values
 
                 if predict_proba and self.supports_proba:
                     kwargs['return_raw'] = True

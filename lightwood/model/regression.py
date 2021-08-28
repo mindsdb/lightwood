@@ -50,8 +50,14 @@ class Regression(BaseModel):
             X.append(x.tolist())
 
         Yh = self.model.predict(X)
+        kwargs = {}
+        for dep in self.target_encoder.dependencies:
+            if not kwargs.get('dependency_data', False):
+                kwargs['dependency_data'] = {dep: ds.data_frame[[dep]].values.tolist()}
+            else:
+                kwargs['dependency_data'][dep] = ds.data_frame[[dep]].values.tolist()
 
-        decoded_predictions = self.target_encoder.decode(torch.Tensor(Yh))
+        decoded_predictions = self.target_encoder.decode(torch.Tensor(Yh), **kwargs)
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})
 
