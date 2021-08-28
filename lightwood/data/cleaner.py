@@ -8,7 +8,7 @@ from dateutil.parser import parse as parse_dt
 import datetime
 from lightwood.helpers.text import clean_float
 import pandas as pd
-from helpers.numeric import can_be_nan_numeric
+from lightwood.helpers.numeric import can_be_nan_numeric
 
 def _to_datetime(element):
     try:
