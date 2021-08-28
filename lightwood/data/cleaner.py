@@ -43,16 +43,6 @@ def _tags_to_tuples(tags_str):
         return tuple()
 
 
-def _standardize_array(element):
-    try:
-        element = str(element)
-        element = element.rstrip(']').lstrip('[')
-        element = element.rstrip(' ').lstrip(' ')
-        return element.replace(', ', ' ').replace(',', ' ')
-    except Exception:
-        return element
-
-
 def _clean_float_or_none(element):
     try:
         calened_float = clean_float(element)
@@ -61,6 +51,19 @@ def _clean_float_or_none(element):
         return calened_float
     except Exception:
         return None
+
+
+def _standardize_array(element):
+    try:
+        element = str(element)
+        element = element.rstrip(']').lstrip('[')
+        element = element.rstrip(' ').lstrip(' ')
+        element = element.replace(', ', ' ').replace(',', ' ')
+        # Weird edge case in which arrays are actually numbers -_-
+        if ' ' not in element:
+            return _clean_float_or_none(element)
+    except Exception:
+        return element
 
 
 def _clean_value(element: object, data_dtype: str):
@@ -74,11 +77,7 @@ def _clean_value(element: object, data_dtype: str):
         element = float(_clean_float_or_none(element))
     if data_dtype in (dtype.integer):
         element = int(_clean_float_or_none(element))
-    if data_dtype in (dtype.array):
-        # Sometimes arrays are actually numbers (always?) this is wrong but handle this case anyway
-        if not str(element).startswith('(') and not str(element).startswith('['):
-            element = _clean_float_or_none(element)
-            
+
     if data_dtype in (dtype.array):
         element = _standardize_array(element)
 
