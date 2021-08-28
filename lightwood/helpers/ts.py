@@ -11,7 +11,10 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
         last = row[f'order_{col}'][-1]
 
         if tss.group_by:
-            series_delta = deltas[frozenset(row[gby].tolist())][col]
+            try:
+                series_delta = deltas[frozenset(row[gby].tolist())][col]
+            except KeyError:
+                series_delta = deltas['__default'][col]
         else:
             series_delta = deltas['__default'][col]
         timestamps = [last + t * series_delta for t in range(nr_predictions)]

@@ -45,6 +45,7 @@ class LightGBM(BaseModel):
         super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
+        self.positive_domain = False
         self.label_set = set()
         self.target = target
         self.dtype_dict = dtype_dict
@@ -107,6 +108,7 @@ class LightGBM(BaseModel):
             'dev': {'ds': ConcatedEncodedDs(dev_ds_arr), 'data': None, 'label_data': {}}
         }
         self.fit_data_len = len(data['train']['ds'])
+        self.positive_domain = getattr(train_ds_arr[0].encoders.get(self.target, None), 'positive_domain', False)
 
         output_dtype = self.dtype_dict[self.target]
 
@@ -222,6 +224,9 @@ class LightGBM(BaseModel):
                 np.argmax(raw_predictions, axis=1).reshape(-1, 1)).flatten()
         else:
             decoded_predictions = raw_predictions
+
+        if self.positive_domain:
+            decoded_predictions = [max(0, p) for p in decoded_predictions]
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})
 

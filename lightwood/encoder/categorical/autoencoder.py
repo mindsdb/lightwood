@@ -1,4 +1,5 @@
 import random
+from typing import Union
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -11,7 +12,8 @@ from lightwood.model.helpers.default_net import DefaultNet
 
 
 class CategoricalAutoEncoder(BaseEncoder):
-    def __init__(self, stop_after: int = 3600, is_target=False, max_encoded_length=100):
+    def __init__(self, stop_after: int = 3600, is_target: bool = False, max_encoded_length: int = 100,
+                 use_autoencoder: Union[bool, None] = None):
         super().__init__(is_target)
         self._prepared = False
         self.name = 'Categorical Autoencoder'
@@ -20,7 +22,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.decoder = None
         self.onehot_encoder = OneHotEncoder(is_target=self.is_target)
         self.desired_error = 0.01
-        self.use_autoencoder = None
+        self.use_autoencoder = use_autoencoder
         self.stop_after = stop_after
         # @TODO stop using instead of ONEHOT !!!@!
         self.is_nn_encoder = True
@@ -50,9 +52,13 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.onehot_encoder.prepare(priming_data)
 
         input_len = self.onehot_encoder._lang.n_words
-        self.use_autoencoder = self.max_encoded_length is not None and input_len > self.max_encoded_length
+        if self.use_autoencoder is None:
+            self.use_autoencoder = self.max_encoded_length is not None and input_len > self.max_encoded_length
 
         if self.use_autoencoder:
+            if self.is_target:
+                log.warning('You are trying to use an autoencoder for the target value! \
+                This is very likely a bad idea')
             log.info('Preparing a categorical autoencoder, this might take a while')
 
             embeddings_layer_len = self.max_encoded_length
@@ -93,6 +99,8 @@ class CategoricalAutoEncoder(BaseEncoder):
             log.info('Categorical autoencoder ready')
 
         self.output_size = self.onehot_encoder._lang.n_words
+        if self.use_autoencoder:
+            self.output_size = self.max_encoded_length
         self._prepared = True
 
     def encode(self, column_data):
