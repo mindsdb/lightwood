@@ -2,6 +2,7 @@ import math
 import torch
 import numpy as np
 from lightwood.encoder.numeric import NumericEncoder
+from lightwood.encoder.time_series.helpers.common import AdaptiveMinMaxNormalizer
 from lightwood.helpers.log import log
 
 
@@ -39,10 +40,17 @@ class TsNumericEncoder(NumericEncoder):
                 vector = [0] * 2
                 if group is not None and self.normalizers is not None:
                     try:
-                        mean = self.normalizers[frozenset(group)].abs_mean
+                        normalizer = self.normalizers[frozenset(group)]
+                        if isinstance(normalizer, AdaptiveMinMaxNormalizer):
+                            mean = self.normalizers[frozenset(group)].mavg
+                        else:
+                            mean = self.normalizers[frozenset(group)].abs_mean
                     except KeyError:
-                        # novel group-by, we use default normalizer mean
-                        mean = self.normalizers['__default'].abs_mean
+                        normalizer = self.normalizers['__default']  # novel group-by, use default normalizer
+                        if isinstance(normalizer, AdaptiveMinMaxNormalizer):
+                            mean = self.normalizers['__default'].mavg
+                        else:
+                            mean = self.normalizers['__default'].abs_mean
                 else:
                     mean = self._abs_mean
                 if real is not None and mean > 0:
@@ -75,6 +83,8 @@ class TsNumericEncoder(NumericEncoder):
         ret = []
         if not dependency_data:
             dependency_data = {'__default': [None] * len(encoded_values)}
+        # else:
+        #     print('yea')
         if isinstance(encoded_values, torch.Tensor):
             encoded_values = encoded_values.tolist()
 
@@ -93,10 +103,21 @@ class TsNumericEncoder(NumericEncoder):
                     else:
                         if group is not None and self.normalizers is not None:
                             try:
-                                mean = self.normalizers[frozenset(group)].abs_mean
+                                normalizer = self.normalizers[frozenset(group)]
+                                if isinstance(normalizer, AdaptiveMinMaxNormalizer):
+                                    mean = normalizer.mavg
+                                    if mean is None:
+                                        mean = normalizer.abs_mean
+                                else:
+                                    mean = normalizer.abs_mean
                             except KeyError:
-                                # decode new group with default normalizer
-                                mean = self.normalizers['__default'].abs_mean
+                                normalizer = self.normalizers['__default']  # novel group-by, use default normalizer
+                                if isinstance(normalizer, AdaptiveMinMaxNormalizer):
+                                    mean = normalizer.mavg
+                                    if mean is None:
+                                        mean = normalizer.abs_mean
+                                else:
+                                    mean = normalizer.abs_mean
                         else:
                             mean = self._abs_mean
 

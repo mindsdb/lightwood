@@ -16,9 +16,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     else:
         info['group_info'] = {}
 
-    # @TODO: maybe normalizers should fit using only the training folds??
-    new_data = generate_target_group_normalizers(info)
-
+    new_data = generate_target_group_normalizers(info, timeseries_settings)
     deltas = get_delta(data[timeseries_settings.order_by],
                        info,
                        new_data['group_combinations'],

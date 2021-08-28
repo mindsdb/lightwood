@@ -1,4 +1,5 @@
 from itertools import product
+from typing import Dict
 
 import torch
 import numpy as np
@@ -6,6 +7,7 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
 
 from lightwood.api.dtype import dtype
+from lightwood.api.types import TimeseriesSettings
 
 
 class MinMaxNormalizer:
@@ -44,6 +46,44 @@ class MinMaxNormalizer:
 
     def decode(self, y):
         return self.scaler.inverse_transform(y)
+
+
+class AdaptiveMinMaxNormalizer(MinMaxNormalizer):
+    def __init__(self, window_size, combination=()):
+        super().__init__(combination)
+        self.window_size = window_size
+        self.mavg = None
+
+    def get_mavg(self, arr):
+        arr[np.isnan(arr)] = self.abs_mean  # if no info, assume absolute mean seen at training
+
+        if arr.shape[1] > self.window_size:
+            arr = arr[:, :self.window_size]
+        else:
+            arr = np.pad(arr, max(0, (arr.shape[1] - 1) - self.window_size))
+
+        return arr.mean(axis=1).reshape(-1, 1)
+
+    def encode(self, y) -> torch.Tensor:
+        if isinstance(y[0], list):
+            y = np.vstack(y)
+        if isinstance(y[0], torch.Tensor):
+            y = torch.stack(y).numpy()
+        if len(y.shape) < 2:
+            y = np.expand_dims(y, axis=1)
+
+        y = y.astype(float)
+        self.mavg = self.get_mavg(y)
+        y /= np.repeat(self.mavg, y.shape[1], axis=1)
+        return torch.Tensor(y)
+
+    def decode(self, y):
+        if self.mavg is None:
+            mavg = self.get_mavg(y)  # get mavg from current data
+        else:
+            mavg = self.mavg
+        decoded = y * mavg
+        return decoded
 
 
 class CatNormalizer:
@@ -107,7 +147,7 @@ def get_group_matches(data, combination):
             return [], np.array([])
 
 
-def generate_target_group_normalizers(data):
+def generate_target_group_normalizers(data: Dict, tss: TimeseriesSettings):
     """
     Helper function called from data_source. It generates and fits all needed normalizers for a target variable
     based on its grouped entities.
@@ -134,12 +174,12 @@ def generate_target_group_normalizers(data):
                 combination = frozenset(combination)  # freeze so that we can hash with it
                 _, subset = get_group_matches(data, combination)
                 if subset.size > 0:
-                    normalizers[combination] = MinMaxNormalizer(combination=combination)
+                    normalizers[combination] = AdaptiveMinMaxNormalizer(tss.window, combination=combination)
                     normalizers[combination].prepare(subset)
                     group_combinations.append(combination)
 
         # ...plus a default one, used at inference time and fitted with all training data
-        normalizers['__default'] = MinMaxNormalizer()
+        normalizers['__default'] = AdaptiveMinMaxNormalizer(tss.window)
         normalizers['__default'].prepare(data['data'])
         group_combinations.append('__default')
 
