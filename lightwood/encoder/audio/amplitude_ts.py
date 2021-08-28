@@ -9,7 +9,7 @@ from lightwood.helpers.log import log
 
 class AmplitudeTsEncoder(BaseEncoder):
 
-    def __init__(self, is_target=False):
+    def __init__(self, is_target: bool = False):
         super().__init__(is_target)
         self._ts_encoder = TimeSeriesEncoder()
         self._max_samples = 2000

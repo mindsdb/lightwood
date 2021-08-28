@@ -5,7 +5,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 
 class MultiHotEncoder(BaseEncoder):
-    def __init__(self, is_target=False):
+    def __init__(self, is_target: bool = False):
         super().__init__(is_target)
         self._binarizer = MultiLabelBinarizer()
         self._seen = set()
