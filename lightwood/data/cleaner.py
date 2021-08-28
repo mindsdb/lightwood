@@ -156,8 +156,7 @@ def cleaner(
         data[name] = new_data
 
         if data_dtype == dtype.integer:
-            data[name] = data[name].astype(int)
+            data[name] = [int(x) if x is not None else None for x in data[name]]
         elif data_dtype in (dtype.float, dtype.array):
-            data[name] = data[name].astype(float)
-
+            data[name] = [float(x) if x is not None else None for x in data[name]]
     return data
