@@ -8,6 +8,7 @@ from dateutil.parser import parse as parse_dt
 import datetime
 from lightwood.helpers.text import clean_float
 import pandas as pd
+from lightwood.helpers.numeric import can_be_nan_numeric
 
 
 def _to_datetime(element):
@@ -43,21 +44,27 @@ def _tags_to_tuples(tags_str):
         return tuple()
 
 
+def _clean_float_or_none(element):
+    try:
+        calened_float = clean_float(element)
+        if can_be_nan_numeric(calened_float):
+            return None
+        return calened_float
+    except Exception:
+        return None
+
+
 def _standardize_array(element):
     try:
         element = str(element)
         element = element.rstrip(']').lstrip('[')
         element = element.rstrip(' ').lstrip(' ')
-        return element.replace(', ', ' ').replace(',', ' ')
+        element = element.replace(', ', ' ').replace(',', ' ')
+        # Weird edge case in which arrays are actually numbers -_-
+        if ' ' not in element:
+            return _clean_float_or_none(element)
     except Exception:
         return element
-
-
-def _clean_float_or_none(element):
-    try:
-        return clean_float(element)
-    except Exception:
-        return None
 
 
 def _clean_value(element: object, data_dtype: str):
@@ -68,7 +75,7 @@ def _clean_value(element: object, data_dtype: str):
         element = _standardize_datetime(element)
 
     if data_dtype in (dtype.float):
-        element = _clean_float_or_none(element)
+        element = float(_clean_float_or_none(element))
     if data_dtype in (dtype.integer):
         element = int(_clean_float_or_none(element))
 
@@ -154,10 +161,4 @@ def cleaner(
             raise Exception(err)
 
         data[name] = new_data
-
-        if data_dtype == dtype.integer:
-            data[name] = data[name].astype(int)
-        elif data_dtype in (dtype.float, dtype.array):
-            data[name] = data[name].astype(float)
-
     return data
