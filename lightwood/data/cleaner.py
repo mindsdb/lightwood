@@ -8,7 +8,7 @@ from dateutil.parser import parse as parse_dt
 import datetime
 from lightwood.helpers.text import clean_float
 import pandas as pd
-
+from helpers.numeric import can_be_nan_numeric
 
 def _to_datetime(element):
     try:
@@ -55,7 +55,10 @@ def _standardize_array(element):
 
 def _clean_float_or_none(element):
     try:
-        return clean_float(element)
+        calened_float = clean_float(element)
+        if can_be_nan_numeric(calened_float):
+            return None
+        return calened_float
     except Exception:
         return None
 
@@ -68,10 +71,14 @@ def _clean_value(element: object, data_dtype: str):
         element = _standardize_datetime(element)
 
     if data_dtype in (dtype.float):
-        element = _clean_float_or_none(element)
+        element = float(_clean_float_or_none(element))
     if data_dtype in (dtype.integer):
         element = int(_clean_float_or_none(element))
-
+    if data_dtype in (dtype.array):
+        # Sometimes arrays are actually numbers (always?) this is wrong but handle this case anyway
+        if not str(element).startswith('(') and not str(element).startswith('['):
+            element = _clean_float_or_none(element)
+            
     if data_dtype in (dtype.array):
         element = _standardize_array(element)
 
@@ -154,9 +161,4 @@ def cleaner(
             raise Exception(err)
 
         data[name] = new_data
-
-        if data_dtype == dtype.integer:
-            data[name] = [int(x) if x is not None else None for x in data[name]]
-        elif data_dtype in (dtype.float, dtype.array):
-            data[name] = [float(x) if x is not None else None for x in data[name]]
     return data
