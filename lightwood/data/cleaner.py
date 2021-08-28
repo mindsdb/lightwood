@@ -10,6 +10,7 @@ from lightwood.helpers.text import clean_float
 import pandas as pd
 from lightwood.helpers.numeric import can_be_nan_numeric
 
+
 def _to_datetime(element):
     try:
         date = parse_dt(str(element))
