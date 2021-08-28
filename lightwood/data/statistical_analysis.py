@@ -31,7 +31,7 @@ def get_numeric_histogram(data, data_dtype):
 
 def compute_entropy_biased_buckets(histogram):
     S, biased_buckets = None, None
-    if histogram is not None:
+    if histogram is not None or len(histogram['x']) == 0:
         hist_x = histogram['x']
         hist_y = histogram['y']
         nr_values = sum(hist_y)
@@ -49,21 +49,27 @@ def statistical_analysis(data: pd.DataFrame,
     seed()
     log.info('Starting statistical analysis')
     df = cleaner(data, dtypes, problem_definition.pct_invalid, problem_definition.ignore_features,
-                 identifiers, problem_definition.target, 'train', problem_definition.timeseries_settings)
+                 identifiers, problem_definition.target, 'train', problem_definition.timeseries_settings,
+                 problem_definition.anomaly_detection)
 
     missing = {col: len([x for x in df[col] if x is None]) / len(df[col]) for col in df.columns}
     distinct = {col: len(set(df[col])) / len(df[col]) for col in df.columns}
 
     nr_rows = len(df)
     target = problem_definition.target
+    positive_domain = False
     # get train std, used in analysis
     if dtypes[target] in [dtype.float, dtype.integer, dtype.array]:
         df_std = df[target].astype(float).std()
+        if min(df[target]) >= 0:
+            positive_domain = True
     elif dtypes[target] in [dtype.array]:
         try:
             all_vals = []
             for x in df[target]:
                 all_vals += x
+            if min(all_vals) >= 0:
+                positive_domain = True
             df_std = pd.Series(all_vals).astype(float).std()
         except Exception as e:
             log.warning(e)
@@ -77,16 +83,19 @@ def statistical_analysis(data: pd.DataFrame,
     for col in df.columns:
         histograms[col] = None
         buckets[col] = None
-        if dtypes[col] in (dtype.categorical, dtype.binary):
+        if dtypes[col] in (dtype.categorical, dtype.binary, dtype.date):
             hist = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
             histograms[col] = {
-                'x': list(hist.keys()),
+                'x': list([str(x) for x in hist.keys()]),
                 'y': list(hist.values())
             }
             buckets[col] = histograms[col]['x']
-        if dtypes[col] in (dtype.integer, dtype.float, dtype.array):
+        elif dtypes[col] in (dtype.integer, dtype.float, dtype.array):
             histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col])
             buckets[col] = histograms[col]['x']
+        else:
+            histograms[col] = {'x': [], 'y': []}
+            buckets[col] = []
 
     # get observed classes, used in analysis
     target_class_distribution = None
@@ -123,6 +132,7 @@ def statistical_analysis(data: pd.DataFrame,
         df_std_dev=df_std,
         train_observed_classes=train_observed_classes,
         target_class_distribution=target_class_distribution,
+        positive_domain=positive_domain,
         histograms=histograms,
         buckets=buckets,
         missing=missing,

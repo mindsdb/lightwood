@@ -77,6 +77,7 @@ class StatisticalAnalysis:
     distinct: object
     bias: object
     avg_words_per_sentence: object
+    positive_domain: bool
 
 
 @dataclass_json

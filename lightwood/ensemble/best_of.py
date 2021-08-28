@@ -16,7 +16,7 @@ class BestOf(BaseEnsemble):
     def __init__(self, target, models: List[BaseModel], data: List[EncodedDs], accuracy_functions) -> None:
         super().__init__(target, models, data)
         # @TODO: Need some shared accuracy functionality to determine model selection here
-        self.maximize = False if 'evaluate_array_accuracy' in accuracy_functions else True
+        self.maximize = True
         best_score = -pow(2, 32) if self.maximize else pow(2, 32)
         ds = ConcatedEncodedDs(data)
         for idx, model in enumerate(models):

@@ -8,11 +8,12 @@ from dateutil.parser import parse as parse_dt
 import datetime
 from lightwood.helpers.text import clean_float
 import pandas as pd
+from lightwood.helpers.numeric import can_be_nan_numeric
 
 
 def _to_datetime(element):
     try:
-        date = parse_dt(element)
+        date = parse_dt(str(element))
     except Exception:
         try:
             date = datetime.datetime.utcfromtimestamp(element)
@@ -43,21 +44,27 @@ def _tags_to_tuples(tags_str):
         return tuple()
 
 
+def _clean_float_or_none(element):
+    try:
+        calened_float = clean_float(element)
+        if can_be_nan_numeric(calened_float):
+            return None
+        return calened_float
+    except Exception:
+        return None
+
+
 def _standardize_array(element):
     try:
         element = str(element)
         element = element.rstrip(']').lstrip('[')
         element = element.rstrip(' ').lstrip(' ')
-        return element.replace(', ', ' ').replace(',', ' ')
+        element = element.replace(', ', ' ').replace(',', ' ')
+        # Weird edge case in which arrays are actually numbers -_-
+        if ' ' not in element:
+            return _clean_float_or_none(element)
     except Exception:
         return element
-
-
-def _clean_float_or_none(element):
-    try:
-        return clean_float(element)
-    except Exception:
-        return None
 
 
 def _clean_value(element: object, data_dtype: str):
@@ -68,7 +75,7 @@ def _clean_value(element: object, data_dtype: str):
         element = _standardize_datetime(element)
 
     if data_dtype in (dtype.float):
-        element = _clean_float_or_none(element)
+        element = float(_clean_float_or_none(element))
     if data_dtype in (dtype.integer):
         element = int(_clean_float_or_none(element))
 
@@ -103,10 +110,10 @@ def cleaner(
         data: pd.DataFrame, dtype_dict: Dict[str, str],
         pct_invalid: float, ignore_features: List[str],
         identifiers: Dict[str, str],
-        target: str, mode: str, timeseries_settings: TimeseriesSettings) -> pd.DataFrame:
+        target: str, mode: str, timeseries_settings: TimeseriesSettings, anomaly_detection: bool) -> pd.DataFrame:
     # Drop columns we don't want to use
     data = deepcopy(data)
-    to_drop = [*ignore_features, *list(identifiers.keys())]
+    to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target]]
     exceptions = ['__mdb_make_predictions']
     for col in to_drop:
         try:
@@ -117,7 +124,7 @@ def cleaner(
     if mode == 'train':
         data = clean_empty_targets(data, target)
     if mode == 'predict':
-        if target in data.columns and not timeseries_settings.use_previous_target:
+        if target in data.columns and not timeseries_settings.use_previous_target and not anomaly_detection:
             data = data.drop(columns=[target])
 
     # Drop extra columns
@@ -154,5 +161,4 @@ def cleaner(
             raise Exception(err)
 
         data[name] = new_data
-
     return data

@@ -7,7 +7,7 @@ from lightwood.encoder.base import BaseEncoder
 
 class Img2VecEncoder(BaseEncoder):
 
-    def __init__(self, is_target=False):
+    def __init__(self, is_target: bool = False):
         super().__init__(is_target)
         self.model = None
         # I think we should make this an enum, something like: speed, balance, accuracy

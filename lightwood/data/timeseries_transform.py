@@ -101,11 +101,16 @@ def transform_timeseries(
             partial(
                 _ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window),
             df_arr)
+
+        df_arr = pool.map(partial(_ts_add_future_target, target=target, nr_predictions=tss.nr_predictions,
+                                  data_dtype=tss.target_type, mode=mode),
+                          df_arr)
+
         if tss.use_previous_target:
             df_arr = pool.map(
                 partial(
-                    _ts_add_previous_target, target=target, nr_predictions=tss.nr_predictions,
-                    window=tss.window, data_dtype=tss.target_type, mode=mode),
+                    _ts_add_previous_target, target=target,
+                    window=tss.window, data_dtype=tss.target_type),
                 df_arr)
         pool.close()
         pool.join()
@@ -115,11 +120,11 @@ def transform_timeseries(
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
                                               historical_columns=ob_arr + tss.historical_columns, window=window)
+            df_arr[i] = _ts_add_future_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions,
+                                              data_dtype=tss.target_type, mode=mode)
             if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(
-                    df_arr[i],
-                    target=target, nr_predictions=tss.nr_predictions, window=tss.window, data_dtype=tss.target_type,
-                    mode=mode)
+                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window,
+                                                    data_dtype=tss.target_type)
 
     combined_df = pd.concat(df_arr)
 
@@ -219,11 +224,9 @@ def _ts_add_previous_rows(df, historical_columns, window):
     return df
 
 
-def _ts_add_previous_target(df, target, nr_predictions, window, data_dtype, mode):
+def _ts_add_previous_target(df, target, window, data_dtype):
     if target not in df:
         return df
-    if data_dtype in (dtype.integer, dtype.float, dtype.array):
-        df[target] = df[target].astype(float)
     previous_target_values = list(df[target])
     del previous_target_values[-1]
     previous_target_values = [None] + previous_target_values
@@ -236,6 +239,15 @@ def _ts_add_previous_target(df, target, nr_predictions, window, data_dtype, mode
         previous_target_values_arr.append(arr)
 
     df[f'__mdb_ts_previous_{target}'] = previous_target_values_arr
+    return df
+
+
+def _ts_add_future_target(df, target, nr_predictions, data_dtype, mode):
+    if target not in df:
+        return df
+    if data_dtype in (dtype.integer, dtype.float, dtype.array):
+        df[target] = df[target].astype(float)
+
     for timestep_index in range(1, nr_predictions):
         next_target_value_arr = list(df[target])
         for del_index in range(0, min(timestep_index, len(next_target_value_arr))):

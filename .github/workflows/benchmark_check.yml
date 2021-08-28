@@ -9,10 +9,12 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Assert benchmarks ran and this version is better
         run: |
-          git clone https://github.com/torokmark/assert.sh.git; cd assert.sh; source assert.sh; cd ..;
-          commit=$(git rev-parse HEAD)
+          wget https://raw.githubusercontent.com/torokmark/assert.sh/main/assert.sh
+          source assert.sh
+          commit=${{ github.event.pull_request.head.sha }}
           against="best"
           status=$(curl -X GET http://benchmarks.mindsdb.com:9107/compare/$against/$commit?release_only=True)
           echo Got benchmark status $status between $commit and $against
