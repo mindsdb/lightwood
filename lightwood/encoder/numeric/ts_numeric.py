@@ -1,5 +1,3 @@
-from typing import Union
-
 import torch
 import numpy as np
 
@@ -13,7 +11,7 @@ class TsNumericEncoder(NumericEncoder):
     Variant of vanilla numerical encoder, supports dynamic mean re-scaling
     """
 
-    def __init__(self, is_target: bool = False, positive_domain: bool = False, grouped_by: Union[list, None] = None,
+    def __init__(self, is_target: bool = False, positive_domain: bool = False, grouped_by: list = [],
                  prev_target: str = None):
         super(TsNumericEncoder, self).__init__(is_target=is_target, positive_domain=positive_domain)
         # time series normalization params
@@ -21,7 +19,7 @@ class TsNumericEncoder(NumericEncoder):
         self.group_combinations = None
         self.grouped_by = grouped_by
         self.prev_target = f'__mdb_ts_previous_{prev_target}' if prev_target else None
-        self.dependencies = [*self.grouped_by, self.prev_target]
+        self.dependencies = [*self.grouped_by, self.prev_target] if self.grouped_by or self.prev_target else []
         self.output_size = 2 if is_target else 3
 
     def encode(self, data, dependency_data={}):
