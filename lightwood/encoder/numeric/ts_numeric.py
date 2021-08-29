@@ -30,11 +30,14 @@ class TsNumericEncoder(NumericEncoder):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         if not dependency_data:
-            dependency_data = {k: {'__default': [None] * len(data)} for k in self.grouped_by}
+            group_data = {k: {'__default': [None] * len(data)} for k in self.grouped_by}
+            historicals = [[None] * len(data)]
+        else:
+            group_data = {k: dependency_data[k] for k in self.grouped_by} if self.grouped_by else \
+                {'__default': [None] * len(data)}
+            historicals = dependency_data[self.prev_target] if self.prev_target is not None else [[None] * len(data)]
 
         ret = []
-        group_data = {k: dependency_data[k] for k in self.grouped_by}
-        historicals = dependency_data[self.prev_target] if self.prev_target is not None else None
 
         for real, group, historical in zip(data, list(zip(*group_data.values())), historicals):
 
@@ -47,19 +50,19 @@ class TsNumericEncoder(NumericEncoder):
                     real = None
             if self.is_target:
                 vector = [0] * 2
-                if group is not None and self.normalizers is not None:
+                if self.grouped_by and self.normalizers is not None:
                     try:
                         normalizer = self.normalizers[frozenset(group)]
                         if isinstance(normalizer, AdaptiveMinMaxNormalizer):
-                            mean = self.normalizers[frozenset(group)].get_mavg(np.array([historical]).astype(float))
+                            mean = normalizer.get_mavg(np.array([historical]).astype(float))
                         else:
-                            mean = self.normalizers[frozenset(group)].abs_mean
+                            mean = normalizer.abs_mean
                     except KeyError:
                         normalizer = self.normalizers['__default']  # novel group-by, use default normalizer
                         if isinstance(normalizer, AdaptiveMinMaxNormalizer):
-                            mean = self.normalizers['__default'].mavg
+                            mean = normalizer.mavg
                         else:
-                            mean = self.normalizers['__default'].abs_mean
+                            mean = normalizer.abs_mean
                 else:
                     mean = self._abs_mean
                 if real is not None and mean > 0:
@@ -92,7 +95,8 @@ class TsNumericEncoder(NumericEncoder):
             historicals = [[None] * len(encoded_values)]
         else:
             group_data = {k: [e[0] if isinstance(e, list) else e for e in dependency_data[k]] for k in self.grouped_by}
-            historicals = dependency_data[self.prev_target] if self.prev_target is not None else None
+            historicals = dependency_data[self.prev_target] if self.prev_target is not None else \
+                [[None] * len(encoded_values)]
 
         if isinstance(encoded_values, torch.Tensor):
             encoded_values = encoded_values.tolist()

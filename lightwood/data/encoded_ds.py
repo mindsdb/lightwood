@@ -47,8 +47,8 @@ class EncodedDs(Dataset):
             if self.encoders.get(col, None):
                 kwargs = {}
                 if 'dependency_data' in inspect.signature(self.encoders[col].encode).parameters:
-                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
-                                                 for dep in self.encoders[col].dependencies}
+                    deps = [dep for dep in self.encoders[col].dependencies if dep in self.data_frame.columns]
+                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]] for dep in deps}
                 if hasattr(self.encoders[col], 'data_window'):
                     cols = [self.target] + [f'{self.target}_timestep_{i}'
                                             for i in range(1, self.encoders[col].data_window)]

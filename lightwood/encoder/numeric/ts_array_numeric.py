@@ -16,11 +16,12 @@ class TsArrayNumericEncoder(BaseEncoder):
         self.normalizers = None
         self.group_combinations = None
         self.grouped_by = grouped_by
-        self.prev_target = prev_target
-        self.dependencies = [self.grouped_by, self.prev_target]
+        self.prev_target = f'__mdb_ts_previous_{prev_target}' if prev_target else None
+        self.dependencies = [*self.grouped_by, self.prev_target] if self.grouped_by or self.prev_target else []
         self.data_window = timesteps
         self.positive_domain = positive_domain
-        self.sub_encoder = TsNumericEncoder(is_target=is_target, positive_domain=positive_domain, grouped_by=grouped_by)
+        self.sub_encoder = TsNumericEncoder(is_target=is_target, positive_domain=positive_domain, grouped_by=grouped_by,
+                                            prev_target=prev_target)
         self.output_size = self.data_window * self.sub_encoder.output_size
 
     def prepare(self, priming_data):
@@ -34,6 +35,9 @@ class TsArrayNumericEncoder(BaseEncoder):
         """dependency_data: dict with grouped_by column info,
         to retrieve the correct normalizer for each datum
         :return tensor with shape (batch, NxK) where N: self.data_window and K: sub-encoder # of output features"""
+        if not self.sub_encoder.normalizers:
+            self.sub_encoder.normalizers = self.normalizers
+
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         if not dependency_data:

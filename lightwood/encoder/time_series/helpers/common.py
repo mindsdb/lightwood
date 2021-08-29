@@ -174,6 +174,7 @@ def generate_target_group_normalizers(data: Dict, tss: TimeseriesSettings):
                 combination = frozenset(combination)  # freeze so that we can hash with it
                 _, subset = get_group_matches(data, combination)
                 if subset.size > 0:
+                    # @TODO: normal if not use previous target?
                     normalizers[combination] = AdaptiveMinMaxNormalizer(tss.window, combination=combination)
                     normalizers[combination].prepare(subset)
                     group_combinations.append(combination)
