@@ -269,12 +269,12 @@ class Neural(BaseModel):
                     ConcatedEncodedDs(train_ds_arr[subset_idx * 9: (subset_idx + 1) * 9]),
                     batch_size=200, shuffle=True)
 
-                stop_after = self.stop_after / 4
+                stop_after = self.stop_after / 8 if not self.timeseries_settings.is_timeseries else self.stop_after
                 return_model_after = (20000 if subset_itt > 0 else 1) if not self.timeseries_settings.is_timeseries \
                     else 20000
 
                 self.model, epoch_to_best_model, err = self._max_fit(
-                    train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, return_model_after)
+                    train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after)
 
                 self.epochs_to_best += epoch_to_best_model
 
