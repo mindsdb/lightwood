@@ -60,9 +60,11 @@ class AdaptiveMinMaxNormalizer(MinMaxNormalizer):
         if arr.shape[1] > self.window_size:
             arr = arr[:, :self.window_size]
         else:
-            arr = np.pad(arr, max(0, (arr.shape[1] - 1) - self.window_size))
+            arr = np.pad(arr, max(0, (arr.shape[1] - 1) - self.window_size), constant_values=self.abs_mean)
 
-        return arr.mean(axis=1).reshape(-1, 1)
+        mean = arr.mean(axis=1).reshape(-1, 1)
+
+        return np.clip(mean, 1, max(1, max(mean)))
 
     def encode(self, y) -> torch.Tensor:
         if isinstance(y[0], list):
