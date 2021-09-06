@@ -18,6 +18,8 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
         else:
             series_delta = deltas['__default'][col]
         timestamps = [last + t * series_delta for t in range(nr_predictions)]
+        if len(timestamps) == 1:
+            timestamps = timestamps[0]  # preserves original input format in nr_predictions==1 case
         df[f'order_{col}'].iloc[idx] = timestamps
     return df[f'order_{col}']
 
