@@ -263,23 +263,12 @@ class Neural(BaseModel):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        for subset_itt in (0, 1):
-            for subset_idx in range(len(dev_ds_arr)):
-                train_dl = DataLoader(
-                    ConcatedEncodedDs(train_ds_arr[subset_idx * 9: (subset_idx + 1) * 9]),
-                    batch_size=200, shuffle=True)
+        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=True)
 
-                stop_after = self.stop_after / 8
-                return_model_after = 20000 if subset_itt > 0 else 1
+        self.model, epoch_to_best_model, err = self._max_fit(
+            train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=20000)
 
-                if self.timeseries_settings.is_timeseries:
-                    return_model_after = 20000
-                    stop_after = self.stop_after
-
-                self.model, epoch_to_best_model, err = self._max_fit(
-                    train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after)
-
-                self.epochs_to_best += epoch_to_best_model
+        self.epochs_to_best += epoch_to_best_model
 
         if len(con_test_ds) > 0:
             if self.fit_on_dev:
