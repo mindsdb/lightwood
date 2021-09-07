@@ -9,8 +9,35 @@
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/lightwood)
 
-Lightwood version 1 is out :)
-The documentation is still a work in progress to please bear with us, should be here before October.
+
+## What is lightwood?
+
+* Lightwood is a tool for automatic machine learning
+* Lightwood is an implementation of J{AI}SON
+* Lightwood is a library for declarative ML
+
+## End to End
+
+Lightwood works with pandas dataframes. You can give it a dataframe and tell ask it to analyze it in order to generate code for solving some inferential problem. It will infer the "types" of your columns and run some statistical analysis on the data. Finally, once all of this is done, it will generate a `JsonAI` object.
+
+<h1 align="center">
+	<img width="800" src="https://github.com/mindsdb/lightwood/blob/staging/lightwood/docs/code_from_problem.jpg" alt="Lightwood">
+	<br>
+	<br>
+</h1>
+
+
+```
+import lightwood
+import requests
+
+data = requests.get('https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/hdi/data.csv').text
+
+dataframe = pd.read_csv(io.StringIO(data), sep=",")
+problem_definition = lightwood.ProblemDefinition.from_dict({'target': 'Development Index'})
+```
+
+
 
 
 ### Current contributors 
