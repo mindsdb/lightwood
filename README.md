@@ -18,6 +18,9 @@
 
 ## End to End
 
+
+### Generate code
+
 Lightwood works with pandas dataframes. You can give it a dataframe and tell ask it to analyze it in order to generate code for solving some inferential problem. It will infer the "types" of your columns and run some statistical analysis on the data. Finally, once all of this is done, it will generate a `JsonAI` object.
 
 <h1 align="center">
@@ -26,6 +29,7 @@ Lightwood works with pandas dataframes. You can give it a dataframe and tell ask
 	<br>
 </h1>
 
+*Important note: The `JsonAI` object is just a json. You can dump it by calling `to_dict` or `to_json`, then edit it to your liking. Then you can reload it by calling `lightwood.JsonAI.from_dict` (or `from_json`). This is a rather tedious way of doing this, and we'll document J{AI}SON editing better when we have some tools to help the process along*
 
 ```
 import lightwood
@@ -37,10 +41,18 @@ dataframe = pd.read_csv(io.StringIO(data), sep=",")
 problem_definition = lightwood.ProblemDefinition.from_dict({'target': 'Development Index'})
 ```
 
+### Train a Predictor
+
+...
+
+
+### Make some inferences
+
+...
 
 
 
-### Current contributors 
+## Current contributors 
 
 <a href="https://github.com/mindsdb/lightwood/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=mindsdb/lightwood" />
