@@ -21,7 +21,7 @@
 Lightwood works with pandas dataframes. You can give it a dataframe and tell ask it to analyze it in order to generate code for solving some inferential problem. It will infer the "types" of your columns and run some statistical analysis on the data. Finally, once all of this is done, it will generate a `JsonAI` object.
 
 <h1 align="center">
-	<img width="800" src="https://github.com/mindsdb/lightwood/blob/staging/docs/code_from_problem.jpg" alt="Lightwood">
+	<img width="800" src="https://github.com/mindsdb/lightwood/blob/staging/docs/1.jpg" alt="Lightwood">
 	<br>
 	<br>
 </h1>
