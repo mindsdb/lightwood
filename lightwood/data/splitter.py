@@ -19,16 +19,22 @@ def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings) -> List[pd.Dat
             folds = np.array_split(data, k)
         else:
             gcols = tss.group_by
-            all_group_combinations = list(product(*[data[gcol].unique() for gcol in tss.group_by]))
-            folds = [pd.DataFrame() for _ in range(k)]
-            for group in all_group_combinations:
-                subframe = data
-                for idx, gcol in enumerate(gcols):
-                    subframe = subframe[subframe[gcol] == group[idx]]
+            folds = grouped_ts_splitter(data, k, gcols)
 
-                subfolds = np.array_split(subframe, k)
+    return folds
 
-                for i in range(k):
-                    folds[i] = pd.concat([folds[i], subfolds[i]])
+
+def grouped_ts_splitter(data: pd.DataFrame, k: int, gcols: List[str]):
+    all_group_combinations = list(product(*[data[gcol].unique() for gcol in gcols]))
+    folds = [pd.DataFrame() for _ in range(k)]
+    for group in all_group_combinations:
+        subframe = data
+        for idx, gcol in enumerate(gcols):
+            subframe = subframe[subframe[gcol] == group[idx]]
+
+        subfolds = np.array_split(subframe, k)
+
+        for i in range(k):
+            folds[i] = pd.concat([folds[i], subfolds[i]])
 
     return folds
