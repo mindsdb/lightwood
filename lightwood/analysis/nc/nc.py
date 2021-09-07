@@ -8,6 +8,7 @@ import abc
 import numpy as np
 import sklearn.base
 from scipy.interpolate import interp1d
+from copy import deepcopy
 
 
 # -----------------------------------------------------------------------------
@@ -336,6 +337,17 @@ class BaseModelNc(BaseScorer):
                 pass
 
         return self.err_func.apply(prediction, y) / norm
+
+    def __deepcopy__(self, memo={}):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if k != 'model':  # model should not be copied
+                setattr(result, k, deepcopy(v, memo))
+            else:
+                setattr(result, k, v)
+        return result
 
 
 # -----------------------------------------------------------------------------
