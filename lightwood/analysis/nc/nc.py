@@ -472,7 +472,7 @@ class RegressorNc(BaseModelNc):
                 norm = self.normalizer.score(x) + self.beta
             except Exception:
                 pass
-        
+
         if significance:
             err_dist = self.err_func.apply_inverse(nc, significance)
             err_dist = np.hstack([err_dist] * n_test)
