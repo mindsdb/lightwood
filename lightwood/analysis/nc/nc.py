@@ -329,7 +329,6 @@ class BaseModelNc(BaseScorer):
         prediction = self.model.predict(x)
         n_test = x.shape[0]
 
-        
         if self.normalizer is not None:
             try:
                 norm = self.normalizer.score(x) + self.beta
