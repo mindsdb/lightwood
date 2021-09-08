@@ -327,17 +327,16 @@ class BaseModelNc(BaseScorer):
             Nonconformity scores of samples.
         """ # noqa
         prediction = self.model.predict(x)
-        n_test = x.shape[0]
 
+        err = self.err_func.apply(prediction, y)
         if self.normalizer is not None:
             try:
                 norm = self.normalizer.score(x) + self.beta
+                err = err / norm
             except Exception:
-                norm = np.ones(n_test)
-        else:
-            norm = np.ones(n_test)
+                pass
 
-        return self.err_func.apply(prediction, y) / norm
+        return err
 
     def __deepcopy__(self, memo={}):
         cls = self.__class__
