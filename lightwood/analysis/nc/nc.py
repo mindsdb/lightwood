@@ -343,7 +343,7 @@ class BaseModelNc(BaseScorer):
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():
-            if k != 'model':  # model should not be copied
+            if k not in ['model', 'normalizer']:  # model should not be copied
                 setattr(result, k, deepcopy(v, memo))
             else:
                 setattr(result, k, v)
