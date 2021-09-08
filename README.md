@@ -8,51 +8,59 @@
 ![](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)
 [![PyPI version](https://badge.fury.io/py/lightwood.svg)](https://badge.fury.io/py/lightwood)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/lightwood)
+[![Discourse posts](https://img.shields.io/discourse/posts?server=https%3A%2F%2Fcommunity.mindsdb.com%2F)](https://community.mindsdb.com/)
+
+Lightwood is like Legos for Machine Learning. 
+
+A Pytorch based framework that breaks down machine learning problems into smaller blocks that can be glued together seamlessly with one objective:
+
+- Make it so simple that you can build predictive models with as little as one line of code.
 
 
-## What is lightwood?
+# Documentation
+Learn more from the [Lightwood's docs](https://docs.mindsdb.com/lightwood/info/).  
 
-* Lightwood is a tool for automatic machine learning
-* Lightwood is an implementation of J{AI}SON
-* Lightwood is a library for declarative ML
+## Try it out
 
-## End to End
+### Installation
+You can install Lightwood from pip:
 
-
-### Generate code
-
-Lightwood works with pandas dataframes. You can give it a dataframe and tell ask it to analyze it in order to generate code for solving some inferential problem. It will infer the "types" of your columns and run some statistical analysis on the data. Finally, once all of this is done, it will generate a `JsonAI` object.
-
-<h1 align="center">
-	<img src="https://github.com/mindsdb/lightwood/blob/staging/docs/1.jpg" alt="Lightwood">
-	<br>
-	<br>
-</h1>
-
-*Important note: The `JsonAI` object is just a json. You can dump it by calling `to_dict` or `to_json`, then edit it to your liking. Then you can reload it by calling `lightwood.JsonAI.from_dict` (or `from_json`). This is a rather tedious way of doing this, and we'll document J{AI}SON editing better when we have some tools to help the process along*
-
+```python
+pip3 install lightwood
 ```
-import lightwood
-import requests
+>Note: depending on your environment, you might have to use pip instead of pip3 in the above command.
 
-data = requests.get('https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/hdi/data.csv').text
+### Usage
+Given the simple sensor_data.csv let's predict sensor3 values.
+| sensor1  | sensor2 | sensor3 |
+|----|----|----|
+|  1 | -1 | -1 |
+| 0  | 1  | 0  |
+| -1  |- 1  |1  |
 
-dataframe = pd.read_csv(io.StringIO(data), sep=",")
-problem_definition = lightwood.ProblemDefinition.from_dict({'target': 'Development Index'})
+Import [Predictor](https://mindsdb.github.io/lightwood/API/) from Lightwood
+```python
+from lightwood import Predictor
 ```
 
-### Train a Predictor
+Train the model.
+```python
+import pandas
+sensor3_predictor = Predictor(output=['sensor3']).learn(from_data=pandas.read_csv('sensor_data.csv'))
+```
+You can now predict what *sensor3* value will be.
 
-...
+```python
+prediction = sensor3_predictor.predict(when={'sensor1':1, 'sensor2':-1})
+```
 
+* You can also try Lightwood in Google Colab: [![Google Colab](https://colab.research.google.com/assets/colab-badge.svg "Lightwood")](https://colab.research.google.com/drive/10W43sur_uj28ROiGuAIF9X46_Xrx1e7K)
 
-### Make some inferences
+## Contributing
 
-...
+Thanks for your interest. There are many ways to contribute to this project. Please, check out our [Contribution guide](https://github.com/mindsdb/lightwood/blob/master/CONTRIBUTING.md).
 
-
-
-## Current contributors 
+### Current contributors 
 
 <a href="https://github.com/mindsdb/lightwood/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=mindsdb/lightwood" />
