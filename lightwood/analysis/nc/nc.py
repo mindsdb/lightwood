@@ -329,12 +329,14 @@ class BaseModelNc(BaseScorer):
         prediction = self.model.predict(x)
         n_test = x.shape[0]
 
-        norm = np.ones(n_test)
+        
         if self.normalizer is not None:
             try:
                 norm = self.normalizer.score(x) + self.beta
             except Exception:
-                pass
+                norm = np.ones(n_test)
+        else:
+            norm = np.ones(n_test)
 
         return self.err_func.apply(prediction, y) / norm
 
