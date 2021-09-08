@@ -6,6 +6,7 @@ Inductive conformal predictors.
 
 from collections import defaultdict
 from functools import partial
+from typing import Optional
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -170,7 +171,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         else:
             self.classes = np.unique(np.hstack([self.classes, y]))
 
-    def predict(self, x, significance=None):
+    def predict(self, x: np.array, significance: Optional[float] = None) -> np.array:
         """Predict the output values for a set of input patterns.
 
         Parameters
@@ -220,7 +221,6 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
                     p[j, i] = (n_gt + n_eq) / (n_cal + 1)
                 else:
                     p[j, i] = (n_gt + n_eq * random_uniform_dist) / (n_cal + 1)
-                    
 
         if significance is not None:
             return p > significance
