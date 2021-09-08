@@ -466,19 +466,19 @@ class RegressorNc(BaseModelNc):
         n_test = x.shape[0]
         prediction = self.model.predict(x)
 
-        norm = np.ones(n_test)
+        norm = 1
         if self.normalizer is not None:
             try:
                 norm = self.normalizer.score(x) + self.beta
             except Exception:
                 pass
-
+        
         if significance:
-            intervals = np.zeros((x.shape[0], 2))
             err_dist = self.err_func.apply_inverse(nc, significance)
             err_dist = np.hstack([err_dist] * n_test)
             err_dist *= norm
 
+            intervals = np.zeros((x.shape[0], 2))
             intervals[:, 0] = prediction - err_dist[0, :]
             intervals[:, 1] = prediction + err_dist[1, :]
 
