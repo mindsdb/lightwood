@@ -194,6 +194,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         # TODO: if x == self.last_x ...
         n_test_objects = x.shape[0]
         p = np.zeros((n_test_objects, self.classes.size))
+        random_uniform_dist = np.random.uniform(0, 1, 1)
         for i, c in enumerate(self.classes):
             test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
             test_class.fill(c)
@@ -215,7 +216,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
                 p[j, i] = n_gt / (n_cal + 1)
 
                 if self.smoothing:
-                    p[j, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
+                    p[j, i] += (n_eq * random_uniform_dist) / (n_cal + 1)
                 else:
                     p[j, i] += n_eq / (n_cal + 1)
 
