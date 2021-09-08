@@ -208,16 +208,18 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
                 cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
                 n_cal = cal_scores.size
 
-                idx_left = np.searchsorted(cal_scores, nc, 'left')
-                idx_right = np.searchsorted(cal_scores, nc, 'right')
-                n_gt = n_cal - idx_right
-                n_eq = idx_right - idx_left + 1
+                n_eq = 0
+                n_gt = 0
+                for cal_score in cal_scores:
+                    if cal_score == nc:
+                        n_eq += 1
+                    elif nc < cal_score:
+                        n_gt += 1
 
-                p[j, i] = n_gt / (n_cal + 1)
-
-                p[j, i] += n_eq / (n_cal + 1)
                 if self.smoothing:
-                    p[j, i] *= random_uniform_dist
+                    p[j, i] = (n_gt + n_eq) / (n_cal + 1)
+                else:
+                    p[j, i] = (n_gt + n_eq * random_uniform_dist) / (n_cal + 1)
                     
 
         if significance is not None:
