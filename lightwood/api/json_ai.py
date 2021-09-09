@@ -627,7 +627,7 @@ class Predictor(PredictorInterface):
     mode: str
 
     def __init__(self):
-        seed()
+        seed({json_ai.problem_definition.seed_nr})
         self.target = '{json_ai.problem_definition.target}'
         self.mode = 'innactive'
 
