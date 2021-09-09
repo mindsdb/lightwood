@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.api.types import TimeseriesSettings
+from lightwood.api.dtype import dtype
 from lightwood.encoder.time_series.helpers.common import get_group_matches, generate_target_group_normalizers
 
 
@@ -21,7 +22,10 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     # @TODO: maybe normalizers should fit using only the training folds??
     new_data = generate_target_group_normalizers(info)
 
-    naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
+    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.array):
+        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
+    else:
+        naive_forecast_residuals, scale_factor = {}, {}
 
     deltas = get_delta(data[timeseries_settings.order_by],
                        info,
@@ -85,6 +89,6 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
     Note: method assumes predictions are all for the same group combination
     m: season length. the naive forecasts will be the m-th previously seen value for each series
     """
-    residuals = target_data.rolling(window=m+1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
+    residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
     scale_factor = np.average(residuals)
     return residuals.tolist(), scale_factor

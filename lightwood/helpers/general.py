@@ -1,4 +1,3 @@
-import math
 import importlib
 from typing import List, Union, Dict, Optional
 
@@ -76,10 +75,10 @@ def evaluate_array_accuracy(
         true_values = np.array(true_values)
         predictions = np.array(predictions)
         mases = []
-        wrapped_data = {
-            'data': data.reset_index(drop=True),
-            'group_info': {gcol: data[gcol].tolist() for gcol in ts_analysis['tss'].group_by}
-        }
+        wrapped_data = {'data': data.reset_index(drop=True),
+                        'group_info': {gcol: data[gcol].tolist()
+                                       for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
+                        }
         for group in ts_analysis['group_combinations']:
             g_idxs, _ = get_group_matches(wrapped_data, group)
             trues = true_values[g_idxs]
