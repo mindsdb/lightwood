@@ -367,7 +367,6 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'module': 'model_analyzer',
             'args': {
                 'stats_info': '$statistical_analysis',
-                'ts_cfg': '$problem_definition.timeseries_settings',
                 'accuracy_functions': '$accuracy_functions',
                 'predictor': '$ensemble',
                 'data': 'test_data',
@@ -378,6 +377,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'fixed_significance': None,
                 'confidence_normalizer': False,
                 'positive_domain': '$statistical_analysis.positive_domain',
+                'ts_cfg': '$problem_definition.timeseries_settings',
+                'ts_analysis': '$ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
             }
         }
 
