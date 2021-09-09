@@ -21,12 +21,12 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     # @TODO: maybe normalizers should fit using only the training folds??
     new_data = generate_target_group_normalizers(info)
 
+    naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
+
     deltas = get_delta(data[timeseries_settings.order_by],
                        info,
                        new_data['group_combinations'],
                        timeseries_settings.order_by)
-
-    naive_forecast_residuals, scale_factor = get_ts_residuals(data[[target]])
 
     return {'target_normalizers': new_data['target_normalizers'],
             'deltas': deltas,
@@ -50,6 +50,7 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
         deltas["__default"][col] = delta
 
     if ts_info.get('group_info', False):
+        original_data = ts_info['data']
         for group in group_combinations:
             if group != "__default":
                 deltas[group] = {}
@@ -63,15 +64,27 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
                             lambda x: x.iloc[1] - x.iloc[0])
                         delta = rolling_diff.value_counts(ascending=False).keys()[0]
                         deltas[group][col] = delta
+        ts_info['data'] = original_data
 
     return deltas
 
 
-def get_ts_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, float]:
+def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[Dict, Dict]:
+    group_residuals = {}
+    group_scale_factors = {}
+    for group in group_combinations:
+        subset = get_group_matches(info, group)
+        residuals, scale_factor = get_naive_residuals(pd.DataFrame(subset))  # @TODO: pass m once we handle seasonality
+        group_residuals[group] = residuals
+        group_scale_factors[group] = scale_factor
+    return group_residuals, group_scale_factors
+
+
+def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, float]:
     """ Useful for computing MASE forecasting error.
     Note: method assumes predictions are all for the same group combination
     m: season length. the naive forecasts will be the m-th previously seen value for each series
     """
-    residuals = target_data.rolling(window=m+1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:]
+    residuals = target_data.rolling(window=m+1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
     scale_factor = np.average(residuals)
-    return residuals, scale_factor
+    return residuals.tolist(), scale_factor

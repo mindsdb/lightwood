@@ -92,7 +92,7 @@ def get_group_matches(data, combination):
     if isinstance(data['data'], np.ndarray) and len(data['data'].shape) < 2:
         data['data'] = np.expand_dims(data['data'], axis=1)
 
-    if not combination:
+    if not combination or combination == '__default':
         idxs = range(len(data['data']))
         return [idxs, np.array(data['data'])[idxs, :]]  # return all data
     else:
