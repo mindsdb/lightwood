@@ -153,6 +153,7 @@ class ProblemDefinition:
     ignore_features: List[str]
     fit_on_validation: bool
     strict_mode: bool
+    seed_nr: int
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -173,6 +174,7 @@ class ProblemDefinition:
         ignore_features = obj.get('ignore_features', [])
         fit_on_validation = obj.get('fit_on_validation', True)
         strict_mode = obj.get('strict_mode', True)
+        seed_nr = obj.get('seed_nr', 420)
 
         problem_definition = ProblemDefinition(
             target=target,
@@ -191,7 +193,8 @@ class ProblemDefinition:
             anomaly_cooldown=anomaly_cooldown,
             ignore_features=ignore_features,
             fit_on_validation=fit_on_validation,
-            strict_mode=strict_mode
+            strict_mode=strict_mode,
+            seed_nr=seed_nr
         )
 
         return problem_definition
