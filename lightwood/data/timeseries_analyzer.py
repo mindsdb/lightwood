@@ -26,10 +26,15 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
                        new_data['group_combinations'],
                        timeseries_settings.order_by)
 
+    naive_forecast_residuals, scale_factor = get_ts_residuals(data[[target]])
+
     return {'target_normalizers': new_data['target_normalizers'],
             'deltas': deltas,
             'tss': timeseries_settings,
-            'group_combinations': new_data['group_combinations']}
+            'group_combinations': new_data['group_combinations'],
+            'ts_naive_residuals': naive_forecast_residuals,
+            'ts_naive_mae': scale_factor
+            }
 
 
 def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_cols: list):
@@ -62,23 +67,11 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
     return deltas
 
 
-def get_ts_residuals(predictions: pd.DataFrame, seasonality_n_steps=1) -> Tuple[List, float]:
-    """Note: method assumes predictions are all for the same group combination"""
-    true_values = predictions['truth'][1:]
-
-    # @TODO: incorporate seasonality offset
-    naive_predictions = predictions[:len(true_values)]  # forecast is the last observed value
-
-    residuals = [abs(t - p) for t, p in zip(true_values, naive_predictions)]
+def get_ts_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, float]:
+    """ Useful for computing MASE forecasting error.
+    Note: method assumes predictions are all for the same group combination
+    m: season length. the naive forecasts will be the m-th previously seen value for each series
+    """
+    residuals = target_data.rolling(window=m+1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:]
     scale_factor = np.average(residuals)
-    # mase = 0.0
-    #
-    # for ifh in range(ts_cfg.nr_predictions):
-    #     offset_truth = true_values[ifh:]
-    #     forecasts = [p[ifh] for p in predictions['prediction']][:-ifh]
-    #     error = [abs(t - p) for t, p in zip(offset_truth, forecasts)]
-    #     mase += error
-    #
-    # mase /= scale_factor
-
     return residuals, scale_factor
