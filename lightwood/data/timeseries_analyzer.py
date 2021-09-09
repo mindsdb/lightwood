@@ -77,7 +77,7 @@ def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[D
     group_residuals = {}
     group_scale_factors = {}
     for group in group_combinations:
-        subset = get_group_matches(info, group)
+        idxs, subset = get_group_matches(info, group)
         residuals, scale_factor = get_naive_residuals(pd.DataFrame(subset))  # @TODO: pass m once we handle seasonality
         group_residuals[group] = residuals
         group_scale_factors[group] = scale_factor
