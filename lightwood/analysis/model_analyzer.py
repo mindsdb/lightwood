@@ -11,8 +11,10 @@ from lightwood.api import dtype
 from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.helpers.general import evaluate_accuracy
+from lightwood.data.timeseries_analyzer import get_ts_residuals
 from lightwood.ensemble import BaseEnsemble
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
+from lightwood.encoder.time_series.helpers.common import get_group_matches
 
 from lightwood.analysis.acc_stats import AccStats
 from lightwood.analysis.nc.norm import Normalizer
@@ -37,13 +39,14 @@ def model_analyzer(
     train_data: List[EncodedDs],
     stats_info: StatisticalAnalysis,
     target: str,
-    ts_cfg: TimeseriesSettings,
     dtype_dict: Dict[str, str],
     disable_column_importance: bool,
     fixed_significance: float,
     positive_domain: bool,
     confidence_normalizer: bool,
-    accuracy_functions
+    accuracy_functions,
+    ts_cfg: TimeseriesSettings,
+    ts_analysis: Dict,
 ):
     """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
 
@@ -68,6 +71,19 @@ def model_analyzer(
     normal_predictions = predictor(encoded_data) if not is_classification else predictor(
         encoded_data, predict_proba=True)
     normal_predictions = normal_predictions.set_index(data.index)
+
+    # if prediction task is time series, get residual errors
+    if ts_cfg.is_timeseries:
+        train_preds = predictor(encoded_train_data)
+        train_df = deepcopy(encoded_train_data.data_frame).reset_index(drop=True)
+        runtime_analyzer['ts_residuals'] = {}
+        runtime_analyzer['ts_naive_mae'] = {}
+        for group in ts_analysis['group_combinations']:
+            df_subset = get_group_matches(train_df, group)
+            preds_subset = train_preds[df_subset.index]
+            train_residuals, scale_factor = get_ts_residuals(preds_subset)
+            runtime_analyzer['ts_residuals'][group] = train_residuals
+            runtime_analyzer['ts_naive_mae'][group] = scale_factor
 
     # confidence estimation with inductive conformal predictors (ICPs)
     runtime_analyzer['icp'] = {'__mdb_active': False}
