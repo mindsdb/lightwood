@@ -1,4 +1,6 @@
-from typing import Dict
+from typing import Dict, Tuple, List
+
+import numpy as np
 import pandas as pd
 
 from lightwood.api.types import TimeseriesSettings
@@ -58,3 +60,25 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
                         deltas[group][col] = delta
 
     return deltas
+
+
+def get_ts_residuals(predictions: pd.DataFrame, seasonality_n_steps=1) -> Tuple[List, float]:
+    """Note: method assumes predictions are all for the same group combination"""
+    true_values = predictions['truth'][1:]
+
+    # @TODO: incorporate seasonality offset
+    naive_predictions = predictions[:len(true_values)]  # forecast is the last observed value
+
+    residuals = [abs(t - p) for t, p in zip(true_values, naive_predictions)]
+    scale_factor = np.average(residuals)
+    # mase = 0.0
+    #
+    # for ifh in range(ts_cfg.nr_predictions):
+    #     offset_truth = true_values[ifh:]
+    #     forecasts = [p[ifh] for p in predictions['prediction']][:-ifh]
+    #     error = [abs(t - p) for t, p in zip(offset_truth, forecasts)]
+    #     mase += error
+    #
+    # mase /= scale_factor
+
+    return residuals, scale_factor
