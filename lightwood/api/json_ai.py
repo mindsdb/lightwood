@@ -97,6 +97,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             input_cols.append(col_name)
 
     is_target_predicting_encoder = False
+    is_ts = problem_definition.timeseries_settings.is_timeseries
     # Single text column classification
     if len(input_cols) == 1 and type_information.dtypes[
             input_cols[0]] in (
@@ -168,6 +169,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
             'module': 'BestOf',
             'args': {
                 'accuracy_functions': '$accuracy_functions',
+                'ts_analysis': 'self.ts_analysis' if is_ts else None
             }
         }
     )}
@@ -327,6 +329,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
     ensemble['args']['target'] = ensemble['args'].get('target', '$target')
     ensemble['args']['data'] = ensemble['args'].get('data', 'test_data')
+    ensemble['args']['models'] = ensemble['args'].get('models', '$models')
     ensemble['args']['models'] = ensemble['args'].get('models', '$models')
 
     for name in json_ai.features:
