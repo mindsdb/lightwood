@@ -213,9 +213,9 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
                         n_gt += 1
 
                 if self.smoothing:
-                    p[j, i] = (n_gt + n_eq) / (n_cal + 1)
-                else:
                     p[j, i] = (n_gt + n_eq * random_uniform_dist) / (n_cal + 1)
+                else:
+                    p[j, i] = (n_gt + n_eq) / (n_cal + 1)
 
         if significance is not None:
             return p > significance
