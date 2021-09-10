@@ -45,8 +45,9 @@ def compute_entropy_biased_buckets(histogram):
 def statistical_analysis(data: pd.DataFrame,
                          dtypes: Dict[str, str],
                          identifiers: Dict[str, object],
-                         problem_definition: ProblemDefinition) -> StatisticalAnalysis:
-    seed()
+                         problem_definition: ProblemDefinition,
+                         seed_nr: int = 420) -> StatisticalAnalysis:
+    seed(seed_nr)
     log.info('Starting statistical analysis')
     df = cleaner(data, dtypes, problem_definition.pct_invalid, problem_definition.ignore_features,
                  identifiers, problem_definition.target, 'train', problem_definition.timeseries_settings,
