@@ -210,16 +210,21 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
-    if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float] and not is_ts:
+    if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
         accuracy_functions = ['r2_score']
     elif list(outputs.values())[0].data_dtype == dtype.categorical:
         accuracy_functions = ['balanced_accuracy_score']
     elif list(outputs.values())[0].data_dtype == dtype.tags:
         accuracy_functions = ['balanced_accuracy_score']
-    elif list(outputs.values())[0].data_dtype == dtype.array or is_ts:
+    elif list(outputs.values())[0].data_dtype == dtype.array:
         accuracy_functions = ['evaluate_array_accuracy']
     else:
         accuracy_functions = ['accuracy_score']
+
+    # special time series accuracy function dispatch
+    if is_ts:
+        if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
+            accuracy_functions = ['evaluate_array_accuracy']
 
     if problem_definition.time_aim is None and (
             problem_definition.seconds_per_model is None or problem_definition.seconds_per_encoder is None):
