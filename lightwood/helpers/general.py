@@ -13,7 +13,7 @@ def evaluate_accuracy(data: pd.DataFrame,
                       predictions: pd.Series,
                       target: str,
                       accuracy_functions: List[str],
-                      ts_analysis: Optional[dict] = None) -> Dict[str, float]:
+                      ts_analysis: Optional[dict] = {}) -> Dict[str, float]:
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
