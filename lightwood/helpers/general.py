@@ -18,7 +18,7 @@ def evaluate_accuracy(data: pd.DataFrame,
 
     for accuracy_function_str in accuracy_functions:
         if accuracy_function_str == 'evaluate_array_accuracy':
-            nr_predictions = len(predictions.iloc[0])
+            nr_predictions = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
             cols = [target] + [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]
             true_values = data[cols].values.tolist()
             score_dict[accuracy_function_str] = evaluate_array_accuracy(list(true_values),
@@ -58,6 +58,7 @@ def evaluate_array_accuracy(
         data: pd.DataFrame,
         **kwargs
 ) -> float:
+
     def mase(trues, preds, scale_error, fh):
         agg = 0
         for i in range(fh):
@@ -68,26 +69,36 @@ def evaluate_array_accuracy(
         return agg / scale_error
 
     ts_analysis = kwargs.get('ts_analysis', {})
-    if not ts_analysis:
+    naive_errors = ts_analysis.get('ts_naive_mae', {})
+
+    if not naive_errors:
         # use mean R2 method if naive errors were not computed
         return evaluate_array_r2_accuracy(true_values, predictions)
-    else:
-        true_values = np.array(true_values)
-        predictions = np.array(predictions)
-        mases = []
-        wrapped_data = {'data': data.reset_index(drop=True),
-                        'group_info': {gcol: data[gcol].tolist()
-                                       for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
-                        }
-        for group in ts_analysis['group_combinations']:
-            g_idxs, _ = get_group_matches(wrapped_data, group)
-            trues = true_values[g_idxs]
-            preds = predictions[g_idxs]
 
-            # add MASE score for each group (__default only considered if the task is non-grouped)
-            if len(ts_analysis['group_combinations']) == 1 or group != '__default':
-                mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].nr_predictions))
-        return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
+    mases = []
+    true_values = np.array(true_values)
+    predictions = np.array(predictions)
+    wrapped_data = {'data': data.reset_index(drop=True),
+                    'group_info': {gcol: data[gcol].tolist()
+                                   for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
+                    }
+    for group in ts_analysis['group_combinations']:
+        g_idxs, _ = get_group_matches(wrapped_data, group)
+        trues = true_values[g_idxs]
+        preds = predictions[g_idxs]
+
+        if ts_analysis['tss'].nr_predictions == 1:
+            preds = np.expand_dims(preds, axis=1)
+
+        # only evaluate accuracy for rows with complete historical context
+        if len(trues) > ts_analysis['tss'].window:
+            trues = trues[ts_analysis['tss'].window:]
+            preds = preds[ts_analysis['tss'].window:]
+
+        # add MASE score for each group (__default only considered if the task is non-grouped)
+        if len(ts_analysis['group_combinations']) == 1 or group != '__default':
+            mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].nr_predictions))
+    return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
 
 
 def evaluate_array_r2_accuracy(
@@ -95,11 +106,16 @@ def evaluate_array_r2_accuracy(
         predictions: List[List[Union[int, float]]],
         **kwargs
 ) -> float:
+    # Note: this method does not filter data points with incomplete historical data, so it's less accurate
     base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
 
     aggregate = 0
-    fh = len(predictions[0])
+
+    fh = 1 if not isinstance(predictions[0], list) else len(predictions[0])
+    if fh == 1:
+        predictions = [[p] for p in predictions]
 
     for i in range(fh):
         aggregate += base_acc_fn([t[i] for t in true_values], [p[i] for p in predictions])
+
     return aggregate / fh
