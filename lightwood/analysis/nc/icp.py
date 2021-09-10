@@ -151,7 +151,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         842-851.
     """
 
-    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None, 
+    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None,
                  smoothing: bool = True) -> None:
         super(IcpClassifier, self).__init__(nc_function, condition)
         self.classes = None
