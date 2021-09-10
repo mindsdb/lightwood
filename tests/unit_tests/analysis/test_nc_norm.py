@@ -10,6 +10,7 @@ class TestNcNormalizer(unittest.TestCase):
         bounds = [0.5, 1.5]
 
         labels = Normalizer.compute_numerical_labels(preds, truths, bounds)
+        print(labels)
         self.assertTrue(np.min(labels) >= bounds[0])
         self.assertTrue(np.max(labels) <= bounds[1])
         self.assertFalse(np.isnan(labels).any())
@@ -20,6 +21,7 @@ class TestNcNormalizer(unittest.TestCase):
         truths = np.array([[0, 1], [0, 1], [1, 0], [1, 0]])
 
         labels = Normalizer.compute_categorical_labels(preds, truths)
+        print(labels)
         self.assertTrue(np.min(labels) >= 0)
         self.assertFalse(np.isnan(labels).any())
         self.assertFalse(np.isinf(labels).any())
