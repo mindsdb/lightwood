@@ -1,33 +1,35 @@
-class dtype():
+class dtype:
     """
     Definitions of all data types currently supported.
     """
+
     # Numerical type data
-    integer = 'integer'
-    float = 'float'
+    integer = "integer"
+    float = "float"
+    quantity = "quantity"
 
     # Categorical type data
-    binary = 'binary'
-    categorical = 'categorical'
-    tags = 'tags'
+    binary = "binary"
+    categorical = "categorical"
+    tags = "tags"
 
     # Dates and Times (time-series)
-    date = 'date'
-    datetime = 'datetime'
+    date = "date"
+    datetime = "datetime"
 
     # Text
-    short_text = 'short_text'
-    rich_text = 'rich_text'
+    short_text = "short_text"
+    rich_text = "rich_text"
 
     # Complex Data types
-    image = 'image'
-    audio = 'audio'
-    video = 'video'
+    image = "image"
+    audio = "audio"
+    video = "video"
 
     # Series/Sequences
-    array = 'array'
-    
+    array = "array"
+
     # Misc (Unk/NaNs)
-    empty = 'empty'
-    invalid = 'invalid'
-    quantity = 'quantity'
+    empty = "empty"
+    invalid = "invalid"
+
