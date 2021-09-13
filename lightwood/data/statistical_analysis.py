@@ -14,7 +14,10 @@ from lightwood.data.cleaner import _clean_float_or_none
 
 
 def get_datetime_histogram(data, data_dtype):
-    data = [_clean_float_or_none(parse_dt(str(x)).timestamp()) for x in data]
+    if isinstance(data[0], float) or isinstance(data[0], int):
+        data = [_clean_float_or_none(x) for x in data]
+    else:
+        data = [_clean_float_or_none(parse_dt(str(x)).timestamp()) for x in data]
 
     Y, X = np.histogram(data, bins=min(50, len(set(data))),
                         range=(min(data), max(data)), density=False)
