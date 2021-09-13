@@ -57,7 +57,7 @@ class PredictorInterface:
         """
         pass
 
-    def save(self, file_path: str):
+    def save(self, file_path: str) -> None:
         """
         With a provided file path, saves the Predictor instance for later use.
 
