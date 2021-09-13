@@ -1,7 +1,8 @@
 from typing import Dict
 import pandas as pd
 import numpy as np
-
+import datetime
+from dateutil.parser import parse as parse_dt
 from lightwood.api import StatisticalAnalysis, ProblemDefinition
 from lightwood.helpers.numeric import filter_nan
 from lightwood.helpers.seed import seed
@@ -10,6 +11,24 @@ from lightwood.helpers.log import log
 from lightwood.api.dtype import dtype
 from scipy.stats import entropy
 from lightwood.data.cleaner import _clean_float_or_none
+
+
+def get_datetime_histogram(data, data_dtype):
+    data = [_clean_float_or_none(parse_dt(str(x)).timestamp()) for x in data]
+
+    Y, X = np.histogram(data, bins=min(50, len(set(data))),
+                        range=(min(data), max(data)), density=False)
+    if data_dtype == dtype.integer:
+        Y, X = np.histogram(data, bins=[int(round(x)) for x in X], density=False)
+
+    X = X[:-1].tolist()
+    Y = Y.tolist()
+
+    X = [datetime.datetime.fromtimestamp(x) for x in X]
+    return {
+        'x': X,
+        'y': Y
+    }
 
 
 def get_numeric_histogram(data, data_dtype):
@@ -84,7 +103,7 @@ def statistical_analysis(data: pd.DataFrame,
     for col in df.columns:
         histograms[col] = None
         buckets[col] = None
-        if dtypes[col] in (dtype.categorical, dtype.binary, dtype.date):
+        if dtypes[col] in (dtype.categorical, dtype.binary, dtype.tags):
             hist = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
             histograms[col] = {
                 'x': list([str(x) for x in hist.keys()]),
@@ -94,8 +113,10 @@ def statistical_analysis(data: pd.DataFrame,
         elif dtypes[col] in (dtype.integer, dtype.float, dtype.array):
             histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col])
             buckets[col] = histograms[col]['x']
+        elif dtypes[col] in (dtype.date, dtype.datetime):
+            histograms[col] = get_datetime_histogram(filter_nan(df[col]), dtypes[col])
         else:
-            histograms[col] = {'x': [], 'y': []}
+            histograms[col] = {'x': ['Unknown'], 'y': [1]}
             buckets[col] = []
 
     # get observed classes, used in analysis
