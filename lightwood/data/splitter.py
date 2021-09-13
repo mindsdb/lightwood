@@ -7,6 +7,9 @@ from lightwood.api.types import TimeseriesSettings
 
 
 def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings) -> List[pd.DataFrame]:
+    """
+    Splits a dataframe into k equally-sized folds.
+    """
     if not tss.is_timeseries:
         # shuffle
         data = data.sample(frac=1).reset_index(drop=True)
@@ -25,6 +28,11 @@ def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings) -> List[pd.Dat
 
 
 def grouped_ts_splitter(data: pd.DataFrame, k: int, gcols: List[str]):
+    """
+    Splitter for grouped time series tasks, where there is a set of `gcols` columns by which data is grouped.
+    Each group yields a different time series, and the splitter generates `k` folds from `data`,
+    with equally-sized sub-series for each group.
+    """
     all_group_combinations = list(product(*[data[gcol].unique() for gcol in gcols]))
     folds = [pd.DataFrame() for _ in range(k)]
     for group in all_group_combinations:
