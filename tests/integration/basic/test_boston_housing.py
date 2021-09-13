@@ -10,6 +10,7 @@ class TestBasic(unittest.TestCase):
         from lightwood.api.high_level import predictor_from_problem
 
         df = pd.read_csv('tests/data/boston.csv')[:500]
+        df = df.rename(columns={df.columns[1]: f'\'{df.columns[1]}\''})
         target = 'MEDV'
 
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 200}))
