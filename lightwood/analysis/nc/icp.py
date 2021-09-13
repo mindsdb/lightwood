@@ -111,6 +111,7 @@ class BaseIcp(BaseEstimator):
     def _calibrate_hook(self, x, y, increment):
         pass
 
+
 # -----------------------------------------------------------------------------
 # Inductive conformal classifier
 # -----------------------------------------------------------------------------
