@@ -58,9 +58,21 @@ def evaluate_array_accuracy(
         data: pd.DataFrame,
         **kwargs
 ) -> float:
+    """
+    Evaluate accuracy in numerical time series forecasting tasks.
+    Defaults to mean absolute scaled error (MASE) if in-sample residuals are available.
+    If this is not the case, R2 score is computed instead.
+
+    Scores are computed for each timestep (as determined by `timeseries_settings.nr_predictions`),
+    and the final accuracy is the reciprocal of the average score through all timesteps.
+    """
 
     def mase(trues, preds, scale_error, fh):
-        agg = 0
+        """
+        Computes mean absolute scaled error.
+        The scale corrective factor is the mean in-sample residual from the naive forecasting method.
+        """
+        agg = 0.0
         for i in range(fh):
             true = [t[i] for t in trues]
             pred = [p[i] for p in preds]
@@ -72,8 +84,8 @@ def evaluate_array_accuracy(
     naive_errors = ts_analysis.get('ts_naive_mae', {})
 
     if not naive_errors:
-        # use mean R2 method if naive errors were not computed
-        return evaluate_array_r2_accuracy(true_values, predictions)
+        # use mean R2 method if naive errors are not available
+        return evaluate_array_r2_accuracy(true_values, predictions, ts_analysis=ts_analysis)
 
     mases = []
     true_values = np.array(true_values)
@@ -98,6 +110,7 @@ def evaluate_array_accuracy(
         # add MASE score for each group (__default only considered if the task is non-grouped)
         if len(ts_analysis['group_combinations']) == 1 or group != '__default':
             mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].nr_predictions))
+
     return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
 
 
@@ -106,14 +119,22 @@ def evaluate_array_r2_accuracy(
         predictions: List[List[Union[int, float]]],
         **kwargs
 ) -> float:
-    # Note: this method does not filter data points with incomplete historical data, so it's less accurate
+    """
+    Default time series forecasting accuracy method.
+    Returns mean R2 score over all timesteps in the forecasting horizon.
+    """
     base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
 
-    aggregate = 0
+    aggregate = 0.0
 
     fh = 1 if not isinstance(predictions[0], list) else len(predictions[0])
     if fh == 1:
         predictions = [[p] for p in predictions]
+
+    # only evaluate accuracy for rows with complete historical context
+    if kwargs['ts_analysis'].get('tss', False):
+        true_values = true_values[kwargs['ts_analysis']['tss'].window:]
+        predictions = predictions[kwargs['ts_analysis']['tss'].window:]
 
     for i in range(fh):
         aggregate += base_acc_fn([t[i] for t in true_values], [p[i] for p in predictions])
