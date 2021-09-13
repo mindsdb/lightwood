@@ -73,7 +73,25 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
     return deltas
 
 
+def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, float]:
+    """
+    Computes forecasting residuals for the naive method (forecasts for time `t` is the value observed at `t-1`).
+    Useful for computing MASE forecasting error.
+
+    Note: method assumes predictions are all for the same group combination. For a dataframe that contains multiple
+     series, use `get_grouped_naive_resiudals`.
+
+    m: season length. the naive forecasts will be the m-th previously seen value for each series
+    """
+    residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
+    scale_factor = np.average(residuals)
+    return residuals.tolist(), scale_factor
+
+
 def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[Dict, Dict]:
+    """
+    Wraps `get_naive_residuals` for a dataframe with grouped time series.
+    """
     group_residuals = {}
     group_scale_factors = {}
     for group in group_combinations:
@@ -82,13 +100,3 @@ def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[D
         group_residuals[group] = residuals
         group_scale_factors[group] = scale_factor
     return group_residuals, group_scale_factors
-
-
-def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, float]:
-    """ Useful for computing MASE forecasting error.
-    Note: method assumes predictions are all for the same group combination
-    m: season length. the naive forecasts will be the m-th previously seen value for each series
-    """
-    residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
-    scale_factor = np.average(residuals)
-    return residuals.tolist(), scale_factor
