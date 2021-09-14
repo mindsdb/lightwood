@@ -119,7 +119,7 @@ def statistical_analysis(data: pd.DataFrame,
         elif dtypes[col] in (dtype.date, dtype.datetime):
             histograms[col] = get_datetime_histogram(filter_nan(df[col]), dtypes[col])
         else:
-            histograms[col] = {'x': ['Unknown'], 'y': [1]}
+            histograms[col] = {'x': ['Unknown'], 'y': [len(filter_nan(df[col]))]}
             buckets[col] = []
 
     # get observed classes, used in analysis
