@@ -13,7 +13,7 @@ from scipy.stats import entropy
 from lightwood.data.cleaner import _clean_float_or_none
 
 
-def get_datetime_histogram(data: pd.Series) -> Dict[str, list]:
+def get_datetime_histogram(data: pd.Series, bins: int) -> Dict[str, list]:
     """Generates the histogram for date and datetime types
     """
     if isinstance(data[0], float) or isinstance(data[0], int):
@@ -21,7 +21,7 @@ def get_datetime_histogram(data: pd.Series) -> Dict[str, list]:
     else:
         data = [_clean_float_or_none(parse_dt(str(x)).timestamp()) for x in data]
 
-    Y, X = np.histogram(data, bins=min(50, len(set(data))),
+    Y, X = np.histogram(data, bins=min(bins, len(set(data))),
                         range=(min(data), max(data)), density=False)
 
     X = X[:-1].tolist()
@@ -34,12 +34,12 @@ def get_datetime_histogram(data: pd.Series) -> Dict[str, list]:
     }
 
 
-def get_numeric_histogram(data: pd.Series, data_dtype: dtype) -> Dict[str, list]:
+def get_numeric_histogram(data: pd.Series, data_dtype: dtype, bins: int) -> Dict[str, list]:
     """Generate the histogram for integer and float typed data
     """
     data = [_clean_float_or_none(x) for x in data]
 
-    Y, X = np.histogram(data, bins=min(50, len(set(data))),
+    Y, X = np.histogram(data, bins=min(bins, len(set(data))),
                         range=(min(data), max(data)), density=False)
     if data_dtype == dtype.integer:
         Y, X = np.histogram(data, bins=[int(round(x)) for x in X], density=False)
@@ -116,10 +116,10 @@ def statistical_analysis(data: pd.DataFrame,
             }
             buckets[col] = histograms[col]['x']
         elif dtypes[col] in (dtype.integer, dtype.float, dtype.array):
-            histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col])
+            histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col], 50)
             buckets[col] = histograms[col]['x']
         elif dtypes[col] in (dtype.date, dtype.datetime):
-            histograms[col] = get_datetime_histogram(filter_nan(df[col]), dtypes[col])
+            histograms[col] = get_datetime_histogram(filter_nan(df[col]), 50)
         else:
             histograms[col] = {'x': ['Unknown'], 'y': [len(filter_nan(df[col]))]}
             buckets[col] = []
