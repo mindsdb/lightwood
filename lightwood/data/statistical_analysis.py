@@ -13,7 +13,9 @@ from scipy.stats import entropy
 from lightwood.data.cleaner import _clean_float_or_none
 
 
-def get_datetime_histogram(data, data_dtype):
+def get_datetime_histogram(data: pd.Series) -> Dict[str, list]:
+    """Generates the histogram for date and datetime types
+    """
     if isinstance(data[0], float) or isinstance(data[0], int):
         data = [_clean_float_or_none(x) for x in data]
     else:
@@ -21,8 +23,6 @@ def get_datetime_histogram(data, data_dtype):
 
     Y, X = np.histogram(data, bins=min(50, len(set(data))),
                         range=(min(data), max(data)), density=False)
-    if data_dtype == dtype.integer:
-        Y, X = np.histogram(data, bins=[int(round(x)) for x in X], density=False)
 
     X = X[:-1].tolist()
     Y = Y.tolist()
@@ -34,7 +34,9 @@ def get_datetime_histogram(data, data_dtype):
     }
 
 
-def get_numeric_histogram(data, data_dtype):
+def get_numeric_histogram(data: pd.Series, data_dtype: dtype) -> Dict[str, list]:
+    """Generate the histogram for integer and float typed data
+    """
     data = [_clean_float_or_none(x) for x in data]
 
     Y, X = np.histogram(data, bins=min(50, len(set(data))),
