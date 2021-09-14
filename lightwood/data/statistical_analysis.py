@@ -4,7 +4,7 @@ import numpy as np
 import datetime
 from dateutil.parser import parse as parse_dt
 from lightwood.api import StatisticalAnalysis, ProblemDefinition
-from lightwood.helpers.numeric import filter_nan
+from lightwood.helpers.numeric import filter_nan_and_none
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
@@ -38,7 +38,7 @@ def get_numeric_histogram(data: pd.Series, data_dtype: dtype, bins: int) -> Dict
     """Generate the histogram for integer and float typed data
     """
     data = [_clean_float_or_none(x) for x in data]
-
+    
     Y, X = np.histogram(data, bins=min(bins, len(set(data))),
                         range=(min(data), max(data)), density=False)
     if data_dtype == dtype.integer:
@@ -116,12 +116,12 @@ def statistical_analysis(data: pd.DataFrame,
             }
             buckets[col] = histograms[col]['x']
         elif dtypes[col] in (dtype.integer, dtype.float, dtype.array):
-            histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col], 50)
+            histograms[col] = get_numeric_histogram(filter_nan_and_none(df[col]), dtypes[col], 50)
             buckets[col] = histograms[col]['x']
         elif dtypes[col] in (dtype.date, dtype.datetime):
-            histograms[col] = get_datetime_histogram(filter_nan(df[col]), 50)
+            histograms[col] = get_datetime_histogram(filter_nan_and_none(df[col]), 50)
         else:
-            histograms[col] = {'x': ['Unknown'], 'y': [len(filter_nan(df[col]))]}
+            histograms[col] = {'x': ['Unknown'], 'y': [len(df[col])]}
             buckets[col] = []
 
     # get observed classes, used in analysis

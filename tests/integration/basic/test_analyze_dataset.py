@@ -1,5 +1,5 @@
 from mindsdb_datasources import FileDS
-from lightwood import infer_types
+from lightwood import analyze_dataset
 from lightwood.api import dtype
 import unittest
 from itertools import cycle
@@ -16,11 +16,11 @@ from tests.utils.data_generation import (
 
 
 class TestInferTypes(unittest.TestCase):
-    def test_infer_types_on_home_rentlas(self):
+    def test_analyze_home_rentlas(self):
         datasource = FileDS(
             "https://raw.githubusercontent.com/mindsdb/mindsdb-examples/master/classics/home_rentals/dataset/train.csv"
         )
-        type_information = infer_types(datasource.df, pct_invalid=0)
+        type_information = analyze_dataset(datasource.df).type_information
 
         self.assertTrue(
             type_information.dtypes["number_of_rooms"] == dtype.categorical)
@@ -47,7 +47,7 @@ class TestInferTypes(unittest.TestCase):
         for k in type_information.identifiers:
             self.assertTrue(type_information.identifiers[k] is None)
 
-    def test_type_deduction(self):
+    def test_with_generated(self):
         n_points = 100
 
         # Apparently for n_category_values = 10 it doesn't work
@@ -90,13 +90,17 @@ class TestInferTypes(unittest.TestCase):
             }
         )
 
-        type_information = infer_types(df, pct_invalid=0)
+        analysis = analyze_dataset(df)
+        type_information = analysis.type_information
         for col_name in df.columns:
             expected_type = test_column_types[col_name]
             print(
                 f"Got {type_information.dtypes[col_name]} | Expected: {expected_type}"
             )
             assert type_information.dtypes[col_name] == expected_type
+        
+        stats = analysis.statistical_analysis
+        print(stats.histograms)
 
 
 '''

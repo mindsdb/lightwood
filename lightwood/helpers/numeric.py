@@ -7,9 +7,10 @@ See the example (+ comments) in this article: https://cerebralab.com/Exceptions_
 
 Sorry, python is dumb, but the spirit of your investigation wasn't, try again
 '''
+from typing import Iterable
 
 
-def can_be_nan_numeric(value):
+def can_be_nan_numeric(value: object) -> bool:
     try:
         value = str(value)
         value = float(value)
@@ -25,5 +26,5 @@ def can_be_nan_numeric(value):
     return isnan
 
 
-def filter_nan(series):
-    return [x for x in series if not can_be_nan_numeric(x)]
+def filter_nan_and_none(series: Iterable) -> list:
+    return [x for x in series if not can_be_nan_numeric(x) and x is not None]
