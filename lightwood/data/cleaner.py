@@ -149,6 +149,7 @@ def cleaner(
             try:
                 new_data.append(_clean_value(element, data_dtype))
             except Exception as e:
+                print(e, element)
                 new_data.append(None)
                 log.warning(
                     f'Unable to parse elemnt: {element} or type {data_dtype} from column {name}. Excetpion: {e}')
