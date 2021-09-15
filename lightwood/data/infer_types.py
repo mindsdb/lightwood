@@ -81,16 +81,24 @@ def get_numeric_type(element: object) -> str:
             string_as_nr = int(string_as_nr)
     except Exception:
         pass
-
+    
+    print(element)
     if isinstance(string_as_nr, float):
+        print('is nr')
         return dtype.float
     elif isinstance(string_as_nr, int):
+        print('is nr')
         return dtype.integer
     else:
         try:
             if can_be_nan_numeric(element):
+                print('is nr')
                 return dtype.integer
+            else:
+                print('is no nr')
+                return None
         except Exception:
+            print('is no nr')
             return None
 
 
