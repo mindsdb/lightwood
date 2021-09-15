@@ -38,12 +38,12 @@ def get_numeric_histogram(data: pd.Series, data_dtype: dtype, bins: int) -> Dict
     """Generate the histogram for integer and float typed data
     """
     # Handle arrays that are actual arrays and not things that become arrays later
-    if ' ' in data[0]:
+    if ' ' in str(data[0]):
         new_data = []
         for list_str in data:
             new_data.extend([float(x) for x in list_str.split(' ')])
         data = new_data
-        
+
     data = [_clean_float_or_none(x) for x in data]
 
     Y, X = np.histogram(data, bins=min(bins, len(set(data))),
@@ -116,7 +116,7 @@ def statistical_analysis(data: pd.DataFrame,
         histograms[col] = None
         buckets[col] = None
         if dtypes[col] in (dtype.categorical, dtype.binary, dtype.tags):
-            hist = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
+            hist = dict(df[col].value_counts())
             histograms[col] = {
                 'x': list([str(x) for x in hist.keys()]),
                 'y': list(hist.values())

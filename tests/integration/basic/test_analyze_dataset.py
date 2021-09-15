@@ -48,7 +48,8 @@ class TestInferTypes(unittest.TestCase):
             self.assertTrue(type_information.identifiers[k] is None)
 
     def test_with_generated(self):
-        n_points = 100
+        # Must be an even number
+        n_points = 134
 
         # Apparently for n_category_values = 10 it doesn't work
         n_category_values = 4
@@ -100,8 +101,16 @@ class TestInferTypes(unittest.TestCase):
             assert type_information.dtypes[col_name] == expected_type
         
         stats = analysis.statistical_analysis
-        print(stats.histograms)
+        for k in stats.histograms:
+            if k != 'sequential_array':
+                assert np.sum(stats.histograms[k]['y']) == n_points
 
+        assert set(stats.histograms['short_text']['x']) == set(['Unknown'])
+        assert set(stats.histograms['rich_text']['x']) == set(['Unknown'])
+        assert set(stats.histograms['rich_text']['x']) == set(['Unknown'])
+        # 50 is a magic number, when we change this, tests must change
+        assert len(set(stats.histograms['date_timestamp']['x'])) == 50
+        assert len(set(stats.histograms['date_date']['x'])) == 50
 
 '''
     def test_deduce_foreign_key(self):
