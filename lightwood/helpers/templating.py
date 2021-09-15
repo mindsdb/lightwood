@@ -84,6 +84,7 @@ def call(entity: dict, json_ai: JsonAI) -> str:
 def inline_dict(obj: dict) -> str:
     arr = []
     for k, v in obj.items():
+        k = k.replace("'", "\\'").replace('"', '\\"')
         arr.append(f"""'{k}': {v}""")
 
     dict_code = '{\n' + ',\n'.join(arr) + '\n}'
