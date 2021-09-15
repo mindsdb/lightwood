@@ -37,7 +37,7 @@ def lookup_encoder(
     is_target_predicting_encoder: bool,
 ):
     """
-    Assign a default encoder for a given column based on its data type, and whether it is a target. Encoders intake raw (but cleaned) data and return an feature representation. This function assigns, per data type, what the featurizer should be. This function runs on each column within the dataset available for model building to assign how it should be featurized. 
+    Assign a default encoder for a given column based on its data type, and whether it is a target. Encoders intake raw (but cleaned) data and return an feature representation. This function assigns, per data type, what the featurizer should be. This function runs on each column within the dataset available for model building to assign how it should be featurized.
 
     Users may override to create a custom encoder to enable their own featurization process. However, in order to generate a template JSON-AI, this code is run first. Users may edit the generated syntax and use custom approaches while model building.
 
@@ -143,7 +143,7 @@ def generate_json_ai(
     Given ``TypeInformation``, ``StatisticalAnalysis``, and the ``ProblemDefinition``, generate a JSON config file with the necessary elements of the ML pipeline populated.
 
     :param TypeInformation: Specifies what data types each column within the dataset are
-    :param statistical_analysis: 
+    :param statistical_analysis:
     :param problem_definition: Specifies details of the model training/building procedure, as defined by ``ProblemDefinition``
 
     :returns: JSON-AI object with fully populated details of the ML pipeline
@@ -369,7 +369,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     """
     To enable brevity in writing, auto-generate the "unspecified/missing" details required in the ML pipeline.
 
-    :params: json_ai: ``JsonAI`` object that describes the ML pipeline that may not have every detail fully specified. 
+    :params: json_ai: ``JsonAI`` object that describes the ML pipeline that may not have every detail fully specified.
 
     :returns: ``JSONAI`` object with all necessary parameters that were previously left unmentioned filled in.
     """
