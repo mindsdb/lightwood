@@ -62,9 +62,11 @@ def _standardize_array(element):
         element = element.replace(', ', ' ').replace(',', ' ')
         # Weird edge case in which arrays are actually numbers -_-
         if ' ' not in element:
-            return _clean_float_or_none(element)
+            element = _clean_float_or_none(element)
     except Exception:
-        return element
+        pass
+    
+    return element
 
 
 def _clean_value(element: object, data_dtype: str):
@@ -149,7 +151,6 @@ def cleaner(
             try:
                 new_data.append(_clean_value(element, data_dtype))
             except Exception as e:
-                print(e, element)
                 new_data.append(None)
                 log.warning(
                     f'Unable to parse elemnt: {element} or type {data_dtype} from column {name}. Excetpion: {e}')
