@@ -99,7 +99,7 @@ class TestInferTypes(unittest.TestCase):
                 f"Got {type_information.dtypes[col_name]} | Expected: {expected_type}"
             )
             assert type_information.dtypes[col_name] == expected_type
-        
+
         stats = analysis.statistical_analysis
         for k in stats.histograms:
             if k != 'sequential_array':
@@ -111,6 +111,7 @@ class TestInferTypes(unittest.TestCase):
         # 50 is a magic number, when we change this, tests must change
         assert len(set(stats.histograms['date_timestamp']['x'])) == 50
         assert len(set(stats.histograms['date_date']['x'])) == 50
+
 
 '''
     def test_deduce_foreign_key(self):
