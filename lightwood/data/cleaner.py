@@ -65,7 +65,7 @@ def _standardize_array(element):
             element = _clean_float_or_none(element)
     except Exception:
         pass
-    
+
     return element
 
 
