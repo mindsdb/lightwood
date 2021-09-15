@@ -62,9 +62,11 @@ def _standardize_array(element):
         element = element.replace(', ', ' ').replace(',', ' ')
         # Weird edge case in which arrays are actually numbers -_-
         if ' ' not in element:
-            return _clean_float_or_none(element)
+            element = _clean_float_or_none(element)
     except Exception:
-        return element
+        pass
+
+    return element
 
 
 def _clean_value(element: object, data_dtype: str):
