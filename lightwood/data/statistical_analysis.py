@@ -27,7 +27,7 @@ def get_datetime_histogram(data: pd.Series, bins: int) -> Dict[str, list]:
     X = X[:-1].tolist()
     Y = Y.tolist()
 
-    X = [datetime.datetime.fromtimestamp(x) for x in X]
+    X = [str(datetime.datetime.fromtimestamp(x)) for x in X]
     return {
         'x': X,
         'y': Y
