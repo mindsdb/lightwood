@@ -7,7 +7,6 @@
 # TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should be renamed df_std_target_dev
 # TODO: How do you specify a custom accuracy function when it's a str? I'm assuming via an import
 # TODO: Problem definition missing a few terms
-# TODO: TimeseriesSettings - Patricio might need help
 # TODO: Model Analysis
 # TODO: Analyzer
 
@@ -177,16 +176,16 @@ class DataAnalysis:
 @dataclass
 class TimeseriesSettings:
     """
-    For time-series specific problems, more specific treatment of the data is necessary. The following attributes enable time-series to be carried out properly.
+    For time-series specific problems, more specific treatment of the data is necessary. The following attributes enable time-series tasks to be carried out properly.
 
-    :param is_timeseries: Whether the input data is time series; this flag is checked in subsequent internal steps to ensure processing is appropriate for time-series data IF true.
-    :param order_by:
-    :param window: The horizon that a model intakes
-    :param group_by:
-    :param use_previous_target:
-    :param nr_predictions:
-    :param historical_columns:
-    :param target_type:
+    :param is_timeseries: Whether the input data should be treated as time series; if true, this flag is checked in subsequent internal steps to ensure processing is appropriate for time-series data.
+    :param order_by: A list of columns by which the data should be ordered.
+    :param group_by: Optional list of columns by which the data should be grouped. Each different combination of values for these columns will yield a different series.
+    :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a prediction, after the rows are ordered by order_by columns and split into groups if applicable.
+    :param nr_predictions: The number of points in the future that predictions should be made for, defaults to 1. Once trained, the model will be able to predict up to this many points into the future.
+    :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the time series predictor. Note that a non-historical column shall still be used to forecast, but without considering their change through time.
+    :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).
+    :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
     """
 
     is_timeseries: bool
