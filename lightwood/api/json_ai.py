@@ -96,6 +96,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 dtype.invalid, dtype.empty) and col_name != target:
             input_cols.append(col_name)
 
+    tss = problem_definition.timeseries_settings
     is_target_predicting_encoder = False
     # Single text column classification
     if len(input_cols) == 1 and type_information.dtypes[
@@ -123,8 +124,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
         }]
 
-        if not problem_definition.timeseries_settings.is_timeseries or \
-                problem_definition.timeseries_settings.nr_predictions <= 1:
+        if not tss.is_timeseries or tss.nr_predictions <= 1:
             models.extend([{
                 'module': 'LightGBM',
                 'args': {
@@ -139,7 +139,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                     }
             }
             ])
-        elif problem_definition.timeseries_settings.nr_predictions > 1:
+        elif tss.nr_predictions > 1:
             models.extend([{
                 'module': 'LightGBMArray',
                 'args': {
@@ -149,7 +149,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
                 }
             }])
 
-            if problem_definition.timeseries_settings.use_previous_target:
+            if tss.use_previous_target:
                 models.extend([
                     {
                         'module': 'SkTime',
@@ -172,8 +172,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     )}
 
-    if (problem_definition.timeseries_settings.is_timeseries and
-            problem_definition.timeseries_settings.nr_predictions > 1):
+    if tss.is_timeseries and tss.nr_predictions > 1:
         list(outputs.values())[0].data_dtype = dtype.array
 
     list(
@@ -188,12 +187,12 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         encoder = lookup_encoder(col_dtype, col_name, False, problem_definition, is_target_predicting_encoder)
 
         for encoder_name in ts_encoders:
-            if problem_definition.timeseries_settings.is_timeseries and encoder_name == encoder['module'].split('.')[1]:
-                if problem_definition.timeseries_settings.group_by is not None:
-                    for group in problem_definition.timeseries_settings.group_by:
+            if tss.is_timeseries and encoder_name == encoder['module'].split('.')[1]:
+                if tss.group_by is not None:
+                    for group in tss.group_by:
                         dependency.append(group)
 
-                if problem_definition.timeseries_settings.use_previous_target:
+                if tss.use_previous_target:
                     dependency.append(f'__mdb_ts_previous_{target}')
 
         if len(dependency) > 0:
@@ -259,6 +258,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     problem_definition = json_ai.problem_definition
+    tss = problem_definition.timeseries_settings
+
     imports = [
         'from lightwood.model import Neural', 'from lightwood.model import LightGBM',
         'from lightwood.model import LightGBMArray', 'from lightwood.model import SkTime',
@@ -286,7 +287,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             continue
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
-    if problem_definition.timeseries_settings.use_previous_target:
+    if tss.use_previous_target:
         imports.append('from lightwood.encoder import TimeSeriesPlainEncoder')
 
     # Add implicit arguments
@@ -303,8 +304,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             models[i]['args']['timeseries_settings'] = models[i]['args'].get(
                 'timeseries_settings', '$problem_definition.timeseries_settings')
             models[i]['args']['net'] = models[i]['args'].get(
-                'net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries
-                or not problem_definition.timeseries_settings.use_previous_target
+                'net', '"DefaultNet"' if not tss.is_timeseries
+                or not tss.use_previous_target
                 else '"ArNet"')
 
         elif models[i]['module'] == 'LightGBM':
@@ -395,13 +396,13 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'encoded_data': 'encoded_data',
                 'predictions': 'df',
                 'analysis': '$runtime_analyzer',
-                'ts_analysis': '$ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
+                'ts_analysis': '$ts_analysis' if tss.is_timeseries else None,
                 'target_name': '$target',
                 'target_dtype': '$dtype_dict[self.target]',
             }
         }
 
-    if problem_definition.timeseries_settings.is_timeseries:
+    if tss.is_timeseries:
         if json_ai.timeseries_transformer is None:
             json_ai.timeseries_transformer = {
                 'module': 'transform_timeseries',
@@ -442,7 +443,8 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
             dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
     # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
-    if json_ai.problem_definition.timeseries_settings.use_previous_target:
+    tss = json_ai.problem_definition.timeseries_settings
+    if tss.is_timeseries and tss.use_previous_target:
         col_name = f'__mdb_ts_previous_{json_ai.problem_definition.target}'
         json_ai.problem_definition.timeseries_settings.target_type = list(json_ai.outputs.values())[0].data_dtype
         encoder_dict[col_name] = call(lookup_encoder(list(json_ai.outputs.values())[0].data_dtype,
