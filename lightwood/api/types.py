@@ -269,14 +269,14 @@ class ProblemDefinition:
     :param unbias_target:
     :param seconds_per_model: Number of seconds maximum to spend PER model trained in the list of possible mixers.
     :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to learn a representation.
-    :param time_aim:
+    :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including encoders and models.
     :param target_weights:
-    :param positive_domain:
-    :param fixed_confidence:
-    :param timeseries_settings:
-    :param anomaly_detection: Whether to conduct anomaly detection; currently supported only for time-series.
-    :param anomaly_error_rate
-    :param anomaly_cooldown:
+    :param positive_domain: For numerical taks, force predictor output to be positive (integer or float).
+    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so that predictions, in average, are correct `alpha` percent of the time.
+    :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.
+    :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-series.
+    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).
+    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly detector.
     :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name found in this list will be automatically removed from subsequent steps in the ML pipeline.
     :param fit_on_validation: Whether to fit the model on the held-out validation data. Validation data is strictly used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new incoming data over time, the user may train the model further using the entire dataset.
     :param strict_mode:
