@@ -81,6 +81,7 @@ def transform_timeseries(
     else:
         df_arr = [original_df]
 
+    n_groups = len(df_arr)
     last_index = original_df['original_index'].max()
     for i, subdf in enumerate(df_arr):
         if '__mdb_make_predictions' in subdf.columns and mode == 'predict':
@@ -115,7 +116,7 @@ def transform_timeseries(
         pool.close()
         pool.join()
     else:
-        for i in range(len(df_arr)):
+        for i in range(n_groups):
             df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
@@ -132,11 +133,14 @@ def transform_timeseries(
         combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool).isin([True])])
         del combined_df['__mdb_make_predictions']
 
-    if len(combined_df) == 0:
-        raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size. If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` advanced argument to `True`, but this might lead to subpar predictions.') # noqa
+    if len(combined_df) < n_groups * tss.window:
+        if tss.allow_incomplete_history:
+            log.info("Forecasting with incomplete historical context, predictions might be subpar")
+        else:
+            raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size. If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` timeseries setting to `True`, but this might lead to subpar predictions.') # noqa
 
     df_gb_map = None
-    if len(df_arr) > 1:  # @TODO: and (transaction.lmd['quick_learn'] or transaction.lmd['quick_predict']):
+    if n_groups > 1:
         df_gb_list = list(combined_df.groupby(tss.group_by))
         df_gb_map = {}
         for gb, df in df_gb_list:
