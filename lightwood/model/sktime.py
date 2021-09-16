@@ -42,7 +42,7 @@ class SkTime(BaseModel):
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
         for group in self.ts_analysis['group_combinations']:
-            self.models[group] = self.model_class()
+            self.models[group] = self.model_class(suppress_warnings=True)
 
             if self.grouped_by == ['__default']:
                 series_idxs = data['data'].index
