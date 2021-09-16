@@ -59,6 +59,7 @@ class TestTimeseries(unittest.TestCase):
                                                                    'anomaly_detection': True,
                                                                    'timeseries_settings': {
                                                                        'use_previous_target': True,
+                                                                       'allow_incomplete_history': True,
                                                                        'group_by': ['Country'],
                                                                        'nr_predictions': nr_preds,
                                                                        'order_by': [order_by],
@@ -91,6 +92,7 @@ class TestTimeseries(unittest.TestCase):
                                                                    'anomaly_detection': False,
                                                                    'timeseries_settings': {
                                                                        'use_previous_target': False,
+                                                                       'allow_incomplete_history': True,
                                                                        'nr_predictions': nr_preds,
                                                                        'order_by': [order_by],
                                                                        'window': 5}
