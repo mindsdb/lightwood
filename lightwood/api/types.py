@@ -484,17 +484,18 @@ class JsonAI:
 @dataclass
 class ModelAnalysis:
     """
-    The ``ModelAnalysis`` class handles how models are evaluated for predictive performance. For each ML algorithm trained, we return a series of
+    The ``ModelAnalysis`` class stores useful information to describe a model and understand its predictive performance on a validation dataset.
+    For each trained ML algorithm, we store:
 
-    :param accuracies:
-    :param accuracy_histogram:
-    :param accuracy_samples:
+    :param accuracies: Dictionary with obtained values for each accuracy function (specified in JsonAI)
+    :param accuracy_histogram: Dictionary with histograms of reported accuracy by target value.
+    :param accuracy_samples: Dictionary with sampled pairs of observed target values and respective predictions.
     :param train_sample_size: Size of the training set (data that parameters are updated on)
     :param test_sample_size: Size of the testing set (explicitly held out)
-    :param column_importances:
-    :param confusion_matrix:
-    :param histograms:
-    :param dtypes:
+    :param column_importances: Dictionary with the importance of each column for the model, as estimated by an approach that closely follows a leave-one-covariate-out strategy.
+    :param confusion_matrix: A confusion matrix for the validation dataset.
+    :param histograms: Histogram for each dataset feature.
+    :param dtypes: Inferred data types for each dataset feature.
 
     """
 
