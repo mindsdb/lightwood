@@ -60,3 +60,4 @@ AI2.json
 
 assert.sh
 docs/_build
+docs/source/_build
