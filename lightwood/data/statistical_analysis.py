@@ -1,9 +1,10 @@
 from typing import Dict
 import pandas as pd
 import numpy as np
-
+import datetime
+from dateutil.parser import parse as parse_dt
 from lightwood.api import StatisticalAnalysis, ProblemDefinition
-from lightwood.helpers.numeric import filter_nan
+from lightwood.helpers.numeric import filter_nan_and_none
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
@@ -12,10 +13,40 @@ from scipy.stats import entropy
 from lightwood.data.cleaner import _clean_float_or_none
 
 
-def get_numeric_histogram(data, data_dtype):
+def get_datetime_histogram(data: pd.Series, bins: int) -> Dict[str, list]:
+    """Generates the histogram for date and datetime types
+    """
+    if isinstance(data[0], float) or isinstance(data[0], int):
+        data = [_clean_float_or_none(x) for x in data]
+    else:
+        data = [_clean_float_or_none(parse_dt(str(x)).timestamp()) for x in data]
+
+    Y, X = np.histogram(data, bins=min(bins, len(set(data))),
+                        range=(min(data), max(data)), density=False)
+
+    X = X[:-1].tolist()
+    Y = Y.tolist()
+
+    X = [str(datetime.datetime.fromtimestamp(x)) for x in X]
+    return {
+        'x': X,
+        'y': Y
+    }
+
+
+def get_numeric_histogram(data: pd.Series, data_dtype: dtype, bins: int) -> Dict[str, list]:
+    """Generate the histogram for integer and float typed data
+    """
+    # Handle arrays that are actual arrays and not things that become arrays later
+    if ' ' in str(data[0]):
+        new_data = []
+        for list_str in data:
+            new_data.extend([float(x) for x in list_str.split(' ')])
+        data = new_data
+
     data = [_clean_float_or_none(x) for x in data]
 
-    Y, X = np.histogram(data, bins=min(50, len(set(data))),
+    Y, X = np.histogram(data, bins=min(bins, len(set(data))),
                         range=(min(data), max(data)), density=False)
     if data_dtype == dtype.integer:
         Y, X = np.histogram(data, bins=[int(round(x)) for x in X], density=False)
@@ -84,18 +115,20 @@ def statistical_analysis(data: pd.DataFrame,
     for col in df.columns:
         histograms[col] = None
         buckets[col] = None
-        if dtypes[col] in (dtype.categorical, dtype.binary, dtype.date):
-            hist = dict(df[col].value_counts().apply(lambda x: x / len(df[col])))
+        if dtypes[col] in (dtype.categorical, dtype.binary, dtype.tags):
+            hist = dict(df[col].value_counts())
             histograms[col] = {
                 'x': list([str(x) for x in hist.keys()]),
                 'y': list(hist.values())
             }
             buckets[col] = histograms[col]['x']
         elif dtypes[col] in (dtype.integer, dtype.float, dtype.array):
-            histograms[col] = get_numeric_histogram(filter_nan(df[col]), dtypes[col])
+            histograms[col] = get_numeric_histogram(filter_nan_and_none(df[col]), dtypes[col], 50)
             buckets[col] = histograms[col]['x']
+        elif dtypes[col] in (dtype.date, dtype.datetime):
+            histograms[col] = get_datetime_histogram(filter_nan_and_none(df[col]), 50)
         else:
-            histograms[col] = {'x': [], 'y': []}
+            histograms[col] = {'x': ['Unknown'], 'y': [len(df[col])]}
             buckets[col] = []
 
     # get observed classes, used in analysis
