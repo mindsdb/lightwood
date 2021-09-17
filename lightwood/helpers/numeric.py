@@ -1,16 +1,14 @@
-'''
-To: future intern reading this bit of code thinking "this is dumb, we could just check for isnan and isinf
-
-No, no you can't, this will break subtly in a bunch of edge cases.
-
-See the example (+ comments) in this article: https://cerebralab.com/Exceptions_as_control_flow
-
-Sorry, python is dumb, but the spirit of your investigation wasn't, try again
-'''
 from typing import Iterable
 
 
 def can_be_nan_numeric(value: object) -> bool:
+    """
+    Tells us if **value** might be nan or inf or some other numeric value\
+        (i.e. which can be cast as `float`) that is not actually a number.\
+        Name is vague because I'm not 100% sure of all the edge cases of numeric\
+        values that have number-like type behavior.
+    """
+
     try:
         value = str(value)
         value = float(value)
