@@ -1,17 +1,14 @@
 """
 Inductive conformal predictors.
 """
-
 # Original author: Henrik Linusson (github.com/donlnz)
-
 from collections import defaultdict
 from functools import partial
-from typing import Optional
-
+from typing import Optional, Union
 import numpy as np
 from sklearn.base import BaseEstimator
-
 from lightwood.analysis.nc.base import RegressorMixin, ClassifierMixin
+from types import FunctionType
 
 
 # -----------------------------------------------------------------------------
@@ -21,7 +18,7 @@ class BaseIcp(BaseEstimator):
     """Base class for inductive conformal predictors.
     """
 
-    def __init__(self, nc_function, condition=None):
+    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None):
         self.cal_x, self.cal_y = None, None
         self.nc_function = nc_function
 
@@ -44,7 +41,7 @@ class BaseIcp(BaseEstimator):
             self.condition = lambda x: 0
             self.conditional = False
 
-    def fit(self, x, y):
+    def fit(self, x: np.array, y: np.array) -> None:
         """Fit underlying nonconformity scorer.
 
         Parameters
@@ -104,15 +101,15 @@ class BaseIcp(BaseEstimator):
             cal_scores = self.nc_function.score(self.cal_x, self.cal_y)
             self.cal_scores = {0: np.sort(cal_scores)[::-1]}
 
-    def _calibrate_hook(self, x, y, increment):
-        pass
-
-    def _update_calibration_set(self, x, y, increment):
+    def _update_calibration_set(self, x: np.array, y: np.array, increment: bool) -> None:
         if increment and self.cal_x is not None and self.cal_y is not None:
             self.cal_x = np.vstack([self.cal_x, x])
             self.cal_y = np.hstack([self.cal_y, y])
         else:
             self.cal_x, self.cal_y = x, y
+
+    def _calibrate_hook(self, x: np.array, y: np.array, increment: bool) -> None:
+        pass
 
 
 # -----------------------------------------------------------------------------
@@ -157,15 +154,16 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         842-851.
     """
 
-    def __init__(self, nc_function, condition=None, smoothing=True):
+    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None,
+                 smoothing: bool = True) -> None:
         super(IcpClassifier, self).__init__(nc_function, condition)
         self.classes = None
         self.smoothing = smoothing
 
-    def _calibrate_hook(self, x, y, increment=False):
+    def _calibrate_hook(self, x: np.array, y: np.array, increment: bool = False) -> None:
         self._update_classes(y, increment)
 
-    def _update_classes(self, y, increment):
+    def _update_classes(self, y: np.array, increment: bool) -> None:
         if self.classes is None or not increment:
             self.classes = np.unique(y)
         else:
@@ -293,10 +291,10 @@ class IcpRegressor(BaseIcp, RegressorMixin):
         842-851.
     """
 
-    def __init__(self, nc_function, condition=None):
+    def __init__(self, nc_function: FunctionType, condition: bool = None) -> None:
         super(IcpRegressor, self).__init__(nc_function, condition)
 
-    def predict(self, x, significance=None):
+    def predict(self, x: np.array, significance: bool = None) -> np.array:
         """Predict the output values for a set of input patterns.
 
         Parameters
