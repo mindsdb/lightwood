@@ -26,7 +26,7 @@ def lookup_encoder(
         dtype.image: 'Image.Img2VecEncoder',
         dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
         dtype.short_text: 'Short_Text.CategoricalAutoEncoder',
-        dtype.array: 'Array.TimeSeriesEncoder',
+        dtype.array: 'Array.TimeSeriesPlainEncoder',
         dtype.quantity: 'Quantity.NumericEncoder',
     }
 
