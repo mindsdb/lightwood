@@ -101,14 +101,14 @@ class BaseIcp(BaseEstimator):
             cal_scores = self.nc_function.score(self.cal_x, self.cal_y)
             self.cal_scores = {0: np.sort(cal_scores)[::-1]}
 
-    def _update_calibration_set(self, x: np.array, y: np.array, increment: bool) -> np.array:
+    def _update_calibration_set(self, x: np.array, y: np.array, increment: bool) -> None:
         if increment and self.cal_x is not None and self.cal_y is not None:
             self.cal_x = np.vstack([self.cal_x, x])
             self.cal_y = np.hstack([self.cal_y, y])
         else:
             self.cal_x, self.cal_y = x, y
 
-    def _calibrate_hook(self, x, y, increment):
+    def _calibrate_hook(self, x: np.array, y: np.array, increment: bool) -> None:
         pass
 
 
