@@ -91,7 +91,7 @@ def statistical_analysis(data: pd.DataFrame,
     target = problem_definition.target
     positive_domain = False
     # get train std, used in analysis
-    if dtypes[target] in [dtype.float, dtype.integer, dtype.array]:
+    if dtypes[target] in [dtype.float, dtype.integer]:
         df_std = df[target].astype(float).std()
         if min(df[target]) >= 0:
             positive_domain = True
@@ -122,7 +122,7 @@ def statistical_analysis(data: pd.DataFrame,
                 'y': list(hist.values())
             }
             buckets[col] = histograms[col]['x']
-        elif dtypes[col] in (dtype.integer, dtype.float, dtype.array):
+        elif dtypes[col] in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
             histograms[col] = get_numeric_histogram(filter_nan_and_none(df[col]), dtypes[col], 50)
             buckets[col] = histograms[col]['x']
         elif dtypes[col] in (dtype.date, dtype.datetime):

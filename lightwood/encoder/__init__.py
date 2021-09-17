@@ -17,10 +17,10 @@ from lightwood.encoder.array.array import ArrayEncoder
 from lightwood.encoder.categorical.multihot import MultiHotEncoder
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.encoder.type_encoder_maps import (Array, Binary, Categorical, Date, Datetime, Float, Image, Integer,
-                                                 Quantity, Rich_Text, Short_Text, Tags)
+                                                 TimeSeries, Quantity, Rich_Text, Short_Text, Tags)
 
 
-# Encoders that depend on optiona dependencies
+# Encoders that depend on optional dependencies
 try:
     from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
 except Exception:
@@ -32,5 +32,5 @@ __all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder',
            'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder',
            'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder', 'MultiHotEncoder',
            'PretrainedLangEncoder', 'AmplitudeTsEncoder', 'BinaryEncoder', 'DatetimeNormalizerEncoder',
-           'Array', 'Binary', 'Categorical', 'Date', 'Datetime', 'Float', 'Image', 'Integer',
+           'Array', 'TimeSeries', 'Binary', 'Categorical', 'Date', 'Datetime', 'Float', 'Image', 'Integer',
            'Quantity', 'Rich_Text', 'Short_Text', 'Tags']

@@ -80,7 +80,7 @@ class Neural(BaseModel):
             criterion = TransformCrossEntropyLoss(weight=self.target_encoder.index_weights.to(self.model.device))
         elif self.dtype_dict[self.target] in (dtype.tags):
             criterion = nn.BCEWithLogitsLoss()
-        elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.array)
+        elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.tsarray)
                 and self.timeseries_settings.is_timeseries):
             criterion = nn.L1Loss()
         elif self.dtype_dict[self.target] in (dtype.integer, dtype.float):
