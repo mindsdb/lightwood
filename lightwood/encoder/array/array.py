@@ -7,7 +7,7 @@ from lightwood.api import dtype
 from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
 
 
-class TimeSeriesPlainEncoder(BaseEncoder):
+class ArrayEncoder(BaseEncoder):
     def __init__(self, stop_after: int, window: int = None, is_target: bool = False, original_type: dtype = None):
         """
         Fits a normalizer for a time series previous historical data.
@@ -25,7 +25,7 @@ class TimeSeriesPlainEncoder(BaseEncoder):
     def prepare(self, priming_data):
         if self.output_size is None:
             self.output_size = np.max([len(x) for x in priming_data if x is not None])
-        for i in range(priming_data):
+        for i in range(len(priming_data)):
             if priming_data[i] is None:
                 priming_data[i] = [0] * self.output_size
 
@@ -47,12 +47,14 @@ class TimeSeriesPlainEncoder(BaseEncoder):
     def encode(self, column_data: Union[list, np.ndarray]) -> torch.Tensor:
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
-        for i in range(column_data):
-            if column_data[i] is None:
-                column_data[i] = [0] * self.output_size
 
         if isinstance(column_data, pd.Series):
             column_data = column_data.values
+
+        for i in range(len(column_data)):
+            if column_data[i] is None:
+                column_data[i] = [0] * self.output_size
+
         data = torch.cat([self._normalizer.encode(column_data)], dim=-1)
         data[torch.isnan(data)] = 0.0
         data[torch.isinf(data)] = 0.0
