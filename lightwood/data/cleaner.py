@@ -60,7 +60,7 @@ def _standardize_array(element):
         element = element.rstrip(']').lstrip('[')
         element = element.rstrip(' ').lstrip(' ')
         element = element.replace(', ', ' ').replace(',', ' ')
-        # Weird edge case in which arrays are actually numbers -_-
+        # Handles cases where arrays are numbers
         if ' ' not in element:
             element = _clean_float_or_none(element)
     except Exception:
