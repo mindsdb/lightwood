@@ -184,7 +184,9 @@ class Neural(BaseModel):
 
             train_error = np.mean(running_losses)
 
-            running_errors.append(self._error(dev_dl, criterion))
+            epoch_error = self._error(dev_dl, criterion)
+            running_errors.append(epoch_error)
+            log.debug(f'Loss @ epoch {epoch}: {epoch_error}')
 
             if np.isnan(train_error) or np.isnan(
                     running_errors[-1]) or np.isinf(train_error) or np.isinf(
@@ -197,8 +199,8 @@ class Neural(BaseModel):
                 epochs_to_best = epoch
 
             if len(running_errors) >= 5:
-                delta_mean = np.mean([running_errors[-i - 1] - running_errors[-i]
-                                     for i in range(1, len(running_errors[-5:]))])
+                delta_mean = np.average([running_errors[-i - 1] - running_errors[-i] for i in range(1, 5)],
+                                        weights=[(1 / 2)**i for i in range(1, 5)])
                 if delta_mean <= 0:
                     break
             elif (time.time() - started) > stop_after:
@@ -261,18 +263,12 @@ class Neural(BaseModel):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        for subset_itt in (0, 1):
-            for subset_idx in range(len(dev_ds_arr)):
-                train_dl = DataLoader(
-                    ConcatedEncodedDs(train_ds_arr[subset_idx * 9: (subset_idx + 1) * 9]),
-                    batch_size=200, shuffle=True)
+        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=True)
 
-                stop_after = self.stop_after / 4
+        self.model, epoch_to_best_model, err = self._max_fit(
+            train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=20000)
 
-                self.model, epoch_to_best_model, err = self._max_fit(
-                    train_dl, dev_dl, criterion, optimizer, scaler, stop_after / 2, 20000 if subset_itt > 0 else 1)
-
-                self.epochs_to_best += epoch_to_best_model
+        self.epochs_to_best += epoch_to_best_model
 
         if len(con_test_ds) > 0:
             if self.fit_on_dev:

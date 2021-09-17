@@ -349,8 +349,8 @@ def sample_data(df: pd.DataFrame):
     return df.iloc[input_data_sample_indexes]
 
 
-def infer_types(data: pd.DataFrame, pct_invalid: float) -> TypeInformation:
-    seed()
+def infer_types(data: pd.DataFrame, pct_invalid: float, seed_nr: int = 420) -> TypeInformation:
+    seed(seed_nr)
     type_information = TypeInformation()
     sample_df = sample_data(data)
     sample_size = len(sample_df)

@@ -1,5 +1,5 @@
 from mindsdb_datasources import FileDS
-from lightwood import infer_types
+from lightwood import analyze_dataset
 from lightwood.api import dtype
 import unittest
 from itertools import cycle
@@ -16,11 +16,11 @@ from tests.utils.data_generation import (
 
 
 class TestInferTypes(unittest.TestCase):
-    def test_infer_types_on_home_rentlas(self):
+    def test_analyze_home_rentlas(self):
         datasource = FileDS(
             "https://raw.githubusercontent.com/mindsdb/mindsdb-examples/master/classics/home_rentals/dataset/train.csv"
         )
-        type_information = infer_types(datasource.df, pct_invalid=0)
+        type_information = analyze_dataset(datasource.df).type_information
 
         self.assertTrue(
             type_information.dtypes["number_of_rooms"] == dtype.categorical)
@@ -47,8 +47,9 @@ class TestInferTypes(unittest.TestCase):
         for k in type_information.identifiers:
             self.assertTrue(type_information.identifiers[k] is None)
 
-    def test_type_deduction(self):
-        n_points = 100
+    def test_with_generated(self):
+        # Must be an even number
+        n_points = 134
 
         # Apparently for n_category_values = 10 it doesn't work
         n_category_values = 4
@@ -90,13 +91,26 @@ class TestInferTypes(unittest.TestCase):
             }
         )
 
-        type_information = infer_types(df, pct_invalid=0)
+        analysis = analyze_dataset(df)
+        type_information = analysis.type_information
         for col_name in df.columns:
             expected_type = test_column_types[col_name]
             print(
                 f"Got {type_information.dtypes[col_name]} | Expected: {expected_type}"
             )
             assert type_information.dtypes[col_name] == expected_type
+
+        stats = analysis.statistical_analysis
+        for k in stats.histograms:
+            if k != 'sequential_array':
+                assert np.sum(stats.histograms[k]['y']) == n_points
+
+        assert set(stats.histograms['short_text']['x']) == set(['Unknown'])
+        assert set(stats.histograms['rich_text']['x']) == set(['Unknown'])
+        assert set(stats.histograms['rich_text']['x']) == set(['Unknown'])
+        # 50 is a magic number, when we change this, tests must change
+        assert len(set(stats.histograms['date_timestamp']['x'])) == 50
+        assert len(set(stats.histograms['date_date']['x'])) == 50
 
 
 '''
