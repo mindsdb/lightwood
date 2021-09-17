@@ -4,7 +4,6 @@ import torch
 import numpy as np
 import pandas as pd
 
-# restore_icp_state, clear_icp_state
 from lightwood.analysis.nc.util import get_numerical_conf_range, get_categorical_conf, get_anomalies
 from lightwood.helpers.ts import get_inferred_timestamps, add_tn_conf_bounds
 from lightwood.api.dtype import dtype
@@ -94,6 +93,8 @@ def explain(data: pd.DataFrame,
 
             # base ICP
             X = deepcopy(icp_X)
+            # Ugly optimization but accessing `values` actually wasted a lot of time
+            icp_values = X.values
 
             # get all possible ranges
             if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1 and is_numerical:
@@ -101,11 +102,11 @@ def explain(data: pd.DataFrame,
                 # bounds in time series are only given for the first forecast
                 analysis['icp']['__default'].nc_function.model.prediction_cache = \
                     [p[0] for p in predictions['prediction']]
-                all_confs = analysis['icp']['__default'].predict(X.values)
+                all_confs = analysis['icp']['__default'].predict(icp_values)
 
             elif is_numerical:
                 analysis['icp']['__default'].nc_function.model.prediction_cache = predictions['prediction']
-                all_confs = analysis['icp']['__default'].predict(X.values)
+                all_confs = analysis['icp']['__default'].predict(icp_values)
 
             # categorical
             else:
@@ -122,7 +123,7 @@ def explain(data: pd.DataFrame,
 
                 conf_candidates = list(range(20)) + list(range(20, 100, 10))
                 all_ranges = np.array(
-                    [analysis['icp']['__default'].predict(X.values, significance=s / 100)
+                    [analysis['icp']['__default'].predict(icp_values, significance=s / 100)
                      for s in conf_candidates])
                 all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
 
