@@ -12,7 +12,7 @@ def clean_df(df, target, is_classification, label_encoders):
     if is_classification:
         if enc and isinstance(enc.categories_[0][0], str):
             cats = enc.categories_[0].tolist()
-            # the last element is "__mdb_unkonw_cat"
+            # the last element is "__mdb_unknown_cat"
             y = np.array([cats.index(i) if i in cats else len(cats) - 1 for i in y])
         y = y.astype(int)
     else:
