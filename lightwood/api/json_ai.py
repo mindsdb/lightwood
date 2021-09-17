@@ -459,7 +459,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         )
 
     ignored_cols = json_ai.problem_definition.ignore_features
-    input_cols = ','.join([f"""'{name}'""" for name in json_ai.features if name not in ignored_cols])
+    input_cols = [x.replace("'", "\\'").replace('"', '\\"')
+                  for x in json_ai.features]
+    input_cols = ','.join([f"""'{name}'""" for name in input_cols if name not in ignored_cols])
 
     ts_transform_code = ''
     ts_analyze_code = ''
