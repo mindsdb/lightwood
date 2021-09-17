@@ -2,6 +2,8 @@
 `pip3 install sphinx sphinx_rtd_theme autoapi[extension] sphinx-autoapi sphinx_autodoc_typehints myst_parser`
 `cd docs`
 `make html`
+`python3 -m http.server`
+
 
 ## Creating the docs
 First, make a new directory (should exist) named `docs`.
