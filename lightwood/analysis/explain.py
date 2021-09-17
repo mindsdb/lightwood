@@ -70,8 +70,8 @@ def explain(data: pd.DataFrame,
 
         icp_X[target_name] = preds
 
-        is_categorical = target_dtype in (dtype.binary, dtype.categorical, dtype.array)
-        is_numerical = target_dtype in [dtype.integer, dtype.float] or target_dtype == dtype.array
+        is_categorical = target_dtype in (dtype.binary, dtype.categorical)
+        is_numerical = target_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray)
         is_anomaly_task = is_numerical and timeseries_settings.is_timeseries and anomaly_detection
 
         if (is_numerical or is_categorical) and analysis['icp'].get('__mdb_active', False):
