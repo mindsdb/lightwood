@@ -245,7 +245,7 @@ def _ts_add_previous_target(df, target, window, data_dtype):
 def _ts_add_future_target(df, target, nr_predictions, data_dtype, mode):
     if target not in df:
         return df
-    if data_dtype in (dtype.integer, dtype.float, dtype.array):
+    if data_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
         df[target] = df[target].astype(float)
 
     for timestep_index in range(1, nr_predictions):

@@ -10,6 +10,7 @@ class dtype():
     audio = 'audio'
     video = 'video'
     array = 'array'
+    tsarray = 'tsarray'
     short_text = 'short_text'
     rich_text = 'rich_text'
     empty = 'empty'
