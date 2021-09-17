@@ -6,6 +6,7 @@ Inductive conformal predictors.
 
 from collections import defaultdict
 from functools import partial
+from typing import Optional
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -170,7 +171,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         else:
             self.classes = np.unique(np.hstack([self.classes, y]))
 
-    def predict(self, x, significance=None):
+    def predict(self, x: np.array, significance: Optional[float] = None) -> np.array:
         """Predict the output values for a set of input patterns.
 
         Parameters
@@ -194,6 +195,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         # TODO: if x == self.last_x ...
         n_test_objects = x.shape[0]
         p = np.zeros((n_test_objects, self.classes.size))
+
         for i, c in enumerate(self.classes):
             test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
             test_class.fill(c)
@@ -207,17 +209,18 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
                 cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
                 n_cal = cal_scores.size
 
-                idx_left = np.searchsorted(cal_scores, nc, 'left')
-                idx_right = np.searchsorted(cal_scores, nc, 'right')
-                n_gt = n_cal - idx_right
-                n_eq = idx_right - idx_left + 1
-
-                p[j, i] = n_gt / (n_cal + 1)
+                n_eq = 0
+                n_gt = 0
+                for cal_score in cal_scores:
+                    if cal_score == nc:
+                        n_eq += 1
+                    elif nc < cal_score:
+                        n_gt += 1
 
                 if self.smoothing:
-                    p[j, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
+                    p[j, i] = (n_gt + n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
                 else:
-                    p[j, i] += n_eq / (n_cal + 1)
+                    p[j, i] = (n_gt + n_eq) / (n_cal + 1)
 
         if significance is not None:
             return p > significance
