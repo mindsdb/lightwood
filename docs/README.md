@@ -1,7 +1,8 @@
 ## Compiling the docs
 `pip3 install sphinx sphinx_rtd_theme autoapi[extension] sphinx-autoapi sphinx_autodoc_typehints myst_parser`
 `cd docs`
-`make html`
+`sphinx-build -b html source _build`
+`cd _build`
 `python3 -m http.server`
 
 

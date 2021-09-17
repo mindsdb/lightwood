@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lightwood API Types &mdash; lightwood 1.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Encode your data" href="encode.html" />
+    <link rel="prev" title="Data Types (dtypes)" href="dtype.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+            <a href="../index.html">
+            <img src="../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#the-lightwood-api-table-of-contents">The Lightwood API Table of Contents</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Lightwood API Types</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature">Feature</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Output">Output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TypeInformation">TypeInformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.StatisticalAnalysis">StatisticalAnalysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.DataAnalysis">DataAnalysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings">TimeseriesSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition">ProblemDefinition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI">JsonAI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ModelAnalysis">ModelAnalysis</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="encode.html">Encode your data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">lightwood</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a> &raquo;</li>
+      <li>Lightwood API Types</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/types.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lightwood-api-types">
+<h1>Lightwood API Types<a class="headerlink" href="#lightwood-api-types" title="Permalink to this headline"></a></h1>
+<p>Lightwood consists of several high level abstractions to enable the data science/machine learning (DS/ML) pipeline in a step-by-step procedure.</p>
+<span class="target" id="module-api.types"></span><dl class="py class">
+<dt class="sig sig-object py" id="api.types.Feature">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">Feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#Feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Feature" title="Permalink to this definition"></a></dt>
+<dd><p>Within a dataframe, each column is considered its own “feature” (unless ignored etc.). The following expects each feature to have descriptions of the following:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the methodology for encoding a feature (a Lightwood Encoder)</p></li>
+<li><p><strong>data_dtype</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The type of information within this column (ex.: numerical, categorical, etc.)</p></li>
+<li><p><strong>dependency</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – Any custom attributes for this feature that may require non-standard processing. This highly depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.Feature.from_dict">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#Feature.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Feature.from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Create <code class="docutils literal notranslate"><span class="pre">Feature</span></code> objects from the a dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – A dictionary representation of a column feature’s attributes. Must include keys <em>encoder</em>, <em>data_dtype</em>, and <em>dependency</em>.</p>
+</dd>
+<dt class="field-even">Example</dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">my_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;feature_A&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;encoder&quot;</span><span class="p">:</span> <span class="n">MyEncoder</span><span class="p">,</span> <span class="s2">&quot;data_dtype&quot;</span><span class="p">:</span> <span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;dependency&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Feature</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">my_dict</span><span class="p">[</span><span class="s2">&quot;feature_A&quot;</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Feature</span><span class="p">(</span><span class="n">encoder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_dtype</span><span class="o">=</span><span class="s1">&#39;categorical&#39;</span><span class="p">,</span> <span class="n">dependency</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A Feature object with loaded information.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.Feature.from_json">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#Feature.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Feature.from_json" title="Permalink to this definition"></a></dt>
+<dd><p>Create <code class="docutils literal notranslate"><span class="pre">Feature</span></code> objects from JSON representation. This method calls on :ref: <cite>from_dict</cite> after loading the json config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – A JSON representation of the feature.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loaded information into the Feature representation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.Feature.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#Feature.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Feature.to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a Feature to a dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A python dictionary with strings indicating the three key elements and their respective values of the Feature class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.Feature.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#Feature.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Feature.to_json" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a Feature into a JSON object. Calls <code class="docutils literal notranslate"><span class="pre">to_dict</span></code> under the hood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Json config syntax for the three key elements and their respective values of the Feature class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.Output">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">Output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#Output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Output" title="Permalink to this definition"></a></dt>
+<dd><p>A representation for the output feature. This is specifically used on the target column of your dataset. Four attributes are expected as seen below.</p>
+<p>Note, currently supervised tasks are supported, hence categorical, numerical, and time-series are the expected outputs types. Complex features such as text generation are not currently available by default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dtype</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The type of information within the target column (ex.: numerical, categorical, etc.).</p></li>
+<li><p><strong>encoder</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the methodology for encoding the target feature (a Lightwood Encoder). There can only be one encoder for the output target.</p></li>
+<li><p><strong>models</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – The list of ML algorithms that are trained for the target distribution.</p></li>
+<li><p><strong>ensemble</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For a panel of ML algorithms, the approach of selecting the best model, and the metrics used in that evaluation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.TypeInformation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">TypeInformation</span></span><a class="reference internal" href="../_modules/api/types.html#TypeInformation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TypeInformation" title="Permalink to this definition"></a></dt>
+<dd><p>For a dataset, provides information on columns types, how they’re used, and any other potential identifiers.</p>
+<p>TypeInformation is generated within <code class="docutils literal notranslate"><span class="pre">data.infer_types</span></code>, where small samples of each column are evaluated in a custom framework to understand what kind of data type the model is. The user may override data types, but it is recommended to do so within a JSON-AI config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtypes</strong> – For each column’s name, the associated data type inferred.</p></li>
+<li><p><strong>additional_info</strong> – Any possible sub-categories or additional descriptive information.</p></li>
+<li><p><strong>identifiers</strong> – Columns within the dataset highly suspected of being identifiers or IDs. These do not contain informatic value, therefore will be ignored in subsequent training/analysis procedures unless manually indicated.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.StatisticalAnalysis">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">StatisticalAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nr_rows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_std_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_observed_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_class_distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buckets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distinct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_words_per_sentence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#StatisticalAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.StatisticalAnalysis" title="Permalink to this definition"></a></dt>
+<dd><p>The Statistical Analysis data class allows users to consider key descriptors of their data using simple techniques such as histograms, mean and standard deviation, word count, missing values, and any detected bias in the information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nr_rows</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of rows (samples) in the dataset</p></li>
+<li><p><strong>df_std_dev</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The standard deviation of the target of the dataset</p></li>
+<li><p><strong>train_observed_classes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
+<li><p><strong>target_class_distribution</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
+<li><p><strong>histograms</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
+<li><p><strong>buckets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
+<li><p><strong>missing</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
+<li><p><strong>distinct</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
+<li><p><strong>bias</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
+<li><p><strong>avg_words_per_sentence</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
+<li><p><strong>positive_domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.DataAnalysis">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">DataAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statistical_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_information</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#DataAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.DataAnalysis" title="Permalink to this definition"></a></dt>
+<dd><p>Data Analysis wraps :class: <cite>.StatisticalAnalysis</cite> and :class: <cite>.TypeInformation</cite> together. Further details can be seen in their respective documentation references.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.TimeseriesSettings">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">TimeseriesSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_previous_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_predictions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">historical_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings" title="Permalink to this definition"></a></dt>
+<dd><p>For time-series specific problems, more specific treatment of the data is necessary. The following attributes enable time-series tasks to be carried out properly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>is_timeseries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether the input data should be treated as time series; if true, this flag is checked in subsequent internal steps to ensure processing is appropriate for time-series data.</p></li>
+<li><p><strong>order_by</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – A list of columns by which the data should be ordered.</p></li>
+<li><p><strong>group_by</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – Optional list of columns by which the data should be grouped. Each different combination of values for these columns will yield a different series.</p></li>
+<li><p><strong>window</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The temporal horizon (number of rows) that a model intakes to “look back” into when making a prediction, after the rows are ordered by order_by columns and split into groups if applicable.</p></li>
+<li><p><strong>nr_predictions</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The number of points in the future that predictions should be made for, defaults to 1. Once trained, the model will be able to predict up to this many points into the future.</p></li>
+<li><p><strong>historical_columns</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – The temporal dynamics of these columns will be used as additional context to train the time series predictor. Note that a non-historical column shall still be used to forecast, but without considering their change through time.</p></li>
+<li><p><strong>target_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Automatically inferred dtype of the target (e.g. <cite>dtype.integer</cite>, <cite>dtype.float</cite>).</p></li>
+<li><p><strong>use_previous_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Use the previous values of the target column to generate predictions. Defaults to True.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.TimeseriesSettings.from_dict">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a TimeseriesSettings object from python dictionary specifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>obj: A python dictionary with the necessary representation for time-series. The only mandatory columns are <code class="docutils literal notranslate"><span class="pre">order_by</span></code> and <code class="docutils literal notranslate"><span class="pre">window</span></code>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A populated <code class="docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code> object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.TimeseriesSettings.from_json">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.from_json" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a TimeseriesSettings object from JSON specifications via python dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>data: JSON-config file with necessary Time-series specifications</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A populated <code class="docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code> object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.TimeseriesSettings.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a dictionary from <code class="docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code> object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A python dictionary containing the <code class="docutils literal notranslate"><span class="pre">TimeSeriesSettings</span></code> specifications.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.TimeseriesSettings.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.to_json" title="Permalink to this definition"></a></dt>
+<dd><p>Creates JSON config from TimeseriesSettings object
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]
+:returns: The JSON config syntax containing the <code class="docutils literal notranslate"><span class="pre">TimeSeriesSettings</span></code> specifications.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.ProblemDefinition">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">ProblemDefinition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfolds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_invalid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unbias_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_aim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_confidence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_error_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_cooldown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_validation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition" title="Permalink to this definition"></a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> object indicates details on how the models that predict the target are prepared. The only required specification from a user is the <code class="docutils literal notranslate"><span class="pre">target</span></code>, which indicates the column within the input data that the user is trying to predict. Within the <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, the user can specify aspects about how long the feature-engineering preparation may take, and nuances about training the models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the target column; this is the column that will be used as the goal of the prediction.</p></li>
+<li><p><strong>nfolds</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of data subsets</p></li>
+<li><p><strong>pct_invalid</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Number of data points maximally tolerated as invalid/missing/unknown. If the data cleaning process exceeds this number, no subsequent steps will be taken.</p></li>
+<li><p><strong>unbias_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
+<li><p><strong>seconds_per_model</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Number of seconds maximum to spend PER model trained in the list of possible mixers.</p></li>
+<li><p><strong>seconds_per_encoder</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Number of seconds maximum to spend when training an encoder that requires data to learn a representation.</p></li>
+<li><p><strong>time_aim</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Time budget (in seconds) to train all needed components for the predictive tasks, including encoders and models.</p></li>
+<li><p><strong>target_weights</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – </p></li>
+<li><p><strong>positive_domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – For numerical taks, force predictor output to be positive (integer or float).</p></li>
+<li><p><strong>fixed_confidence</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – For analyzer module, specifies a fixed <cite>alpha</cite> confidence for the model calibration so that predictions, in average, are correct <cite>alpha</cite> percent of the time.</p></li>
+<li><p><strong>timeseries_settings</strong> (<a class="reference internal" href="#api.types.TimeseriesSettings" title="api.types.TimeseriesSettings"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code></a>) – TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.</p></li>
+<li><p><strong>anomaly_detection</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to conduct unsupervised anomaly detection; currently supported only for time-series.</p></li>
+<li><p><strong>anomaly_error_rate</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).</p></li>
+<li><p><strong>anomaly_cooldown</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Sets the minimum amount of timesteps between consecutive firings of the the anomaly detector.</p></li>
+<li><p><strong>ignore_features</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The names of the columns the user wishes to ignore in the ML pipeline. Any column name found in this list will be automatically removed from subsequent steps in the ML pipeline.</p></li>
+<li><p><strong>fit_on_validation</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to fit the model on the held-out validation data. Validation data is strictly used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new incoming data over time, the user may train the model further using the entire dataset.</p></li>
+<li><p><strong>strict_mode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.ProblemDefinition.from_dict">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a ProblemDefinition object from a python dictionary with necessary specifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – A python dictionary with the necessary features for the <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> class. Only requires <code class="docutils literal notranslate"><span class="pre">target</span></code> to be specified.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A populated <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.ProblemDefinition.from_json">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.from_json" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a ProblemDefinition Object from JSON config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A populated ProblemDefinition object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.ProblemDefinition.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a python dictionary from the ProblemDefinition object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A python dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.ProblemDefinition.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.to_json" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a JSON config from the ProblemDefinition object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>TODO</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.JsonAI">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">JsonAI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifiers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleaner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_transformer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI" title="Permalink to this definition"></a></dt>
+<dd><p>The JsonAI Class allows users to construct flexible JSON config to specify their ML pipeline. JSON-AI follows a recipe of how to pre-process data, construct features, and train on the target column. To do so, the following specifications are required internally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="#api.types.Feature" title="api.types.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">Feature</span></code></a>]) – The corresponding``Feature`` object for each of the column names of the dataset</p></li>
+<li><p><strong>outputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="#api.types.Output" title="api.types.Output"><code class="xref py py-class docutils literal notranslate"><span class="pre">Output</span></code></a>]) – The column name of the target and its <code class="docutils literal notranslate"><span class="pre">Output</span></code> object</p></li>
+<li><p><strong>problem_definition</strong> (<a class="reference internal" href="#api.types.ProblemDefinition" title="api.types.ProblemDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code></a>) – The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> criteria.</p></li>
+<li><p><strong>identifiers</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.</p></li>
+<li><p><strong>cleaner</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, “None” suggests Lightwood’s default approach in <code class="docutils literal notranslate"><span class="pre">data.cleaner</span></code>.</p></li>
+<li><p><strong>splitter</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – The Splitter object is the method in which the input data is split into training/validation/testing data.</p></li>
+<li><p><strong>analyzer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – The Analyzer object is used to evaluate how well a model performed on the predictive task.</p></li>
+<li><p><strong>explainer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.</p></li>
+<li><p><strong>imports</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – A list of custom packages, indicated through a str import statement, that a user can call.</p></li>
+<li><p><strong>timeseries_transformer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – </p></li>
+<li><p><strong>timeseries_analyzer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – </p></li>
+<li><p><strong>accuracy_functions</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – A list of performance metrics used to evaluate the best models.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.JsonAI.from_dict">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a JSON-AI object from dictionary specifications of the JSON-config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.JsonAI.from_json">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.from_json" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a JSON-AI object from JSON config</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.JsonAI.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a python dictionary with necessary modules within the ML pipeline specified from the JSON-AI object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A python dictionary that has the necessary components of the ML pipeline for a given dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.JsonAI.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.to_json" title="Permalink to this definition"></a></dt>
+<dd><p>Creates JSON config to represent the necessary modules within the ML pipeline specified from the JSON-AI object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A JSON config that has the necessary components of the ML pipeline for a given dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.ModelAnalysis">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">ModelAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accuracies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_histogram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_sample_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_sample_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_importances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confusion_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtypes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ModelAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ModelAnalysis" title="Permalink to this definition"></a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">ModelAnalysis</span></code> class stores useful information to describe a model and understand its predictive performance on a validation dataset.
+For each trained ML algorithm, we store:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>accuracies</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Dictionary with obtained values for each accuracy function (specified in JsonAI)</p></li>
+<li><p><strong>accuracy_histogram</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]) – Dictionary with histograms of reported accuracy by target value.</p></li>
+<li><p><strong>accuracy_samples</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]) – Dictionary with sampled pairs of observed target values and respective predictions.</p></li>
+<li><p><strong>train_sample_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Size of the training set (data that parameters are updated on)</p></li>
+<li><p><strong>test_sample_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Size of the testing set (explicitly held out)</p></li>
+<li><p><strong>column_importances</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Dictionary with the importance of each column for the model, as estimated by an approach that closely follows a leave-one-covariate-out strategy.</p></li>
+<li><p><strong>confusion_matrix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – A confusion matrix for the validation dataset.</p></li>
+<li><p><strong>histograms</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – Histogram for each dataset feature.</p></li>
+<li><p><strong>dtypes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – Inferred data types for each dataset feature.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dtype.html" class="btn btn-neutral float-left" title="Data Types (dtypes)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="encode.html" class="btn btn-neutral float-right" title="Encode your data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, MindsDB.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
