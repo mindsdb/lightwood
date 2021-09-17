@@ -74,12 +74,15 @@ def transform_timeseries(
     for oby in tss.order_by:
         original_df[f'__mdb_original_{oby}'] = original_df[oby]
 
+    group_lengths = []
     if len(gb_arr) > 0:
         df_arr = []
         for _, df in original_df.groupby(gb_arr):
             df_arr.append(df.sort_values(by=ob_arr))
+            group_lengths.append(len(df))
     else:
         df_arr = [original_df]
+        group_lengths.append(len(original_df))
 
     n_groups = len(df_arr)
     last_index = original_df['original_index'].max()
@@ -133,9 +136,9 @@ def transform_timeseries(
         combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool).isin([True])])
         del combined_df['__mdb_make_predictions']
 
-    if len(combined_df) < n_groups * tss.window:
+    if not infer_mode and any([i < tss.window for i in group_lengths]):
         if tss.allow_incomplete_history:
-            log.info("Forecasting with incomplete historical context, predictions might be subpar")
+            log.warning("Forecasting with incomplete historical context, predictions might be subpar")
         else:
             raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size. If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` timeseries setting to `True`, but this might lead to subpar predictions.') # noqa
 
