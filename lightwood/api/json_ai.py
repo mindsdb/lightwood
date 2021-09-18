@@ -8,7 +8,7 @@ from lightwood.api.types import (JsonAI, TypeInformation, StatisticalAnalysis, F
 
 
 trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder')
-ts_encoders = ('TimeSeriesEncoder', 'ArrayEncoder', 'TsNumericEncoder')
+ts_encoders = ('TimeSeriesEncoder', 'TsNumericEncoder')
 
 
 def lookup_encoder(
