@@ -210,9 +210,9 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     # Decide on the accuracy functions to use
     if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
         accuracy_functions = ['r2_score']
-    elif list(outputs.values())[0].data_dtype == (dtype.categorical, dtype.tags, dtype.binary):
+    elif list(outputs.values())[0].data_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ['balanced_accuracy_score']
-    elif list(outputs.values())[0].data_dtype == dtype.array:
+    elif list(outputs.values())[0].data_dtype in [dtype.array]:
         accuracy_functions = ['evaluate_array_accuracy']
     else:
         accuracy_functions = ['accuracy_score']
