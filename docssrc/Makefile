@@ -20,5 +20,6 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 github:
-	@make html
+	@make -b html
 	@cp -a build/html/. ../docs
+	@rm -r build
