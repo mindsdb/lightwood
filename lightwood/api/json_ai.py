@@ -46,7 +46,7 @@ def lookup_encoder(
             encoder_dict['module'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
-                encoder_dict['args'] = {'target_class_distribution': '$statistical_analysis.target_class_distribution'}
+                encoder_dict['args']['target_class_distribution'] = '$statistical_analysis.target_class_distribution'
         if col_dtype in (dtype.integer, dtype.float, dtype.array):
             encoder_dict['args']['positive_domain'] = '$statistical_analysis.positive_domain'
 
@@ -83,7 +83,7 @@ def lookup_encoder(
 
     if is_target_predicting_encoder:
         encoder_dict['args']['embed_mode'] = 'False'
-
+    
     return encoder_dict
 
 
