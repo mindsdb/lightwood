@@ -17,10 +17,10 @@ from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.analysis.acc_stats import AccStats
 from lightwood.analysis.nc.norm import Normalizer
 from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc
-from lightwood.analysis.nc.util import clean_df, set_conf_range
+from lightwood.analysis.nc.util import clean_df, set_conf_range, t_softmax
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
 from lightwood.analysis.nc.nc import RegressorNc, ClassifierNc, MarginErrFunc
-from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter, t_softmax
+from lightwood.analysis.nc.wrappers import ConformalClassifierAdapter, ConformalRegressorAdapter
 
 
 """

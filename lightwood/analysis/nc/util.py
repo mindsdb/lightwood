@@ -1,5 +1,13 @@
+import torch
 import numpy as np
+from torch.nn.functional import softmax
 from lightwood.api.dtype import dtype
+
+
+def t_softmax(x, t=1.0, axis=1):
+    """ Softmax with temperature scaling """
+    # @TODO: move this, not a wrapper
+    return softmax(torch.Tensor(x) / t, dim=axis).numpy()
 
 
 def clean_df(df, target, is_classification, label_encoders):
