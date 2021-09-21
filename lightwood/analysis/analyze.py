@@ -12,7 +12,7 @@ from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
 
 from lightwood.analysis.nc.util import t_softmax
-from lightwood.analysis.acc_stats import AccStats
+from lightwood.analysis.helpers.acc_stats import AccStats
 from lightwood.analysis.nc.calibrate import icp_calibration
 
 
