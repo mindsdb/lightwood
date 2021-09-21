@@ -10,7 +10,7 @@ import torch
 import time
 from lightwood.helpers.log import log
 from sklearn.preprocessing import OrdinalEncoder
-from lightwood.model.base import BaseModel
+from lightwood.model.base import BaseMixer
 
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
@@ -27,7 +27,7 @@ def check_gpu_support():
         return False
 
 
-class LightGBM(BaseModel):
+class LightGBM(BaseMixer):
     model: lightgbm.LGBMModel
     ordinal_encoder: OrdinalEncoder
     label_set: Set[str]

@@ -268,7 +268,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score', 'import pandas as pd',
         'from lightwood.helpers.seed import seed', 'from lightwood.helpers.log import log', 'import lightwood',
-        'from lightwood.api import *', 'from lightwood.model import BaseModel',
+        'from lightwood.api import *', 'from lightwood.model import BaseMixer',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
         'from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
         'from lightwood.ensemble import BaseEnsemble', 'from typing import Dict, List',
@@ -623,7 +623,7 @@ from lightwood.api import PredictorInterface
 
 class Predictor(PredictorInterface):
     target: str
-    models: List[BaseModel]
+    models: List[BaseMixer]
     encoders: Dict[str, BaseEncoder]
     ensemble: BaseEnsemble
     mode: str

@@ -3,7 +3,7 @@ import pandas as pd
 from lightwood.data.encoded_ds import EncodedDs
 
 
-class BaseModel:
+class BaseMixer:
     fit_data_len: int
     stable: bool
 

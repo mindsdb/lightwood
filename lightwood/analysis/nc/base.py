@@ -23,11 +23,11 @@ class ClassifierMixin(object):
         return 'classification'
 
 
-class BaseModelAdapter(BaseEstimator):
+class BaseMixerAdapter(BaseEstimator):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, model: object, fit_params: Dict[str, object] = None) -> None:
-        super(BaseModelAdapter, self).__init__()
+        super(BaseMixerAdapter, self).__init__()
 
         self.model = model
         self.last_x, self.last_y = None, None
@@ -95,7 +95,7 @@ class BaseModelAdapter(BaseEstimator):
         pass
 
 
-class ClassifierAdapter(BaseModelAdapter):
+class ClassifierAdapter(BaseMixerAdapter):
     def __init__(self, model: object, fit_params: Dict[str, object] = None) -> None:
         super(ClassifierAdapter, self).__init__(model, fit_params)
 
@@ -103,7 +103,7 @@ class ClassifierAdapter(BaseModelAdapter):
         return self.model.predict_proba(x)
 
 
-class RegressorAdapter(BaseModelAdapter):
+class RegressorAdapter(BaseMixerAdapter):
     def __init__(self, model: object, fit_params: Dict[str, object] = None) -> None:
         super(RegressorAdapter, self).__init__(model, fit_params)
 

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.helpers.log import log
-from lightwood.model.base import BaseModel
+from lightwood.model.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 from lightwood.helpers.general import evaluate_accuracy
@@ -13,7 +13,7 @@ from lightwood.helpers.general import evaluate_accuracy
 class BestOf(BaseEnsemble):
     best_index: int
 
-    def __init__(self, target, models: List[BaseModel], data: List[EncodedDs], accuracy_functions) -> None:
+    def __init__(self, target, models: List[BaseMixer], data: List[EncodedDs], accuracy_functions) -> None:
         super().__init__(target, models, data)
         # @TODO: Need some shared accuracy functionality to determine model selection here
         self.maximize = True
