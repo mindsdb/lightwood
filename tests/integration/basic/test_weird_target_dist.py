@@ -25,6 +25,6 @@ class TestBasic(unittest.TestCase):
         })
         target = 'target'
 
-        predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 60}))
+        predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 60, 'unbias_target': True}))
         predictor.learn(df)
         predictor.predict(df)
