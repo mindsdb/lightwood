@@ -137,7 +137,7 @@ class TimeseriesSettings:
 @dataclass
 class ProblemDefinition:
     target: str
-    nfolds: int
+    nsubsets: int
     pct_invalid: float
     unbias_target: bool
     seconds_per_model: Union[int, None]
@@ -158,7 +158,7 @@ class ProblemDefinition:
     @staticmethod
     def from_dict(obj: Dict):
         target = obj['target']
-        nfolds = obj.get('nfolds', 30)
+        nsubsets = obj.get('nsubsets', 30)
         pct_invalid = obj.get('pct_invalid', 1)
         unbias_target = obj.get('unbias_target', False)
         seconds_per_model = obj.get('seconds_per_model', None)
@@ -178,7 +178,7 @@ class ProblemDefinition:
 
         problem_definition = ProblemDefinition(
             target=target,
-            nfolds=nfolds,
+            nsubsets=nsubsets,
             pct_invalid=pct_invalid,
             unbias_target=unbias_target,
             seconds_per_model=seconds_per_model,

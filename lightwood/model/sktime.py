@@ -35,8 +35,8 @@ class SkTime(BaseModel):
     def fit(self, ds_arr: List[EncodedDs]) -> None:
         log.info('Started fitting sktime forecaster for array prediction')
 
-        all_folds = ConcatedEncodedDs(ds_arr)
-        df = all_folds.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
+        all_subsets = ConcatedEncodedDs(ds_arr)
+        df = all_subsets.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
         data = {'data': df[self.target],
                 'group_info': {gcol: df[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
