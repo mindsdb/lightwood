@@ -17,7 +17,8 @@ from lightwood.analysis.nc.norm import Normalizer
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
 from lightwood.analysis.nc.base import CachedRegressorAdapter, CachedClassifierAdapter
 from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc, RegressorNc, ClassifierNc, MarginErrFunc
-from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numerical_conf_range, get_categorical_conf, get_anomalies
+from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numerical_conf_range, \
+    get_categorical_conf, get_anomalies
 
 
 """
