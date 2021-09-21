@@ -121,7 +121,7 @@ def model_analyzer(
 
         # setup prediction cache to avoid additional .predict() calls
         if is_classification:
-            if predictor.models[predictor.best_index].supports_proba:
+            if predictor.mixers[predictor.best_index].supports_proba:
                 icp.nc_function.model.prediction_cache = normal_predictions[all_cat_cols].values
             else:
                 predicted_classes = pd.get_dummies(normal_predictions['prediction']).values  # inflate to one-hot enc
