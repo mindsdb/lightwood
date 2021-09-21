@@ -160,7 +160,7 @@ class ProblemDefinition:
         target = obj['target']
         nfolds = obj.get('nfolds', 30)
         pct_invalid = obj.get('pct_invalid', 1)
-        unbias_target = obj.get('unbias_target', False)
+        unbias_target = obj.get('unbias_target', True)
         seconds_per_model = obj.get('seconds_per_model', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
         time_aim = obj.get('time_aim', None)
