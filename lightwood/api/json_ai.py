@@ -359,7 +359,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'args': {
                 'tss': '$problem_definition.timeseries_settings',
                 'data': 'data',
-                'k': 'nfolds'
+                'k': 'nsubsets'
             }
         }
     if json_ai.analyzer is None:
@@ -512,14 +512,14 @@ data = {call(json_ai.cleaner, json_ai)}
 {ts_transform_code}
 {ts_analyze_code}
 
-nfolds = {json_ai.problem_definition.nfolds}
-log.info(f'Splitting the data into {{nfolds}} folds')
-folds = {call(json_ai.splitter, json_ai)}
+nsubsets = {json_ai.problem_definition.nsubsets}
+log.info(f'Splitting the data into {{nsubsets}} subsets')
+subsets = {call(json_ai.splitter, json_ai)}
 
 log.info('Preparing the encoders')
 
 encoder_preping_dict = {{}}
-enc_preping_data = pd.concat(folds[0:nfolds-1])
+enc_preping_data = pd.concat(subsets[0:nsubsets-1])
 for col_name, encoder in self.encoders.items():
     if not encoder.is_nn_encoder:
         encoder_preping_dict[col_name] = [encoder, enc_preping_data[col_name], 'prepare']
@@ -534,7 +534,7 @@ if self.target not in parallel_preped_encoders:
 
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
-        priming_data = pd.concat(folds[0:nfolds-1])
+        priming_data = pd.concat(subsets[0:nsubsets-1])
         kwargs = {{}}
         if self.dependencies[col_name]:
             kwargs['dependency_data'] = {{}}
@@ -557,9 +557,9 @@ for col_name, encoder in self.encoders.items():
 
     learn_body = f"""
 log.info('Featurizing the data')
-encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
-train_data = encoded_ds_arr[0:int(nfolds*0.9)]
-test_data = encoded_ds_arr[int(nfolds*0.9):]
+encoded_ds_arr = lightwood.encode(self.encoders, subsets, self.target)
+train_data = encoded_ds_arr[0:int(nsubsets*0.9)]
+test_data = encoded_ds_arr[int(nsubsets*0.9):]
 
 log.info('Training the models')
 self.models = [{', '.join([call(x, json_ai) for x in list(json_ai.outputs.values())[0].models])}]
