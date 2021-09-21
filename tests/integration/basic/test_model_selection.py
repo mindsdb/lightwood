@@ -5,7 +5,7 @@ from lightwood.api.high_level import json_ai_from_problem
 from lightwood.api.types import ProblemDefinition
 
 
-class TestmixerSelection(unittest.TestCase):
+class TestMixerSelection(unittest.TestCase):
     def get_mixers(self, df: pd.DataFrame, target: str, prob_kwargs: dict = None):
         prob_kwargs = {'target': target, 'time_aim': 15} if not prob_kwargs else {'target': target, **prob_kwargs}
         prdb = ProblemDefinition.from_dict(prob_kwargs)
