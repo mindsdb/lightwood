@@ -25,3 +25,4 @@ github:
 	@rm -r ../docs
 	@cp -a build/html/. ../docs
 	@rm -r build
+	@touch ../.nojekyll
