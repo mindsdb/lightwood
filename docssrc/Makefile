@@ -21,5 +21,7 @@ help:
 
 github:
 	@make -b html
+	@touch ../docs
+	@rm -r ../docs
 	@cp -a build/html/. ../docs
 	@rm -r build

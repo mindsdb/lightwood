@@ -1,37 +1,79 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Predictor Interface &mdash; lightwood 1.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="JSON-AI Config" href="json_ai.html" />
     <link rel="prev" title="Encode your data" href="encode.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search"  style="background: white" >
+          
+
+          
             <a href="../index.html">
+          
+
+          
+            
             <img src="../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 1.1.0
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +81,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
@@ -60,37 +113,79 @@
 </li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">lightwood</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
+    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a> &raquo;</li>
+        
       <li>Predictor Interface</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/api/predictor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <section id="predictor-interface">
-<h1>Predictor Interface<a class="headerlink" href="#predictor-interface" title="Permalink to this headline"></a></h1>
+            
+  <div class="section" id="predictor-interface">
+<h1>Predictor Interface<a class="headerlink" href="#predictor-interface" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> creates the skeletal structure around basic functionality of Lightwood.</p>
 <span class="target" id="module-api.predictor"></span><dl class="py class">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.predictor.</span></span><span class="sig-name descname"><span class="pre">PredictorInterface</span></span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.predictor.</span></span><span class="sig-name descname"><span class="pre">PredictorInterface</span></span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstraction of a Lightwood predictor. The PredictorInterface encompasses how Lightwood interacts with the full ML pipeline. Internally,</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> class must have 5 expected functions:</p>
 <ul class="simple">
@@ -103,7 +198,7 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> is created via J{ai}son’s custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.adjust">
-<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.adjust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.adjust" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.adjust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.adjust" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adjusts a previously trained model on new data. Adopts the same process as <code class="docutils literal notranslate"><span class="pre">learn</span></code> but with the exception that the <cite>adjust</cite> function expects the best model to have been already trained.</p>
 <p>..warnings:: Not tested yet - this is an experimental feature
 :type data: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>
@@ -120,7 +215,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.learn">
-<span class="sig-name descname"><span class="pre">learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.learn" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.learn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains the attribute model starting from raw data. Raw data is pre-processed and cleaned accordingly. As data is assigned a particular type (ex: numerical, categorical, etc.), the respective feature encoder will convert it into a representation useable for training ML models. Of all ML models requested, these models are compiled and fit on the training data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -137,7 +232,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.predict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intakes raw data to provide predicted values for your trained model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -154,7 +249,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.predict_proba">
-<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.predict_proba" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.predict_proba" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intakes raw data to provide some element of confidence/explainability metric to gauge your model’s predictive abilities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -171,7 +266,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.save" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>With a provided file path, saves the Predictor instance for later use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -188,37 +283,54 @@
 
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="encode.html" class="btn btn-neutral float-left" title="Encode your data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="json_ai.html" class="btn btn-neutral float-right" title="JSON-AI Config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="encode.html" class="btn btn-neutral float-left" title="Encode your data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2021, MindsDB.</p>
-  </div>
+    <p>
+        &#169; Copyright 2017-2021, MindsDB.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
