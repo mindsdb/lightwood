@@ -90,7 +90,7 @@ colors = {
 }
 
 # HTML details
-html_theme = "sphinx_rtd_theme"#'msmb_theme'
+html_theme = 'sphinx_rtd_theme'
 
 
 html_theme_options = {
