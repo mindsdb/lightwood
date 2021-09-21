@@ -1,4 +1,3 @@
-from lightwood.api.types import JsonAI
 
 
 '''

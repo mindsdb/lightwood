@@ -83,7 +83,6 @@ def lookup_encoder(
 
     if is_target_predicting_encoder:
         encoder_dict['args']['embed_mode'] = 'False'
-    
     return encoder_dict
 
 
