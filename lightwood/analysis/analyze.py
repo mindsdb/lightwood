@@ -16,8 +16,6 @@ from lightwood.analysis.acc_stats import AccStats
 from lightwood.analysis.nc.calibrate import icp_calibration
 
 
-
-
 def model_analyzer(
     predictor: BaseEnsemble,
     data: List[EncodedDs],
@@ -122,9 +120,6 @@ def model_analyzer(
         runtime_analyzer = block.compute(runtime_analyzer, **{})
 
     return model_analysis, runtime_analyzer
-
-
-
 
 
 def compute_global_importance(
