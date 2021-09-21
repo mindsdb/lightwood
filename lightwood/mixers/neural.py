@@ -19,13 +19,13 @@ from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.model.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
-from lightwood.model.base import BaseModel
+from lightwood.model.base import BaseMixer
 from lightwood.model.helpers.ar_net import ArNet
 from lightwood.model.helpers.default_net import DefaultNet
 from lightwood.encoder.base import BaseEncoder
 
 
-class Neural(BaseModel):
+class Neural(BaseMixer):
     model: nn.Module
     dtype_dict: dict
     target: str

@@ -4,12 +4,12 @@ from typing import Dict, List, Union
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
-from lightwood.model.base import BaseModel
+from lightwood.model.base import BaseMixer
 from lightwood.model.lightgbm import LightGBM
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
-class LightGBMArray(BaseModel):
+class LightGBMArray(BaseMixer):
     """LightGBM-based model, intended for usage in time series tasks."""
     models: List[LightGBM]
     n_ts_predictions: int

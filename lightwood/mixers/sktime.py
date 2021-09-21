@@ -5,12 +5,12 @@ from sktime.forecasting.arima import AutoARIMA
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
-from lightwood.model.base import BaseModel
+from lightwood.model.base import BaseMixer
 from lightwood.encoder.time_series.helpers.common import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
-class SkTime(BaseModel):
+class SkTime(BaseMixer):
     forecaster: str
     n_ts_predictions: int
     target: str

@@ -251,7 +251,7 @@ class RegressorNormalizer(BaseScorer):
         return norm
 
 
-class BaseModelNc(BaseScorer):
+class BaseMixerNc(BaseScorer):
     """Base class for nonconformity scorers based on an underlying model.
 
     Parameters
@@ -273,7 +273,7 @@ class BaseModelNc(BaseScorer):
     """ # noqa
 
     def __init__(self, model, err_func, normalizer=None, beta=0):
-        super(BaseModelNc, self).__init__()
+        super(BaseMixerNc, self).__init__()
         self.err_func = err_func
         self.model = model
         self.normalizer = normalizer
@@ -353,7 +353,7 @@ class BaseModelNc(BaseScorer):
 # -----------------------------------------------------------------------------
 # Classification nonconformity scorers
 # -----------------------------------------------------------------------------
-class ClassifierNc(BaseModelNc):
+class ClassifierNc(BaseMixerNc):
     """Nonconformity scorer using an underlying class probability estimating
     model.
 
@@ -397,7 +397,7 @@ class ClassifierNc(BaseModelNc):
 # -----------------------------------------------------------------------------
 # Regression nonconformity scorers
 # -----------------------------------------------------------------------------
-class RegressorNc(BaseModelNc):
+class RegressorNc(BaseMixerNc):
     """Nonconformity scorer using an underlying regression model.
 
     Parameters
