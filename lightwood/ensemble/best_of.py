@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.helpers.log import log
-from lightwood.model.base import BaseMixer
+from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 from lightwood.helpers.general import evaluate_accuracy

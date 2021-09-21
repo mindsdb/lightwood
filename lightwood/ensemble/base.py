@@ -1,5 +1,5 @@
 from typing import List
-from lightwood.model.base import BaseMixer
+from lightwood.mixer.base import BaseMixer
 import pandas as pd
 from lightwood.data.encoded_ds import EncodedDs
 

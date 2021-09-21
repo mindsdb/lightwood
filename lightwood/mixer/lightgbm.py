@@ -10,7 +10,7 @@ import torch
 import time
 from lightwood.helpers.log import log
 from sklearn.preprocessing import OrdinalEncoder
-from lightwood.model.base import BaseMixer
+from lightwood.mixer.base import BaseMixer
 
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
