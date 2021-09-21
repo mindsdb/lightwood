@@ -429,13 +429,13 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 def code_from_json_ai(json_ai: JsonAI) -> str:
     json_ai = add_implicit_values(json_ai)
 
-    encoder_dict = {json_ai.problem_definition.target: call(list(json_ai.outputs.values())[0].encoder, json_ai)}
+    encoder_dict = {json_ai.problem_definition.target: call(list(json_ai.outputs.values())[0].encoder)}
     dependency_dict = {}
     dtype_dict = {json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""}
 
     for col_name, feature in json_ai.features.items():
         if col_name not in json_ai.problem_definition.ignore_features:
-            encoder_dict[col_name] = call(feature.encoder, json_ai)
+            encoder_dict[col_name] = call(feature.encoder)
             dependency_dict[col_name] = feature.dependency
             dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
@@ -448,8 +448,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      False,
                                                      json_ai.problem_definition,
                                                      False,
-                                                     ),
-                                      json_ai)
+                                                     ))
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
         json_ai.features[col_name] = Feature(
@@ -467,10 +466,10 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     if json_ai.timeseries_transformer is not None:
         ts_transform_code = f"""
 log.info('Transforming timeseries data')
-data = {call(json_ai.timeseries_transformer, json_ai)}
+data = {call(json_ai.timeseries_transformer)}
 """
         ts_analyze_code = f"""
-self.ts_analysis = {call(json_ai.timeseries_analyzer, json_ai)}
+self.ts_analysis = {call(json_ai.timeseries_analyzer)}
 """
 
     if json_ai.timeseries_analyzer is not None:
@@ -505,14 +504,14 @@ self.dependencies = {inline_dict(dependency_dict)}
 self.input_cols = [{input_cols}]
 
 log.info('Cleaning the data')
-data = {call(json_ai.cleaner, json_ai)}
+data = {call(json_ai.cleaner)}
 
 {ts_transform_code}
 {ts_analyze_code}
 
 nfolds = {json_ai.problem_definition.nfolds}
 log.info(f'Splitting the data into {{nfolds}} folds')
-folds = {call(json_ai.splitter, json_ai)}
+folds = {call(json_ai.splitter)}
 
 log.info('Preparing the encoders')
 
@@ -560,7 +559,7 @@ train_data = encoded_ds_arr[0:int(nfolds*0.9)]
 test_data = encoded_ds_arr[int(nfolds*0.9):]
 
 log.info('Training the models')
-self.models = [{', '.join([call(x, json_ai) for x in list(json_ai.outputs.values())[0].models])}]
+self.models = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].models])}]
 trained_models = []
 for model in self.models:
     try:
@@ -574,11 +573,11 @@ for model in self.models:
 self.models = trained_models
 
 log.info('Ensembling the model')
-self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble, json_ai)}
+self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
 
 log.info('Analyzing the ensemble')
-self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
+self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 
 # Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
 for model in self.models:
@@ -590,7 +589,7 @@ for model in self.models:
     predict_common_body = f"""
 self.mode = 'predict'
 log.info('Cleaning the data')
-data = {call(json_ai.cleaner, json_ai)}
+data = {call(json_ai.cleaner)}
 
 {ts_transform_code}
 
@@ -608,7 +607,7 @@ return insights
 
     predict_proba_body = f"""
 df = self.ensemble(encoded_ds, predict_proba=True)
-insights = {call(json_ai.explainer, json_ai)}
+insights = {call(json_ai.explainer)}
 return insights
 """
     predict_proba_body = align(predict_proba_body, 2)

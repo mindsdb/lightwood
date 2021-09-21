@@ -69,12 +69,12 @@ def is_allowed(v):
     return True
 
 
-def call(entity: dict, json_ai: JsonAI) -> str:
+def call(entity: dict) -> str:
     for k, v in entity['args'].items():
         if not str(v).startswith('$'):
             if not is_allowed(v):
                 raise Exception(f'Invalid value: {v} for arg {k}')
-                
+
     args = [f'{k}={v}' for k, v in entity['args'].items() if not str(v).startswith('$')]
 
     for k, v in entity['args'].items():
