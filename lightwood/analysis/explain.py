@@ -1,7 +1,7 @@
+from typing import Optional, List, Dict
 import torch
 import pandas as pd
 
-from lightwood.api.dtype import dtype
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.ts import get_inferred_timestamps
 from lightwood.analysis.nc.calibrate import icp_explain
@@ -11,10 +11,11 @@ def explain(data: pd.DataFrame,
             encoded_data: torch.Tensor,
             predictions: pd.DataFrame,
             timeseries_settings: TimeseriesSettings,
-            analysis: dict,
+            analysis: Dict,
             target_name: str,
             target_dtype: str,
-            positive_domain: bool,
+
+            positive_domain: bool,  # @TODO: pass these bools to the block constructor so that they are not needed here
             fixed_confidence: float,
             anomaly_detection: bool,
 
@@ -26,10 +27,10 @@ def explain(data: pd.DataFrame,
             # implicitly assumes series are regularly spaced
             anomaly_cooldown: int,
 
-            ts_analysis: dict = None
+            explainer_blocks: Optional[List] = [],
+            ts_analysis: Optional[Dict] = {}
             ):
 
-    # @TODO: check not quick_predict
     data = data.reset_index(drop=True)
 
     insights = pd.DataFrame()
@@ -41,7 +42,6 @@ def explain(data: pd.DataFrame,
         insights['truth'] = [None] * len(predictions['prediction'])
 
     if timeseries_settings.is_timeseries:
-
         if timeseries_settings.group_by:
             for col in timeseries_settings.group_by:
                 insights[f'group_{col}'] = data[col]
@@ -70,20 +70,8 @@ def explain(data: pd.DataFrame,
                                anomaly_cooldown
                                )
 
-    # Make sure the target and real values are of an appropriate type
-    if timeseries_settings.is_timeseries and timeseries_settings.nr_predictions > 1:
-        # Array output that are not of type <array> originally are odd and I'm not sure how to handle them
-        # Or if they even need handling yet
-        pass
-    elif target_dtype in (dtype.integer):
-        insights['prediction'] = insights['prediction'].astype(int)
-        insights['upper'] = insights['upper'].astype(int)
-        insights['lower'] = insights['lower'].astype(int)
-    elif target_dtype in (dtype.float):
-        insights['prediction'] = insights['prediction'].astype(float)
-        insights['upper'] = insights['upper'].astype(float)
-        insights['lower'] = insights['lower'].astype(float)
-    elif target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
-        insights['prediction'] = insights['prediction'].astype(str)
+    # user explainer blocks
+    for block in explainer_blocks:
+        insights = block.explain(insights, **{})
 
     return insights

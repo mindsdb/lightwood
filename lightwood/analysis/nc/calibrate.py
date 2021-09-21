@@ -385,7 +385,23 @@ def icp_explain(data,
                                       cooldown=anomaly_cooldown)
             insights['anomaly'] = anomalies
 
-        if tss.is_timeseries and tss.nr_predictions > 1 and is_numerical:
-            insights = add_tn_conf_bounds(insights, tss)
+    if tss.is_timeseries and tss.nr_predictions > 1 and is_numerical:
+        insights = add_tn_conf_bounds(insights, tss)
+
+    # Make sure the target and real values are of an appropriate type
+    if tss.is_timeseries and tss.nr_predictions > 1:
+        # Array output that are not of type <array> originally are odd and I'm not sure how to handle them
+        # Or if they even need handling yet
+        pass
+    elif target_dtype in (dtype.integer):
+        insights['prediction'] = insights['prediction'].astype(int)
+        insights['upper'] = insights['upper'].astype(int)
+        insights['lower'] = insights['lower'].astype(int)
+    elif target_dtype in (dtype.float):
+        insights['prediction'] = insights['prediction'].astype(float)
+        insights['upper'] = insights['upper'].astype(float)
+        insights['lower'] = insights['lower'].astype(float)
+    elif target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
+        insights['prediction'] = insights['prediction'].astype(str)
 
     return insights
