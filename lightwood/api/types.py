@@ -175,7 +175,6 @@ class ProblemDefinition:
         fit_on_validation = obj.get('fit_on_validation', True)
         strict_mode = obj.get('strict_mode', True)
         seed_nr = obj.get('seed_nr', 420)
-
         problem_definition = ProblemDefinition(
             target=target,
             nfolds=nfolds,
