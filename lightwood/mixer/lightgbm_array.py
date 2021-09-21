@@ -4,8 +4,8 @@ from typing import Dict, List, Union
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
-from lightwood.model.base import BaseMixer
-from lightwood.model.lightgbm import LightGBM
+from lightwood.mixer.base import BaseMixer
+from lightwood.mixer.lightgbm import LightGBM
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 

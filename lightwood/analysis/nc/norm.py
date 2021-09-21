@@ -8,7 +8,7 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 
 from lightwood.api.dtype import dtype
-from lightwood.model import BaseMixer
+from lightwood.mixer import BaseMixer
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 

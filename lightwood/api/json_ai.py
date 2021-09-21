@@ -260,15 +260,15 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     problem_definition = json_ai.problem_definition
     imports = [
-        'from lightwood.model import Neural', 'from lightwood.model import LightGBM',
-        'from lightwood.model import LightGBMArray', 'from lightwood.model import SkTime',
-        'from lightwood.model import Unit', 'from lightwood.model import Regression',
+        'from lightwood.mixer import Neural', 'from lightwood.mixer import LightGBM',
+        'from lightwood.mixer import LightGBMArray', 'from lightwood.mixer import SkTime',
+        'from lightwood.mixer import Unit', 'from lightwood.mixer import Regression',
         'from lightwood.ensemble import BestOf', 'from lightwood.data import cleaner',
         'from lightwood.data import transform_timeseries, timeseries_analyzer', 'from lightwood.data import splitter',
         'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score', 'import pandas as pd',
         'from lightwood.helpers.seed import seed', 'from lightwood.helpers.log import log', 'import lightwood',
-        'from lightwood.api import *', 'from lightwood.model import BaseMixer',
+        'from lightwood.api import *', 'from lightwood.mixer import BaseMixer',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
         'from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
         'from lightwood.ensemble import BaseEnsemble', 'from typing import Dict, List',
