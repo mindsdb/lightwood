@@ -34,7 +34,7 @@ This is made possible by the simple but powerful idea of the `sequence
 to sequence network <https://arxiv.org/abs/1409.3215>`__, in which two
 recurrent neural networks work together to transform one sequence to
 another. An encoder network condenses an input sequence into a vector,
-and a decoder network unsubsets that vector into a new sequence.
+and a decoder network unfolds that vector into a new sequence.
 
 .. figure:: /_static/img/seq-seq-images/seq2seq.png
    :alt:
