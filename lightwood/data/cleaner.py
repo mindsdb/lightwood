@@ -31,12 +31,17 @@ def cleaner(
     :param data: The raw data
     :param dtype_dict: Type information for each column
     :param pct_invalid: How much of each column can be invalid
-    
+    :param ignore_features: Columns that we want to ignore
+    :param identifiers: A dict containing all identifier typed columns
+    :param target: The target columns
+    :param mode: Can be "predict" or "train"
+    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
+    :param anomaly_detection: Are we detecting anomalies with this predictor?
 
     :returns: The cleaned data
     """ # noqa
 
-    data = _remove_columns(data, ignore_features, identifiers, target, mode, timeseries_settings, 
+    data = _remove_columns(data, ignore_features, identifiers, target, mode, timeseries_settings,
                            anomaly_detection, dtype_dict)
 
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
@@ -232,10 +237,23 @@ def _rm_rows_w_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     return df
 
 
-def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers: Dict[str, object], target: str, 
-                    mode: str, timeseries_settings: TimeseriesSettings, anomaly_detection: bool, 
+def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers: Dict[str, object], target: str,
+                    mode: str, timeseries_settings: TimeseriesSettings, anomaly_detection: bool,
                     dtype_dict: Dict[str, dtype]) -> pd.DataFrame:
-    # Drop columns we don't want to use
+    """
+    Drop columns we don't want to use in order to train or predict
+
+    :param data: The raw data
+    :param dtype_dict: Type information for each column
+    :param ignore_features: Columns that we want to ignore
+    :param identifiers: A dict containing all identifier typed columns
+    :param target: The target columns
+    :param mode: Can be "predict" or "train"
+    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
+    :param anomaly_detection: Are we detecting anomalies with this predictor?
+
+    :returns: A (new) dataframe without the dropped columns
+    """ # noqa
     data = deepcopy(data)
     to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target]]
     exceptions = ["__mdb_make_predictions"]
@@ -264,6 +282,15 @@ def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers:
 
 
 def _get_columns_to_clean(data: pd.DataFrame, dtype_dict: Dict[str, dtype], mode: str, target: str) -> List[str]:
+    """
+    :param data: The raw data
+    :param dtype_dict: Type information for each column
+    :param target: The target columns
+    :param mode: Can be "predict" or "train"
+
+    :returns: A list of columns that we want to clean
+    """ # noqa
+
     cleanable_columns = []
     for name, _ in dtype_dict.items():
         if mode == "predict":
