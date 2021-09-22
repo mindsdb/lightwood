@@ -17,7 +17,7 @@ class PredictorInterface:
     - ``save``: Saves the Predictor object for further use.
 
     The ``PredictorInterface`` is created via J{ai}son's custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.
-    """
+    """ # noqa
 
     model_analysis: ModelAnalysis = None
 
@@ -31,7 +31,7 @@ class PredictorInterface:
         :param data: Data used in training the model(s).
 
         :returns: Provides best fit model.
-        """
+        """ # noqa
         pass
 
     def adjust(self, data: pd.DataFrame) -> None:
@@ -42,7 +42,7 @@ class PredictorInterface:
         :param data: New data used to adjust a previously trained model.
 
         :returns: Adjusts best-fit model
-        """
+        """ # noqa
         pass
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -62,7 +62,7 @@ class PredictorInterface:
         :param data: Data that the model(s) will evaluate on; provides the some element of predictive strength (ex: how "confident" the model is).
 
         :returns: A dataframe of confidence metrics for each datapoint provided in the input (n_samples, n_classes)
-        """
+        """ # noqa
         pass
 
     def save(self, file_path: str) -> None:
