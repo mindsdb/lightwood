@@ -1,16 +1,14 @@
 """
 Inductive conformal predictors.
 """
-
 # Original author: Henrik Linusson (github.com/donlnz)
-
 from collections import defaultdict
 from functools import partial
-
+from typing import Optional, Union
 import numpy as np
 from sklearn.base import BaseEstimator
-
 from lightwood.analysis.nc.base import RegressorMixin, ClassifierMixin
+from types import FunctionType
 
 
 # -----------------------------------------------------------------------------
@@ -20,7 +18,7 @@ class BaseIcp(BaseEstimator):
     """Base class for inductive conformal predictors.
     """
 
-    def __init__(self, nc_function, condition=None):
+    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None):
         self.cal_x, self.cal_y = None, None
         self.nc_function = nc_function
 
@@ -43,7 +41,7 @@ class BaseIcp(BaseEstimator):
             self.condition = lambda x: 0
             self.conditional = False
 
-    def fit(self, x, y):
+    def fit(self, x: np.array, y: np.array) -> None:
         """Fit underlying nonconformity scorer.
 
         Parameters
@@ -103,15 +101,15 @@ class BaseIcp(BaseEstimator):
             cal_scores = self.nc_function.score(self.cal_x, self.cal_y)
             self.cal_scores = {0: np.sort(cal_scores)[::-1]}
 
-    def _calibrate_hook(self, x, y, increment):
-        pass
-
-    def _update_calibration_set(self, x, y, increment):
+    def _update_calibration_set(self, x: np.array, y: np.array, increment: bool) -> None:
         if increment and self.cal_x is not None and self.cal_y is not None:
             self.cal_x = np.vstack([self.cal_x, x])
             self.cal_y = np.hstack([self.cal_y, y])
         else:
             self.cal_x, self.cal_y = x, y
+
+    def _calibrate_hook(self, x: np.array, y: np.array, increment: bool) -> None:
+        pass
 
 
 # -----------------------------------------------------------------------------
@@ -156,21 +154,22 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         842-851.
     """
 
-    def __init__(self, nc_function, condition=None, smoothing=True):
+    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None,
+                 smoothing: bool = True) -> None:
         super(IcpClassifier, self).__init__(nc_function, condition)
         self.classes = None
         self.smoothing = smoothing
 
-    def _calibrate_hook(self, x, y, increment=False):
+    def _calibrate_hook(self, x: np.array, y: np.array, increment: bool = False) -> None:
         self._update_classes(y, increment)
 
-    def _update_classes(self, y, increment):
+    def _update_classes(self, y: np.array, increment: bool) -> None:
         if self.classes is None or not increment:
             self.classes = np.unique(y)
         else:
             self.classes = np.unique(np.hstack([self.classes, y]))
 
-    def predict(self, x, significance=None):
+    def predict(self, x: np.array, significance: Optional[float] = None) -> np.array:
         """Predict the output values for a set of input patterns.
 
         Parameters
@@ -194,6 +193,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         # TODO: if x == self.last_x ...
         n_test_objects = x.shape[0]
         p = np.zeros((n_test_objects, self.classes.size))
+
         for i, c in enumerate(self.classes):
             test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
             test_class.fill(c)
@@ -207,17 +207,18 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
                 cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
                 n_cal = cal_scores.size
 
-                idx_left = np.searchsorted(cal_scores, nc, 'left')
-                idx_right = np.searchsorted(cal_scores, nc, 'right')
-                n_gt = n_cal - idx_right
-                n_eq = idx_right - idx_left + 1
-
-                p[j, i] = n_gt / (n_cal + 1)
+                n_eq = 0
+                n_gt = 0
+                for cal_score in cal_scores:
+                    if cal_score == nc:
+                        n_eq += 1
+                    elif nc < cal_score:
+                        n_gt += 1
 
                 if self.smoothing:
-                    p[j, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
+                    p[j, i] = (n_gt + n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
                 else:
-                    p[j, i] += n_eq / (n_cal + 1)
+                    p[j, i] = (n_gt + n_eq) / (n_cal + 1)
 
         if significance is not None:
             return p > significance
@@ -290,10 +291,10 @@ class IcpRegressor(BaseIcp, RegressorMixin):
         842-851.
     """
 
-    def __init__(self, nc_function, condition=None):
+    def __init__(self, nc_function: FunctionType, condition: bool = None) -> None:
         super(IcpRegressor, self).__init__(nc_function, condition)
 
-    def predict(self, x, significance=None):
+    def predict(self, x: np.array, significance: bool = None) -> np.array:
         """Predict the output values for a set of input patterns.
 
         Parameters

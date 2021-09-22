@@ -4,7 +4,8 @@
 # TODO: Why does TimeSeriesSettings have an encode_json flag?
 # TODO: Because from_dict intakes "obj", it's incorrectly read in docs
 # TODO: DataAnalysis needs in-doc references [NATASHA]
-# TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should be renamed df_std_target_dev
+# TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should \
+# be renamed df_std_target_dev
 # TODO: How do you specify a custom accuracy function when it's a str? I'm assuming via an import
 # TODO: Problem definition missing a few terms
 # TODO: Model Analysis
@@ -21,11 +22,13 @@ import json
 @dataclass
 class Feature:
     """
-    Within a dataframe, each column is considered its own "feature" (unless ignored etc.). The following expects each feature to have descriptions of the following:
+    Within a dataframe, each column is considered its own "feature" (unless ignored etc.). \
+        The following expects each feature to have descriptions of the following:
 
     :param encoder: the methodology for encoding a feature (a Lightwood Encoder)
     :param data_dtype: The type of information within this column (ex.: numerical, categorical, etc.)
-    :param dependency: Any custom attributes for this feature that may require non-standard processing. This highly depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
+    :param dependency: Any custom attributes for this feature that may require non-standard processing. This highly\
+    depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
     """
 
     encoder: str
@@ -103,7 +106,7 @@ class Output:
 
     data_dtype: str
     encoder: str = None
-    models: List[str] = None
+    mixers: List[str] = None
     ensemble: str = None
 
 
@@ -134,7 +137,9 @@ class TypeInformation:
 @dataclass
 class StatisticalAnalysis:
     """
-    The Statistical Analysis data class allows users to consider key descriptors of their data using simple techniques such as histograms, mean and standard deviation, word count, missing values, and any detected bias in the information.
+    The Statistical Analysis data class allows users to consider key descriptors of their data using simple \
+        techniques such as histograms, mean and standard deviation, word count, missing values, and any detected bias\
+             in the information.
 
     :param nr_rows: Number of rows (samples) in the dataset
     :param df_std_dev: The standard deviation of the target of the dataset
@@ -176,14 +181,21 @@ class DataAnalysis:
 @dataclass
 class TimeseriesSettings:
     """
-    For time-series specific problems, more specific treatment of the data is necessary. The following attributes enable time-series tasks to be carried out properly.
+    For time-series specific problems, more specific treatment of the data is necessary. The following attributes \
+        enable time-series tasks to be carried out properly.
 
-    :param is_timeseries: Whether the input data should be treated as time series; if true, this flag is checked in subsequent internal steps to ensure processing is appropriate for time-series data.
+    :param is_timeseries: Whether the input data should be treated as time series; if true, this flag is checked in \
+        subsequent internal steps to ensure processing is appropriate for time-series data.
     :param order_by: A list of columns by which the data should be ordered.
-    :param group_by: Optional list of columns by which the data should be grouped. Each different combination of values for these columns will yield a different series.
-    :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a prediction, after the rows are ordered by order_by columns and split into groups if applicable.
-    :param nr_predictions: The number of points in the future that predictions should be made for, defaults to 1. Once trained, the model will be able to predict up to this many points into the future.
-    :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the time series predictor. Note that a non-historical column shall still be used to forecast, but without considering their change through time.
+    :param group_by: Optional list of columns by which the data should be grouped. Each different combination of values\
+         for these columns will yield a different series.
+    :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a\
+         prediction, after the rows are ordered by order_by columns and split into groups if applicable.
+    :param nr_predictions: The number of points in the future that predictions should be made for, defaults to 1. Once \
+        trained, the model will be able to predict up to this many points into the future.
+    :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the \
+        time series predictor. Note that a non-historical column shall still be used to forecast, but without \
+            considering their change through time.
     :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).
     :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
     """
@@ -261,32 +273,46 @@ class TimeseriesSettings:
 @dataclass
 class ProblemDefinition:
     """
-    The ``ProblemDefinition`` object indicates details on how the models that predict the target are prepared. The only required specification from a user is the ``target``, which indicates the column within the input data that the user is trying to predict. Within the ``ProblemDefinition``, the user can specify aspects about how long the feature-engineering preparation may take, and nuances about training the models.
+    The ``ProblemDefinition`` object indicates details on how the models that predict the target are prepared. \
+        The only required specification from a user is the ``target``, which indicates the column within the input \
+        data that the user is trying to predict. Within the ``ProblemDefinition``, the user can specify aspects \
+        about how long the feature-engineering preparation may take, and nuances about training the models.
 
     :param target: The name of the target column; this is the column that will be used as the goal of the prediction.
     :param nfolds: Number of data subsets
-    :param pct_invalid: Number of data points maximally tolerated as invalid/missing/unknown. If the data cleaning process exceeds this number, no subsequent steps will be taken.
+    :param pct_invalid: Number of data points maximally tolerated as invalid/missing/unknown. \
+        If the data cleaning process exceeds this number, no subsequent steps will be taken.
     :param unbias_target:
     :param seconds_per_model: Number of seconds maximum to spend PER model trained in the list of possible mixers.
-    :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to learn a representation.
-    :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including encoders and models.
+    :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \ 
+    learn a representation.
+    :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \
+        encoders and models.
     :param target_weights:
     :param positive_domain: For numerical taks, force predictor output to be positive (integer or float).
-    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so that predictions, in average, are correct `alpha` percent of the time.
-    :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.
-    :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-series.
-    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).
-    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly detector.
-    :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name found in this list will be automatically removed from subsequent steps in the ML pipeline.
-    :param fit_on_validation: Whether to fit the model on the held-out validation data. Validation data is strictly used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new incoming data over time, the user may train the model further using the entire dataset.
+    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
+        that predictions, in average, are correct `alpha` percent of the time.
+    :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for \
+         available settings.
+    :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-\
+        series.
+    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
+        (respectively implies wider and tighter bounds, all other parameters being equal).
+    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
+        detector.
+    :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
+        found in this list will be automatically removed from subsequent steps in the ML pipeline.
+    :param fit_on_validation: Whether to fit the model on the held-out validation data. Validation data is strictly \
+        used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new \
+            incoming data over time, the user may train the model further using the entire dataset.
     :param strict_mode:
     """
 
     target: str
-    nfolds: int
+    nsubsets: int
     pct_invalid: float
     unbias_target: bool
-    seconds_per_model: Union[int, None]
+    seconds_per_mixer: Union[int, None]
     seconds_per_encoder: Union[int, None]
     time_aim: Union[int, None]
     target_weights: Union[List[float], None]
@@ -299,42 +325,42 @@ class ProblemDefinition:
     ignore_features: List[str]
     fit_on_validation: bool
     strict_mode: bool
+    seed_nr: int
 
     @staticmethod
     def from_dict(obj: Dict):
         """
         Creates a ProblemDefinition object from a python dictionary with necessary specifications.
 
-        :param obj: A python dictionary with the necessary features for the ``ProblemDefinition`` class. Only requires ``target`` to be specified.
+        :param obj: A python dictionary with the necessary features for the ``ProblemDefinition`` class. 
+        Only requires ``target`` to be specified.
 
         :returns: A populated ``ProblemDefinition`` object.
         """
-        target = obj["target"]
-        nfolds = obj.get("nfolds", 30)
-        pct_invalid = obj.get("pct_invalid", 1)
-        unbias_target = obj.get("unbias_target", False)
-        seconds_per_model = obj.get("seconds_per_model", None)
-        seconds_per_encoder = obj.get("seconds_per_encoder", None)
-        time_aim = obj.get("time_aim", None)
-        target_weights = obj.get("target_weights", None)
-        positive_domain = obj.get("positive_domain", False)
-        fixed_confidence = obj.get("fixed_confidence", None)
-        timeseries_settings = TimeseriesSettings.from_dict(
-            obj.get("timeseries_settings", {})
-        )
-        anomaly_detection = obj.get("anomaly_detection", True)
-        anomaly_error_rate = obj.get("anomaly_error_rate", None)
-        anomaly_cooldown = obj.get("anomaly_detection", 1)
-        ignore_features = obj.get("ignore_features", [])
-        fit_on_validation = obj.get("fit_on_validation", True)
-        strict_mode = obj.get("strict_mode", True)
-
+        target = obj['target']
+        nsubsets = obj.get('nsubsets', 30)
+        pct_invalid = obj.get('pct_invalid', 1)
+        unbias_target = obj.get('unbias_target', True)
+        seconds_per_mixer = obj.get('seconds_per_mixer', None)
+        seconds_per_encoder = obj.get('seconds_per_encoder', None)
+        time_aim = obj.get('time_aim', None)
+        target_weights = obj.get('target_weights', None)
+        positive_domain = obj.get('positive_domain', False)
+        fixed_confidence = obj.get('fixed_confidence', None)
+        timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
+        anomaly_detection = obj.get('anomaly_detection', True)
+        anomaly_error_rate = obj.get('anomaly_error_rate', None)
+        anomaly_cooldown = obj.get('anomaly_detection', 1)
+        ignore_features = obj.get('ignore_features', [])
+        fit_on_validation = obj.get('fit_on_validation', True)
+        strict_mode = obj.get('strict_mode', True)
+        seed_nr = obj.get('seed_nr', 420)
         problem_definition = ProblemDefinition(
             target=target,
-            nfolds=nfolds,
+            nsubsets=nsubsets,
             pct_invalid=pct_invalid,
             unbias_target=unbias_target,
-            seconds_per_model=seconds_per_model,
+            seconds_per_mixer=seconds_per_mixer,
             seconds_per_encoder=seconds_per_encoder,
             time_aim=time_aim,
             target_weights=target_weights,
@@ -347,6 +373,7 @@ class ProblemDefinition:
             ignore_features=ignore_features,
             fit_on_validation=fit_on_validation,
             strict_mode=strict_mode,
+            seed_nr=seed_nr
         )
 
         return problem_definition

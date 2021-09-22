@@ -5,9 +5,7 @@ from lightwood.encoder.base import BaseEncoder
 from lightwood.data.encoded_ds import EncodedDs
 
 
-def encode(
-    encoders: List[BaseEncoder], folds: List[pd.DataFrame], target: str
-) -> List[EncodedDs]:
+def encode(encoders: List[BaseEncoder], subsets: List[pd.DataFrame], target: str) -> List[EncodedDs]:
     """
     Given a list of Lightwood encoders, and data subsets, applies the encoders onto each subset.
 
@@ -17,10 +15,10 @@ def encode(
 
     :returns: An encoded dataset for each encoder in the list
     """
-    if isinstance(folds, pd.DataFrame):
-        folds = [folds]
+    if isinstance(subsets, pd.DataFrame):
+        subsets = [subsets]
 
     encoded_ds_arr: List[EncodedDs] = []
-    for fold in folds:
-        encoded_ds_arr.append(EncodedDs(encoders, fold, target))
+    for subset in subsets:
+        encoded_ds_arr.append(EncodedDs(encoders, subset, target))
     return encoded_ds_arr
