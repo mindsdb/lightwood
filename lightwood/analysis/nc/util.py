@@ -6,13 +6,12 @@ from lightwood.api.dtype import dtype
 
 def t_softmax(x, t=1.0, axis=1):
     """ Softmax with temperature scaling """
-    # @TODO: move this, not a wrapper
     return softmax(torch.Tensor(x) / t, dim=axis).numpy()
 
 
 def clean_df(df, target, is_classification, label_encoders):
     """ Returns cleaned DF for nonconformist calibration """
-    # @TODO: reevaluate whether this can be streamlined inside custom nonconf
+    # @TODO: reevaluate whether this can be streamlined
     enc = label_encoders
 
     y = df.pop(target).values
