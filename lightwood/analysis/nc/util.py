@@ -71,7 +71,7 @@ def set_conf_range(
     return 0.005, np.zeros((X.shape[0], 2))
 
 
-def get_numerical_conf_range(
+def get_numeric_conf_range(
         all_confs, df_std_dev=None, positive_domain=False, std_tol=1, group='__default', error_rate=None):
     """ Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance
         error_rate: pre-determined error rate for the ICP, used in anomaly detection tasks to adjust the
