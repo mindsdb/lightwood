@@ -3,12 +3,12 @@ from typing import Union
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from lightwood.model.helpers.ranger import Ranger
+from lightwood.mixer.helpers.ranger import Ranger
 from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.encoder.categorical.gym import Gym
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
-from lightwood.model.helpers.default_net import DefaultNet
+from lightwood.mixer.helpers.default_net import DefaultNet
 
 
 class CategoricalAutoEncoder(BaseEncoder):

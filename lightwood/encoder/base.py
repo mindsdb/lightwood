@@ -10,7 +10,7 @@ class BaseEncoder:
     def __init__(self, is_target=False) -> None:
         self.is_target = is_target
         self._prepared = False
-        self.uses_folds = False
+        self.uses_subsets = False
         self.is_nn_encoder = False
         self.dependencies = []
         self.output_size = None

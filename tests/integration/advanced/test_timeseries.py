@@ -55,7 +55,7 @@ class TestTimeseries(unittest.TestCase):
         pred = predictor_from_problem(train,
                                       ProblemDefinition.from_dict({'target': target,
                                                                    'time_aim': 30,
-                                                                   'nfolds': 10,
+                                                                   'nsubsets': 10,
                                                                    'anomaly_detection': True,
                                                                    'timeseries_settings': {
                                                                        'use_previous_target': True,
@@ -87,7 +87,7 @@ class TestTimeseries(unittest.TestCase):
         nr_preds = 2
         pred = predictor_from_problem(data,
                                       ProblemDefinition.from_dict({'target': target,
-                                                                   'nfolds': 10,
+                                                                   'nsubsets': 10,
                                                                    'anomaly_detection': False,
                                                                    'timeseries_settings': {
                                                                        'use_previous_target': False,
@@ -118,7 +118,7 @@ class TestTimeseries(unittest.TestCase):
         predictor = predictor_from_problem(df,
                                            ProblemDefinition.from_dict({'target': target,
                                                                         'time_aim': 30,
-                                                                        'nfolds': 5,
+                                                                        'nsubsets': 5,
                                                                         'anomaly_detection': False,
                                                                         'timeseries_settings': {
                                                                             'order_by': ['T'],
