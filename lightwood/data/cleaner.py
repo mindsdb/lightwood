@@ -6,7 +6,7 @@ import datetime
 from dateutil.parser import parse as parse_dt
 
 from lightwood.api.dtype import dtype
-from lightwood.helpers.text import clean_float
+from lightwood.helpers import text
 from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import can_be_nan_numeric
@@ -25,59 +25,25 @@ def cleaner(
     timeseries_settings: TimeseriesSettings,
     anomaly_detection: bool,
 ) -> pd.DataFrame:
+    """
+    The cleaner 
+    """
 
-    log.info("My cleaner deployed!")
-    # Drop columns we don't want to use
-    data = deepcopy(data)
-    to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target]]
-    exceptions = ["__mdb_make_predictions"]
-    for col in to_drop:
-        try:
-            data = data.drop(columns=[col])
-        except Exception:
-            pass
+    data = _remove_columns(data, ignore_features, identifiers, target, mode, timeseries_settings, 
+                           anomaly_detection, dtype_dict)
 
-    if mode == "train":
-        data = clean_empty_targets(data, target)
-    if mode == "predict":
-        if (
-            target in data.columns
-            and not timeseries_settings.use_previous_target
-            and not anomaly_detection
-        ):
-            data = data.drop(columns=[target])
+    for col in _get_columns_to_clean(data, dtype_dict, mode, target):
+        # Get and apply a cleaning function for each data type
+        # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
+        data[col] = data[col].apply(get_cleaning_func(dtype_dict[col]))
 
-    # Drop extra columns
-    for name in list(data.columns):
-        if name not in dtype_dict and name not in exceptions:
-            data = data.drop(columns=[name])
-
-    # Standardize content
-    for name, data_dtype in dtype_dict.items():
-        if mode == "predict":
-            if name == target:
-                continue
-        if name in to_drop:
-            continue
-        if name not in data.columns:
-            if "__mdb_ts_previous" not in name:
-                data[name] = [None] * len(data)
-            continue
-
-        # Gets cleaning function and applies to data
-        clean_fxn = get_cleaning_func(data_dtype)
-
-        data[name] = data[name].apply(clean_fxn)
-
-        if check_invalid(data[name], pct_invalid):
-            err = f"Too many ({pct_invalid}%) invalid values in column {name} of type {data_dtype}"
-            log.error(err)
-            raise Exception(err)
+        # If a column has too many None values, raise an Excpetion
+        _check_if_invalid(data[col], pct_invalid, col)
 
     return data
 
 
-def check_invalid(new_data: pd.Series, pct_invalid: float) -> bool:
+def _check_if_invalid(new_data: pd.Series, pct_invalid: float, col_name: str) -> bool:
     """ Checks how many invalid data points there are """
 
     chk_invalid = (
@@ -86,7 +52,10 @@ def check_invalid(new_data: pd.Series, pct_invalid: float) -> bool:
         / len(new_data)
     )
 
-    return chk_invalid > pct_invalid
+    if chk_invalid > pct_invalid:
+        err = f'Too many ({chk_invalid}%) invalid values in column {col_name}nam'
+        log.error(err)
+        raise Exception(err)
 
 
 def get_cleaning_func(data_dtype: dtype) -> Callable:
@@ -96,7 +65,7 @@ def get_cleaning_func(data_dtype: dtype) -> Callable:
     :param data_dtype: The data-type (inferred from a column) as prescribed from ``api.dtype``
 
     :returns: The appropriate function that will pre-process (clean) data of specified dtype.
-    """
+    """ # noqa
     if data_dtype in (dtype.date, dtype.datetime):
         clean_func = _standardize_datetime
 
@@ -113,7 +82,7 @@ def get_cleaning_func(data_dtype: dtype) -> Callable:
         clean_func = _tags_to_tuples
 
     elif data_dtype in (dtype.quantity):
-        clean_func = lambda x: float(re.sub("[^0-9.,]", "", x).replace(",", "."))
+        clean_func = _clean_quantity
 
     elif data_dtype in (
         dtype.short_text,
@@ -121,7 +90,7 @@ def get_cleaning_func(data_dtype: dtype) -> Callable:
         dtype.categorical,
         dtype.binary,
     ):
-        clean_func = lambda x: str(x)
+        clean_func = _clean_text
 
     else:
         raise ValueError(f"{data_dtype} is not supported. Check lightwood.api.dtype")
@@ -198,7 +167,7 @@ def _standardize_array(element: object) -> Optional[Union[List[float], float]]:
 
 
 # ------------------------- #
-# Numeric and Quantitative
+# Integers/Floats/Quantities
 # ------------------------- #
 
 def _clean_float(element: object) -> Optional[float]:
@@ -206,7 +175,7 @@ def _clean_float(element: object) -> Optional[float]:
     Given an element, converts it into a numeric format. If element is NaN, or inf, then returns None.
     """
     try:
-        cleaned_float = clean_float(element)
+        cleaned_float = text.clean_float(element)
         if can_be_nan_numeric(cleaned_float):
             return None
         return cleaned_float
@@ -224,12 +193,12 @@ def _clean_int(element: object) -> Optional[int]:
 def _clean_quantity(element: object) -> Optional[float]:
     return float(re.sub("[^0-9.,]", "", str(element)).replace(",", "."))
 
-# ----------------- #
-# Empty/Missing/NaN handling
-# ----------------- #
+
+def _clean_text(element: object) -> str:
+    return str(element)
 
 
-def clean_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
+def _rm_rows_w_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     """
     Drop any rows that have targets as unknown. Targets are necessary to train.
 
@@ -254,3 +223,44 @@ def clean_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
         )  # noqa
 
     return df
+
+
+def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers: Dict[str, object], target: str, 
+                    mode: str, timeseries_settings: TimeseriesSettings, anomaly_detection: bool, 
+                    dtype_dict: Dict[str, dtype]) -> pd.DataFrame:
+    # Drop columns we don't want to use
+    data = deepcopy(data)
+    to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target]]
+    exceptions = ["__mdb_make_predictions"]
+    for col in to_drop:
+        try:
+            data = data.drop(columns=[col])
+        except Exception:
+            pass
+
+    if mode == "train":
+        data = _rm_rows_w_empty_targets(data, target)
+    if mode == "predict":
+        if (
+            target in data.columns
+            and not timeseries_settings.use_previous_target
+            and not anomaly_detection
+        ):
+            data = data.drop(columns=[target])
+
+    # Drop extra columns
+    for name in list(data.columns):
+        if name not in dtype_dict and name not in exceptions:
+            data = data.drop(columns=[name])
+
+    return data
+
+
+def _get_columns_to_clean(data: pd.DataFrame, dtype_dict: Dict[str, dtype], mode: str, target: str) -> List[str]:
+    cleanable_columns = []
+    for name, _ in dtype_dict.items():
+        if mode == "predict":
+            if name == target:
+                continue
+        if name in data.columns:
+            cleanable_columns.append(name)
