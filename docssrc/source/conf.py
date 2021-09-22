@@ -10,7 +10,6 @@
 
 import sys
 import os
-import lightwood as lw
 import datetime
 import sphinx_rtd_theme
 
@@ -25,14 +24,14 @@ sys.path.append(os.path.abspath('../../lightwood'))
 project = 'lightwood'
 copyright = '2021, MindsDB'
 authors = "MindsDB"
-#author = 'Natasha Seelam (natasha@mindsdb.com)'
+# author = 'Natasha Seelam (natasha@mindsdb.com)'
 now = datetime.datetime.now()
 copyright = u'2017-{}, '.format(now.year) + authors
 
 # Version of the package
 packageversion = __import__('lightwood').__version__
 
-version = packageversion 
+version = packageversion
 release = packageversion
 
 # ----------------- #
@@ -123,11 +122,10 @@ html_css_files = ['_static/custom.css']
 html_context = {
     'css_files': [
         '_static/custom.css',  # overrides for wide tables in RTD theme
-        ],
-    }
+    ]}
 
 html_theme_path = [
-    #msmb_theme.get_html_theme_path(),
+    # msmb_theme.get_html_theme_path(),
     sphinx_rtd_theme.get_html_theme_path()
 ]
 
@@ -152,4 +150,4 @@ autoapi_generate_api_docs = False
 
 autoapi_dirs = ['../../lightwood']
 
-#autodoc_member_order = 'bysource' # Keep order of the members accordingly
+# autodoc_member_order = 'bysource' # Keep order of the members accordingly
