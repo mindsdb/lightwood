@@ -229,7 +229,7 @@ class TimeseriesSettings:
         :param: obj: A python dictionary with the necessary representation for time-series. The only mandatory columns are ``order_by`` and ``window``.
 
         :returns: A populated ``TimeseriesSettings`` object.
-        """
+        """ # noqa
         if len(obj) > 0:
             for mandatory_setting in ["order_by", "window"]:
                 if mandatory_setting not in obj:

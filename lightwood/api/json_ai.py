@@ -1,5 +1,5 @@
 # TODO: We need a better way to specify trainable_encoders
-# TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested 
+# TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested
 # in seeing where these come from and it's not clear that you need to look here.
 # TODO: What does `target_class_distribution` and `positive_domain` do?
 # TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
@@ -654,8 +654,8 @@ self.supports_proba = self.ensemble.supports_proba
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 
-# Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is  
-# an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is  
+# Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is
+# an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is
 # important to train with.
 for mixer in self.mixers:
     if {json_ai.problem_definition.fit_on_validation}:
