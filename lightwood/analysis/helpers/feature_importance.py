@@ -19,8 +19,8 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
         ns = SimpleNamespace(**kwargs)
         empty_input_accuracy = {}
         ignorable_input_cols = [x for x in ns.input_cols if (not ns.ts_cfg.is_timeseries or
-                                                          (x not in ns.ts_cfg.order_by and
-                                                           x not in ns.ts_cfg.historical_columns))]
+                                                             (x not in ns.ts_cfg.order_by and
+                                                              x not in ns.ts_cfg.historical_columns))]
         for col in ignorable_input_cols:
             partial_data = deepcopy(ns.encoded_val_data)
             partial_data.clear_cache()
