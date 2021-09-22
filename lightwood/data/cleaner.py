@@ -112,7 +112,7 @@ def get_cleaning_func(data_dtype: dtype) -> Callable:
         clean_func = _standardize_array
 
     elif data_dtype in (dtype.tags):
-        clean_fun = _tags_to_tuples
+        clean_func = _tags_to_tuples
 
     elif data_dtype in (dtype.quantity):
         clean_func = lambda x: float(re.sub("[^0-9.,]", "", x).replace(",", "."))
