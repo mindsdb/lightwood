@@ -58,6 +58,7 @@ def lookup_encoder(
         dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
         dtype.short_text: 'Short_Text.CategoricalAutoEncoder',
         dtype.array: 'Array.ArrayEncoder',
+        dtype.tsarray: 'TimeSeries.TimeSeriesEncoder',
         dtype.quantity: 'Quantity.NumericEncoder',
     }
 
@@ -80,7 +81,8 @@ def lookup_encoder(
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
                 encoder_dict['args']['target_class_distribution'] = '$statistical_analysis.target_class_distribution'
-        if col_dtype in (dtype.integer, dtype.float, dtype.array):
+
+        if col_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
             encoder_dict['args'][
                 "positive_domain"
             ] = "$statistical_analysis.positive_domain"
@@ -104,9 +106,9 @@ def lookup_encoder(
             if tss.nr_predictions > 1:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
-                encoder_dict['module'] = 'Array.TsArrayNumericEncoder'
+                encoder_dict['module'] = 'TimeSeries.TsArrayNumericEncoder'
         if '__mdb_ts_previous' in col_name:
-            encoder_dict['module'] = col_dtype.capitalize() + '.ArrayEncoder'
+            encoder_dict['module'] = 'Array.ArrayEncoder'
             encoder_dict['args']['original_type'] = f'"{tss.target_type}"'
             encoder_dict['args']['window'] = f'{tss.window}'
 
@@ -229,7 +231,7 @@ def generate_json_ai(
     if (
         tss.is_timeseries and tss.nr_predictions > 1
     ):
-        list(outputs.values())[0].data_dtype = dtype.array
+        list(outputs.values())[0].data_dtype = dtype.tsarray
 
     list(outputs.values())[0].encoder = lookup_encoder(
         type_information.dtypes[target], target, True, problem_definition, False
@@ -264,7 +266,7 @@ def generate_json_ai(
         accuracy_functions = ['r2_score']
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ['balanced_accuracy_score']
-    elif output_dtype in [dtype.array]:
+    elif output_dtype in (dtype.array, dtype.tsarray):
         accuracy_functions = ['evaluate_array_accuracy']
     else:
         raise Exception(f'Please specify a custom accuracy function for output type {output_dtype}')
@@ -274,7 +276,9 @@ def generate_json_ai(
         problem_definition.time_aim = 1000 + np.log(
             statistical_analysis.nr_rows / 10 + 1) * np.sum(
             [4
-             if x in [dtype.rich_text, dtype.short_text, dtype.array, dtype.video, dtype.audio, dtype.image] else 1
+             if x in [dtype.rich_text, dtype.short_text, dtype.array,
+                      dtype.tsarray, dtype.video, dtype.audio, dtype.image]
+             else 1
              for x in type_information.dtypes.values()]) * 200
 
     if problem_definition.time_aim is not None:
@@ -329,7 +333,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'from lightwood.helpers.seed import seed', 'from lightwood.helpers.log import log', 'import lightwood',
         'from lightwood.api import *', 'from lightwood.mixer import BaseMixer',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
-        'from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
+        'from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, TimeSeries, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
         'from lightwood.ensemble import BaseEnsemble', 'from typing import Dict, List',
         'from lightwood.helpers.parallelism import mut_method_call',
         'from lightwood.data.encoded_ds import ConcatedEncodedDs', 'from lightwood import ProblemDefinition']
