@@ -86,7 +86,7 @@ def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
 
     :returns: An object containing insights about the data (specifically the type information and statistical analysis)
     """ # noqa
-    
+
     problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0])})
 
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)

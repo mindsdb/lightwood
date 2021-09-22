@@ -727,6 +727,13 @@ class Predictor(PredictorInterface):
 
 
 def validate_json_ai(json_ai: JsonAI) -> bool:
+    """
+    Checks the validity of a ``JsonAI`` object
+    
+    :param json_ai: A ``JsonAI`` object
+
+    :returns: Wether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
+    """ # noqa
     from lightwood.api.high_level import predictor_from_code, code_from_json_ai
 
     try:
