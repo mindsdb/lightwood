@@ -4,7 +4,7 @@ import pandas as pd
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.ts import get_inferred_timestamps
-from lightwood.analysis.nc.calibrate import icp_explain
+from lightwood.analysis.nc.calibrate import ICP
 
 
 def explain(data: pd.DataFrame,
@@ -53,25 +53,36 @@ def explain(data: pd.DataFrame,
             insights[f'order_{col}'] = get_inferred_timestamps(
                 insights, col, ts_analysis['deltas'], timeseries_settings)
 
+    # ------------------------- #
+    # Core Explanations
+    # ------------------------- #
+
+    kwargs = {
+        'data': data,
+        'encoded_data': encoded_data,
+        'predictions': predictions,
+        'analysis': analysis,
+        'target_name': target_name,
+        'target_dtype': target_dtype,
+        'tss': timeseries_settings,
+        'positive_domain': positive_domain,
+        'fixed_confidence': fixed_confidence,
+        'anomaly_detection': anomaly_detection,
+        'anomaly_error_rate': anomaly_error_rate,
+        'anomaly_cooldown': anomaly_cooldown
+    }
+
     # confidence estimation using calibrated inductive conformal predictors (ICPs)
     if analysis['icp']['__mdb_active']:
-        insights = icp_explain(data,
-                               encoded_data,
-                               predictions,
-                               analysis,
-                               insights,
-                               target_name,
-                               target_dtype,
-                               timeseries_settings,
-                               positive_domain,
-                               fixed_confidence,
-                               anomaly_detection,
-                               anomaly_error_rate,
-                               anomaly_cooldown
-                               )
+        # this particular call is stateless, but we need to be passing analysis blocks from the predictor to this call
+        # so that state is preserved
+        calibrator = ICP()
+        row_insights, global_insights = calibrator.explain(insights, **kwargs)
 
-    # user explainer blocks
+    # ------------------------- #
+    # Additional Explanations
+    # ------------------------- #
     for block in explainer_blocks:
-        insights = block.explain(insights, **{})
+        row_insights, global_insights = block.explain(insights, **{})
 
-    return insights
+    return row_insights
