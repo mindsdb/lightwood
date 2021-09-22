@@ -91,7 +91,7 @@ def statistical_analysis(data: pd.DataFrame,
     target = problem_definition.target
     positive_domain = False
     # get train std, used in analysis
-    if dtypes[target] in [dtype.float, dtype.integer]:
+    if dtypes[target] in [dtype.float, dtype.integer, dtype.tsarray]:
         df_std = df[target].astype(float).std()
         if min(df[target]) >= 0:
             positive_domain = True
