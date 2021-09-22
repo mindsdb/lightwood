@@ -1,3 +1,16 @@
+# TODO: type hint the returns
+# TODO: Issue with Feature.to_dict (2021.09.13 - NS)
+# TODO: Feature, TimeSeriesSettings, ProblemDefinition, Json_AI to_dict/to_json outputs don't look correct
+# TODO: Why does TimeSeriesSettings have an encode_json flag?
+# TODO: Because from_dict intakes "obj", it's incorrectly read in docs
+# TODO: DataAnalysis needs in-doc references [NATASHA]
+# TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should \
+# be renamed df_std_target_dev
+# TODO: How do you specify a custom accuracy function when it's a str? I'm assuming via an import
+# TODO: Problem definition missing a few terms
+# TODO: Model Analysis
+# TODO: Analyzer
+
 from typing import Dict, List, Optional, Union
 from dataclasses import dataclass
 from lightwood.helpers.log import log
@@ -8,29 +21,63 @@ import json
 
 @dataclass
 class Feature:
+    """
+    Within a dataframe, each column is considered its own "feature" (unless ignored etc.). \
+        The following expects each feature to have descriptions of the following:
+
+    :param encoder: the methodology for encoding a feature (a Lightwood Encoder)
+    :param data_dtype: The type of information within this column (ex.: numerical, categorical, etc.)
+    :param dependency: Any custom attributes for this feature that may require non-standard processing. This highly\
+    depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
+    """
+
     encoder: str
     data_dtype: str = None
     dependency: List[str] = None
 
     @staticmethod
     def from_dict(obj: Dict):
-        encoder = obj['encoder']
-        data_dtype = obj.get('data_dtype', None)
-        dependency = obj.get('dependency', None)
+        """
+        Create ``Feature`` objects from the a dictionary representation.
 
-        feature = Feature(
-            encoder=encoder,
-            data_dtype=data_dtype,
-            dependency=dependency
-        )
+        :param obj: A dictionary representation of a column feature's attributes. Must include keys *encoder*, \
+            *data_dtype*, and *dependency*.
+
+        :Example:
+
+        >>> my_dict = {"feature_A": {"encoder": MyEncoder, "data_dtype": "categorical", "dependency": None}}
+        >>> print(Feature.from_dict(my_dict["feature_A"]))
+        >>> Feature(encoder=None, data_dtype='categorical', dependency=None)
+
+        :returns: A Feature object with loaded information.
+        """
+        encoder = obj["encoder"]
+        data_dtype = obj.get("data_dtype", None)
+        dependency = obj.get("dependency", None)
+
+        feature = Feature(encoder=encoder, data_dtype=data_dtype, dependency=dependency)
 
         return feature
 
     @staticmethod
     def from_json(data: str):
+        """
+        Create ``Feature`` objects from JSON representation. This method calls on :ref: `from_dict` after loading the \
+            json config.
+
+        :param data: A JSON representation of the feature.
+
+        :returns: Loaded information into the Feature representation.
+        """
         return Feature.from_dict(json.loads(data))
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        """
+        Converts a Feature to a dictionary representation.
+
+        :returns: A python dictionary with strings indicating the three key elements and their respective values of \
+            the Feature class.
+        """
         as_dict = _asdict(self, encode_json=encode_json)
         for k in list(as_dict.keys()):
             if as_dict[k] is None:
@@ -38,21 +85,51 @@ class Feature:
         return as_dict
 
     def to_json(self) -> Dict[str, Json]:
+        """
+        Converts a Feature into a JSON object. Calls ``to_dict`` under the hood.
+
+        :returns: Json config syntax for the three key elements and their respective values of the Feature class.
+        """
         return json.dumps(self.to_dict(), indent=4)
 
 
 @dataclass_json
 @dataclass
 class Output:
+    """
+    A representation for the output feature. This is specifically used on the target column of your dataset. \
+    Four attributes are expected as seen below.
+
+    Note, currently supervised tasks are supported, hence categorical, numerical, and time-series are the expected \
+    outputs types. Complex features such as text generation are not currently available by default.
+
+    :param data_dtype: The type of information within the target column (ex.: numerical, categorical, etc.).
+    :param encoder: the methodology for encoding the target feature (a Lightwood Encoder). There can only be one \
+    encoder for the output target.
+    :param models: The list of ML algorithms that are trained for the target distribution.
+    :param ensemble: For a panel of ML algorithms, the approach of selecting the best model, and the metrics used in \
+    that evaluation.
+    """
+
     data_dtype: str
     encoder: str = None
-    models: List[str] = None
+    mixers: List[str] = None
     ensemble: str = None
 
 
 @dataclass_json
 @dataclass
 class TypeInformation:
+    """
+    For a dataset, provides information on columns types, how they're used, and any other potential identifiers.
+
+    TypeInformation is generated within ``data.infer_types``, where small samples of each column are evaluated in a custom framework to understand what kind of data type the model is. The user may override data types, but it is recommended to do so within a JSON-AI config file.
+
+    :param dtypes: For each column's name, the associated data type inferred.
+    :param additional_info: Any possible sub-categories or additional descriptive information.
+    :param identifiers: Columns within the dataset highly suspected of being identifiers or IDs. These do not contain informatic value, therefore will be ignored in subsequent training/analysis procedures unless manually indicated.
+    """ # noqa
+
     dtypes: Dict[str, str]
     additional_info: Dict[str, object]
     identifiers: Dict[str, str]
@@ -66,9 +143,26 @@ class TypeInformation:
 @dataclass_json
 @dataclass
 class StatisticalAnalysis:
+    """
+    The Statistical Analysis data class allows users to consider key descriptors of their data using simple \
+        techniques such as histograms, mean and standard deviation, word count, missing values, and any detected bias\
+             in the information.
+
+    :param nr_rows: Number of rows (samples) in the dataset
+    :param df_std_dev: The standard deviation of the target of the dataset
+    :param train_observed_classes:
+    :param target_class_distribution:
+    :param histograms:
+    :param buckets:
+    :param missing:
+    :param distinct:
+    :param bias:
+    :param avg_words_per_sentence:
+    :param positive_domain:
+    """
+
     nr_rows: int
     df_std_dev: Optional[float]
-    # Write proper to and from dict parsing for this than switch back to using the types bellow, dataclasses_json sucks!
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
     histograms: object  # Dict[str, Dict[str, List[object]]]
@@ -83,12 +177,36 @@ class StatisticalAnalysis:
 @dataclass_json
 @dataclass
 class DataAnalysis:
+    """
+    Data Analysis wraps :class: `.StatisticalAnalysis` and :class: `.TypeInformation` together. Further details can be seen in their respective documentation references.
+    """ # noqa
+
     statistical_analysis: StatisticalAnalysis
     type_information: TypeInformation
 
 
 @dataclass
 class TimeseriesSettings:
+    """
+    For time-series specific problems, more specific treatment of the data is necessary. The following attributes \
+        enable time-series tasks to be carried out properly.
+
+    :param is_timeseries: Whether the input data should be treated as time series; if true, this flag is checked in \
+        subsequent internal steps to ensure processing is appropriate for time-series data.
+    :param order_by: A list of columns by which the data should be ordered.
+    :param group_by: Optional list of columns by which the data should be grouped. Each different combination of values\
+         for these columns will yield a different series.
+    :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a\
+         prediction, after the rows are ordered by order_by columns and split into groups if applicable.
+    :param nr_predictions: The number of points in the future that predictions should be made for, defaults to 1. Once \
+        trained, the model will be able to predict up to this many points into the future.
+    :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the \
+        time series predictor. Note that a non-historical column shall still be used to forecast, but without \
+            considering their change through time.
+    :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).
+    :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
+    """
+
     is_timeseries: bool
     order_by: List[str] = None
     window: int = None
@@ -96,25 +214,34 @@ class TimeseriesSettings:
     use_previous_target: bool = True
     nr_predictions: int = None
     historical_columns: List[str] = None
-    target_type: str = ''  # @TODO: is the current setter (outside of initialization) a sane option?
+    target_type: str = (
+        ""  # @TODO: is the current setter (outside of initialization) a sane option?
+    )
     allow_incomplete_history: bool = False
 
     @staticmethod
     def from_dict(obj: Dict):
+        """
+        Creates a TimeseriesSettings object from python dictionary specifications.
+
+        :param: obj: A python dictionary with the necessary representation for time-series. The only mandatory columns are ``order_by`` and ``window``.
+
+        :returns: A populated ``TimeseriesSettings`` object.
+        """ # noqa
         if len(obj) > 0:
-            for mandatory_setting in ['order_by', 'window']:
+            for mandatory_setting in ["order_by", "window"]:
                 if mandatory_setting not in obj:
-                    err = f'Missing mandatory timeseries setting: {mandatory_setting}'
+                    err = f"Missing mandatory timeseries setting: {mandatory_setting}"
                     log.error(err)
                     raise Exception(err)
 
             timeseries_settings = TimeseriesSettings(
                 is_timeseries=True,
-                order_by=obj['order_by'],
-                window=obj['window'],
-                use_previous_target=obj.get('use_previous_target', True),
+                order_by=obj["order_by"],
+                window=obj["window"],
+                use_previous_target=obj.get("use_previous_target", True),
                 historical_columns=[],
-                nr_predictions=obj.get('nr_predictions', 1),
+                nr_predictions=obj.get("nr_predictions", 1),
                 allow_incomplete_history=obj.get('allow_incomplete_history', False)
             )
             for setting in obj:
@@ -127,22 +254,74 @@ class TimeseriesSettings:
 
     @staticmethod
     def from_json(data: str):
+        """
+        Creates a TimeseriesSettings object from JSON specifications via python dictionary.
+
+        :param: data: JSON-config file with necessary Time-series specifications
+
+        :returns: A populated ``TimeseriesSettings`` object.
+        """
         return TimeseriesSettings.from_dict(json.loads(data))
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        """
+        Creates a dictionary from ``TimeseriesSettings`` object
+
+        :returns: A python dictionary containing the ``TimeSeriesSettings`` specifications.
+        """
         return _asdict(self, encode_json=encode_json)
 
     def to_json(self) -> Dict[str, Json]:
+        """
+        Creates JSON config from TimeseriesSettings object
+        :returns: The JSON config syntax containing the ``TimeSeriesSettings`` specifications.
+        """
         return json.dumps(self.to_dict())
 
 
 @dataclass
 class ProblemDefinition:
+    """
+    The ``ProblemDefinition`` object indicates details on how the models that predict the target are prepared. \
+        The only required specification from a user is the ``target``, which indicates the column within the input \
+        data that the user is trying to predict. Within the ``ProblemDefinition``, the user can specify aspects \
+        about how long the feature-engineering preparation may take, and nuances about training the models.
+
+    :param target: The name of the target column; this is the column that will be used as the goal of the prediction.
+    :param nfolds: Number of data subsets
+    :param pct_invalid: Number of data points maximally tolerated as invalid/missing/unknown. \
+        If the data cleaning process exceeds this number, no subsequent steps will be taken.
+    :param unbias_target:
+    :param seconds_per_model: Number of seconds maximum to spend PER model trained in the list of possible mixers.
+    :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \
+    learn a representation.
+    :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \
+        encoders and models.
+    :param target_weights:
+    :param positive_domain: For numerical taks, force predictor output to be positive (integer or float).
+    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
+        that predictions, in average, are correct `alpha` percent of the time.
+    :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for \
+         available settings.
+    :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-\
+        series.
+    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
+        (respectively implies wider and tighter bounds, all other parameters being equal).
+    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
+        detector.
+    :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
+        found in this list will be automatically removed from subsequent steps in the ML pipeline.
+    :param fit_on_validation: Whether to fit the model on the held-out validation data. Validation data is strictly \
+        used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new \
+            incoming data over time, the user may train the model further using the entire dataset.
+    :param strict_mode:
+    """
+
     target: str
-    nfolds: int
+    nsubsets: int
     pct_invalid: float
     unbias_target: bool
-    seconds_per_model: Union[int, None]
+    seconds_per_mixer: Union[int, None]
     seconds_per_encoder: Union[int, None]
     time_aim: Union[int, None]
     target_weights: Union[List[float], None]
@@ -159,11 +338,19 @@ class ProblemDefinition:
 
     @staticmethod
     def from_dict(obj: Dict):
+        """
+        Creates a ProblemDefinition object from a python dictionary with necessary specifications.
+
+        :param obj: A python dictionary with the necessary features for the ``ProblemDefinition`` class.
+        Only requires ``target`` to be specified.
+
+        :returns: A populated ``ProblemDefinition`` object.
+        """
         target = obj['target']
-        nfolds = obj.get('nfolds', 30)
+        nsubsets = obj.get('nsubsets', 30)
         pct_invalid = obj.get('pct_invalid', 1)
-        unbias_target = obj.get('unbias_target', False)
-        seconds_per_model = obj.get('seconds_per_model', None)
+        unbias_target = obj.get('unbias_target', True)
+        seconds_per_mixer = obj.get('seconds_per_mixer', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
         time_aim = obj.get('time_aim', None)
         target_weights = obj.get('target_weights', None)
@@ -177,13 +364,12 @@ class ProblemDefinition:
         fit_on_validation = obj.get('fit_on_validation', True)
         strict_mode = obj.get('strict_mode', True)
         seed_nr = obj.get('seed_nr', 420)
-
         problem_definition = ProblemDefinition(
             target=target,
-            nfolds=nfolds,
+            nsubsets=nsubsets,
             pct_invalid=pct_invalid,
             unbias_target=unbias_target,
-            seconds_per_model=seconds_per_model,
+            seconds_per_mixer=seconds_per_mixer,
             seconds_per_encoder=seconds_per_encoder,
             time_aim=time_aim,
             target_weights=target_weights,
@@ -203,17 +389,53 @@ class ProblemDefinition:
 
     @staticmethod
     def from_json(data: str):
+        """
+        Creates a ProblemDefinition Object from JSON config file.
+
+        :param data:
+
+        :returns: A populated ProblemDefinition object.
+        """
         return ProblemDefinition.from_dict(json.loads(data))
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        """
+        Creates a python dictionary from the ProblemDefinition object
+
+        :returns: A python dictionary
+        """
         return _asdict(self, encode_json=encode_json)
 
     def to_json(self) -> Dict[str, Json]:
+        """
+        Creates a JSON config from the ProblemDefinition object
+
+        :returns: TODO
+        """
         return json.dumps(self.to_dict())
 
 
 @dataclass
 class JsonAI:
+    """
+    The JsonAI Class allows users to construct flexible JSON config to specify their ML pipeline. JSON-AI follows a \
+    recipe of how to pre-process data, construct features, and train on the target column. To do so, the following \
+    specifications are required internally.
+
+    :param features: The corresponding``Feature`` object for each of the column names of the dataset
+    :param outputs: The column name of the target and its ``Output`` object
+    :param problem_definition: The ``ProblemDefinition`` criteria.
+    :param identifiers: A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.
+    :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, "None" suggests Lightwood's default approach in ``data.cleaner``.
+    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.
+    :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.
+    :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
+    :param imports: A list of custom packages, indicated through a str import statement, that a user can call.
+    :param timeseries_transformer:
+    :param timeseries_analyzer:
+    :param accuracy_functions: A list of performance metrics used to evaluate the best models.
+    """ # noqa
+
     features: Dict[str, Feature]
     outputs: Dict[str, Output]
     problem_definition: ProblemDefinition
@@ -230,19 +452,22 @@ class JsonAI:
 
     @staticmethod
     def from_dict(obj: Dict):
-        features = {k: Feature.from_dict(v) for k, v in obj['features'].items()}
-        outputs = {k: Output.from_dict(v) for k, v in obj['outputs'].items()}
-        problem_definition = ProblemDefinition.from_dict(obj['problem_definition'])
-        identifiers = obj['identifiers']
-        cleaner = obj.get('cleaner', None)
-        splitter = obj.get('splitter', None)
-        analyzer = obj.get('analyzer', None)
-        explainer = obj.get('explainer', None)
-        imports = obj.get('imports', None)
-        timeseries_transformer = obj.get('timeseries_transformer', None)
-        timeseries_analyzer = obj.get('timeseries_analyzer', None)
-        accuracy_functions = obj.get('accuracy_functions', None)
-        phases = obj.get('phases', None)
+        """
+        Creates a JSON-AI object from dictionary specifications of the JSON-config.
+        """
+        features = {k: Feature.from_dict(v) for k, v in obj["features"].items()}
+        outputs = {k: Output.from_dict(v) for k, v in obj["outputs"].items()}
+        problem_definition = ProblemDefinition.from_dict(obj["problem_definition"])
+        identifiers = obj["identifiers"]
+        cleaner = obj.get("cleaner", None)
+        splitter = obj.get("splitter", None)
+        analyzer = obj.get("analyzer", None)
+        explainer = obj.get("explainer", None)
+        imports = obj.get("imports", None)
+        timeseries_transformer = obj.get("timeseries_transformer", None)
+        timeseries_analyzer = obj.get("timeseries_analyzer", None)
+        accuracy_functions = obj.get("accuracy_functions", None)
+        phases = obj.get("phases", None)
 
         json_ai = JsonAI(
             features=features,
@@ -257,19 +482,25 @@ class JsonAI:
             timeseries_transformer=timeseries_transformer,
             timeseries_analyzer=timeseries_analyzer,
             accuracy_functions=accuracy_functions,
-            phases=phases
+            phases=phases,
         )
 
         return json_ai
 
     @staticmethod
     def from_json(data: str):
+        """ Creates a JSON-AI object from JSON config"""
         return JsonAI.from_dict(json.loads(data))
 
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        """
+        Creates a python dictionary with necessary modules within the ML pipeline specified from the JSON-AI object.
+
+        :returns: A python dictionary that has the necessary components of the ML pipeline for a given dataset.
+        """
         as_dict = _asdict(self, encode_json=encode_json)
         for k in list(as_dict.keys()):
-            if k == 'features':
+            if k == "features":
                 feature_dict = {}
                 for name in self.features:
                     feature_dict[name] = self.features[name].to_dict()
@@ -279,12 +510,33 @@ class JsonAI:
         return as_dict
 
     def to_json(self) -> Dict[str, Json]:
+        """
+        Creates JSON config to represent the necessary modules within the ML pipeline specified from the JSON-AI object.
+
+        :returns: A JSON config that has the necessary components of the ML pipeline for a given dataset.
+        """
         return json.dumps(self.to_dict(), indent=4)
 
 
 @dataclass_json
 @dataclass
 class ModelAnalysis:
+    """
+    The ``ModelAnalysis`` class stores useful information to describe a model and understand its predictive performance on a validation dataset.
+    For each trained ML algorithm, we store:
+
+    :param accuracies: Dictionary with obtained values for each accuracy function (specified in JsonAI)
+    :param accuracy_histogram: Dictionary with histograms of reported accuracy by target value.
+    :param accuracy_samples: Dictionary with sampled pairs of observed target values and respective predictions.
+    :param train_sample_size: Size of the training set (data that parameters are updated on)
+    :param test_sample_size: Size of the testing set (explicitly held out)
+    :param column_importances: Dictionary with the importance of each column for the model, as estimated by an approach that closely follows a leave-one-covariate-out strategy.
+    :param confusion_matrix: A confusion matrix for the validation dataset.
+    :param histograms: Histogram for each dataset feature.
+    :param dtypes: Inferred data types for each dataset feature.
+
+    """ # noqa
+
     accuracies: Dict[str, float]
     accuracy_histogram: Dict[str, list]
     accuracy_samples: Dict[str, list]
