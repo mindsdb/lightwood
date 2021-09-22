@@ -45,7 +45,7 @@ def model_analyzer(
     confidence_normalizer: bool,
     accuracy_functions
 ):
-    """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
+    """Analyses model on a validation subset to evaluate accuracy and confidence of future predictions"""
 
     data_type = dtype_dict[target]
     data_subtype = data_type
