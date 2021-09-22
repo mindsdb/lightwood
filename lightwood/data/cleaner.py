@@ -264,3 +264,4 @@ def _get_columns_to_clean(data: pd.DataFrame, dtype_dict: Dict[str, dtype], mode
                 continue
         if name in data.columns:
             cleanable_columns.append(name)
+    return cleanable_columns
