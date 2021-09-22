@@ -59,3 +59,5 @@ AI.json
 AI2.json
 
 assert.sh
+docssrc/build
+docssrc/build/*
