@@ -14,7 +14,8 @@ class TestBasic(unittest.TestCase):
         train = df[mask]
         test = df[~mask]
 
-        predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 20}))
+        predictor = predictor_from_problem(df, ProblemDefinition.from_dict(
+            {'target': target, 'time_aim': 20, 'unbias_target': False}))
         predictor.learn(train)
 
         if hasattr(predictor, 'ensemble'):
