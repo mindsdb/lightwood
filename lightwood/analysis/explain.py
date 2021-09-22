@@ -93,7 +93,7 @@ def explain(data: pd.DataFrame,
 
             # base ICP
             X = deepcopy(icp_X)
-            # Ugly optimization but accessing `values` actually wasted a lot of time
+            # Calling `values` multiple times increased runtime of this function; referenced var is faster
             icp_values = X.values
 
             # get all possible ranges

@@ -7,14 +7,14 @@ the unity mixer just arg-maxes the output of the encoder.
 
 from typing import List
 from lightwood.encoder.base import BaseEncoder
-from lightwood.model.base import BaseModel
+from lightwood.mixer.base import BaseMixer
 from lightwood.helpers.log import log
 from lightwood.data.encoded_ds import EncodedDs
 import pandas as pd
 import torch
 
 
-class Unit(BaseModel):
+class Unit(BaseMixer):
     def __init__(self, stop_after: int, target_encoder: BaseEncoder):
         super().__init__(stop_after)
         self.target_encoder = target_encoder

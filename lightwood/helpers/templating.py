@@ -1,4 +1,3 @@
-from lightwood.api.types import JsonAI
 
 
 '''
@@ -30,7 +29,7 @@ def is_allowed(v):
         return True
 
     # Allowed variable names
-    if v in ['df', 'nfolds', 'data', 'encoded_data', 'train_data', 'encoded_train_data', 'test_data']:
+    if v in ['df', 'nsubsets', 'data', 'encoded_data', 'train_data', 'encoded_train_data', 'test_data']:
         return True
 
     try:
@@ -69,8 +68,13 @@ def is_allowed(v):
     return True
 
 
-def call(entity: dict, json_ai: JsonAI) -> str:
-    args = [f'{k}={v}' for k, v in entity['args'].items() if not str(v).startswith('$') and is_allowed(v)]
+def call(entity: dict) -> str:
+    for k, v in entity['args'].items():
+        if not str(v).startswith('$'):
+            if not is_allowed(v):
+                raise Exception(f'Invalid value: {v} for arg {k}')
+
+    args = [f'{k}={v}' for k, v in entity['args'].items() if not str(v).startswith('$')]
 
     for k, v in entity['args'].items():
         if str(v).startswith('$'):

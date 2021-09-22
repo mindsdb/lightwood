@@ -46,7 +46,7 @@ class Feature:
 class Output:
     data_dtype: str
     encoder: str = None
-    models: List[str] = None
+    mixers: List[str] = None
     ensemble: str = None
 
 
@@ -137,10 +137,10 @@ class TimeseriesSettings:
 @dataclass
 class ProblemDefinition:
     target: str
-    nfolds: int
+    nsubsets: int
     pct_invalid: float
     unbias_target: bool
-    seconds_per_model: Union[int, None]
+    seconds_per_mixer: Union[int, None]
     seconds_per_encoder: Union[int, None]
     time_aim: Union[int, None]
     target_weights: Union[List[float], None]
@@ -158,10 +158,10 @@ class ProblemDefinition:
     @staticmethod
     def from_dict(obj: Dict):
         target = obj['target']
-        nfolds = obj.get('nfolds', 30)
+        nsubsets = obj.get('nsubsets', 30)
         pct_invalid = obj.get('pct_invalid', 1)
-        unbias_target = obj.get('unbias_target', False)
-        seconds_per_model = obj.get('seconds_per_model', None)
+        unbias_target = obj.get('unbias_target', True)
+        seconds_per_mixer = obj.get('seconds_per_mixer', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
         time_aim = obj.get('time_aim', None)
         target_weights = obj.get('target_weights', None)
@@ -175,13 +175,12 @@ class ProblemDefinition:
         fit_on_validation = obj.get('fit_on_validation', True)
         strict_mode = obj.get('strict_mode', True)
         seed_nr = obj.get('seed_nr', 420)
-
         problem_definition = ProblemDefinition(
             target=target,
-            nfolds=nfolds,
+            nsubsets=nsubsets,
             pct_invalid=pct_invalid,
             unbias_target=unbias_target,
-            seconds_per_model=seconds_per_model,
+            seconds_per_mixer=seconds_per_mixer,
             seconds_per_encoder=seconds_per_encoder,
             time_aim=time_aim,
             target_weights=target_weights,
