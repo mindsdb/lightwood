@@ -27,7 +27,7 @@ def set_conf_range(
     significance: desired confidence level. can be preset 0 < x <= 0.99
     """
     # numerical
-    if target_type in [dtype.integer, dtype.float, dtype.array, dtype.tsarray]:
+    if target_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
 
         # ICP gets all possible bounds (shape: (B, 2, 99))
         all_ranges = icp.predict(X.values)
