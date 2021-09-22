@@ -11,7 +11,7 @@ from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import can_be_nan_numeric
 
-from typing import Dict, List, Optional, Tuple, Callable
+from typing import Dict, List, Optional, Tuple, Callable, Union
 
 
 def cleaner(
