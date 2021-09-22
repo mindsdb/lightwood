@@ -101,12 +101,10 @@ def get_cleaning_func(data_dtype: dtype) -> Callable:
         clean_func = _standardize_datetime
 
     elif data_dtype in (dtype.float):
-        clean_func = _clean_numeric
+        clean_func = _clean_float
 
     elif data_dtype in (dtype.integer):
-        clean_fun = (
-            lambda x: int(_clean_numeric(x)) if _clean_numeric(x) is not None else None
-        )
+        clean_func = _clean_int
 
     elif data_dtype in (dtype.array):
         clean_func = _standardize_array
@@ -190,7 +188,7 @@ def _standardize_array(element: object) -> Optional[Union[List[float], float]]:
         element = element.replace(", ", " ").replace(",", " ")
         # Handles cases where arrays are numbers
         if " " not in element:
-            element = _clean_numeric(element)
+            element = _clean_float(element)
         else:
             element = [float(x) for x in element.split(" ")]
     except Exception:
@@ -200,11 +198,10 @@ def _standardize_array(element: object) -> Optional[Union[List[float], float]]:
 
 
 # ------------------------- #
-# Numeric
+# Numeric and Quantitative
 # ------------------------- #
 
-
-def _clean_numeric(element: object) -> Optional[float]:
+def _clean_float(element: object) -> Optional[float]:
     """
     Given an element, converts it into a numeric format. If element is NaN, or inf, then returns None.
     """
@@ -216,6 +213,16 @@ def _clean_numeric(element: object) -> Optional[float]:
     except Exception:
         return None
 
+
+def _clean_int(element: object) -> Optional[int]:
+    element = _clean_float(element)
+    if element is not None:
+        element = int(element)
+    return element
+
+
+def _clean_quantity(element: object) -> Optional[float]:
+    return float(re.sub("[^0-9.,]", "", str(element)).replace(",", "."))
 
 # ----------------- #
 # Empty/Missing/NaN handling
