@@ -40,7 +40,8 @@ class Feature:
         """
         Create ``Feature`` objects from the a dictionary representation.
 
-        :param obj: A dictionary representation of a column feature's attributes. Must include keys *encoder*, *data_dtype*, and *dependency*.
+        :param obj: A dictionary representation of a column feature's attributes. Must include keys *encoder*, \
+            *data_dtype*, and *dependency*.
 
         :Example:
 
@@ -61,7 +62,8 @@ class Feature:
     @staticmethod
     def from_json(data: str):
         """
-        Create ``Feature`` objects from JSON representation. This method calls on :ref: `from_dict` after loading the json config.
+        Create ``Feature`` objects from JSON representation. This method calls on :ref: `from_dict` after loading the \
+            json config.
 
         :param data: A JSON representation of the feature.
 
@@ -73,7 +75,8 @@ class Feature:
         """
         Converts a Feature to a dictionary representation.
 
-        :returns: A python dictionary with strings indicating the three key elements and their respective values of the Feature class.
+        :returns: A python dictionary with strings indicating the three key elements and their respective values of \
+            the Feature class.
         """
         as_dict = _asdict(self, encode_json=encode_json)
         for k in list(as_dict.keys()):
@@ -94,14 +97,18 @@ class Feature:
 @dataclass
 class Output:
     """
-    A representation for the output feature. This is specifically used on the target column of your dataset. Four attributes are expected as seen below.
+    A representation for the output feature. This is specifically used on the target column of your dataset. \
+    Four attributes are expected as seen below.
 
-    Note, currently supervised tasks are supported, hence categorical, numerical, and time-series are the expected outputs types. Complex features such as text generation are not currently available by default.
+    Note, currently supervised tasks are supported, hence categorical, numerical, and time-series are the expected \
+    outputs types. Complex features such as text generation are not currently available by default.
 
     :param data_dtype: The type of information within the target column (ex.: numerical, categorical, etc.).
-    :param encoder: the methodology for encoding the target feature (a Lightwood Encoder). There can only be one encoder for the output target.
+    :param encoder: the methodology for encoding the target feature (a Lightwood Encoder). There can only be one \
+    encoder for the output target.
     :param models: The list of ML algorithms that are trained for the target distribution.
-    :param ensemble: For a panel of ML algorithms, the approach of selecting the best model, and the metrics used in that evaluation.
+    :param ensemble: For a panel of ML algorithms, the approach of selecting the best model, and the metrics used in \
+    that evaluation.
     """
 
     data_dtype: str
@@ -116,11 +123,14 @@ class TypeInformation:
     """
     For a dataset, provides information on columns types, how they're used, and any other potential identifiers.
 
-    TypeInformation is generated within ``data.infer_types``, where small samples of each column are evaluated in a custom framework to understand what kind of data type the model is. The user may override data types, but it is recommended to do so within a JSON-AI config file.
+    TypeInformation is generated within ``data.infer_types``, where small samples of each column are evaluated in a \
+    custom framework to understand what kind of data type the model is. The user may override data types, but it is \
+    recommended to do so within a JSON-AI config file.
 
     :param dtypes: For each column's name, the associated data type inferred.
     :param additional_info: Any possible sub-categories or additional descriptive information.
-    :param identifiers: Columns within the dataset highly suspected of being identifiers or IDs. These do not contain informatic value, therefore will be ignored in subsequent training/analysis procedures unless manually indicated.
+    :param identifiers: Columns within the dataset highly suspected of being identifiers or IDs. These do not contain\
+     informatic value, therefore will be ignored in subsequent training/analysis procedures unless manually indicated.
     """
 
     dtypes: Dict[str, str]
@@ -172,7 +182,7 @@ class StatisticalAnalysis:
 class DataAnalysis:
     """
     Data Analysis wraps :class: `.StatisticalAnalysis` and :class: `.TypeInformation` together. Further details can be seen in their respective documentation references.
-    """
+    """ # noqa
 
     statistical_analysis: StatisticalAnalysis
     type_information: TypeInformation
@@ -284,7 +294,7 @@ class ProblemDefinition:
         If the data cleaning process exceeds this number, no subsequent steps will be taken.
     :param unbias_target:
     :param seconds_per_model: Number of seconds maximum to spend PER model trained in the list of possible mixers.
-    :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \ 
+    :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \
     learn a representation.
     :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \
         encoders and models.
@@ -332,7 +342,7 @@ class ProblemDefinition:
         """
         Creates a ProblemDefinition object from a python dictionary with necessary specifications.
 
-        :param obj: A python dictionary with the necessary features for the ``ProblemDefinition`` class. 
+        :param obj: A python dictionary with the necessary features for the ``ProblemDefinition`` class.
         Only requires ``target`` to be specified.
 
         :returns: A populated ``ProblemDefinition`` object.
@@ -409,7 +419,9 @@ class ProblemDefinition:
 @dataclass
 class JsonAI:
     """
-    The JsonAI Class allows users to construct flexible JSON config to specify their ML pipeline. JSON-AI follows a recipe of how to pre-process data, construct features, and train on the target column. To do so, the following specifications are required internally.
+    The JsonAI Class allows users to construct flexible JSON config to specify their ML pipeline. JSON-AI follows a \
+    recipe of how to pre-process data, construct features, and train on the target column. To do so, the following \
+    specifications are required internally.
 
     :param features: The corresponding``Feature`` object for each of the column names of the dataset
     :param outputs: The column name of the target and its ``Output`` object
@@ -423,7 +435,7 @@ class JsonAI:
     :param timeseries_transformer:
     :param timeseries_analyzer:
     :param accuracy_functions: A list of performance metrics used to evaluate the best models.
-    """
+    """ # noqa
 
     features: Dict[str, Feature]
     outputs: Dict[str, Output]
@@ -524,7 +536,7 @@ class ModelAnalysis:
     :param histograms: Histogram for each dataset feature.
     :param dtypes: Inferred data types for each dataset feature.
 
-    """
+    """ # noqa
 
     accuracies: Dict[str, float]
     accuracy_histogram: Dict[str, list]

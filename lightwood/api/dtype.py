@@ -11,7 +11,7 @@ class dtype:
     - **Miscellaneous**: Miscellaneous data descriptors include ``empty``, an explicitly unknown value versus ``invalid``, a data type not currently supported.
     
     Custom data types may be implemented here as a flag for subsequent treatment and processing. You are welcome to include your own definitions, so long as they do not override the existing type names (alternatively, if you do, please edit subsequent parts of the preprocessing pipeline to correctly indicate how you want to deal with these data types).
-    """
+    """ # noqa
 
     # Numerical type data
     integer = "integer"
