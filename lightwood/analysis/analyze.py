@@ -9,7 +9,7 @@ from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
 
-from lightwood.analysis.nc.calibrate import icp_calibration
+from lightwood.analysis.nc.calibrate import ICP
 from lightwood.analysis.helpers.acc_stats import AccStats
 from lightwood.analysis.helpers.feature_importance import GlobalFeatureImportance
 
@@ -53,7 +53,9 @@ def model_analyzer(
         encoded_val_data, predict_proba=True)
     normal_predictions = normal_predictions.set_index(data.index)
 
-    # core analysis methods
+    # ------------------------- #
+    # Core Analysis
+    # ------------------------- #
     kwargs = {
         'predictor': predictor,
         'target': target,
@@ -74,43 +76,28 @@ def model_analyzer(
         'accuracy_functions': accuracy_functions
     }
 
-    # 1. confidence estimation with inductive conformal predictors (ICPs)
-    icp_output, result_df = icp_calibration(
-        predictor,
-        target,
-        dtype_dict,
-        normal_predictions,
-        data,
-        train_data,
-        encoded_val_data,
-        is_classification,
-        is_numerical,
-        is_multi_ts,
-        stats_info,
-        ts_cfg,
-        fixed_significance,
-        positive_domain,
-        confidence_normalizer,
-    )
-    runtime_analyzer = {**runtime_analyzer, **icp_output}
+    # confidence estimation with inductive conformal predictors (ICPs)
+    calibrator = ICP()
+    runtime_analyzer = calibrator.analyze(runtime_analyzer, **kwargs)
+    result_df = calibrator.result_df
 
-    # 2. accuracy metric for validation data
+    # accuracy metrics for validation data
     score_dict = evaluate_accuracy(data, normal_predictions['prediction'], target, accuracy_functions)
     kwargs['normal_accuracy'] = np.mean(list(score_dict.values()))
 
-    # 3. global feature importance
-    if not disable_column_importance:
-        block = GlobalFeatureImportance()
-        runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
-    else:
-        runtime_analyzer['column_importances'] = None
-
-    # 4. validation stats (e.g. confusion matrix, histograms)
+    # validation stats (e.g. confusion matrix, histograms)
     acc_stats = AccStats(dtype_dict=dtype_dict, target=target, buckets=stats_info.buckets)
     acc_stats.fit(data, normal_predictions, conf=result_df)
     bucket_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats(
         is_classification=is_classification, is_numerical=is_numerical)
     runtime_analyzer['bucket_accuracy'] = bucket_accuracy
+
+    # global feature importance
+    if not disable_column_importance:
+        block = GlobalFeatureImportance()
+        runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
+    else:
+        runtime_analyzer['column_importances'] = None
 
     model_analysis = ModelAnalysis(
         accuracies=score_dict,
@@ -124,7 +111,9 @@ def model_analyzer(
         dtypes=dtype_dict
     )
 
-    # user analysis blocks
+    # ------------------------- #
+    # Additional Analysis Blocks
+    # ------------------------- #
     for block in analysis_blocks:
         runtime_analyzer = block.compute(runtime_analyzer, **{})
 
