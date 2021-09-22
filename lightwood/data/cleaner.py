@@ -26,8 +26,15 @@ def cleaner(
     anomaly_detection: bool,
 ) -> pd.DataFrame:
     """
-    The cleaner 
-    """
+    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standaridzed type and all malformed or otherwise missing or invalid elements are turned into ``None``
+
+    :param data: The raw data
+    :param dtype_dict: Type information for each column
+    :param pct_invalid: How much of each column can be invalid
+    
+
+    :returns: The cleaned data
+    """ # noqa
 
     data = _remove_columns(data, ignore_features, identifiers, target, mode, timeseries_settings, 
                            anomaly_detection, dtype_dict)
