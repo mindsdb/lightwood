@@ -9,6 +9,6 @@ def encode(encoders: List[BaseEncoder], subsets: List[pd.DataFrame], target: str
         subsets = [subsets]
 
     encoded_ds_arr: List[EncodedDs] = []
-    for fold in subsets:
-        encoded_ds_arr.append(EncodedDs(encoders, fold, target))
+    for subset in subsets:
+        encoded_ds_arr.append(EncodedDs(encoders, subset, target))
     return encoded_ds_arr

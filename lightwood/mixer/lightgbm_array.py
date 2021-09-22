@@ -36,8 +36,8 @@ class LightGBMArray(BaseMixer):
 
         for timestep in range(self.n_ts_predictions):
             if timestep > 0:
-                for fold in range(len(ds_arr)):
-                    ds_arr[fold].data_frame[self.target] = ds_arr[fold].data_frame[f'{self.target}_timestep_{timestep}']
+                for idx in range(len(ds_arr)):
+                    ds_arr[idx].data_frame[self.target] = ds_arr[idx].data_frame[f'{self.target}_timestep_{timestep}']
             self.models[timestep].fit(ds_arr)  # @TODO: this call could be parallelized
 
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
@@ -46,8 +46,8 @@ class LightGBMArray(BaseMixer):
         for timestep in range(self.n_ts_predictions):
             if timestep > 0:
                 for data in train_data, dev_data:
-                    for fold in range(len(data)):
-                        data[fold].data_frame[self.target] = data[fold].data_frame[f'{self.target}_timestep_{timestep}']
+                    for idx in range(len(data)):
+                        data[idx].data_frame[self.target] = data[idx].data_frame[f'{self.target}_timestep_{timestep}']
 
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
