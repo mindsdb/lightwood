@@ -1,44 +1,63 @@
 import random
-from typing import Union
+from types import SimpleNamespace
+from typing import Dict, Tuple, Optional
 
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
+
 from lightwood.api.dtype import dtype
+from lightwood.analysis.base import BaseAnalysisBlock
+from lightwood.helpers.general import evaluate_accuracy
 
 
-class AccStats:
-    """
-    Computes accuracy stats and a confusion matrix for the validation dataset
-    """
+class AccStats(BaseAnalysisBlock):
+    """ Computes accuracy stats and a confusion matrix for the validation dataset """
 
-    def __init__(self, dtype_dict: dict, target: str, buckets: Union[None, dict]):
-        self.col_stats = dtype_dict
-        self.target = target
-        self.input_cols = list(dtype_dict.keys())
-        self.buckets = buckets if buckets else {}
+    def __init__(self):
+        super().__init__(deps=['confidence'])  # @TODO: enforce that this actually prevents early execution somehow
+
+    def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
+        ns = SimpleNamespace(**kwargs)
+
+        info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
+                                               ns.target, ns.accuracy_functions)
+        info['normal_accuracy'] = np.mean(list(info['score_dict'].values()))
+
+        self.fit(ns, info['result_df'])
+        info['val_overall_acc'], info['acc_histogram'], info['cm'], info['acc_samples'] = self.get_accuracy_stats()
+        return info
+
+    def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
+        # does nothing on inference
+        return insights, {}
+
+    def fit(self, ns: SimpleNamespace, conf=Optional[np.ndarray]):
+        self.col_stats = ns.dtype_dict
+        self.target = ns.target
+        self.input_cols = list(ns.dtype_dict.keys())
+        self.buckets = ns.stats_info.buckets if ns.stats_info.buckets else {}
 
         self.normal_predictions_bucketized = []
         self.real_values_bucketized = []
         self.numerical_samples_arr = []
 
-    def fit(self, input_df: pd.DataFrame, predictions: pd.DataFrame, conf=Union[None, np.ndarray]):
         column_indexes = {}
         for i, col in enumerate(self.input_cols):
             column_indexes[col] = i
 
         real_present_inputs_arr = []
-        for _, row in input_df.iterrows():
+        for _, row in ns.data.iterrows():
             present_inputs = [1] * len(self.input_cols)
             for i, col in enumerate(self.input_cols):
                 if str(row[col]) in ('None', 'nan', '', 'Nan', 'NAN', 'NaN'):
                     present_inputs[i] = 0
             real_present_inputs_arr.append(present_inputs)
 
-        for n in range(len(predictions)):
-            row = input_df.iloc[n]
+        for n in range(len(ns.normal_predictions)):
+            row = ns.data.iloc[n]
             real_value = row[self.target]
-            predicted_value = predictions.iloc[n]['prediction']
+            predicted_value = ns.normal_predictions.iloc[n]['prediction']
 
             if isinstance(predicted_value, list):
                 # T+N time series, for now we compare the T+1 prediction only @TODO: generalize
@@ -54,8 +73,8 @@ class AccStats:
 
             if self.buckets:
                 bucket = self.buckets[self.target]
-                predicted_value_b = get_value_bucket(predicted_value, bucket, self.col_stats[self.target])
-                real_value_b = get_value_bucket(real_value, bucket, self.col_stats[self.target])
+                predicted_value_b = self.get_value_bucket(predicted_value, bucket, self.col_stats[self.target])
+                real_value_b = self.get_value_bucket(real_value, bucket, self.col_stats[self.target])
             else:
                 predicted_value_b = predicted_value
                 real_value_b = real_value
@@ -134,38 +153,38 @@ class AccStats:
 
         return overall_accuracy, accuracy_histogram, cm, accuracy_samples
 
+    @staticmethod
+    def get_value_bucket(value, buckets, target_dtype):
+        """
+        :return: The bucket in the `histogram` in which our `value` falls
+        """
+        if buckets is None:
+            return None
 
-def get_value_bucket(value, buckets, target_dtype):
-    """
-    :return: The bucket in the `histogram` in which our `value` falls
-    """
-    if buckets is None:
-        return None
+        if target_dtype in (dtype.binary, dtype.categorical):
+            if value in buckets:
+                bucket = buckets.index(value)
+            else:
+                bucket = len(buckets)  # for null values
 
-    if target_dtype in (dtype.binary, dtype.categorical):
-        if value in buckets:
-            bucket = buckets.index(value)
+        elif target_dtype in (dtype.integer, dtype.float):
+            bucket = AccStats.closest(buckets, value)
         else:
             bucket = len(buckets)  # for null values
 
-    elif target_dtype in (dtype.integer, dtype.float):
-        bucket = closest(buckets, value)
-    else:
-        bucket = len(buckets)  # for null values
+        return bucket
 
-    return bucket
+    @staticmethod
+    def closest(arr, value):
+        """
+        :return: The index of the member of `arr` which is closest to `value`
+        """
+        if value is None:
+            return -1
 
+        for i, ele in enumerate(arr):
+            value = float(str(value).replace(',', '.'))
+            if ele > value:
+                return i - 1
 
-def closest(arr, value):
-    """
-    :return: The index of the member of `arr` which is closest to `value`
-    """
-    if value is None:
-        return -1
-
-    for i, ele in enumerate(arr):
-        value = float(str(value).replace(',', '.'))
-        if ele > value:
-            return i - 1
-
-    return len(arr) - 1
+        return len(arr) - 1

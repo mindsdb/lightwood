@@ -1,10 +1,7 @@
 from typing import Dict, List, Optional
 
-import numpy as np
-
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
-from lightwood.helpers.general import evaluate_accuracy
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
@@ -79,18 +76,10 @@ def model_analyzer(
     # confidence estimation with inductive conformal predictors (ICPs)
     calibrator = ICP()
     runtime_analyzer = calibrator.analyze(runtime_analyzer, **kwargs)
-    result_df = calibrator.result_df
 
-    # accuracy metrics for validation data
-    score_dict = evaluate_accuracy(data, normal_predictions['prediction'], target, accuracy_functions)
-    kwargs['normal_accuracy'] = np.mean(list(score_dict.values()))
-
-    # validation stats (e.g. confusion matrix, histograms)
-    acc_stats = AccStats(dtype_dict=dtype_dict, target=target, buckets=stats_info.buckets)
-    acc_stats.fit(data, normal_predictions, conf=result_df)
-    bucket_accuracy, accuracy_histogram, cm, accuracy_samples = acc_stats.get_accuracy_stats(
-        is_classification=is_classification, is_numerical=is_numerical)
-    runtime_analyzer['bucket_accuracy'] = bucket_accuracy
+    # validation accuracy metrics and stats (e.g. confusion matrix, histograms)
+    acc_stats = AccStats()
+    runtime_analyzer = acc_stats.analyze(runtime_analyzer, **kwargs)
 
     # global feature importance
     if not disable_column_importance:
@@ -100,12 +89,12 @@ def model_analyzer(
         runtime_analyzer['column_importances'] = None
 
     model_analysis = ModelAnalysis(
-        accuracies=score_dict,
-        accuracy_histogram=accuracy_histogram,
-        accuracy_samples=accuracy_samples,
+        accuracies=runtime_analyzer['score_dict'],
+        accuracy_histogram=runtime_analyzer['acc_histogram'],
+        accuracy_samples=runtime_analyzer['acc_samples'],
         train_sample_size=len(encoded_train_data),
         test_sample_size=len(encoded_val_data),
-        confusion_matrix=cm,
+        confusion_matrix=runtime_analyzer['cm'],
         column_importances=runtime_analyzer['column_importances'],
         histograms=stats_info.histograms,
         dtypes=dtype_dict

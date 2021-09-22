@@ -42,7 +42,7 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
         column_importances = {}
         acc_increases = []
         for col in ignorable_input_cols:
-            accuracy_increase = (ns.normal_accuracy - empty_input_accuracy[col])
+            accuracy_increase = (info['normal_accuracy'] - empty_input_accuracy[col])
             acc_increases.append(accuracy_increase)
 
         # low 0.2 temperature to accentuate differences

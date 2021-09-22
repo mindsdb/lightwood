@@ -32,7 +32,6 @@ class ICP(BaseAnalysisBlock):
     """ Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity """
     def __init__(self):
         super().__init__(deps=None)
-        self.result_df = None
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
@@ -194,7 +193,7 @@ class ICP(BaseAnalysisBlock):
             # consolidate all groups here
             output['icp']['__mdb_active'] = True
 
-        self.result_df = result_df  # store results for validation data
+        output['result_df'] = result_df
         self.is_prepared = True
 
         info = {**info, **output}
