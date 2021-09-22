@@ -50,7 +50,7 @@ def model_analyzer(
     data_type = dtype_dict[target]
     data_subtype = data_type
 
-    is_numerical = data_type in [dtype.integer, dtype.float, dtype.array, dtype.tsarray]
+    is_numerical = data_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray)
     is_classification = data_type in (dtype.categorical, dtype.binary)
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
 
