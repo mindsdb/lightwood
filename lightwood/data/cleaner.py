@@ -63,6 +63,8 @@ def _standardize_array(element):
         # Handles cases where arrays are numbers
         if ' ' not in element:
             element = _clean_float_or_none(element)
+        else:
+            element = [float(x) for x in element.split(' ')]
     except Exception:
         pass
 
