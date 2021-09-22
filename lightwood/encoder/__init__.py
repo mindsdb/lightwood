@@ -13,7 +13,7 @@ from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.encoder.categorical.binary import BinaryEncoder
 from lightwood.encoder.categorical.autoencoder import CategoricalAutoEncoder
 from lightwood.encoder.time_series.rnn import TimeSeriesEncoder
-from lightwood.encoder.time_series.plain import TimeSeriesPlainEncoder
+from lightwood.encoder.array.array import ArrayEncoder
 from lightwood.encoder.categorical.multihot import MultiHotEncoder
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.encoder.type_encoder_maps import (Array, Binary, Categorical, Date, Datetime, Float, Image, Integer,
@@ -27,10 +27,10 @@ except Exception:
     AmplitudeTsEncoder = None
 
 
-__ts_encoders__ = [TsNumericEncoder, TimeSeriesEncoder, TimeSeriesPlainEncoder]
+__ts_encoders__ = [TsNumericEncoder, TimeSeriesEncoder, ArrayEncoder]
 __all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder', 'TsNumericEncoder',
            'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder',
-           'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'MultiHotEncoder',
+           'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder', 'MultiHotEncoder',
            'PretrainedLangEncoder', 'AmplitudeTsEncoder', 'BinaryEncoder', 'DatetimeNormalizerEncoder',
            'Array', 'Binary', 'Categorical', 'Date', 'Datetime', 'Float', 'Image', 'Integer',
            'Quantity', 'Rich_Text', 'Short_Text', 'Tags']
