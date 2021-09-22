@@ -7,8 +7,8 @@ from lightwood.api.types import (JsonAI, TypeInformation, StatisticalAnalysis, F
                                  Output, ProblemDefinition)
 
 
-trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder')
-ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder')
+trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder')
+ts_encoders = ('TimeSeriesEncoder', 'TsNumericEncoder')
 
 
 def lookup_encoder(
@@ -26,7 +26,7 @@ def lookup_encoder(
         dtype.image: 'Image.Img2VecEncoder',
         dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
         dtype.short_text: 'Short_Text.CategoricalAutoEncoder',
-        dtype.array: 'Array.TimeSeriesEncoder',
+        dtype.array: 'Array.ArrayEncoder',
         dtype.quantity: 'Quantity.NumericEncoder',
     }
 
@@ -69,7 +69,7 @@ def lookup_encoder(
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
                 encoder_dict['module'] = 'Array.TsArrayNumericEncoder'
         if '__mdb_ts_previous' in col_name:
-            encoder_dict['module'] = col_dtype.capitalize() + '.TimeSeriesPlainEncoder'
+            encoder_dict['module'] = col_dtype.capitalize() + '.ArrayEncoder'
             encoder_dict['args']['original_type'] = f'"{tss.target_type}"'
             encoder_dict['args']['window'] = f'{tss.window}'
 
@@ -287,7 +287,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
     if problem_definition.timeseries_settings.use_previous_target:
-        imports.append('from lightwood.encoder import TimeSeriesPlainEncoder')
+        imports.append('from lightwood.encoder import ArrayEncoder')
 
     # Add implicit arguments
     # @TODO: Consider removing once we have a proper editor in studio
