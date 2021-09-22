@@ -63,8 +63,8 @@ def lookup_encoder(
 
     # If column is a target, only specific feature representations are allowed that enable supervised tasks
     target_encoder_lookup_override = {
-        dtype.rich_text: "Rich_Text.VocabularyEncoder",
-        dtype.categorical: "Categorical.OneHotEncoder",
+        dtype.rich_text: 'Rich_Text.VocabularyEncoder',
+        dtype.categorical: 'Categorical.OneHotEncoder',
     }
 
     # Assign a default encoder to each column.
@@ -72,16 +72,16 @@ def lookup_encoder(
 
     # If the column is a target, ensure that the feature representation can enable supervised tasks
     if is_target:
-        encoder_dict["args"] = {"is_target": "True"}
+        encoder_dict['args'] = {'is_target': 'True'}
 
         if col_dtype in target_encoder_lookup_override:
-            encoder_dict["module"] = target_encoder_lookup_override[col_dtype]
+            encoder_dict['module'] = target_encoder_lookup_override[col_dtype]
 
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
                 encoder_dict['args']['target_class_distribution'] = '$statistical_analysis.target_class_distribution'
         if col_dtype in (dtype.integer, dtype.float, dtype.array):
-            encoder_dict["args"][
+            encoder_dict['args'][
                 "positive_domain"
             ] = "$statistical_analysis.positive_domain"
 
@@ -89,18 +89,18 @@ def lookup_encoder(
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
         if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict["module"] = col_dtype.capitalize() + ".TimeSeriesEncoder"
-            encoder_dict["args"]["original_type"] = f'"{col_dtype}"'
-            encoder_dict["args"]["target"] = "self.target"
-            encoder_dict["args"]["grouped_by"] = f"{gby}"
+            encoder_dict['module'] = col_dtype.capitalize() + ".TimeSeriesEncoder"
+            encoder_dict['args']['original_type'] = f'"{col_dtype}"'
+            encoder_dict['args']['target'] = "self.target"
+            encoder_dict['args']['grouped_by'] = f"{gby}"
 
         if is_target:
             if col_dtype in [dtype.integer]:
-                encoder_dict["args"]["grouped_by"] = f"{gby}"
-                encoder_dict["module"] = "Integer.TsNumericEncoder"
+                encoder_dict['args']['grouped_by'] = f"{gby}"
+                encoder_dict['module'] = "Integer.TsNumericEncoder"
             if col_dtype in [dtype.float]:
-                encoder_dict["args"]["grouped_by"] = f"{gby}"
-                encoder_dict["module"] = "Float.TsNumericEncoder"
+                encoder_dict['args']['grouped_by'] = f"{gby}"
+                encoder_dict['module'] = "Float.TsNumericEncoder"
             if tss.nr_predictions > 1:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
@@ -111,12 +111,12 @@ def lookup_encoder(
             encoder_dict['args']['window'] = f'{tss.window}'
 
     # Set arguments for the encoder
-    if encoder_dict["module"] == "Rich_Text.PretrainedLangEncoder" and not is_target:
-        encoder_dict["args"]["output_type"] = "$dtype_dict[$target]"
+    if encoder_dict['module'] == "Rich_Text.PretrainedLangEncoder" and not is_target:
+        encoder_dict['args']['output_type'] = "$dtype_dict[$target]"
 
     for encoder_name in trainable_encoders:
-        if encoder_name == encoder_dict["module"].split(".")[1]:
-            encoder_dict["args"][
+        if encoder_name == encoder_dict['module'].split(".")[1]:
+            encoder_dict['args'][
                 "stop_after"
             ] = "$problem_definition.seconds_per_encoder"
 
@@ -247,7 +247,7 @@ def generate_json_ai(
         for encoder_name in ts_encoders:
             if (
                 problem_definition.timeseries_settings.is_timeseries
-                and encoder_name == encoder["module"].split(".")[1]
+                and encoder_name == encoder['module'].split(".")[1]
             ):
                 if problem_definition.timeseries_settings.group_by is not None:
                     for group in problem_definition.timeseries_settings.group_by:
@@ -341,7 +341,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         json_ai.imports.extend(imports)
 
     for feature in [list(json_ai.outputs.values())[0], *json_ai.features.values()]:
-        encoder_import = feature.encoder["module"]
+        encoder_import = feature.encoder['module']
         if "." in encoder_import:
             continue
         imports.append(f"from lightwood.encoder import {encoder_import}")
@@ -394,7 +394,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             json_ai.features[name].dependency = []
         if json_ai.features[name].data_dtype is None:
             json_ai.features[name].data_dtype = (
-                json_ai.features[name].encoder["module"].split(".")[0].lower()
+                json_ai.features[name].encoder['module'].split(".")[0].lower()
             )
 
     # Add implicit phases

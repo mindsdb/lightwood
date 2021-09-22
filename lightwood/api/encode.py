@@ -1,4 +1,3 @@
-# TODO (2021.09.15 - Change "folds" to "subsets")
 from typing import List
 import pandas as pd
 from lightwood.encoder.base import BaseEncoder
