@@ -151,6 +151,7 @@ def generate_json_ai(
         ):
             input_cols.append(col_name)
 
+    tss = problem_definition.timeseries_settings
     is_target_predicting_encoder = False
     # Single text column classification
     if (
@@ -179,8 +180,7 @@ def generate_json_ai(
 
         }]
 
-        if not problem_definition.timeseries_settings.is_timeseries or \
-                problem_definition.timeseries_settings.nr_predictions <= 1:
+        if not tss.is_timeseries or tss.nr_predictions == 1:
             mixers.extend([{
                 'module': 'LightGBM',
                 'args': {
@@ -195,7 +195,7 @@ def generate_json_ai(
                     }
             }
             ])
-        elif problem_definition.timeseries_settings.nr_predictions > 1:
+        elif tss.nr_predictions > 1:
             mixers.extend([{
                 'module': 'LightGBMArray',
                 'args': {
@@ -205,7 +205,7 @@ def generate_json_ai(
                 }
             }])
 
-            if problem_definition.timeseries_settings.use_previous_target:
+            if tss.use_previous_target:
                 mixers.extend([
                     {
                         'module': 'SkTime',
@@ -229,8 +229,7 @@ def generate_json_ai(
     )}
 
     if (
-        problem_definition.timeseries_settings.is_timeseries
-        and problem_definition.timeseries_settings.nr_predictions > 1
+        tss.is_timeseries and tss.nr_predictions > 1
     ):
         list(outputs.values())[0].data_dtype = dtype.tsarray
 
@@ -247,15 +246,12 @@ def generate_json_ai(
         )
 
         for encoder_name in ts_encoders:
-            if (
-                problem_definition.timeseries_settings.is_timeseries
-                and encoder_name == encoder['module'].split(".")[1]
-            ):
-                if problem_definition.timeseries_settings.group_by is not None:
-                    for group in problem_definition.timeseries_settings.group_by:
+            if tss.is_timeseries and encoder_name == encoder['module'].split(".")[1]:
+                if tss.group_by is not None:
+                    for group in tss.group_by:
                         dependency.append(group)
 
-                if problem_definition.timeseries_settings.use_previous_target:
+                if tss.use_previous_target:
                     dependency.append(f"__mdb_ts_previous_{target}")
 
         if len(dependency) > 0:
@@ -265,15 +261,15 @@ def generate_json_ai(
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
-    if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime]:
+    output_dtype = list(outputs.values())[0].data_dtype
+    if output_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime]:
         accuracy_functions = ['r2_score']
-    elif list(outputs.values())[0].data_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
+    elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ['balanced_accuracy_score']
-    elif list(outputs.values())[0].data_dtype in (dtype.array, dtype.tsarray):
+    elif output_dtype in (dtype.array, dtype.tsarray):
         accuracy_functions = ['evaluate_array_accuracy']
     else:
-        data_dtype = list(outputs.values())[0].data_dtype
-        raise Exception(f'Please specify a custom accuracy function for output type {data_dtype}')
+        raise Exception(f'Please specify a custom accuracy function for output type {output_dtype}')
 
     if problem_definition.time_aim is None and (
             problem_definition.seconds_per_mixer is None or problem_definition.seconds_per_encoder is None):
@@ -324,6 +320,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     :returns: ``JSONAI`` object with all necessary parameters that were previously left unmentioned filled in.
     """
     problem_definition = json_ai.problem_definition
+    tss = problem_definition.timeseries_settings
+
     imports = [
         'from lightwood.mixer import Neural', 'from lightwood.mixer import LightGBM',
         'from lightwood.mixer import LightGBMArray', 'from lightwood.mixer import SkTime',
@@ -351,7 +349,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             continue
         imports.append(f"from lightwood.encoder import {encoder_import}")
 
-    if problem_definition.timeseries_settings.use_previous_target:
+    if tss.use_previous_target:
         imports.append('from lightwood.encoder import ArrayEncoder')
 
     # Add implicit arguments
@@ -368,8 +366,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]['args']['timeseries_settings'] = mixers[i]['args'].get(
                 'timeseries_settings', '$problem_definition.timeseries_settings')
             mixers[i]['args']['net'] = mixers[i]['args'].get(
-                'net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries
-                or not problem_definition.timeseries_settings.use_previous_target
+                'net', '"DefaultNet"' if not tss.is_timeseries
+                or not tss.use_previous_target
                 else '"ArNet"')
 
         elif mixers[i]['module'] == 'LightGBM':
@@ -462,15 +460,13 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "encoded_data": "encoded_data",
                 "predictions": "df",
                 "analysis": "$runtime_analyzer",
-                "ts_analysis": "$ts_analysis"
-                if problem_definition.timeseries_settings.is_timeseries
-                else None,
+                "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
                 "target_name": "$target",
                 "target_dtype": "$dtype_dict[self.target]",
             },
         }
 
-    if problem_definition.timeseries_settings.is_timeseries:
+    if tss.is_timeseries:
         if json_ai.timeseries_transformer is None:
             json_ai.timeseries_transformer = {
                 "module": "transform_timeseries",
@@ -521,7 +517,8 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
             dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
     # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
-    if json_ai.problem_definition.timeseries_settings.use_previous_target:
+    tss = json_ai.problem_definition.timeseries_settings
+    if tss.is_timeseries and tss.use_previous_target:
         col_name = f'__mdb_ts_previous_{json_ai.problem_definition.target}'
         json_ai.problem_definition.timeseries_settings.target_type = list(json_ai.outputs.values())[0].data_dtype
         encoder_dict[col_name] = call(lookup_encoder(list(json_ai.outputs.values())[0].data_dtype,

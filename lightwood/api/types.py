@@ -211,12 +211,13 @@ class TimeseriesSettings:
     order_by: List[str] = None
     window: int = None
     group_by: List[str] = None
-    use_previous_target: bool = False
+    use_previous_target: bool = True
     nr_predictions: int = None
     historical_columns: List[str] = None
     target_type: str = (
         ""  # @TODO: is the current setter (outside of initialization) a sane option?
     )
+    allow_incomplete_history: bool = False
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -241,6 +242,7 @@ class TimeseriesSettings:
                 use_previous_target=obj.get("use_previous_target", True),
                 historical_columns=[],
                 nr_predictions=obj.get("nr_predictions", 1),
+                allow_incomplete_history=obj.get('allow_incomplete_history', False)
             )
             for setting in obj:
                 timeseries_settings.__setattr__(setting, obj[setting])
