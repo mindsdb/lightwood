@@ -1,10 +1,24 @@
+# TODO: We need a better way to specify trainable_encoders
+# TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested
+# in seeing where these come from and it's not clear that you need to look here.
+# TODO: What does `target_class_distribution` and `positive_domain` do?
+# TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
+# TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
+# TODO: Please fix spelling on parallel_preped_encoders
+
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
-import autopep8
+import black
 from lightwood.api import dtype
 import numpy as np
-from lightwood.api.types import (JsonAI, TypeInformation, StatisticalAnalysis, Feature,
-                                 Output, ProblemDefinition)
+from lightwood.api.types import (
+    JsonAI,
+    TypeInformation,
+    StatisticalAnalysis,
+    Feature,
+    Output,
+    ProblemDefinition,
+)
 
 
 trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder')
@@ -12,8 +26,25 @@ ts_encoders = ('TimeSeriesEncoder', 'TsNumericEncoder')
 
 
 def lookup_encoder(
-        col_dtype: str, col_name: str, is_target: bool, problem_defintion: ProblemDefinition,
-        is_target_predicting_encoder: bool):
+    col_dtype: str,
+    col_name: str,
+    is_target: bool,
+    problem_defintion: ProblemDefinition,
+    is_target_predicting_encoder: bool,
+):
+    """
+    Assign a default encoder for a given column based on its data type, and whether it is a target. Encoders intake raw (but cleaned) data and return an feature representation. This function assigns, per data type, what the featurizer should be. This function runs on each column within the dataset available for model building to assign how it should be featurized.
+
+    Users may override to create a custom encoder to enable their own featurization process. However, in order to generate a template JSON-AI, this code is run first. Users may edit the generated syntax and use custom approaches while model building.
+
+    For each encoder, "args" may be passed. These args depend an encoder requires during its preparation call.
+
+    :param col_dtype: A data-type of a column specified
+    :param col_name: The name of the column
+    :param is_target: Whether the column is the target for prediction. If true, only certain possible feature representations are allowed, particularly for complex data types.
+    :param problem_definition: The ``ProblemDefinition`` criteria; this populates specifics on how models and encoders may be trained.
+    :param is_target_predicting_encoder:
+    """ # noqa
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
         dtype.integer: 'Integer.NumericEncoder',
@@ -30,40 +61,46 @@ def lookup_encoder(
         dtype.quantity: 'Quantity.NumericEncoder',
     }
 
+    # If column is a target, only specific feature representations are allowed that enable supervised tasks
     target_encoder_lookup_override = {
         dtype.rich_text: 'Rich_Text.VocabularyEncoder',
-        dtype.categorical: 'Categorical.OneHotEncoder'
+        dtype.categorical: 'Categorical.OneHotEncoder',
     }
 
-    encoder_dict = {
-        'module': encoder_lookup[col_dtype],
-        'args': {}
-    }
+    # Assign a default encoder to each column.
+    encoder_dict = {"module": encoder_lookup[col_dtype], "args": {}}
 
+    # If the column is a target, ensure that the feature representation can enable supervised tasks
     if is_target:
         encoder_dict['args'] = {'is_target': 'True'}
+
         if col_dtype in target_encoder_lookup_override:
             encoder_dict['module'] = target_encoder_lookup_override[col_dtype]
+
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
                 encoder_dict['args']['target_class_distribution'] = '$statistical_analysis.target_class_distribution'
         if col_dtype in (dtype.integer, dtype.float, dtype.array):
-            encoder_dict['args']['positive_domain'] = '$statistical_analysis.positive_domain'
+            encoder_dict['args'][
+                "positive_domain"
+            ] = "$statistical_analysis.positive_domain"
 
+    # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
         if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict['module'] = col_dtype.capitalize() + '.TimeSeriesEncoder'
+            encoder_dict['module'] = col_dtype.capitalize() + ".TimeSeriesEncoder"
             encoder_dict['args']['original_type'] = f'"{col_dtype}"'
             encoder_dict['args']['target'] = "self.target"
             encoder_dict['args']['grouped_by'] = f"{gby}"
+
         if is_target:
             if col_dtype in [dtype.integer]:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
-                encoder_dict['module'] = 'Integer.TsNumericEncoder'
+                encoder_dict['module'] = "Integer.TsNumericEncoder"
             if col_dtype in [dtype.float]:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
-                encoder_dict['module'] = 'Float.TsNumericEncoder'
+                encoder_dict['module'] = "Float.TsNumericEncoder"
             if tss.nr_predictions > 1:
                 encoder_dict['args']['grouped_by'] = f"{gby}"
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
@@ -74,33 +111,51 @@ def lookup_encoder(
             encoder_dict['args']['window'] = f'{tss.window}'
 
     # Set arguments for the encoder
-    if encoder_dict['module'] == 'Rich_Text.PretrainedLangEncoder' and not is_target:
-        encoder_dict['args']['output_type'] = '$dtype_dict[$target]'
+    if encoder_dict['module'] == "Rich_Text.PretrainedLangEncoder" and not is_target:
+        encoder_dict['args']['output_type'] = "$dtype_dict[$target]"
 
     for encoder_name in trainable_encoders:
-        if encoder_name == encoder_dict['module'].split('.')[1]:
-            encoder_dict['args']['stop_after'] = '$problem_definition.seconds_per_encoder'
+        if encoder_name == encoder_dict['module'].split(".")[1]:
+            encoder_dict['args'][
+                "stop_after"
+            ] = "$problem_definition.seconds_per_encoder"
 
     if is_target_predicting_encoder:
         encoder_dict['args']['embed_mode'] = 'False'
     return encoder_dict
 
 
-def generate_json_ai(type_information: TypeInformation, statistical_analysis: StatisticalAnalysis,
-                     problem_definition: ProblemDefinition) -> JsonAI:
+def generate_json_ai(
+    type_information: TypeInformation,
+    statistical_analysis: StatisticalAnalysis,
+    problem_definition: ProblemDefinition,
+) -> JsonAI:
+    """
+    Given ``TypeInformation``, ``StatisticalAnalysis``, and the ``ProblemDefinition``, generate a JSON config file with the necessary elements of the ML pipeline populated.
+
+    :param TypeInformation: Specifies what data types each column within the dataset are
+    :param statistical_analysis:
+    :param problem_definition: Specifies details of the model training/building procedure, as defined by ``ProblemDefinition``
+
+    :returns: JSON-AI object with fully populated details of the ML pipeline
+    """ # noqa
     target = problem_definition.target
     input_cols = []
     for col_name, col_dtype in type_information.dtypes.items():
-        if col_name not in type_information.identifiers and col_dtype not in (
-                dtype.invalid, dtype.empty) and col_name != target:
+        if (
+            col_name not in type_information.identifiers
+            and col_dtype not in (dtype.invalid, dtype.empty)
+            and col_name != target
+        ):
             input_cols.append(col_name)
 
     is_target_predicting_encoder = False
     # Single text column classification
-    if len(input_cols) == 1 and type_information.dtypes[
-            input_cols[0]] in (
-            dtype.rich_text) and type_information.dtypes[target] in (
-            dtype.categorical, dtype.binary):
+    if (
+        len(input_cols) == 1
+        and type_information.dtypes[input_cols[0]] in (dtype.rich_text)
+        and type_information.dtypes[target] in (dtype.categorical, dtype.binary)
+    ):
         is_target_predicting_encoder = True
 
     if is_target_predicting_encoder:
@@ -171,39 +226,40 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         }
     )}
 
-    if (problem_definition.timeseries_settings.is_timeseries and
-            problem_definition.timeseries_settings.nr_predictions > 1):
+    if (
+        problem_definition.timeseries_settings.is_timeseries
+        and problem_definition.timeseries_settings.nr_predictions > 1
+    ):
         list(outputs.values())[0].data_dtype = dtype.array
 
-    list(
-        outputs.values())[0].encoder = lookup_encoder(
-        type_information.dtypes[target],
-        target, True, problem_definition, False)
+    list(outputs.values())[0].encoder = lookup_encoder(
+        type_information.dtypes[target], target, True, problem_definition, False
+    )
 
     features: Dict[str, Feature] = {}
     for col_name in input_cols:
         col_dtype = type_information.dtypes[col_name]
         dependency = []
-        encoder = lookup_encoder(col_dtype, col_name, False, problem_definition, is_target_predicting_encoder)
+        encoder = lookup_encoder(
+            col_dtype, col_name, False, problem_definition, is_target_predicting_encoder
+        )
 
         for encoder_name in ts_encoders:
-            if problem_definition.timeseries_settings.is_timeseries and encoder_name == encoder['module'].split('.')[1]:
+            if (
+                problem_definition.timeseries_settings.is_timeseries
+                and encoder_name == encoder['module'].split(".")[1]
+            ):
                 if problem_definition.timeseries_settings.group_by is not None:
                     for group in problem_definition.timeseries_settings.group_by:
                         dependency.append(group)
 
                 if problem_definition.timeseries_settings.use_previous_target:
-                    dependency.append(f'__mdb_ts_previous_{target}')
+                    dependency.append(f"__mdb_ts_previous_{target}")
 
         if len(dependency) > 0:
-            feature = Feature(
-                encoder=encoder,
-                dependency=dependency
-            )
+            feature = Feature(encoder=encoder, dependency=dependency)
         else:
-            feature = Feature(
-                encoder=encoder
-            )
+            feature = Feature(encoder=encoder)
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
@@ -250,11 +306,18 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         identifiers=type_information.identifiers,
         timeseries_transformer=None,
         timeseries_analyzer=None,
-        accuracy_functions=accuracy_functions
+        accuracy_functions=accuracy_functions,
     )
 
 
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
+    """
+    To enable brevity in writing, auto-generate the "unspecified/missing" details required in the ML pipeline.
+
+    :params: json_ai: ``JsonAI`` object that describes the ML pipeline that may not have every detail fully specified.
+
+    :returns: ``JSONAI`` object with all necessary parameters that were previously left unmentioned filled in.
+    """
     problem_definition = json_ai.problem_definition
     imports = [
         'from lightwood.mixer import Neural', 'from lightwood.mixer import LightGBM',
@@ -279,9 +342,9 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
     for feature in [list(json_ai.outputs.values())[0], *json_ai.features.values()]:
         encoder_import = feature.encoder['module']
-        if '.' in encoder_import:
+        if "." in encoder_import:
             continue
-        imports.append(f'from lightwood.encoder import {encoder_import}')
+        imports.append(f"from lightwood.encoder import {encoder_import}")
 
     if problem_definition.timeseries_settings.use_previous_target:
         imports.append('from lightwood.encoder import ArrayEncoder')
@@ -330,24 +393,26 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         if json_ai.features[name].dependency is None:
             json_ai.features[name].dependency = []
         if json_ai.features[name].data_dtype is None:
-            json_ai.features[name].data_dtype = json_ai.features[name].encoder['module'].split('.')[0].lower()
+            json_ai.features[name].data_dtype = (
+                json_ai.features[name].encoder['module'].split(".")[0].lower()
+            )
 
     # Add implicit phases
     # @TODO: Consider removing once we have a proper editor in studio
     if json_ai.cleaner is None:
         json_ai.cleaner = {
-            'module': 'cleaner',
-            'args': {
-                'pct_invalid': '$problem_definition.pct_invalid',
-                'ignore_features': '$problem_definition.ignore_features',
-                'identifiers': '$identifiers',
-                'data': 'data',
-                'dtype_dict': '$dtype_dict',
-                'target': '$target',
-                'mode': '$mode',
-                'timeseries_settings': '$problem_definition.timeseries_settings',
-                'anomaly_detection': '$problem_definition.anomaly_detection'
-            }
+            "module": "cleaner",
+            "args": {
+                "pct_invalid": "$problem_definition.pct_invalid",
+                "ignore_features": "$problem_definition.ignore_features",
+                "identifiers": "$identifiers",
+                "data": "data",
+                "dtype_dict": "$dtype_dict",
+                "target": "$target",
+                "mode": "$mode",
+                "timeseries_settings": "$problem_definition.timeseries_settings",
+                "anomaly_detection": "$problem_definition.anomaly_detection",
+            },
         }
 
     if json_ai.splitter is None:
@@ -361,76 +426,88 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         }
     if json_ai.analyzer is None:
         json_ai.analyzer = {
-            'module': 'model_analyzer',
-            'args': {
-                'stats_info': '$statistical_analysis',
-                'ts_cfg': '$problem_definition.timeseries_settings',
-                'accuracy_functions': '$accuracy_functions',
-                'predictor': '$ensemble',
-                'data': 'test_data',
-                'train_data': 'train_data',
-                'target': '$target',
-                'disable_column_importance': 'False',
-                'dtype_dict': '$dtype_dict',
-                'fixed_significance': None,
-                'confidence_normalizer': False,
-                'positive_domain': '$statistical_analysis.positive_domain',
-            }
+            "module": "model_analyzer",
+            "args": {
+                "stats_info": "$statistical_analysis",
+                "ts_cfg": "$problem_definition.timeseries_settings",
+                "accuracy_functions": "$accuracy_functions",
+                "predictor": "$ensemble",
+                "data": "test_data",
+                "train_data": "train_data",
+                "target": "$target",
+                "disable_column_importance": "False",
+                "dtype_dict": "$dtype_dict",
+                "fixed_significance": None,
+                "confidence_normalizer": False,
+                "positive_domain": "$statistical_analysis.positive_domain",
+            },
         }
 
     if json_ai.explainer is None:
         json_ai.explainer = {
-            'module': 'explain',
-            'args': {
-                'timeseries_settings': '$problem_definition.timeseries_settings',
-                'positive_domain': '$statistical_analysis.positive_domain',
-                'fixed_confidence': '$problem_definition.fixed_confidence',
-                'anomaly_detection': '$problem_definition.anomaly_detection',
-                'anomaly_error_rate': '$problem_definition.anomaly_error_rate',
-                'anomaly_cooldown': '$problem_definition.anomaly_cooldown',
-                'data': 'data',
-                'encoded_data': 'encoded_data',
-                'predictions': 'df',
-                'analysis': '$runtime_analyzer',
-                'ts_analysis': '$ts_analysis' if problem_definition.timeseries_settings.is_timeseries else None,
-                'target_name': '$target',
-                'target_dtype': '$dtype_dict[self.target]',
-            }
+            "module": "explain",
+            "args": {
+                "timeseries_settings": "$problem_definition.timeseries_settings",
+                "positive_domain": "$statistical_analysis.positive_domain",
+                "fixed_confidence": "$problem_definition.fixed_confidence",
+                "anomaly_detection": "$problem_definition.anomaly_detection",
+                "anomaly_error_rate": "$problem_definition.anomaly_error_rate",
+                "anomaly_cooldown": "$problem_definition.anomaly_cooldown",
+                "data": "data",
+                "encoded_data": "encoded_data",
+                "predictions": "df",
+                "analysis": "$runtime_analyzer",
+                "ts_analysis": "$ts_analysis"
+                if problem_definition.timeseries_settings.is_timeseries
+                else None,
+                "target_name": "$target",
+                "target_dtype": "$dtype_dict[self.target]",
+            },
         }
 
     if problem_definition.timeseries_settings.is_timeseries:
         if json_ai.timeseries_transformer is None:
             json_ai.timeseries_transformer = {
-                'module': 'transform_timeseries',
-                'args': {
-                    'timeseries_settings': '$problem_definition.timeseries_settings',
-                    'data': 'data',
-                    'dtype_dict': '$dtype_dict',
-                    'target': '$target',
-                    'mode': '$mode'
-                }
+                "module": "transform_timeseries",
+                "args": {
+                    "timeseries_settings": "$problem_definition.timeseries_settings",
+                    "data": "data",
+                    "dtype_dict": "$dtype_dict",
+                    "target": "$target",
+                    "mode": "$mode",
+                },
             }
 
         if json_ai.timeseries_analyzer is None:
             json_ai.timeseries_analyzer = {
-                'module': 'timeseries_analyzer',
-                'args': {
-                    'timeseries_settings': '$problem_definition.timeseries_settings',
-                    'data': 'data',
-                    'dtype_dict': '$dtype_dict',
-                    'target': '$target'
-                }
+                "module": "timeseries_analyzer",
+                "args": {
+                    "timeseries_settings": "$problem_definition.timeseries_settings",
+                    "data": "data",
+                    "dtype_dict": "$dtype_dict",
+                    "target": "$target",
+                },
             }
 
     return json_ai
 
 
 def code_from_json_ai(json_ai: JsonAI) -> str:
+    """
+    Generates a custom ``PredictorInterface`` given the specifications from ``JsonAI`` object.
+
+    :param json_ai: ``JsonAI`` object with fully specified parameters
+
+    :returns: Automated syntax of the ``PredictorInterface`` object.
+    """
+    # Fill in any missing values
     json_ai = add_implicit_values(json_ai)
 
     encoder_dict = {json_ai.problem_definition.target: call(list(json_ai.outputs.values())[0].encoder)}
     dependency_dict = {}
-    dtype_dict = {json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""}
+    dtype_dict = {
+        json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
+    }
 
     for col_name, feature in json_ai.features.items():
         if col_name not in json_ai.problem_definition.ignore_features:
@@ -450,18 +527,16 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      ))
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
-        json_ai.features[col_name] = Feature(
-            encoder=encoder_dict[col_name]
-        )
+        json_ai.features[col_name] = Feature(encoder=encoder_dict[col_name])
 
     ignored_cols = json_ai.problem_definition.ignore_features
     input_cols = [x.replace("'", "\\'").replace('"', '\\"')
                   for x in json_ai.features]
     input_cols = ','.join([f"""'{name}'""" for name in input_cols if name not in ignored_cols])
 
-    ts_transform_code = ''
-    ts_analyze_code = ''
-    ts_encoder_code = ''
+    ts_transform_code = ""
+    ts_analyze_code = ""
+    ts_encoder_code = ""
     if json_ai.timeseries_transformer is not None:
         ts_transform_code = f"""
 log.info('Transforming timeseries data')
@@ -484,7 +559,7 @@ if encoder.is_target:
     encoder.group_combinations = self.ts_analysis['group_combinations']
 """
     else:
-        ts_target_code = ''
+        ts_target_code = ""
 
     dataprep_body = f"""
 # The type of each column
@@ -579,7 +654,9 @@ self.supports_proba = self.ensemble.supports_proba
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 
-# Partially fit the mixer on the reamining of the data, data is precious, we mustn't loss one bit
+# Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is
+# an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is
+# important to train with.
 for mixer in self.mixers:
     if {json_ai.problem_definition.fit_on_validation}:
         mixer.partial_fit(test_data, train_data)
@@ -612,7 +689,7 @@ return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
 
-    imports = '\n'.join(json_ai.imports)
+    imports = "\n".join(json_ai.imports)
     predictor_code = f"""
 {imports}
 from lightwood.api import PredictorInterface
@@ -644,14 +721,21 @@ class Predictor(PredictorInterface):
 {predict_proba_body}
 """
 
-    if len(predictor_code) < 5000:
-        predictor_code = autopep8.fix_code(predictor_code)
+    predictor_code = black.format_str(predictor_code, mode=black.FileMode())
 
     return predictor_code
 
 
 def validate_json_ai(json_ai: JsonAI) -> bool:
+    """
+    Checks the validity of a ``JsonAI`` object
+    
+    :param json_ai: A ``JsonAI`` object
+
+    :returns: Wether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
+    """ # noqa
     from lightwood.api.high_level import predictor_from_code, code_from_json_ai
+
     try:
         predictor_from_code(code_from_json_ai(json_ai))
         return True
