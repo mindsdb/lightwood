@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.predictor &mdash; lightwood 1.1.0 documentation</title>
+  <title>api.predictor &mdash; lightwood 1.2.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -181,7 +181,7 @@
 <span class="sd">    - ``save``: Saves the Predictor object for further use.</span>
 
 <span class="sd">    The ``PredictorInterface`` is created via J{ai}son&#39;s custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
 
     <span class="n">model_analysis</span><span class="p">:</span> <span class="n">ModelAnalysis</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -195,7 +195,7 @@
 <span class="sd">        :param data: Data used in training the model(s).</span>
 
 <span class="sd">        :returns: Provides best fit model.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="PredictorInterface.adjust"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.adjust">[docs]</a>    <span class="k">def</span> <span class="nf">adjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -206,7 +206,7 @@
 <span class="sd">        :param data: New data used to adjust a previously trained model.</span>
 
 <span class="sd">        :returns: Adjusts best-fit model</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="PredictorInterface.predict"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -226,7 +226,7 @@
 <span class="sd">        :param data: Data that the model(s) will evaluate on; provides the some element of predictive strength (ex: how &quot;confident&quot; the model is).</span>
 
 <span class="sd">        :returns: A dataframe of confidence metrics for each datapoint provided in the input (n_samples, n_classes)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="PredictorInterface.save"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
