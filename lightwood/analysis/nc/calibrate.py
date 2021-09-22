@@ -12,7 +12,7 @@ from lightwood.data.encoded_ds import ConcatedEncodedDs
 from lightwood.api.types import StatisticalAnalysis, TimeseriesSettings
 from lightwood.helpers.ts import add_tn_conf_bounds
 
-from lightwood.analysis.helpers.base import BaseAnalysisBlock
+from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.analysis.nc.norm import Normalizer
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
 from lightwood.analysis.nc.base import CachedRegressorAdapter, CachedClassifierAdapter
