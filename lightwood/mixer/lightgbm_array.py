@@ -4,12 +4,12 @@ from typing import Dict, List, Union
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
-from lightwood.model.base import BaseModel
-from lightwood.model.lightgbm import LightGBM
+from lightwood.mixer.base import BaseMixer
+from lightwood.mixer.lightgbm import LightGBM
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
-class LightGBMArray(BaseModel):
+class LightGBMArray(BaseMixer):
     """LightGBM-based model, intended for usage in time series tasks."""
     models: List[LightGBM]
     n_ts_predictions: int
@@ -36,8 +36,8 @@ class LightGBMArray(BaseModel):
 
         for timestep in range(self.n_ts_predictions):
             if timestep > 0:
-                for fold in range(len(ds_arr)):
-                    ds_arr[fold].data_frame[self.target] = ds_arr[fold].data_frame[f'{self.target}_timestep_{timestep}']
+                for idx in range(len(ds_arr)):
+                    ds_arr[idx].data_frame[self.target] = ds_arr[idx].data_frame[f'{self.target}_timestep_{timestep}']
             self.models[timestep].fit(ds_arr)  # @TODO: this call could be parallelized
 
     def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
@@ -46,8 +46,8 @@ class LightGBMArray(BaseModel):
         for timestep in range(self.n_ts_predictions):
             if timestep > 0:
                 for data in train_data, dev_data:
-                    for fold in range(len(data)):
-                        data[fold].data_frame[self.target] = data[fold].data_frame[f'{self.target}_timestep_{timestep}']
+                    for idx in range(len(data)):
+                        data[idx].data_frame[self.target] = data[idx].data_frame[f'{self.target}_timestep_{timestep}']
 
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
