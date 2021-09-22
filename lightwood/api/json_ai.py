@@ -46,7 +46,7 @@ def lookup_encoder(
             encoder_dict['module'] = target_encoder_lookup_override[col_dtype]
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
-                encoder_dict['args'] = {'target_class_distribution': '$statistical_analysis.target_class_distribution'}
+                encoder_dict['args']['target_class_distribution'] = '$statistical_analysis.target_class_distribution'
         if col_dtype in (dtype.integer, dtype.float, dtype.array):
             encoder_dict['args']['positive_domain'] = '$statistical_analysis.positive_domain'
 
@@ -83,7 +83,6 @@ def lookup_encoder(
 
     if is_target_predicting_encoder:
         encoder_dict['args']['embed_mode'] = 'False'
-
     return encoder_dict
 
 
@@ -208,16 +207,14 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
-    if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
+    if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime]:
         accuracy_functions = ['r2_score']
-    elif list(outputs.values())[0].data_dtype == dtype.categorical:
+    elif list(outputs.values())[0].data_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ['balanced_accuracy_score']
-    elif list(outputs.values())[0].data_dtype == dtype.tags:
-        accuracy_functions = ['balanced_accuracy_score']
-    elif list(outputs.values())[0].data_dtype == dtype.array:
+    elif list(outputs.values())[0].data_dtype in [dtype.array]:
         accuracy_functions = ['evaluate_array_accuracy']
     else:
-        accuracy_functions = ['accuracy_score']
+        raise Exception(f'Please specify a custom accuracy function for output type {data_dtype}')
 
     if problem_definition.time_aim is None and (
             problem_definition.seconds_per_mixer is None or problem_definition.seconds_per_encoder is None):
@@ -431,13 +428,13 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 def code_from_json_ai(json_ai: JsonAI) -> str:
     json_ai = add_implicit_values(json_ai)
 
-    encoder_dict = {json_ai.problem_definition.target: call(list(json_ai.outputs.values())[0].encoder, json_ai)}
+    encoder_dict = {json_ai.problem_definition.target: call(list(json_ai.outputs.values())[0].encoder)}
     dependency_dict = {}
     dtype_dict = {json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""}
 
     for col_name, feature in json_ai.features.items():
         if col_name not in json_ai.problem_definition.ignore_features:
-            encoder_dict[col_name] = call(feature.encoder, json_ai)
+            encoder_dict[col_name] = call(feature.encoder)
             dependency_dict[col_name] = feature.dependency
             dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
@@ -450,8 +447,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      False,
                                                      json_ai.problem_definition,
                                                      False,
-                                                     ),
-                                      json_ai)
+                                                     ))
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
         json_ai.features[col_name] = Feature(
@@ -469,10 +465,10 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     if json_ai.timeseries_transformer is not None:
         ts_transform_code = f"""
 log.info('Transforming timeseries data')
-data = {call(json_ai.timeseries_transformer, json_ai)}
+data = {call(json_ai.timeseries_transformer)}
 """
         ts_analyze_code = f"""
-self.ts_analysis = {call(json_ai.timeseries_analyzer, json_ai)}
+self.ts_analysis = {call(json_ai.timeseries_analyzer)}
 """
 
     if json_ai.timeseries_analyzer is not None:
@@ -507,14 +503,14 @@ self.dependencies = {inline_dict(dependency_dict)}
 self.input_cols = [{input_cols}]
 
 log.info('Cleaning the data')
-data = {call(json_ai.cleaner, json_ai)}
+data = {call(json_ai.cleaner)}
 
 {ts_transform_code}
 {ts_analyze_code}
 
 nsubsets = {json_ai.problem_definition.nsubsets}
 log.info(f'Splitting the data into {{nsubsets}} subsets')
-subsets = {call(json_ai.splitter, json_ai)}
+subsets = {call(json_ai.splitter)}
 
 log.info('Preparing the encoders')
 
@@ -557,12 +553,13 @@ for col_name, encoder in self.encoders.items():
 
     learn_body = f"""
 log.info('Featurizing the data')
+
 encoded_ds_arr = lightwood.encode(self.encoders, subsets, self.target)
 train_data = encoded_ds_arr[0:int(nsubsets*0.9)]
 test_data = encoded_ds_arr[int(nsubsets*0.9):]
 
 log.info('Training the mixers')
-self.mixers = [{', '.join([call(x, json_ai) for x in list(json_ai.outputs.values())[0].mixers])}]
+self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
 trained_mixers = []
 for mixer in self.mixers:
     try:
@@ -576,11 +573,11 @@ for mixer in self.mixers:
 self.mixers = trained_mixers
 
 log.info('Ensembling the mixer')
-self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble, json_ai)}
+self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
 
 log.info('Analyzing the ensemble')
-self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}
+self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 
 # Partially fit the mixer on the reamining of the data, data is precious, we mustn't loss one bit
 for mixer in self.mixers:
@@ -592,7 +589,7 @@ for mixer in self.mixers:
     predict_common_body = f"""
 self.mode = 'predict'
 log.info('Cleaning the data')
-data = {call(json_ai.cleaner, json_ai)}
+data = {call(json_ai.cleaner)}
 
 {ts_transform_code}
 
@@ -603,14 +600,14 @@ encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
     predict_body = f"""
 df = self.ensemble(encoded_ds)
-insights = {call(json_ai.explainer, json_ai)}
+insights = {call(json_ai.explainer)}
 return insights
 """
     predict_body = align(predict_body, 2)
 
     predict_proba_body = f"""
 df = self.ensemble(encoded_ds, predict_proba=True)
-insights = {call(json_ai.explainer, json_ai)}
+insights = {call(json_ai.explainer)}
 return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
