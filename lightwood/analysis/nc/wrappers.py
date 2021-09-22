@@ -1,4 +1,3 @@
-import os
 import torch
 from torch.nn.functional import softmax
 from lightwood.analysis.nc.base import RegressorAdapter, ClassifierAdapter
@@ -17,25 +16,6 @@ def clear_icp_state(icp):
     icp.model.last_y = None
     if icp.normalizer is not None:
         icp.normalizer.model = None
-
-
-def restore_icp_state(col, hmd, session):
-    icps = hmd['icp'][col]
-    try:
-        predictor = session.transaction.model_backend.predictor
-    except AttributeError:
-        model_path = os.path.join(CONFIG.MINDSDB_STORAGE_PATH, hmd['name'], 'lightwood_data')
-        predictor = Predictor(load_from_path=model_path)
-
-    for group, icp in icps.items():
-        if group not in ['__mdb_groups', '__mdb_group_keys']:
-            icp.nc_function.model.model = predictor
-
-    # restore model in normalizer
-    for group, icp in icps.items():
-        if group not in ['__mdb_groups', '__mdb_group_keys']:
-            if icp.nc_function.normalizer is not None:
-                icp.nc_function.normalizer.model = icp.nc_function.model.model
 
 
 class ConformalRegressorAdapter(RegressorAdapter):
