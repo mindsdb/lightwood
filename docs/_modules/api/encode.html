@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.encode &mdash; lightwood 1.1.0 documentation</title>
+  <title>api.encode &mdash; lightwood 1.2.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -162,16 +162,13 @@
            <div itemprop="articleBody">
             
   <h1>Source code for api.encode</h1><div class="highlight"><pre>
-<span></span><span class="c1"># TODO (2021.09.15 - Change &quot;folds&quot; to &quot;subsets&quot;)</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="k">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="k">import</span> <span class="n">EncodedDs</span>
 
 
-<div class="viewcode-block" id="encode"><a class="viewcode-back" href="../../api/encode.html#api.encode.encode">[docs]</a><span class="k">def</span> <span class="nf">encode</span><span class="p">(</span>
-    <span class="n">encoders</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseEncoder</span><span class="p">],</span> <span class="n">folds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">]:</span>
+<div class="viewcode-block" id="encode"><a class="viewcode-back" href="../../api/encode.html#api.encode.encode">[docs]</a><span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="n">encoders</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseEncoder</span><span class="p">],</span> <span class="n">subsets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a list of Lightwood encoders, and data subsets, applies the encoders onto each subset.</span>
 
@@ -181,12 +178,12 @@
 
 <span class="sd">    :returns: An encoded dataset for each encoder in the list</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">folds</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="n">folds</span> <span class="o">=</span> <span class="p">[</span><span class="n">folds</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subsets</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">subsets</span> <span class="o">=</span> <span class="p">[</span><span class="n">subsets</span><span class="p">]</span>
 
     <span class="n">encoded_ds_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">folds</span><span class="p">:</span>
-        <span class="n">encoded_ds_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EncodedDs</span><span class="p">(</span><span class="n">encoders</span><span class="p">,</span> <span class="n">fold</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets</span><span class="p">:</span>
+        <span class="n">encoded_ds_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EncodedDs</span><span class="p">(</span><span class="n">encoders</span><span class="p">,</span> <span class="n">subset</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">encoded_ds_arr</span></div>
 </pre></div>
 

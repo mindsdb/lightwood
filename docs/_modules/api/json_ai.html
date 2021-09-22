@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.json_ai &mdash; lightwood 1.1.0 documentation</title>
+  <title>api.json_ai &mdash; lightwood 1.2.0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -163,7 +163,8 @@
             
   <h1>Source code for api.json_ai</h1><div class="highlight"><pre>
 <span></span><span class="c1"># TODO: We need a better way to specify trainable_encoders</span>
-<span class="c1"># TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested in seeing where these come from and it&#39;s not clear that you need to look here.</span>
+<span class="c1"># TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested</span>
+<span class="c1"># in seeing where these come from and it&#39;s not clear that you need to look here.</span>
 <span class="c1"># TODO: What does `target_class_distribution` and `positive_domain` do?</span>
 <span class="c1"># TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?</span>
 <span class="c1"># TODO: add_implicit_values unit test ensures NO changes for a fully specified file.</span>
@@ -171,7 +172,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Dict</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.templating</span> <span class="k">import</span> <span class="n">call</span><span class="p">,</span> <span class="n">inline_dict</span><span class="p">,</span> <span class="n">align</span>
-<span class="kn">import</span> <span class="nn">autopep8</span>
+<span class="kn">import</span> <span class="nn">black</span>
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="k">import</span> <span class="n">dtype</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="k">import</span> <span class="p">(</span>
@@ -184,13 +185,8 @@
 <span class="p">)</span>
 
 
-<span class="n">trainable_encoders</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;PretrainedLangEncoder&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CategoricalAutoEncoder&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TimeSeriesEncoder&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TimeSeriesPlainEncoder&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">ts_encoders</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;TimeSeriesEncoder&quot;</span><span class="p">,</span> <span class="s2">&quot;TimeSeriesPlainEncoder&quot;</span><span class="p">,</span> <span class="s2">&quot;TsNumericEncoder&quot;</span><span class="p">)</span>
+<span class="n">trainable_encoders</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PretrainedLangEncoder&#39;</span><span class="p">,</span> <span class="s1">&#39;CategoricalAutoEncoder&#39;</span><span class="p">,</span> <span class="s1">&#39;TimeSeriesEncoder&#39;</span><span class="p">,</span> <span class="s1">&#39;ArrayEncoder&#39;</span><span class="p">)</span>
+<span class="n">ts_encoders</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;TimeSeriesEncoder&#39;</span><span class="p">,</span> <span class="s1">&#39;TsNumericEncoder&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="lookup_encoder"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.lookup_encoder">[docs]</a><span class="k">def</span> <span class="nf">lookup_encoder</span><span class="p">(</span>
@@ -212,27 +208,27 @@
 <span class="sd">    :param is_target: Whether the column is the target for prediction. If true, only certain possible feature representations are allowed, particularly for complex data types.</span>
 <span class="sd">    :param problem_definition: The ``ProblemDefinition`` criteria; this populates specifics on how models and encoders may be trained.</span>
 <span class="sd">    :param is_target_predicting_encoder:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
     <span class="n">tss</span> <span class="o">=</span> <span class="n">problem_defintion</span><span class="o">.</span><span class="n">timeseries_settings</span>
     <span class="n">encoder_lookup</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">:</span> <span class="s2">&quot;Integer.NumericEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">:</span> <span class="s2">&quot;Float.NumericEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">:</span> <span class="s2">&quot;Binary.BinaryEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span> <span class="s2">&quot;Categorical.CategoricalAutoEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span> <span class="s2">&quot;Tags.MultiHotEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">:</span> <span class="s2">&quot;Date.DatetimeEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="s2">&quot;Datetime.DatetimeEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">image</span><span class="p">:</span> <span class="s2">&quot;Image.Img2VecEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">:</span> <span class="s2">&quot;Rich_Text.PretrainedLangEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">:</span> <span class="s2">&quot;Short_Text.CategoricalAutoEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">:</span> <span class="s2">&quot;Array.TimeSeriesEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">:</span> <span class="s2">&quot;Quantity.NumericEncoder&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">:</span> <span class="s1">&#39;Integer.NumericEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">:</span> <span class="s1">&#39;Float.NumericEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">:</span> <span class="s1">&#39;Binary.BinaryEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span> <span class="s1">&#39;Categorical.CategoricalAutoEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span> <span class="s1">&#39;Tags.MultiHotEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">:</span> <span class="s1">&#39;Date.DatetimeEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="s1">&#39;Datetime.DatetimeEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">image</span><span class="p">:</span> <span class="s1">&#39;Image.Img2VecEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">:</span> <span class="s1">&#39;Rich_Text.PretrainedLangEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">:</span> <span class="s1">&#39;Short_Text.CategoricalAutoEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">:</span> <span class="s1">&#39;Array.ArrayEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">:</span> <span class="s1">&#39;Quantity.NumericEncoder&#39;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1"># If column is a target, only specific feature representations are allowed that enable supervised tasks</span>
     <span class="n">target_encoder_lookup_override</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">:</span> <span class="s2">&quot;Rich_Text.VocabularyEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span> <span class="s2">&quot;Categorical.OneHotEncoder&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">:</span> <span class="s1">&#39;Rich_Text.VocabularyEncoder&#39;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span> <span class="s1">&#39;Categorical.OneHotEncoder&#39;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1"># Assign a default encoder to each column.</span>
@@ -240,19 +236,16 @@
 
     <span class="c1"># If the column is a target, ensure that the feature representation can enable supervised tasks</span>
     <span class="k">if</span> <span class="n">is_target</span><span class="p">:</span>
-        <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;is_target&quot;</span><span class="p">:</span> <span class="s2">&quot;True&quot;</span><span class="p">}</span>
+        <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;is_target&#39;</span><span class="p">:</span> <span class="s1">&#39;True&#39;</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="n">target_encoder_lookup_override</span><span class="p">:</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_encoder_lookup_override</span><span class="p">[</span><span class="n">col_dtype</span><span class="p">]</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_encoder_lookup_override</span><span class="p">[</span><span class="n">col_dtype</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">problem_defintion</span><span class="o">.</span><span class="n">unbias_target</span><span class="p">:</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;target_class_distribution&quot;</span><span class="p">:</span> <span class="s2">&quot;$statistical_analysis.target_class_distribution&quot;</span>
-                <span class="p">}</span>
-
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target_class_distribution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;$statistical_analysis.target_class_distribution&#39;</span>
         <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span>
                 <span class="s2">&quot;positive_domain&quot;</span>
             <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;$statistical_analysis.positive_domain&quot;</span>
 
@@ -260,41 +253,39 @@
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
         <span class="n">gby</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">:</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">col_dtype</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.TimeSeriesEncoder&quot;</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;original_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;&quot;</span><span class="si">{col_dtype}</span><span class="s1">&quot;&#39;</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;self.target&quot;</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{gby}</span><span class="s2">&quot;</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">col_dtype</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.TimeSeriesEncoder&quot;</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;original_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;&quot;</span><span class="si">{col_dtype}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;self.target&quot;</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;grouped_by&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{gby}</span><span class="s2">&quot;</span>
 
         <span class="k">if</span> <span class="n">is_target</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">]:</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{gby}</span><span class="s2">&quot;</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Integer.TsNumericEncoder&quot;</span>
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;grouped_by&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{gby}</span><span class="s2">&quot;</span>
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Integer.TsNumericEncoder&quot;</span>
             <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">]:</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{gby}</span><span class="s2">&quot;</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Float.TsNumericEncoder&quot;</span>
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;grouped_by&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{gby}</span><span class="s2">&quot;</span>
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Float.TsNumericEncoder&quot;</span>
             <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{gby}</span><span class="s2">&quot;</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;timesteps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{tss.nr_predictions}</span><span class="s2">&quot;</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Array.TsArrayNumericEncoder&quot;</span>
-
-        <span class="k">if</span> <span class="s2">&quot;__mdb_ts_previous&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="p">:</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">col_dtype</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.TimeSeriesPlainEncoder&quot;</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;original_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;&quot;</span><span class="si">{tss.target_type}</span><span class="s1">&quot;&#39;</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;window&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{tss.window}</span><span class="s2">&quot;</span>
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;grouped_by&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{gby}</span><span class="s2">&quot;</span>
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;timesteps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{tss.nr_predictions}</span><span class="s2">&quot;</span>
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Array.TsArrayNumericEncoder&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;__mdb_ts_previous&#39;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="p">:</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">col_dtype</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;.ArrayEncoder&#39;</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;original_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;&quot;</span><span class="si">{tss.target_type}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;window&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{tss.window}</span><span class="s1">&#39;</span>
 
     <span class="c1"># Set arguments for the encoder</span>
-    <span class="k">if</span> <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Rich_Text.PretrainedLangEncoder&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_target</span><span class="p">:</span>
-        <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;output_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;$dtype_dict[$target]&quot;</span>
+    <span class="k">if</span> <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Rich_Text.PretrainedLangEncoder&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_target</span><span class="p">:</span>
+        <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;output_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;$dtype_dict[$target]&quot;</span>
 
     <span class="k">for</span> <span class="n">encoder_name</span> <span class="ow">in</span> <span class="n">trainable_encoders</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">encoder_name</span> <span class="o">==</span> <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span>
+        <span class="k">if</span> <span class="n">encoder_name</span> <span class="o">==</span> <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span>
                 <span class="s2">&quot;stop_after&quot;</span>
             <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;$problem_definition.seconds_per_encoder&quot;</span>
 
     <span class="k">if</span> <span class="n">is_target_predicting_encoder</span><span class="p">:</span>
-        <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;embed_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;False&quot;</span>
-
+        <span class="n">encoder_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;embed_mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
     <span class="k">return</span> <span class="n">encoder_dict</span></div>
 
 
@@ -311,7 +302,7 @@
 <span class="sd">    :param problem_definition: Specifies details of the model training/building procedure, as defined by ``ProblemDefinition``</span>
 
 <span class="sd">    :returns: JSON-AI object with fully populated details of the ML pipeline</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
     <span class="n">target</span> <span class="o">=</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span>
     <span class="n">input_cols</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -332,88 +323,72 @@
         <span class="n">is_target_predicting_encoder</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">is_target_predicting_encoder</span><span class="p">:</span>
-        <span class="n">models</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Unit&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;target_encoder&quot;</span><span class="p">:</span> <span class="s2">&quot;$encoders[self.target]&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_model&quot;</span><span class="p">,</span>
-                <span class="p">},</span>
+        <span class="n">mixers</span> <span class="o">=</span> <span class="p">[{</span>
+            <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;Unit&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;target_encoder&#39;</span><span class="p">:</span> <span class="s1">&#39;$encoders[self.target]&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;stop_after&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.seconds_per_mixer&#39;</span>
             <span class="p">}</span>
-        <span class="p">]</span>
+        <span class="p">}]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">models</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Neural&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_model&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;search_hyperparameters&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="p">},</span>
+        <span class="n">mixers</span> <span class="o">=</span> <span class="p">[{</span>
+            <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;Neural&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;fit_on_dev&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;stop_after&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.seconds_per_mixer&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;search_hyperparameters&#39;</span><span class="p">:</span> <span class="kc">True</span>
             <span class="p">}</span>
-        <span class="p">]</span>
 
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="ow">not</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span>
-            <span class="ow">or</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">&lt;=</span> <span class="mi">1</span>
-        <span class="p">):</span>
-            <span class="n">models</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;LightGBM&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_model&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                        <span class="p">},</span>
-                    <span class="p">},</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Regression&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_model&quot;</span><span class="p">,</span>
-                        <span class="p">},</span>
-                    <span class="p">},</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">models</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;LightGBMArray&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                            <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_model&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;n_ts_predictions&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.nr_predictions&quot;</span><span class="p">,</span>
-                        <span class="p">},</span>
+        <span class="p">}]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> \
+                <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">mixers</span><span class="o">.</span><span class="n">extend</span><span class="p">([{</span>
+                <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;LightGBM&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;stop_after&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.seconds_per_mixer&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;fit_on_dev&#39;</span><span class="p">:</span> <span class="kc">True</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;Regression&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;stop_after&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.seconds_per_mixer&#39;</span><span class="p">,</span>
                     <span class="p">}</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
+            <span class="p">}</span>
+            <span class="p">])</span>
+        <span class="k">elif</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">mixers</span><span class="o">.</span><span class="n">extend</span><span class="p">([{</span>
+                <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;LightGBMArray&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;fit_on_dev&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;stop_after&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.seconds_per_mixer&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;n_ts_predictions&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.timeseries_settings.nr_predictions&#39;</span>
+                <span class="p">}</span>
+            <span class="p">}])</span>
 
             <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
-                <span class="n">models</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="p">{</span>
-                            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;SkTime&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_model&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;n_ts_predictions&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.nr_predictions&quot;</span><span class="p">,</span>
-                            <span class="p">},</span>
-                        <span class="p">}</span>
-                    <span class="p">]</span>
-                <span class="p">)</span>
+                <span class="n">mixers</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;SkTime&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;stop_after&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.seconds_per_mixer&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;n_ts_predictions&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.timeseries_settings.nr_predictions&#39;</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">}</span>
+                <span class="p">])</span>
 
-    <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">target</span><span class="p">:</span> <span class="n">Output</span><span class="p">(</span>
-            <span class="n">data_dtype</span><span class="o">=</span><span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="n">target</span><span class="p">],</span>
-            <span class="n">encoder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
-            <span class="n">ensemble</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;BestOf&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;accuracy_functions&quot;</span><span class="p">:</span> <span class="s2">&quot;$accuracy_functions&quot;</span><span class="p">,</span>
-                <span class="p">},</span>
-            <span class="p">},</span>
-        <span class="p">)</span>
-    <span class="p">}</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">target</span><span class="p">:</span> <span class="n">Output</span><span class="p">(</span>
+        <span class="n">data_dtype</span><span class="o">=</span><span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="n">target</span><span class="p">],</span>
+        <span class="n">encoder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">mixers</span><span class="o">=</span><span class="n">mixers</span><span class="p">,</span>
+        <span class="n">ensemble</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;BestOf&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;accuracy_functions&#39;</span><span class="p">:</span> <span class="s1">&#39;$accuracy_functions&#39;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">)}</span>
 
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span>
@@ -436,7 +411,7 @@
         <span class="k">for</span> <span class="n">encoder_name</span> <span class="ow">in</span> <span class="n">ts_encoders</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span>
-                <span class="ow">and</span> <span class="n">encoder_name</span> <span class="o">==</span> <span class="n">encoder</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">encoder_name</span> <span class="o">==</span> <span class="n">encoder</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
             <span class="p">):</span>
                 <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
@@ -452,66 +427,36 @@
         <span class="n">features</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature</span>
 
     <span class="c1"># Decide on the accuracy functions to use</span>
-    <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">]:</span>
-        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;r2_score&quot;</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span>
-        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;balanced_accuracy_score&quot;</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
-        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;balanced_accuracy_score&quot;</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_array_accuracy&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r2_score&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">]:</span>
+        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;balanced_accuracy_score&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
+        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;evaluate_array_accuracy&#39;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;accuracy_score&quot;</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Please specify a custom accuracy function for output type </span><span class="si">{data_dtype}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
-        <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_model</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="ow">or</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="ow">is</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="mi">1000</span>
-            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">statistical_analysis</span><span class="o">.</span><span class="n">nr_rows</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="mi">4</span>
-                    <span class="k">if</span> <span class="n">x</span>
-                    <span class="ow">in</span> <span class="p">[</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">video</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">audio</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
-                    <span class="p">]</span>
-                    <span class="k">else</span> <span class="mi">1</span>
-                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-            <span class="o">*</span> <span class="mi">200</span>
-        <span class="p">)</span>
+            <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_mixer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+            <span class="n">statistical_analysis</span><span class="o">.</span><span class="n">nr_rows</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">4</span>
+             <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">video</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">audio</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">image</span><span class="p">]</span> <span class="k">else</span> <span class="mi">1</span>
+             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="o">*</span> <span class="mi">200</span>
 
     <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nr_trainable_encoders</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">x</span>
-                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">trainable_encoders</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-        <span class="n">nr_models</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
-        <span class="n">encoder_time_budget_pct</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
-            <span class="mf">3.3</span> <span class="o">/</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">1.5</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nr_trainable_encoders</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span>
-        <span class="p">)</span>
+        <span class="n">nr_trainable_encoders</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="ow">in</span> <span class="n">trainable_encoders</span><span class="p">])</span>
+        <span class="n">nr_mixers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mixers</span><span class="p">)</span>
+        <span class="n">encoder_time_budget_pct</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">3.3</span> <span class="o">/</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">1.5</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nr_trainable_encoders</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nr_trainable_encoders</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-                <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">encoder_time_budget_pct</span> <span class="o">/</span> <span class="n">nr_trainable_encoders</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_model</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-            <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">encoder_time_budget_pct</span><span class="p">)</span> <span class="o">/</span> <span class="n">nr_models</span><span class="p">)</span>
-        <span class="p">)</span>
+                <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">*</span> <span class="p">(</span><span class="n">encoder_time_budget_pct</span> <span class="o">/</span> <span class="n">nr_trainable_encoders</span><span class="p">))</span>
+        <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_mixer</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">encoder_time_budget_pct</span><span class="p">)</span> <span class="o">/</span> <span class="n">nr_mixers</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">JsonAI</span><span class="p">(</span>
         <span class="n">cleaner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -539,32 +484,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span>
     <span class="n">imports</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;from lightwood.model import Neural&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.model import LightGBM&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.model import LightGBMArray&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.model import SkTime&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.model import Unit&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.model import Regression&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.ensemble import BestOf&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.data import cleaner&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.data import transform_timeseries, timeseries_analyzer&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.data import splitter&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.analysis import model_analyzer, explain&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;import pandas as pd&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.helpers.seed import seed&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.helpers.log import log&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;import lightwood&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.api import *&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.model import BaseModel&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.encoder import BaseEncoder, __ts_encoders__&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags&quot;</span><span class="p">,</span>  <span class="c1"># noqa</span>
-        <span class="s2">&quot;from lightwood.ensemble import BaseEnsemble&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from typing import Dict, List&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.helpers.parallelism import mut_method_call&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood.data.encoded_ds import ConcatedEncodedDs&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;from lightwood import ProblemDefinition&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
+        <span class="s1">&#39;from lightwood.mixer import Neural&#39;</span><span class="p">,</span> <span class="s1">&#39;from lightwood.mixer import LightGBM&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.mixer import LightGBMArray&#39;</span><span class="p">,</span> <span class="s1">&#39;from lightwood.mixer import SkTime&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.mixer import Unit&#39;</span><span class="p">,</span> <span class="s1">&#39;from lightwood.mixer import Regression&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.ensemble import BestOf&#39;</span><span class="p">,</span> <span class="s1">&#39;from lightwood.data import cleaner&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.data import transform_timeseries, timeseries_analyzer&#39;</span><span class="p">,</span> <span class="s1">&#39;from lightwood.data import splitter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.analysis import model_analyzer, explain&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score&#39;</span><span class="p">,</span> <span class="s1">&#39;import pandas as pd&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.helpers.seed import seed&#39;</span><span class="p">,</span> <span class="s1">&#39;from lightwood.helpers.log import log&#39;</span><span class="p">,</span> <span class="s1">&#39;import lightwood&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.api import *&#39;</span><span class="p">,</span> <span class="s1">&#39;from lightwood.mixer import BaseMixer&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.encoder import BaseEncoder, __ts_encoders__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags&#39;</span><span class="p">,</span> <span class="c1"># noqa</span>
+        <span class="s1">&#39;from lightwood.ensemble import BaseEnsemble&#39;</span><span class="p">,</span> <span class="s1">&#39;from typing import Dict, List&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.helpers.parallelism import mut_method_call&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;from lightwood.data.encoded_ds import ConcatedEncodedDs&#39;</span><span class="p">,</span> <span class="s1">&#39;from lightwood import ProblemDefinition&#39;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">imports</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">json_ai</span><span class="o">.</span><span class="n">imports</span> <span class="o">=</span> <span class="n">imports</span>
@@ -572,86 +505,60 @@
         <span class="n">json_ai</span><span class="o">.</span><span class="n">imports</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">imports</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span> <span class="o">*</span><span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">values</span><span class="p">()]:</span>
-        <span class="n">encoder_import</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span>
+        <span class="n">encoder_import</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">encoder_import</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">imports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;from lightwood.encoder import </span><span class="si">{encoder_import}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
-        <span class="n">imports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;from lightwood.encoder import TimeSeriesPlainEncoder&quot;</span><span class="p">)</span>
+        <span class="n">imports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;from lightwood.encoder import ArrayEncoder&#39;</span><span class="p">)</span>
 
     <span class="c1"># Add implicit arguments</span>
     <span class="c1"># @TODO: Consider removing once we have a proper editor in studio</span>
-    <span class="n">models</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">models</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Unit&quot;</span><span class="p">:</span>
+    <span class="n">mixers</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">mixers</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mixers</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Unit&#39;</span><span class="p">:</span>
             <span class="k">pass</span>
-        <span class="k">elif</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Neural&quot;</span><span class="p">:</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target_encoder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;target_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;$encoders[self.target]&quot;</span>
-            <span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;dtype_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">,</span> <span class="s2">&quot;$dtype_dict&quot;</span>
-            <span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;input_cols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;input_cols&quot;</span><span class="p">,</span> <span class="s2">&quot;$input_cols&quot;</span>
-            <span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;timeseries_settings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">,</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span>
-            <span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;net&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;net&quot;</span><span class="p">,</span>
-                <span class="s1">&#39;&quot;DefaultNet&quot;&#39;</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span>
+        <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Neural&#39;</span><span class="p">:</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target_encoder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_encoder&#39;</span><span class="p">,</span> <span class="s1">&#39;$encoders[self.target]&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;$target&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">,</span> <span class="s1">&#39;$dtype_dict&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;input_cols&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;input_cols&#39;</span><span class="p">,</span> <span class="s1">&#39;$input_cols&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;timeseries_settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;timeseries_settings&#39;</span><span class="p">,</span> <span class="s1">&#39;$problem_definition.timeseries_settings&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;net&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;net&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;DefaultNet&quot;&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span>
                 <span class="ow">or</span> <span class="ow">not</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">use_previous_target</span>
-                <span class="k">else</span> <span class="s1">&#39;&quot;ArNet&quot;&#39;</span><span class="p">,</span>
-            <span class="p">)</span>
+                <span class="k">else</span> <span class="s1">&#39;&quot;ArNet&quot;&#39;</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;LightGBM&quot;</span><span class="p">:</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;dtype_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">,</span> <span class="s2">&quot;$dtype_dict&quot;</span>
-            <span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;input_cols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;input_cols&quot;</span><span class="p">,</span> <span class="s2">&quot;$input_cols&quot;</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Regression&quot;</span><span class="p">:</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;dtype_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">,</span> <span class="s2">&quot;$dtype_dict&quot;</span>
-            <span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target_encoder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;target_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;$encoders[self.target]&quot;</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;LightGBMArray&quot;</span><span class="p">:</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;dtype_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">,</span> <span class="s2">&quot;$dtype_dict&quot;</span>
-            <span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;input_cols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;input_cols&quot;</span><span class="p">,</span> <span class="s2">&quot;$input_cols&quot;</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;SkTime&quot;</span><span class="p">:</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;dtype_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">,</span> <span class="s2">&quot;$dtype_dict&quot;</span>
-            <span class="p">)</span>
-            <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;ts_analysis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;ts_analysis&quot;</span><span class="p">,</span> <span class="s2">&quot;$ts_analysis&quot;</span>
-            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;LightGBM&#39;</span><span class="p">:</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;$target&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">,</span> <span class="s1">&#39;$dtype_dict&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;input_cols&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;input_cols&#39;</span><span class="p">,</span> <span class="s1">&#39;$input_cols&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Regression&#39;</span><span class="p">:</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;$target&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">,</span> <span class="s1">&#39;$dtype_dict&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target_encoder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_encoder&#39;</span><span class="p">,</span> <span class="s1">&#39;$encoders[self.target]&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;LightGBMArray&#39;</span><span class="p">:</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;$target&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">,</span> <span class="s1">&#39;$dtype_dict&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;input_cols&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;input_cols&#39;</span><span class="p">,</span> <span class="s1">&#39;$input_cols&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SkTime&#39;</span><span class="p">:</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;$target&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">,</span> <span class="s1">&#39;$dtype_dict&#39;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">,</span> <span class="s1">&#39;$ts_analysis&#39;</span><span class="p">)</span>
 
     <span class="n">ensemble</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">ensemble</span>
-    <span class="n">ensemble</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
-    <span class="n">ensemble</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;test_data&quot;</span><span class="p">)</span>
-    <span class="n">ensemble</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;models&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;models&quot;</span><span class="p">,</span> <span class="s2">&quot;$models&quot;</span><span class="p">)</span>
+    <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;$target&#39;</span><span class="p">)</span>
+    <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;test_data&#39;</span><span class="p">)</span>
+    <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;mixers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mixers&#39;</span><span class="p">,</span> <span class="s1">&#39;$mixers&#39;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">dependency</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">dependency</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="p">)</span>
 
     <span class="c1"># Add implicit phases</span>
@@ -674,12 +581,12 @@
 
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">splitter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">json_ai</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;splitter&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;tss&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="s2">&quot;nfolds&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
+            <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;splitter&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;tss&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.timeseries_settings&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="s1">&#39;nsubsets&#39;</span>
+            <span class="p">}</span>
         <span class="p">}</span>
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">analyzer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">json_ai</span><span class="o">.</span><span class="n">analyzer</span> <span class="o">=</span> <span class="p">{</span>
@@ -760,12 +667,7 @@
     <span class="c1"># Fill in any missing values</span>
     <span class="n">json_ai</span> <span class="o">=</span> <span class="n">add_implicit_values</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
 
-    <span class="n">encoder_dict</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">:</span> <span class="n">call</span><span class="p">(</span>
-            <span class="nb">list</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="n">json_ai</span>
-        <span class="p">)</span>
-    <span class="p">}</span>
-
+    <span class="n">encoder_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">:</span> <span class="n">call</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span><span class="p">)}</span>
     <span class="n">dependency_dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">dtype_dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">:</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;&#39;{list(json_ai.outputs.values())[0].data_dtype}&#39;&quot;&quot;&quot;</span>
@@ -773,34 +675,28 @@
 
     <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">col_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">:</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">call</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="n">json_ai</span><span class="p">)</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">call</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="n">encoder</span><span class="p">)</span>
             <span class="n">dependency_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">dependency</span>
             <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;&#39;</span><span class="si">{feature.data_dtype}</span><span class="s2">&#39;&quot;&quot;&quot;</span>
 
     <span class="c1"># @TODO: Move into json-ai creation function (I think? Maybe? Let&#39;s discuss)</span>
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
-        <span class="n">col_name</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;__mdb_ts_previous_</span><span class="si">{json_ai.problem_definition.target}</span><span class="s2">&quot;</span>
-        <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span>
-        <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">call</span><span class="p">(</span>
-            <span class="n">lookup_encoder</span><span class="p">(</span>
-                <span class="nb">list</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span><span class="p">,</span>
-                <span class="n">col_name</span><span class="p">,</span>
-                <span class="kc">False</span><span class="p">,</span>
-                <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="p">,</span>
-                <span class="kc">False</span><span class="p">,</span>
-            <span class="p">),</span>
-            <span class="n">json_ai</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">col_name</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;__mdb_ts_previous_</span><span class="si">{json_ai.problem_definition.target}</span><span class="s1">&#39;</span>
+        <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span>
+        <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">call</span><span class="p">(</span><span class="n">lookup_encoder</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span><span class="p">,</span>
+                                                     <span class="n">col_name</span><span class="p">,</span>
+                                                     <span class="kc">False</span><span class="p">,</span>
+                                                     <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="p">,</span>
+                                                     <span class="kc">False</span><span class="p">,</span>
+                                                     <span class="p">))</span>
         <span class="n">dependency_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;&#39;{list(json_ai.outputs.values())[0].data_dtype}&#39;&quot;&quot;&quot;</span>
         <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span><span class="n">encoder</span><span class="o">=</span><span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">])</span>
 
     <span class="n">ignored_cols</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span>
-    <span class="n">input_cols</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">f</span><span class="s2">&quot;&quot;&quot;&#39;</span><span class="si">{name}</span><span class="s2">&#39;&quot;&quot;&quot;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignored_cols</span><span class="p">]</span>
-    <span class="p">)</span>
+    <span class="n">input_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+                  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">]</span>
+    <span class="n">input_cols</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="s2">&quot;&quot;&quot;&#39;</span><span class="si">{name}</span><span class="s2">&#39;&quot;&quot;&quot;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">input_cols</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignored_cols</span><span class="p">])</span>
 
     <span class="n">ts_transform_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">ts_analyze_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -808,10 +704,10 @@
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">timeseries_transformer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ts_transform_code</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">log.info(&#39;Transforming timeseries data&#39;)</span>
-<span class="s2">data = {call(json_ai.timeseries_transformer, json_ai)}</span>
+<span class="s2">data = {call(json_ai.timeseries_transformer)}</span>
 <span class="s2">&quot;&quot;&quot;</span>
         <span class="n">ts_analyze_code</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">self.ts_analysis = {call(json_ai.timeseries_analyzer, json_ai)}</span>
+<span class="s2">self.ts_analysis = {call(json_ai.timeseries_analyzer)}</span>
 <span class="s2">&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">timeseries_analyzer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -846,19 +742,19 @@
 <span class="s2">self.input_cols = [</span><span class="si">{input_cols}</span><span class="s2">]</span>
 
 <span class="s2">log.info(&#39;Cleaning the data&#39;)</span>
-<span class="s2">data = {call(json_ai.cleaner, json_ai)}</span>
+<span class="s2">data = {call(json_ai.cleaner)}</span>
 
 <span class="si">{ts_transform_code}</span><span class="s2"></span>
 <span class="si">{ts_analyze_code}</span><span class="s2"></span>
 
-<span class="s2">nfolds = </span><span class="si">{json_ai.problem_definition.nfolds}</span><span class="s2"></span>
-<span class="s2">log.info(f&#39;Splitting the data into {{nfolds}} folds&#39;)</span>
-<span class="s2">folds = {call(json_ai.splitter, json_ai)}</span>
+<span class="s2">nsubsets = </span><span class="si">{json_ai.problem_definition.nsubsets}</span><span class="s2"></span>
+<span class="s2">log.info(f&#39;Splitting the data into {{nsubsets}} subsets&#39;)</span>
+<span class="s2">subsets = {call(json_ai.splitter)}</span>
 
 <span class="s2">log.info(&#39;Preparing the encoders&#39;)</span>
 
 <span class="s2">encoder_preping_dict = {{}}</span>
-<span class="s2">enc_preping_data = pd.concat(folds[0:nfolds-1])</span>
+<span class="s2">enc_preping_data = pd.concat(subsets[0:nsubsets-1])</span>
 <span class="s2">for col_name, encoder in self.encoders.items():</span>
 <span class="s2">    if not encoder.is_nn_encoder:</span>
 <span class="s2">        encoder_preping_dict[col_name] = [encoder, enc_preping_data[col_name], &#39;prepare&#39;]</span>
@@ -873,7 +769,7 @@
 
 <span class="s2">for col_name, encoder in self.encoders.items():</span>
 <span class="s2">    if encoder.is_nn_encoder:</span>
-<span class="s2">        priming_data = pd.concat(folds[0:nfolds-1])</span>
+<span class="s2">        priming_data = pd.concat(subsets[0:nsubsets-1])</span>
 <span class="s2">        kwargs = {{}}</span>
 <span class="s2">        if self.dependencies[col_name]:</span>
 <span class="s2">            kwargs[&#39;dependency_data&#39;] = {{}}</span>
@@ -896,42 +792,45 @@
 
     <span class="n">learn_body</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">log.info(&#39;Featurizing the data&#39;)</span>
-<span class="s2">encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)</span>
-<span class="s2">train_data = encoded_ds_arr[0:int(nfolds*0.9)]</span>
-<span class="s2">test_data = encoded_ds_arr[int(nfolds*0.9):]</span>
 
-<span class="s2">log.info(&#39;Training the models&#39;)</span>
-<span class="s2">self.models = [{&#39;, &#39;.join([call(x, json_ai) for x in list(json_ai.outputs.values())[0].models])}]</span>
-<span class="s2">trained_models = []</span>
-<span class="s2">for model in self.models:</span>
+<span class="s2">encoded_ds_arr = lightwood.encode(self.encoders, subsets, self.target)</span>
+<span class="s2">train_data = encoded_ds_arr[0:int(nsubsets*0.9)]</span>
+<span class="s2">test_data = encoded_ds_arr[int(nsubsets*0.9):]</span>
+
+<span class="s2">log.info(&#39;Training the mixers&#39;)</span>
+<span class="s2">self.mixers = [{&#39;, &#39;.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]</span>
+<span class="s2">trained_mixers = []</span>
+<span class="s2">for mixer in self.mixers:</span>
 <span class="s2">    try:</span>
-<span class="s2">        model.fit(train_data)</span>
-<span class="s2">        trained_models.append(model)</span>
+<span class="s2">        mixer.fit(train_data)</span>
+<span class="s2">        trained_mixers.append(mixer)</span>
 <span class="s2">    except Exception as e:</span>
-<span class="s2">        log.warning(f&#39;Exception: {{e}} when training model: {{model}}&#39;)</span>
-<span class="s2">        if </span><span class="si">{json_ai.problem_definition.strict_mode}</span><span class="s2"> and model.stable:</span>
+<span class="s2">        log.warning(f&#39;Exception: {{e}} when training mixer: {{mixer}}&#39;)</span>
+<span class="s2">        if </span><span class="si">{json_ai.problem_definition.strict_mode}</span><span class="s2"> and mixer.stable:</span>
 <span class="s2">            raise e</span>
 
-<span class="s2">self.models = trained_models</span>
+<span class="s2">self.mixers = trained_mixers</span>
 
-<span class="s2">log.info(&#39;Ensembling the model&#39;)</span>
-<span class="s2">self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble, json_ai)}</span>
+<span class="s2">log.info(&#39;Ensembling the mixer&#39;)</span>
+<span class="s2">self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}</span>
 <span class="s2">self.supports_proba = self.ensemble.supports_proba</span>
 
 <span class="s2">log.info(&#39;Analyzing the ensemble&#39;)</span>
-<span class="s2">self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer, json_ai)}</span>
+<span class="s2">self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}</span>
 
-<span class="s2"># Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is important to train with.</span>
-<span class="s2">for model in self.models:</span>
+<span class="s2"># Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is</span>
+<span class="s2"># an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is</span>
+<span class="s2"># important to train with.</span>
+<span class="s2">for mixer in self.mixers:</span>
 <span class="s2">    if </span><span class="si">{json_ai.problem_definition.fit_on_validation}</span><span class="s2">:</span>
-<span class="s2">        model.partial_fit(test_data, train_data)</span>
+<span class="s2">        mixer.partial_fit(test_data, train_data)</span>
 <span class="s2">&quot;&quot;&quot;</span>
     <span class="n">learn_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">learn_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">predict_common_body</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">self.mode = &#39;predict&#39;</span>
 <span class="s2">log.info(&#39;Cleaning the data&#39;)</span>
-<span class="s2">data = {call(json_ai.cleaner, json_ai)}</span>
+<span class="s2">data = {call(json_ai.cleaner)}</span>
 
 <span class="si">{ts_transform_code}</span><span class="s2"></span>
 
@@ -942,14 +841,14 @@
 
     <span class="n">predict_body</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">df = self.ensemble(encoded_ds)</span>
-<span class="s2">insights = {call(json_ai.explainer, json_ai)}</span>
+<span class="s2">insights = {call(json_ai.explainer)}</span>
 <span class="s2">return insights</span>
 <span class="s2">&quot;&quot;&quot;</span>
     <span class="n">predict_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">predict_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">predict_proba_body</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">df = self.ensemble(encoded_ds, predict_proba=True)</span>
-<span class="s2">insights = {call(json_ai.explainer, json_ai)}</span>
+<span class="s2">insights = {call(json_ai.explainer)}</span>
 <span class="s2">return insights</span>
 <span class="s2">&quot;&quot;&quot;</span>
     <span class="n">predict_proba_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">predict_proba_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -962,13 +861,13 @@
 
 <span class="s2">class Predictor(PredictorInterface):</span>
 <span class="s2">    target: str</span>
-<span class="s2">    models: List[BaseModel]</span>
+<span class="s2">    mixers: List[BaseMixer]</span>
 <span class="s2">    encoders: Dict[str, BaseEncoder]</span>
 <span class="s2">    ensemble: BaseEnsemble</span>
 <span class="s2">    mode: str</span>
 
 <span class="s2">    def __init__(self):</span>
-<span class="s2">        seed()</span>
+<span class="s2">        seed(</span><span class="si">{json_ai.problem_definition.seed_nr}</span><span class="s2">)</span>
 <span class="s2">        self.target = &#39;</span><span class="si">{json_ai.problem_definition.target}</span><span class="s2">&#39;</span>
 <span class="s2">        self.mode = &#39;innactive&#39;</span>
 
@@ -986,20 +885,26 @@
 <span class="si">{predict_proba_body}</span><span class="s2"></span>
 <span class="s2">&quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictor_code</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
-        <span class="n">predictor_code</span> <span class="o">=</span> <span class="n">autopep8</span><span class="o">.</span><span class="n">fix_code</span><span class="p">(</span><span class="n">predictor_code</span><span class="p">)</span>
+    <span class="n">predictor_code</span> <span class="o">=</span> <span class="n">black</span><span class="o">.</span><span class="n">format_str</span><span class="p">(</span><span class="n">predictor_code</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">black</span><span class="o">.</span><span class="n">FileMode</span><span class="p">())</span>
 
     <span class="k">return</span> <span class="n">predictor_code</span></div>
 
 
-<span class="k">def</span> <span class="nf">validate_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="validate_json_ai"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.validate_json_ai">[docs]</a><span class="k">def</span> <span class="nf">validate_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks the validity of a ``JsonAI`` object</span>
+<span class="sd">    </span>
+<span class="sd">    :param json_ai: A ``JsonAI`` object</span>
+
+<span class="sd">    :returns: Wether the JsonAI is valid, i.e. doesn&#39;t contain prohibited values, unknown values and can be turned into code.</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
     <span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="k">import</span> <span class="n">predictor_from_code</span><span class="p">,</span> <span class="n">code_from_json_ai</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">))</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 </pre></div>
 
            </div>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Encode your data &mdash; lightwood 1.1.0 documentation</title>
+  <title>Encode your data &mdash; lightwood 1.2.0 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -184,13 +184,13 @@
 <span id="encode-your-data"></span><h1>Encode your data<a class="headerlink" href="#module-api.encode" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="api.encode.encode">
-<span class="sig-prename descclassname"><span class="pre">api.encode.</span></span><span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/encode.html#encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.encode.encode" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">api.encode.</span></span><span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/encode.html#encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.encode.encode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of Lightwood encoders, and data subsets, applies the encoders onto each subset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>encoders</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEncoder</span></code>]) – A list of lightwood encoders, in the order of each of the column types.</p></li>
-<li><p><strong>folds</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – A list of data subsets, each being a separate dataframe with all the columns applied per encoder.</p></li>
+<li><p><strong>folds</strong> – A list of data subsets, each being a separate dataframe with all the columns applied per encoder.</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the column that is the target for prediction.</p></li>
 </ul>
 </dd>

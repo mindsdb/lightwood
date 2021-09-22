@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>JSON-AI Config &mdash; lightwood 1.1.0 documentation</title>
+  <title>JSON-AI Config &mdash; lightwood 1.2.0 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -107,6 +107,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#api.json_ai.code_from_json_ai">code_from_json_ai</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.json_ai.generate_json_ai">generate_json_ai</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.json_ai.lookup_encoder">lookup_encoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.json_ai.validate_json_ai">validate_json_ai</a></li>
 </ul>
 </li>
 </ul>
@@ -254,6 +255,23 @@
 <li><p><strong>problem_definition</strong> – The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> criteria; this populates specifics on how models and encoders may be trained.</p></li>
 <li><p><strong>is_target_predicting_encoder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="api.json_ai.validate_json_ai">
+<span class="sig-prename descclassname"><span class="pre">api.json_ai.</span></span><span class="sig-name descname"><span class="pre">validate_json_ai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_ai</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/json_ai.html#validate_json_ai"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.json_ai.validate_json_ai" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the validity of a <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_ai</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">JsonAI</span></code>) – A <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Wether the JsonAI is valid, i.e. doesn’t contain prohibited values, unknown values and can be turned into code.</p>
 </dd>
 </dl>
 </dd></dl>
