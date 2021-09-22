@@ -7,12 +7,12 @@ from sklearn.linear_model import LinearRegression
 
 from lightwood.helpers.log import log
 from lightwood.api.dtype import dtype
-from lightwood.model import BaseModel
+from lightwood.mixer import BaseMixer
 from lightwood.encoder.base import BaseEncoder
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 
 
-class Regression(BaseModel):
+class Regression(BaseMixer):
     model: LinearRegression
     label_map: dict
     supports_proba: bool
