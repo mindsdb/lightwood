@@ -16,8 +16,9 @@ class TestBasic(unittest.TestCase):
 
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict(
             {'target': target, 'time_aim': 20, 'unbias_target': False}))
+        
         predictor.learn(train)
-
+    
         if hasattr(predictor, 'ensemble'):
             for i, mixer in enumerate(predictor.ensemble.mixers):
 

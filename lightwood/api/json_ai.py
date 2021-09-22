@@ -8,7 +8,7 @@
 
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
-import autopep8
+import black
 from lightwood.api import dtype
 import numpy as np
 from lightwood.api.types import (
@@ -721,8 +721,7 @@ class Predictor(PredictorInterface):
 {predict_proba_body}
 """
 
-    if len(predictor_code) < 5000:
-        predictor_code = autopep8.fix_code(predictor_code)
+    predictor_code = black.format_str(predictor_code, mode=black.FileMode())
 
     return predictor_code
 
