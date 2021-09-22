@@ -1,5 +1,6 @@
 # TODO: We need a better way to specify trainable_encoders
-# TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested in seeing where these come from and it's not clear that you need to look here.
+# TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested 
+# in seeing where these come from and it's not clear that you need to look here.
 # TODO: What does `target_class_distribution` and `positive_domain` do?
 # TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
 # TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
@@ -43,7 +44,7 @@ def lookup_encoder(
     :param is_target: Whether the column is the target for prediction. If true, only certain possible feature representations are allowed, particularly for complex data types.
     :param problem_definition: The ``ProblemDefinition`` criteria; this populates specifics on how models and encoders may be trained.
     :param is_target_predicting_encoder:
-    """
+    """ # noqa
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
         dtype.integer: 'Integer.NumericEncoder',
@@ -137,7 +138,7 @@ def generate_json_ai(
     :param problem_definition: Specifies details of the model training/building procedure, as defined by ``ProblemDefinition``
 
     :returns: JSON-AI object with fully populated details of the ML pipeline
-    """
+    """ # noqa
     target = problem_definition.target
     input_cols = []
     for col_name, col_dtype in type_information.dtypes.items():
