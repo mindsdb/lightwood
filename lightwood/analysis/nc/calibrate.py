@@ -15,7 +15,7 @@ from lightwood.analysis.nc.norm import Normalizer
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
 from lightwood.analysis.nc.base import CachedRegressorAdapter, CachedClassifierAdapter
 from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc, RegressorNc, ClassifierNc, MarginErrFunc
-from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numerical_conf_range, \
+from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numeric_conf_range, \
     get_categorical_conf, get_anomalies
 
 
@@ -282,10 +282,10 @@ class ICP(BaseAnalysisBlock):
                         confs = all_confs[:, :, int(100 * (1 - significances)) - 1]
                     else:
                         error_rate = ns.anomaly_error_rate if is_anomaly_task else None
-                        significances, confs = get_numerical_conf_range(all_confs,
-                                                                        df_std_dev=ns.analysis['df_std_dev'],
-                                                                        positive_domain=ns.positive_domain,
-                                                                        error_rate=error_rate)
+                        significances, confs = get_numeric_conf_range(all_confs,
+                                                                      df_std_dev=ns.analysis['df_std_dev'],
+                                                                      positive_domain=ns.positive_domain,
+                                                                      error_rate=error_rate)
                     result.loc[X.index, 'lower'] = confs[:, 0]
                     result.loc[X.index, 'upper'] = confs[:, 1]
                 else:
@@ -320,11 +320,11 @@ class ICP(BaseAnalysisBlock):
                                 if is_numerical:
                                     all_confs = icp.predict(X.values)
                                     error_rate = ns.anomaly_error_rate if is_anomaly_task else None
-                                    significances, confs = get_numerical_conf_range(all_confs,
-                                                                                    df_std_dev=ns.analysis['df_std_dev'],
-                                                                                    positive_domain=ns.positive_domain,
-                                                                                    group=frozenset(group),
-                                                                                    error_rate=error_rate)
+                                    significances, confs = get_numeric_conf_range(all_confs,
+                                                                                  df_std_dev=ns.analysis['df_std_dev'],
+                                                                                  positive_domain=ns.positive_domain,
+                                                                                  group=frozenset(group),
+                                                                                  error_rate=error_rate)
 
                                     # only replace where grouped ICP is more informative (i.e. tighter)
                                     default_icp_widths = result.loc[X.index, 'upper'] - result.loc[X.index, 'lower']
