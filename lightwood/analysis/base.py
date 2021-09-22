@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Optional
+from typing import Tuple, List, Dict, Optional
 
 import pandas as pd
 
@@ -6,7 +6,7 @@ import pandas as pd
 class BaseAnalysisBlock:
     """Class to be inherited by any analysis/explainer block."""
     def __init__(self,
-                 deps: Optional[list] = None
+                 deps: Optional[List] = []
                  ):
 
         self.is_prepared = False
