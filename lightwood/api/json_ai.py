@@ -178,7 +178,7 @@ def generate_json_ai(
 
         }]
 
-        if not tss.is_timeseries or tss.nr_predictions <= 1:
+        if not tss.is_timeseries or tss.nr_predictions == 1:
             mixers.extend([{
                 'module': 'LightGBM',
                 'args': {
@@ -259,15 +259,15 @@ def generate_json_ai(
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
-    if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime]:
+    output_dtype = list(outputs.values())[0].data_dtype
+    if output_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime]:
         accuracy_functions = ['r2_score']
-    elif list(outputs.values())[0].data_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
+    elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ['balanced_accuracy_score']
-    elif list(outputs.values())[0].data_dtype in [dtype.array]:
+    elif output_dtype in [dtype.array]:
         accuracy_functions = ['evaluate_array_accuracy']
     else:
-        data_dtype = list(outputs.values())[0].data_dtype
-        raise Exception(f'Please specify a custom accuracy function for output type {data_dtype}')
+        raise Exception(f'Please specify a custom accuracy function for output type {output_dtype}')
 
     if problem_definition.time_aim is None and (
             problem_definition.seconds_per_mixer is None or problem_definition.seconds_per_encoder is None):
