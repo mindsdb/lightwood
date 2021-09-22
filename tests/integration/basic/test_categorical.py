@@ -19,7 +19,7 @@ class TestBasic(unittest.TestCase):
         predictor.learn(train)
 
         if hasattr(predictor, 'ensemble'):
-            for i, model in enumerate(predictor.ensemble.models):
+            for i, mixer in enumerate(predictor.ensemble.mixers):
 
                 predictor.ensemble.best_index = i
                 predictions = predictor.predict(test)

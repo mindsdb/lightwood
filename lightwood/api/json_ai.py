@@ -7,8 +7,8 @@ from lightwood.api.types import (JsonAI, TypeInformation, StatisticalAnalysis, F
                                  Output, ProblemDefinition)
 
 
-trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'TimeSeriesPlainEncoder')
-ts_encoders = ('TimeSeriesEncoder', 'TimeSeriesPlainEncoder', 'TsNumericEncoder')
+trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder')
+ts_encoders = ('TimeSeriesEncoder', 'TsNumericEncoder')
 
 
 def lookup_encoder(
@@ -26,7 +26,7 @@ def lookup_encoder(
         dtype.image: 'Image.Img2VecEncoder',
         dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
         dtype.short_text: 'Short_Text.CategoricalAutoEncoder',
-        dtype.array: 'Array.TimeSeriesEncoder',
+        dtype.array: 'Array.ArrayEncoder',
         dtype.quantity: 'Quantity.NumericEncoder',
     }
 
@@ -69,7 +69,7 @@ def lookup_encoder(
                 encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
                 encoder_dict['module'] = 'Array.TsArrayNumericEncoder'
         if '__mdb_ts_previous' in col_name:
-            encoder_dict['module'] = col_dtype.capitalize() + '.TimeSeriesPlainEncoder'
+            encoder_dict['module'] = col_dtype.capitalize() + '.ArrayEncoder'
             encoder_dict['args']['original_type'] = f'"{tss.target_type}"'
             encoder_dict['args']['window'] = f'{tss.window}'
 
@@ -104,19 +104,19 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         is_target_predicting_encoder = True
 
     if is_target_predicting_encoder:
-        models = [{
+        mixers = [{
             'module': 'Unit',
             'args': {
                 'target_encoder': '$encoders[self.target]',
-                'stop_after': '$problem_definition.seconds_per_model'
+                'stop_after': '$problem_definition.seconds_per_mixer'
             }
         }]
     else:
-        models = [{
+        mixers = [{
             'module': 'Neural',
             'args': {
                 'fit_on_dev': True,
-                'stop_after': '$problem_definition.seconds_per_model',
+                'stop_after': '$problem_definition.seconds_per_mixer',
                 'search_hyperparameters': True
             }
 
@@ -124,36 +124,36 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 
         if not problem_definition.timeseries_settings.is_timeseries or \
                 problem_definition.timeseries_settings.nr_predictions <= 1:
-            models.extend([{
+            mixers.extend([{
                 'module': 'LightGBM',
                 'args': {
-                    'stop_after': '$problem_definition.seconds_per_model',
+                    'stop_after': '$problem_definition.seconds_per_mixer',
                     'fit_on_dev': True
                 }
             },
                 {
                     'module': 'Regression',
                     'args': {
-                        'stop_after': '$problem_definition.seconds_per_model',
+                        'stop_after': '$problem_definition.seconds_per_mixer',
                     }
             }
             ])
         elif problem_definition.timeseries_settings.nr_predictions > 1:
-            models.extend([{
+            mixers.extend([{
                 'module': 'LightGBMArray',
                 'args': {
                     'fit_on_dev': True,
-                    'stop_after': '$problem_definition.seconds_per_model',
+                    'stop_after': '$problem_definition.seconds_per_mixer',
                     'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions'
                 }
             }])
 
             if problem_definition.timeseries_settings.use_previous_target:
-                models.extend([
+                mixers.extend([
                     {
                         'module': 'SkTime',
                         'args': {
-                            'stop_after': '$problem_definition.seconds_per_model',
+                            'stop_after': '$problem_definition.seconds_per_mixer',
                             'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
                         },
                     }
@@ -162,7 +162,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     outputs = {target: Output(
         data_dtype=type_information.dtypes[target],
         encoder=None,
-        models=models,
+        mixers=mixers,
         ensemble={
             'module': 'BestOf',
             'args': {
@@ -217,7 +217,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         raise Exception(f'Please specify a custom accuracy function for output type {data_dtype}')
 
     if problem_definition.time_aim is None and (
-            problem_definition.seconds_per_model is None or problem_definition.seconds_per_encoder is None):
+            problem_definition.seconds_per_mixer is None or problem_definition.seconds_per_encoder is None):
         problem_definition.time_aim = 1000 + np.log(
             statistical_analysis.nr_rows / 10 + 1) * np.sum(
             [4
@@ -227,7 +227,7 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
     if problem_definition.time_aim is not None:
         nr_trainable_encoders = len([x for x in features.values() if x.encoder['module'].split('.')[1]
                                     in trainable_encoders])
-        nr_models = len(list(outputs.values())[0].models)
+        nr_mixers = len(list(outputs.values())[0].mixers)
         encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5)
 
         if nr_trainable_encoders == 0:
@@ -235,8 +235,8 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
         else:
             problem_definition.seconds_per_encoder = int(
                 problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders))
-        problem_definition.seconds_per_model = int(
-            problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_models))
+        problem_definition.seconds_per_mixer = int(
+            problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_mixers))
 
     return JsonAI(
         cleaner=None,
@@ -257,15 +257,15 @@ def generate_json_ai(type_information: TypeInformation, statistical_analysis: St
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     problem_definition = json_ai.problem_definition
     imports = [
-        'from lightwood.model import Neural', 'from lightwood.model import LightGBM',
-        'from lightwood.model import LightGBMArray', 'from lightwood.model import SkTime',
-        'from lightwood.model import Unit', 'from lightwood.model import Regression',
+        'from lightwood.mixer import Neural', 'from lightwood.mixer import LightGBM',
+        'from lightwood.mixer import LightGBMArray', 'from lightwood.mixer import SkTime',
+        'from lightwood.mixer import Unit', 'from lightwood.mixer import Regression',
         'from lightwood.ensemble import BestOf', 'from lightwood.data import cleaner',
         'from lightwood.data import transform_timeseries, timeseries_analyzer', 'from lightwood.data import splitter',
         'from lightwood.analysis import model_analyzer, explain',
         'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score', 'import pandas as pd',
         'from lightwood.helpers.seed import seed', 'from lightwood.helpers.log import log', 'import lightwood',
-        'from lightwood.api import *', 'from lightwood.model import BaseModel',
+        'from lightwood.api import *', 'from lightwood.mixer import BaseMixer',
         'from lightwood.encoder import BaseEncoder, __ts_encoders__',
         'from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
         'from lightwood.ensemble import BaseEnsemble', 'from typing import Dict, List',
@@ -284,47 +284,47 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         imports.append(f'from lightwood.encoder import {encoder_import}')
 
     if problem_definition.timeseries_settings.use_previous_target:
-        imports.append('from lightwood.encoder import TimeSeriesPlainEncoder')
+        imports.append('from lightwood.encoder import ArrayEncoder')
 
     # Add implicit arguments
     # @TODO: Consider removing once we have a proper editor in studio
-    models = json_ai.outputs[json_ai.problem_definition.target].models
-    for i in range(len(models)):
-        if models[i]['module'] == 'Unit':
+    mixers = json_ai.outputs[json_ai.problem_definition.target].mixers
+    for i in range(len(mixers)):
+        if mixers[i]['module'] == 'Unit':
             pass
-        elif models[i]['module'] == 'Neural':
-            models[i]['args']['target_encoder'] = models[i]['args'].get('target_encoder', '$encoders[self.target]')
-            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
-            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
-            models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
-            models[i]['args']['timeseries_settings'] = models[i]['args'].get(
+        elif mixers[i]['module'] == 'Neural':
+            mixers[i]['args']['target_encoder'] = mixers[i]['args'].get('target_encoder', '$encoders[self.target]')
+            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
+            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
+            mixers[i]['args']['input_cols'] = mixers[i]['args'].get('input_cols', '$input_cols')
+            mixers[i]['args']['timeseries_settings'] = mixers[i]['args'].get(
                 'timeseries_settings', '$problem_definition.timeseries_settings')
-            models[i]['args']['net'] = models[i]['args'].get(
+            mixers[i]['args']['net'] = mixers[i]['args'].get(
                 'net', '"DefaultNet"' if not problem_definition.timeseries_settings.is_timeseries
                 or not problem_definition.timeseries_settings.use_previous_target
                 else '"ArNet"')
 
-        elif models[i]['module'] == 'LightGBM':
-            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
-            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
-            models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
-        elif models[i]['module'] == 'Regression':
-            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
-            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
-            models[i]['args']['target_encoder'] = models[i]['args'].get('target_encoder', '$encoders[self.target]')
-        elif models[i]['module'] == 'LightGBMArray':
-            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
-            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
-            models[i]['args']['input_cols'] = models[i]['args'].get('input_cols', '$input_cols')
-        elif models[i]['module'] == 'SkTime':
-            models[i]['args']['target'] = models[i]['args'].get('target', '$target')
-            models[i]['args']['dtype_dict'] = models[i]['args'].get('dtype_dict', '$dtype_dict')
-            models[i]['args']['ts_analysis'] = models[i]['args'].get('ts_analysis', '$ts_analysis')
+        elif mixers[i]['module'] == 'LightGBM':
+            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
+            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
+            mixers[i]['args']['input_cols'] = mixers[i]['args'].get('input_cols', '$input_cols')
+        elif mixers[i]['module'] == 'Regression':
+            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
+            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
+            mixers[i]['args']['target_encoder'] = mixers[i]['args'].get('target_encoder', '$encoders[self.target]')
+        elif mixers[i]['module'] == 'LightGBMArray':
+            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
+            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
+            mixers[i]['args']['input_cols'] = mixers[i]['args'].get('input_cols', '$input_cols')
+        elif mixers[i]['module'] == 'SkTime':
+            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
+            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
+            mixers[i]['args']['ts_analysis'] = mixers[i]['args'].get('ts_analysis', '$ts_analysis')
 
     ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
     ensemble['args']['target'] = ensemble['args'].get('target', '$target')
     ensemble['args']['data'] = ensemble['args'].get('data', 'test_data')
-    ensemble['args']['models'] = ensemble['args'].get('models', '$models')
+    ensemble['args']['mixers'] = ensemble['args'].get('mixers', '$mixers')
 
     for name in json_ai.features:
         if json_ai.features[name].dependency is None:
@@ -356,7 +356,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'args': {
                 'tss': '$problem_definition.timeseries_settings',
                 'data': 'data',
-                'k': 'nfolds'
+                'k': 'nsubsets'
             }
         }
     if json_ai.analyzer is None:
@@ -508,14 +508,14 @@ data = {call(json_ai.cleaner)}
 {ts_transform_code}
 {ts_analyze_code}
 
-nfolds = {json_ai.problem_definition.nfolds}
-log.info(f'Splitting the data into {{nfolds}} folds')
-folds = {call(json_ai.splitter)}
+nsubsets = {json_ai.problem_definition.nsubsets}
+log.info(f'Splitting the data into {{nsubsets}} subsets')
+subsets = {call(json_ai.splitter)}
 
 log.info('Preparing the encoders')
 
 encoder_preping_dict = {{}}
-enc_preping_data = pd.concat(folds[0:nfolds-1])
+enc_preping_data = pd.concat(subsets[0:nsubsets-1])
 for col_name, encoder in self.encoders.items():
     if not encoder.is_nn_encoder:
         encoder_preping_dict[col_name] = [encoder, enc_preping_data[col_name], 'prepare']
@@ -530,7 +530,7 @@ if self.target not in parallel_preped_encoders:
 
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
-        priming_data = pd.concat(folds[0:nfolds-1])
+        priming_data = pd.concat(subsets[0:nsubsets-1])
         kwargs = {{}}
         if self.dependencies[col_name]:
             kwargs['dependency_data'] = {{}}
@@ -553,35 +553,36 @@ for col_name, encoder in self.encoders.items():
 
     learn_body = f"""
 log.info('Featurizing the data')
-encoded_ds_arr = lightwood.encode(self.encoders, folds, self.target)
-train_data = encoded_ds_arr[0:int(nfolds*0.9)]
-test_data = encoded_ds_arr[int(nfolds*0.9):]
 
-log.info('Training the models')
-self.models = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].models])}]
-trained_models = []
-for model in self.models:
+encoded_ds_arr = lightwood.encode(self.encoders, subsets, self.target)
+train_data = encoded_ds_arr[0:int(nsubsets*0.9)]
+test_data = encoded_ds_arr[int(nsubsets*0.9):]
+
+log.info('Training the mixers')
+self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
+trained_mixers = []
+for mixer in self.mixers:
     try:
-        model.fit(train_data)
-        trained_models.append(model)
+        mixer.fit(train_data)
+        trained_mixers.append(mixer)
     except Exception as e:
-        log.warning(f'Exception: {{e}} when training model: {{model}}')
-        if {json_ai.problem_definition.strict_mode} and model.stable:
+        log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
+        if {json_ai.problem_definition.strict_mode} and mixer.stable:
             raise e
 
-self.models = trained_models
+self.mixers = trained_mixers
 
-log.info('Ensembling the model')
+log.info('Ensembling the mixer')
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
 
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 
-# Partially fit the model on the reamining of the data, data is precious, we mustn't loss one bit
-for model in self.models:
+# Partially fit the mixer on the reamining of the data, data is precious, we mustn't loss one bit
+for mixer in self.mixers:
     if {json_ai.problem_definition.fit_on_validation}:
-        model.partial_fit(test_data, train_data)
+        mixer.partial_fit(test_data, train_data)
 """
     learn_body = align(learn_body, 2)
 
@@ -619,7 +620,7 @@ from lightwood.api import PredictorInterface
 
 class Predictor(PredictorInterface):
     target: str
-    models: List[BaseModel]
+    mixers: List[BaseMixer]
     encoders: Dict[str, BaseEncoder]
     ensemble: BaseEnsemble
     mode: str

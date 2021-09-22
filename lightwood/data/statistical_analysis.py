@@ -38,10 +38,10 @@ def get_numeric_histogram(data: pd.Series, data_dtype: dtype, bins: int) -> Dict
     """Generate the histogram for integer and float typed data
     """
     # Handle arrays that are actual arrays and not things that become arrays later
-    if ' ' in str(data[0]):
+    if isinstance(data[0], list):
         new_data = []
-        for list_str in data:
-            new_data.extend([float(x) for x in list_str.split(' ')])
+        for arr in data:
+            new_data.extend(arr)
         data = new_data
 
     data = [_clean_float_or_none(x) for x in data]
@@ -85,7 +85,7 @@ def statistical_analysis(data: pd.DataFrame,
                  problem_definition.anomaly_detection)
 
     missing = {col: len([x for x in df[col] if x is None]) / len(df[col]) for col in df.columns}
-    distinct = {col: len(set(df[col])) / len(df[col]) for col in df.columns}
+    distinct = {col: len(set([str(x) for x in df[col]])) / len(df[col]) for col in df.columns}
 
     nr_rows = len(df)
     target = problem_definition.target
