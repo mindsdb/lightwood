@@ -19,7 +19,7 @@ def create_custom_module():
 
     os.mkdir(mdir)
     with open(os.path.join(mdir, 'custom_cleaners.py'), 'w') as fp:
-        fp.write(f'def throwing_cleaner(): raise Exception({test_err_message})')
+        fp.write(f'def throwing_cleaner(): raise Exception("{test_err_message}")')
 
 
 class TestBasic(unittest.TestCase):
@@ -33,7 +33,8 @@ class TestBasic(unittest.TestCase):
         # modify it
         json_ai_dump = json_ai.to_dict()
         json_ai_dump['cleaner'] = {
-            'module': 'custom_cleaners.throwing_cleaner'
+            'module': 'custom_cleaners.throwing_cleaner',
+            'args': {}
         }
 
         json_ai = JsonAI.from_dict(json_ai_dump)
@@ -45,6 +46,7 @@ class TestBasic(unittest.TestCase):
             predictor.learn(df)
         except Exception as e:
             assert str(e) == test_err_message
+            return
 
-        raise Exception('Predictor did not contain modified functioN!')
+        raise Exception('Predictor did not contain modified function!')
 
