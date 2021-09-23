@@ -6,7 +6,7 @@ from itertools import product
 from lightwood.api.types import TimeseriesSettings
 
 
-def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings, 
+def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings,
              seed: int, pct_train: float) -> List[pd.DataFrame]:
     """
     Splits a dataframe into k equally-sized subsets.
