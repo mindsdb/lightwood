@@ -255,7 +255,8 @@ def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers:
     :returns: A (new) dataframe without the dropped columns
     """ # noqa
     data = deepcopy(data)
-    to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target]]
+    to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target],
+               [x for x in data.columns if dtype_dict[x] == dtype.invalid]]
     exceptions = ["__mdb_make_predictions"]
     for col in to_drop:
         try:
