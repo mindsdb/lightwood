@@ -8,6 +8,7 @@ import abc
 import numpy as np
 import sklearn.base
 from scipy.interpolate import interp1d
+from copy import deepcopy
 
 
 # -----------------------------------------------------------------------------
@@ -326,16 +327,27 @@ class BaseModelNc(BaseScorer):
             Nonconformity scores of samples.
         """ # noqa
         prediction = self.model.predict(x)
-        n_test = x.shape[0]
 
-        norm = np.ones(n_test)
+        err = self.err_func.apply(prediction, y)
         if self.normalizer is not None:
             try:
                 norm = self.normalizer.score(x) + self.beta
+                err = err / norm
             except Exception:
                 pass
 
-        return self.err_func.apply(prediction, y) / norm
+        return err
+
+    def __deepcopy__(self, memo={}):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if k not in ['model', 'normalizer']:  # model should not be copied
+                setattr(result, k, deepcopy(v, memo))
+            else:
+                setattr(result, k, v)
+        return result
 
 
 # -----------------------------------------------------------------------------
@@ -454,7 +466,7 @@ class RegressorNc(BaseModelNc):
         n_test = x.shape[0]
         prediction = self.model.predict(x)
 
-        norm = np.ones(n_test)
+        norm = 1
         if self.normalizer is not None:
             try:
                 norm = self.normalizer.score(x) + self.beta
@@ -462,11 +474,11 @@ class RegressorNc(BaseModelNc):
                 pass
 
         if significance:
-            intervals = np.zeros((x.shape[0], 2))
             err_dist = self.err_func.apply_inverse(nc, significance)
             err_dist = np.hstack([err_dist] * n_test)
             err_dist *= norm
 
+            intervals = np.zeros((x.shape[0], 2))
             intervals[:, 0] = prediction - err_dist[0, :]
             intervals[:, 1] = prediction + err_dist[1, :]
 
