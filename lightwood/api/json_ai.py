@@ -557,12 +557,12 @@ data = {call(json_ai.cleaner)}
 
 nsubsets = {json_ai.problem_definition.nsubsets}
 log.info(f'Splitting the data into {{nsubsets}} subsets')
-subsets = {call(json_ai.splitter)}
+data = {call(json_ai.splitter)}
 
 log.info('Preparing the encoders')
 
 encoder_preping_dict = {{}}
-enc_preping_data = pd.concat(subsets[0:nsubsets-1])
+enc_preping_data = pd.concat(data['train'])
 for col_name, encoder in self.encoders.items():
     if not encoder.is_nn_encoder:
         encoder_preping_dict[col_name] = [encoder, enc_preping_data[col_name], 'prepare']
@@ -577,7 +577,7 @@ if self.target not in parallel_preped_encoders:
 
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
-        priming_data = pd.concat(subsets[0:nsubsets-1])
+        priming_data = pd.concat(data['train'])
         kwargs = {{}}
         if self.dependencies[col_name]:
             kwargs['dependency_data'] = {{}}
@@ -601,16 +601,16 @@ for col_name, encoder in self.encoders.items():
     learn_body = f"""
 log.info('Featurizing the data')
 
-encoded_ds_arr = lightwood.encode(self.encoders, subsets, self.target)
-train_data = encoded_ds_arr[0:int(nsubsets*0.9)]
-test_data = encoded_ds_arr[int(nsubsets*0.9):]
+encoded_data = {{}}
+encoded_data['train'] = lightwood.encode(data['train'], subsets, self.target)
+encoded_data['test'] = lightwood.encode(data['test'], subsets, self.target)
 
 log.info('Training the mixers')
 self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
 trained_mixers = []
 for mixer in self.mixers:
     try:
-        mixer.fit(train_data)
+        mixer.fit(encoded_data['train'])
         trained_mixers.append(mixer)
     except Exception as e:
         log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
@@ -631,7 +631,7 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 # important to train with.
 for mixer in self.mixers:
     if {json_ai.problem_definition.fit_on_validation}:
-        mixer.partial_fit(test_data, train_data)
+        mixer.partial_fit(encoded_data['test'], encoded_data['train'])
 """
     learn_body = align(learn_body, 2)
 
