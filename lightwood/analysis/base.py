@@ -9,7 +9,6 @@ class BaseAnalysisBlock:
                  deps: Optional[List] = []
                  ):
 
-        self.is_prepared = False
         self.dependencies = deps  # can be parallelized when there are no dependencies
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:

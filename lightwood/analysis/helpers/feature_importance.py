@@ -51,7 +51,6 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
             column_importances[col] = 10 * inc  # scores go from 0 to 10 in GUI
 
         info['column_importances'] = column_importances
-        self.is_prepared = True
         return info
 
     def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
