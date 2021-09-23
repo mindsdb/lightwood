@@ -11,14 +11,18 @@ test_err_message = 'This ! Is ! A ! Testing ! Error !'
 
 def create_custom_module():
     mdir = os.path.expanduser('~/lightwood_modules')
-
+    mpath = os.path.join(mdir, 'custom_cleaners.py')
     try:
-        shutil.rmtree(mdir)
+        shutil.rmtree(mpath)
     except Exception:
         pass
 
-    os.mkdir(mdir)
-    with open(os.path.join(mdir, 'custom_cleaners.py'), 'w') as fp:
+    try:
+        os.mkdir(mdir)
+    except Exception:
+        pass
+
+    with open(mpath, 'w') as fp:
         fp.write(f'def throwing_cleaner(): raise Exception("{test_err_message}")')
 
 
