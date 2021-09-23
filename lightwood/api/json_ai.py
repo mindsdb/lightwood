@@ -393,8 +393,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'args': {
                 'tss': '$problem_definition.timeseries_settings',
                 'data': 'data',
-                'k': 'nsubsets',
-                'seed': None,
+                'seed': 1, # TODO - we should use user-specified seed here
+                'target': None, # TODO - make stratification default by passing target col
                 'pct_train': 0.9
             }
         }
