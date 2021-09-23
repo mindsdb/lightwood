@@ -302,7 +302,6 @@ def generate_json_ai(
         explainer=None,
         features=features,
         outputs=outputs,
-        imports=None,
         problem_definition=problem_definition,
         identifiers=type_information.identifiers,
         timeseries_transformer=None,
@@ -321,36 +320,6 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     """
     problem_definition = json_ai.problem_definition
     tss = problem_definition.timeseries_settings
-
-    imports = [
-        'from lightwood.mixer import Neural', 'from lightwood.mixer import LightGBM',
-        'from lightwood.mixer import LightGBMArray', 'from lightwood.mixer import SkTime',
-        'from lightwood.mixer import Unit', 'from lightwood.mixer import Regression',
-        'from lightwood.ensemble import BestOf', 'from lightwood.data import cleaner',
-        'from lightwood.data import transform_timeseries, timeseries_analyzer', 'from lightwood.data import splitter',
-        'from lightwood.analysis import model_analyzer, explain',
-        'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score', 'import pandas as pd',
-        'from lightwood.helpers.seed import seed', 'from lightwood.helpers.log import log', 'import lightwood',
-        'from lightwood.api import *', 'from lightwood.mixer import BaseMixer',
-        'from lightwood.encoder import BaseEncoder, __ts_encoders__',
-        'from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, TimeSeries, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
-        'from lightwood.ensemble import BaseEnsemble', 'from typing import Dict, List',
-        'from lightwood.helpers.parallelism import mut_method_call',
-        'from lightwood.data.encoded_ds import ConcatedEncodedDs', 'from lightwood import ProblemDefinition']
-
-    if json_ai.imports is None:
-        json_ai.imports = imports
-    else:
-        json_ai.imports.extend(imports)
-
-    for feature in [list(json_ai.outputs.values())[0], *json_ai.features.values()]:
-        encoder_import = feature.encoder['module']
-        if "." in encoder_import:
-            continue
-        imports.append(f"from lightwood.encoder import {encoder_import}")
-
-    if tss.use_previous_target:
-        imports.append('from lightwood.encoder import ArrayEncoder')
 
     # Add implicit arguments
     # @TODO: Consider removing once we have a proper editor in studio
@@ -691,11 +660,47 @@ return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
 
-    imports = "\n".join(json_ai.imports)
+    imports = """
+import lightwood
+from lightwood.analysis import *
+from lightwood.api import *
+from lightwood.data import *
+from lightwood.encoder import *
+from lightwood.ensemble import *
+from lightwood.helpers.device import *
+from lightwood.helpers.general import *
+from lightwood.helpers.log import *
+from lightwood.helpers.numeric import *
+from lightwood.helpers.parallelism import *
+from lightwood.helpers.seed import *
+from lightwood.helpers.text import *
+from lightwood.helpers.torch import *
+from lightwood.mixer import *
+from lightwood.encoder import __ts_encoders__
+import pandas as pd
+from typing import Dict, List
+import os
+import importlib.machinery
+import os
+import importlib.machinery
+from types import ModuleType
+import sys"""
+
+    import_external_dir = """
+for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
+    if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
+        for file_name in list(os.walk(import_dir))[0][2]:
+            print(file_name)
+            mod_name = file_name.rstrip('.py')
+            loader = importlib.machinery.SourceFileLoader(mod_name,
+                                                          os.path.join(import_dir, file_name))
+            module = ModuleType(loader.name)
+            loader.exec_module(module)
+            exec(f'{mod_name} = module')
+"""
     predictor_code = f"""
 {imports}
-from lightwood.api import PredictorInterface
-
+{import_external_dir}
 
 class Predictor(PredictorInterface):
     target: str
