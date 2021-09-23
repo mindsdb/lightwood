@@ -11,6 +11,7 @@ from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import can_be_nan_numeric
 
+import numpy as np
 from typing import Dict, List, Optional, Tuple, Callable, Union
 
 
@@ -48,10 +49,11 @@ def cleaner(
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
-        data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
-
+        data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
+                    ).replace({np.nan: None})
         # If a column has too many None values, raise an Excpetion
         _check_if_invalid(data[col], pct_invalid, col)
+    
 
     return data
 
@@ -207,7 +209,8 @@ def _clean_int(element: object) -> Optional[int]:
 
 
 def _clean_quantity(element: object) -> Optional[float]:
-    return float(re.sub("[^0-9.,]", "", str(element)).replace(",", "."))
+    element = float(re.sub("[^0-9.,]", "", str(element)).replace(",", "."))
+    return _clean_float(element)
 
 
 def _clean_text(element: object) -> str:
