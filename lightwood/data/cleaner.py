@@ -80,7 +80,7 @@ def get_cleaning_func(data_dtype: dtype, custom_cleaning_functions: Dict[str, st
     :returns: The appropriate function that will pre-process (clean) data of specified dtype.
     """ # noqa
     if data_dtype in custom_cleaning_functions:
-        clean_func = custom_cleaning_functions[data_dtype]
+        clean_func = eval(custom_cleaning_functions[data_dtype])
 
     elif data_dtype in (dtype.date, dtype.datetime):
         clean_func = _standardize_datetime
