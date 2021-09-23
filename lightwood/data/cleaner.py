@@ -41,7 +41,7 @@ def cleaner(
 
     :returns: The cleaned data
     """ # noqa
-    
+
     data = _remove_columns(data, ignore_features, identifiers, target, mode, timeseries_settings,
                            anomaly_detection, dtype_dict)
 
