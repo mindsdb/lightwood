@@ -24,7 +24,12 @@ def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings, seed: int) -> 
             gcols = tss.group_by
             subsets = grouped_ts_splitter(data, k, gcols)
 
-    return subsets
+    train_data = subsets[0:int(k * 0.9)]
+    test_data = subsets[int(k * 0.9):]
+    return {
+        'train': train_data,
+        'test': test_data
+    }
 
 
 def grouped_ts_splitter(data: pd.DataFrame, k: int, gcols: List[str]):
