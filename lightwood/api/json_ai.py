@@ -691,7 +691,9 @@ return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
 
-    imports = "\n".join(json_ai.imports)
+    imports = """
+    from
+    """
     predictor_code = f"""
 {imports}
 from lightwood.api import PredictorInterface
