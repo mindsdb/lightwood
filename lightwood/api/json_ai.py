@@ -603,8 +603,8 @@ for col_name, encoder in self.encoders.items():
 log.info('Featurizing the data')
 
 encoded_data = {{}}
-encoded_data['train'] = lightwood.encode(data['train'], subsets, self.target)
-encoded_data['test'] = lightwood.encode(data['test'], subsets, self.target)
+encoded_data['train'] = lightwood.encode(self.encoders, data['train'], self.target)
+encoded_data['test'] = lightwood.encode(self.encoders, data['test'], self.target)
 
 log.info('Training the mixers')
 self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
