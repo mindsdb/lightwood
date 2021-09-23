@@ -24,6 +24,7 @@ def cleaner(
     mode: str,
     timeseries_settings: TimeseriesSettings,
     anomaly_detection: bool,
+    custom_cleaning_functions: Dict[str, str]
 ) -> pd.DataFrame:
     """
     The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standaridzed type and all malformed or otherwise missing or invalid elements are turned into ``None``
@@ -47,7 +48,7 @@ def cleaner(
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
-        data[col] = data[col].apply(get_cleaning_func(dtype_dict[col]))
+        data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
 
         # If a column has too many None values, raise an Excpetion
         _check_if_invalid(data[col], pct_invalid, col)
@@ -70,7 +71,7 @@ def _check_if_invalid(new_data: pd.Series, pct_invalid: float, col_name: str) ->
         raise Exception(err)
 
 
-def get_cleaning_func(data_dtype: dtype) -> Callable:
+def get_cleaning_func(data_dtype: dtype, custom_cleaning_functions: Dict[str, str]) -> Callable:
     """
     For the provided data type, provide the appropriate cleaning function. Below are the defaults, users can either override this function OR impose a custom block.
 
@@ -78,7 +79,10 @@ def get_cleaning_func(data_dtype: dtype) -> Callable:
 
     :returns: The appropriate function that will pre-process (clean) data of specified dtype.
     """ # noqa
-    if data_dtype in (dtype.date, dtype.datetime):
+    if data_dtype in custom_cleaning_functions:
+        clean_func = custom_cleaning_functions[data_dtype]
+
+    elif data_dtype in (dtype.date, dtype.datetime):
         clean_func = _standardize_datetime
 
     elif data_dtype in (dtype.float):
@@ -255,14 +259,12 @@ def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers:
     :returns: A (new) dataframe without the dropped columns
     """ # noqa
     data = deepcopy(data)
-    to_drop = [*ignore_features, [x for x in identifiers.keys() if x != target],
-               [x for x in data.columns if dtype_dict[x] == dtype.invalid]]
+    to_drop = [*ignore_features, *[x for x in identifiers.keys() if x != target],
+               *[x for x in data.columns if x in dtype_dict and dtype_dict[x] == dtype.invalid]]
     exceptions = ["__mdb_make_predictions"]
     for col in to_drop:
-        try:
-            data = data.drop(columns=[col])
-        except Exception:
-            pass
+        if col in data.columns:
+            data.drop(columns=[col], inplace=True)
 
     if mode == "train":
         data = _rm_rows_w_empty_targets(data, target)
