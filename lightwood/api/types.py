@@ -211,12 +211,13 @@ class TimeseriesSettings:
     order_by: List[str] = None
     window: int = None
     group_by: List[str] = None
-    use_previous_target: bool = False
+    use_previous_target: bool = True
     nr_predictions: int = None
     historical_columns: List[str] = None
     target_type: str = (
         ""  # @TODO: is the current setter (outside of initialization) a sane option?
     )
+    allow_incomplete_history: bool = False
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -241,6 +242,7 @@ class TimeseriesSettings:
                 use_previous_target=obj.get("use_previous_target", True),
                 historical_columns=[],
                 nr_predictions=obj.get("nr_predictions", 1),
+                allow_incomplete_history=obj.get('allow_incomplete_history', False)
             )
             for setting in obj:
                 timeseries_settings.__setattr__(setting, obj[setting])
@@ -428,7 +430,6 @@ class JsonAI:
     :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.
     :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.
     :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
-    :param imports: A list of custom packages, indicated through a str import statement, that a user can call.
     :param timeseries_transformer:
     :param timeseries_analyzer:
     :param accuracy_functions: A list of performance metrics used to evaluate the best models.
@@ -442,7 +443,6 @@ class JsonAI:
     splitter: Optional[object] = None
     analyzer: Optional[object] = None
     explainer: Optional[object] = None
-    imports: Optional[List[str]] = None
     timeseries_transformer: Optional[object] = None
     timeseries_analyzer: Optional[object] = None
     accuracy_functions: Optional[List[str]] = None
@@ -461,7 +461,6 @@ class JsonAI:
         splitter = obj.get("splitter", None)
         analyzer = obj.get("analyzer", None)
         explainer = obj.get("explainer", None)
-        imports = obj.get("imports", None)
         timeseries_transformer = obj.get("timeseries_transformer", None)
         timeseries_analyzer = obj.get("timeseries_analyzer", None)
         accuracy_functions = obj.get("accuracy_functions", None)
@@ -476,7 +475,6 @@ class JsonAI:
             splitter=splitter,
             analyzer=analyzer,
             explainer=explainer,
-            imports=imports,
             timeseries_transformer=timeseries_transformer,
             timeseries_analyzer=timeseries_analyzer,
             accuracy_functions=accuracy_functions,

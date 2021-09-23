@@ -38,8 +38,8 @@ class dtype:
 
     # Series/Sequences
     array = "array"
+    tsarray = 'tsarray'
 
     # Misc (Unk/NaNs)
     empty = "empty"
     invalid = "invalid"
-
