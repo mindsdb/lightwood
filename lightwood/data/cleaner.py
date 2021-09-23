@@ -85,7 +85,7 @@ def get_cleaning_func(data_dtype: dtype, custom_cleaning_functions: Dict[str, st
     elif data_dtype in (dtype.date, dtype.datetime):
         clean_func = _standardize_datetime
 
-    elif data_dtype in (dtype.float):
+    elif data_dtype in (dtype.float, dtype.tsarray):
         clean_func = _clean_float
 
     elif data_dtype in (dtype.integer):
