@@ -6,10 +6,14 @@ from itertools import product
 from lightwood.api.types import TimeseriesSettings
 
 
-def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings, seed: int) -> List[pd.DataFrame]:
+def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings, 
+             seed: int, pct_train: float) -> List[pd.DataFrame]:
     """
     Splits a dataframe into k equally-sized subsets.
     """
+    if pct_train > 1:
+        raise Exception(f'The value of pct_train ({pct_train}) needs to be between 0 and 1')
+
     if not tss.is_timeseries:
         # shuffle
         data = data.sample(frac=1, seed=seed if seed is not None else len(data)).reset_index(drop=True)
@@ -24,8 +28,8 @@ def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings, seed: int) -> 
             gcols = tss.group_by
             subsets = grouped_ts_splitter(data, k, gcols)
 
-    train_data = subsets[0:int(k * 0.9)]
-    test_data = subsets[int(k * 0.9):]
+    train_data = subsets[0:int(k * pct_train)]
+    test_data = subsets[int(k * pct_train):]
     return {
         'train': train_data,
         'test': test_data
