@@ -24,7 +24,7 @@ def cleaner(
     mode: str,
     timeseries_settings: TimeseriesSettings,
     anomaly_detection: bool,
-    custom_cleaning_functions: Dict[str, str]
+    custom_cleaning_functions: Dict[str, str] = {}
 ) -> pd.DataFrame:
     """
     The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standaridzed type and all malformed or otherwise missing or invalid elements are turned into ``None``
@@ -41,7 +41,7 @@ def cleaner(
 
     :returns: The cleaned data
     """ # noqa
-
+    
     data = _remove_columns(data, ignore_features, identifiers, target, mode, timeseries_settings,
                            anomaly_detection, dtype_dict)
 
