@@ -6,13 +6,13 @@ from itertools import product
 from lightwood.api.types import TimeseriesSettings
 
 
-def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings) -> List[pd.DataFrame]:
+def splitter(data: pd.DataFrame, k: int, tss: TimeseriesSettings, seed: int) -> List[pd.DataFrame]:
     """
     Splits a dataframe into k equally-sized subsets.
     """
     if not tss.is_timeseries:
         # shuffle
-        data = data.sample(frac=1).reset_index(drop=True)
+        data = data.sample(frac=1, seed=seed if seed is not None else len(data)).reset_index(drop=True)
 
         # split
         subsets = np.array_split(data, k)
