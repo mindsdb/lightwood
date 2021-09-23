@@ -36,6 +36,7 @@ class TestBasic(unittest.TestCase):
             'module': 'custom_cleaners.throwing_cleaner',
             'args': {}
         }
+        print(json_ai_dump)
 
         json_ai = JsonAI.from_dict(json_ai_dump)
 
