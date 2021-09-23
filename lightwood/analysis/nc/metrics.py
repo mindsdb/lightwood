@@ -152,8 +152,7 @@ def class_one_c(prediction, y, significance):
     only a single class label) of a conformal classification model.
     """
     prediction = prediction > significance
-    n_singletons = np.sum(1 for _ in filter(lambda x: np.sum(x) == 1,
-                                            prediction))
+    n_singletons = np.sum(1 for _ in filter(lambda x: np.sum(x) == 1, prediction))
     return n_singletons / y.size
 
 
@@ -162,8 +161,7 @@ def class_empty(prediction, y, significance):
     only a single class label) of a conformal classification model.
     """
     prediction = prediction > significance
-    n_empty = np.sum(1 for _ in filter(lambda x: np.sum(x) == 0,
-                                       prediction))
+    n_empty = np.sum(1 for _ in filter(lambda x: np.sum(x) == 0, prediction))
     return n_empty / y.size
 
 

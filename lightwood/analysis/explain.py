@@ -15,7 +15,7 @@ def explain(data: pd.DataFrame,
             target_name: str,
             target_dtype: str,
 
-            positive_domain: bool,  # @TODO: pass these bools to the block constructor so that they are not needed here
+            positive_domain: bool,  # @TODO: pass inside a {} with params for each block to avoid signature overload
             fixed_confidence: float,
             anomaly_detection: bool,
 
@@ -74,8 +74,6 @@ def explain(data: pd.DataFrame,
 
     # confidence estimation using calibrated inductive conformal predictors (ICPs)
     if analysis['icp']['__mdb_active']:
-        # this particular call is stateless, but we need to be passing analysis blocks from the predictor to this call
-        # so that state is preserved
         calibrator = ICP()
         row_insights, global_insights = calibrator.explain(insights, **kwargs)
 
