@@ -394,7 +394,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 'tss': '$problem_definition.timeseries_settings',
                 'data': 'data',
                 'k': 'nsubsets',
-                'seed': None
+                'seed': None,
+                'pct_train': 0.9
             }
         }
     if json_ai.analyzer is None:
