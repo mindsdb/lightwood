@@ -19,14 +19,6 @@ from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numeric_con
     get_categorical_conf, get_anomalies
 
 
-"""
-Pending:
- - [] simplify nonconformist custom implementation
- - [] reimplement caching for faster analysis?
- - [] confidence for T+N <- active research question
-"""
-
-
 class ICP(BaseAnalysisBlock):
     """ Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity """
     def __init__(self):
