@@ -19,7 +19,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     else:
         info['group_info'] = {}
 
-    # @TODO: maybe normalizers should fit using only the training folds??
+    # @TODO: maybe normalizers should fit using only the training subsets??
     new_data = generate_target_group_normalizers(info)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.array):

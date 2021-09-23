@@ -60,11 +60,15 @@ def _standardize_array(element):
         element = element.rstrip(']').lstrip('[')
         element = element.rstrip(' ').lstrip(' ')
         element = element.replace(', ', ' ').replace(',', ' ')
-        # Weird edge case in which arrays are actually numbers -_-
+        # Handles cases where arrays are numbers
         if ' ' not in element:
-            return _clean_float_or_none(element)
+            element = _clean_float_or_none(element)
+        else:
+            element = [float(x) for x in element.split(' ')]
     except Exception:
-        return element
+        pass
+
+    return element
 
 
 def _clean_value(element: object, data_dtype: str):
