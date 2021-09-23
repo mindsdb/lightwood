@@ -321,9 +321,6 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     problem_definition = json_ai.problem_definition
     tss = problem_definition.timeseries_settings
 
-    for feature in [list(json_ai.outputs.values())[0], *json_ai.features.values()]:
-        encoder_import = feature.encoder['module']
-
     # Add implicit arguments
     # @TODO: Consider removing once we have a proper editor in studio
     mixers = json_ai.outputs[json_ai.problem_definition.target].mixers
@@ -681,10 +678,28 @@ from lightwood.helpers.torch import *
 from lightwood.mixer import *
 import pandas as pd
 from typing import Dict, List
+import os
+import importlib.machinery
+import os
+import importlib.machinery
+from types import ModuleType
+import sys"""
+
+    import_external_dir = """
+for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
+    if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
+        for file_name in list(os.walk(import_dir))[0][2]:
+            print(file_name)
+            mod_name = file_name.rstrip('.py')
+            loader = importlib.machinery.SourceFileLoader(mod_name,
+                                                          os.path.join(import_dir, file_name))
+            module = ModuleType(loader.name)
+            loader.exec_module(module)
+            exec(f'{mod_name} = module')
 """
     predictor_code = f"""
 {imports}
-
+{import_external_dir}
 
 class Predictor(PredictorInterface):
     target: str
