@@ -302,7 +302,6 @@ def generate_json_ai(
         explainer=None,
         features=features,
         outputs=outputs,
-        imports=None,
         problem_definition=problem_definition,
         identifiers=type_information.identifiers,
         timeseries_transformer=None,
@@ -322,35 +321,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     problem_definition = json_ai.problem_definition
     tss = problem_definition.timeseries_settings
 
-    imports = [
-        'from lightwood.mixer import Neural', 'from lightwood.mixer import LightGBM',
-        'from lightwood.mixer import LightGBMArray', 'from lightwood.mixer import SkTime',
-        'from lightwood.mixer import Unit', 'from lightwood.mixer import Regression',
-        'from lightwood.ensemble import BestOf', 'from lightwood.data import cleaner',
-        'from lightwood.data import transform_timeseries, timeseries_analyzer', 'from lightwood.data import splitter',
-        'from lightwood.analysis import model_analyzer, explain',
-        'from sklearn.metrics import r2_score, balanced_accuracy_score, accuracy_score', 'import pandas as pd',
-        'from lightwood.helpers.seed import seed', 'from lightwood.helpers.log import log', 'import lightwood',
-        'from lightwood.api import *', 'from lightwood.mixer import BaseMixer',
-        'from lightwood.encoder import BaseEncoder, __ts_encoders__',
-        'from lightwood.encoder import Array, Binary, Categorical, Date, Datetime, TimeSeries, Float, Image, Integer, Quantity, Rich_Text, Short_Text, Tags', # noqa
-        'from lightwood.ensemble import BaseEnsemble', 'from typing import Dict, List',
-        'from lightwood.helpers.parallelism import mut_method_call',
-        'from lightwood.data.encoded_ds import ConcatedEncodedDs', 'from lightwood import ProblemDefinition']
-
-    if json_ai.imports is None:
-        json_ai.imports = imports
-    else:
-        json_ai.imports.extend(imports)
-
     for feature in [list(json_ai.outputs.values())[0], *json_ai.features.values()]:
         encoder_import = feature.encoder['module']
-        if "." in encoder_import:
-            continue
-        imports.append(f"from lightwood.encoder import {encoder_import}")
-
-    if tss.use_previous_target:
-        imports.append('from lightwood.encoder import ArrayEncoder')
 
     # Add implicit arguments
     # @TODO: Consider removing once we have a proper editor in studio
