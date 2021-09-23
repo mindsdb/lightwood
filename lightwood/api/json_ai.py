@@ -676,6 +676,7 @@ from lightwood.helpers.seed import *
 from lightwood.helpers.text import *
 from lightwood.helpers.torch import *
 from lightwood.mixer import *
+from lightwood.encoders import __ts_encoders__
 import pandas as pd
 from typing import Dict, List
 import os
