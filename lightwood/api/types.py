@@ -106,8 +106,8 @@ class Output:
     :param data_dtype: The type of information within the target column (ex.: numerical, categorical, etc.).
     :param encoder: the methodology for encoding the target feature (a Lightwood Encoder). There can only be one \
     encoder for the output target.
-    :param models: The list of ML algorithms that are trained for the target distribution.
-    :param ensemble: For a panel of ML algorithms, the approach of selecting the best model, and the metrics used in \
+    :param mixers: The list of ML algorithms that are trained for the target distribution.
+    :param ensemble: For a panel of ML algorithms, the approach of selecting the best mixer, and the metrics used in \
     that evaluation.
     """
 
@@ -432,7 +432,7 @@ class JsonAI:
     :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
     :param timeseries_transformer:
     :param timeseries_analyzer:
-    :param accuracy_functions: A list of performance metrics used to evaluate the best models.
+    :param accuracy_functions: A list of performance metrics used to evaluate the best mixers.
     """ # noqa
 
     features: Dict[str, Feature]
