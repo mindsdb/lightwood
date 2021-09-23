@@ -197,11 +197,9 @@ class ICP(BaseAnalysisBlock):
         info = {**info, **output}
         return info
 
-    # def explain(sel) -> Tuple[pd.DataFrame, Dict[str, object]]:
     def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         ns = SimpleNamespace(**kwargs)
 
-        # @TODO: Move icp_explain
         icp_X = deepcopy(ns.data)
 
         # replace observed data w/predictions
