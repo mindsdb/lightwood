@@ -692,11 +692,26 @@ return insights
     predict_proba_body = align(predict_proba_body, 2)
 
     imports = """
-    from
-    """
+import lightwood
+from lightwood.analysis import *
+from lightwood.api import *
+from lightwood.data import *
+from lightwood.encoder import *
+from lightwood.ensemble import *
+from lightwood.helpers.device import *
+from lightwood.helpers.general import *
+from lightwood.helpers.log import *
+from lightwood.helpers.numeric import *
+from lightwood.helpers.parallelism import *
+from lightwood.helpers.seed import *
+from lightwood.helpers.text import *
+from lightwood.helpers.torch import *
+from lightwood.mixer import *
+import pandas as pd
+from typing import Dict, List
+"""
     predictor_code = f"""
 {imports}
-from lightwood.api import PredictorInterface
 
 
 class Predictor(PredictorInterface):
