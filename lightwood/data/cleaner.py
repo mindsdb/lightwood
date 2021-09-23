@@ -50,10 +50,9 @@ def cleaner(
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
-                    ).replace({np.nan: None})
+                                    ).replace({np.nan: None})
         # If a column has too many None values, raise an Excpetion
         _check_if_invalid(data[col], pct_invalid, col)
-    
 
     return data
 
