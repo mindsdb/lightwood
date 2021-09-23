@@ -90,6 +90,8 @@ def get_numeric_type(element: object) -> str:
         try:
             if can_be_nan_numeric(element):
                 return dtype.integer
+            else:
+                return None
         except Exception:
             return None
 

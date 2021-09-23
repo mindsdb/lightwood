@@ -45,12 +45,12 @@ def model_analyzer(
     confidence_normalizer: bool,
     accuracy_functions
 ):
-    """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
+    """Analyses model on a validation subset to evaluate accuracy and confidence of future predictions"""
 
     data_type = dtype_dict[target]
     data_subtype = data_type
 
-    is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
+    is_numerical = data_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray)
     is_classification = data_type in (dtype.categorical, dtype.binary)
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
 
@@ -121,7 +121,7 @@ def model_analyzer(
 
         # setup prediction cache to avoid additional .predict() calls
         if is_classification:
-            if predictor.models[predictor.best_index].supports_proba:
+            if predictor.mixers[predictor.best_index].supports_proba:
                 icp.nc_function.model.prediction_cache = normal_predictions[all_cat_cols].values
             else:
                 predicted_classes = pd.get_dummies(normal_predictions['prediction']).values  # inflate to one-hot enc

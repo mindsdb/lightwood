@@ -125,7 +125,7 @@ def generate_target_group_normalizers(data):
 
     # numerical normalizers, here we spawn one per each group combination
     else:
-        if data['original_type'] == dtype.array:
+        if data['original_type'] == dtype.tsarray:
             data['data'] = data['data'].reshape(-1, 1).astype(float)
 
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))

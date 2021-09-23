@@ -12,7 +12,8 @@ def clean_df(df, target, is_classification, label_encoders):
     if is_classification:
         if enc and isinstance(enc.categories_[0][0], str):
             cats = enc.categories_[0].tolist()
-            y = np.array([cats.index(i) for i in y])
+            # the last element is "__mdb_unknown_cat"
+            y = np.array([cats.index(i) if i in cats else len(cats) - 1 for i in y])
         y = y.astype(int)
     else:
         y = y.astype(float)
@@ -26,7 +27,7 @@ def set_conf_range(
     significance: desired confidence level. can be preset 0 < x <= 0.99
     """
     # numerical
-    if target_type in [dtype.integer, dtype.float, dtype.array]:
+    if target_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
 
         # ICP gets all possible bounds (shape: (B, 2, 99))
         all_ranges = icp.predict(X.values)
