@@ -19,10 +19,49 @@ from lightwood.api.types import (
     Output,
     ProblemDefinition,
 )
-
+# Require to exec `IMPORT_EXTERNAL_DIRS`
+from typing import Dict, List # noqa
+import os # noqa
+import importlib.machinery # noqa
+from types import ModuleType # noqa
+import sys # noqa
 
 trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder')
 ts_encoders = ('TimeSeriesEncoder', 'TsNumericEncoder')
+IMPORT_EXTERNAL_DIRS = """
+for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
+    if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
+        for file_name in list(os.walk(import_dir))[0][2]:
+            mod_name = file_name.rstrip('.py')
+            loader = importlib.machinery.SourceFileLoader(mod_name,
+                                                          os.path.join(import_dir, file_name))
+            module = ModuleType(loader.name)
+            loader.exec_module(module)
+            exec(f'{mod_name} = module')
+"""
+IMPORTS = """
+import lightwood
+from lightwood.analysis import *
+from lightwood.api import *
+from lightwood.data import *
+from lightwood.encoder import *
+from lightwood.ensemble import *
+from lightwood.helpers.device import *
+from lightwood.helpers.general import *
+from lightwood.helpers.log import *
+from lightwood.helpers.numeric import *
+from lightwood.helpers.parallelism import *
+from lightwood.helpers.seed import *
+from lightwood.helpers.text import *
+from lightwood.helpers.torch import *
+from lightwood.mixer import *
+from lightwood.encoder import __ts_encoders__
+import pandas as pd
+from typing import Dict, List
+import os
+import importlib.machinery
+from types import ModuleType
+import sys"""
 
 
 def lookup_encoder(
@@ -369,8 +408,9 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 json_ai.features[name].encoder['module'].split(".")[0].lower()
             )
 
+    exec(IMPORT_EXTERNAL_DIRS)
     # Add "hidden" fields
-    hidden_fields = [(json_ai.cleaner, {
+    hidden_fields = [('cleaner', {
         "module": "cleaner",
         "args": {
             "pct_invalid": "$problem_definition.pct_invalid",
@@ -383,14 +423,14 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             "timeseries_settings": "$problem_definition.timeseries_settings",
             "anomaly_detection": "$problem_definition.anomaly_detection",
         },
-    }), (json_ai.splitter, {
+    }), ('splitter', {
         'module': 'splitter',
         'args': {
             'tss': '$problem_definition.timeseries_settings',
             'data': 'data',
             'k': 'nsubsets'
         }
-    }), (json_ai.analyzer, {
+    }), ('analyzer', {
          "module": "model_analyzer",
          "args": {
              "stats_info": "$statistical_analysis",
@@ -406,7 +446,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              "confidence_normalizer": False,
              "positive_domain": "$statistical_analysis.positive_domain",
          },
-         }), (json_ai.explainer, {
+         }), ('explainer', {
              "module": "explain",
              "args": {
                  "timeseries_settings": "$problem_definition.timeseries_settings",
@@ -423,7 +463,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                  "target_name": "$target",
                  "target_dtype": "$dtype_dict[self.target]",
              },
-         }), (json_ai.timeseries_transformer, {
+         }), ('timeseries_transformer', {
              "module": "transform_timeseries",
              "args": {
                  "timeseries_settings": "$problem_definition.timeseries_settings",
@@ -432,7 +472,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                  "target": "$target",
                  "mode": "$mode",
              },
-         }), (json_ai.timeseries_analyzer, {
+         }), ('timeseries_analyzer', {
              "module": "timeseries_analyzer",
              "args": {
                  "timeseries_settings": "$problem_definition.timeseries_settings",
@@ -442,16 +482,20 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              },
          })]
 
-    for field, implicit_value in hidden_fields:
+    for field_name, implicit_value in hidden_fields:
+        field = json_ai.__getattribute__(field_name)
         if field is None:
             field = implicit_value
         else:
-            args = __import__(field['module']).__code__.co_argcount
+            args = eval(field['module']).__code__.co_varnames
             for arg in args:
-                if arg not in field['args']:
-                    if arg in implicit_value['args']:
-                        field['args'][arg] = implicit_value['args'][arg]
-
+                if 'args' not in field:
+                    field['args'] = implicit_value['args']
+                else:
+                    if arg not in field['args']:
+                        if arg in implicit_value['args']:
+                            field['args'][arg] = implicit_value['args'][arg]
+        json_ai.__setattr__(field_name, field)
     return json_ai
 
 
@@ -653,47 +697,10 @@ return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
 
-    imports = """
-import lightwood
-from lightwood.analysis import *
-from lightwood.api import *
-from lightwood.data import *
-from lightwood.encoder import *
-from lightwood.ensemble import *
-from lightwood.helpers.device import *
-from lightwood.helpers.general import *
-from lightwood.helpers.log import *
-from lightwood.helpers.numeric import *
-from lightwood.helpers.parallelism import *
-from lightwood.helpers.seed import *
-from lightwood.helpers.text import *
-from lightwood.helpers.torch import *
-from lightwood.mixer import *
-from lightwood.encoder import __ts_encoders__
-import pandas as pd
-from typing import Dict, List
-import os
-import importlib.machinery
-import os
-import importlib.machinery
-from types import ModuleType
-import sys"""
 
-    import_external_dir = """
-for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
-    if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
-        for file_name in list(os.walk(import_dir))[0][2]:
-            print(file_name)
-            mod_name = file_name.rstrip('.py')
-            loader = importlib.machinery.SourceFileLoader(mod_name,
-                                                          os.path.join(import_dir, file_name))
-            module = ModuleType(loader.name)
-            loader.exec_module(module)
-            exec(f'{mod_name} = module')
-"""
     predictor_code = f"""
-{imports}
-{import_external_dir}
+{IMPORTS}
+{IMPORT_EXTERNAL_DIRS}
 
 class Predictor(PredictorInterface):
     target: str
