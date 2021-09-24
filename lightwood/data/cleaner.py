@@ -52,7 +52,8 @@ def cleaner(
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
                                     ).replace({np.nan: None})
         # If a column has too many None values, raise an Excpetion
-        _check_if_invalid(data[col], pct_invalid, col)
+        # Figure out how to reintroduce later, maybe a custom flag, `crash for too much invalid data`?
+        # _check_if_invalid(data[col], pct_invalid, col)
 
     return data
 
