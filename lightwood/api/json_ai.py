@@ -74,8 +74,7 @@ def lookup_encoder(
     :param problem_definition: The ``ProblemDefinition`` criteria; this populates specifics on how models and encoders may be trained.
     :param is_target_predicting_encoder:
     """ # noqa
-    exec(IMPORTS)
-    exec(IMPORT_EXTERNAL_DIRS)
+
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
         dtype.integer: 'Integer.NumericEncoder',
@@ -170,9 +169,9 @@ def generate_json_ai(
     :param problem_definition: Specifies details of the model training/building procedure, as defined by ``ProblemDefinition``
 
     :returns: JSON-AI object with fully populated details of the ML pipeline
-    """ # noqa
-    exec(IMPORTS)
-    exec(IMPORT_EXTERNAL_DIRS)
+    """ # noqaexec
+    exec(IMPORTS, globals())
+    exec(IMPORT_EXTERNAL_DIRS, globals())
     target = problem_definition.target
     input_cols = []
     for col_name, col_dtype in type_information.dtypes.items():
@@ -353,9 +352,6 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     :returns: nothing, this method mutates the respective field of the ``JsonAI`` object it receives
     """ # noqa
     # These imports might be slow, in which case the only <easy> solution is to line this code
-    exec(IMPORTS)
-    exec(IMPORT_EXTERNAL_DIRS)
-
     field = json_ai.__getattribute__(field_name)
     if field is None:
         if is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
