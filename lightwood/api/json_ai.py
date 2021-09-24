@@ -56,8 +56,6 @@ import os
 import importlib.machinery
 from types import ModuleType
 import sys"""
-exec(IMPORTS)
-exec(IMPORT_EXTERNAL_DIRS)
 
 
 def lookup_encoder(
@@ -346,6 +344,8 @@ def generate_json_ai(
 
 
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
+    exec(IMPORTS)
+    exec(IMPORT_EXTERNAL_DIRS)
     """
     To enable brevity in writing, auto-generate the "unspecified/missing" details required in the ML pipeline.
 
