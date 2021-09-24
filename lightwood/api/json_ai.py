@@ -1,11 +1,10 @@
-# TODO: We need a better way to specify trainable_encoders
 # TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested
 # in seeing where these come from and it's not clear that you need to look here.
 # TODO: What does `target_class_distribution` and `positive_domain` do?
 # TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
 # TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
 # TODO: Please fix spelling on parallel_preped_encoders
-
+import lightwood.encoder
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 import black
@@ -20,8 +19,6 @@ from lightwood.api.types import (
     ProblemDefinition,
 )
 
-trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder')
-ts_encoders = ('TimeSeriesEncoder', 'TsNumericEncoder')
 IMPORT_EXTERNAL_DIRS = """
 for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
@@ -49,7 +46,6 @@ from lightwood.helpers.seed import *
 from lightwood.helpers.text import *
 from lightwood.helpers.torch import *
 from lightwood.mixer import *
-from lightwood.encoder import __ts_encoders__
 import pandas as pd
 from typing import Dict, List
 import os
@@ -78,6 +74,8 @@ def lookup_encoder(
     :param problem_definition: The ``ProblemDefinition`` criteria; this populates specifics on how models and encoders may be trained.
     :param is_target_predicting_encoder:
     """ # noqa
+    exec(IMPORTS)
+    exec(IMPORT_EXTERNAL_DIRS)
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
         dtype.integer: 'Integer.NumericEncoder',
@@ -149,11 +147,10 @@ def lookup_encoder(
     if encoder_dict['module'] == "Rich_Text.PretrainedLangEncoder" and not is_target:
         encoder_dict['args']['output_type'] = "$dtype_dict[$target]"
 
-    for encoder_name in trainable_encoders:
-        if encoder_name == encoder_dict['module'].split(".")[1]:
-            encoder_dict['args'][
-                "stop_after"
-            ] = "$problem_definition.seconds_per_encoder"
+    if eval(encoder_dict['module'].split(".")[1]).is_trainable_encoder:
+        encoder_dict['args'][
+            "stop_after"
+        ] = "$problem_definition.seconds_per_encoder"
 
     if is_target_predicting_encoder:
         encoder_dict['args']['embed_mode'] = 'False'
@@ -174,6 +171,8 @@ def generate_json_ai(
 
     :returns: JSON-AI object with fully populated details of the ML pipeline
     """ # noqa
+    exec(IMPORTS)
+    exec(IMPORT_EXTERNAL_DIRS)
     target = problem_definition.target
     input_cols = []
     for col_name, col_dtype in type_information.dtypes.items():
@@ -278,14 +277,13 @@ def generate_json_ai(
             col_dtype, col_name, False, problem_definition, is_target_predicting_encoder
         )
 
-        for encoder_name in ts_encoders:
-            if tss.is_timeseries and encoder_name == encoder['module'].split(".")[1]:
-                if tss.group_by is not None:
-                    for group in tss.group_by:
-                        dependency.append(group)
+        if tss.is_timeseries and eval(encoder['module'].split(".")[1]).is_timeseries_encoder:
+            if tss.group_by is not None:
+                for group in tss.group_by:
+                    dependency.append(group)
 
-                if tss.use_previous_target:
-                    dependency.append(f"__mdb_ts_previous_{target}")
+            if tss.use_previous_target:
+                dependency.append(f"__mdb_ts_previous_{target}")
 
         if len(dependency) > 0:
             feature = Feature(encoder=encoder, dependency=dependency)
@@ -315,8 +313,8 @@ def generate_json_ai(
              for x in type_information.dtypes.values()]) * 200
 
     if problem_definition.time_aim is not None:
-        nr_trainable_encoders = len([x for x in features.values() if x.encoder['module'].split('.')[1]
-                                    in trainable_encoders])
+        nr_trainable_encoders = len([x for x in features.values() if
+                                    eval(x.encoder['module'].split('.')[1]).is_trainable_encoder])
         nr_mixers = len(list(outputs.values())[0].mixers)
         encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5)
 
@@ -567,8 +565,8 @@ self.ts_analysis = {call(json_ai.timeseries_analyzer)}
 """
 
     if json_ai.timeseries_analyzer is not None:
-        ts_encoder_code = """
-if type(encoder) in __ts_encoders__:
+        ts_encoder_code = f"""
+if encoder.is_timeseries_encoder:
     kwargs['ts_analysis'] = self.ts_analysis
 """
 
