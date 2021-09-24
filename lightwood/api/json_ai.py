@@ -153,6 +153,7 @@ def generate_json_ai(
 
     tss = problem_definition.timeseries_settings
     is_target_predicting_encoder = False
+    is_ts = problem_definition.timeseries_settings.is_timeseries
     # Single text column classification
     if (
         len(input_cols) == 1
@@ -224,6 +225,7 @@ def generate_json_ai(
             'module': 'BestOf',
             'args': {
                 'accuracy_functions': '$accuracy_functions',
+                'ts_analysis': 'self.ts_analysis' if is_ts else None
             }
         }
     )}
@@ -270,6 +272,11 @@ def generate_json_ai(
         accuracy_functions = ['evaluate_array_accuracy']
     else:
         raise Exception(f'Please specify a custom accuracy function for output type {output_dtype}')
+
+    # special dispatch for t+1 time series forecasters
+    if is_ts:
+        if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
+            accuracy_functions = ['evaluate_array_accuracy']
 
     if problem_definition.time_aim is None and (
             problem_definition.seconds_per_mixer is None or problem_definition.seconds_per_encoder is None):
