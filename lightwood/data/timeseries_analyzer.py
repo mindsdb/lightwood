@@ -22,7 +22,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     # @TODO: maybe normalizers should fit using only the training subsets??
     new_data = generate_target_group_normalizers(info)
 
-    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.array):
+    if dtype_dict[target] == dtype.tsarray:
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
     else:
         naive_forecast_residuals, scale_factor = {}, {}
@@ -81,7 +81,10 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
     Note: method assumes predictions are all for the same group combination. For a dataframe that contains multiple
      series, use `get_grouped_naive_resiudals`.
 
-    m: season length. the naive forecasts will be the m-th previously seen value for each series
+    :param target_data: observed time series targets
+    :param m: season length. the naive forecasts will be the m-th previously seen value for each series
+
+    :returns: (list of naive residuals, average residual value)
     """
     residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
     scale_factor = np.average(residuals)
