@@ -11,6 +11,8 @@ import time
 from lightwood.helpers.log import log
 from sklearn.preprocessing import OrdinalEncoder
 from lightwood.mixer.base import BaseMixer
+from helpers.device import get_devices
+
 
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
@@ -22,7 +24,11 @@ def check_gpu_support():
         train_data = lightgbm.Dataset(data, label=label)
         params = {'num_iterations': 1, 'device': 'gpu'}
         lightgbm.train(params, train_set=train_data)
-        return True
+        device, nr_devices = get_devices()
+        if nr_devices > 0 and str(device) != 'cpu':
+            return True
+        else:
+            return False
     except Exception:
         return False
 
