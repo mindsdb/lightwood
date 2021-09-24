@@ -273,7 +273,7 @@ def generate_json_ai(
     else:
         raise Exception(f'Please specify a custom accuracy function for output type {output_dtype}')
 
-    # special time series accuracy function dispatch
+    # special dispatch for t+1 time series forecasters
     if is_ts:
         if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
             accuracy_functions = ['evaluate_array_accuracy']
