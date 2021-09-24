@@ -23,7 +23,7 @@ def create_custom_module():
         pass
 
     with open(mpath, 'w') as fp:
-        fp.write(f"""
+        fp.write("""
 import pandas as pd
 
 def throwing_cleaner(data: pd.DataFrame, err_msg: str):
