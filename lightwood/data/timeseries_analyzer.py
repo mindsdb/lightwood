@@ -22,7 +22,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     # @TODO: maybe normalizers should fit using only the training subsets??
     new_data = generate_target_group_normalizers(info)
 
-    if dtype_dict[target] == dtype.tsarray:
+    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.tsarray):
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
     else:
         naive_forecast_residuals, scale_factor = {}, {}
