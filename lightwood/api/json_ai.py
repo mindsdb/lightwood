@@ -19,12 +19,6 @@ from lightwood.api.types import (
     Output,
     ProblemDefinition,
 )
-# Require to exec `IMPORT_EXTERNAL_DIRS`
-from typing import Dict, List # noqa
-import os # noqa
-import importlib.machinery # noqa
-from types import ModuleType # noqa
-import sys # noqa
 
 trainable_encoders = ('PretrainedLangEncoder', 'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder')
 ts_encoders = ('TimeSeriesEncoder', 'TsNumericEncoder')
@@ -62,6 +56,8 @@ import os
 import importlib.machinery
 from types import ModuleType
 import sys"""
+exec(IMPORTS)
+exec(IMPORT_EXTERNAL_DIRS)
 
 
 def lookup_encoder(
@@ -408,7 +404,6 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 json_ai.features[name].encoder['module'].split(".")[0].lower()
             )
 
-    exec(IMPORT_EXTERNAL_DIRS)
     # Add "hidden" fields
     hidden_fields = [('cleaner', {
         "module": "cleaner",
@@ -696,7 +691,6 @@ insights = {call(json_ai.explainer)}
 return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
-
 
     predictor_code = f"""
 {IMPORTS}
