@@ -343,9 +343,37 @@ def generate_json_ai(
     )
 
 
-def add_implicit_values(json_ai: JsonAI) -> JsonAI:
+def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: dict, is_timeseries: bool) -> None:
+    """
+    Populate the implicit field of the JsonAI, either by filling it in entirely if missing, or by introspecting the class or function and assigning default values to the args in it's signature that are in the implicit default but haven't been populated by the user
+
+    :params: json_ai: ``JsonAI`` object that describes the ML pipeline that may not have every detail fully specified.
+    :params: field_name: Name of the field the implicit field in ``JsonAI``
+    :params: implicit_value: The dictionary containing implicit values for the module and arg in the field
+    :params: is_timeseries: Whether or not this is a timeseries problem
+
+    :returns: nothing, this method mutates the respective field of the ``JsonAI`` object it receives
+    """ # noqa
+    # These imports might be slow, in which case the only <easy> solution is to line this code
     exec(IMPORTS)
     exec(IMPORT_EXTERNAL_DIRS)
+
+    field = json_ai.__getattribute__(field_name)
+    if field is None:
+        if is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
+            field = implicit_value
+    else:
+        args = eval(field['module']).__code__.co_varnames
+        for arg in args:
+            if 'args' not in field:
+                field['args'] = implicit_value['args']
+            else:
+                if arg not in field['args']:
+                    if arg in implicit_value['args']:
+                        field['args'][arg] = implicit_value['args'][arg]
+    json_ai.__setattr__(field_name, field)
+
+def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     """
     To enable brevity in writing, auto-generate the "unspecified/missing" details required in the ML pipeline.
 
@@ -478,20 +506,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
          })]
 
     for field_name, implicit_value in hidden_fields:
-        field = json_ai.__getattribute__(field_name)
-        if field is None:
-            if tss.is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
-                field = implicit_value
-        else:
-            args = eval(field['module']).__code__.co_varnames
-            for arg in args:
-                if 'args' not in field:
-                    field['args'] = implicit_value['args']
-                else:
-                    if arg not in field['args']:
-                        if arg in implicit_value['args']:
-                            field['args'][arg] = implicit_value['args'][arg]
-        json_ai.__setattr__(field_name, field)
+        populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
+
     return json_ai
 
 
