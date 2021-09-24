@@ -9,6 +9,9 @@ from sklearn.metrics import r2_score, f1_score, mean_absolute_error
 from lightwood.encoder.time_series.helpers.common import get_group_matches
 
 
+# ------------------------- #
+# Accuracy metrics
+# ------------------------- #
 def evaluate_accuracy(data: pd.DataFrame,
                       predictions: pd.Series,
                       target: str,
@@ -67,19 +70,6 @@ def evaluate_array_accuracy(
     and the final accuracy is the reciprocal of the average score through all timesteps.
     """
 
-    def mase(trues, preds, scale_error, fh):
-        """
-        Computes mean absolute scaled error.
-        The scale corrective factor is the mean in-sample residual from the naive forecasting method.
-        """
-        agg = 0.0
-        for i in range(fh):
-            true = [t[i] for t in trues]
-            pred = [p[i] for p in preds]
-            agg += mean_absolute_error(true, pred)
-
-        return agg / scale_error
-
     ts_analysis = kwargs.get('ts_analysis', {})
     naive_errors = ts_analysis.get('ts_naive_mae', {})
 
@@ -132,7 +122,7 @@ def evaluate_array_r2_accuracy(
         predictions = [[p] for p in predictions]
 
     # only evaluate accuracy for rows with complete historical context
-    if kwargs['ts_analysis'].get('tss', False):
+    if kwargs.get('ts_analysis', {}).get('tss', False):
         true_values = true_values[kwargs['ts_analysis']['tss'].window:]
         predictions = predictions[kwargs['ts_analysis']['tss'].window:]
 
@@ -140,3 +130,23 @@ def evaluate_array_r2_accuracy(
         aggregate += base_acc_fn([t[i] for t in true_values], [p[i] for p in predictions])
 
     return aggregate / fh
+
+
+# ------------------------- #
+# Helpers
+# ------------------------- #
+def mase(trues, preds, scale_error, fh):
+    """
+    Computes mean absolute scaled error.
+    The scale corrective factor is the mean in-sample residual from the naive forecasting method.
+    """
+    if scale_error == 0:
+        scale_error = 1  # cover (rare) case where series is constant
+
+    agg = 0.0
+    for i in range(fh):
+        true = [t[i] for t in trues]
+        pred = [p[i] for p in preds]
+        agg += mean_absolute_error(true, pred)
+
+    return (agg / fh) / scale_error
