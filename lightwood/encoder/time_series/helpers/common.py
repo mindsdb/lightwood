@@ -132,7 +132,7 @@ def get_group_matches(data, combination):
     if isinstance(data['data'], np.ndarray) and len(data['data'].shape) < 2:
         data['data'] = np.expand_dims(data['data'], axis=1)
 
-    if not combination:
+    if combination == '__default':
         idxs = range(len(data['data']))
         return [idxs, np.array(data['data'])[idxs, :]]  # return all data
     else:
@@ -165,7 +165,7 @@ def generate_target_group_normalizers(data: Dict, tss: TimeseriesSettings):
 
     # numerical normalizers, here we spawn one per each group combination
     else:
-        if data['original_type'] == dtype.array:
+        if data['original_type'] == dtype.tsarray:
             data['data'] = data['data'].reshape(-1, 1).astype(float)
 
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))

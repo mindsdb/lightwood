@@ -52,20 +52,26 @@ class TestTimeseries(unittest.TestCase):
         target = 'Traffic'
         order_by = 'T'
         nr_preds = 2
+        window = 5
         pred = predictor_from_problem(train,
                                       ProblemDefinition.from_dict({'target': target,
                                                                    'time_aim': 30,
-                                                                   'nfolds': 10,
+                                                                   'nsubsets': 10,
                                                                    'anomaly_detection': True,
                                                                    'timeseries_settings': {
                                                                        'use_previous_target': True,
+                                                                       'allow_incomplete_history': True,
                                                                        'group_by': ['Country'],
                                                                        'nr_predictions': nr_preds,
                                                                        'order_by': [order_by],
-                                                                       'window': 5
+                                                                       'window': window
                                                                    }}))
         pred.learn(train)
         preds = pred.predict(test)
+        self.check_ts_prediction_df(preds, nr_preds, [order_by])
+
+        # test allowed incomplete history
+        preds = pred.predict(test[:window - 1])
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # test inferring mode
@@ -85,19 +91,24 @@ class TestTimeseries(unittest.TestCase):
         target = 'Traffic'
         order_by = 'T'
         nr_preds = 2
+        window = 5
         pred = predictor_from_problem(data,
                                       ProblemDefinition.from_dict({'target': target,
-                                                                   'nfolds': 10,
+                                                                   'nsubsets': 10,
                                                                    'anomaly_detection': False,
                                                                    'timeseries_settings': {
                                                                        'use_previous_target': False,
+                                                                       'allow_incomplete_history': False,
                                                                        'nr_predictions': nr_preds,
                                                                        'order_by': [order_by],
-                                                                       'window': 5}
+                                                                       'window': window}
                                                                    }))
         pred.learn(data)
         preds = pred.predict(data[0:10])
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
+
+        # test incomplete history, should not be possible
+        self.assertRaises(Exception, pred.predict, test[:window - 1])
 
         # test inferring mode
         test['__mdb_make_predictions'] = False
@@ -118,7 +129,7 @@ class TestTimeseries(unittest.TestCase):
         predictor = predictor_from_problem(df,
                                            ProblemDefinition.from_dict({'target': target,
                                                                         'time_aim': 30,
-                                                                        'nfolds': 5,
+                                                                        'nsubsets': 5,
                                                                         'anomaly_detection': False,
                                                                         'timeseries_settings': {
                                                                             'order_by': ['T'],

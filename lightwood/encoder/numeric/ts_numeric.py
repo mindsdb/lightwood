@@ -63,9 +63,10 @@ class TsNumericEncoder(NumericEncoder):
                             mean = normalizer.abs_mean
                 else:
                     mean = self._abs_mean
-                if real is not None and mean > 0:
+
+                if real is not None:
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
-                    vector[1] = real / mean
+                    vector[1] = real / mean if mean != 0 else real
                 else:
                     raise Exception(f'Can\'t encode target value: {real}')
 
@@ -131,7 +132,7 @@ class TsNumericEncoder(NumericEncoder):
                     else:
                         mean = self._abs_mean
 
-                    real_value = vector[1] * mean
+                    real_value = vector[1] * mean if mean != 0 else vector[1]
 
                     if self.positive_domain:
                         real_value = abs(real_value)
