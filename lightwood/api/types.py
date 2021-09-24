@@ -348,7 +348,7 @@ class ProblemDefinition:
         """
         target = obj['target']
         nsubsets = obj.get('nsubsets', 30)
-        pct_invalid = obj.get('pct_invalid', 100)
+        pct_invalid = obj.get('pct_invalid', 2)
         unbias_target = obj.get('unbias_target', True)
         seconds_per_mixer = obj.get('seconds_per_mixer', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
