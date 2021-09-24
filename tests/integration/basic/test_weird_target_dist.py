@@ -1,6 +1,7 @@
 import unittest
 import pandas as pd
 from lightwood.api.types import ProblemDefinition
+from lightwood import dtype
 
 
 class TestBasic(unittest.TestCase):
@@ -20,12 +21,13 @@ class TestBasic(unittest.TestCase):
         # The target will be cateogircal and there will be a bunch of values
         # in all datasets (train/dev/validation) that were not present in the others
         df = pd.DataFrame({
-            'target': [1 for _ in range(200)] + [f'{i}cat' for i in range(100)],
-            'y': [i for i in range(300)]
+            'target': [1 for _ in range(500)] + [f'{i}cat' for i in range(100)],
+            'y': [i for i in range(600)]
         })
         target = 'target'
 
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict(
                                            {'target': target, 'time_aim': 60, 'unbias_target': True}))
         predictor.learn(df)
+        assert predictor.model_analysis.dtypes['traget'] == dtype.categorical
         predictor.predict(df)
