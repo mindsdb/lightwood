@@ -4,7 +4,6 @@
 # TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
 # TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
 # TODO: Please fix spelling on parallel_preped_encoders
-import lightwood.encoder
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 import black
@@ -367,6 +366,7 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
                         field['args'][arg] = implicit_value['args'][arg]
     json_ai.__setattr__(field_name, field)
 
+
 def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     """
     To enable brevity in writing, auto-generate the "unspecified/missing" details required in the ML pipeline.
@@ -561,7 +561,7 @@ self.ts_analysis = {call(json_ai.timeseries_analyzer)}
 """
 
     if json_ai.timeseries_analyzer is not None:
-        ts_encoder_code = f"""
+        ts_encoder_code = """
 if encoder.is_timeseries_encoder:
     kwargs['ts_analysis'] = self.ts_analysis
 """
