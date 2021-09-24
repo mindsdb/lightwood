@@ -29,5 +29,5 @@ class TestBasic(unittest.TestCase):
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict(
                                            {'target': target, 'time_aim': 60, 'unbias_target': True}))
         predictor.learn(df)
-        assert predictor.model_analysis.dtypes['traget'] == dtype.categorical
+        assert predictor.model_analysis.dtypes['target'] == dtype.categorical
         predictor.predict(df)
