@@ -480,7 +480,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     for field_name, implicit_value in hidden_fields:
         field = json_ai.__getattribute__(field_name)
         if field is None:
-            field = implicit_value
+            if tss.is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
+                field = implicit_value
         else:
             args = eval(field['module']).__code__.co_varnames
             for arg in args:
