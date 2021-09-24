@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,8 @@ from lightwood.helpers.general import evaluate_accuracy
 class BestOf(BaseEnsemble):
     best_index: int
 
-    def __init__(self, target, mixers: List[BaseMixer], data: List[EncodedDs], accuracy_functions) -> None:
+    def __init__(self, target, mixers: List[BaseMixer], data: List[EncodedDs], accuracy_functions,
+                 ts_analysis: Optional[dict] = None) -> None:
         super().__init__(target, mixers, data)
         # @TODO: Need some shared accuracy functionality to determine mixer selection here
         self.maximize = True
@@ -24,7 +25,8 @@ class BestOf(BaseEnsemble):
                 ds.data_frame,
                 mixer(ds)['prediction'],
                 target,
-                accuracy_functions
+                accuracy_functions,
+                ts_analysis=ts_analysis
             )
             avg_score = np.mean(list(score_dict.values()))
             log.info(f'Mixer {type(mixer).__name__} obtained a best-of evaluation score of {round(avg_score,4)}')
