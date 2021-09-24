@@ -93,7 +93,11 @@ class TsNumericEncoder(NumericEncoder):
             group_data = {'__default': [None] * len(encoded_values)}
             historicals = [[None] * len(encoded_values)]
         else:
-            group_data = {k: [e[0] if isinstance(e, list) else e for e in dependency_data[k]] for k in self.grouped_by}
+            if self.grouped_by:
+                group_data = {k: [e[0] if isinstance(e, list) else e for e in dependency_data[k]]
+                              for k in self.grouped_by}
+            else:
+                group_data = {'__default': [None] * len(encoded_values)}
             historicals = dependency_data[self.prev_target] if self.prev_target is not None else \
                 [[None] * len(encoded_values)]
 
