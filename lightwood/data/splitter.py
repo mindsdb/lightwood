@@ -36,7 +36,7 @@ def splitter(
 
     # Time series needs to preserve the sequence
     if tss.is_timeseries:
-        train, test = _split_timeseries(data, target, pct_train, tss)
+        train, test = _split_timeseries(data, tss)
 
     else:
         # Shuffle the data
@@ -52,20 +52,19 @@ def stratify(data: pd.DataFrame, pct_train: float, target: Optional[str]):
     Stratify a dataset on a target column; returns a train/test split.
     """
     if target is None:
-        Ntrain = int(len(data) * pct_train)
-        train, test = data[:Ntrain], data[Ntrain:]
+        n_train = int(len(data) * pct_train)
+        train, test = data[:n_train], data[n_train:]
     else:
         train = []
         test = []
 
-        for label, subset in data.groupby(target):
+        for _, subset in data.groupby(target):
 
             # Extract, from each label,
-            N = len(subset)
-            Ntrain = int(N * pct_train)  # Ensure 1 example passed to test
+            n_train = int(len(subset) * pct_train)  # Ensure 1 example passed to test
 
-            train.append(subset[:Ntrain])
-            test.append(subset[Ntrain:])
+            train.append(subset[:n_train])
+            test.append(subset[n_train:])
 
         train = pd.concat(train)
         test = pd.concat(test)
@@ -75,9 +74,7 @@ def stratify(data: pd.DataFrame, pct_train: float, target: Optional[str]):
 
 def _split_timeseries(
     data: pd.DataFrame,
-    pct_train: float,
-    tss: TimeseriesSettings,
-    target: Optional[str]
+    tss: TimeseriesSettings
 ):
     """
     Returns a time-series split based on group-by columns or not for time-series.
@@ -91,11 +88,8 @@ def _split_timeseries(
 
     :returns Train/test split of the data of interest
     """
-    if not tss.group_by:
-        train, test = stratify(data, pct_train, target)
-    else:
-        gcols = tss.group_by
-        subsets = grouped_ts_splitter(data, 30, gcols)
+    gcols = tss.group_by
+    subsets = grouped_ts_splitter(data, 30, gcols)
     return subsets
 
 
