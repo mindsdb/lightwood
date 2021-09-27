@@ -3,7 +3,6 @@
 # TODO: What does `target_class_distribution` and `positive_domain` do?
 # TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
 # TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
-# TODO: Please fix spelling on parallel_prepped_encoders
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 import black
