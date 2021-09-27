@@ -1,11 +1,11 @@
 # TODO: Make stratification work for grouped cols??
 # TODO: Make stratification work for regression via histogram bins??
 
+from lightwood import dtype
 import pandas as pd
 import numpy as np
 from typing import List, Dict, Optional
 from itertools import product
-
 from lightwood.api.types import TimeseriesSettings
 
 
@@ -13,6 +13,7 @@ def splitter(
     data: pd.DataFrame,
     tss: TimeseriesSettings,
     pct_train: float,
+    dtype_dict: Dict[str, str],
     seed: int = 1,
     target: Optional[str] = None,
 ) -> Dict[str, pd.DataFrame]:
@@ -23,6 +24,7 @@ def splitter(
     :param tss: time-series specific details for splitting
     :param pct_train: training fraction of data; must be less than 1
     :param seed: Random state for pandas data-frame shuffling
+    :param dtype_dict: Dictionary with the data type of all columns
     :param target: Name of the target column; if specified, data will be stratified on this column
 
     :returns: A dictionary containing "train" and "test" splits of the data.
@@ -37,12 +39,12 @@ def splitter(
         train, test = _split_timeseries(data, target, pct_train, tss)
 
     else:
-
         # Shuffle the data
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
-        train, test = stratify(data, target, pct_train)
+        if dtype_dict[target] in (dtype.categorical, dtype.binary):
+            train, test = stratify(data, target, pct_train)
 
-    return {"train": train_data, "test": test_data, "stratified_on": target}
+    return {"train": train, "test": test, "stratified_on": target}
 
 
 def stratify(data: pd.DataFrame, pct_train: float, target: Optional[str]):
@@ -58,9 +60,9 @@ def stratify(data: pd.DataFrame, pct_train: float, target: Optional[str]):
 
         for label, subset in data.groupby(target):
 
-            # Extract, from each label, 
+            # Extract, from each label,
             N = len(subset)
-            Ntrain = int(N * pct_train) # Ensure 1 example passed to test
+            Ntrain = int(N * pct_train)  # Ensure 1 example passed to test
 
             train.append(subset[:Ntrain])
             test.append(subset[Ntrain:])
@@ -112,7 +114,7 @@ def grouped_ts_splitter(
     :param gcols: Columns to group-by on
 
     :returns A list of equally-sized data subsets that can be concatenated by the full data. This preserves the group-by columns.
-    """
+    """ # noqa
     all_group_combinations = list(product(*[data[gcol].unique() for gcol in gcols]))
     subsets = [pd.DataFrame() for _ in range(k)]
     for group in all_group_combinations:

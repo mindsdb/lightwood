@@ -228,6 +228,7 @@ def model_analyzer(
         runtime_analyzer['icp']['__mdb_active'] = True
 
     # get accuracy metric for validation data
+    # @TODO: maybe pass ts_analysis to trigger group-wise MASE instead of R2 mean, though it wouldn't be 0-1 bounded
     score_dict = evaluate_accuracy(
         data,
         normal_predictions['prediction'],
