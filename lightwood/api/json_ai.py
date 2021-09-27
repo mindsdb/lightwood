@@ -452,6 +452,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'tss': '$problem_definition.timeseries_settings',
             'data': 'data',
             'seed': 1,
+            'Nsubsets': 30,
             'target': None,
             'dtype_dict': '$dtype_dict',
             'pct_train': 0.9
@@ -612,19 +613,19 @@ data = {call(json_ai.splitter)}
 
 log.info('Preparing the encoders')
 
-encoder_preping_dict = {{}}
-enc_preping_data = pd.concat(data['train'])
+encoder_prepping_dict = {{}}
+enc_prepping_data = pd.concat(data['train'])
 for col_name, encoder in self.encoders.items():
     if not encoder.is_nn_encoder:
-        encoder_preping_dict[col_name] = [encoder, enc_preping_data[col_name], 'prepare']
-        log.info(f'Encoder preping dict length of: {{len(encoder_preping_dict)}}')
+        encoder_prepping_dict[col_name] = [encoder, enc_prepping_data[col_name], 'prepare']
+        log.info(f'Encoder prepping dict length of: {{len(encoder_prepping_dict)}}')
 
-parallel_prepped_encoders = mut_method_call(encoder_preping_dict)
+parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
 for col_name, encoder in parallel_prepped_encoders.items():
     self.encoders[col_name] = encoder
 
 if self.target not in parallel_prepped_encoders:
-    self.encoders[self.target].prepare(enc_preping_data[self.target])
+    self.encoders[self.target].prepare(enc_prepping_data[self.target])
 
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
