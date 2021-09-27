@@ -54,7 +54,7 @@ def cleaner(
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         for nan_val in VALUES_FOR_NAN_AND_NONE_IN_PANDAS:
             data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
-                                    ).replace({nan_val: None})
+                                        ).replace({nan_val: None})
         # If a column has too many None values, raise an Excpetion
         # Figure out how to reintroduce later, maybe a custom flag, `crash for too much invalid data`?
         # _check_if_invalid(data[col], pct_invalid, col)

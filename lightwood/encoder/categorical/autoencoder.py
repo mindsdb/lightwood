@@ -1,5 +1,4 @@
 import random
-from typing import Union
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -63,8 +62,8 @@ class CategoricalAutoEncoder(BaseEncoder):
         optimizer = Ranger(self.net.parameters())
 
         gym = Gym(model=self.net, optimizer=optimizer, scheduler=None, loss_criterion=criterion,
-                    device=self.net.device, name=self.name, input_encoder=self.onehot_encoder.encode,
-                    output_encoder=self._encoder_targets)
+                  device=self.net.device, name=self.name, input_encoder=self.onehot_encoder.encode,
+                  output_encoder=self._encoder_targets)
 
         batch_size = min(200, int(len(priming_data) / 50))
 
@@ -75,13 +74,13 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         test_data_loader = None
 
-        best_model, error, training_time = gym.fit(train_data_loader,
-                                                    test_data_loader,
-                                                    desired_error=self.desired_error,
-                                                    max_time=self.stop_after,
-                                                    callback=self._train_callback,
-                                                    eval_every_x_epochs=1,
-                                                    max_unimproving_models=5)
+        best_model, _, _ = gym.fit(train_data_loader,
+                                   test_data_loader,
+                                   desired_error=self.desired_error,
+                                   max_time=self.stop_after,
+                                   callback=self._train_callback,
+                                   eval_every_x_epochs=1,
+                                   max_unimproving_models=5)
 
         self.net = best_model.to(self.net.device)
 
