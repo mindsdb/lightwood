@@ -3,7 +3,7 @@
 # TODO: What does `target_class_distribution` and `positive_domain` do?
 # TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
 # TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
-# TODO: Please fix spelling on parallel_preped_encoders
+# TODO: Please fix spelling on parallel_prepped_encoders
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 import black
@@ -620,11 +620,11 @@ for col_name, encoder in self.encoders.items():
         encoder_preping_dict[col_name] = [encoder, enc_preping_data[col_name], 'prepare']
         log.info(f'Encoder preping dict length of: {{len(encoder_preping_dict)}}')
 
-parallel_preped_encoders = mut_method_call(encoder_preping_dict)
-for col_name, encoder in parallel_preped_encoders.items():
+parallel_prepped_encoders = mut_method_call(encoder_preping_dict)
+for col_name, encoder in parallel_prepped_encoders.items():
     self.encoders[col_name] = encoder
 
-if self.target not in parallel_preped_encoders:
+if self.target not in parallel_prepped_encoders:
     self.encoders[self.target].prepare(enc_preping_data[self.target])
 
 for col_name, encoder in self.encoders.items():
@@ -642,7 +642,7 @@ for col_name, encoder in self.encoders.items():
 
         # This assumes target  encoders are also prepared in parallel, might not be true
         if hasattr(encoder, 'uses_target'):
-            kwargs['encoded_target_values'] = parallel_preped_encoders[self.target].encode(priming_data[self.target])
+            kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
 
         encoder.prepare(priming_data[col_name], **kwargs)
 
