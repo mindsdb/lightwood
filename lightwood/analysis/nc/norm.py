@@ -65,7 +65,7 @@ class Normalizer(BaseMixer):
         return scores
 
     def get_labels(self, preds: pd.DataFrame, truths: np.ndarray, target_enc) -> np.ndarray:
-        if self.target_dtype in [dtype.integer, dtype.float]:
+        if self.target_dtype in [dtype.integer, dtype.float, dtype.quantity]:
             if not self.multi_ts_task:
                 preds = preds.values.squeeze()
             else:

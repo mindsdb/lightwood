@@ -71,7 +71,7 @@ def explain(data: pd.DataFrame,
         icp_X[target_name] = preds
 
         is_categorical = target_dtype in (dtype.binary, dtype.categorical)
-        is_numerical = target_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray)
+        is_numerical = target_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity)
         is_anomaly_task = is_numerical and timeseries_settings.is_timeseries and anomaly_detection
 
         if (is_numerical or is_categorical) and analysis['icp'].get('__mdb_active', False):
@@ -223,7 +223,7 @@ def explain(data: pd.DataFrame,
         insights['prediction'] = insights['prediction'].astype(int)
         insights['upper'] = insights['upper'].astype(int)
         insights['lower'] = insights['lower'].astype(int)
-    elif target_dtype in (dtype.float):
+    elif target_dtype in (dtype.float, dtype.quantity):
         insights['prediction'] = insights['prediction'].astype(float)
         insights['upper'] = insights['upper'].astype(float)
         insights['lower'] = insights['lower'].astype(float)
