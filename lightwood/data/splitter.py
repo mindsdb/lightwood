@@ -36,25 +36,29 @@ def splitter(
             f"The value of pct_train ({pct_train}) needs to be between 0 and 1"
         )
 
+    # Shuffle the data
+    data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
+
     # Time series needs to preserve the sequence
     if tss.is_timeseries:
         train, test = _split_timeseries(data, tss, pct_train, N_subsets)
 
     else:
-        # Shuffle the data
-        data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
         if dtype_dict[target] in (dtype.categorical, dtype.binary):
-            train, test = stratify(data, target, pct_train)
+            train, test = stratify(data, pct_train, seed, target)
 
     return {"train": train, "test": test, "stratified_on": target}
 
 
-def stratify(data: pd.DataFrame, pct_train: float, target: Optional[str] = None):
+def stratify(
+    data: pd.DataFrame, pct_train: float, seed: int, target: Optional[str] = None
+):
     """
     Stratify a dataset on a target column; returns a train/test split.
 
     :param data: Dataset to split into training/testing
     :param pct_train: Fraction of data reserved for training (rest is testing)
+    :param seed: Random seed for shuffling pandas dataframe
     :param target: Name of the target column to stratify on
     """
     if target is None:
@@ -72,8 +76,11 @@ def stratify(data: pd.DataFrame, pct_train: float, target: Optional[str] = None)
             train.append(subset[:n_train])
             test.append(subset[n_train:])
 
-        train = pd.concat(train)
-        test = pd.concat(test)
+        # Shuffle train/test to ensure homogenous distribution
+        train = (
+            pd.concat(train).sample(frac=1, random_state=seed).reset_index(drop=True)
+        )
+        test = pd.concat(test).sample(frac=1, random_state=seed).reset_index(drop=True)
 
     return train, test
 
@@ -98,7 +105,8 @@ def _split_timeseries(
     """
     gcols = tss.group_by
     subsets = grouped_ts_splitter(data, k, gcols)
-    return subsets[:int(pct_train * k)], subsets[int(pct_train * k):]
+    Ntrain = int(pct_train * k)
+    return subsets[:Ntrain], subsets[Ntrain:]
 
 
 def grouped_ts_splitter(
