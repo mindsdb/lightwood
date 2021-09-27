@@ -21,6 +21,8 @@ from lightwood.encoder.time_series.helpers.transformer_helpers import Transforme
 
 
 class TimeSeriesEncoder(BaseEncoder):
+    is_timeseries_encoder: bool = True
+    is_trainable_encoder: bool = True
 
     def __init__(self, stop_after: int, is_target=False, original_type: str = None, target: str = None,
                  grouped_by: List[str] = [], encoder_type='rnn'):

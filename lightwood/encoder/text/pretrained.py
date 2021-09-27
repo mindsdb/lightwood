@@ -74,6 +74,8 @@ from transformers import (
 
 
 class PretrainedLangEncoder(BaseEncoder):
+    is_trainable_encoder: bool = True
+
     """
     Pretrained language models.
     Option to train on a target encoding of choice.

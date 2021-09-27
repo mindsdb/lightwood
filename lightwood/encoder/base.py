@@ -7,6 +7,9 @@ class BaseEncoder:
     is_target: bool
     prepared: bool
 
+    is_timeseries_encoder: bool = False
+    is_trainable_encoder: bool = False
+
     def __init__(self, is_target=False) -> None:
         self.is_target = is_target
         self._prepared = False

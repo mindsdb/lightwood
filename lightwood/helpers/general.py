@@ -1,29 +1,37 @@
-import math
 import importlib
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Optional
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import r2_score, f1_score
+from sklearn.metrics import r2_score, f1_score, mean_absolute_error
 
 
+from lightwood.encoder.time_series.helpers.common import get_group_matches
+
+
+# ------------------------- #
+# Accuracy metrics
+# ------------------------- #
 def evaluate_accuracy(data: pd.DataFrame,
                       predictions: pd.Series,
                       target: str,
-                      accuracy_functions: List[str]) -> Dict[str, float]:
+                      accuracy_functions: List[str],
+                      ts_analysis: Optional[dict] = {}) -> Dict[str, float]:
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
         if accuracy_function_str == 'evaluate_array_accuracy':
-            nr_predictions = len(predictions.iloc[0])
+            nr_predictions = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
             cols = [target] + [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]
             true_values = data[cols].values.tolist()
-            accuracy_function = evaluate_array_accuracy
+            score_dict[accuracy_function_str] = evaluate_array_accuracy(list(true_values),
+                                                                        list(predictions),
+                                                                        data,
+                                                                        ts_analysis=ts_analysis)
         else:
             true_values = data[target].tolist()
             accuracy_function = getattr(importlib.import_module('sklearn.metrics'), accuracy_function_str)
-
-        score_dict[accuracy_function_str] = accuracy_function(list(true_values), list(predictions))
+            score_dict[accuracy_function_str] = accuracy_function(list(true_values), list(predictions))
 
     return score_dict
 
@@ -50,18 +58,95 @@ def evaluate_multilabel_accuracy(true_values, predictions, **kwargs):
 def evaluate_array_accuracy(
         true_values: List[List[Union[int, float]]],
         predictions: List[List[Union[int, float]]],
+        data: pd.DataFrame,
         **kwargs
 ) -> float:
-    # @TODO: ideally MASE here
+    """
+    Evaluate accuracy in numerical time series forecasting tasks.
+    Defaults to mean absolute scaled error (MASE) if in-sample residuals are available.
+    If this is not the case, R2 score is computed instead.
+
+    Scores are computed for each timestep (as determined by `timeseries_settings.nr_predictions`),
+    and the final accuracy is the reciprocal of the average score through all timesteps.
+    """
+
+    ts_analysis = kwargs.get('ts_analysis', {})
+    naive_errors = ts_analysis.get('ts_naive_mae', {})
+
+    if not naive_errors:
+        # use mean R2 method if naive errors are not available
+        return evaluate_array_r2_accuracy(true_values, predictions, ts_analysis=ts_analysis)
+
+    mases = []
+    true_values = np.array(true_values)
+    predictions = np.array(predictions)
+    wrapped_data = {'data': data.reset_index(drop=True),
+                    'group_info': {gcol: data[gcol].tolist()
+                                   for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
+                    }
+    for group in ts_analysis['group_combinations']:
+        g_idxs, _ = get_group_matches(wrapped_data, group)
+        trues = true_values[g_idxs]
+        preds = predictions[g_idxs]
+
+        if ts_analysis['tss'].nr_predictions == 1:
+            preds = np.expand_dims(preds, axis=1)
+
+        # only evaluate accuracy for rows with complete historical context
+        if len(trues) > ts_analysis['tss'].window:
+            trues = trues[ts_analysis['tss'].window:]
+            preds = preds[ts_analysis['tss'].window:]
+
+        # add MASE score for each group (__default only considered if the task is non-grouped)
+        if len(ts_analysis['group_combinations']) == 1 or group != '__default':
+            mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].nr_predictions))
+
+    return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
+
+
+def evaluate_array_r2_accuracy(
+        true_values: List[List[Union[int, float]]],
+        predictions: List[List[Union[int, float]]],
+        **kwargs
+) -> float:
+    """
+    Default time series forecasting accuracy method.
+    Returns mean R2 score over all timesteps in the forecasting horizon.
+    """
     base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
-    aggregate = 0
 
-    for i in range(len(predictions)):
-        try:
-            valid_horizon = [math.isnan(x) for x in true_values[i]].index(True)
-        except ValueError:
-            valid_horizon = len(true_values[i])
+    aggregate = 0.0
 
-        aggregate += base_acc_fn(true_values[i][:valid_horizon], predictions[i][:valid_horizon])
+    fh = 1 if not isinstance(predictions[0], list) else len(predictions[0])
+    if fh == 1:
+        predictions = [[p] for p in predictions]
 
-    return aggregate / len(predictions)
+    # only evaluate accuracy for rows with complete historical context
+    if kwargs.get('ts_analysis', {}).get('tss', False):
+        true_values = true_values[kwargs['ts_analysis']['tss'].window:]
+        predictions = predictions[kwargs['ts_analysis']['tss'].window:]
+
+    for i in range(fh):
+        aggregate += base_acc_fn([t[i] for t in true_values], [p[i] for p in predictions])
+
+    return aggregate / fh
+
+
+# ------------------------- #
+# Helpers
+# ------------------------- #
+def mase(trues, preds, scale_error, fh):
+    """
+    Computes mean absolute scaled error.
+    The scale corrective factor is the mean in-sample residual from the naive forecasting method.
+    """
+    if scale_error == 0:
+        scale_error = 1  # cover (rare) case where series is constant
+
+    agg = 0.0
+    for i in range(fh):
+        true = [t[i] for t in trues]
+        pred = [p[i] for p in preds]
+        agg += mean_absolute_error(true, pred)
+
+    return (agg / fh) / scale_error
