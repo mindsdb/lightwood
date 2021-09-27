@@ -29,7 +29,8 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.max_encoded_length = max_encoded_length
 
     def _train_callback(self, error, real_buff, predicted_buff):
-        log.info(f'{self.name} reached a loss of {error} while training !')
+        pass
+        #  log.info(f'{self.name} reached a loss of {error} while training !')
 
     def _encoder_targets(self, data):
         oh_encoded_categories = self.onehot_encoder.encode(data)
