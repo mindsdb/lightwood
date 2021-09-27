@@ -81,7 +81,7 @@ def lookup_encoder(
         dtype.float: 'Float.NumericEncoder',
         dtype.binary: 'Binary.BinaryEncoder',
         dtype.categorical: 'Categorical.CategoricalAutoEncoder'
-        if statistical_analysis is None or len(statistical_analysis.histograms[col_name]) > 100 
+        if statistical_analysis is None or len(statistical_analysis.histograms[col_name]) > 100
         else 'Categorical.OneHotEncoder',
         dtype.tags: 'Tags.MultiHotEncoder',
         dtype.date: 'Date.DatetimeEncoder',
