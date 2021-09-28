@@ -23,7 +23,13 @@ def create_custom_module():
         pass
 
     with open(mpath, 'w') as fp:
-        fp.write(f'def throwing_cleaner(): raise Exception("{test_err_message}")')
+        fp.write("""
+import pandas as pd
+
+def throwing_cleaner(data: pd.DataFrame, err_msg: str):
+    assert isinstance(data, pd.DataFrame)
+    raise Exception(err_msg)
+""")
 
 
 class TestBasic(unittest.TestCase):
@@ -38,9 +44,10 @@ class TestBasic(unittest.TestCase):
         json_ai_dump = json_ai.to_dict()
         json_ai_dump['cleaner'] = {
             'module': 'custom_cleaners.throwing_cleaner',
-            'args': {}
+            'args': {
+                'err_msg': f'"{test_err_message}"'
+            }
         }
-        print(json_ai_dump)
 
         json_ai = JsonAI.from_dict(json_ai_dump)
 

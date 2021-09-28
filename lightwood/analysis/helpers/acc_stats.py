@@ -20,6 +20,7 @@ class AccStats(BaseAnalysisBlock):
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
 
+        # @TODO: maybe pass ts_analysis to trigger group-wise MASE instead of R2 mean, though it wouldn't be 0-1 bounded
         info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
                                                ns.target, ns.accuracy_functions)
         info['normal_accuracy'] = np.mean(list(info['score_dict'].values()))
