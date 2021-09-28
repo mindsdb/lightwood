@@ -9,7 +9,7 @@ class BaseAnalysisBlock:
                  deps: Optional[List] = []
                  ):
 
-        self.dependencies = deps  # can be parallelized when there are no dependencies
+        self.dependencies = deps  # can be parallelized when there are no dependencies @TODO
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         """

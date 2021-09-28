@@ -2,6 +2,7 @@ from typing import Optional, List, Dict
 import torch
 import pandas as pd
 
+import lightwood.api.json_ai
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.ts import get_inferred_timestamps
 from lightwood.analysis.nc.calibrate import ICP
@@ -80,7 +81,13 @@ def explain(data: pd.DataFrame,
     # ------------------------- #
     # Additional Explanations
     # ------------------------- #
-    for block in explainer_blocks:
-        row_insights, global_insights = block.explain(insights, **{})
+    if len(explainer_blocks) > 0:
+        exec(lightwood.api.json_ai.IMPORTS_FOR_EXTERNAL_DIRS, globals())
+        exec(lightwood.api.json_ai.IMPORT_EXTERNAL_DIRS, globals())
+
+        for dirpath in explainer_blocks:
+            module, block_name = dirpath.split(".")
+            block = getattr(eval(module), block_name)()
+            row_insights, global_insights = block.explain(insights, **kwargs)
 
     return row_insights

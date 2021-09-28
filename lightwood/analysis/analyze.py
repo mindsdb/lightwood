@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 
+import lightwood.api.json_ai
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
@@ -103,7 +104,13 @@ def model_analyzer(
     # ------------------------- #
     # Additional Analysis Blocks
     # ------------------------- #
-    for block in analysis_blocks:
-        runtime_analyzer = block.compute(runtime_analyzer, **{})
+    if len(analysis_blocks) > 0:
+        exec(lightwood.api.json_ai.IMPORTS_FOR_EXTERNAL_DIRS, globals())
+        exec(lightwood.api.json_ai.IMPORT_EXTERNAL_DIRS, globals())
+
+        for dirpath in analysis_blocks:
+            module, block_name = dirpath.split(".")
+            block = getattr(eval(module), block_name)()
+            runtime_analyzer = block.analyze(runtime_analyzer, **{})
 
     return model_analysis, runtime_analyzer
