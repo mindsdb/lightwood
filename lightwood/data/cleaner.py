@@ -58,7 +58,6 @@ def cleaner(
         # If a column has too many None values, raise an Excpetion
         # Figure out how to reintroduce later, maybe a custom flag, `crash for too much invalid data`?
         # _check_if_invalid(data[col], pct_invalid, col)
-    pd.set_option("display.max_rows", None, "display.max_columns", None)
     return data
 
 
