@@ -32,23 +32,22 @@ def model_analyzer(
     runtime_analyzer = {}
     data_type = dtype_dict[target]
 
-    is_numerical = data_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray)
-    is_classification = data_type in (dtype.categorical, dtype.binary)
-    is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
-
     # encoded data representations
     encoded_train_data = ConcatedEncodedDs(train_data)
     encoded_val_data = ConcatedEncodedDs(data)
     data = encoded_val_data.data_frame
+    input_cols = list([col for col in data.columns if col != target])
 
-    # additional flags
+    # predictive task
+    is_numerical = data_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray)
+    is_classification = data_type in (dtype.categorical, dtype.binary)
+    is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
     has_pretrained_text_enc = any([isinstance(enc, PretrainedLangEncoder)
                                    for enc in encoded_train_data.encoders.values()])
-    disable_column_importance = disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
 
-    input_cols = list([col for col in data.columns if col != target])
-    normal_predictions = predictor(encoded_val_data) if not is_classification else predictor(
-        encoded_val_data, predict_proba=True)
+    # predictions for validation dataset
+    normal_predictions = predictor(encoded_val_data) if not is_classification else predictor(encoded_val_data,
+                                                                                             predict_proba=True)
     normal_predictions = normal_predictions.set_index(data.index)
 
     # ------------------------- #
@@ -83,6 +82,7 @@ def model_analyzer(
     runtime_analyzer = acc_stats.analyze(runtime_analyzer, **kwargs)
 
     # global feature importance
+    disable_column_importance = disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
     if not disable_column_importance:
         block = GlobalFeatureImportance()
         runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)

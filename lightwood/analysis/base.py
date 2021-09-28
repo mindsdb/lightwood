@@ -20,7 +20,7 @@ class BaseAnalysisBlock:
 
         :param info: Dictionary where any new information or objects are added. The next analysis block will use
         the output of the previous block as a starting point.
-        :param kwargs: Dictionary with useful variables from either the core analysis or the rest of the prediction
+        :param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
         pipeline.
         """
         raise NotImplementedError
