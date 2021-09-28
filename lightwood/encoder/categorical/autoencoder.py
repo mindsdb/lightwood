@@ -28,10 +28,6 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.output_size = None
         self.max_encoded_length = max_encoded_length
 
-    def _train_callback(self, error, real_buff, predicted_buff):
-        pass
-        #  log.info(f'{self.name} reached a loss of {error} while training !')
-
     def _encoder_targets(self, data):
         oh_encoded_categories = self.onehot_encoder.encode(data)
         target = oh_encoded_categories.cpu().numpy()
@@ -79,7 +75,6 @@ class CategoricalAutoEncoder(BaseEncoder):
                                    test_data_loader,
                                    desired_error=self.desired_error,
                                    max_time=self.stop_after,
-                                   callback=self._train_callback,
                                    eval_every_x_epochs=1,
                                    max_unimproving_models=5)
 
