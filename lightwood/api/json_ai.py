@@ -29,6 +29,14 @@ for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_mo
             loader.exec_module(module)
             exec(f'{mod_name} = module')
 """
+
+IMPORTS_FOR_EXTERNAL_DIRS = """
+import os
+from types import ModuleType
+import importlib.machinery
+import sys
+"""
+
 IMPORTS = """
 import lightwood
 from lightwood.analysis import *
@@ -46,11 +54,7 @@ from lightwood.helpers.text import *
 from lightwood.helpers.torch import *
 from lightwood.mixer import *
 import pandas as pd
-from typing import Dict, List
-import os
-import importlib.machinery
-from types import ModuleType
-import sys"""
+from typing import Dict, List"""
 
 
 def lookup_encoder(
@@ -170,6 +174,7 @@ def generate_json_ai(
     :returns: JSON-AI object with fully populated details of the ML pipeline
     """ # noqaexec
     exec(IMPORTS, globals())
+    exec(IMPORTS_FOR_EXTERNAL_DIRS, globals())
     exec(IMPORT_EXTERNAL_DIRS, globals())
     target = problem_definition.target
     input_cols = []
@@ -712,6 +717,7 @@ return insights
 
     predictor_code = f"""
 {IMPORTS}
+{IMPORTS_FOR_EXTERNAL_DIRS}
 {IMPORT_EXTERNAL_DIRS}
 
 class Predictor(PredictorInterface):
