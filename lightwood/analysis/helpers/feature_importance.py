@@ -12,6 +12,20 @@ from lightwood.analysis.nc.util import t_softmax
 
 
 class GlobalFeatureImportance(BaseAnalysisBlock):
+    """
+    Analysis block that estimates column importance with a variant of the LOCO (leave-one-covariate-out) algorithm.
+
+    Roughly speaking, the procedure:
+        - iterates over all input columns
+        - if the input column is optional, then make a predict with its values set to None
+        - compare this accuracy with the accuracy obtained using all data
+        - all accuracy differences are passed through a softmax and reported as estimated column importance scores
+
+    Note that, crucially, this method does not refit the predictor at any point.
+
+    Reference:
+        https://compstat-lmu.github.io/iml_methods_limitations/pfi.html
+    """
     def __init__(self):
         super().__init__(deps=None)
 
