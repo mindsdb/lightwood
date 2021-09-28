@@ -15,7 +15,7 @@ def splitter(
     pct_train: float,
     dtype_dict: Dict[str, str],
     seed: int = 1,
-    N_subsets: int = 30,
+    n_subsets: int = 30,
     target: Optional[str] = None,
 ) -> Dict[str, pd.DataFrame]:
     """
@@ -26,7 +26,7 @@ def splitter(
     :param pct_train: training fraction of data; must be less than 1
     :param dtype_dict: Dictionary with the data type of all columns
     :param seed: Random state for pandas data-frame shuffling
-    :param N_subsets: Number of subsets to create from data (for time-series)
+    :param n_subsets: Number of subsets to create from data (for time-series)
     :param target: Name of the target column; if specified, data will be stratified on this column
 
     :returns: A dictionary containing "train" and "test" splits of the data.
@@ -41,7 +41,7 @@ def splitter(
 
     # Time series needs to preserve the sequence
     if tss.is_timeseries:
-        train, test = _split_timeseries(data, tss, pct_train, N_subsets)
+        train, test = _split_timeseries(data, tss, pct_train, n_subsets)
 
     else:
         if dtype_dict[target] in (dtype.categorical, dtype.binary):
