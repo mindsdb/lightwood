@@ -26,12 +26,12 @@ def model_analyzer(
     accuracy_functions,
     analysis_blocks: Optional = []
 ):
-    """Analyses model on a validation fold to evaluate accuracy and confidence of future predictions"""
+    """Analyses model on a validation subset to evaluate accuracy and confidence of future predictions"""
 
     runtime_analyzer = {}
     data_type = dtype_dict[target]
 
-    is_numerical = data_type in [dtype.integer, dtype.float] or data_type in [dtype.array]
+    is_numerical = data_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray)
     is_classification = data_type in (dtype.categorical, dtype.binary)
     is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
 
