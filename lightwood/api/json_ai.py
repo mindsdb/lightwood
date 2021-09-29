@@ -723,14 +723,14 @@ encoded_data = encoded_ds.get_encoded_data(include_target=False)
     predict_body = f"""
 df = self.ensemble(encoded_ds)
 insights, global_insights = {call(json_ai.explainer)}
-return insights, global_insights
+return insights
 """
     predict_body = align(predict_body, 2)
 
     predict_proba_body = f"""
 df = self.ensemble(encoded_ds, predict_proba=True)
 insights, global_insights = {call(json_ai.explainer)}
-return insights, global_insights
+return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
 
