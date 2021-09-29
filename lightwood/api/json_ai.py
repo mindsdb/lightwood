@@ -481,11 +481,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              "data": "test_data",
              "train_data": "train_data",
              "target": "$target",
-             "disable_column_importance": "False",
              "dtype_dict": "$dtype_dict",
-             "fixed_significance": None,
-             "confidence_normalizer": False,
-             "positive_domain": "$statistical_analysis.positive_domain",
              "analysis_blocks": "$analysis_blocks"
          },
          }), ('explainer', {
@@ -509,15 +505,24 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
          }), ('analysis_blocks', [
              {
                  'module': 'ICP',
-                 'args': {},
+                 'args': {
+                     "fixed_significance": None,
+                     "confidence_normalizer": False,
+                     "positive_domain": "$statistical_analysis.positive_domain",
+
+                 },
              },
              {
                  'module': 'AccStats',
-                 'args': {'deps': ['ICP']},
+                 'args': {
+                     'deps': ['ICP']
+                 },
              },
              {
                  'module': 'GlobalFeatureImportance',
-                 'args': {},
+                 'args': {
+                     "disable_column_importance": "False",
+                 },
              },
          ]), ('timeseries_transformer', {
              "module": "transform_timeseries",

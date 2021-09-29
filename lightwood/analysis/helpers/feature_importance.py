@@ -25,13 +25,14 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
     Reference:
         https://compstat-lmu.github.io/iml_methods_limitations/pfi.html
     """
-    def __init__(self):
+    def __init__(self, disable_column_importance):
         super().__init__()
+        self.disable_column_importance = disable_column_importance
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
 
-        if ns.disable_column_importance:
+        if self.disable_column_importance or ns.ts_cfg.is_timeseries or ns.has_pretrained_text_enc:
             info['column_importances'] = None
         else:
             empty_input_accuracy = {}
