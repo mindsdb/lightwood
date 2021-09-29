@@ -1,6 +1,7 @@
 from typing import Tuple, List, Dict, Optional
 
 import pandas as pd
+from lightwood.helpers.log import log
 
 
 class BaseAnalysisBlock:
@@ -23,7 +24,8 @@ class BaseAnalysisBlock:
         :param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
         pipeline.
         """
-        raise NotImplementedError
+        log.warning("This method has not been implemented, no modifications will be done to the model analysis.")
+        return info
 
     def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         """
@@ -36,4 +38,5 @@ class BaseAnalysisBlock:
             - insights: modified input dataframe with any new row insights added here.
             - global_insights: dict() with any explanations that concern all predicted instances or the model itself.
         """
-        raise NotImplementedError
+        log.warning("This method has not been implemented, no modifications will be done to the data insights.")
+        return insights, {}

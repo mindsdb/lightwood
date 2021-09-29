@@ -31,7 +31,8 @@ class AccStats(BaseAnalysisBlock):
 
     def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         # does nothing on inference
-        return insights, {}
+        pass
+        # return insights, {}
 
     def fit(self, ns: SimpleNamespace, conf=Optional[np.ndarray]):
         self.col_stats = ns.dtype_dict

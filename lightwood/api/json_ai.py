@@ -30,13 +30,6 @@ for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_mo
             exec(f'{mod_name} = module')
 """
 
-IMPORTS_FOR_EXTERNAL_DIRS = """
-import os
-from types import ModuleType
-import importlib.machinery
-import sys
-"""
-
 IMPORTS = """
 import lightwood
 from lightwood.analysis import *
@@ -54,7 +47,12 @@ from lightwood.helpers.text import *
 from lightwood.helpers.torch import *
 from lightwood.mixer import *
 import pandas as pd
-from typing import Dict, List"""
+from typing import Dict, List
+import os
+from types import ModuleType
+import importlib.machinery
+import sys
+"""
 
 
 def lookup_encoder(
@@ -174,7 +172,6 @@ def generate_json_ai(
     :returns: JSON-AI object with fully populated details of the ML pipeline
     """ # noqaexec
     exec(IMPORTS, globals())
-    exec(IMPORTS_FOR_EXTERNAL_DIRS, globals())
     exec(IMPORT_EXTERNAL_DIRS, globals())
     target = problem_definition.target
     input_cols = []
@@ -492,7 +489,20 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                  "target_name": "$target",
                  "target_dtype": "$dtype_dict[self.target]",
              },
-         }), ('timeseries_transformer', {
+         }), ('analysis_blocks', [
+        {
+            'module': 'AccStats',
+            'args': {},
+        },
+        {
+            'module': 'GlobalFeatureImportance',
+            'args': {},
+        },
+        {
+            'module': 'ICP',
+            'args': {},
+        }
+    ]), ('timeseries_transformer', {
              "module": "transform_timeseries",
              "args": {
                  "timeseries_settings": "$problem_definition.timeseries_settings",
@@ -602,6 +612,8 @@ self.encoders = {inline_dict(encoder_dict)}
 self.dependencies = {inline_dict(dependency_dict)}
 #
 self.input_cols = [{input_cols}]
+
+self.analysis_blocks = [{}]
 
 log.info('Cleaning the data')
 data = {call(json_ai.cleaner)}
@@ -717,7 +729,6 @@ return insights
 
     predictor_code = f"""
 {IMPORTS}
-{IMPORTS_FOR_EXTERNAL_DIRS}
 {IMPORT_EXTERNAL_DIRS}
 
 class Predictor(PredictorInterface):
