@@ -27,7 +27,8 @@ for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_mo
                                                           os.path.join(import_dir, file_name))
             module = ModuleType(loader.name)
             loader.exec_module(module)
-            exec(f'{mod_name} = module')
+            sys.modules[mod_name] = module
+            exec(f'import {mod_name}')
 """
 
 IMPORTS = """
@@ -364,6 +365,9 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     if field is None:
         if is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
             field = implicit_value
+    elif isinstance(field, list) and isinstance(implicit_value, list):
+        implicit_value.extend(field)
+        field = implicit_value
     else:
         args = eval(field['module']).__code__.co_varnames
         for arg in args:
