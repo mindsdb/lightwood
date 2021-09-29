@@ -189,9 +189,9 @@ class ICP(BaseAnalysisBlock):
         info = {**info, **output}
         return info
 
-    def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
+    def explain(self, row_insights: pd.DataFrame, global_insights: Dict[str, object],
+                **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         ns = SimpleNamespace(**kwargs)
-        global_insights = {'': None}
 
         if ns.analysis['icp']['__mdb_active']:
             icp_X = deepcopy(ns.data)
@@ -252,7 +252,7 @@ class ICP(BaseAnalysisBlock):
                         all_cat_cols = [col for col in ns.predictions.columns if '__mdb_proba' in col]
                         class_dists = ns.predictions[all_cat_cols].values
                         for icol, cat_col in enumerate(all_cat_cols):
-                            insights.loc[X.index, cat_col] = class_dists[:, icol]
+                            row_insights.loc[X.index, cat_col] = class_dists[:, icol]
                     else:
                         class_dists = pd.get_dummies(ns.predictions['prediction']).values
 
@@ -335,21 +335,21 @@ class ICP(BaseAnalysisBlock):
                                     significances = get_categorical_conf(all_confs, conf_candidates)
                                     result.loc[X.index, 'significance'] = significances
 
-                insights['confidence'] = result['significance'].astype(float).tolist()
+                row_insights['confidence'] = result['significance'].astype(float).tolist()
 
                 if is_numerical:
-                    insights['lower'] = result['lower'].astype(float)
-                    insights['upper'] = result['upper'].astype(float)
+                    row_insights['lower'] = result['lower'].astype(float)
+                    row_insights['upper'] = result['upper'].astype(float)
 
                 # anomaly detection
                 if is_anomaly_task:
-                    anomalies = get_anomalies(insights,
+                    anomalies = get_anomalies(row_insights,
                                               ns.data[ns.target_name],
                                               cooldown=ns.anomaly_cooldown)
-                    insights['anomaly'] = anomalies
+                    row_insights['anomaly'] = anomalies
 
             if ns.tss.is_timeseries and ns.tss.nr_predictions > 1 and is_numerical:
-                insights = add_tn_conf_bounds(insights, ns.tss)
+                row_insights = add_tn_conf_bounds(row_insights, ns.tss)
 
             # Make sure the target and real values are of an appropriate type
             if ns.tss.is_timeseries and ns.tss.nr_predictions > 1:
@@ -357,14 +357,14 @@ class ICP(BaseAnalysisBlock):
                 # Or if they even need handling yet
                 pass
             elif ns.target_dtype in (dtype.integer):
-                insights['prediction'] = insights['prediction'].astype(int)
-                insights['upper'] = insights['upper'].astype(int)
-                insights['lower'] = insights['lower'].astype(int)
+                row_insights['prediction'] = row_insights['prediction'].astype(int)
+                row_insights['upper'] = row_insights['upper'].astype(int)
+                row_insights['lower'] = row_insights['lower'].astype(int)
             elif ns.target_dtype in (dtype.float):
-                insights['prediction'] = insights['prediction'].astype(float)
-                insights['upper'] = insights['upper'].astype(float)
-                insights['lower'] = insights['lower'].astype(float)
+                row_insights['prediction'] = row_insights['prediction'].astype(float)
+                row_insights['upper'] = row_insights['upper'].astype(float)
+                row_insights['lower'] = row_insights['lower'].astype(float)
             elif ns.target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
-                insights['prediction'] = insights['prediction'].astype(str)
+                row_insights['prediction'] = row_insights['prediction'].astype(str)
 
-        return insights, global_insights
+        return row_insights, global_insights
