@@ -471,6 +471,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              "fixed_significance": None,
              "confidence_normalizer": False,
              "positive_domain": "$statistical_analysis.positive_domain",
+             "analysis_blocks": "$analysis_blocks"
          },
          }), ('explainer', {
              "module": "explain",
@@ -488,21 +489,22 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                  "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
                  "target_name": "$target",
                  "target_dtype": "$dtype_dict[self.target]",
+                 "explainer_blocks": "$analysis_blocks"
              },
          }), ('analysis_blocks', [
-        {
-            'module': 'AccStats',
-            'args': {},
-        },
-        {
-            'module': 'GlobalFeatureImportance',
-            'args': {},
-        },
-        {
-            'module': 'ICP',
-            'args': {},
-        }
-    ]), ('timeseries_transformer', {
+             {
+                 'module': 'ICP',
+                 'args': {},
+             },
+             {
+                 'module': 'AccStats',
+                 'args': {'deps': ['ICP']},
+             },
+             {
+                 'module': 'GlobalFeatureImportance',
+                 'args': {},
+             },
+         ]), ('timeseries_transformer', {
              "module": "transform_timeseries",
              "args": {
                  "timeseries_settings": "$problem_definition.timeseries_settings",
@@ -613,7 +615,7 @@ self.dependencies = {inline_dict(dependency_dict)}
 #
 self.input_cols = [{input_cols}]
 
-self.analysis_blocks = [{}]
+self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
 
 log.info('Cleaning the data')
 data = {call(json_ai.cleaner)}

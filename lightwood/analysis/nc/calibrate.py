@@ -22,7 +22,7 @@ from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numeric_con
 class ICP(BaseAnalysisBlock):
     """ Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity """
     def __init__(self):
-        super().__init__(deps=None)
+        super().__init__()
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)

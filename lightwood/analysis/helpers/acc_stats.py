@@ -1,9 +1,8 @@
 import random
 from types import SimpleNamespace
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional
 
 import numpy as np
-import pandas as pd
 from sklearn.metrics import confusion_matrix
 
 from lightwood.api.dtype import dtype
@@ -14,8 +13,8 @@ from lightwood.helpers.general import evaluate_accuracy
 class AccStats(BaseAnalysisBlock):
     """ Computes accuracy stats and a confusion matrix for the validation dataset """
 
-    def __init__(self):
-        super().__init__(deps=['confidence'])  # @TODO: enforce that this actually prevents early execution somehow
+    def __init__(self, deps=('ICP',)):
+        super().__init__(deps=deps)  # @TODO: enforce that this actually prevents early execution somehow
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
@@ -28,11 +27,6 @@ class AccStats(BaseAnalysisBlock):
         self.fit(ns, info['result_df'])
         info['val_overall_acc'], info['acc_histogram'], info['cm'], info['acc_samples'] = self.get_accuracy_stats()
         return info
-
-    def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
-        # does nothing on inference
-        pass
-        # return insights, {}
 
     def fit(self, ns: SimpleNamespace, conf=Optional[np.ndarray]):
         self.col_stats = ns.dtype_dict
