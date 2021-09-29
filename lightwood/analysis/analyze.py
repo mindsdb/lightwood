@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
 
-import lightwood.api.json_ai
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
@@ -8,6 +7,7 @@ from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
 
 from lightwood.analysis.nc.calibrate import ICP
+from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.analysis.helpers.acc_stats import AccStats
 from lightwood.analysis.helpers.feature_importance import GlobalFeatureImportance
 
@@ -25,7 +25,7 @@ def model_analyzer(
     positive_domain: bool,
     confidence_normalizer: bool,
     accuracy_functions,
-    analysis_blocks: Optional = []
+    analysis_blocks: Optional[List[BaseAnalysisBlock]] = []
 ):
     """Analyses model on a validation subset to evaluate accuracy and confidence of future predictions"""
 
@@ -104,13 +104,7 @@ def model_analyzer(
     # ------------------------- #
     # Additional Analysis Blocks
     # ------------------------- #
-    if len(analysis_blocks) > 0:
-        exec(lightwood.api.json_ai.IMPORTS_FOR_EXTERNAL_DIRS, globals())
-        exec(lightwood.api.json_ai.IMPORT_EXTERNAL_DIRS, globals())
-
-        for dirpath in analysis_blocks:
-            module, block_name = dirpath.split(".")
-            block = getattr(eval(module), block_name)()
-            runtime_analyzer = block.analyze(runtime_analyzer, **{})
+    for block in analysis_blocks:
+        runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
 
     return model_analysis, runtime_analyzer
