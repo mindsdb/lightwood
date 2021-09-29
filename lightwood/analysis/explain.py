@@ -30,31 +30,41 @@ def explain(data: pd.DataFrame,
             explainer_blocks: Optional[List[BaseAnalysisBlock]] = [],
             ts_analysis: Optional[Dict] = {}
             ):
+    """
+    This procedure runs at the end of every normal `.predict()` call. Its goal is to generate prediction insights,
+    potentially using information generated at the model analysis stage (e.g. confidence estimation).
+
+    As in `analysis()`, any user-specified analysis blocks (see class `BaseAnalysisBlock`) are also called here.
+
+    :return:
+    row_insights: a DataFrame containing predictions and all generated insights at a row-level.
+    """
 
     # ------------------------- #
     # Setup base insights
     # ------------------------- #
     data = data.reset_index(drop=True)
 
-    insights = pd.DataFrame()
-    insights['prediction'] = predictions['prediction']
+    row_insights = pd.DataFrame()
+    global_insights = {}
+    row_insights['prediction'] = predictions['prediction']
 
     if target_name in data.columns:
-        insights['truth'] = data[target_name]
+        row_insights['truth'] = data[target_name]
     else:
-        insights['truth'] = [None] * len(predictions['prediction'])
+        row_insights['truth'] = [None] * len(predictions['prediction'])
 
     if timeseries_settings.is_timeseries:
         if timeseries_settings.group_by:
             for col in timeseries_settings.group_by:
-                insights[f'group_{col}'] = data[col]
+                row_insights[f'group_{col}'] = data[col]
 
         for col in timeseries_settings.order_by:
-            insights[f'order_{col}'] = data[col]
+            row_insights[f'order_{col}'] = data[col]
 
         for col in timeseries_settings.order_by:
-            insights[f'order_{col}'] = get_inferred_timestamps(
-                insights, col, ts_analysis['deltas'], timeseries_settings)
+            row_insights[f'order_{col}'] = get_inferred_timestamps(
+                row_insights, col, ts_analysis['deltas'], timeseries_settings)
 
     kwargs = {
         'data': data,
@@ -75,6 +85,6 @@ def explain(data: pd.DataFrame,
     # Call explanation blocks
     # ------------------------- #
     for block in explainer_blocks:
-        row_insights, global_insights = block.explain(insights, **kwargs)
+        row_insights, global_insights = block.explain(row_insights, global_insights, **kwargs)
 
-    return row_insights
+    return row_insights, global_insights

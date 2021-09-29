@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Tuple, Optional
 
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
@@ -16,19 +16,31 @@ def model_analyzer(
     target: str,
     ts_cfg: TimeseriesSettings,
     dtype_dict: Dict[str, str],
-    disable_column_importance: bool,
+    disable_column_importance: bool,  # @TODO: pass these arguments when instantiating blocks instead
     fixed_significance: float,
     positive_domain: bool,
     confidence_normalizer: bool,
     accuracy_functions,
     analysis_blocks: Optional[List[BaseAnalysisBlock]] = []
-):
-    """Analyses model on a validation subset to evaluate accuracy and confidence of future predictions"""
+) -> Tuple[ModelAnalysis, Dict[str, object]]:
+    """
+    Analyses model on a validation subset to evaluate accuracy, estimate feature importance and generate a
+    calibration model to estimating confidence in future predictions.
+
+    Additionally, any user-specified analysis blocks (see class `BaseAnalysisBlock`) are also called here.
+
+    :return:
+    runtime_analyzer: This dictionary object gets populated in a sequential fashion with data generated from
+    any `.analyze()` block call. This dictionary object is stored in the predictor itself, and used when
+    calling the `.explain()` method of all analysis blocks when generating predictions.
+
+    model_analysis: `ModelAnalysis` object that contains core analysis metrics, not necessarily needed when predicting.
+    """
 
     runtime_analyzer = {}
     data_type = dtype_dict[target]
 
-    # encoded data representations
+    # retrieve encoded data representations
     encoded_train_data = ConcatedEncodedDs(train_data)
     encoded_val_data = ConcatedEncodedDs(data)
     data = encoded_val_data.data_frame
@@ -41,13 +53,13 @@ def model_analyzer(
     has_pretrained_text_enc = any([isinstance(enc, PretrainedLangEncoder)
                                    for enc in encoded_train_data.encoders.values()])
 
-    # predictions for validation dataset
+    # raw predictions for validation dataset
     normal_predictions = predictor(encoded_val_data) if not is_classification else predictor(encoded_val_data,
                                                                                              predict_proba=True)
     normal_predictions = normal_predictions.set_index(data.index)
 
     # ------------------------- #
-    # Core Analysis
+    # Run analysis blocks, both core and user-defined
     # ------------------------- #
     kwargs = {
         'predictor': predictor,
@@ -70,9 +82,6 @@ def model_analyzer(
         'disable_column_importance': disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
     }
 
-    # ------------------------- #
-    # Run analysis blocks, both core and user-defined
-    # ------------------------- #
     for block in analysis_blocks:
         runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
 
