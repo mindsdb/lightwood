@@ -458,7 +458,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'args': {
             'tss': '$problem_definition.timeseries_settings',
             'data': 'data',
-            'k': 'nsubsets'
+            'k': 'nsubsets',
+            'seed': 1
         }
     }), ('analyzer', {
          "module": "model_analyzer",
