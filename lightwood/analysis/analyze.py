@@ -70,21 +70,6 @@ def model_analyzer(
         'disable_column_importance': disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
     }
 
-    # confidence estimation with inductive conformal predictors (ICPs)
-    # calibrator = ICP()
-    # runtime_analyzer = calibrator.analyze(runtime_analyzer, **kwargs)
-
-    # validation accuracy metrics and stats (e.g. confusion matrix, histograms)
-    # acc_stats = AccStats()
-    # runtime_analyzer = acc_stats.analyze(runtime_analyzer, **kwargs)
-
-    # global feature importance
-    # if not disable_column_importance:
-    #     block = GlobalFeatureImportance()
-    #     runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
-    # else:
-    #     runtime_analyzer['column_importances'] = None
-
     # ------------------------- #
     # Run analysis blocks, both core and user-defined
     # ------------------------- #

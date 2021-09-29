@@ -5,7 +5,6 @@ import pandas as pd
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.ts import get_inferred_timestamps
 from lightwood.analysis.base import BaseAnalysisBlock
-from lightwood.analysis.nc.calibrate import ICP
 
 
 def explain(data: pd.DataFrame,
@@ -32,6 +31,9 @@ def explain(data: pd.DataFrame,
             ts_analysis: Optional[Dict] = {}
             ):
 
+    # ------------------------- #
+    # Setup base insights
+    # ------------------------- #
     data = data.reset_index(drop=True)
 
     insights = pd.DataFrame()
@@ -54,10 +56,6 @@ def explain(data: pd.DataFrame,
             insights[f'order_{col}'] = get_inferred_timestamps(
                 insights, col, ts_analysis['deltas'], timeseries_settings)
 
-    # ------------------------- #
-    # Core Explanations
-    # ------------------------- #
-
     kwargs = {
         'data': data,
         'encoded_data': encoded_data,
@@ -73,13 +71,8 @@ def explain(data: pd.DataFrame,
         'anomaly_cooldown': anomaly_cooldown
     }
 
-    # confidence estimation using calibrated inductive conformal predictors (ICPs)
-    if analysis['icp']['__mdb_active']:
-        calibrator = ICP()
-        row_insights, global_insights = calibrator.explain(insights, **kwargs)
-
     # ------------------------- #
-    # Additional Explanations
+    # Call explanation blocks
     # ------------------------- #
     for block in explainer_blocks:
         row_insights, global_insights = block.explain(insights, **kwargs)
