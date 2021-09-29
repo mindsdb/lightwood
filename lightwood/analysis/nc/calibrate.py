@@ -21,8 +21,15 @@ from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numeric_con
 
 class ICP(BaseAnalysisBlock):
     """ Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity """
-    def __init__(self):
+    def __init__(self,
+                 fixed_significance: float,
+                 positive_domain: bool,
+                 confidence_normalizer: bool
+                 ):
         super().__init__()
+        self.fixed_significance = fixed_significance
+        self.positive_domain = positive_domain
+        self.confidence_normalizer = confidence_normalizer
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
@@ -66,7 +73,7 @@ class ICP(BaseAnalysisBlock):
 
             norm_params = {'target': ns.target, 'dtype_dict': ns.dtype_dict, 'predictor': ns.predictor,
                            'encoders': ns.encoded_val_data.encoders, 'is_multi_ts': ns.is_multi_ts, 'stop_after': 1e2}
-            if ns.confidence_normalizer:
+            if self.confidence_normalizer:
                 normalizer = Normalizer(fit_params=norm_params)
                 normalizer.fit(ns.train_data)
                 normalizer.prediction_cache = normalizer(ns.encoded_val_data)
@@ -118,7 +125,7 @@ class ICP(BaseAnalysisBlock):
             # get confidence estimation for validation dataset
             conf, ranges = set_conf_range(
                 icp_df, icp, ns.dtype_dict[ns.target],
-                output, positive_domain=ns.positive_domain, significance=ns.fixed_significance)
+                output, positive_domain=self.positive_domain, significance=self.fixed_significance)
             if not ns.is_classification:
                 result_df = pd.DataFrame(index=ns.data.index, columns=['confidence', 'lower', 'upper'], dtype=float)
                 result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
@@ -173,7 +180,7 @@ class ICP(BaseAnalysisBlock):
                         icp_df, icps[frozenset(group)],
                         ns.dtype_dict[ns.target],
                         output, group=frozenset(group),
-                        positive_domain=ns.positive_domain, significance=ns.fixed_significance)
+                        positive_domain=self.positive_domain, significance=self.fixed_significance)
                     # save group bounds
                     if not ns.is_classification:
                         result_df.loc[icp_df.index, 'lower'] = group_ranges[:, 0]
@@ -273,7 +280,7 @@ class ICP(BaseAnalysisBlock):
                         error_rate = ns.anomaly_error_rate if is_anomaly_task else None
                         significances, confs = get_numeric_conf_range(all_confs,
                                                                       df_std_dev=ns.analysis['df_std_dev'],
-                                                                      positive_domain=ns.positive_domain,
+                                                                      positive_domain=self.positive_domain,
                                                                       error_rate=error_rate)
                     result.loc[X.index, 'lower'] = confs[:, 0]
                     result.loc[X.index, 'upper'] = confs[:, 1]
@@ -311,7 +318,7 @@ class ICP(BaseAnalysisBlock):
                                     error_rate = ns.anomaly_error_rate if is_anomaly_task else None
                                     significances, confs = get_numeric_conf_range(all_confs,
                                                                                   df_std_dev=ns.analysis['df_std_dev'],
-                                                                                  positive_domain=ns.positive_domain,
+                                                                                  positive_domain=self.positive_domain,
                                                                                   group=frozenset(group),
                                                                                   error_rate=error_rate)
 
