@@ -79,6 +79,7 @@ class {cname}(BaseAnalysisBlock):
 
     def explain(self, row_insights, global_insights, **kwargs):
         global_insights['test'] = 'test'
+        row_insights['test'] = 'test'
         return row_insights, global_insights
 """
         create_custom_module(os.path.join(mdir, f'{mname}.py'), module_code)
@@ -100,6 +101,8 @@ class {cname}(BaseAnalysisBlock):
         code = code_from_json_ai(json_ai)
         predictor = predictor_from_code(code)
         predictor.learn(df)
-        _ = predictor.predict(df)
+        row_insights, global_insights = predictor.predict(df)
 
         assert predictor.runtime_analyzer['test'] == 'test'
+        assert global_insights['test'] == 'test'
+        assert row_insights['test'].iloc[0] == 'test'
