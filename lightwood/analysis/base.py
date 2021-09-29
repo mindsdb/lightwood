@@ -10,7 +10,7 @@ class BaseAnalysisBlock:
                  deps: Optional[Tuple] = ()
                  ):
 
-        self.dependencies = deps  # can be parallelized when there are no dependencies @TODO
+        self.dependencies = deps  # can be parallelized when there are no dependencies @TODO enforce
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         """
@@ -27,16 +27,20 @@ class BaseAnalysisBlock:
         log.info(f"{self.__class__.__name__}.analyze() has not been implemented, no modifications will be done to the model analysis.")  # noqa
         return info
 
-    def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
+    def explain(self,
+                row_insights: pd.DataFrame,
+                global_insights: Dict[str, object], **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         """
         This method should be called once during the explaining phase at inference time, or not called at all.
         Additional explanations can be at an instance level (row-wise) or global.
         For the former, return a data frame with any new insights. For the latter, a dictionary is required.
 
-        :param insights: dataframe with previously computed row-level explanations.
+        :param row_insights: dataframe with previously computed row-level explanations.
+        :param global_insights: dict() with any explanations that concern all predicted instances or the model itself.
+
         :returns:
-            - insights: modified input dataframe with any new row insights added here.
+            - row_insights: modified input dataframe with any new row insights added here.
             - global_insights: dict() with any explanations that concern all predicted instances or the model itself.
         """
         log.info(f"{self.__class__.__name__}.explain() has not been implemented, no modifications will be done to the data insights.")  # noqa
-        return insights, {}
+        return row_insights, global_insights
