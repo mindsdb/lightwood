@@ -69,8 +69,8 @@ class AccStats(BaseAnalysisBlock):
 
             if self.buckets:
                 bucket = self.buckets[self.target]
-                predicted_value_b = self.get_value_bucket(predicted_value, bucket, self.col_stats[self.target])
-                real_value_b = self.get_value_bucket(real_value, bucket, self.col_stats[self.target])
+                predicted_value_b = get_value_bucket(predicted_value, bucket, self.col_stats[self.target])
+                real_value_b = get_value_bucket(real_value, bucket, self.col_stats[self.target])
             else:
                 predicted_value_b = predicted_value
                 real_value_b = real_value
@@ -149,38 +149,38 @@ class AccStats(BaseAnalysisBlock):
 
         return overall_accuracy, accuracy_histogram, cm, accuracy_samples
 
-    @staticmethod
-    def get_value_bucket(value, buckets, target_dtype):
-        """
-        :return: The bucket in the `histogram` in which our `value` falls
-        """
-        if buckets is None:
-            return None
 
-        if target_dtype in (dtype.binary, dtype.categorical):
-            if value in buckets:
-                bucket = buckets.index(value)
-            else:
-                bucket = len(buckets)  # for null values
+def get_value_bucket(value, buckets, target_dtype):
+    """
+    :return: The bucket in the `histogram` in which our `value` falls
+    """
+    if buckets is None:
+        return None
 
-        elif target_dtype in (dtype.integer, dtype.float):
-            bucket = AccStats.closest(buckets, value)
+    if target_dtype in (dtype.binary, dtype.categorical):
+        if value in buckets:
+            bucket = buckets.index(value)
         else:
             bucket = len(buckets)  # for null values
 
-        return bucket
+    elif target_dtype in (dtype.integer, dtype.float):
+        bucket = closest(buckets, value)
+    else:
+        bucket = len(buckets)  # for null values
 
-    @staticmethod
-    def closest(arr, value):
-        """
-        :return: The index of the member of `arr` which is closest to `value`
-        """
-        if value is None:
-            return -1
+    return bucket
 
-        for i, ele in enumerate(arr):
-            value = float(str(value).replace(',', '.'))
-            if ele > value:
-                return i - 1
 
-        return len(arr) - 1
+def closest(arr, value):
+    """
+    :return: The index of the member of `arr` which is closest to `value`
+    """
+    if value is None:
+        return -1
+
+    for i, ele in enumerate(arr):
+        value = float(str(value).replace(',', '.'))
+        if ele > value:
+            return i - 1
+
+    return len(arr) - 1
