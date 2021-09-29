@@ -2,14 +2,10 @@ from typing import Dict, List, Optional
 
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
+from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
-
-from lightwood.analysis.nc.calibrate import ICP
-from lightwood.analysis.base import BaseAnalysisBlock
-from lightwood.analysis.helpers.acc_stats import AccStats
-from lightwood.analysis.helpers.feature_importance import GlobalFeatureImportance
 
 
 def model_analyzer(
@@ -70,25 +66,34 @@ def model_analyzer(
         'fixed_significance': fixed_significance,
         'positive_domain': positive_domain,
         'confidence_normalizer': confidence_normalizer,
-        'accuracy_functions': accuracy_functions
+        'accuracy_functions': accuracy_functions,
+        'disable_column_importance': disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
     }
 
     # confidence estimation with inductive conformal predictors (ICPs)
-    calibrator = ICP()
-    runtime_analyzer = calibrator.analyze(runtime_analyzer, **kwargs)
+    # calibrator = ICP()
+    # runtime_analyzer = calibrator.analyze(runtime_analyzer, **kwargs)
 
     # validation accuracy metrics and stats (e.g. confusion matrix, histograms)
-    acc_stats = AccStats()
-    runtime_analyzer = acc_stats.analyze(runtime_analyzer, **kwargs)
+    # acc_stats = AccStats()
+    # runtime_analyzer = acc_stats.analyze(runtime_analyzer, **kwargs)
 
     # global feature importance
-    disable_column_importance = disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
-    if not disable_column_importance:
-        block = GlobalFeatureImportance()
-        runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
-    else:
-        runtime_analyzer['column_importances'] = None
+    # if not disable_column_importance:
+    #     block = GlobalFeatureImportance()
+    #     runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
+    # else:
+    #     runtime_analyzer['column_importances'] = None
 
+    # ------------------------- #
+    # Run analysis blocks, both core and user-defined
+    # ------------------------- #
+    for block in analysis_blocks:
+        runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
+
+    # ------------------------- #
+    # Populate ModelAnalysis object
+    # ------------------------- #
     model_analysis = ModelAnalysis(
         accuracies=runtime_analyzer['score_dict'],
         accuracy_histogram=runtime_analyzer['acc_histogram'],
@@ -100,11 +105,5 @@ def model_analyzer(
         histograms=stats_info.histograms,
         dtypes=dtype_dict
     )
-
-    # ------------------------- #
-    # Additional Analysis Blocks
-    # ------------------------- #
-    for block in analysis_blocks:
-        runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
 
     return model_analysis, runtime_analyzer

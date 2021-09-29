@@ -1,4 +1,4 @@
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, Dict, Optional
 
 import pandas as pd
 from lightwood.helpers.log import log
@@ -7,7 +7,7 @@ from lightwood.helpers.log import log
 class BaseAnalysisBlock:
     """Class to be inherited by any analysis/explainer block."""
     def __init__(self,
-                 deps: Optional[List] = []
+                 deps: Optional[Tuple] = ()
                  ):
 
         self.dependencies = deps  # can be parallelized when there are no dependencies @TODO
@@ -24,7 +24,7 @@ class BaseAnalysisBlock:
         :param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
         pipeline.
         """
-        log.warning("This method has not been implemented, no modifications will be done to the model analysis.")
+        log.info(f"{self.__class__.__name__}.analyze() has not been implemented, no modifications will be done to the model analysis.")  # noqa
         return info
 
     def explain(self, insights: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
@@ -38,5 +38,5 @@ class BaseAnalysisBlock:
             - insights: modified input dataframe with any new row insights added here.
             - global_insights: dict() with any explanations that concern all predicted instances or the model itself.
         """
-        log.warning("This method has not been implemented, no modifications will be done to the data insights.")
+        log.info(f"{self.__class__.__name__}.explain() has not been implemented, no modifications will be done to the data insights.")  # noqa
         return insights, {}
