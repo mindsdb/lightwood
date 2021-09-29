@@ -349,6 +349,22 @@ def generate_json_ai(
     )
 
 
+def merge_implicit_values(field, implicit_value):
+    try:
+        args = eval(field['module']).__code__.co_varnames
+    except AttributeError:
+        args = list(eval(field['module'])().__dict__.keys())
+
+    for arg in args:
+        if 'args' not in field:
+            field['args'] = implicit_value['args']
+        else:
+            if arg not in field['args']:
+                if arg in implicit_value['args']:
+                    field['args'][arg] = implicit_value['args'][arg]
+    return field
+
+
 def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: dict, is_timeseries: bool) -> None:
     """
     Populate the implicit field of the JsonAI, either by filling it in entirely if missing, or by introspecting the class or function and assigning default values to the args in it's signature that are in the implicit default but haven't been populated by the user
@@ -366,17 +382,11 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
         if is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
             field = implicit_value
     elif isinstance(field, list) and isinstance(implicit_value, list):
+        field = [merge_implicit_values(f, v) for f, v in zip(field, implicit_value)]
         implicit_value.extend(field)
         field = implicit_value
     else:
-        args = eval(field['module']).__code__.co_varnames
-        for arg in args:
-            if 'args' not in field:
-                field['args'] = implicit_value['args']
-            else:
-                if arg not in field['args']:
-                    if arg in implicit_value['args']:
-                        field['args'][arg] = implicit_value['args'][arg]
+        field = merge_implicit_values(field, implicit_value)
     json_ai.__setattr__(field_name, field)
 
 
