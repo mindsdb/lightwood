@@ -350,10 +350,7 @@ def generate_json_ai(
 
 
 def merge_implicit_values(field, implicit_value):
-    try:
-        args = eval(field['module']).__code__.co_varnames
-    except AttributeError:
-        args = list(eval(field['module'])().__dict__.keys())
+    args = eval(field['module']).__code__.co_varnames
 
     for arg in args:
         if 'args' not in field:
