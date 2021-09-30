@@ -16,7 +16,7 @@ class TestBasic(unittest.TestCase):
         df = df.rename(columns={df.columns[2]: f'\'{df.columns[2]}}}'})
         df = df.rename(columns={df.columns[3]: f'{{{df.columns[3]}\"'})
         target = 'MEDV'
-        
+
         # Make this a quantity
         df[target] = [f'{x}$' for x in df[target]]
 
