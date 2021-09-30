@@ -17,6 +17,8 @@ from lightwood.api.types import (
     Output,
     ProblemDefinition,
 )
+import inspect
+
 
 IMPORT_EXTERNAL_DIRS = """
 for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
@@ -350,7 +352,11 @@ def generate_json_ai(
 
 
 def merge_implicit_values(field, implicit_value):
-    args = eval(field['module']).__code__.co_varnames
+    module = eval(field['module'])
+    if inspect.isclass(module):
+        args = inspect.getargspec(module.__init__)[1:]
+    else:
+        args = eval(field['module']).__code__.co_varnames
 
     for arg in args:
         if 'args' not in field:
