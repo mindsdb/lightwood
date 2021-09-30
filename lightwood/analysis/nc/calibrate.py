@@ -215,7 +215,7 @@ class ICP(BaseAnalysisBlock):
             icp_X[ns.target_name] = preds
 
             is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.array)
-            is_numerical = ns.target_dtype in [dtype.integer, dtype.float] or ns.target_dtype == dtype.array
+            is_numerical = ns.target_dtype in [dtype.integer, dtype.float, dtype.quantity] or ns.target_dtype == dtype.array
             is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
 
             if (is_numerical or is_categorical) and ns.analysis['icp'].get('__mdb_active', False):
@@ -367,7 +367,7 @@ class ICP(BaseAnalysisBlock):
                 row_insights['prediction'] = row_insights['prediction'].astype(int)
                 row_insights['upper'] = row_insights['upper'].astype(int)
                 row_insights['lower'] = row_insights['lower'].astype(int)
-            elif ns.target_dtype in (dtype.float):
+            elif ns.target_dtype in (dtype.float, dtype.quantity):
                 row_insights['prediction'] = row_insights['prediction'].astype(float)
                 row_insights['upper'] = row_insights['upper'].astype(float)
                 row_insights['lower'] = row_insights['lower'].astype(float)

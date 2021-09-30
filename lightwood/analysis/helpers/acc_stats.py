@@ -60,11 +60,11 @@ class AccStats(BaseAnalysisBlock):
                 predicted_value = predicted_value[0]
 
             predicted_value = predicted_value \
-                if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
+                if self.col_stats[self.target] not in [dtype.integer, dtype.float, dtype.quantity] \
                 else float(predicted_value)
 
             real_value = real_value \
-                if self.col_stats[self.target] not in [dtype.integer, dtype.float] \
+                if self.col_stats[self.target] not in [dtype.integer, dtype.float, dtype.quantity] \
                 else float(real_value)
 
             if self.buckets:
@@ -75,14 +75,14 @@ class AccStats(BaseAnalysisBlock):
                 predicted_value_b = predicted_value
                 real_value_b = real_value
 
-            if conf is not None and self.col_stats[self.target] in [dtype.integer, dtype.float]:
+            if conf is not None and self.col_stats[self.target] in [dtype.integer, dtype.float, dtype.quantity]:
                 predicted_range = conf.iloc[n][['lower', 'upper']].tolist()
             else:
                 predicted_range = (predicted_value_b, predicted_value_b)
 
             self.real_values_bucketized.append(real_value_b)
             self.normal_predictions_bucketized.append(predicted_value_b)
-            if conf is not None and self.col_stats[self.target] in [dtype.integer, dtype.float]:
+            if conf is not None and self.col_stats[self.target] in [dtype.integer, dtype.float, dtype.quantity]:
                 self.numerical_samples_arr.append((real_value, predicted_range))
 
     def get_accuracy_stats(self, is_classification=None, is_numerical=None):
@@ -163,7 +163,7 @@ def get_value_bucket(value, buckets, target_dtype):
         else:
             bucket = len(buckets)  # for null values
 
-    elif target_dtype in (dtype.integer, dtype.float):
+    elif target_dtype in (dtype.integer, dtype.float, dtype.quantity):
         bucket = closest(buckets, value)
     else:
         bucket = len(buckets)  # for null values
