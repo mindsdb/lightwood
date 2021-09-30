@@ -354,7 +354,7 @@ def generate_json_ai(
 def merge_implicit_values(field, implicit_value):
     module = eval(field['module'])
     if inspect.isclass(module):
-        args = inspect.getargspec(module.__init__)[1:]
+        args = inspect.getargspec(module.__init__).args[1:]
     else:
         args = eval(field['module']).__code__.co_varnames
 
@@ -391,7 +391,8 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     elif isinstance(field, list) and isinstance(implicit_value, list):
         for i in range(len(field)):
             sub_field_implicit = [x for x in implicit_value if x['module'] == field[i]['module']]
-            field[i] = merge_implicit_values(field[i], sub_field_implicit)
+            if len(sub_field_implicit) == 1:
+                field[i] = merge_implicit_values(field[i], sub_field_implicit[0])
     # If the user specified the field, add implicit arguments which we didn't specify
     else:
         field = merge_implicit_values(field, implicit_value)
