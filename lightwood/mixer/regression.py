@@ -26,7 +26,7 @@ class Regression(BaseMixer):
         self.stable = False
 
     def fit(self, ds_arr: List[EncodedDs]) -> None:
-        if self.target_dtype not in (dtype.float, dtype.integer):
+        if self.target_dtype not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(f'Unspported {self.target_dtype} type for regression')
         log.info('Fitting Linear Regression model')
         X = []

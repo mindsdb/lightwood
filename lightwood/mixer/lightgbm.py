@@ -98,7 +98,7 @@ class LightGBM(BaseMixer):
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype == dtype.integer:
                 label_data = label_data.astype(int)
-            elif output_dtype == dtype.float:
+            elif output_dtype in (dtype.float, dtype.quantity):
                 label_data = label_data.astype(float)
 
             data[subset_name]['label_data'] = label_data
@@ -120,12 +120,12 @@ class LightGBM(BaseMixer):
 
         data = self._to_dataset(data, output_dtype)
 
-        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary):
+        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary, dtype.quantity):
             log.error(f'Lightgbm mixer not supported for type: {output_dtype}')
             raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
-            objective = 'regression' if output_dtype in (dtype.integer, dtype.float) else 'multiclass'
-            metric = 'l2' if output_dtype in (dtype.integer, dtype.float) else 'multi_logloss'
+            objective = 'regression' if output_dtype in (dtype.integer, dtype.float, dtype.quantity) else 'multiclass'
+            metric = 'l2' if output_dtype in (dtype.integer, dtype.float, dtype.quantity) else 'multi_logloss'
 
         self.params = {
             'objective': objective,
