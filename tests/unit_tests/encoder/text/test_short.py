@@ -89,7 +89,6 @@ class TestShortTextEncoder(unittest.TestCase):
         enc = ShortTextEncoder(is_target=True)
         enc.prepare(priming_data)
 
-        assert not enc.cae.use_autoencoder
         assert enc.is_target is True
 
         # _combine is expected to be 'concat' when is_target is True
@@ -113,7 +112,6 @@ class TestShortTextEncoder(unittest.TestCase):
         enc = ShortTextEncoder(is_target=True)
         enc.prepare(priming_data)
 
-        assert not enc.cae.use_autoencoder
         assert enc.is_target is True
 
         # _combine is expected to be 'concat' when is_target is True
@@ -137,7 +135,6 @@ class TestShortTextEncoder(unittest.TestCase):
         enc = ShortTextEncoder(is_target=False)
         enc.prepare(priming_data)
 
-        assert not enc.cae.use_autoencoder
         assert enc.is_target is False
 
         # _combine is expected to be 'mean' when is_target is False
@@ -157,7 +154,6 @@ class TestShortTextEncoder(unittest.TestCase):
         enc = ShortTextEncoder(is_target=False)
         enc.prepare(priming_data)
 
-        assert enc.cae.use_autoencoder
         assert enc.is_target is False
 
         # _combine is expected to be 'mean' when is_target is False
@@ -177,7 +173,6 @@ class TestShortTextEncoder(unittest.TestCase):
         enc = ShortTextEncoder(is_target=False, mode='concat')
         enc.prepare(priming_data)
 
-        assert not enc.cae.use_autoencoder
         assert enc.is_target is False
         assert enc._mode == 'concat'
 
@@ -199,7 +194,6 @@ class TestShortTextEncoder(unittest.TestCase):
         enc = ShortTextEncoder(is_target=False, mode='concat')
         enc.prepare(priming_data)
 
-        assert enc.cae.use_autoencoder
         assert enc.is_target is False
         assert enc._mode == 'concat'
 
