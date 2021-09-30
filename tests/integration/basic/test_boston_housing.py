@@ -28,6 +28,6 @@ class TestBasic(unittest.TestCase):
         predictions = predictor.predict(df)
 
         # sanity checks
-        self.assertTrue(r2_score([float(x.rstrip('$') for x in df[target])], predictions['prediction']) > 0.8)
+        self.assertTrue(r2_score([float(x.rstrip('$')) for x in df[target]], predictions['prediction']) > 0.8)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
         self.assertTrue(all([p['lower'] <= p['prediction'] <= p['upper'] for _, p in predictions.iterrows()]))
