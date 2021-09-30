@@ -349,6 +349,22 @@ def generate_json_ai(
     )
 
 
+def merge_implicit_values(field, implicit_value):
+    try:
+        args = eval(field['module']).__code__.co_varnames
+    except AttributeError:
+        args = list(eval(field['module'])().__dict__.keys())
+
+    for arg in args:
+        if 'args' not in field:
+            field['args'] = implicit_value['args']
+        else:
+            if arg not in field['args']:
+                if arg in implicit_value['args']:
+                    field['args'][arg] = implicit_value['args'][arg]
+    return field
+
+
 def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: dict, is_timeseries: bool) -> None:
     """
     Populate the implicit field of the JsonAI, either by filling it in entirely if missing, or by introspecting the class or function and assigning default values to the args in it's signature that are in the implicit default but haven't been populated by the user
@@ -372,24 +388,10 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     elif isinstance(field, list) and isinstance(implicit_value, list):
         for i in range(len(field)):
             sub_field_implicit = [x for x in implicit_value if x['module'] == field[i]['module']]
-            args = eval(field[i]['module']).__code__.co_varnames
-            for arg in args:
-                if 'args' not in field[i]:
-                    field[i]['args'] = sub_field_implicit['args']
-                else:
-                    if arg not in field[i]['args']:
-                        if arg in sub_field_implicit['args']:
-                            field[i]['args'][arg] = sub_field_implicit['args'][arg]
+            field[i] = merge_implicit_values(field[i], sub_field_implicit)
     # If the user specified the field, add implicit arguments which we didn't specify
     else:
-        args = eval(field['module']).__code__.co_varnames
-        for arg in args:
-            if 'args' not in field:
-                field['args'] = implicit_value['args']
-            else:
-                if arg not in field['args']:
-                    if arg in implicit_value['args']:
-                        field['args'][arg] = implicit_value['args'][arg]
+        field = merge_implicit_values(field, implicit_value)
     json_ai.__setattr__(field_name, field)
 
 
@@ -484,11 +486,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              "data": "test_data",
              "train_data": "train_data",
              "target": "$target",
-             "disable_column_importance": "False",
              "dtype_dict": "$dtype_dict",
-             "fixed_significance": None,
-             "confidence_normalizer": False,
-             "positive_domain": "$statistical_analysis.positive_domain",
              "analysis_blocks": "$analysis_blocks"
          },
          }), ('explainer', {
@@ -512,15 +510,24 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
          }), ('analysis_blocks', [
              {
                  'module': 'ICP',
-                 'args': {},
+                 'args': {
+                     "fixed_significance": None,
+                     "confidence_normalizer": False,
+                     "positive_domain": "$statistical_analysis.positive_domain",
+
+                 },
              },
              {
                  'module': 'AccStats',
-                 'args': {'deps': ['ICP']},
+                 'args': {
+                     'deps': ['ICP']
+                 },
              },
              {
                  'module': 'GlobalFeatureImportance',
-                 'args': {},
+                 'args': {
+                     "disable_column_importance": "False",
+                 },
              },
          ]), ('timeseries_transformer', {
              "module": "transform_timeseries",

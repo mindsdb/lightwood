@@ -16,10 +16,6 @@ def model_analyzer(
     target: str,
     ts_cfg: TimeseriesSettings,
     dtype_dict: Dict[str, str],
-    disable_column_importance: bool,  # @TODO: pass these arguments when instantiating blocks instead
-    fixed_significance: float,
-    positive_domain: bool,
-    confidence_normalizer: bool,
     accuracy_functions,
     analysis_blocks: Optional[List[BaseAnalysisBlock]] = []
 ) -> Tuple[ModelAnalysis, Dict[str, object]]:
@@ -75,11 +71,8 @@ def model_analyzer(
         'is_multi_ts': is_multi_ts,
         'stats_info': stats_info,
         'ts_cfg': ts_cfg,
-        'fixed_significance': fixed_significance,
-        'positive_domain': positive_domain,
-        'confidence_normalizer': confidence_normalizer,
         'accuracy_functions': accuracy_functions,
-        'disable_column_importance': disable_column_importance or ts_cfg.is_timeseries or has_pretrained_text_enc
+        'has_pretrained_text_enc': has_pretrained_text_enc
     }
 
     for block in analysis_blocks:
