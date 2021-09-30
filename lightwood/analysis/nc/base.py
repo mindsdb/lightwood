@@ -5,6 +5,9 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 
+from lightwood.analysis.nc.util import t_softmax
+
+
 class RegressorMixin(object):
     def __init__(self) -> None:
         super(RegressorMixin, self).__init__()
@@ -109,3 +112,35 @@ class RegressorAdapter(BaseModelAdapter):
 
     def _underlying_predict(self, x: np.array) -> np.array:
         return self.model.predict(x)
+
+
+class CachedRegressorAdapter(RegressorAdapter):
+    def __init__(self, model, fit_params=None):
+        super(CachedRegressorAdapter, self).__init__(model, fit_params)
+        self.prediction_cache = None
+
+    def fit(self, x=None, y=None):
+        """ At this point, the predictor has already been trained, but this
+        has to be called to setup some things in the nonconformist backend """
+        pass
+
+    def predict(self, x=None):
+        """ Same as in .fit()
+        :return: np.array (n_test, n_classes) with class probability estimates """
+        return self.prediction_cache
+
+
+class CachedClassifierAdapter(ClassifierAdapter):
+    def __init__(self, model, fit_params=None):
+        super(CachedClassifierAdapter, self).__init__(model, fit_params)
+        self.prediction_cache = None
+
+    def fit(self, x=None, y=None):
+        """ At this point, the predictor has already been trained, but this
+        has to be called to setup some things in the nonconformist backend """
+        pass
+
+    def predict(self, x=None):
+        """ Same as in .fit()
+        :return: np.array (n_test, n_classes) with class probability estimates """
+        return t_softmax(self.prediction_cache, t=0.5)
