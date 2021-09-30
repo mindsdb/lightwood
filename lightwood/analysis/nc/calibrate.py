@@ -21,6 +21,7 @@ from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numeric_con
 
 class ICP(BaseAnalysisBlock):
     """ Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity """
+
     def __init__(self,
                  fixed_significance: float,
                  positive_domain: bool,
@@ -215,7 +216,8 @@ class ICP(BaseAnalysisBlock):
             icp_X[ns.target_name] = preds
 
             is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.array)
-            is_numerical = ns.target_dtype in [dtype.integer, dtype.float, dtype.quantity] or ns.target_dtype == dtype.array
+            is_numerical = ns.target_dtype in [dtype.integer, dtype.float,
+                                               dtype.quantity] or ns.target_dtype == dtype.array
             is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
 
             if (is_numerical or is_categorical) and ns.analysis['icp'].get('__mdb_active', False):
