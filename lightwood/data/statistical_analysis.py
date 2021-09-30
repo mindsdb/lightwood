@@ -155,7 +155,8 @@ def statistical_analysis(data: pd.DataFrame,
         if dtypes[col] in (dtype.rich_text, dtype.short_text):
             words_per_sentence = []
             for item in df[col]:
-                words_per_sentence.append(len(item.split(' ')))
+                if item is not None:
+                    words_per_sentence.append(len(item.split(' ')))
             avg_words_per_sentence[col] = int(np.mean(words_per_sentence))
         else:
             avg_words_per_sentence[col] = None

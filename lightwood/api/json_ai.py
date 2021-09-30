@@ -64,6 +64,7 @@ def lookup_encoder(
     is_target: bool,
     problem_defintion: ProblemDefinition,
     is_target_predicting_encoder: bool,
+    statistical_analysis: StatisticalAnalysis
 ):
     """
     Assign a default encoder for a given column based on its data type, and whether it is a target. Encoders intake raw (but cleaned) data and return an feature representation. This function assigns, per data type, what the featurizer should be. This function runs on each column within the dataset available for model building to assign how it should be featurized.
@@ -84,7 +85,9 @@ def lookup_encoder(
         dtype.integer: 'Integer.NumericEncoder',
         dtype.float: 'Float.NumericEncoder',
         dtype.binary: 'Binary.BinaryEncoder',
-        dtype.categorical: 'Categorical.CategoricalAutoEncoder',
+        dtype.categorical: 'Categorical.CategoricalAutoEncoder'
+        if statistical_analysis is None or len(statistical_analysis.histograms[col_name]) > 100
+        else 'Categorical.OneHotEncoder',
         dtype.tags: 'Tags.MultiHotEncoder',
         dtype.date: 'Date.DatetimeEncoder',
         dtype.datetime: 'Datetime.DatetimeEncoder',
@@ -271,7 +274,7 @@ def generate_json_ai(
         list(outputs.values())[0].data_dtype = dtype.tsarray
 
     list(outputs.values())[0].encoder = lookup_encoder(
-        type_information.dtypes[target], target, True, problem_definition, False
+        type_information.dtypes[target], target, True, problem_definition, False, statistical_analysis
     )
 
     features: Dict[str, Feature] = {}
@@ -279,7 +282,7 @@ def generate_json_ai(
         col_dtype = type_information.dtypes[col_name]
         dependency = []
         encoder = lookup_encoder(
-            col_dtype, col_name, False, problem_definition, is_target_predicting_encoder
+            col_dtype, col_name, False, problem_definition, is_target_predicting_encoder, statistical_analysis
         )
 
         if tss.is_timeseries and eval(encoder['module'].split(".")[1]).is_timeseries_encoder:
@@ -594,6 +597,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      False,
                                                      json_ai.problem_definition,
                                                      False,
+                                                     None
                                                      ))
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
