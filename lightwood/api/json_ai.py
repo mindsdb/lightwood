@@ -363,11 +363,24 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     # These imports might be slow, in which case the only <easy> solution is to line this code
     field = json_ai.__getattribute__(field_name)
     if field is None:
+        # This if is to only populated timeseries-specific implicit fields for implicit problems
         if is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
             field = implicit_value
+
+    # If the user specified one or more subfields in a field that's a list
+    # Populate them with implicit arguments form the implicit values from that subfield
     elif isinstance(field, list) and isinstance(implicit_value, list):
-        implicit_value.extend(field)
-        field = implicit_value
+        for i in range(len(field)):
+            sub_field_implicit = [x for x in implicit_value if x['module'] == field[i]['module']]
+            args = eval(field[i]['module']).__code__.co_varnames
+            for arg in args:
+                if 'args' not in field[i]:
+                    field[i]['args'] = sub_field_implicit['args']
+                else:
+                    if arg not in field[i]['args']:
+                        if arg in sub_field_implicit['args']:
+                            field[i]['args'][arg] = sub_field_implicit['args'][arg]
+    # If the user specified the field, add implicit arguments which we didn't specify
     else:
         args = eval(field['module']).__code__.co_varnames
         for arg in args:

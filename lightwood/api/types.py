@@ -10,7 +10,6 @@
 # TODO: Problem definition missing a few terms
 # TODO: Model Analysis
 # TODO: Analyzer
-
 from typing import Dict, List, Optional, Union
 from dataclasses import dataclass
 from lightwood.helpers.log import log
