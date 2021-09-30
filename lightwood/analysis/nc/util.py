@@ -1,10 +1,17 @@
+import torch
 import numpy as np
+from torch.nn.functional import softmax
 from lightwood.api.dtype import dtype
+
+
+def t_softmax(x, t=1.0, axis=1):
+    """ Softmax with temperature scaling """
+    return softmax(torch.Tensor(x) / t, dim=axis).numpy()
 
 
 def clean_df(df, target, is_classification, label_encoders):
     """ Returns cleaned DF for nonconformist calibration """
-    # @TODO: reevaluate whether this can be streamlined inside custom nonconf
+    # @TODO: reevaluate whether this can be streamlined
     enc = label_encoders
 
     y = df.pop(target).values
@@ -64,7 +71,7 @@ def set_conf_range(
     return 0.005, np.zeros((X.shape[0], 2))
 
 
-def get_numerical_conf_range(
+def get_numeric_conf_range(
         all_confs, df_std_dev=None, positive_domain=False, std_tol=1, group='__default', error_rate=None):
     """ Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance
         error_rate: pre-determined error rate for the ICP, used in anomaly detection tasks to adjust the
