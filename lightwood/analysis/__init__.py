@@ -1,4 +1,12 @@
-from lightwood.analysis.model_analyzer import model_analyzer
+# Base
+from lightwood.analysis.analyze import model_analyzer
 from lightwood.analysis.explain import explain
 
-__all__ = ['model_analyzer', 'explain']
+# Blocks
+from lightwood.analysis.base import BaseAnalysisBlock
+from lightwood.analysis.nc.calibrate import ICP
+from lightwood.analysis.helpers.acc_stats import AccStats
+from lightwood.analysis.helpers.feature_importance import GlobalFeatureImportance
+
+
+__all__ = ['model_analyzer', 'explain', 'ICP', 'AccStats', 'GlobalFeatureImportance', 'BaseAnalysisBlock']

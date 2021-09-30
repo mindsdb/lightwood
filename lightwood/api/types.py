@@ -10,7 +10,6 @@
 # TODO: Problem definition missing a few terms
 # TODO: Model Analysis
 # TODO: Analyzer
-
 from typing import Dict, List, Optional, Union
 from dataclasses import dataclass
 from lightwood.helpers.log import log
@@ -106,8 +105,8 @@ class Output:
     :param data_dtype: The type of information within the target column (ex.: numerical, categorical, etc.).
     :param encoder: the methodology for encoding the target feature (a Lightwood Encoder). There can only be one \
     encoder for the output target.
-    :param models: The list of ML algorithms that are trained for the target distribution.
-    :param ensemble: For a panel of ML algorithms, the approach of selecting the best model, and the metrics used in \
+    :param mixers: The list of ML algorithms that are trained for the target distribution.
+    :param ensemble: For a panel of ML algorithms, the approach of selecting the best mixer, and the metrics used in \
     that evaluation.
     """
 
@@ -430,9 +429,10 @@ class JsonAI:
     :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.
     :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.
     :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
+    :param analysis_blocks: The blocks that get used in both analysis and inference inside the analyzer and explainer blocks.
     :param timeseries_transformer:
     :param timeseries_analyzer:
-    :param accuracy_functions: A list of performance metrics used to evaluate the best models.
+    :param accuracy_functions: A list of performance metrics used to evaluate the best mixers.
     """ # noqa
 
     features: Dict[str, Feature]
@@ -443,10 +443,10 @@ class JsonAI:
     splitter: Optional[object] = None
     analyzer: Optional[object] = None
     explainer: Optional[object] = None
+    analysis_blocks: Optional[List[object]] = None
     timeseries_transformer: Optional[object] = None
     timeseries_analyzer: Optional[object] = None
     accuracy_functions: Optional[List[str]] = None
-    phases: Optional[Dict[str, object]] = None
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -461,10 +461,10 @@ class JsonAI:
         splitter = obj.get("splitter", None)
         analyzer = obj.get("analyzer", None)
         explainer = obj.get("explainer", None)
+        analysis_blocks = obj.get("analysis_blocks", None)
         timeseries_transformer = obj.get("timeseries_transformer", None)
         timeseries_analyzer = obj.get("timeseries_analyzer", None)
         accuracy_functions = obj.get("accuracy_functions", None)
-        phases = obj.get("phases", None)
 
         json_ai = JsonAI(
             features=features,
@@ -475,10 +475,10 @@ class JsonAI:
             splitter=splitter,
             analyzer=analyzer,
             explainer=explainer,
+            analysis_blocks=analysis_blocks,
             timeseries_transformer=timeseries_transformer,
             timeseries_analyzer=timeseries_analyzer,
             accuracy_functions=accuracy_functions,
-            phases=phases,
         )
 
         return json_ai
