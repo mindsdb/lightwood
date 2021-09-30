@@ -389,12 +389,13 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     # If the user specified one or more subfields in a field that's a list
     # Populate them with implicit arguments form the implicit values from that subfield
     elif isinstance(field, list) and isinstance(implicit_value, list):
-        print(implicit_value, field)
-        exit()
         for i in range(len(field)):
             sub_field_implicit = [x for x in implicit_value if x['module'] == field[i]['module']]
             if len(sub_field_implicit) == 1:
                 field[i] = merge_implicit_values(field[i], sub_field_implicit[0])
+        for sub_field_implicit in implicit_value:
+            if len([x for x in field if x['module'] == sub_field_implicit['module']]) == 0:
+                field.append(sub_field_implicit)
     # If the user specified the field, add implicit arguments which we didn't specify
     else:
         field = merge_implicit_values(field, implicit_value)
