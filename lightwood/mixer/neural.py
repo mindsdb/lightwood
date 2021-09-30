@@ -51,7 +51,7 @@ class Neural(BaseMixer):
         self.stable = True
 
     def _final_tuning(self, data_arr):
-        if self.dtype_dict[self.target] in (dtype.integer, dtype.float):
+        if self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity):
             self.model = self.model.eval()
             with torch.no_grad():
                 acc_dict = {}
@@ -80,10 +80,10 @@ class Neural(BaseMixer):
             criterion = TransformCrossEntropyLoss(weight=self.target_encoder.index_weights.to(self.model.device))
         elif self.dtype_dict[self.target] in (dtype.tags):
             criterion = nn.BCEWithLogitsLoss()
-        elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.tsarray)
+        elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.tsarray, dtype.quantity)
                 and self.timeseries_settings.is_timeseries):
             criterion = nn.L1Loss()
-        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float):
+        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity):
             criterion = MSELoss()
         else:
             criterion = MSELoss()

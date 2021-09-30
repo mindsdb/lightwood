@@ -301,7 +301,7 @@ def generate_json_ai(
 
     # Decide on the accuracy functions to use
     output_dtype = list(outputs.values())[0].data_dtype
-    if output_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime]:
+    if output_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime, dtype.quantity]:
         accuracy_functions = ['r2_score']
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ['balanced_accuracy_score']
