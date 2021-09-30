@@ -389,6 +389,8 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     # If the user specified one or more subfields in a field that's a list
     # Populate them with implicit arguments form the implicit values from that subfield
     elif isinstance(field, list) and isinstance(implicit_value, list):
+        print(implicit_value, field)
+        exit()
         for i in range(len(field)):
             sub_field_implicit = [x for x in implicit_value if x['module'] == field[i]['module']]
             if len(sub_field_implicit) == 1:
