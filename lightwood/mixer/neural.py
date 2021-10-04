@@ -224,8 +224,8 @@ class Neural(BaseMixer):
             return np.mean(running_losses)
 
     def _init_net(self, ds: EncodedDs):
-        net_kwargs = {'input_size': len(ds_arr[0][0][0]),
-                      'output_size': len(ds_arr[0][0][1]),
+        net_kwargs = {'input_size': len(ds[0][0]),
+                      'output_size': len(ds[0][1]),
                       'num_hidden': self.num_hidden,
                       'dropout': 0}
 
@@ -258,17 +258,14 @@ class Neural(BaseMixer):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=True)
-
         self.model, epoch_to_best_model, err = self._max_fit(
             train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=20000)
 
         self.epochs_to_best += epoch_to_best_model
 
-        if len(con_test_ds) > 0:
-            if self.fit_on_dev:
-                self.partial_fit(dev_ds_arr, train_ds_arr)
-            self._final_tuning(dev_ds_arr)
+        if self.fit_on_dev:
+            self.partial_fit(dev_data, train_data)
+        self._final_tuning(dev_data)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly # noqa
