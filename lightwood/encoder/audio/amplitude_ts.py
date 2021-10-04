@@ -4,14 +4,18 @@ import requests
 import numpy as np
 import torch
 from lightwood.encoder.base import BaseEncoder
+from lightwood.encoder.array.array import ArrayEncoder
 from lightwood.helpers.log import log
 
 
 class AmplitudeTsEncoder(BaseEncoder):
+    """
+    Encodes a raw audio signal by wrapping the ArrayEncoder.
+    """
 
     def __init__(self, is_target: bool = False):
         super().__init__(is_target)
-        self._ts_encoder = TimeSeriesEncoder()
+        self._ts_encoder = ArrayEncoder()
         self._max_samples = 2000
 
     def encode(self, column_data):
