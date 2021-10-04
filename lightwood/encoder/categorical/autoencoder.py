@@ -8,6 +8,7 @@ from lightwood.encoder.categorical.gym import Gym
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.mixer.helpers.default_net import DefaultNet
+import pandas as pd
 
 
 class CategoricalAutoEncoder(BaseEncoder):

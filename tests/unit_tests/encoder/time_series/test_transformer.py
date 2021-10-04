@@ -61,7 +61,7 @@ class TestTransformerEncoder(unittest.TestCase):
         encoder = TimeSeriesEncoder(stop_after=10)
         encoder.encoder_class = TransformerEncoder
         encoder._transformer_hidden_size = 32
-        encoder.prepare(data, feedback_hoop_function=print)
+        encoder.prepare(data, data,feedback_hoop_function=print)
 
         correct_answer = torch.tensor(example)[:, 1:]
 
