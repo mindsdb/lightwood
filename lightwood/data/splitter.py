@@ -43,10 +43,11 @@ def splitter(
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
     stratify_on = []
-    if tss.is_timeseries or dtype_dict[target] in (dtype.categorical, dtype.binary) and target is not None:
-        stratify_on = [target]
-        if isinstance(tss.group_by, list):
-            stratify_on = stratify_on + tss.group_by
+    if target is not None:
+        if dtype_dict[target] in (dtype.categorical, dtype.binary):
+            stratify_on = [target]
+        if tss.is_timeseries and isinstance(tss.group_by, list):
+            stratify_on += tss.group_by
         subsets = stratify(data, nr_subsets, stratify_on)
     else:
         subsets = np.array_split(data, nr_subsets)
