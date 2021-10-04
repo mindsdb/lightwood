@@ -700,7 +700,7 @@ for col_name, encoder in self.encoders.items():
         if hasattr(encoder, 'uses_target'):
             kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
 
-        encoder.prepare(data['train'], data['dev'], **kwargs)
+        encoder.prepare(data['train'][col_name], data['dev'][col_name], **kwargs)
 
     {align(ts_target_code, 1)}
 """
