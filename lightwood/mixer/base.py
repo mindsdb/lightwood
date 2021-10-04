@@ -1,4 +1,3 @@
-from typing import List
 import pandas as pd
 from lightwood.data.encoded_ds import EncodedDs
 

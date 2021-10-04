@@ -1,5 +1,5 @@
 import pandas as pd
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.data.encoded_ds import EncodedDs
 from lightwood.api import dtype
 from typing import Dict, List, Set
 import numpy as np
