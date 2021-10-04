@@ -1,5 +1,5 @@
 # TODO: Make stratification work for regression via histogram bins??
-from lightwood import dtype
+from lightwood.api.dtype import dtype
 import pandas as pd
 import numpy as np
 from typing import List, Dict
