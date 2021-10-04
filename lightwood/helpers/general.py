@@ -86,20 +86,23 @@ def evaluate_array_accuracy(
                     }
     for group in ts_analysis['group_combinations']:
         g_idxs, _ = get_group_matches(wrapped_data, group)
-        trues = true_values[g_idxs]
-        preds = predictions[g_idxs]
 
-        if ts_analysis['tss'].nr_predictions == 1:
-            preds = np.expand_dims(preds, axis=1)
+        # only evaluate populated groups
+        if g_idxs:
+            trues = true_values[g_idxs]
+            preds = predictions[g_idxs]
 
-        # only evaluate accuracy for rows with complete historical context
-        if len(trues) > ts_analysis['tss'].window:
-            trues = trues[ts_analysis['tss'].window:]
-            preds = preds[ts_analysis['tss'].window:]
+            if ts_analysis['tss'].nr_predictions == 1:
+                preds = np.expand_dims(preds, axis=1)
 
-        # add MASE score for each group (__default only considered if the task is non-grouped)
-        if len(ts_analysis['group_combinations']) == 1 or group != '__default':
-            mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].nr_predictions))
+            # only evaluate accuracy for rows with complete historical context
+            if len(trues) > ts_analysis['tss'].window:
+                trues = trues[ts_analysis['tss'].window:]
+                preds = preds[ts_analysis['tss'].window:]
+
+            # add MASE score for each group (__default only considered if the task is non-grouped)
+            if len(ts_analysis['group_combinations']) == 1 or group != '__default':
+                mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].nr_predictions))
 
     return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
 
