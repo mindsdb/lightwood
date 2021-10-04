@@ -33,8 +33,8 @@ def splitter(
     if pct_train + pct_dev + pct_test != 100:
         raise Exception('The train, dev and test percentage of the data needs to sum up to 100')
 
-    gcd = np.gcd(pct_test, np.gcd(pct_train, pct_dev))
-    nr_subsets = 100 / gcd
+    gcd = np.gcd(100, np.gcd(pct_test, np.gcd(pct_train, pct_dev)))
+    nr_subsets = int(100 / gcd)
 
     # Shuffle the data
     if not tss.is_timeseries:
@@ -52,8 +52,7 @@ def splitter(
     train = pd.concat(subsets[0:int(pct_train / gcd)])
     dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
     test = pd.concat(subsets[int(pct_train / gcd + pct_dev / gcd):])
-    print(len(train), len(dev), len(test))
-    exit()
+
     return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
 
