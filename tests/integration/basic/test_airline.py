@@ -6,6 +6,7 @@ from lightwood.api.types import ProblemDefinition
 
 
 class TestBasic(unittest.TestCase):
+    # Interesting: has coordinates as inputs
     def test_0_predict_file_flow(self):
         from lightwood.api.high_level import predictor_from_problem
 

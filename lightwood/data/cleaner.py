@@ -15,6 +15,9 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple, Callable, Union
 
 
+VALUES_FOR_NAN_AND_NONE_IN_PANDAS = [np.nan, 'nan', 'NaN', 'Nan', 'None']
+
+
 def cleaner(
     data: pd.DataFrame,
     dtype_dict: Dict[str, str],
@@ -49,12 +52,12 @@ def cleaner(
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
-        data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
-                                    ).replace({np.nan: None})
+        for nan_val in VALUES_FOR_NAN_AND_NONE_IN_PANDAS:
+            data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
+                                        ).replace({nan_val: None})
         # If a column has too many None values, raise an Excpetion
         # Figure out how to reintroduce later, maybe a custom flag, `crash for too much invalid data`?
         # _check_if_invalid(data[col], pct_invalid, col)
-
     return data
 
 
