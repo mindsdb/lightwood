@@ -1,7 +1,7 @@
 from lightwood.api.types import ModelAnalysis
 import dill
 import pandas as pd
-
+from typing import Dict
 
 # Interface that must be respected by predictor objects generated from JSON ML and/or compatible with Mindsdb
 class PredictorInterface:
@@ -24,13 +24,59 @@ class PredictorInterface:
     def __init__(self):
         pass
 
+    def analyze_data(self, data: pd.DataFrame) -> None:
+        """
+        Performs a statistical analysis on the data to identify distributions, imbalanced classes, and other nuances within the data.
+
+        :param data: Data used in training the model(s).
+        """ # noqa
+        pass
+
+    def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Cleans the unprocessed dataset provided.
+
+        :param data: (Unprocessed) Data used in training the model(s).
+        :returns: The cleaned data frame
+        """ # noqa
+        pass
+
+    def split(self, clean_data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+        """
+        Categorizes the data into a training/testing split; if data is a classification problem, will stratify the data.
+
+        :param clean_data: Pre-processed data.
+        :returns: Dictionary containing training/testing fraction
+        """ # noqa
+        pass
+
+    def featurize(self, train_test: Dict[str, pd.DataFrame]):
+        """
+        Prepares the encoders for each column of data, and provides an encoded representation for each dataset in ``train_test``.
+
+        :param train_test: Pre-processed data from the dataset, split into train/test (or any other keys relevant)
+
+        :returns: For each dataset provided in ``train_test``, the encoded representations of the data.
+        """ # noqa
+        pass
+
+    def fit(self, enc_train_test: dict[str, pd.DataFrame]) -> None:
+        """
+        Fits "mixer" models to train predictors on the featurized data.
+
+        :param enc_train_test: Pre-processed and featurized data, split into the relevant train/test splits.
+        """
+        pass
+
     def learn(self, data: pd.DataFrame) -> None:
         """
         Trains the attribute model starting from raw data. Raw data is pre-processed and cleaned accordingly. As data is assigned a particular type (ex: numerical, categorical, etc.), the respective feature encoder will convert it into a representation useable for training ML models. Of all ML models requested, these models are compiled and fit on the training data.
 
-        :param data: Data used in training the model(s).
+        This step amalgates ``preprocess`` -> ``featurize`` -> ``fit`` with the necessary splitting + analyze_data that occurs. 
 
-        :returns: Provides best fit model.
+        :param data: (Unprocessed) Data used in training the model(s).
+
+        :returns: Nothing; instantiates with best fit model from ensemble.
         """ # noqa
         pass
 
@@ -41,7 +87,7 @@ class PredictorInterface:
         ..warnings:: Not tested yet - this is an experimental feature
         :param data: New data used to adjust a previously trained model.
 
-        :returns: Adjusts best-fit model
+        :returns: Nothing; adjusts best-fit model
         """ # noqa
         pass
 
@@ -52,7 +98,7 @@ class PredictorInterface:
         :param data: Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.
 
         :returns: A dataframe of predictions of the same length of input.
-        """
+        """ # noqa
         pass
 
     def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
