@@ -452,7 +452,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
     ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
     ensemble['args']['target'] = ensemble['args'].get('target', '$target')
-    ensemble['args']['data'] = ensemble['args'].get('data', 'test_data')
+    ensemble['args']['data'] = ensemble['args'].get('data', 'encoded_test_data')
     ensemble['args']['mixers'] = ensemble['args'].get('mixers', '$mixers')
 
     for name in json_ai.features:
@@ -496,8 +496,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              "ts_cfg": "$problem_definition.timeseries_settings",
              "accuracy_functions": "$accuracy_functions",
              "predictor": "$ensemble",
-             "data": "test_data",
-             "train_data": "train_data",
+             "data": "encoded_test_data",
+             "train_data": "encoded_train_data",
              "target": "$target",
              "dtype_dict": "$dtype_dict",
              "analysis_blocks": "$analysis_blocks"
@@ -709,17 +709,16 @@ for col_name, encoder in self.encoders.items():
     learn_body = f"""
 log.info('Featurizing the data')
 
-encoded_data = {{}}
-encoded_data['train'] = EncodedDs(self.encoders, data['train'], self.target)
-encoded_data['dev'] = EncodedDs(self.encoders, data['dev'], self.target)
-encoded_data['test'] = EncodedDs(self.encoders, data['test'], self.target)
+encoded_train_data = EncodedDs(self.encoders, data['train'], self.target)
+encoded_dev_data = EncodedDs(self.encoders, data['dev'], self.target)
+encoded_test_data = EncodedDs(self.encoders, data['test'], self.target)
 
 log.info('Training the mixers')
 self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
 trained_mixers = []
 for mixer in self.mixers:
     try:
-        mixer.fit(encoded_data['train'], encoded_data['dev'])
+        mixer.fit(encoded_train_data, encoded_dev_data)
         trained_mixers.append(mixer)
     except Exception as e:
         log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
@@ -740,7 +739,7 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 # important to train with.
 for mixer in self.mixers:
     if {json_ai.problem_definition.fit_on_validation}:
-        mixer.partial_fit(encoded_data['test'], encoded_data['train'])
+        mixer.partial_fit(encoded_test_data, ConcatedEncodedDs([encoded_train_data, encoded_dev_data]))
 """
     learn_body = align(learn_body, 2)
 
