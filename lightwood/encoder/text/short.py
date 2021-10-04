@@ -58,7 +58,7 @@ class ShortTextEncoder(BaseEncoder):
             for tok in tokens:
                 unique_tokens.add(tok)
 
-        self.cae.prepare(unique_tokens)
+        self.cae.prepare(unique_tokens, unique_tokens)
 
         if self._mode == 'concat':
             self.max_words_per_sent = max_words_per_sent

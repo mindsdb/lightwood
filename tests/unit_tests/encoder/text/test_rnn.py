@@ -14,7 +14,7 @@ class TestRnnEncoder(unittest.TestCase):
                      ]
 
         encoder = RnnEncoder(encoded_vector_size=10, train_iters=7500)
-        encoder.prepare(sentences)
+        encoder.prepare(sentences, sentences)
         encoder.encode(sentences)
 
         # test de decoder
