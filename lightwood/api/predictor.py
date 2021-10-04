@@ -50,9 +50,18 @@ class PredictorInterface:
         """ # noqa
         pass
 
+    def prepare(self,train_test: Dict[str, pd.DataFrame]) -> None:
+        """
+        Prepares the encoders for each column of data. 
+
+        :param train_test: Pre-processed data that has been split into train/test. Explicitly uses "train" in preparation of encoders.
+
+        :returns: Nothing; prepares the encoders for learned representations.
+        """
+
     def featurize(self, train_test: Dict[str, pd.DataFrame]):
         """
-        Prepares the encoders for each column of data, and provides an encoded representation for each dataset in ``train_test``.
+        Provides an encoded representation for each dataset in ``train_test``. Requires `self.encoders` to be prepared.
 
         :param train_test: Pre-processed data from the dataset, split into train/test (or any other keys relevant)
 
@@ -60,7 +69,7 @@ class PredictorInterface:
         """ # noqa
         pass
 
-    def fit(self, enc_train_test: dict[str, pd.DataFrame]) -> None:
+    def fit(self, enc_train_test: Dict[str, pd.DataFrame]) -> None:
         """
         Fits "mixer" models to train predictors on the featurized data.
 

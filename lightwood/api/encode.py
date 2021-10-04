@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 import pandas as pd
 from lightwood.encoder.base import BaseEncoder
 from lightwood.data.encoded_ds import EncodedDs
