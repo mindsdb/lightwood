@@ -87,7 +87,7 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List
             subframe = subframe[subframe[col] == group[idx]]
 
         subset = np.array_split(subframe, nr_subset)
-        
+
         # Allocate to subsets randomly
         already_visited = []
         for _ in range(nr_subset):
