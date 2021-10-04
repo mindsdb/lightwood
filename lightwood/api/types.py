@@ -298,16 +298,10 @@ class ProblemDefinition:
         encoders and models.
     :param target_weights:
     :param positive_domain: For numerical taks, force predictor output to be positive (integer or float).
-    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
-        that predictions, in average, are correct `alpha` percent of the time.
     :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for \
          available settings.
     :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-\
         series.
-    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
-        (respectively implies wider and tighter bounds, all other parameters being equal).
-    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
-        detector.
     :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
         found in this list will be automatically removed from subsequent steps in the ML pipeline.
     :param fit_on_validation: Whether to fit the model on the held-out validation data. Validation data is strictly \
@@ -325,11 +319,8 @@ class ProblemDefinition:
     time_aim: Union[int, None]
     target_weights: Union[List[float], None]
     positive_domain: bool
-    fixed_confidence: Union[int, float, None]
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
-    anomaly_error_rate: Union[float, None]
-    anomaly_cooldown: int
     ignore_features: List[str]
     fit_on_validation: bool
     strict_mode: bool
@@ -354,11 +345,8 @@ class ProblemDefinition:
         time_aim = obj.get('time_aim', None)
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
-        fixed_confidence = obj.get('fixed_confidence', None)
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         anomaly_detection = obj.get('anomaly_detection', True)
-        anomaly_error_rate = obj.get('anomaly_error_rate', None)
-        anomaly_cooldown = obj.get('anomaly_detection', 1)
         ignore_features = obj.get('ignore_features', [])
         fit_on_validation = obj.get('fit_on_validation', True)
         strict_mode = obj.get('strict_mode', True)
@@ -373,11 +361,8 @@ class ProblemDefinition:
             time_aim=time_aim,
             target_weights=target_weights,
             positive_domain=positive_domain,
-            fixed_confidence=fixed_confidence,
             timeseries_settings=timeseries_settings,
             anomaly_detection=anomaly_detection,
-            anomaly_error_rate=anomaly_error_rate,
-            anomaly_cooldown=anomaly_cooldown,
             ignore_features=ignore_features,
             fit_on_validation=fit_on_validation,
             strict_mode=strict_mode,
@@ -542,3 +527,54 @@ class ModelAnalysis:
     confusion_matrix: object
     histograms: object
     dtypes: object
+
+
+@dataclass
+class PredictionArguments:
+    """
+    This class contains all possible arguments that can be passed to a Lightwood predictor at inference time.
+    On each predict call, all arguments included in a parameter dictionary will update the respective fields
+    in the `PredictionArguments` instance that the predictor will have.
+        
+    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
+        that predictions, in average, are correct `alpha` percent of the time.
+    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
+        (respectively implies wider and tighter bounds, all other parameters being equal).
+    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
+        detector.
+    """  # noqa
+
+    fixed_confidence: Union[int, float, None] = None
+    anomaly_error_rate: Union[float, None] = None
+    anomaly_cooldown: int = 1
+
+    @staticmethod
+    def from_dict(obj: Dict):
+        """
+        Creates a ``PredictionArguments`` object from a python dictionary with necessary specifications.
+
+        :param obj: A python dictionary with the necessary features for the ``PredictionArguments`` class.
+
+        :returns: A populated ``PredictionArguments`` object.
+        """
+
+        # maybe this should be stateful instead, and save the latest used value for each field?
+        fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
+        anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
+        anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
+
+        pred_args = PredictionArguments(
+            fixed_confidence=fixed_confidence,
+            anomaly_error_rate=anomaly_error_rate,
+            anomaly_cooldown=anomaly_cooldown,
+        )
+
+        return pred_args
+
+    def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        """
+        Creates a python dictionary from the ``PredictionArguments`` object
+
+        :returns: A python dictionary
+        """
+        return _asdict(self, encode_json=encode_json)

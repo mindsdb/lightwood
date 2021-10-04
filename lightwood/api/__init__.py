@@ -9,6 +9,7 @@ from lightwood.api.types import (
     TimeseriesSettings,
     ModelAnalysis,
     DataAnalysis,
+    PredictionArguments,
 )
 from lightwood.api.predictor import PredictorInterface
 from lightwood.api.encode import encode
@@ -38,6 +39,7 @@ __all__ = [
     "TimeseriesSettings",
     "ModelAnalysis",
     "DataAnalysis",
+    "PredictionArguments",
     "PredictorInterface",
     "encode",
     "dtype",

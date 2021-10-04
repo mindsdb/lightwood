@@ -325,15 +325,16 @@ class ICP(BaseAnalysisBlock):
                                                                                   error_rate=error_rate)
 
                                     # only replace where grouped ICP is more informative (i.e. tighter)
-                                    default_icp_widths = result.loc[X.index, 'upper'] - result.loc[X.index, 'lower']
-                                    grouped_widths = np.subtract(confs[:, 1], confs[:, 0])
-                                    insert_index = (default_icp_widths > grouped_widths)[lambda x: x.isin([True])].index
-                                    conf_index = (default_icp_widths.reset_index(drop=True) >
-                                                  grouped_widths)[lambda x: x.isin([True])].index
+                                    if ns.fixed_confidence is None:
+                                        default_widths = result.loc[X.index, 'upper'] - result.loc[X.index, 'lower']
+                                        grouped_widths = np.subtract(confs[:, 1], confs[:, 0])
+                                        insert_index = (default_widths > grouped_widths)[lambda x: x.isin([True])].index
+                                        conf_index = (default_widths.reset_index(drop=True) >
+                                                      grouped_widths)[lambda x: x.isin([True])].index
 
-                                    result.loc[insert_index, 'lower'] = confs[conf_index, 0]
-                                    result.loc[insert_index, 'upper'] = confs[conf_index, 1]
-                                    result.loc[insert_index, 'significance'] = significances[conf_index]
+                                        result.loc[insert_index, 'lower'] = confs[conf_index, 0]
+                                        result.loc[insert_index, 'upper'] = confs[conf_index, 1]
+                                        result.loc[insert_index, 'significance'] = significances[conf_index]
 
                                 else:
                                     conf_candidates = list(range(20)) + list(range(20, 100, 10))

@@ -35,9 +35,6 @@ class TestBasic(unittest.TestCase):
 
         # check customizable ICP fixed confidence param
         fixed_conf = 0.8
-        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 30, 'fixed_confidence': fixed_conf})
-        predictor = predictor_from_problem(df, pdef)
-        predictor.learn(df)
-        fixed_predictions = predictor.predict(df)
+        fixed_predictions = predictor.predict(df, {'fixed_confidence': fixed_conf})
 
         assert all([v == fixed_conf for v in fixed_predictions['confidence'].values])
