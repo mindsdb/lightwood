@@ -26,8 +26,7 @@ class ArrayEncoder(BaseEncoder):
 
     def prepare(self, train_priming_data, dev_priming_data):
         priming_data = pd.concat([train_priming_data, dev_priming_data])
-        if isinstance(priming_data, pd.Series):
-            priming_data = priming_data.values
+        priming_data = priming_data.values
 
         if self.output_size is None:
             self.output_size = np.max([len(x) for x in priming_data if x is not None])
