@@ -27,14 +27,13 @@ class BaseEncoder:
         - output_size: length of each encoding tensor for a single data point.
 
     """
+
     is_target: bool
     is_timeseries_encoder: bool = False
     is_trainable_encoder: bool = False
 
     def __init__(self, is_target=False) -> None:
-        """
-
-        """
+        """"""
         self.is_target = is_target
         self._prepared = False
         self.is_nn_encoder = False
