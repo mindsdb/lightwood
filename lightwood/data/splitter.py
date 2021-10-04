@@ -15,9 +15,9 @@ def splitter(
     tss: TimeseriesSettings,
     dtype_dict: Dict[str, str],
     seed: int,
-    pct_train: float,
-    pct_dev: float,
-    pct_test: float,
+    pct_train: int,
+    pct_dev: int,
+    pct_test: int,
     target: str
 ) -> Dict[str, pd.DataFrame]:
     """
@@ -31,24 +31,29 @@ def splitter(
     :param n_subsets: Number of subsets to create from data (for time-series)
     :param target: Name of the target column; if specified, data will be stratified on this column
 
-    :returns: A dictionary containing "train" and "test" splits of the data.
-    """
-    if pct_train + pct_dev + pct_test != 1:
-        raise Exception('The train, dev and test percentage of the data needs to sum up to 1')
+    :returns: A dictionary containing the keys train, test and dev with their respective data frames, as well as the "stratified_on" key indicating which columns the data was stratified on (None if it wasn't stratified on anything)
+    """ # noqa
+    if pct_train + pct_dev + pct_test == 100:
+        raise Exception('The train, dev and test percentage of the data needs to sum up to 100')
 
     # Shuffle the data
     if not tss.is_timeseries:
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
+    stratify_on = None
     if tss.is_timeseries or dtype_dict[target] in (dtype.categorical, dtype.binary) and target is not None:
         stratify_on = [target]
         if isinstance(tss.group_by, list):
             stratify_on = stratify_on + tss.group_by
         subsets = stratify(data, 100, stratify_on)
     else:
-        subsets = 
+        subsets = np.array_split(data, 100)
 
-    return {"train": train, "test": test, "stratified_on": target}
+    train = pd.concat(subsets[0:pct_train])
+    dev = pd.concat(subsets[pct_train:pct_train + pct_dev])
+    test = pd.concat(subsets[pct_train + pct_dev:])
+
+    return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
 
 def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List[pd.DataFrame]:

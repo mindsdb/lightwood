@@ -24,7 +24,8 @@ class ArrayEncoder(BaseEncoder):
         else:
             self.output_size = None
 
-    def prepare(self, priming_data):
+    def prepare(self, train_priming_data, dev_priming_data):
+        priming_data = pd.concat([train_priming_data, dev_priming_data])
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values
 

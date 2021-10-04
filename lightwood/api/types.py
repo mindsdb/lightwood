@@ -317,7 +317,6 @@ class ProblemDefinition:
     """
 
     target: str
-    nsubsets: int
     pct_invalid: float
     unbias_target: bool
     seconds_per_mixer: Union[int, None]

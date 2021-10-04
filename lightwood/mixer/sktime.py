@@ -32,10 +32,10 @@ class SkTime(BaseMixer):
         self.supports_proba = False
         self.stable = True
 
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
+    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Started fitting sktime forecaster for array prediction')
 
-        all_subsets = ConcatedEncodedDs(ds_arr)
+        all_subsets = ConcatedEncodedDs([train_data, dev_data])
         df = all_subsets.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
         data = {'data': df[self.target],
                 'group_info': {gcol: df[gcol].tolist()

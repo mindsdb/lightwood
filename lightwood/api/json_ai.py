@@ -485,9 +485,9 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'seed': 1,
             'target': '$target',
             'dtype_dict': '$dtype_dict',
-            'pct_train': 0.8,
-            'pct_dev': 0.1,
-            'pct_test': 0.1
+            'pct_train': 80,
+            'pct_dev': 10,
+            'pct_test': 10
         }
     }), ('analyzer', {
          "module": "model_analyzer",
@@ -662,17 +662,15 @@ data = {call(json_ai.cleaner)}
 {ts_transform_code}
 {ts_analyze_code}
 
-nsubsets = {json_ai.problem_definition.nsubsets}
-log.info(f'Splitting the data into {{nsubsets}} subsets')
 data = {call(json_ai.splitter)}
 
 log.info('Preparing the encoders')
 
 encoder_prepping_dict = {{}}
-enc_prepping_data = pd.concat(data['train'])
+concatenated_train_dev = pd.concat([data['train'], data['dev']])
 for col_name, encoder in self.encoders.items():
-    if not encoder.is_nn_encoder:
-        encoder_prepping_dict[col_name] = [encoder, enc_prepping_data[col_name], 'prepare']
+    if not encoder.is_trainable_encoder:
+        encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], 'prepare']
         log.info(f'Encoder prepping dict length of: {{len(encoder_prepping_dict)}}')
 
 parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
@@ -680,11 +678,14 @@ for col_name, encoder in parallel_prepped_encoders.items():
     self.encoders[col_name] = encoder
 
 if self.target not in parallel_prepped_encoders:
-    self.encoders[self.target].prepare(enc_prepping_data[self.target])
+    if self.encoders[self.target].is_trainable_encoder:
+        self.encoders[self.target].prepare(data['train'][self.target], data['dev'][self.target])
+    else:
+        self.encoders[self.target].prepare(pd.concat([data['train'], data['dev']])[self.target])
 
 for col_name, encoder in self.encoders.items():
-    if encoder.is_nn_encoder:
-        priming_data = pd.concat(data['train'])
+    if encoder.is_trainable_encoder:
+        priming_data = pd.concat([data['train'], data['dev']])
         kwargs = {{}}
         if self.dependencies[col_name]:
             kwargs['dependency_data'] = {{}}
@@ -699,7 +700,10 @@ for col_name, encoder in self.encoders.items():
         if hasattr(encoder, 'uses_target'):
             kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
 
-        encoder.prepare(priming_data[col_name], **kwargs)
+    if encoder.is_trainable_encoder:
+        encoder.prepare(data['train'], data['dev'], **kwargs)
+    else:
+        encoder.prepare(pd.concat([data['train'], data['dev']]), **kwargs)
 
     {align(ts_target_code, 1)}
 """
@@ -710,6 +714,7 @@ log.info('Featurizing the data')
 
 encoded_data = {{}}
 encoded_data['train'] = lightwood.encode(self.encoders, data['train'], self.target)
+encoded_data['dev'] = lightwood.encode(self.encoders, data['dev'], self.target)
 encoded_data['test'] = lightwood.encode(self.encoders, data['test'], self.target)
 
 log.info('Training the mixers')
@@ -717,7 +722,7 @@ self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mi
 trained_mixers = []
 for mixer in self.mixers:
     try:
-        mixer.fit(encoded_data['train'])
+        mixer.fit(encoded_data['train'], encoded_data['dev'])
         trained_mixers.append(mixer)
     except Exception as e:
         log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
