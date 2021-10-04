@@ -10,8 +10,8 @@ from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSe
 
 def model_analyzer(
     predictor: BaseEnsemble,
-    data: List[EncodedDs],
-    train_data: List[EncodedDs],
+    data: EncodedDs,
+    train_data: EncodedDs,
     stats_info: StatisticalAnalysis,
     target: str,
     ts_cfg: TimeseriesSettings,
