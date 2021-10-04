@@ -16,6 +16,8 @@ from lightwood.api.types import (
     Output,
     ProblemDefinition,
 )
+import inspect
+
 
 IMPORT_EXTERNAL_DIRS = """
 for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
@@ -26,8 +28,10 @@ for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_mo
                                                           os.path.join(import_dir, file_name))
             module = ModuleType(loader.name)
             loader.exec_module(module)
-            exec(f'{mod_name} = module')
+            sys.modules[mod_name] = module
+            exec(f'import {mod_name}')
 """
+
 IMPORTS = """
 import lightwood
 from lightwood.analysis import *
@@ -47,9 +51,10 @@ from lightwood.mixer import *
 import pandas as pd
 from typing import Dict, List
 import os
-import importlib.machinery
 from types import ModuleType
-import sys"""
+import importlib.machinery
+import sys
+"""
 
 
 def lookup_encoder(
@@ -58,6 +63,7 @@ def lookup_encoder(
     is_target: bool,
     problem_defintion: ProblemDefinition,
     is_target_predicting_encoder: bool,
+    statistical_analysis: StatisticalAnalysis
 ):
     """
     Assign a default encoder for a given column based on its data type, and whether it is a target. Encoders intake raw (but cleaned) data and return an feature representation. This function assigns, per data type, what the featurizer should be. This function runs on each column within the dataset available for model building to assign how it should be featurized.
@@ -78,7 +84,9 @@ def lookup_encoder(
         dtype.integer: 'Integer.NumericEncoder',
         dtype.float: 'Float.NumericEncoder',
         dtype.binary: 'Binary.BinaryEncoder',
-        dtype.categorical: 'Categorical.CategoricalAutoEncoder',
+        dtype.categorical: 'Categorical.CategoricalAutoEncoder'
+        if statistical_analysis is None or len(statistical_analysis.histograms[col_name]) > 100
+        else 'Categorical.OneHotEncoder',
         dtype.tags: 'Tags.MultiHotEncoder',
         dtype.date: 'Date.DatetimeEncoder',
         dtype.datetime: 'Datetime.DatetimeEncoder',
@@ -265,7 +273,7 @@ def generate_json_ai(
         list(outputs.values())[0].data_dtype = dtype.tsarray
 
     list(outputs.values())[0].encoder = lookup_encoder(
-        type_information.dtypes[target], target, True, problem_definition, False
+        type_information.dtypes[target], target, True, problem_definition, False, statistical_analysis
     )
 
     features: Dict[str, Feature] = {}
@@ -273,7 +281,7 @@ def generate_json_ai(
         col_dtype = type_information.dtypes[col_name]
         dependency = []
         encoder = lookup_encoder(
-            col_dtype, col_name, False, problem_definition, is_target_predicting_encoder
+            col_dtype, col_name, False, problem_definition, is_target_predicting_encoder, statistical_analysis
         )
 
         if tss.is_timeseries and eval(encoder['module'].split(".")[1]).is_timeseries_encoder:
@@ -292,7 +300,7 @@ def generate_json_ai(
 
     # Decide on the accuracy functions to use
     output_dtype = list(outputs.values())[0].data_dtype
-    if output_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime]:
+    if output_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime, dtype.quantity]:
         accuracy_functions = ['r2_score']
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ['balanced_accuracy_score']
@@ -345,6 +353,23 @@ def generate_json_ai(
     )
 
 
+def merge_implicit_values(field, implicit_value):
+    module = eval(field['module'])
+    if inspect.isclass(module):
+        args = inspect.getargspec(module.__init__).args[1:]
+    else:
+        args = eval(field['module']).__code__.co_varnames
+
+    for arg in args:
+        if 'args' not in field:
+            field['args'] = implicit_value['args']
+        else:
+            if arg not in field['args']:
+                if arg in implicit_value['args']:
+                    field['args'][arg] = implicit_value['args'][arg]
+    return field
+
+
 def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: dict, is_timeseries: bool) -> None:
     """
     Populate the implicit field of the JsonAI, either by filling it in entirely if missing, or by introspecting the class or function and assigning default values to the args in it's signature that are in the implicit default but haven't been populated by the user
@@ -359,17 +384,23 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     # These imports might be slow, in which case the only <easy> solution is to line this code
     field = json_ai.__getattribute__(field_name)
     if field is None:
+        # This if is to only populated timeseries-specific implicit fields for implicit problems
         if is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
             field = implicit_value
+
+    # If the user specified one or more subfields in a field that's a list
+    # Populate them with implicit arguments form the implicit values from that subfield
+    elif isinstance(field, list) and isinstance(implicit_value, list):
+        for i in range(len(field)):
+            sub_field_implicit = [x for x in implicit_value if x['module'] == field[i]['module']]
+            if len(sub_field_implicit) == 1:
+                field[i] = merge_implicit_values(field[i], sub_field_implicit[0])
+        for sub_field_implicit in implicit_value:
+            if len([x for x in field if x['module'] == sub_field_implicit['module']]) == 0:
+                field.append(sub_field_implicit)
+    # If the user specified the field, add implicit arguments which we didn't specify
     else:
-        args = eval(field['module']).__code__.co_varnames
-        for arg in args:
-            if 'args' not in field:
-                field['args'] = implicit_value['args']
-            else:
-                if arg not in field['args']:
-                    if arg in implicit_value['args']:
-                        field['args'][arg] = implicit_value['args'][arg]
+        field = merge_implicit_values(field, implicit_value)
     json_ai.__setattr__(field_name, field)
 
 
@@ -467,11 +498,8 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              "data": "test_data",
              "train_data": "train_data",
              "target": "$target",
-             "disable_column_importance": "False",
              "dtype_dict": "$dtype_dict",
-             "fixed_significance": None,
-             "confidence_normalizer": False,
-             "positive_domain": "$statistical_analysis.positive_domain",
+             "analysis_blocks": "$analysis_blocks"
          },
          }), ('explainer', {
              "module": "explain",
@@ -489,8 +517,31 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                  "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
                  "target_name": "$target",
                  "target_dtype": "$dtype_dict[self.target]",
+                 "explainer_blocks": "$analysis_blocks"
              },
-         }), ('timeseries_transformer', {
+         }), ('analysis_blocks', [
+             {
+                 'module': 'ICP',
+                 'args': {
+                     "fixed_significance": None,
+                     "confidence_normalizer": False,
+                     "positive_domain": "$statistical_analysis.positive_domain",
+
+                 },
+             },
+             {
+                 'module': 'AccStats',
+                 'args': {
+                     'deps': ['ICP']
+                 },
+             },
+             {
+                 'module': 'GlobalFeatureImportance',
+                 'args': {
+                     "disable_column_importance": "False",
+                 },
+             },
+         ]), ('timeseries_transformer', {
              "module": "transform_timeseries",
              "args": {
                  "timeseries_settings": "$problem_definition.timeseries_settings",
@@ -548,6 +599,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                                                      False,
                                                      json_ai.problem_definition,
                                                      False,
+                                                     None
                                                      ))
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
@@ -600,6 +652,8 @@ self.encoders = {inline_dict(encoder_dict)}
 self.dependencies = {inline_dict(dependency_dict)}
 #
 self.input_cols = [{input_cols}]
+
+self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
 
 log.info('Cleaning the data')
 data = {call(json_ai.cleaner)}
@@ -701,14 +755,14 @@ encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
     predict_body = f"""
 df = self.ensemble(encoded_ds)
-insights = {call(json_ai.explainer)}
+insights, global_insights = {call(json_ai.explainer)}
 return insights
 """
     predict_body = align(predict_body, 2)
 
     predict_proba_body = f"""
 df = self.ensemble(encoded_ds, predict_proba=True)
-insights = {call(json_ai.explainer)}
+insights, global_insights = {call(json_ai.explainer)}
 return insights
 """
     predict_proba_body = align(predict_proba_body, 2)

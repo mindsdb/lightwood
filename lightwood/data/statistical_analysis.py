@@ -91,7 +91,7 @@ def statistical_analysis(data: pd.DataFrame,
     target = problem_definition.target
     positive_domain = False
     # get train std, used in analysis
-    if dtypes[target] in [dtype.float, dtype.integer, dtype.tsarray]:
+    if dtypes[target] in [dtype.float, dtype.integer, dtype.tsarray, dtype.quantity]:
         df_std = df[target].astype(float).std()
         if min(df[target]) >= 0:
             positive_domain = True
@@ -122,7 +122,7 @@ def statistical_analysis(data: pd.DataFrame,
                 'y': list(hist.values())
             }
             buckets[col] = histograms[col]['x']
-        elif dtypes[col] in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
+        elif dtypes[col] in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity):
             histograms[col] = get_numeric_histogram(filter_nan_and_none(df[col]), dtypes[col], 50)
             buckets[col] = histograms[col]['x']
         elif dtypes[col] in (dtype.date, dtype.datetime):
@@ -155,7 +155,8 @@ def statistical_analysis(data: pd.DataFrame,
         if dtypes[col] in (dtype.rich_text, dtype.short_text):
             words_per_sentence = []
             for item in df[col]:
-                words_per_sentence.append(len(item.split(' ')))
+                if item is not None:
+                    words_per_sentence.append(len(item.split(' ')))
             avg_words_per_sentence[col] = int(np.mean(words_per_sentence))
         else:
             avg_words_per_sentence[col] = None
