@@ -156,6 +156,7 @@ class TimeSeriesEncoder(BaseEncoder):
         :param batch_size
         """
         priming_data = pd.concat([train_priming_data, dev_priming_data])
+        priming_data = list(priming_data)
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
         else:
