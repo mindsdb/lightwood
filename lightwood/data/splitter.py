@@ -1,10 +1,8 @@
-# TODO: Make stratification work for grouped cols??
 # TODO: Make stratification work for regression via histogram bins??
-
 from lightwood import dtype
 import pandas as pd
 import numpy as np
-from typing import List, Dict, Optional
+from typing import List, Dict
 from itertools import product
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.splitting import stratify
