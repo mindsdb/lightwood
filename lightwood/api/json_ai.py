@@ -700,10 +700,9 @@ for col_name, encoder in self.encoders.items():
         if hasattr(encoder, 'uses_target'):
             kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
 
-    if encoder.is_trainable_encoder:
         encoder.prepare(data['train'], data['dev'], **kwargs)
     else:
-        encoder.prepare(pd.concat([data['train'], data['dev']]), **kwargs)
+        encoder.prepare(pd.concat([data['train'], data['dev']]))
 
     {align(ts_target_code, 1)}
 """
