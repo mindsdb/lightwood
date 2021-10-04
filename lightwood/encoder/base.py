@@ -3,17 +3,40 @@ import torch
 
 
 class BaseEncoder:
-    """Base class for all encoders"""
-    is_target: bool
-    prepared: bool
+    """
+    Base class for all encoders.
 
+    An encoder should return encoded representations of any columnar data.
+    The procedure for this is defined inside the `encode()` method.
+
+    If this encoder is expected to handle an output column, then it also needs to
+    implement the respective `decode()` method that handles the inverse transformation
+    from encoded representations to the final prediction in the original column space.
+
+    For encoders that learn representations (as opposed to rule-based), the `prepare()`
+    method will handle all learning logic.
+
+    The `to()` method is used to move PyTorch-based encoders to and from a GPU.
+
+
+    Class attributes:
+        - is_target: Whether the data to encode is the target, as per the problem definition.
+        - _prepared: Internal flag to signal that the `prepare()` method has been successfully executed.
+        - is_nn_encoder: Whether the encoder is neural network-based.
+        - dependencies: list of additional columns that the encoder might need to encode.
+        - output_size: length of each encoding tensor for a single data point.
+
+    """
+    is_target: bool
     is_timeseries_encoder: bool = False
     is_trainable_encoder: bool = False
 
     def __init__(self, is_target=False) -> None:
+        """
+
+        """
         self.is_target = is_target
         self._prepared = False
-        self.uses_subsets = False
         self.is_nn_encoder = False
         self.dependencies = []
         self.output_size = None
