@@ -149,7 +149,7 @@ class PretrainedLangEncoder(BaseEncoder):
         """
         os.environ['TOKENIZERS_PARALLELISM'] = 'true'
         priming_data = pd.concat([train_priming_data, dev_priming_data])
-        priming_data = list(priming_data)
+        priming_data = priming_data.values
         if self._prepared:
             raise Exception("Encoder is already prepared.")
 
