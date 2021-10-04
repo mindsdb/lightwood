@@ -701,8 +701,6 @@ for col_name, encoder in self.encoders.items():
             kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
 
         encoder.prepare(data['train'], data['dev'], **kwargs)
-    else:
-        encoder.prepare(pd.concat([data['train'], data['dev']]))
 
     {align(ts_target_code, 1)}
 """
