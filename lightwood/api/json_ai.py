@@ -504,10 +504,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              "args": {
                  "timeseries_settings": "$problem_definition.timeseries_settings",
                  "positive_domain": "$statistical_analysis.positive_domain",
-                 "fixed_confidence": "$problem_definition.fixed_confidence",
                  "anomaly_detection": "$problem_definition.anomaly_detection",
-                 "anomaly_error_rate": "$problem_definition.anomaly_error_rate",
-                 "anomaly_cooldown": "$problem_definition.anomaly_cooldown",
                  "data": "data",
                  "encoded_data": "encoded_data",
                  "predictions": "df",
@@ -515,7 +512,10 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                  "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
                  "target_name": "$target",
                  "target_dtype": "$dtype_dict[self.target]",
-                 "explainer_blocks": "$analysis_blocks"
+                 "explainer_blocks": "$analysis_blocks",
+                 "fixed_confidence": "self.pred_args.fixed_confidence",
+                 "anomaly_error_rate": "self.pred_args.anomaly_error_rate",
+                 "anomaly_cooldown": "self.pred_args.anomaly_cooldown",
              },
          }), ('analysis_blocks', [
              {
@@ -726,6 +726,7 @@ self.mixers = trained_mixers
 log.info('Ensembling the mixer')
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
+self.pred_args = None
 
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
@@ -748,6 +749,8 @@ data = {call(json_ai.cleaner)}
 
 encoded_ds = lightwood.encode(self.encoders, data, self.target)[0]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
+
+self.pred_args = PredictionArguments.from_dict(args)
 """
     predict_common_body = align(predict_common_body, 2)
 
@@ -785,12 +788,12 @@ class Predictor(PredictorInterface):
 {dataprep_body}
 {learn_body}
 
-    def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+    def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_common_body}
 {predict_body}
 
 
-    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
+    def predict_proba(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_common_body}
 {predict_proba_body}
 """
@@ -806,7 +809,7 @@ def validate_json_ai(json_ai: JsonAI) -> bool:
     
     :param json_ai: A ``JsonAI`` object
 
-    :returns: Wether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
+    :returns: Whether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
     """ # noqa
     from lightwood.api.high_level import predictor_from_code, code_from_json_ai
 

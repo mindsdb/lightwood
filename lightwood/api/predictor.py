@@ -1,6 +1,9 @@
-from lightwood.api.types import ModelAnalysis
+from typing import Dict
 import dill
+
 import pandas as pd
+
+from lightwood.api.types import ModelAnalysis
 
 
 # Interface that must be respected by predictor objects generated from JSON ML and/or compatible with Mindsdb
@@ -45,21 +48,23 @@ class PredictorInterface:
         """ # noqa
         pass
 
-    def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+    def predict(self, data: pd.DataFrame, args: Dict[str, object] = {}) -> pd.DataFrame:
         """
         Intakes raw data to provide predicted values for your trained model.
 
         :param data: Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.
+        :param args: parameters needed to update the predictor ``PredictionArguments`` object, which holds any parameters relevant for prediction.
 
         :returns: A dataframe of predictions of the same length of input.
-        """
+        """  # noqa
         pass
 
-    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
+    def predict_proba(self, data: pd.DataFrame, args: Dict[str, object] = {}) -> pd.DataFrame:
         """
         Intakes raw data to provide some element of confidence/explainability metric to gauge your model's predictive abilities.
 
         :param data: Data that the model(s) will evaluate on; provides the some element of predictive strength (ex: how "confident" the model is).
+        :param args: parameters needed to update the predictor ``PredictionArguments`` object, which holds any parameters relevant for prediction.
 
         :returns: A dataframe of confidence metrics for each datapoint provided in the input (n_samples, n_classes)
         """ # noqa
