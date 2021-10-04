@@ -223,7 +223,7 @@ class Neural(BaseMixer):
                 running_losses.append(criterion(Yh, Y).item())
             return np.mean(running_losses)
 
-    def _init_net(self, ds: _init_net):
+    def _init_net(self, ds: EncodedDs):
         net_kwargs = {'input_size': len(ds_arr[0][0][0]),
                       'output_size': len(ds_arr[0][0][1]),
                       'num_hidden': self.num_hidden,
