@@ -1,9 +1,5 @@
-# TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested
-# in seeing where these come from and it's not clear that you need to look here.
-# TODO: What does `target_class_distribution` and `positive_domain` do?
-# TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
+# TODO: What does `target_class_distribution` and `positive_domain` do? (NS)
 # TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
-# TODO: Please fix spelling on parallel_preped_encoders
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 import black
@@ -69,7 +65,7 @@ def lookup_encoder(
     """
     Assign a default encoder for a given column based on its data type, and whether it is a target. Encoders intake raw (but cleaned) data and return an feature representation. This function assigns, per data type, what the featurizer should be. This function runs on each column within the dataset available for model building to assign how it should be featurized.
 
-    Users may override to create a custom encoder to enable their own featurization process. However, in order to generate a template JSON-AI, this code is run first. Users may edit the generated syntax and use custom approaches while model building.
+    Users may override to create a custom encoder to enable their own featurization process. However, in order to generate a template JSON-AI, this code is run first. Users may edit the generated syntax and use custom approaches while model building. We recommend looking at ``encoder_lookup`` and ``target_encoder_lookup_override`` first. For ``encoder_lookup``, you can change the default encoder for a data type and ``target_encoder_lookup_override`` enables you to change what happens to an encoder if it featurizes the target column.
 
     For each encoder, "args" may be passed. These args depend an encoder requires during its preparation call.
 
@@ -200,6 +196,7 @@ def generate_json_ai(
     ):
         is_target_predicting_encoder = True
 
+    # Used when the encoder can act as the mixer; only works for single column trainable encoders
     if is_target_predicting_encoder:
         mixers = [{
             'module': 'Unit',
@@ -355,6 +352,9 @@ def generate_json_ai(
 
 
 def merge_implicit_values(field, implicit_value):
+    """
+    For arguments within a module not explicitly stated, populate with necessary arguments.
+    """
     module = eval(field['module'])
     if inspect.isclass(module):
         args = inspect.getargspec(module.__init__).args[1:]
@@ -608,6 +608,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                   for x in json_ai.features]
     input_cols = ','.join([f"""'{name}'""" for name in input_cols if name not in ignored_cols])
 
+    # ----------------- #
+    # Time-series added blocks
+
     ts_transform_code = ""
     ts_analyze_code = ""
     ts_encoder_code = ""
@@ -634,54 +637,70 @@ if encoder.is_target:
 """
     else:
         ts_target_code = ""
-
-    dataprep_body = f"""
-# The type of each column
-self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
-self.accuracy_functions = {json_ai.accuracy_functions}
-self.identifiers = {json_ai.identifiers}
-self.dtype_dict = {inline_dict(dtype_dict)}
-self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers},
-                                                                self.problem_definition)
-self.mode = 'train'
-# How columns are encoded
-self.encoders = {inline_dict(encoder_dict)}
-# Which column depends on which
-self.dependencies = {inline_dict(dependency_dict)}
-#
-self.input_cols = [{input_cols}]
+    # -------------------- #
+    # Analysis function body
+    analyze_data_body = f"""
+self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, self.problem_definition)
 
 self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
+    """
 
+    analyze_data_body = align(analyze_data_body, 2)
+    # ----------------- #
+    # Cleaning body
+    clean_body = f"""
 log.info('Cleaning the data')
-data = {call(json_ai.cleaner)}
+clean_data = {call(json_ai.cleaner)}
 
+# Time-series blocks
 {ts_transform_code}
 {ts_analyze_code}
 
-nsubsets = {json_ai.problem_definition.nsubsets}
-log.info(f'Splitting the data into {{nsubsets}} subsets')
-subsets = {call(json_ai.splitter)}
+return clean_data
+    """
 
-log.info('Preparing the encoders')
+    clean_body = align(clean_body, 2)
 
-encoder_preping_dict = {{}}
-enc_preping_data = pd.concat(subsets[0:nsubsets-1])
+    # ----------------- #
+    # Splitter body
+    split_body = f"""
+log.info("Splitting the data into train/test")
+train_test_data = {call(json_ai.splitter)}
+
+return train_test_data
+    """
+
+    split_body = align(split_body, 2)
+    # ----------------- #
+    # Prepare the features body
+    feature_body = f"""
+
+# Column to encoder mapping
+self.encoders = {inline_dict(encoder_dict)}
+
+log.info("Preparing encoders and featurizing data")
+
+encoder_prepping_dict = {{}}
+
+# Prepare encoders with training data (only important for learned representations)
+
+enc_prepping_data = train_test["train"] # NSNOTE
+
 for col_name, encoder in self.encoders.items():
     if not encoder.is_nn_encoder:
-        encoder_preping_dict[col_name] = [encoder, enc_preping_data[col_name], 'prepare']
-        log.info(f'Encoder preping dict length of: {{len(encoder_preping_dict)}}')
+        encoder_prepping_dict[col_name] = [encoder, enc_prepping_data[col_name], 'prepare']
+        log.info(f'Preparing encoder dict length of: {{len(encoder_prepping_dict)}}')
 
-parallel_preped_encoders = mut_method_call(encoder_preping_dict)
-for col_name, encoder in parallel_preped_encoders.items():
+parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
+for col_name, encoder in parallel_prepped_encoders.items():
     self.encoders[col_name] = encoder
 
-if self.target not in parallel_preped_encoders:
-    self.encoders[self.target].prepare(enc_preping_data[self.target])
+if self.target not in parallel_prepped_encoders:
+    self.encoders[self.target].prepare(enc_prepping_data[self.target])
 
 for col_name, encoder in self.encoders.items():
     if encoder.is_nn_encoder:
-        priming_data = pd.concat(subsets[0:nsubsets-1])
+        priming_data = train_test["train"] # NSNOTE
         kwargs = {{}}
         if self.dependencies[col_name]:
             kwargs['dependency_data'] = {{}}
@@ -692,25 +711,36 @@ for col_name, encoder in self.encoders.items():
                 }}
             {align(ts_encoder_code, 3)}
 
-        # This assumes target  encoders are also prepared in parallel, might not be true
+        # This assumes target encoders are also prepared in parallel
         if hasattr(encoder, 'uses_target'):
-            kwargs['encoded_target_values'] = parallel_preped_encoders[self.target].encode(priming_data[self.target])
+            kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
 
         encoder.prepare(priming_data[col_name], **kwargs)
 
     {align(ts_target_code, 1)}
-"""
-    dataprep_body = align(dataprep_body, 2)
+    """
+    prepare_body = align(prepare_body, 2)
 
-    learn_body = f"""
+    # ----------------- #
+    # Featurize body
+    feature_body = f"""
 log.info('Featurizing the data')
 
-encoded_ds_arr = lightwood.encode(self.encoders, subsets, self.target)
-train_data = encoded_ds_arr[0:int(nsubsets*0.9)]
-test_data = encoded_ds_arr[int(nsubsets*0.9):]
+for key, data in train_test.items():
+    train_test[key] = lightwood.encode(self.encoders, data, self.target)
 
+return train_test
+    """
+
+    feature_body = align(feature_body, 2)
+    # ----------------- #
+    # Fit body
+    fit_body = f"""
 log.info('Training the mixers')
+self.mode = train
 self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
+
+# For each mixer, attempt to fit or return error message
 trained_mixers = []
 for mixer in self.mixers:
     try:
@@ -723,6 +753,8 @@ for mixer in self.mixers:
 
 self.mixers = trained_mixers
 
+# NS-Note should we make ensembles function?
+# Create ensemble and evaluate best mixers
 log.info('Ensembling the mixer')
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
@@ -733,20 +765,47 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 # Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is
 # an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is
 # important to train with.
+
 for mixer in self.mixers:
     if {json_ai.problem_definition.fit_on_validation}:
         mixer.partial_fit(test_data, train_data)
 """
+    fit_body = align(fit_body, 2)
+    # ----------------- #
+    # Learn body
+    learn_body = f"""
+
+# Perform stats analysis
+self.analyze_data()
+
+# Pre-process the data
+clean_data = self.preprocess(data)
+
+# Create train/test (dev) split
+train_test = self.split(data)
+
+# Prepare encoders
+self.prepare(train_test)
+
+# Make features
+enc_train_test = self.featurize(train_test)
+
+# Prepare mixers
+self.fit(enc_train_test)
+
+"""
     learn_body = align(learn_body, 2)
+
+    # ----------------- #
+    # Predict Body
 
     predict_common_body = f"""
 self.mode = 'predict'
-log.info('Cleaning the data')
-data = {call(json_ai.cleaner)}
+clean_data = self.preprocess(data)
 
 {ts_transform_code}
 
-encoded_ds = lightwood.encode(self.encoders, data, self.target)[0]
+encoded_ds = lightwood.encode(self.encoders, clean_data, self.target)[0]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 """
     predict_common_body = align(predict_common_body, 2)
@@ -758,12 +817,19 @@ return insights
 """
     predict_body = align(predict_body, 2)
 
+    # ----------------- #
+    # Predict Probabilities/Explainer Body
+
     predict_proba_body = f"""
 df = self.ensemble(encoded_ds, predict_proba=True)
 insights, global_insights = {call(json_ai.explainer)}
 return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
+
+    # ----------------- #
+    # PREDICTOR CODE
+    # ----------------- #
 
     predictor_code = f"""
 {IMPORTS}
@@ -779,10 +845,42 @@ class Predictor(PredictorInterface):
     def __init__(self):
         seed({json_ai.problem_definition.seed_nr})
         self.target = '{json_ai.problem_definition.target}'
-        self.mode = 'innactive'
+        self.mode = 'inactive'
+        self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
+        self.accuracy_functions = {json_ai.accuracy_functions}
+        self.identifiers = {json_ai.identifiers}
+        self.dtype_dict = {inline_dict(dtype_dict)}
+
+        # Any feature-column dependencies
+        self.dependencies = {inline_dict(dependency_dict)}
+
+        self.input_cols = [{input_cols}]
+
+
+    def analyze_data(self, data: pd.DataFrame) -> None:
+{analyze_data_body}
+
+    def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
+        # Preprocess and clean data
+{clean_body}
+
+    def split(self, data: pd.DataFrame) -> dict[str, pd.DataFrame]:
+        # Split the data into training/testing splits
+{split_body}
+
+    def prepare(self, train_test: dict[str, pd.DataFrame]) -> None:
+        # Prepare encoders to featurize data
+{prepare_body}
+
+    def featurize(self, train_test: dict[str, pd.DataFrame]):
+        # Featurize data into numerical representations for models
+{feature_body}
+
+    def fit(self, enc_train_test: dict[str, pd.DataFrame]) -> None:
+        # Fit predictors to estimate target
+{fit_body}
 
     def learn(self, data: pd.DataFrame) -> None:
-{dataprep_body}
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -802,7 +900,7 @@ class Predictor(PredictorInterface):
 
 def validate_json_ai(json_ai: JsonAI) -> bool:
     """
-    Checks the validity of a ``JsonAI`` object
+    Checks the validity of a ``JsonAI`` object to ensure fidelity in downstream process.
     
     :param json_ai: A ``JsonAI`` object
 
