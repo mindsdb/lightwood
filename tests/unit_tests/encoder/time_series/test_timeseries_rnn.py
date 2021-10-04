@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from lightwood.encoder.time_series import TimeSeriesEncoder
 from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
+import pandas as pd
 
 
 class TestRnnEncoder(unittest.TestCase):
@@ -48,7 +49,8 @@ class TestRnnEncoder(unittest.TestCase):
         batch_size = 1
 
         encoder = TimeSeriesEncoder(stop_after=10)
-        encoder.prepare(data, data, feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
+        encoder.prepare(pd.Series(data), pd.Series(data),
+                        feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         encoded = encoder.encode(data)
         decoded = encoder.decode(encoded, steps=timesteps).tolist()
 

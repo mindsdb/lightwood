@@ -1,5 +1,6 @@
 import unittest
 from lightwood.encoder.text import RnnEncoder
+import pandas as pd
 
 
 class TestRnnEncoder(unittest.TestCase):
@@ -14,7 +15,7 @@ class TestRnnEncoder(unittest.TestCase):
                      ]
 
         encoder = RnnEncoder(encoded_vector_size=10, train_iters=7500)
-        encoder.prepare(sentences, sentences)
+        encoder.prepare(pd.Series(sentences), pd.Series(sentences))
         encoder.encode(sentences)
 
         # test de decoder
