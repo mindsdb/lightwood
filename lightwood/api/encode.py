@@ -3,8 +3,9 @@ import pandas as pd
 from lightwood.encoder.base import BaseEncoder
 from lightwood.data.encoded_ds import EncodedDs
 
+InputData = Union[pd.DataFrame, List[pd.DataFrame]]
 
-def encode(encoders: List[BaseEncoder], subsets: List[pd.DataFrame], target: str) -> List[EncodedDs]:
+def encode(encoders: List[BaseEncoder], subsets: InputData, target: str) -> List[EncodedDs]:
     """
     Given a list of Lightwood encoders, and data subsets, applies the encoders onto each subset.
 
