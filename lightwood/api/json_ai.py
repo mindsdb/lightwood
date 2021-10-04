@@ -710,9 +710,9 @@ for col_name, encoder in self.encoders.items():
 log.info('Featurizing the data')
 
 encoded_data = {{}}
-encoded_data['train'] = lightwood.encode(self.encoders, data['train'], self.target)
-encoded_data['dev'] = lightwood.encode(self.encoders, data['dev'], self.target)
-encoded_data['test'] = lightwood.encode(self.encoders, data['test'], self.target)
+encoded_data['train'] = EncodedDs(self.encoders, data['train'], self.target)
+encoded_data['dev'] = EncodedDs(self.encoders, data['dev'], self.target)
+encoded_data['test'] = EncodedDs(self.encoders, data['test'], self.target)
 
 log.info('Training the mixers')
 self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
