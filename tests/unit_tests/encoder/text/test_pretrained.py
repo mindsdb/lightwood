@@ -26,14 +26,14 @@ class TestPretrainedLangEncoder(unittest.TestCase):
             primting_target.append(i)
 
         output_1_encoder = NumericEncoder(is_target=True)
-        output_1_encoder.prepare(pd.Series(primting_target))
+        output_1_encoder.prepare(primting_target)
 
         encoded_data_1 = output_1_encoder.encode(primting_target)
         encoded_data_1 = encoded_data_1.tolist()
 
         enc = PretrainedLangEncoder(stop_after=10)
 
-        enc.prepare(pd.Series(primting_target), pd.Series(primting_target),
+        enc.prepare(pd.Series(priming_data), pd.Series(priming_data),
                     encoded_target_values={'targets': [
                         {'output_type': dtype.float, 'encoded_output': encoded_data_1},
                     ]})
