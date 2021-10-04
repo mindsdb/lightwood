@@ -7,16 +7,18 @@ import numpy as np
 from typing import List, Dict, Optional
 from itertools import product
 from lightwood.api.types import TimeseriesSettings
+from lightwood.helpers.splitting import stratify
 
 
 def splitter(
     data: pd.DataFrame,
     tss: TimeseriesSettings,
-    pct_train: float,
     dtype_dict: Dict[str, str],
-    seed: int = 1,
-    n_subsets: int = 30,
-    target: Optional[str] = None,
+    seed: int,
+    pct_train: float,
+    pct_dev: float,
+    pct_test: float,
+    target: str
 ) -> Dict[str, pd.DataFrame]:
     """
     Splits a dataset into stratified training/test. First shuffles the data within the dataframe (via ``df.sample``).
@@ -31,109 +33,47 @@ def splitter(
 
     :returns: A dictionary containing "train" and "test" splits of the data.
     """
-    if pct_train > 1:
-        raise Exception(
-            f"The value of pct_train ({pct_train}) needs to be between 0 and 1"
-        )
+    if pct_train + pct_dev + pct_test != 1:
+        raise Exception('The train, dev and test percentage of the data needs to sum up to 1')
 
     # Shuffle the data
-    data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
+    if not tss.is_timeseries:
+        data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
-    # Time series needs to preserve the sequence
-    if tss.is_timeseries:
-        train, test = _split_timeseries(data, tss, pct_train, n_subsets)
-
+    if tss.is_timeseries or dtype_dict[target] in (dtype.categorical, dtype.binary) and target is not None:
+        stratify_on = [target]
+        if isinstance(tss.group_by, list):
+            stratify_on = stratify_on + tss.group_by
+        subsets = stratify(data, 100, stratify_on)
     else:
-        if dtype_dict[target] in (dtype.categorical, dtype.binary):
-            train, test = stratify(data, pct_train, seed, target)
+        subsets = 
 
     return {"train": train, "test": test, "stratified_on": target}
 
 
-def stratify(
-    data: pd.DataFrame, pct_train: float, seed: int, target: Optional[str] = None
-):
-    """
-    Stratify a dataset on a target column; returns a train/test split.
-
-    :param data: Dataset to split into training/testing
-    :param pct_train: Fraction of data reserved for training (rest is testing)
-    :param seed: Random seed for shuffling pandas dataframe
-    :param target: Name of the target column to stratify on
-    """
-    if target is None:
-        n_train = int(len(data) * pct_train)
-        train, test = data[:n_train], data[n_train:]
-    else:
-        train = []
-        test = []
-
-        for _, subset in data.groupby(target):
-
-            # Extract, from each label,
-            n_train = int(len(subset) * pct_train)  # Ensure 1 example passed to test
-
-            train.append(subset[:n_train])
-            test.append(subset[n_train:])
-
-        # Shuffle train/test to ensure homogenous distribution
-        train = (
-            pd.concat(train).sample(frac=1, random_state=seed).reset_index(drop=True)
-        )
-        test = pd.concat(test).sample(frac=1, random_state=seed).reset_index(drop=True)
-
-    return train, test
-
-
-def _split_timeseries(
-    data: pd.DataFrame,
-    tss: TimeseriesSettings,
-    pct_train: float,
-    k: int = 30,
-):
-    """
-    Returns a time-series split based on group-by columns or not for time-series.
-
-    Stratification occurs only when grouped-columns are not specified. If they are, this is overridden.
-
-    :param data: Input dataset to be split
-    :param tss: time-series specific details for splitting
-    :param pct_train: Fraction of data reserved for training
-    :param k: Number of subsets to create
-
-    :returns Train/test split of the data
-    """
-    gcols = tss.group_by
-    subsets = grouped_ts_splitter(data, k, gcols)
-    Ntrain = int(pct_train * k)
-    return subsets[:Ntrain], subsets[Ntrain:]
-
-
-def grouped_ts_splitter(
-    data: pd.DataFrame, k: int, gcols: List[str]
-) -> List[pd.DataFrame]:
+def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List[pd.DataFrame]:
     """
     Splitter for grouped time series tasks, where there is a set of `gcols` columns by which data is grouped.
     Each group yields a different time series, and the splitter generates `k` subsets from `data`,
     with equally-sized sub-series for each group.
 
     :param data: Data to be split
-    :param k: Number of subsets to create
-    :param gcols: Columns to group-by on
+    :param nr_subset: Number of subsets to create
+    :param stratify_on: Columns to group-by on
 
     :returns A list of equally-sized data subsets that can be concatenated by the full data. This preserves the group-by columns.
     """  # noqa
-    all_group_combinations = list(product(*[data[gcol].unique() for gcol in gcols]))
+    all_group_combinations = list(product(*[data[col].unique() for col in stratify_on]))
 
-    subsets = [pd.DataFrame() for _ in range(k)]
+    subsets = [pd.DataFrame() for _ in range(nr_subset)]
     for group in all_group_combinations:
         subframe = data
-        for idx, gcol in enumerate(gcols):
-            subframe = subframe[subframe[gcol] == group[idx]]
+        for idx, col in enumerate(stratify_on):
+            subframe = subframe[subframe[col] == group[idx]]
 
-        subset = np.array_split(subframe, k)
+        subset = np.array_split(subframe, nr_subset)
 
-        for i in range(k):
+        for i in range(nr_subset):
             subsets[i] = pd.concat([subsets[i], subset[i]])
 
     return subsets
