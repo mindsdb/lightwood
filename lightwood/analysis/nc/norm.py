@@ -29,9 +29,8 @@ class Normalizer(BaseMixer):
         self.bounds = (0.5, 1.5)
         self.error_fn = mean_absolute_error
 
-    def fit(self, data: List[EncodedDs]) -> None:
+    def fit(self, data: EncodedDs) -> None:
         try:
-            data = ConcatedEncodedDs(data)
             preds = self.base_predictor(data, predict_proba=True)
             truths = data.data_frame[self.target]
             labels = self.get_labels(preds, truths.values, data.encoders[self.target])

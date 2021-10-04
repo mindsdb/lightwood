@@ -37,8 +37,8 @@ def model_analyzer(
     data_type = dtype_dict[target]
 
     # retrieve encoded data representations
-    encoded_train_data = ConcatedEncodedDs(train_data)
-    encoded_val_data = ConcatedEncodedDs(data)
+    encoded_train_data = train_data
+    encoded_val_data = data
     data = encoded_val_data.data_frame
     input_cols = list([col for col in data.columns if col != target])
 
