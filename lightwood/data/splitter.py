@@ -30,7 +30,7 @@ def splitter(
 
     :returns: A dictionary containing the keys train, test and dev with their respective data frames, as well as the "stratified_on" key indicating which columns the data was stratified on (None if it wasn't stratified on anything)
     """ # noqa
-    if pct_train + pct_dev + pct_test == 100:
+    if pct_train + pct_dev + pct_test != 100:
         raise Exception('The train, dev and test percentage of the data needs to sum up to 100')
 
     # Shuffle the data
