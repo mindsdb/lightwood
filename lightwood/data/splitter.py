@@ -5,6 +5,7 @@ import numpy as np
 from typing import List, Dict
 from itertools import product
 from lightwood.api.types import TimeseriesSettings
+from lightwood.helpers.log import log
 
 
 def splitter(
@@ -37,6 +38,7 @@ def splitter(
     nr_subsets = int(100 / gcd)
 
     # Shuffle the data
+    np.random.seed(seed)
     if not tss.is_timeseries:
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
@@ -48,6 +50,14 @@ def splitter(
         subsets = stratify(data, nr_subsets, stratify_on)
     else:
         subsets = np.array_split(data, nr_subsets)
+
+    max_len = np.max([len(subset) for subset in subsets])
+    for subset in subsets:
+        if len(subset) < max_len - 2:
+            subset_lengths = [len(subset) for subset in subsets]
+            log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Will use random split')
+            subsets = np.array_split(data, nr_subsets)
+            break
 
     train = pd.concat(subsets[0:int(pct_train / gcd)])
     dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
@@ -77,8 +87,14 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List
             subframe = subframe[subframe[col] == group[idx]]
 
         subset = np.array_split(subframe, nr_subset)
-
-        for i in range(nr_subset):
+        
+        # Allocate to subsets randomly
+        already_visited = []
+        for _ in range(nr_subset):
+            i = np.random.randint(nr_subset)
+            while i in already_visited:
+                i = np.random.randint(nr_subset)
+            already_visited.append(i)
             subsets[i] = pd.concat([subsets[i], subset[i]])
 
     return subsets
