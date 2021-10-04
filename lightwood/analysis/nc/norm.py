@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union
 
 import torch
 import numpy as np

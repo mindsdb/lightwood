@@ -48,7 +48,7 @@ class LightGBMArray(BaseMixer):
             if timestep > 0:
                 train_data.data_frame[self.target] = train_data.data_frame[f'{self.target}_timestep_{timestep}']
                 dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
-                
+
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], predict_proba: bool = False) -> pd.DataFrame:

@@ -17,7 +17,7 @@ from lightwood.api import dtype
 from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.data.encoded_ds import EncodedDs
 from lightwood.mixer.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.helpers.ar_net import ArNet

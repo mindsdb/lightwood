@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Optional
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
 from lightwood.analysis.base import BaseAnalysisBlock
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.data.encoded_ds import EncodedDs
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
 

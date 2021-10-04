@@ -6,7 +6,7 @@ import pandas as pd
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
-from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
+from lightwood.data.encoded_ds import EncodedDs
 from lightwood.helpers.general import evaluate_accuracy
 
 

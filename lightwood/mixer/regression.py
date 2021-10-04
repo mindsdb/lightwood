@@ -1,5 +1,3 @@
-from typing import List
-
 import torch
 import pandas as pd
 from scipy.special import softmax
