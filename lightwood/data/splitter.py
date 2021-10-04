@@ -5,7 +5,6 @@ import numpy as np
 from typing import List, Dict
 from itertools import product
 from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.splitting import stratify
 
 
 def splitter(
