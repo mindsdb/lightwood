@@ -483,10 +483,11 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             'tss': '$problem_definition.timeseries_settings',
             'data': 'data',
             'seed': 1,
-            'Nsubsets': 30,
-            'target': None,
+            'target': '$target',
             'dtype_dict': '$dtype_dict',
-            'pct_train': 0.9
+            'pct_train': 0.8,
+            'pct_dev': 0.1,
+            'pct_test': 0.1
         }
     }), ('analyzer', {
          "module": "model_analyzer",
