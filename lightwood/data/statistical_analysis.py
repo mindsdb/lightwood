@@ -80,7 +80,7 @@ def statistical_analysis(data: pd.DataFrame,
                          seed_nr: int = 420) -> StatisticalAnalysis:
     seed(seed_nr)
     log.info('Starting statistical analysis')
-    df = cleaner(data, dtypes, problem_definition.pct_invalid, problem_definition.ignore_features,
+    df = cleaner(data, dtypes, problem_definition.pct_invalid,
                  identifiers, problem_definition.target, 'train', problem_definition.timeseries_settings,
                  problem_definition.anomaly_detection)
 
