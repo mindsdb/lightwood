@@ -58,7 +58,7 @@ def splitter(
 
     max_len = np.max([len(subset) for subset in subsets])
     for subset in subsets:
-        if len(subset) < max_len - 2:
+        if (len(subset) < max_len - 2) and not tss.is_timeseries:
             subset_lengths = [len(subset) for subset in subsets]
             log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Splitting without stratification')
             subsets = np.array_split(data, nr_subsets)
