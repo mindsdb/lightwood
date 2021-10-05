@@ -157,7 +157,7 @@ class TimeSeriesEncoder(BaseEncoder):
         """
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         priming_data = list(priming_data.values)
-        
+
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
         else:
