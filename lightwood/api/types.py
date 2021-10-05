@@ -10,7 +10,7 @@
 # TODO: Problem definition missing a few terms
 # TODO: Model Analysis
 # TODO: Analyzer
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, TypedDict, Union
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
@@ -414,6 +414,17 @@ class ProblemDefinition:
         return json.dumps(self.to_dict())
 
 
+class Module(TypedDict):
+    """
+    Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.
+
+    :param module: Name of the module (function or class name)
+    :param args: Argument to pass to the function or constructor
+    """ # noqa
+    module: str
+    args: Dict[str, str]
+
+
 @dataclass
 class JsonAI:
     """
@@ -439,13 +450,13 @@ class JsonAI:
     outputs: Dict[str, Output]
     problem_definition: ProblemDefinition
     identifiers: Dict[str, str]
-    cleaner: Optional[object] = None
-    splitter: Optional[object] = None
-    analyzer: Optional[object] = None
-    explainer: Optional[object] = None
-    analysis_blocks: Optional[List[object]] = None
-    timeseries_transformer: Optional[object] = None
-    timeseries_analyzer: Optional[object] = None
+    cleaner: Optional[Module] = None
+    splitter: Optional[Module] = None
+    analyzer: Optional[Module] = None
+    explainer: Optional[Module] = None
+    analysis_blocks: Optional[List[Module]] = None
+    timeseries_transformer: Optional[Module] = None
+    timeseries_analyzer: Optional[Module] = None
     accuracy_functions: Optional[List[str]] = None
 
     @staticmethod
