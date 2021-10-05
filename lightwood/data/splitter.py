@@ -50,7 +50,8 @@ def splitter(
             stratify_on = tss.group_by
 
     if stratify_on is not None:
-        subsets = stratify(data, nr_subsets, stratify_on)
+        random_alloc = False if tss.is_timeseries else True
+        subsets = stratify(data, nr_subsets, stratify_on, random_alloc=random_alloc)
     else:
         subsets = np.array_split(data, nr_subsets)
 
@@ -69,7 +70,7 @@ def splitter(
     return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
 
-def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List[pd.DataFrame]:
+def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_alloc=True) -> List[pd.DataFrame]:
     """
     Stratified data splitter.
     
@@ -82,6 +83,7 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List
     :param data: Data to be split
     :param nr_subset: Number of subsets to create
     :param stratify_on: Columns to group-by on
+    :param random_alloc: Whether to allocate subsets randomly
 
     :returns A list of equally-sized data subsets that can be concatenated by the full data. This preserves the group-by columns.
     """  # noqa
@@ -96,12 +98,16 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List
         subset = np.array_split(subframe, nr_subset)
 
         # Allocate to subsets randomly
-        already_visited = []
-        for _ in range(nr_subset):
-            i = np.random.randint(nr_subset)
-            while i in already_visited:
+        if random_alloc:
+            already_visited = []
+            for _ in range(nr_subset):
                 i = np.random.randint(nr_subset)
-            already_visited.append(i)
-            subsets[i] = pd.concat([subsets[i], subset[i]])
+                while i in already_visited:
+                    i = np.random.randint(nr_subset)
+                already_visited.append(i)
+                subsets[i] = pd.concat([subsets[i], subset[i]])
+        else:
+            for i in range(nr_subset):
+                subsets[i] = pd.concat([subsets[i], subset[i]])
 
     return subsets
