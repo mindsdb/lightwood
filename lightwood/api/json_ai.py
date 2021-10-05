@@ -634,7 +634,6 @@ if encoder.is_target:
 
     dataprep_body = f"""
 # The type of each column
-self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
 self.accuracy_functions = {json_ai.accuracy_functions}
 self.identifiers = {json_ai.identifiers}
 self.dtype_dict = {inline_dict(dtype_dict)}
@@ -779,6 +778,7 @@ class Predictor(PredictorInterface):
         self.mode = 'innactive'
 
     def learn(self, data: pd.DataFrame) -> None:
+        self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
         log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
         df = df.drop(columns=self.problem_definition.ignore_features)
 {dataprep_body}
