@@ -51,3 +51,8 @@ class TestBasic(unittest.TestCase):
 
         self.assertTrue(balanced_accuracy_score(df[target].astype(int), predictions['prediction'].astype(int)) > 0.9)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
+
+        # test predict all mixers with some data
+        predictions = predictor.predict(df[:10], args={'all_mixers': True})
+        assert '__mdb_mixer' in predictions.columns
+        assert '__mdb_best_mixer' in predictions.columns

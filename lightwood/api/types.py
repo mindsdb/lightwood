@@ -538,7 +538,8 @@ class PredictionArguments:
     
     :param predict_proba: triggers (where supported) predictions in raw probability output form. I.e. for classifiers,
     instead of returning only the predicted class, the output additionally includes the assigned probability for
-    each class.    
+    each class.   
+    :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers. 
     :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
         that predictions, in average, are correct `alpha` percent of the time.
     :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
@@ -548,6 +549,7 @@ class PredictionArguments:
     """  # noqa
 
     predict_proba: bool = False
+    all_mixers: bool = False
     fixed_confidence: Union[int, float, None] = None
     anomaly_error_rate: Union[float, None] = None
     anomaly_cooldown: int = 1
@@ -564,12 +566,14 @@ class PredictionArguments:
 
         # maybe this should be stateful instead, and save the latest used value for each field?
         predict_proba = obj.get('predict_proba', PredictionArguments.predict_proba)
+        all_mixers = obj.get('all_mixers', PredictionArguments.all_mixers)
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
         anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
 
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
+            all_mixers=all_mixers,
             fixed_confidence=fixed_confidence,
             anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,
