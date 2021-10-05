@@ -51,7 +51,6 @@ def splitter(
             stratify_on += tss.group_by
 
     if stratify_on:
-        random_alloc = False if tss.is_timeseries else True
         subsets = stratify(data, nr_subsets, stratify_on)
     else:
         subsets = np.array_split(data, nr_subsets)
