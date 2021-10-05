@@ -42,19 +42,21 @@ def splitter(
     if not tss.is_timeseries:
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
-    stratify_on = []
+    stratify_on = None
     if target is not None:
-        if dtype_dict[target] in (dtype.categorical, dtype.binary):
+        if dtype_dict[target] in (dtype.categorical, dtype.binary) and not tss.is_timeseries:
             stratify_on = [target]
         if tss.is_timeseries and isinstance(tss.group_by, list):
-            stratify_on += tss.group_by
+            stratify_on = [tss.group_by]
+
+    if stratify_on is not None:
         subsets = stratify(data, nr_subsets, stratify_on)
     else:
         subsets = np.array_split(data, nr_subsets)
 
     max_len = np.max([len(subset) for subset in subsets])
     for subset in subsets:
-        if len(subset) < max_len - 2:
+        if len(subset) < max_len * 0.9:
             subset_lengths = [len(subset) for subset in subsets]
             log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Will use random split')
             subsets = np.array_split(data, nr_subsets)
