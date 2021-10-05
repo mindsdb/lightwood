@@ -469,7 +469,6 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         "module": "cleaner",
         "args": {
             "pct_invalid": "$problem_definition.pct_invalid",
-            "ignore_features": "$problem_definition.ignore_features",
             "identifiers": "$identifiers",
             "data": "data",
             "dtype_dict": "$dtype_dict",
@@ -582,10 +581,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     }
 
     for col_name, feature in json_ai.features.items():
-        if col_name not in json_ai.problem_definition.ignore_features:
-            encoder_dict[col_name] = call(feature.encoder)
-            dependency_dict[col_name] = feature.dependency
-            dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
+        encoder_dict[col_name] = call(feature.encoder)
+        dependency_dict[col_name] = feature.dependency
+        dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
     # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
     tss = json_ai.problem_definition.timeseries_settings
@@ -603,10 +601,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
         json_ai.features[col_name] = Feature(encoder=encoder_dict[col_name])
 
-    ignored_cols = json_ai.problem_definition.ignore_features
     input_cols = [x.replace("'", "\\'").replace('"', '\\"')
                   for x in json_ai.features]
-    input_cols = ','.join([f"""'{name}'""" for name in input_cols if name not in ignored_cols])
+    input_cols = ','.join([f"""'{name}'""" for name in input_cols])
 
     ts_transform_code = ""
     ts_analyze_code = ""
@@ -637,7 +634,6 @@ if encoder.is_target:
 
     dataprep_body = f"""
 # The type of each column
-self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
 self.accuracy_functions = {json_ai.accuracy_functions}
 self.identifiers = {json_ai.identifiers}
 self.dtype_dict = {inline_dict(dtype_dict)}
@@ -782,15 +778,22 @@ class Predictor(PredictorInterface):
         self.mode = 'innactive'
 
     def learn(self, data: pd.DataFrame) -> None:
+        self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
+        log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
+        data = data.drop(columns=self.problem_definition.ignore_features)
 {dataprep_body}
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+        log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
+        data = data.drop(columns=self.problem_definition.ignore_features)
 {predict_common_body}
 {predict_body}
 
 
     def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
+        log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
+        data = data.drop(columns=self.problem_definition.ignore_features)
 {predict_common_body}
 {predict_proba_body}
 """
