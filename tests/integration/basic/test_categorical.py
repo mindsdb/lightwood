@@ -40,7 +40,7 @@ class TestBasic(unittest.TestCase):
         predictor = self.setup_predictor(df, target)
         predictions = predictor.predict(df)
 
-        self.assertTrue(balanced_accuracy_score(df[target], predictions['prediction']) > 0.7)
+        self.assertTrue(balanced_accuracy_score(df[target], predictions['prediction']) > 0.6)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
 
     def test_1_categorical(self):

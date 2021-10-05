@@ -42,11 +42,12 @@ def splitter(
     if not tss.is_timeseries:
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
-    stratify_on = None
-    if tss.is_timeseries or dtype_dict[target] in (dtype.categorical, dtype.binary) and target is not None:
-        stratify_on = [target]
-        if isinstance(tss.group_by, list):
-            stratify_on = stratify_on + tss.group_by
+    stratify_on = []
+    if target is not None:
+        if dtype_dict[target] in (dtype.categorical, dtype.binary):
+            stratify_on = [target]
+        if tss.is_timeseries and isinstance(tss.group_by, list):
+            stratify_on += tss.group_by
         subsets = stratify(data, nr_subsets, stratify_on)
     else:
         subsets = np.array_split(data, nr_subsets)
@@ -68,9 +69,13 @@ def splitter(
 
 def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List[pd.DataFrame]:
     """
-    Splitter for grouped time series tasks, where there is a set of `gcols` columns by which data is grouped.
-    Each group yields a different time series, and the splitter generates `k` subsets from `data`,
-    with equally-sized sub-series for each group.
+    Stratified data splitter.
+    
+    The `stratify_on` columns yield a cartesian product by which every different subset will be stratified 
+    independently from the others, and recombined at the end. 
+    
+    For grouped time series tasks, each group yields a different time series. That is, the splitter generates
+    `nr_subsets` subsets from `data`, with equally-sized sub-series for each group.
 
     :param data: Data to be split
     :param nr_subset: Number of subsets to create
@@ -87,7 +92,7 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str]) -> List
             subframe = subframe[subframe[col] == group[idx]]
 
         subset = np.array_split(subframe, nr_subset)
-        
+
         # Allocate to subsets randomly
         already_visited = []
         for _ in range(nr_subset):
