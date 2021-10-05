@@ -47,7 +47,7 @@ def splitter(
         if dtype_dict[target] in (dtype.categorical, dtype.binary) and not tss.is_timeseries:
             stratify_on = [target]
         if tss.is_timeseries and isinstance(tss.group_by, list):
-            stratify_on = [tss.group_by]
+            stratify_on = tss.group_by
 
     if stratify_on is not None:
         subsets = stratify(data, nr_subsets, stratify_on)
