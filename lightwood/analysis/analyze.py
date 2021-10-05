@@ -5,7 +5,7 @@ from lightwood.ensemble import BaseEnsemble
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
-from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
+from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings, PredictionArguments
 
 
 def model_analyzer(
@@ -50,8 +50,8 @@ def model_analyzer(
                                    for enc in encoded_train_data.encoders.values()])
 
     # raw predictions for validation dataset
-    normal_predictions = predictor(encoded_val_data) if not is_classification else predictor(encoded_val_data,
-                                                                                             predict_proba=True)
+    args = {} if not is_classification else {"predict_proba": True}
+    normal_predictions = predictor(encoded_val_data, args=PredictionArguments.from_dict(args))
     normal_predictions = normal_predictions.set_index(data.index)
 
     # ------------------------- #

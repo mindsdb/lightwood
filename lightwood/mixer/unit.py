@@ -6,12 +6,15 @@ the unity mixer just arg-maxes the output of the encoder.
 """
 
 from typing import List
-from lightwood.encoder.base import BaseEncoder
-from lightwood.mixer.base import BaseMixer
-from lightwood.helpers.log import log
-from lightwood.data.encoded_ds import EncodedDs
-import pandas as pd
+
 import torch
+import pandas as pd
+
+from lightwood.helpers.log import log
+from lightwood.mixer.base import BaseMixer
+from lightwood.encoder.base import BaseEncoder
+from lightwood.data.encoded_ds import EncodedDs
+from lightwood.api.types import PredictionArguments
 
 
 class Unit(BaseMixer):
@@ -29,8 +32,8 @@ class Unit(BaseMixer):
     ) -> None:
         pass
 
-    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
-        if predict_proba:
+    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
+        if args.predict_proba:
             # @TODO: depending on the target encoder, this might be enabled
             log.warning('This model does not output probability estimates')
 
