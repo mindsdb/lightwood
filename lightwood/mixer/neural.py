@@ -182,7 +182,6 @@ class Neural(BaseMixer):
                 running_losses.append(loss.item())
 
             train_error = np.mean(running_losses)
-
             epoch_error = self._error(dev_dl, criterion)
             running_errors.append(epoch_error)
             log.debug(f'Loss @ epoch {epoch}: {epoch_error}')
