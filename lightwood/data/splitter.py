@@ -60,7 +60,7 @@ def splitter(
     for subset in subsets:
         if len(subset) < max_len - 2:
             subset_lengths = [len(subset) for subset in subsets]
-            log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Will use random split')
+            log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Splitting without stratification')
             subsets = np.array_split(data, nr_subsets)
             break
 
