@@ -263,6 +263,7 @@ def generate_json_ai(
             'module': 'BestOf',
             'args': {
                 'accuracy_functions': '$accuracy_functions',
+                'args': '$pred_args',
                 'ts_analysis': 'self.ts_analysis' if is_ts else None
             }
         }
@@ -724,9 +725,9 @@ for mixer in self.mixers:
 self.mixers = trained_mixers
 
 log.info('Ensembling the mixer')
+self.pred_args = PredictionArguments()
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
-self.pred_args = None
 
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
@@ -755,18 +756,11 @@ self.pred_args = PredictionArguments.from_dict(args)
     predict_common_body = align(predict_common_body, 2)
 
     predict_body = f"""
-df = self.ensemble(encoded_ds)
+df = self.ensemble(encoded_ds, args=self.pred_args)
 insights, global_insights = {call(json_ai.explainer)}
 return insights
 """
     predict_body = align(predict_body, 2)
-
-    predict_proba_body = f"""
-df = self.ensemble(encoded_ds, predict_proba=True)
-insights, global_insights = {call(json_ai.explainer)}
-return insights
-"""
-    predict_proba_body = align(predict_proba_body, 2)
 
     predictor_code = f"""
 {IMPORTS}
@@ -791,11 +785,6 @@ class Predictor(PredictorInterface):
     def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_common_body}
 {predict_body}
-
-
-    def predict_proba(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
-{predict_common_body}
-{predict_proba_body}
 """
 
     predictor_code = black.format_str(predictor_code, mode=black.FileMode())

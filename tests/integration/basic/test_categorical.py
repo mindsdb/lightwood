@@ -28,7 +28,7 @@ class TestBasic(unittest.TestCase):
                 assert 'prediction' in predictions.columns
                 assert 'confidence' in predictions.columns
 
-                predictions = predictor.predict_proba(test)
+                predictions = predictor.predict(test, args={'predict_proba': True})
 
                 for label in df[target].unique():
                     assert f'__mdb_proba_{label}' in predictions.columns

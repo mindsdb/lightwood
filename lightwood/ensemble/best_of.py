@@ -6,6 +6,7 @@ import pandas as pd
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
+from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 from lightwood.helpers.general import evaluate_accuracy
 
@@ -14,7 +15,7 @@ class BestOf(BaseEnsemble):
     best_index: int
 
     def __init__(self, target, mixers: List[BaseMixer], data: List[EncodedDs], accuracy_functions,
-                 ts_analysis: Optional[dict] = None) -> None:
+                 args: PredictionArguments, ts_analysis: Optional[dict] = None) -> None:
         super().__init__(target, mixers, data)
         # @TODO: Need some shared accuracy functionality to determine mixer selection here
         self.maximize = True
@@ -23,7 +24,7 @@ class BestOf(BaseEnsemble):
         for idx, mixer in enumerate(mixers):
             score_dict = evaluate_accuracy(
                 ds.data_frame,
-                mixer(ds)['prediction'],
+                mixer(ds, args)['prediction'],
                 target,
                 accuracy_functions,
                 ts_analysis=ts_analysis
@@ -37,8 +38,8 @@ class BestOf(BaseEnsemble):
         self.supports_proba = self.mixers[self.best_index].supports_proba
         log.info(f'Picked best mixer: {type(self.mixers[self.best_index]).__name__}')
 
-    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
-        return self.mixers[self.best_index](ds, predict_proba=predict_proba)
+    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
+        return self.mixers[self.best_index](ds, args=args)
 
     def improves(self, new, old, functions):
         return new > old if self.maximize else new < old

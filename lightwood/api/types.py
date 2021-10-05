@@ -535,7 +535,10 @@ class PredictionArguments:
     This class contains all possible arguments that can be passed to a Lightwood predictor at inference time.
     On each predict call, all arguments included in a parameter dictionary will update the respective fields
     in the `PredictionArguments` instance that the predictor will have.
-        
+    
+    :param predict_proba: triggers (where supported) predictions in raw probability output form. I.e. for classifiers,
+    instead of returning only the predicted class, the output additionally includes the assigned probability for
+    each class.    
     :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
         that predictions, in average, are correct `alpha` percent of the time.
     :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
@@ -544,6 +547,7 @@ class PredictionArguments:
         detector.
     """  # noqa
 
+    predict_proba: bool = False
     fixed_confidence: Union[int, float, None] = None
     anomaly_error_rate: Union[float, None] = None
     anomaly_cooldown: int = 1
@@ -559,11 +563,13 @@ class PredictionArguments:
         """
 
         # maybe this should be stateful instead, and save the latest used value for each field?
+        predict_proba = obj.get('predict_proba', PredictionArguments.predict_proba)
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
         anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
 
         pred_args = PredictionArguments(
+            predict_proba=predict_proba,
             fixed_confidence=fixed_confidence,
             anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,

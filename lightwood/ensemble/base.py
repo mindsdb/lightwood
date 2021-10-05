@@ -1,7 +1,10 @@
 from typing import List
-from lightwood.mixer.base import BaseMixer
+
 import pandas as pd
+
+from lightwood.mixer.base import BaseMixer
 from lightwood.data.encoded_ds import EncodedDs
+from lightwood.api.types import PredictionArguments
 
 
 class BaseEnsemble:
@@ -16,5 +19,5 @@ class BaseEnsemble:
         self.best_index = 0
         self.supports_proba = False
 
-    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         raise NotImplementedError()
