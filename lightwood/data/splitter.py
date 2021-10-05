@@ -105,7 +105,7 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_
                 while i in already_visited:
                     i = np.random.randint(nr_subset)
                 already_visited.append(i)
-                subsets[i] = pd.concat([subsets[n], subset[i]])
+                subsets[n] = pd.concat([subsets[n], subset[i]])
         else:
             for n in range(nr_subset):
                 subsets[n] = pd.concat([subsets[n], subset[n]])
