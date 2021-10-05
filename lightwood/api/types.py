@@ -10,7 +10,14 @@
 # TODO: Problem definition missing a few terms
 # TODO: Model Analysis
 # TODO: Analyzer
-from typing import Dict, List, Optional, TypedDict, Union
+from typing import Dict, List, Optional, Union
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
