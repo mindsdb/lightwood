@@ -215,6 +215,7 @@ class TimeseriesSettings:
     historical_columns: List[str] = None
     target_type: str = (
         ""  # @TODO: is the current setter (outside of initialization) a sane option?
+        # @TODO: George: No, I don't think it is, we need to pass this some other way
     )
     allow_incomplete_history: bool = False
 
