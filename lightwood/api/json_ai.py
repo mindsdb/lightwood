@@ -780,20 +780,20 @@ class Predictor(PredictorInterface):
     def learn(self, data: pd.DataFrame) -> None:
         self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
         log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-        df = df.drop(columns=self.problem_definition.ignore_features)
+        data = data.drop(columns=self.problem_definition.ignore_features)
 {dataprep_body}
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
         log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-        df = df.drop(columns=self.problem_definition.ignore_features)
+        data = data.drop(columns=self.problem_definition.ignore_features)
 {predict_common_body}
 {predict_body}
 
 
     def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
         log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-        df = df.drop(columns=self.problem_definition.ignore_features)
+        data = data.drop(columns=self.problem_definition.ignore_features)
 {predict_common_body}
 {predict_proba_body}
 """
