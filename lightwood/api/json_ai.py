@@ -581,10 +581,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     }
 
     for col_name, feature in json_ai.features.items():
-        if col_name not in json_ai.problem_definition.ignore_features:
-            encoder_dict[col_name] = call(feature.encoder)
-            dependency_dict[col_name] = feature.dependency
-            dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
+        encoder_dict[col_name] = call(feature.encoder)
+        dependency_dict[col_name] = feature.dependency
+        dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
     # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
     tss = json_ai.problem_definition.timeseries_settings
@@ -602,10 +601,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
         json_ai.features[col_name] = Feature(encoder=encoder_dict[col_name])
 
-    ignored_cols = json_ai.problem_definition.ignore_features
     input_cols = [x.replace("'", "\\'").replace('"', '\\"')
                   for x in json_ai.features]
-    input_cols = ','.join([f"""'{name}'""" for name in input_cols if name not in ignored_cols])
+    input_cols = ','.join([f"""'{name}'""" for name in input_cols])
 
     ts_transform_code = ""
     ts_analyze_code = ""
