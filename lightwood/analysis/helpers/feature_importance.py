@@ -46,11 +46,8 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
                 for ds in partial_data.encoded_ds_arr:
                     ds.data_frame[col] = [None] * len(ds.data_frame[col])
 
-                if not ns.is_classification:
-                    empty_input_preds = ns.predictor(partial_data)
-                else:
-                    empty_input_preds = ns.predictor(partial_data,
-                                                     args=PredictionArguments.from_dict({'predict_proba': True}))
+                args = {'predict_proba': True} if ns.is_classification else {}
+                empty_input_preds = ns.predictor(partial_data, args=PredictionArguments.from_dict(args))
 
                 empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
                     ns.data,
