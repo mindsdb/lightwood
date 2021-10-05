@@ -39,7 +39,14 @@ class BestOf(BaseEnsemble):
         log.info(f'Picked best mixer: {type(self.mixers[self.best_index]).__name__}')
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
-        return self.mixers[self.best_index](ds, args=args)
+        if args.all_mixers:
+            all_predictions = [self.mixers[index](ds, args=args) for index in range(len(self.mixers))]
+            for index, predictions in enumerate(all_predictions):
+                all_predictions[index]['__mdb_mixer'] = index
+                all_predictions[index]['__mdb_best_mixer'] = index == self.best_index
+            return pd.concat(all_predictions)
+        else:
+            return self.mixers[self.best_index](ds, args=args)
 
     def improves(self, new, old, functions):
         return new > old if self.maximize else new < old

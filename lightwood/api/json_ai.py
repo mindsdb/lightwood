@@ -757,8 +757,12 @@ self.pred_args = PredictionArguments.from_dict(args)
 
     predict_body = f"""
 df = self.ensemble(encoded_ds, args=self.pred_args)
-insights, global_insights = {call(json_ai.explainer)}
-return insights
+
+if self.pred_args.all_mixers:
+    return df
+else:
+    insights, global_insights = {call(json_ai.explainer)}
+    return insights
 """
     predict_body = align(predict_body, 2)
 
