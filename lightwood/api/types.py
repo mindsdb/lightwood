@@ -18,6 +18,19 @@ from dataclasses_json.core import _asdict, Json
 import json
 
 
+# See: https://www.python.org/dev/peps/pep-0589/ for how this works
+# Not very intuitive but very powerful abstraction, might be useful in other places (@TODO)
+class Module(TypedDict):
+    """
+    Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.
+
+    :param module: Name of the module (function or class name)
+    :param args: Argument to pass to the function or constructor
+    """ # noqa
+    module: str
+    args: Dict[str, str]
+
+
 @dataclass
 class Feature:
     """
@@ -30,7 +43,7 @@ class Feature:
     depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
     """
 
-    encoder: str
+    encoder: Module
     data_dtype: str = None
     dependency: List[str] = None
 
@@ -412,17 +425,6 @@ class ProblemDefinition:
         :returns: TODO
         """
         return json.dumps(self.to_dict())
-
-
-class Module(TypedDict):
-    """
-    Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.
-
-    :param module: Name of the module (function or class name)
-    :param args: Argument to pass to the function or constructor
-    """ # noqa
-    module: str
-    args: Dict[str, str]
 
 
 @dataclass
