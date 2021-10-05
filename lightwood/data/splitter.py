@@ -23,10 +23,11 @@ def splitter(
 
     :param data: Input dataset to be split
     :param tss: time-series specific details for splitting
-    :param pct_train: training fraction of data; must be less than 1
     :param dtype_dict: Dictionary with the data type of all columns
     :param seed: Random state for pandas data-frame shuffling
-    :param n_subsets: Number of subsets to create from data (for time-series)
+    :param pct_train: training fraction of data; must be less than 1
+    :param pct_dev: dev fraction of data; must be less than 1
+    :param pct_test: testing fraction of data; must be less than 1
     :param target: Name of the target column; if specified, data will be stratified on this column
 
     :returns: A dictionary containing the keys train, test and dev with their respective data frames, as well as the "stratified_on" key indicating which columns the data was stratified on (None if it wasn't stratified on anything)
@@ -42,22 +43,22 @@ def splitter(
     if not tss.is_timeseries:
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
-    stratify_on = None
+    stratify_on = []
     if target is not None:
-        if dtype_dict[target] in (dtype.categorical, dtype.binary) and not tss.is_timeseries:
-            stratify_on = [target]
+        if dtype_dict[target] in (dtype.categorical, dtype.binary):
+            stratify_on += [target]
         if tss.is_timeseries and isinstance(tss.group_by, list):
-            stratify_on = tss.group_by
+            stratify_on += tss.group_by
 
-    if stratify_on is not None:
+    if stratify_on:
         random_alloc = False if tss.is_timeseries else True
-        subsets = stratify(data, nr_subsets, stratify_on, random_alloc=random_alloc)
+        subsets = stratify(data, nr_subsets, stratify_on)
     else:
         subsets = np.array_split(data, nr_subsets)
 
     max_len = np.max([len(subset) for subset in subsets])
     for subset in subsets:
-        if len(subset) < max_len * 0.9:
+        if len(subset) < max_len - 2:
             subset_lengths = [len(subset) for subset in subsets]
             log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Will use random split')
             subsets = np.array_split(data, nr_subsets)
@@ -70,7 +71,7 @@ def splitter(
     return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
 
-def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_alloc=True) -> List[pd.DataFrame]:
+def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_alloc=False) -> List[pd.DataFrame]:
     """
     Stratified data splitter.
     
@@ -100,14 +101,14 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_
         # Allocate to subsets randomly
         if random_alloc:
             already_visited = []
-            for _ in range(nr_subset):
+            for n in range(nr_subset):
                 i = np.random.randint(nr_subset)
                 while i in already_visited:
                     i = np.random.randint(nr_subset)
                 already_visited.append(i)
-                subsets[i] = pd.concat([subsets[i], subset[i]])
+                subsets[i] = pd.concat([subsets[n], subset[i]])
         else:
-            for i in range(nr_subset):
-                subsets[i] = pd.concat([subsets[i], subset[i]])
+            for n in range(nr_subset):
+                subsets[n] = pd.concat([subsets[n], subset[n]])
 
     return subsets
