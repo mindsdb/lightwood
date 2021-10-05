@@ -91,12 +91,14 @@ class SkTime(BaseMixer):
                 series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
+                forecaster = self.models[group] if self.models[group].is_fitted else self.models['__default']
+
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
 
                 for idx, _ in enumerate(series.iteritems()):
-                    ydf['prediction'].iloc[series_idxs[idx]] = self.models[group].predict(
+                    ydf['prediction'].iloc[series_idxs[idx]] = forecaster.predict(
                         np.arange(idx,  # +cutoff
                                   idx + self.n_ts_predictions)).tolist()  # +cutoff
 
