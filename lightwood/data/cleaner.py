@@ -44,7 +44,7 @@ def cleaner(
     :returns: The cleaned data
     """ # noqa
 
-    data = _remove_columns(data, target, mode, timeseries_settings,
+    data = _remove_columns(data, identifiers, target, mode, timeseries_settings,
                            anomaly_detection, dtype_dict)
 
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
