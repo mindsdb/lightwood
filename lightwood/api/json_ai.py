@@ -826,29 +826,35 @@ return train_test_data
 # Column to encoder mapping
 self.encoders = {inline_dict(encoder_dict)}
 
-log.info("Preparing encoders and featurizing data")
+# Prepare the training + dev data
+concatenated_train_dev = pd.concat([data['train'], data['dev']])
+
+log.info('Preparing the encoders')
 
 encoder_prepping_dict = {{}}
 
-# Prepare encoders with training data (only important for learned representations)
-
-enc_prepping_data = train_test["train"] # NSNOTE
-
+# Prepare encoders that do not require learned strategies
 for col_name, encoder in self.encoders.items():
-    if not encoder.is_nn_encoder:
-        encoder_prepping_dict[col_name] = [encoder, enc_prepping_data[col_name], 'prepare']
-        log.info(f'Preparing encoder dict length of: {{len(encoder_prepping_dict)}}')
+    if not encoder.is_trainable_encoder:
+        encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], 'prepare']
+        log.info(f'Encoder prepping dict length of: {{len(encoder_prepping_dict)}}')
 
+# Setup parallelization
 parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
 for col_name, encoder in parallel_prepped_encoders.items():
     self.encoders[col_name] = encoder
 
+# Prepare the target
 if self.target not in parallel_prepped_encoders:
-    self.encoders[self.target].prepare(enc_prepping_data[self.target])
+    if self.encoders[self.target].is_trainable_encoder:
+        self.encoders[self.target].prepare(data['train'][self.target], data['dev'][self.target])
+    else:
+        self.encoders[self.target].prepare(pd.concat([data['train'], data['dev']])[self.target])
 
+# Prepare any non-target encoders that are learned
 for col_name, encoder in self.encoders.items():
-    if encoder.is_nn_encoder:
-        priming_data = train_test["train"] # NSNOTE
+    if encoder.is_trainable_encoder:
+        priming_data = pd.concat([data['train'], data['dev']])
         kwargs = {{}}
         if self.dependencies[col_name]:
             kwargs['dependency_data'] = {{}}
@@ -859,14 +865,14 @@ for col_name, encoder in self.encoders.items():
                 }}
             {align(ts_encoder_code, 3)}
 
-        # This assumes target encoders are also prepared in parallel
+        # If an encoder representation requires the target, provide priming data
         if hasattr(encoder, 'uses_target'):
             kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
 
-        encoder.prepare(priming_data[col_name], **kwargs)
+        encoder.prepare(data['train'][col_name], data['dev'][col_name], **kwargs)
 
     {align(ts_target_code, 1)}
-    """
+"""
     prepare_body = align(prepare_body, 2)
 
     # ----------------- #
@@ -876,10 +882,10 @@ for col_name, encoder in self.encoders.items():
     feature_body = f"""
 log.info('Featurizing the data')
 
-for key, data in train_test.items():
-    train_test[key] = lightwood.encode(self.encoders, data, self.target)
+for key, data in data.items():
+    data[key] = lightwood.encode(self.encoders, data, self.target)
 
-return train_test
+return data
     """
 
     feature_body = align(feature_body, 2)
@@ -889,39 +895,57 @@ return train_test
     # ----------------- #
 
     fit_body = f"""
+
+# --------------- #
+# Extract data
+# --------------- #
+# Extract the featurized data into train/dev/test
+encoded_train_data = EncodedDs(self.encoders, enc_data['train'], self.target)
+encoded_dev_data = EncodedDs(self.encoders, enc_data['dev'], self.target)
+encoded_test_data = EncodedDs(self.encoders, enc_data['test'], self.target)
+
 log.info('Training the mixers')
-self.mode = train
+
+# --------------- #
+# Fit Models
+# --------------- #
+# Assign list of mixers
 self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
 
-# For each mixer, attempt to fit or return error message
+# Train mixers
 trained_mixers = []
 for mixer in self.mixers:
     try:
-        mixer.fit(train_data)
+        mixer.fit(encoded_train_data, encoded_dev_data)
         trained_mixers.append(mixer)
     except Exception as e:
         log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
         if {json_ai.problem_definition.strict_mode} and mixer.stable:
             raise e
 
+# Update mixers to trained versions
 self.mixers = trained_mixers
 
-# NS-Note should we make ensembles function?
-# Create ensemble and evaluate best mixers
+# --------------- #
+# Create Ensembles
+# --------------- #
 log.info('Ensembling the mixer')
+# Create an ensemble of mixers to identify best performing model
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
 
+# --------------- #
+# Analyze Ensembles
+# --------------- #
 log.info('Analyzing the ensemble')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 
 # Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is
 # an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is
 # important to train with.
-
 for mixer in self.mixers:
     if {json_ai.problem_definition.fit_on_validation}:
-        mixer.partial_fit(test_data, train_data)
+        mixer.partial_fit(encoded_test_data, ConcatedEncodedDs([encoded_train_data, encoded_dev_data]))
 """
     fit_body = align(fit_body, 2)
 
@@ -938,7 +962,7 @@ self.analyze_data()
 clean_data = self.preprocess(data)
 
 # Create train/test (dev) split
-train_test = self.split(data)
+train_dev_test = self.split(data)
 
 # Prepare encoders
 self.prepare(train_test)
@@ -956,15 +980,26 @@ self.fit(enc_train_test)
     # ----------------- #
 
     predict_common_body = f"""
+# Remove columns that user specifies to ignore
+log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
+data = data.drop(columns=self.problem_definition.ignore_features)
+for col in self.input_cols:
+    if col not in data.columns:
+        data[col] = [None] * len(data)
+
+# Clean the data
 self.mode = 'predict'
-clean_data = self.preprocess(data)
+log.info('Cleaning the data')
+data = {call(json_ai.cleaner)}
 
 {ts_transform_code}
 
-encoded_ds = lightwood.encode(self.encoders, clean_data, self.target)[0]
+# Featurize the data
+encoded_ds = EncodedDs(self.encoders, data, self.target)
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 """
     predict_common_body = align(predict_common_body, 2)
+
 
     predict_body = f"""
 df = self.ensemble(encoded_ds)
@@ -1026,15 +1061,15 @@ class Predictor(PredictorInterface):
         # Split the data into training/testing splits
 {split_body}
 
-    def prepare(self, train_test: dict[str, pd.DataFrame]) -> None:
+    def prepare(self, data: dict[str, pd.DataFrame]) -> None:
         # Prepare encoders to featurize data
 {prepare_body}
 
-    def featurize(self, train_test: dict[str, pd.DataFrame]):
+    def featurize(self, data: dict[str, pd.DataFrame]):
         # Featurize data into numerical representations for models
 {feature_body}
 
-    def fit(self, enc_train_test: dict[str, pd.DataFrame]) -> None:
+    def fit(self, enc_data: dict[str, pd.DataFrame]) -> None:
         # Fit predictors to estimate target
 {fit_body}
 
