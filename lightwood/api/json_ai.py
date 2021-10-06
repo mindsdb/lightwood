@@ -1,7 +1,3 @@
-# TODO: lookup_encoder is awkward; similar to dtype, can we make a file with encoder_lookup? People may be interested
-# in seeing where these come from and it's not clear that you need to look here.
-# TODO: What does `target_class_distribution` and `positive_domain` do?
-# TODO: generate_json_ai is really large; can we abstract it into smaller functions to make it more readable?
 # TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
@@ -18,7 +14,7 @@ from lightwood.api.types import (
 )
 import inspect
 
-
+# For custom modules, we create a module loader with necessary imports below
 IMPORT_EXTERNAL_DIRS = """
 for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
@@ -63,12 +59,12 @@ def lookup_encoder(
     is_target: bool,
     problem_defintion: ProblemDefinition,
     is_target_predicting_encoder: bool,
-    statistical_analysis: StatisticalAnalysis
+    statistical_analysis: StatisticalAnalysis,
 ):
     """
     Assign a default encoder for a given column based on its data type, and whether it is a target. Encoders intake raw (but cleaned) data and return an feature representation. This function assigns, per data type, what the featurizer should be. This function runs on each column within the dataset available for model building to assign how it should be featurized.
 
-    Users may override to create a custom encoder to enable their own featurization process. However, in order to generate a template JSON-AI, this code is run first. Users may edit the generated syntax and use custom approaches while model building.
+    Users may override to create a custom encoder to enable their own featurization process. However, in order to generate template JSON-AI, this code runs automatically. Users may edit the generated syntax and use custom approaches while model building.
 
     For each encoder, "args" may be passed. These args depend an encoder requires during its preparation call.
 
@@ -77,7 +73,7 @@ def lookup_encoder(
     :param is_target: Whether the column is the target for prediction. If true, only certain possible feature representations are allowed, particularly for complex data types.
     :param problem_definition: The ``ProblemDefinition`` criteria; this populates specifics on how models and encoders may be trained.
     :param is_target_predicting_encoder:
-    """ # noqa
+    """  # noqa
 
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
@@ -100,8 +96,8 @@ def lookup_encoder(
 
     # If column is a target, only specific feature representations are allowed that enable supervised tasks
     target_encoder_lookup_override = {
-        dtype.rich_text: 'Rich_Text.VocabularyEncoder',
-        dtype.categorical: 'Categorical.OneHotEncoder',
+        dtype.rich_text: "Rich_Text.VocabularyEncoder",
+        dtype.categorical: "Categorical.OneHotEncoder",
     }
 
     # Assign a default encoder to each column.
@@ -109,17 +105,19 @@ def lookup_encoder(
 
     # If the column is a target, ensure that the feature representation can enable supervised tasks
     if is_target:
-        encoder_dict['args'] = {'is_target': 'True'}
+        encoder_dict["args"] = {"is_target": "True"}
 
         if col_dtype in target_encoder_lookup_override:
-            encoder_dict['module'] = target_encoder_lookup_override[col_dtype]
+            encoder_dict["module"] = target_encoder_lookup_override[col_dtype]
 
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
-                encoder_dict['args']['target_class_distribution'] = '$statistical_analysis.target_class_distribution'
+                encoder_dict["args"][
+                    "target_class_distribution"
+                ] = "$statistical_analysis.target_class_distribution"
 
         if col_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
-            encoder_dict['args'][
+            encoder_dict["args"][
                 "positive_domain"
             ] = "$statistical_analysis.positive_domain"
 
@@ -127,38 +125,36 @@ def lookup_encoder(
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
         if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict['module'] = col_dtype.capitalize() + ".TimeSeriesEncoder"
-            encoder_dict['args']['original_type'] = f'"{col_dtype}"'
-            encoder_dict['args']['target'] = "self.target"
-            encoder_dict['args']['grouped_by'] = f"{gby}"
+            encoder_dict["module"] = col_dtype.capitalize() + ".TimeSeriesEncoder"
+            encoder_dict["args"]["original_type"] = f'"{col_dtype}"'
+            encoder_dict["args"]["target"] = "self.target"
+            encoder_dict["args"]["grouped_by"] = f"{gby}"
 
         if is_target:
             if col_dtype in [dtype.integer]:
-                encoder_dict['args']['grouped_by'] = f"{gby}"
-                encoder_dict['module'] = "Integer.TsNumericEncoder"
+                encoder_dict["args"]["grouped_by"] = f"{gby}"
+                encoder_dict["module"] = "Integer.TsNumericEncoder"
             if col_dtype in [dtype.float]:
-                encoder_dict['args']['grouped_by'] = f"{gby}"
-                encoder_dict['module'] = "Float.TsNumericEncoder"
+                encoder_dict["args"]["grouped_by"] = f"{gby}"
+                encoder_dict["module"] = "Float.TsNumericEncoder"
             if tss.nr_predictions > 1:
-                encoder_dict['args']['grouped_by'] = f"{gby}"
-                encoder_dict['args']['timesteps'] = f"{tss.nr_predictions}"
-                encoder_dict['module'] = 'TimeSeries.TsArrayNumericEncoder'
-        if '__mdb_ts_previous' in col_name:
-            encoder_dict['module'] = 'Array.ArrayEncoder'
-            encoder_dict['args']['original_type'] = f'"{tss.target_type}"'
-            encoder_dict['args']['window'] = f'{tss.window}'
+                encoder_dict["args"]["grouped_by"] = f"{gby}"
+                encoder_dict["args"]["timesteps"] = f"{tss.nr_predictions}"
+                encoder_dict["module"] = "TimeSeries.TsArrayNumericEncoder"
+        if "__mdb_ts_previous" in col_name:
+            encoder_dict["module"] = "Array.ArrayEncoder"
+            encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
+            encoder_dict["args"]["window"] = f"{tss.window}"
 
     # Set arguments for the encoder
-    if encoder_dict['module'] == "Rich_Text.PretrainedLangEncoder" and not is_target:
-        encoder_dict['args']['output_type'] = "$dtype_dict[$target]"
+    if encoder_dict["module"] == "Rich_Text.PretrainedLangEncoder" and not is_target:
+        encoder_dict["args"]["output_type"] = "$dtype_dict[$target]"
 
-    if eval(encoder_dict['module'].split(".")[1]).is_trainable_encoder:
-        encoder_dict['args'][
-            "stop_after"
-        ] = "$problem_definition.seconds_per_encoder"
+    if eval(encoder_dict["module"].split(".")[1]).is_trainable_encoder:
+        encoder_dict["args"]["stop_after"] = "$problem_definition.seconds_per_encoder"
 
     if is_target_predicting_encoder:
-        encoder_dict['args']['embed_mode'] = 'False'
+        encoder_dict["args"]["embed_mode"] = "False"
     return encoder_dict
 
 
@@ -175,7 +171,7 @@ def generate_json_ai(
     :param problem_definition: Specifies details of the model training/building procedure, as defined by ``ProblemDefinition``
 
     :returns: JSON-AI object with fully populated details of the ML pipeline
-    """ # noqaexec
+    """  # noqaexec
     exec(IMPORTS, globals())
     exec(IMPORT_EXTERNAL_DIRS, globals())
     target = problem_definition.target
@@ -200,80 +196,97 @@ def generate_json_ai(
         is_target_predicting_encoder = True
 
     if is_target_predicting_encoder:
-        mixers = [{
-            'module': 'Unit',
-            'args': {
-                'target_encoder': '$encoders[self.target]',
-                'stop_after': '$problem_definition.seconds_per_mixer'
+        mixers = [
+            {
+                "module": "Unit",
+                "args": {
+                    "target_encoder": "$encoders[self.target]",
+                    "stop_after": "$problem_definition.seconds_per_mixer",
+                },
             }
-        }]
+        ]
     else:
-        mixers = [{
-            'module': 'Neural',
-            'args': {
-                'fit_on_dev': True,
-                'stop_after': '$problem_definition.seconds_per_mixer',
-                'search_hyperparameters': True
+        mixers = [
+            {
+                "module": "Neural",
+                "args": {
+                    "fit_on_dev": True,
+                    "stop_after": "$problem_definition.seconds_per_mixer",
+                    "search_hyperparameters": True,
+                },
             }
-
-        }]
+        ]
 
         if not tss.is_timeseries or tss.nr_predictions == 1:
-            mixers.extend([{
-                'module': 'LightGBM',
-                'args': {
-                    'stop_after': '$problem_definition.seconds_per_mixer',
-                    'fit_on_dev': True
-                }
-            },
-                {
-                    'module': 'Regression',
-                    'args': {
-                        'stop_after': '$problem_definition.seconds_per_mixer',
-                    }
-            }
-            ])
-        elif tss.nr_predictions > 1:
-            mixers.extend([{
-                'module': 'LightGBMArray',
-                'args': {
-                    'fit_on_dev': True,
-                    'stop_after': '$problem_definition.seconds_per_mixer',
-                    'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions'
-                }
-            }])
-
-            if tss.use_previous_target:
-                mixers.extend([
+            mixers.extend(
+                [
                     {
-                        'module': 'SkTime',
-                        'args': {
-                            'stop_after': '$problem_definition.seconds_per_mixer',
-                            'n_ts_predictions': '$problem_definition.timeseries_settings.nr_predictions',
+                        "module": "LightGBM",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "fit_on_dev": True,
+                        },
+                    },
+                    {
+                        "module": "Regression",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                        },
+                    },
+                ]
+            )
+        elif tss.nr_predictions > 1:
+            mixers.extend(
+                [
+                    {
+                        "module": "LightGBMArray",
+                        "args": {
+                            "fit_on_dev": True,
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
                         },
                     }
-                ])
+                ]
+            )
 
-    outputs = {target: Output(
-        data_dtype=type_information.dtypes[target],
-        encoder=None,
-        mixers=mixers,
-        ensemble={
-            'module': 'BestOf',
-            'args': {
-                'accuracy_functions': '$accuracy_functions',
-                'ts_analysis': 'self.ts_analysis' if is_ts else None
-            }
-        }
-    )}
+            if tss.use_previous_target:
+                mixers.extend(
+                    [
+                        {
+                            "module": "SkTime",
+                            "args": {
+                                "stop_after": "$problem_definition.seconds_per_mixer",
+                                "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                            },
+                        }
+                    ]
+                )
 
-    if (
-        tss.is_timeseries and tss.nr_predictions > 1
-    ):
+    outputs = {
+        target: Output(
+            data_dtype=type_information.dtypes[target],
+            encoder=None,
+            mixers=mixers,
+            ensemble={
+                "module": "BestOf",
+                "args": {
+                    "accuracy_functions": "$accuracy_functions",
+                    "ts_analysis": "self.ts_analysis" if is_ts else None,
+                },
+            },
+        )
+    }
+
+    if tss.is_timeseries and tss.nr_predictions > 1:
         list(outputs.values())[0].data_dtype = dtype.tsarray
 
     list(outputs.values())[0].encoder = lookup_encoder(
-        type_information.dtypes[target], target, True, problem_definition, False, statistical_analysis
+        type_information.dtypes[target],
+        target,
+        True,
+        problem_definition,
+        False,
+        statistical_analysis,
     )
 
     features: Dict[str, Feature] = {}
@@ -281,10 +294,18 @@ def generate_json_ai(
         col_dtype = type_information.dtypes[col_name]
         dependency = []
         encoder = lookup_encoder(
-            col_dtype, col_name, False, problem_definition, is_target_predicting_encoder, statistical_analysis
+            col_dtype,
+            col_name,
+            False,
+            problem_definition,
+            is_target_predicting_encoder,
+            statistical_analysis,
         )
 
-        if tss.is_timeseries and eval(encoder['module'].split(".")[1]).is_timeseries_encoder:
+        if (
+            tss.is_timeseries
+            and eval(encoder["module"].split(".")[1]).is_timeseries_encoder
+        ):
             if tss.group_by is not None:
                 for group in tss.group_by:
                     dependency.append(group)
@@ -300,43 +321,78 @@ def generate_json_ai(
 
     # Decide on the accuracy functions to use
     output_dtype = list(outputs.values())[0].data_dtype
-    if output_dtype in [dtype.integer, dtype.float, dtype.date, dtype.datetime, dtype.quantity]:
-        accuracy_functions = ['r2_score']
+    if output_dtype in [
+        dtype.integer,
+        dtype.float,
+        dtype.date,
+        dtype.datetime,
+        dtype.quantity,
+    ]:
+        accuracy_functions = ["r2_score"]
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
-        accuracy_functions = ['balanced_accuracy_score']
+        accuracy_functions = ["balanced_accuracy_score"]
     elif output_dtype in (dtype.array, dtype.tsarray):
-        accuracy_functions = ['evaluate_array_accuracy']
+        accuracy_functions = ["evaluate_array_accuracy"]
     else:
-        raise Exception(f'Please specify a custom accuracy function for output type {output_dtype}')
+        raise Exception(
+            f"Please specify a custom accuracy function for output type {output_dtype}"
+        )
 
     # special dispatch for t+1 time series forecasters
     if is_ts:
         if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
-            accuracy_functions = ['evaluate_array_accuracy']
+            accuracy_functions = ["evaluate_array_accuracy"]
 
     if problem_definition.time_aim is None and (
-            problem_definition.seconds_per_mixer is None or problem_definition.seconds_per_encoder is None):
-        problem_definition.time_aim = 1000 + np.log(
-            statistical_analysis.nr_rows / 10 + 1) * np.sum(
-            [4
-             if x in [dtype.rich_text, dtype.short_text, dtype.array,
-                      dtype.tsarray, dtype.video, dtype.audio, dtype.image]
-             else 1
-             for x in type_information.dtypes.values()]) * 200
+        problem_definition.seconds_per_mixer is None
+        or problem_definition.seconds_per_encoder is None
+    ):
+        problem_definition.time_aim = (
+            1000
+            + np.log(statistical_analysis.nr_rows / 10 + 1)
+            * np.sum(
+                [
+                    4
+                    if x
+                    in [
+                        dtype.rich_text,
+                        dtype.short_text,
+                        dtype.array,
+                        dtype.tsarray,
+                        dtype.video,
+                        dtype.audio,
+                        dtype.image,
+                    ]
+                    else 1
+                    for x in type_information.dtypes.values()
+                ]
+            )
+            * 200
+        )
 
     if problem_definition.time_aim is not None:
-        nr_trainable_encoders = len([x for x in features.values() if
-                                    eval(x.encoder['module'].split('.')[1]).is_trainable_encoder])
+        nr_trainable_encoders = len(
+            [
+                x
+                for x in features.values()
+                if eval(x.encoder["module"].split(".")[1]).is_trainable_encoder
+            ]
+        )
         nr_mixers = len(list(outputs.values())[0].mixers)
-        encoder_time_budget_pct = max(3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5)
+        encoder_time_budget_pct = max(
+            3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5
+        )
 
         if nr_trainable_encoders == 0:
             problem_definition.seconds_per_encoder = 0
         else:
             problem_definition.seconds_per_encoder = int(
-                problem_definition.time_aim * (encoder_time_budget_pct / nr_trainable_encoders))
+                problem_definition.time_aim
+                * (encoder_time_budget_pct / nr_trainable_encoders)
+            )
         problem_definition.seconds_per_mixer = int(
-            problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_mixers))
+            problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_mixers)
+        )
 
     return JsonAI(
         cleaner=None,
@@ -356,23 +412,25 @@ def generate_json_ai(
 def merge_implicit_values(field, implicit_value):
     exec(IMPORTS, globals())
     exec(IMPORT_EXTERNAL_DIRS, globals())
-    module = eval(field['module'])
+    module = eval(field["module"])
     if inspect.isclass(module):
         args = list(inspect.signature(module.__init__).parameters.keys())[1:]
     else:
         args = module.__code__.co_varnames
 
     for arg in args:
-        if 'args' not in field:
-            field['args'] = implicit_value['args']
+        if "args" not in field:
+            field["args"] = implicit_value["args"]
         else:
-            if arg not in field['args']:
-                if arg in implicit_value['args']:
-                    field['args'][arg] = implicit_value['args'][arg]
+            if arg not in field["args"]:
+                if arg in implicit_value["args"]:
+                    field["args"][arg] = implicit_value["args"][arg]
     return field
 
 
-def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: dict, is_timeseries: bool) -> None:
+def populate_implicit_field(
+    json_ai: JsonAI, field_name: str, implicit_value: dict, is_timeseries: bool
+) -> None:
     """
     Populate the implicit field of the JsonAI, either by filling it in entirely if missing, or by introspecting the class or function and assigning default values to the args in it's signature that are in the implicit default but haven't been populated by the user
 
@@ -382,23 +440,31 @@ def populate_implicit_field(json_ai: JsonAI, field_name: str, implicit_value: di
     :params: is_timeseries: Whether or not this is a timeseries problem
 
     :returns: nothing, this method mutates the respective field of the ``JsonAI`` object it receives
-    """ # noqa
+    """  # noqa
     # These imports might be slow, in which case the only <easy> solution is to line this code
     field = json_ai.__getattribute__(field_name)
     if field is None:
         # This if is to only populated timeseries-specific implicit fields for implicit problems
-        if is_timeseries or field_name not in ('timeseries_analyzer', 'timeseries_transformer'):
+        if is_timeseries or field_name not in (
+            "timeseries_analyzer",
+            "timeseries_transformer",
+        ):
             field = implicit_value
 
     # If the user specified one or more subfields in a field that's a list
     # Populate them with implicit arguments form the implicit values from that subfield
     elif isinstance(field, list) and isinstance(implicit_value, list):
         for i in range(len(field)):
-            sub_field_implicit = [x for x in implicit_value if x['module'] == field[i]['module']]
+            sub_field_implicit = [
+                x for x in implicit_value if x["module"] == field[i]["module"]
+            ]
             if len(sub_field_implicit) == 1:
                 field[i] = merge_implicit_values(field[i], sub_field_implicit[0])
         for sub_field_implicit in implicit_value:
-            if len([x for x in field if x['module'] == sub_field_implicit['module']]) == 0:
+            if (
+                len([x for x in field if x["module"] == sub_field_implicit["module"]])
+                == 0
+            ):
                 field.append(sub_field_implicit)
     # If the user specified the field, add implicit arguments which we didn't specify
     else:
@@ -421,146 +487,197 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     # @TODO: Consider removing once we have a proper editor in studio
     mixers = json_ai.outputs[json_ai.problem_definition.target].mixers
     for i in range(len(mixers)):
-        if mixers[i]['module'] == 'Unit':
+        if mixers[i]["module"] == "Unit":
             pass
-        elif mixers[i]['module'] == 'Neural':
-            mixers[i]['args']['target_encoder'] = mixers[i]['args'].get('target_encoder', '$encoders[self.target]')
-            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
-            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
-            mixers[i]['args']['input_cols'] = mixers[i]['args'].get('input_cols', '$input_cols')
-            mixers[i]['args']['timeseries_settings'] = mixers[i]['args'].get(
-                'timeseries_settings', '$problem_definition.timeseries_settings')
-            mixers[i]['args']['net'] = mixers[i]['args'].get(
-                'net', '"DefaultNet"' if not tss.is_timeseries
-                or not tss.use_previous_target
-                else '"ArNet"')
+        elif mixers[i]["module"] == "Neural":
+            mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
+                "target_encoder", "$encoders[self.target]"
+            )
+            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
+            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
+                "dtype_dict", "$dtype_dict"
+            )
+            mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
+                "input_cols", "$input_cols"
+            )
+            mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
+                "timeseries_settings", "$problem_definition.timeseries_settings"
+            )
+            mixers[i]["args"]["net"] = mixers[i]["args"].get(
+                "net",
+                '"DefaultNet"'
+                if not tss.is_timeseries or not tss.use_previous_target
+                else '"ArNet"',
+            )
 
-        elif mixers[i]['module'] == 'LightGBM':
-            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
-            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
-            mixers[i]['args']['input_cols'] = mixers[i]['args'].get('input_cols', '$input_cols')
-        elif mixers[i]['module'] == 'Regression':
-            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
-            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
-            mixers[i]['args']['target_encoder'] = mixers[i]['args'].get('target_encoder', '$encoders[self.target]')
-        elif mixers[i]['module'] == 'LightGBMArray':
-            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
-            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
-            mixers[i]['args']['input_cols'] = mixers[i]['args'].get('input_cols', '$input_cols')
-        elif mixers[i]['module'] == 'SkTime':
-            mixers[i]['args']['target'] = mixers[i]['args'].get('target', '$target')
-            mixers[i]['args']['dtype_dict'] = mixers[i]['args'].get('dtype_dict', '$dtype_dict')
-            mixers[i]['args']['ts_analysis'] = mixers[i]['args'].get('ts_analysis', '$ts_analysis')
+        elif mixers[i]["module"] == "LightGBM":
+            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
+            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
+                "dtype_dict", "$dtype_dict"
+            )
+            mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
+                "input_cols", "$input_cols"
+            )
+        elif mixers[i]["module"] == "Regression":
+            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
+            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
+                "dtype_dict", "$dtype_dict"
+            )
+            mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
+                "target_encoder", "$encoders[self.target]"
+            )
+        elif mixers[i]["module"] == "LightGBMArray":
+            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
+            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
+                "dtype_dict", "$dtype_dict"
+            )
+            mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
+                "input_cols", "$input_cols"
+            )
+        elif mixers[i]["module"] == "SkTime":
+            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
+            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
+                "dtype_dict", "$dtype_dict"
+            )
+            mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
+                "ts_analysis", "$ts_analysis"
+            )
 
     ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
-    ensemble['args']['target'] = ensemble['args'].get('target', '$target')
-    ensemble['args']['data'] = ensemble['args'].get('data', 'encoded_test_data')
-    ensemble['args']['mixers'] = ensemble['args'].get('mixers', '$mixers')
+    ensemble["args"]["target"] = ensemble["args"].get("target", "$target")
+    ensemble["args"]["data"] = ensemble["args"].get("data", "encoded_test_data")
+    ensemble["args"]["mixers"] = ensemble["args"].get("mixers", "$mixers")
 
     for name in json_ai.features:
         if json_ai.features[name].dependency is None:
             json_ai.features[name].dependency = []
         if json_ai.features[name].data_dtype is None:
             json_ai.features[name].data_dtype = (
-                json_ai.features[name].encoder['module'].split(".")[0].lower()
+                json_ai.features[name].encoder["module"].split(".")[0].lower()
             )
 
     # Add "hidden" fields
-    hidden_fields = [('cleaner', {
-        "module": "cleaner",
-        "args": {
-            "pct_invalid": "$problem_definition.pct_invalid",
-            "identifiers": "$identifiers",
-            "data": "data",
-            "dtype_dict": "$dtype_dict",
-            "target": "$target",
-            "mode": "$mode",
-            "timeseries_settings": "$problem_definition.timeseries_settings",
-            "anomaly_detection": "$problem_definition.anomaly_detection",
-        },
-    }), ('splitter', {
-        'module': 'splitter',
-        'args': {
-            'tss': '$problem_definition.timeseries_settings',
-            'data': 'data',
-            'seed': 1,
-            'target': '$target',
-            'dtype_dict': '$dtype_dict',
-            'pct_train': 80,
-            'pct_dev': 10,
-            'pct_test': 10
-        }
-    }), ('analyzer', {
-         "module": "model_analyzer",
-         "args": {
-             "stats_info": "$statistical_analysis",
-             "ts_cfg": "$problem_definition.timeseries_settings",
-             "accuracy_functions": "$accuracy_functions",
-             "predictor": "$ensemble",
-             "data": "encoded_test_data",
-             "train_data": "encoded_train_data",
-             "target": "$target",
-             "dtype_dict": "$dtype_dict",
-             "analysis_blocks": "$analysis_blocks"
-         },
-         }), ('explainer', {
-             "module": "explain",
-             "args": {
-                 "timeseries_settings": "$problem_definition.timeseries_settings",
-                 "positive_domain": "$statistical_analysis.positive_domain",
-                 "fixed_confidence": "$problem_definition.fixed_confidence",
-                 "anomaly_detection": "$problem_definition.anomaly_detection",
-                 "anomaly_error_rate": "$problem_definition.anomaly_error_rate",
-                 "anomaly_cooldown": "$problem_definition.anomaly_cooldown",
-                 "data": "data",
-                 "encoded_data": "encoded_data",
-                 "predictions": "df",
-                 "analysis": "$runtime_analyzer",
-                 "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
-                 "target_name": "$target",
-                 "target_dtype": "$dtype_dict[self.target]",
-                 "explainer_blocks": "$analysis_blocks"
-             },
-         }), ('analysis_blocks', [
-             {
-                 'module': 'ICP',
-                 'args': {
-                     "fixed_significance": None,
-                     "confidence_normalizer": False,
-                     "positive_domain": "$statistical_analysis.positive_domain",
-
-                 },
-             },
-             {
-                 'module': 'AccStats',
-                 'args': {
-                     'deps': ['ICP']
-                 },
-             },
-             {
-                 'module': 'GlobalFeatureImportance',
-                 'args': {
-                     "disable_column_importance": "False",
-                 },
-             },
-         ]), ('timeseries_transformer', {
-             "module": "transform_timeseries",
-             "args": {
-                 "timeseries_settings": "$problem_definition.timeseries_settings",
-                 "data": "data",
-                 "dtype_dict": "$dtype_dict",
-                 "target": "$target",
-                 "mode": "$mode",
-             },
-         }), ('timeseries_analyzer', {
-             "module": "timeseries_analyzer",
-             "args": {
-                 "timeseries_settings": "$problem_definition.timeseries_settings",
-                 "data": "data",
-                 "dtype_dict": "$dtype_dict",
-                 "target": "$target",
-             },
-         })]
+    hidden_fields = [
+        (
+            "cleaner",
+            {
+                "module": "cleaner",
+                "args": {
+                    "pct_invalid": "$problem_definition.pct_invalid",
+                    "identifiers": "$identifiers",
+                    "data": "data",
+                    "dtype_dict": "$dtype_dict",
+                    "target": "$target",
+                    "mode": "$mode",
+                    "timeseries_settings": "$problem_definition.timeseries_settings",
+                    "anomaly_detection": "$problem_definition.anomaly_detection",
+                },
+            },
+        ),
+        (
+            "splitter",
+            {
+                "module": "splitter",
+                "args": {
+                    "tss": "$problem_definition.timeseries_settings",
+                    "data": "data",
+                    "seed": 1,
+                    "target": "$target",
+                    "dtype_dict": "$dtype_dict",
+                    "pct_train": 80,
+                    "pct_dev": 10,
+                    "pct_test": 10,
+                },
+            },
+        ),
+        (
+            "analyzer",
+            {
+                "module": "model_analyzer",
+                "args": {
+                    "stats_info": "$statistical_analysis",
+                    "ts_cfg": "$problem_definition.timeseries_settings",
+                    "accuracy_functions": "$accuracy_functions",
+                    "predictor": "$ensemble",
+                    "data": "encoded_test_data",
+                    "train_data": "encoded_train_data",
+                    "target": "$target",
+                    "dtype_dict": "$dtype_dict",
+                    "analysis_blocks": "$analysis_blocks",
+                },
+            },
+        ),
+        (
+            "explainer",
+            {
+                "module": "explain",
+                "args": {
+                    "timeseries_settings": "$problem_definition.timeseries_settings",
+                    "positive_domain": "$statistical_analysis.positive_domain",
+                    "fixed_confidence": "$problem_definition.fixed_confidence",
+                    "anomaly_detection": "$problem_definition.anomaly_detection",
+                    "anomaly_error_rate": "$problem_definition.anomaly_error_rate",
+                    "anomaly_cooldown": "$problem_definition.anomaly_cooldown",
+                    "data": "data",
+                    "encoded_data": "encoded_data",
+                    "predictions": "df",
+                    "analysis": "$runtime_analyzer",
+                    "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
+                    "target_name": "$target",
+                    "target_dtype": "$dtype_dict[self.target]",
+                    "explainer_blocks": "$analysis_blocks",
+                },
+            },
+        ),
+        (
+            "analysis_blocks",
+            [
+                {
+                    "module": "ICP",
+                    "args": {
+                        "fixed_significance": None,
+                        "confidence_normalizer": False,
+                        "positive_domain": "$statistical_analysis.positive_domain",
+                    },
+                },
+                {
+                    "module": "AccStats",
+                    "args": {"deps": ["ICP"]},
+                },
+                {
+                    "module": "GlobalFeatureImportance",
+                    "args": {
+                        "disable_column_importance": "False",
+                    },
+                },
+            ],
+        ),
+        (
+            "timeseries_transformer",
+            {
+                "module": "transform_timeseries",
+                "args": {
+                    "timeseries_settings": "$problem_definition.timeseries_settings",
+                    "data": "data",
+                    "dtype_dict": "$dtype_dict",
+                    "target": "$target",
+                    "mode": "$mode",
+                },
+            },
+        ),
+        (
+            "timeseries_analyzer",
+            {
+                "module": "timeseries_analyzer",
+                "args": {
+                    "timeseries_settings": "$problem_definition.timeseries_settings",
+                    "data": "data",
+                    "dtype_dict": "$dtype_dict",
+                    "target": "$target",
+                },
+            },
+        ),
+    ]
 
     for field_name, implicit_value in hidden_fields:
         populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
@@ -579,7 +696,11 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     # Fill in any missing values
     json_ai = add_implicit_values(json_ai)
 
-    encoder_dict = {json_ai.problem_definition.target: call(list(json_ai.outputs.values())[0].encoder)}
+    encoder_dict = {
+        json_ai.problem_definition.target: call(
+            list(json_ai.outputs.values())[0].encoder
+        )
+    }
     dependency_dict = {}
     dtype_dict = {
         json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
@@ -593,22 +714,26 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
     tss = json_ai.problem_definition.timeseries_settings
     if tss.is_timeseries and tss.use_previous_target:
-        col_name = f'__mdb_ts_previous_{json_ai.problem_definition.target}'
-        json_ai.problem_definition.timeseries_settings.target_type = list(json_ai.outputs.values())[0].data_dtype
-        encoder_dict[col_name] = call(lookup_encoder(list(json_ai.outputs.values())[0].data_dtype,
-                                                     col_name,
-                                                     False,
-                                                     json_ai.problem_definition,
-                                                     False,
-                                                     None
-                                                     ))
+        col_name = f"__mdb_ts_previous_{json_ai.problem_definition.target}"
+        json_ai.problem_definition.timeseries_settings.target_type = list(
+            json_ai.outputs.values()
+        )[0].data_dtype
+        encoder_dict[col_name] = call(
+            lookup_encoder(
+                list(json_ai.outputs.values())[0].data_dtype,
+                col_name,
+                False,
+                json_ai.problem_definition,
+                False,
+                None,
+            )
+        )
         dependency_dict[col_name] = []
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
         json_ai.features[col_name] = Feature(encoder=encoder_dict[col_name])
 
-    input_cols = [x.replace("'", "\\'").replace('"', '\\"')
-                  for x in json_ai.features]
-    input_cols = ','.join([f"""'{name}'""" for name in input_cols])
+    input_cols = [x.replace("'", "\\'").replace('"', '\\"') for x in json_ai.features]
+    input_cols = ",".join([f"""'{name}'""" for name in input_cols])
 
     ts_transform_code = ""
     ts_analyze_code = ""
@@ -813,11 +938,11 @@ class Predictor(PredictorInterface):
 def validate_json_ai(json_ai: JsonAI) -> bool:
     """
     Checks the validity of a ``JsonAI`` object
-    
+
     :param json_ai: A ``JsonAI`` object
 
     :returns: Wether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
-    """ # noqa
+    """  # noqa
     from lightwood.api.high_level import predictor_from_code, code_from_json_ai
 
     try:
