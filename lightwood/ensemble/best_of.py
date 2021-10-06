@@ -44,6 +44,3 @@ class BestOf(BaseEnsemble):
                 else:
                     log.warning(f'Unstable mixer {type(self.mixers[mixer_index]).__name__} failed with exception: {e}.\
                     Trying next best')
-
-    def improves(self, new, old, functions):
-        return new > old if self.maximize else new < old
