@@ -51,7 +51,7 @@ def splitter(
 
     if stratify_on:
         subsets = stratify(data, nr_subsets, stratify_on)
-        subsets = stratify_check(data, subsets, nr_subsets, tss)
+        subsets = randomize_uneven_stratification(data, subsets, nr_subsets, tss)
     else:
         subsets = np.array_split(data, nr_subsets)
 
@@ -106,8 +106,8 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_
     return subsets
 
 
-def stratify_check(data: pd.DataFrame, subsets: List[pd.DataFrame], nr_subsets: int,
-                   tss: TimeseriesSettings, len_threshold: int = 2):
+def randomize_uneven_stratification(data: pd.DataFrame, subsets: List[pd.DataFrame], nr_subsets: int,
+                                    tss: TimeseriesSettings, len_threshold: int = 2):
     """
     Helper function reverts stratified data back to a normal split if the size difference between splits is larger
     than a certain threshold.
