@@ -886,9 +886,9 @@ for col_name, encoder in self.encoders.items():
 log.info('Featurizing the data')
 
 for key, data in data.items():
-    data[key] = lightwood.encode(self.encoders, data, self.target)
+    enc_data[key] = EncodedDs(self.encoders, data, self.target)
 
-return data
+return enc_data
     """
 
     feature_body = align(feature_body, 2)
