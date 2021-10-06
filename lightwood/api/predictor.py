@@ -50,30 +50,30 @@ class PredictorInterface:
         """ # noqa
         pass
 
-    def prepare(self,train_test: Dict[str, pd.DataFrame]) -> None:
+    def prepare(self, data: Dict[str, pd.DataFrame]) -> None:
         """
         Prepares the encoders for each column of data. 
 
-        :param train_test: Pre-processed data that has been split into train/test. Explicitly uses "train" in preparation of encoders.
+        :param data: Pre-processed data that has been split into train/test. Explicitly uses "train" and/or "dev" in preparation of encoders.
 
         :returns: Nothing; prepares the encoders for learned representations.
         """
 
-    def featurize(self, train_test: Dict[str, pd.DataFrame]):
+    def featurize(self, data: Dict[str, pd.DataFrame]):
         """
-        Provides an encoded representation for each dataset in ``train_test``. Requires `self.encoders` to be prepared.
+        Provides an encoded representation for each dataset in ``data``. Requires `self.encoders` to be prepared.
 
-        :param train_test: Pre-processed data from the dataset, split into train/test (or any other keys relevant)
+        :param data: Pre-processed data from the dataset, split into train/test (or any other keys relevant)
 
-        :returns: For each dataset provided in ``train_test``, the encoded representations of the data.
+        :returns: For each dataset provided in ``data``, the encoded representations of the data.
         """ # noqa
         pass
 
-    def fit(self, enc_train_test: Dict[str, pd.DataFrame]) -> None:
+    def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         """
         Fits "mixer" models to train predictors on the featurized data.
 
-        :param enc_train_test: Pre-processed and featurized data, split into the relevant train/test splits.
+        :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits.
         """
         pass
 
