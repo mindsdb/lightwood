@@ -11,15 +11,14 @@ from lightwood.helpers.general import evaluate_accuracy
 
 
 class BestOf(BaseEnsemble):
-    best_index: int
+    indexes_by_accuracy: List[float]
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
                  ts_analysis: Optional[dict] = None) -> None:
         super().__init__(target, mixers, data)
-        # @TODO: Need some shared accuracy functionality to determine mixer selection here
-        self.maximize = True
-        best_score = -pow(2, 32) if self.maximize else pow(2, 32)
-        for idx, mixer in enumerate(mixers):
+
+        score_list = []
+        for _, mixer in enumerate(mixers):
             score_dict = evaluate_accuracy(
                 data.data_frame,
                 mixer(data)['prediction'],
@@ -28,16 +27,19 @@ class BestOf(BaseEnsemble):
                 ts_analysis=ts_analysis
             )
             avg_score = np.mean(list(score_dict.values()))
-            log.info(f'Mixer {type(mixer).__name__} obtained a best-of evaluation score of {round(avg_score,4)}')
-            if self.improves(avg_score, best_score, accuracy_functions):
-                best_score = avg_score
-                self.best_index = idx
+            score_list.append(avg_score)
 
-        self.supports_proba = self.mixers[self.best_index].supports_proba
-        log.info(f'Picked best mixer: {type(self.mixers[self.best_index]).__name__}')
+        self.indexes_by_accuracy = list(reversed(np.array(score_list).argsort()))
+        self.supports_proba = self.mixers[self.indexes_by_accuracy[0]].supports_proba
+        log.info(f'Picked best mixer: {type(self.mixers[self.indexes_by_accuracy[0]]).__name__}')
 
     def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
-        return self.mixers[self.best_index](ds, predict_proba=predict_proba)
-
-    def improves(self, new, old, functions):
-        return new > old if self.maximize else new < old
+        for mixer_index in self.indexes_by_accuracy:
+            try:
+                return self.mixers[mixer_index](ds, predict_proba=predict_proba)
+            except Exception as e:
+                if self.mixers[mixer_index].stable:
+                    raise(e)
+                else:
+                    log.warning(f'Unstable mixer {type(self.mixers[mixer_index]).__name__} failed with exception: {e}.\
+                    Trying next best')
