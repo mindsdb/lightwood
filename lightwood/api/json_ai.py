@@ -354,11 +354,13 @@ def generate_json_ai(
 
 
 def merge_implicit_values(field, implicit_value):
+    exec(IMPORTS, globals())
+    exec(IMPORT_EXTERNAL_DIRS, globals())
     module = eval(field['module'])
     if inspect.isclass(module):
-        args = inspect.getargspec(module.__init__).args[1:]
+        args = list(inspect.signature(module.__init__).parameters.keys())[1:]
     else:
-        args = eval(field['module']).__code__.co_varnames
+        args = module.__code__.co_varnames
 
     for arg in args:
         if 'args' not in field:
