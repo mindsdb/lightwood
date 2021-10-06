@@ -780,21 +780,15 @@ if encoder.is_target:
     # ----------------- #
 
     analyze_data_body = f"""
-log.info("Performing statistical analysis on the data")
+log.info("Performing statistical analysis on data")
 self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, self.problem_definition)
+
+# Instantiate post-training evaluation
+self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
     """
 
     analyze_data_body = align(analyze_data_body, 2)
 
-    # ----------------- #
-    # Post-Analysis Body
-    # ----------------- #
-
-    post_analyze_body = f"""
-self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
-    """
-
-    post_analyze_body = align(post_analyze_body, 2)
 
     # ----------------- #
     # Pre-processing Body
@@ -959,6 +953,35 @@ for mixer in self.mixers:
     fit_body = align(fit_body, 2)
 
     # ----------------- #
+    # Analyze Ensemble Body
+    # ----------------- #
+
+    analyze_ensemble = f"""
+
+# --------------- #
+# Extract data
+# --------------- #
+# Extract the featurized data into train/dev/test
+encoded_train_data = EncodedDs(self.encoders, enc_data['train'], self.target)
+encoded_dev_data = EncodedDs(self.encoders, enc_data['dev'], self.target)
+encoded_test_data = EncodedDs(self.encoders, enc_data['test'], self.target)
+
+# --------------- #
+# Analyze Ensembles
+# --------------- #
+log.info('Analyzing the ensemble of mixers')
+self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
+
+# Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is
+# an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is
+# important to train with.
+for mixer in self.mixers:
+    if {json_ai.problem_definition.fit_on_validation}:
+        mixer.partial_fit(encoded_test_data, ConcatedEncodedDs([encoded_train_data, encoded_dev_data]))
+"""
+    analyze_ensemble = align(analyze_ensemble, 2)
+
+    # ----------------- #
     # Learn Body
     # ----------------- #
 
@@ -981,6 +1004,9 @@ enc_train_test = self.featurize(train_test)
 
 # Prepare mixers
 self.fit(enc_train_test)
+
+# Analyze the ensemble
+self.analyze_ensemble(enc_train_test)
 
 """
     learn_body = align(learn_body, 2)
@@ -1082,6 +1108,9 @@ class Predictor(PredictorInterface):
         # Fit predictors to estimate target
 {fit_body}
 
+    def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -> None:
+{analyze_ensemble}
+
     def learn(self, data: pd.DataFrame) -> None:
 {learn_body}
 
@@ -1093,9 +1122,6 @@ class Predictor(PredictorInterface):
     def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
 {predict_common_body}
 {predict_proba_body}
-
-    def post_analyze(self) -> None:
-{post_analyze_body}
 """
 
     predictor_code = black.format_str(predictor_code, mode=black.FileMode())
