@@ -687,7 +687,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     return json_ai
 
 
-def code_from_json_ai(json_ai: JsonAI, is_custom: bool) -> str:
+def code_from_json_ai(json_ai: JsonAI) -> str:
     """
     Generates a custom ``PredictorInterface`` given the specifications from ``JsonAI`` object.
 
@@ -697,8 +697,7 @@ def code_from_json_ai(json_ai: JsonAI, is_custom: bool) -> str:
     """
     # ----------------- #
     # Fill in any missing values
-    if not is_custom:
-        json_ai = _add_implicit_values(json_ai)
+    json_ai = _add_implicit_values(json_ai)
 
     # ----------------- #
     # Instantiate encoders
