@@ -885,7 +885,7 @@ for col_name, encoder in self.encoders.items():
     feature_body = f"""
 log.info('Featurizing the data')
 
-for key, data in data.items():
+for key, data in split_data.items():
     enc_data[key] = EncodedDs(self.encoders, data, self.target)
 
 return enc_data
@@ -1087,7 +1087,7 @@ class Predictor(PredictorInterface):
         # Prepare encoders to featurize data
 {prepare_body}
 
-    def featurize(self, data: dict[str, pd.DataFrame]):
+    def featurize(self, split_data: dict[str, pd.DataFrame]):
         # Featurize data into numerical representations for models
 {feature_body}
 
