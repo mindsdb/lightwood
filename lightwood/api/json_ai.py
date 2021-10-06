@@ -1073,6 +1073,7 @@ class Predictor(PredictorInterface):
 
 
     def analyze_data(self, data: pd.DataFrame) -> None:
+        # Perform a statistical analysis on the unprocessed data
 {analyze_data_body}
 
     def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -1096,6 +1097,7 @@ class Predictor(PredictorInterface):
 {fit_body}
 
     def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -> None:
+        # Evaluate quality of fit for the ensemble of mixers
 {analyze_ensemble}
 
     def learn(self, data: pd.DataFrame) -> None:
