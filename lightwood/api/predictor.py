@@ -71,7 +71,15 @@ class PredictorInterface:
 
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         """
-        Fits "mixer" models to train predictors on the featurized data.
+        Fits "mixer" models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them.
+
+        :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits.
+        """
+        pass
+
+    def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -> None:
+        """
+        Evaluate the quality of mixers within an ensemble of models.
 
         :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits.
         """
