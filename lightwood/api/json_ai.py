@@ -740,6 +740,11 @@ for mixer in self.mixers:
     learn_body = align(learn_body, 2)
 
     predict_common_body = f"""
+log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
+data = data.drop(columns=self.problem_definition.ignore_features)
+for col in self.input_cols:
+    if col not in data.columns:
+        data[col] = [None] * len(data)
 self.mode = 'predict'
 log.info('Cleaning the data')
 data = {call(json_ai.cleaner)}
@@ -789,15 +794,11 @@ class Predictor(PredictorInterface):
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
-        log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-        data = data.drop(columns=self.problem_definition.ignore_features)
 {predict_common_body}
 {predict_body}
 
 
     def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
-        log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-        data = data.drop(columns=self.problem_definition.ignore_features)
 {predict_common_body}
 {predict_proba_body}
 """
