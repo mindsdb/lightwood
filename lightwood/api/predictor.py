@@ -89,6 +89,13 @@ class PredictorInterface:
         """ # noqa
         pass
 
+    def post_analyze(self) -> None:
+        """
+        After mixers are trained, perform an analysis on the quality of the fits.
+
+        """ # noqa
+        pass
+
     def adjust(self, data: pd.DataFrame) -> None:
         """
         Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.
