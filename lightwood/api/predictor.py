@@ -59,13 +59,13 @@ class PredictorInterface:
         :returns: Nothing; prepares the encoders for learned representations.
         """
 
-    def featurize(self, data: Dict[str, pd.DataFrame]):
+    def featurize(self, split_data: Dict[str, pd.DataFrame]):
         """
-        Provides an encoded representation for each dataset in ``data``. Requires `self.encoders` to be prepared.
+        Provides an encoded representation for each dataset in ``split_data``. Requires `self.encoders` to be prepared.
 
-        :param data: Pre-processed data from the dataset, split into train/test (or any other keys relevant)
+        :param split_data: Pre-processed data from the dataset, split into train/test (or any other keys relevant)
 
-        :returns: For each dataset provided in ``data``, the encoded representations of the data.
+        :returns: For each dataset provided in ``split_data``, the encoded representations of the data.
         """ # noqa
         pass
 
