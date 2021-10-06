@@ -40,7 +40,7 @@ class BestOf(BaseEnsemble):
             try:
                 return self.mixers[mixer_index](ds, predict_proba=predict_proba)
             except Exception as e:
-                if self.mixers.stable:
+                if self.mixers[mixer_index].stable:
                     raise(e)
                 else:
                     log.warning(f'Unstable mixer {type(self.mixers[mixer_index]).__name__} failed with exception: {e}.\
