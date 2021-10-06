@@ -936,19 +936,6 @@ log.info('Ensembling the mixer')
 # Create an ensemble of mixers to identify best performing model
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
-
-# --------------- #
-# Analyze Ensembles
-# --------------- #
-log.info('Analyzing the ensemble')
-self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
-
-# Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is
-# an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is
-# important to train with.
-for mixer in self.mixers:
-    if {json_ai.problem_definition.fit_on_validation}:
-        mixer.partial_fit(encoded_test_data, ConcatedEncodedDs([encoded_train_data, encoded_dev_data]))
 """
     fit_body = align(fit_body, 2)
 
