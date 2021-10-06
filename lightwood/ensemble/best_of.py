@@ -29,8 +29,7 @@ class BestOf(BaseEnsemble):
             avg_score = np.mean(list(score_dict.values()))
             score_list.append(avg_score)
 
-        self.indexes_by_accuracy = np.array(score_list).argsort()
-
+        self.indexes_by_accuracy = list(reversed(np.array(score_list).argsort()))
         self.supports_proba = self.mixers[self.indexes_by_accuracy[0]].supports_proba
         log.info(f'Picked best mixer: {type(self.mixers[self.indexes_by_accuracy[0]]).__name__}')
 
