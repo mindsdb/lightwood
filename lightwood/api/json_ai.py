@@ -77,21 +77,22 @@ def lookup_encoder(
 
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
-        dtype.integer: 'Integer.NumericEncoder',
-        dtype.float: 'Float.NumericEncoder',
-        dtype.binary: 'Binary.BinaryEncoder',
-        dtype.categorical: 'Categorical.CategoricalAutoEncoder'
-        if statistical_analysis is None or len(statistical_analysis.histograms[col_name]) > 100
-        else 'Categorical.OneHotEncoder',
-        dtype.tags: 'Tags.MultiHotEncoder',
-        dtype.date: 'Date.DatetimeEncoder',
-        dtype.datetime: 'Datetime.DatetimeEncoder',
-        dtype.image: 'Image.Img2VecEncoder',
-        dtype.rich_text: 'Rich_Text.PretrainedLangEncoder',
-        dtype.short_text: 'Short_Text.CategoricalAutoEncoder',
-        dtype.array: 'Array.ArrayEncoder',
-        dtype.tsarray: 'TimeSeries.TimeSeriesEncoder',
-        dtype.quantity: 'Quantity.NumericEncoder',
+        dtype.integer: "Integer.NumericEncoder",
+        dtype.float: "Float.NumericEncoder",
+        dtype.binary: "Binary.BinaryEncoder",
+        dtype.categorical: "Categorical.CategoricalAutoEncoder"
+        if statistical_analysis is None
+        or len(statistical_analysis.histograms[col_name]) > 100
+        else "Categorical.OneHotEncoder",
+        dtype.tags: "Tags.MultiHotEncoder",
+        dtype.date: "Date.DatetimeEncoder",
+        dtype.datetime: "Datetime.DatetimeEncoder",
+        dtype.image: "Image.Img2VecEncoder",
+        dtype.rich_text: "Rich_Text.PretrainedLangEncoder",
+        dtype.short_text: "Short_Text.CategoricalAutoEncoder",
+        dtype.array: "Array.ArrayEncoder",
+        dtype.tsarray: "TimeSeries.TimeSeriesEncoder",
+        dtype.quantity: "Quantity.NumericEncoder",
     }
 
     # If column is a target, only specific feature representations are allowed that enable supervised tasks
@@ -693,25 +694,31 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     :returns: Automated syntax of the ``PredictorInterface`` object.
     """
+    # ----------------- #
     # Fill in any missing values
     json_ai = add_implicit_values(json_ai)
 
+    # ----------------- #
+    # Instantiate encoders
     encoder_dict = {
         json_ai.problem_definition.target: call(
             list(json_ai.outputs.values())[0].encoder
         )
     }
+
+    # Instantiate Depedencies
     dependency_dict = {}
     dtype_dict = {
         json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
     }
 
+    # Populate features and their data-types
     for col_name, feature in json_ai.features.items():
         encoder_dict[col_name] = call(feature.encoder)
         dependency_dict[col_name] = feature.dependency
         dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
 
-    # @TODO: Move into json-ai creation function (I think? Maybe? Let's discuss)
+    # Populate time-series specific details
     tss = json_ai.problem_definition.timeseries_settings
     if tss.is_timeseries and tss.use_previous_target:
         col_name = f"__mdb_ts_previous_{json_ai.problem_definition.target}"
@@ -732,8 +739,14 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
         json_ai.features[col_name] = Feature(encoder=encoder_dict[col_name])
 
+    # ----------------- #
+
     input_cols = [x.replace("'", "\\'").replace('"', '\\"') for x in json_ai.features]
     input_cols = ",".join([f"""'{name}'""" for name in input_cols])
+
+    # ----------------- #
+    # Time-series specific code blocks
+    # ----------------- #
 
     ts_transform_code = ""
     ts_analyze_code = ""
@@ -762,53 +775,80 @@ if encoder.is_target:
     else:
         ts_target_code = ""
 
-    dataprep_body = f"""
-# The type of each column
-self.accuracy_functions = {json_ai.accuracy_functions}
-self.identifiers = {json_ai.identifiers}
-self.dtype_dict = {inline_dict(dtype_dict)}
-self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers},
-                                                                self.problem_definition)
-self.mode = 'train'
-# How columns are encoded
-self.encoders = {inline_dict(encoder_dict)}
-# Which column depends on which
-self.dependencies = {inline_dict(dependency_dict)}
-#
-self.input_cols = [{input_cols}]
+    # ----------------- #
+    # Statistical Analysis Body
+    # ----------------- #
+
+    analyze_data_body = f"""
+self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, self.problem_definition)
 
 self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
+    """
 
+    analyze_data_body = align(analyze_data_body, 2)
+
+    # ----------------- #
+    # Pre-processing Body
+    # ----------------- #
+
+    clean_body = f"""
 log.info('Cleaning the data')
-data = {call(json_ai.cleaner)}
+clean_data = {call(json_ai.cleaner)}
 
+# Time-series blocks
 {ts_transform_code}
 {ts_analyze_code}
 
-data = {call(json_ai.splitter)}
+return clean_data
+    """
 
-log.info('Preparing the encoders')
+    clean_body = align(clean_body, 2)
+
+    # ----------------- #
+    # Train-Test Splitter Body
+    # ----------------- #
+
+    split_body = f"""
+log.info("Splitting the data into train/test")
+train_test_data = {call(json_ai.splitter)}
+
+return train_test_data
+    """
+
+    split_body = align(split_body, 2)
+
+    # ----------------- #
+    # Prepare features Body
+    # ----------------- #
+
+    prepare_body = f"""
+
+# Column to encoder mapping
+self.encoders = {inline_dict(encoder_dict)}
+
+log.info("Preparing encoders and featurizing data")
 
 encoder_prepping_dict = {{}}
-concatenated_train_dev = pd.concat([data['train'], data['dev']])
+
+# Prepare encoders with training data (only important for learned representations)
+
+enc_prepping_data = train_test["train"] # NSNOTE
+
 for col_name, encoder in self.encoders.items():
-    if not encoder.is_trainable_encoder:
-        encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], 'prepare']
-        log.info(f'Encoder prepping dict length of: {{len(encoder_prepping_dict)}}')
+    if not encoder.is_nn_encoder:
+        encoder_prepping_dict[col_name] = [encoder, enc_prepping_data[col_name], 'prepare']
+        log.info(f'Preparing encoder dict length of: {{len(encoder_prepping_dict)}}')
 
 parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
 for col_name, encoder in parallel_prepped_encoders.items():
     self.encoders[col_name] = encoder
 
 if self.target not in parallel_prepped_encoders:
-    if self.encoders[self.target].is_trainable_encoder:
-        self.encoders[self.target].prepare(data['train'][self.target], data['dev'][self.target])
-    else:
-        self.encoders[self.target].prepare(pd.concat([data['train'], data['dev']])[self.target])
+    self.encoders[self.target].prepare(enc_prepping_data[self.target])
 
 for col_name, encoder in self.encoders.items():
-    if encoder.is_trainable_encoder:
-        priming_data = pd.concat([data['train'], data['dev']])
+    if encoder.is_nn_encoder:
+        priming_data = train_test["train"] # NSNOTE
         kwargs = {{}}
         if self.dependencies[col_name]:
             kwargs['dependency_data'] = {{}}
@@ -819,29 +859,45 @@ for col_name, encoder in self.encoders.items():
                 }}
             {align(ts_encoder_code, 3)}
 
-        # This assumes target  encoders are also prepared in parallel, might not be true
+        # This assumes target encoders are also prepared in parallel
         if hasattr(encoder, 'uses_target'):
             kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
 
-        encoder.prepare(data['train'][col_name], data['dev'][col_name], **kwargs)
+        encoder.prepare(priming_data[col_name], **kwargs)
 
     {align(ts_target_code, 1)}
-"""
-    dataprep_body = align(dataprep_body, 2)
+    """
+    prepare_body = align(prepare_body, 2)
 
-    learn_body = f"""
+    # ----------------- #
+    # Featurize Data Body
+    # ----------------- #
+
+    feature_body = f"""
 log.info('Featurizing the data')
 
-encoded_train_data = EncodedDs(self.encoders, data['train'], self.target)
-encoded_dev_data = EncodedDs(self.encoders, data['dev'], self.target)
-encoded_test_data = EncodedDs(self.encoders, data['test'], self.target)
+for key, data in train_test.items():
+    train_test[key] = lightwood.encode(self.encoders, data, self.target)
 
+return train_test
+    """
+
+    feature_body = align(feature_body, 2)
+
+    # ----------------- #
+    # Fit Mixer Body
+    # ----------------- #
+
+    fit_body = f"""
 log.info('Training the mixers')
+self.mode = train
 self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
+
+# For each mixer, attempt to fit or return error message
 trained_mixers = []
 for mixer in self.mixers:
     try:
-        mixer.fit(encoded_train_data, encoded_dev_data)
+        mixer.fit(train_data)
         trained_mixers.append(mixer)
     except Exception as e:
         log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
@@ -850,6 +906,8 @@ for mixer in self.mixers:
 
 self.mixers = trained_mixers
 
+# NS-Note should we make ensembles function?
+# Create ensemble and evaluate best mixers
 log.info('Ensembling the mixer')
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
@@ -860,25 +918,50 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 # Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is
 # an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is
 # important to train with.
+
 for mixer in self.mixers:
     if {json_ai.problem_definition.fit_on_validation}:
-        mixer.partial_fit(encoded_test_data, ConcatedEncodedDs([encoded_train_data, encoded_dev_data]))
+        mixer.partial_fit(test_data, train_data)
 """
-    learn_body = align(learn_body, 2)
+    fit_body = align(fit_body, 2)
+
+    # ----------------- #
+    # Learn Body
+    # ----------------- #
+
+    learn_body = f"""
+
+# Perform stats analysis
+self.analyze_data()
+
+# Pre-process the data
+clean_data = self.preprocess(data)
+
+# Create train/test (dev) split
+train_test = self.split(data)
+
+# Prepare encoders
+self.prepare(train_test)
+
+# Make features
+enc_train_test = self.featurize(train_test)
+
+# Prepare mixers
+self.fit(enc_train_test)
+
+"""
+
+    # ----------------- #
+    # Predict Body
+    # ----------------- #
 
     predict_common_body = f"""
-log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-data = data.drop(columns=self.problem_definition.ignore_features)
-for col in self.input_cols:
-    if col not in data.columns:
-        data[col] = [None] * len(data)
 self.mode = 'predict'
-log.info('Cleaning the data')
-data = {call(json_ai.cleaner)}
+clean_data = self.preprocess(data)
 
 {ts_transform_code}
 
-encoded_ds = EncodedDs(self.encoders, data, self.target)
+encoded_ds = lightwood.encode(self.encoders, clean_data, self.target)[0]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 """
     predict_common_body = align(predict_common_body, 2)
@@ -890,12 +973,21 @@ return insights
 """
     predict_body = align(predict_body, 2)
 
+    # ----------------- #
+    # Predict Proba Body
+    # ----------------- #
+
     predict_proba_body = f"""
 df = self.ensemble(encoded_ds, predict_proba=True)
 insights, global_insights = {call(json_ai.explainer)}
 return insights
 """
     predict_proba_body = align(predict_proba_body, 2)
+    # ----------------- #
+
+    # ----------------- #
+    # PREDICTOR BASE CODE
+    # ----------------- #
 
     predictor_code = f"""
 {IMPORTS}
@@ -911,13 +1003,42 @@ class Predictor(PredictorInterface):
     def __init__(self):
         seed({json_ai.problem_definition.seed_nr})
         self.target = '{json_ai.problem_definition.target}'
-        self.mode = 'innactive'
+        self.mode = 'inactive'
+        self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
+        self.accuracy_functions = {json_ai.accuracy_functions}
+        self.identifiers = {json_ai.identifiers}
+        self.dtype_dict = {inline_dict(dtype_dict)}
+
+        # Any feature-column dependencies
+        self.dependencies = {inline_dict(dependency_dict)}
+
+        self.input_cols = [{input_cols}]
+
+
+    def analyze_data(self, data: pd.DataFrame) -> None:
+{analyze_data_body}
+
+    def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
+        # Preprocess and clean data
+{clean_body}
+
+    def split(self, data: pd.DataFrame) -> dict[str, pd.DataFrame]:
+        # Split the data into training/testing splits
+{split_body}
+
+    def prepare(self, train_test: dict[str, pd.DataFrame]) -> None:
+        # Prepare encoders to featurize data
+{prepare_body}
+
+    def featurize(self, train_test: dict[str, pd.DataFrame]):
+        # Featurize data into numerical representations for models
+{feature_body}
+
+    def fit(self, enc_train_test: dict[str, pd.DataFrame]) -> None:
+        # Fit predictors to estimate target
+{fit_body}
 
     def learn(self, data: pd.DataFrame) -> None:
-        self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
-        log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-        data = data.drop(columns=self.problem_definition.ignore_features)
-{dataprep_body}
 {learn_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
