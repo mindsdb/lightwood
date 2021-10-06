@@ -414,7 +414,7 @@ def _merge_implicit_values(field, implicit_value):
     exec(IMPORTS, globals())
     exec(IMPORT_EXTERNAL_DIRS, globals())
     module = eval(field["module"])
-    
+
     if inspect.isclass(module):
         args = list(inspect.signature(module.__init__).parameters.keys())[1:]
     else:
@@ -687,7 +687,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     return json_ai
 
 
-def code_from_json_ai(json_ai: JsonAI) -> str:
+def code_from_json_ai(json_ai: JsonAI, is_custom: bool) -> str:
     """
     Generates a custom ``PredictorInterface`` given the specifications from ``JsonAI`` object.
 
@@ -697,7 +697,8 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     """
     # ----------------- #
     # Fill in any missing values
-    json_ai = _add_implicit_values(json_ai)
+    if not is_custom:
+        json_ai = _add_implicit_values(json_ai)
 
     # ----------------- #
     # Instantiate encoders
