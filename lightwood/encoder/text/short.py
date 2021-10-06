@@ -4,6 +4,7 @@ from lightwood.encoder import BaseEncoder
 from lightwood.encoder.categorical import CategoricalAutoEncoder
 from lightwood.helpers.text import tokenize_text
 from lightwood.helpers.torch import concat_vectors_and_pad, average_vectors
+import pandas as pd
 
 
 class ShortTextEncoder(BaseEncoder):
@@ -35,7 +36,6 @@ class ShortTextEncoder(BaseEncoder):
         # Defined in self.prepare()
         self._combine_fn = None
         self.max_words_per_sent = None
-        self.is_nn_encoder = True
         self.cae = CategoricalAutoEncoder(is_target=is_target, max_encoded_length=100)
         self._prepared = False
 
@@ -59,7 +59,7 @@ class ShortTextEncoder(BaseEncoder):
             for tok in tokens:
                 unique_tokens.add(tok)
 
-        self.cae.prepare(unique_tokens)
+        self.cae.prepare(pd.Series(list(unique_tokens)), pd.Series([]))
 
         if self._mode == 'concat':
             self.max_words_per_sent = max_words_per_sent
@@ -87,10 +87,7 @@ class ShortTextEncoder(BaseEncoder):
     def decode(self, vectors):
         if self._mode == 'concat':
 
-            if self.cae.use_autoencoder:
-                vec_size = self.cae.max_encoded_length
-            else:
-                vec_size = len(self.cae.onehot_encoder._lang.index2word)
+            vec_size = self.cae.max_encoded_length
 
             output = []
             for vec in vectors:

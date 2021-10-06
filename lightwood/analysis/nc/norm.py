@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union
 
 import torch
 import numpy as np
@@ -29,9 +29,8 @@ class Normalizer(BaseMixer):
         self.bounds = (0.5, 1.5)
         self.error_fn = mean_absolute_error
 
-    def fit(self, data: List[EncodedDs]) -> None:
+    def fit(self, data: EncodedDs) -> None:
         try:
-            data = ConcatedEncodedDs(data)
             preds = self.base_predictor(data, predict_proba=True)
             truths = data.data_frame[self.target]
             labels = self.get_labels(preds, truths.values, data.encoders[self.target])
@@ -65,7 +64,7 @@ class Normalizer(BaseMixer):
         return scores
 
     def get_labels(self, preds: pd.DataFrame, truths: np.ndarray, target_enc) -> np.ndarray:
-        if self.target_dtype in [dtype.integer, dtype.float]:
+        if self.target_dtype in [dtype.integer, dtype.float, dtype.quantity]:
             if not self.multi_ts_task:
                 preds = preds.values.squeeze()
             else:

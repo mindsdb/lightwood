@@ -24,7 +24,7 @@ class Gym:
 
         self.best_model = None
 
-    def fit(self, train_data_loader, test_data_loader, desired_error, max_time, callback,
+    def fit(self, train_data_loader, test_data_loader, desired_error, max_time, callback=None,
             eval_every_x_epochs=1, max_unimproving_models=10, custom_train_func=None, custom_test_func=None):
         started = time.time()
         epoch = 0
@@ -126,7 +126,7 @@ class Gym:
                     delta_mean = np.mean(test_error_delta_buff[-max_unimproving_models:])
                     if delta_mean <= 0:
                         keep_training = False
-
-                callback(test_error, real_buff, predicted_buff)
+                if callback is not None:
+                    callback(test_error, real_buff, predicted_buff)
 
         return self.best_model, lowest_test_error, int(time.time() - started)

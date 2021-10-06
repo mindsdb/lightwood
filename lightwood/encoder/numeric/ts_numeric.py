@@ -10,6 +10,7 @@ class TsNumericEncoder(NumericEncoder):
     """
     Variant of vanilla numerical encoder, supports dynamic mean re-scaling
     """
+    is_timeseries_encoder: bool = True
 
     def __init__(self, is_target: bool = False, positive_domain: bool = False, grouped_by: list = [],
                  prev_target: str = None):

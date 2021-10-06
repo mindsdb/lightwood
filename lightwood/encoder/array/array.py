@@ -8,6 +8,8 @@ from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNo
 
 
 class ArrayEncoder(BaseEncoder):
+    is_trainable_encoder: bool = True
+
     def __init__(self, stop_after: int, window: int = None, is_target: bool = False, original_type: dtype = None):
         """
         Fits a normalizer for a time series previous historical data.
@@ -22,9 +24,9 @@ class ArrayEncoder(BaseEncoder):
         else:
             self.output_size = None
 
-    def prepare(self, priming_data):
-        if isinstance(priming_data, pd.Series):
-            priming_data = priming_data.values
+    def prepare(self, train_priming_data, dev_priming_data):
+        priming_data = pd.concat([train_priming_data, dev_priming_data])
+        priming_data = priming_data.values
 
         if self.output_size is None:
             self.output_size = np.max([len(x) for x in priming_data if x is not None])

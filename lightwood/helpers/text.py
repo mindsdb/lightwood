@@ -230,7 +230,7 @@ def get_identifier_description(data, column_name, data_dtype):
     # Detect foreign key
     if data_dtype == dtype.integer:
         if _is_foreign_key_name(column_name):
-            return 'Foregin key'
+            return 'Foreign key'
 
     if _is_identifier_name(column_name) or data_dtype in (dtype.categorical, dtype.binary):
         if unquie_pct > 0.98:

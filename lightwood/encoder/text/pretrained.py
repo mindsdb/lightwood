@@ -74,6 +74,8 @@ from transformers import (
 
 
 class PretrainedLangEncoder(BaseEncoder):
+    is_trainable_encoder: bool = True
+
     """
     Pretrained language models.
     Option to train on a target encoding of choice.
@@ -126,7 +128,6 @@ class PretrainedLangEncoder(BaseEncoder):
         self._pretrained_model_name = "distilbert-base-uncased"
 
         self.device, _ = get_devices()
-        self.is_nn_encoder = True
         self.stop_after = stop_after
 
         self.embed_mode = embed_mode
@@ -139,7 +140,7 @@ class PretrainedLangEncoder(BaseEncoder):
         else:
             log.info("Embedding mode off. Logits are output of encode()")
 
-    def prepare(self, priming_data: pd.Series, encoded_target_values: torch.Tensor):
+    def prepare(self, train_priming_data: pd.Series, dev_priming_data: pd.Series, encoded_target_values: torch.Tensor):
         """
         Prepare the encoder by training on the target.
 
@@ -147,6 +148,8 @@ class PretrainedLangEncoder(BaseEncoder):
         Automatically assumes this.
         """
         os.environ['TOKENIZERS_PARALLELISM'] = 'true'
+        priming_data = pd.concat([train_priming_data, dev_priming_data])
+        priming_data = priming_data.values
         if self._prepared:
             raise Exception("Encoder is already prepared.")
 
