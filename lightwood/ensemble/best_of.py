@@ -6,24 +6,23 @@ import pandas as pd
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
-from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
+from lightwood.data.encoded_ds import EncodedDs
 from lightwood.helpers.general import evaluate_accuracy
 
 
 class BestOf(BaseEnsemble):
     best_index: int
 
-    def __init__(self, target, mixers: List[BaseMixer], data: List[EncodedDs], accuracy_functions,
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
                  ts_analysis: Optional[dict] = None) -> None:
         super().__init__(target, mixers, data)
         # @TODO: Need some shared accuracy functionality to determine mixer selection here
         self.maximize = True
         best_score = -pow(2, 32) if self.maximize else pow(2, 32)
-        ds = ConcatedEncodedDs(data)
         for idx, mixer in enumerate(mixers):
             score_dict = evaluate_accuracy(
-                ds.data_frame,
-                mixer(ds)['prediction'],
+                data.data_frame,
+                mixer(data)['prediction'],
                 target,
                 accuracy_functions,
                 ts_analysis=ts_analysis

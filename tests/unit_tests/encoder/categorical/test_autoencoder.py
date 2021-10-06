@@ -4,7 +4,7 @@ import string
 import random
 import logging
 from sklearn.metrics import accuracy_score
-
+import pandas as pd
 from lightwood.helpers.log import log
 
 
@@ -34,7 +34,7 @@ class TestAutoencoder(unittest.TestCase):
         enc = CategoricalAutoEncoder(stop_after=20)
         enc.desired_error = 3
 
-        enc.prepare(priming_data)
+        enc.prepare(pd.Series(priming_data), pd.Series(priming_data))
         encoded_data = enc.encode(test_data)
         decoded_data = enc.decode(encoded_data)
 
