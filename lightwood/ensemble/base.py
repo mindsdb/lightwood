@@ -5,12 +5,12 @@ from lightwood.data.encoded_ds import EncodedDs
 
 
 class BaseEnsemble:
-    data: List[EncodedDs]
+    data: EncodedDs
     mixers: List[BaseMixer]
     best_index: int
     supports_proba: bool
 
-    def __init__(self, target, mixers: List[BaseMixer], data: List[EncodedDs]) -> None:
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs) -> None:
         self.data = data
         self.mixers = mixers
         self.best_index = 0

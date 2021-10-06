@@ -3,15 +3,15 @@ from typing import Dict, List, Tuple, Optional
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
 from lightwood.analysis.base import BaseAnalysisBlock
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.data.encoded_ds import EncodedDs
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings
 
 
 def model_analyzer(
     predictor: BaseEnsemble,
-    data: List[EncodedDs],
-    train_data: List[EncodedDs],
+    data: EncodedDs,
+    train_data: EncodedDs,
     stats_info: StatisticalAnalysis,
     target: str,
     ts_cfg: TimeseriesSettings,
@@ -37,8 +37,8 @@ def model_analyzer(
     data_type = dtype_dict[target]
 
     # retrieve encoded data representations
-    encoded_train_data = ConcatedEncodedDs(train_data)
-    encoded_val_data = ConcatedEncodedDs(data)
+    encoded_train_data = train_data
+    encoded_val_data = data
     data = encoded_val_data.data_frame
     input_cols = list([col for col in data.columns if col != target])
 

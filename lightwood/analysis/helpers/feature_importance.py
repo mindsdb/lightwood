@@ -42,8 +42,7 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
             for col in ignorable_input_cols:
                 partial_data = deepcopy(ns.encoded_val_data)
                 partial_data.clear_cache()
-                for ds in partial_data.encoded_ds_arr:
-                    ds.data_frame[col] = [None] * len(ds.data_frame[col])
+                partial_data.data_frame[col] = [None] * len(partial_data.data_frame[col])
 
                 if not ns.is_classification:
                     empty_input_preds = ns.predictor(partial_data)

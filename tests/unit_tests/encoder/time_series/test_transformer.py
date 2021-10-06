@@ -4,6 +4,7 @@ import torch
 import unittest
 from lightwood.encoder.time_series import TimeSeriesEncoder
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, len_to_mask, get_chunk
+import pandas as pd
 
 
 class TestTransformerEncoder(unittest.TestCase):
@@ -61,7 +62,7 @@ class TestTransformerEncoder(unittest.TestCase):
         encoder = TimeSeriesEncoder(stop_after=10)
         encoder.encoder_class = TransformerEncoder
         encoder._transformer_hidden_size = 32
-        encoder.prepare(data, feedback_hoop_function=print)
+        encoder.prepare(pd.Series(data), pd.Series(data), feedback_hoop_function=print)
 
         correct_answer = torch.tensor(example)[:, 1:]
 
