@@ -12,14 +12,13 @@ from lightwood.helpers.general import evaluate_accuracy
 
 class BestOf(BaseEnsemble):
     indexes_by_accuracy: List[float]
-    
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
                  ts_analysis: Optional[dict] = None) -> None:
         super().__init__(target, mixers, data)
 
         score_list = []
-        for idx, mixer in enumerate(mixers):
+        for _, mixer in enumerate(mixers):
             score_dict = evaluate_accuracy(
                 data.data_frame,
                 mixer(data)['prediction'],
