@@ -418,15 +418,20 @@ def _merge_implicit_values(field, implicit_value):
     if inspect.isclass(module):
         args = list(inspect.signature(module.__init__).parameters.keys())[1:]
     else:
-        args = module.__code__.co_varnames
+        # Attempt to add implicit values, if fails, returns field as-is
+        try:
+            args = module.__code__.co_varnames
 
-    for arg in args:
-        if "args" not in field:
-            field["args"] = implicit_value["args"]
-        else:
-            if arg not in field["args"]:
-                if arg in implicit_value["args"]:
-                    field["args"][arg] = implicit_value["args"][arg]
+            for arg in args:
+                if "args" not in field:
+                    field["args"] = implicit_value["args"]
+                else:
+                    if arg not in field["args"]:
+                        if arg in implicit_value["args"]:
+                            field["args"][arg] = implicit_value["args"][arg]
+        except AttributeError:
+            pass
+
     return field
 
 
@@ -1081,19 +1086,19 @@ class Predictor(PredictorInterface):
         # Preprocess and clean data
 {clean_body}
 
-    def split(self, data: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    def split(self, clean_data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
         # Split the data into training/testing splits
 {split_body}
 
-    def prepare(self, data: dict[str, pd.DataFrame]) -> None:
+    def prepare(self, data: Dict[str, pd.DataFrame]) -> None:
         # Prepare encoders to featurize data
 {prepare_body}
 
-    def featurize(self, split_data: dict[str, pd.DataFrame]):
+    def featurize(self, split_data: Dict[str, pd.DataFrame]):
         # Featurize data into numerical representations for models
 {feature_body}
 
-    def fit(self, enc_data: dict[str, pd.DataFrame]) -> None:
+    def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Fit predictors to estimate target
 {fit_body}
 
