@@ -1,4 +1,3 @@
-# TODO: Make stratification work for regression via histogram bins??
 from lightwood.api.dtype import dtype
 import pandas as pd
 import numpy as np
@@ -52,16 +51,9 @@ def splitter(
 
     if stratify_on:
         subsets = stratify(data, nr_subsets, stratify_on)
+        subsets = stratify_check(data, subsets, nr_subsets, tss)
     else:
         subsets = np.array_split(data, nr_subsets)
-
-    max_len = np.max([len(subset) for subset in subsets])
-    for subset in subsets:
-        if (len(subset) < max_len - 2) and not tss.is_timeseries:
-            subset_lengths = [len(subset) for subset in subsets]
-            log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Splitting without stratification')
-            subsets = np.array_split(data, nr_subsets)
-            break
 
     train = pd.concat(subsets[0:int(pct_train / gcd)])
     dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
@@ -87,6 +79,7 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_
 
     :returns A list of equally-sized data subsets that can be concatenated by the full data. This preserves the group-by columns.
     """  # noqa
+    # TODO: Make stratification work for regression via histogram bins??
     all_group_combinations = list(product(*[data[col].unique() for col in stratify_on]))
 
     subsets = [pd.DataFrame() for _ in range(nr_subset)]
@@ -110,4 +103,29 @@ def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_
             for n in range(nr_subset):
                 subsets[n] = pd.concat([subsets[n], subset[n]])
 
+    return subsets
+
+
+def stratify_check(data: pd.DataFrame, subsets: List[pd.DataFrame], nr_subsets: int,
+                   tss: TimeseriesSettings, len_threshold: int = 2):
+    """
+    Helper function reverts stratified data back to a normal split if the size difference between splits is larger
+    than a certain threshold.
+
+    :param data: Raw data
+    :param subsets: Stratified data
+    :param nr_subsets: Number of subsets
+    :param tss: TimeseriesSettings
+    :param len_threshold: size difference between subsets to revert the stratification process
+
+    :return: Inplace-modified subsets if threshold was passed. Else, subsets are returned unmodified.
+    """
+    if not tss.is_timeseries:
+        max_len = np.max([len(subset) for subset in subsets])
+        for subset in subsets:
+            if len(subset) < max_len - len_threshold:
+                subset_lengths = [len(subset) for subset in subsets]
+                log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Splitting without stratification')  # noqa
+                subsets = np.array_split(data, nr_subsets)
+                break
     return subsets
