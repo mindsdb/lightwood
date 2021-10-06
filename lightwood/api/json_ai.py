@@ -981,13 +981,13 @@ self.analyze_data(data)
 clean_data = self.preprocess(data)
 
 # Create train/test (dev) split
-train_dev_test = self.split(data)
+train_dev_test = self.split(clean_data)
 
 # Prepare encoders
-self.prepare(train_test)
+self.prepare(train_dev_test)
 
-# Make features
-enc_train_test = self.featurize(train_test)
+# Create feature vectors from data
+enc_train_test = self.featurize(train_dev_test)
 
 # Prepare mixers
 self.fit(enc_train_test)
