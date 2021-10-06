@@ -780,12 +780,21 @@ if encoder.is_target:
     # ----------------- #
 
     analyze_data_body = f"""
+log.info("Performing statistical analysis on the data")
 self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, self.problem_definition)
-
-self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
     """
 
     analyze_data_body = align(analyze_data_body, 2)
+
+    # ----------------- #
+    # Post-Analysis Body
+    # ----------------- #
+
+    post_analyze_body = f"""
+self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
+    """
+
+    post_analyze_body = align(post_analyze_body, 2)
 
     # ----------------- #
     # Pre-processing Body
@@ -956,7 +965,7 @@ for mixer in self.mixers:
     learn_body = f"""
 
 # Perform stats analysis
-self.analyze_data()
+self.analyze_data(data)
 
 # Pre-process the data
 clean_data = self.preprocess(data)
@@ -974,7 +983,7 @@ enc_train_test = self.featurize(train_test)
 self.fit(enc_train_test)
 
 """
-
+    learn_body = align(learn_body, 2)
     # ----------------- #
     # Predict Body
     # ----------------- #
@@ -1084,6 +1093,9 @@ class Predictor(PredictorInterface):
     def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
 {predict_common_body}
 {predict_proba_body}
+
+    def post_analyze(self) -> None:
+{post_analyze_body}
 """
 
     predictor_code = black.format_str(predictor_code, mode=black.FileMode())
