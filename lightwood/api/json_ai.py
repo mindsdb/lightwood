@@ -886,9 +886,9 @@ for col_name, encoder in self.encoders.items():
 log.info('Featurizing the data')
 
 for key, data in split_data.items():
-    enc_data[key] = EncodedDs(self.encoders, data, self.target)
+    split_data[key] = EncodedDs(self.encoders, data, self.target)
 
-return enc_data
+return split_data
     """
 
     feature_body = align(feature_body, 2)
