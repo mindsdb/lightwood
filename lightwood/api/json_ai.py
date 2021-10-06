@@ -1,4 +1,4 @@
-# TODO: add_implicit_values unit test ensures NO changes for a fully specified file.
+# TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 import black
@@ -410,10 +410,11 @@ def generate_json_ai(
     )
 
 
-def merge_implicit_values(field, implicit_value):
+def _merge_implicit_values(field, implicit_value):
     exec(IMPORTS, globals())
     exec(IMPORT_EXTERNAL_DIRS, globals())
     module = eval(field["module"])
+    
     if inspect.isclass(module):
         args = list(inspect.signature(module.__init__).parameters.keys())[1:]
     else:
@@ -429,7 +430,7 @@ def merge_implicit_values(field, implicit_value):
     return field
 
 
-def populate_implicit_field(
+def _populate_implicit_field(
     json_ai: JsonAI, field_name: str, implicit_value: dict, is_timeseries: bool
 ) -> None:
     """
@@ -460,7 +461,7 @@ def populate_implicit_field(
                 x for x in implicit_value if x["module"] == field[i]["module"]
             ]
             if len(sub_field_implicit) == 1:
-                field[i] = merge_implicit_values(field[i], sub_field_implicit[0])
+                field[i] = _merge_implicit_values(field[i], sub_field_implicit[0])
         for sub_field_implicit in implicit_value:
             if (
                 len([x for x in field if x["module"] == sub_field_implicit["module"]])
@@ -469,11 +470,11 @@ def populate_implicit_field(
                 field.append(sub_field_implicit)
     # If the user specified the field, add implicit arguments which we didn't specify
     else:
-        field = merge_implicit_values(field, implicit_value)
+        field = _merge_implicit_values(field, implicit_value)
     json_ai.__setattr__(field_name, field)
 
 
-def add_implicit_values(json_ai: JsonAI) -> JsonAI:
+def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     """
     To enable brevity in writing, auto-generate the "unspecified/missing" details required in the ML pipeline.
 
@@ -681,7 +682,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
     ]
 
     for field_name, implicit_value in hidden_fields:
-        populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
+        _populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
 
     return json_ai
 
@@ -696,7 +697,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     """
     # ----------------- #
     # Fill in any missing values
-    json_ai = add_implicit_values(json_ai)
+    json_ai = _add_implicit_values(json_ai)
 
     # ----------------- #
     # Instantiate encoders
