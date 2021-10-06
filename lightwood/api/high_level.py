@@ -62,16 +62,15 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
     return json_ai
 
 
-def code_from_json_ai(json_ai: JsonAI, is_custom: bool = False) -> str:
+def code_from_json_ai(json_ai: JsonAI) -> str:
     """
-    Autogenerates custom code based on the details you specified inside your JsonAI. If you have custom modules, ensure you populate the JSON-syntax appropriately.
+    Autogenerates custom code based on the details you specified inside your JsonAI.
 
     :param json_ai: A ``JsonAI`` object
-    :param is_custom: Whether you have customized modules in ``JsonAI``
 
     :returns: Code (text) generate based on the ``JsonAI`` you created
     """
-    return _code_from_json_ai(json_ai, is_custom)
+    return _code_from_json_ai(json_ai)
 
 
 def predictor_from_code(code: str) -> PredictorInterface:
