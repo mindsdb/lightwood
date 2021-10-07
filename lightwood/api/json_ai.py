@@ -23,7 +23,9 @@ IMPORT_EXTERNAL_DIRS = """
 for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
         for file_name in list(os.walk(import_dir))[0][2]:
-            mod_name = file_name.rstrip('.py')
+            mod_name = file_name
+            if file_name[-3:] == '.py':
+                mod_name = mod_name[:-3]
             loader = importlib.machinery.SourceFileLoader(mod_name,
                                                           os.path.join(import_dir, file_name))
             module = ModuleType(loader.name)
