@@ -964,15 +964,31 @@ encoded_test_data = EncodedDs(self.encoders, enc_data['test'], self.target)
 # --------------- #
 log.info('Analyzing the ensemble of mixers')
 self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
-
-# Enable partial fit of model, after its trained, on validation data. This is ONLY to be used in cases where there is
-# an expectation of testing data and a continuously evolving pipeline; this assumes that all data available is
-# important to train with.
-for mixer in self.mixers:
-    if {json_ai.problem_definition.fit_on_validation}:
-        mixer.partial_fit(encoded_test_data, ConcatedEncodedDs([encoded_train_data, encoded_dev_data]))
 """
     analyze_ensemble = align(analyze_ensemble, 2)
+
+    # ----------------- #
+    # Adjust Ensemble Body
+    # ----------------- #
+
+    adjust_body = f"""
+
+# --------------- #
+# Extract data
+# --------------- #
+# Extract the featurized data
+encoded_old_data = EncodedDs(self.encoders, enc_data['old'], self.target)
+encoded_new_data = EncodedDs(self.encoders, enc_data['new'], self.target)
+
+# --------------- #
+# Adjust (Update) Mixers
+# --------------- #
+log.info('Updating the mixers')
+ 
+for mixer in self.mixers:
+    mixer.partial_fit(encoded_new_data, encoded_old_data)
+"""
+    adjust_body = align(adjust_body, 2)
 
     # ----------------- #
     # Learn Body
@@ -1000,6 +1016,13 @@ self.fit(enc_train_test)
 
 # Analyze the ensemble
 self.analyze_ensemble(enc_train_test)
+
+# ------------------------ #
+# Enable partial fit of model AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits. This assumes that the predictor could be continuously evolved, hence including the reserved data may improve predictivity. MAKE `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
+
+# Update the mixers with partial fit
+if {json_ai.problem_definition.fit_on_validation}:
+    self.adjust(update_data)
 
 """
     learn_body = align(learn_body, 2)
@@ -1108,6 +1131,10 @@ class Predictor(PredictorInterface):
 
     def learn(self, data: pd.DataFrame) -> None:
 {learn_body}
+
+    def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:
+        # Update mixers with new information
+{adjust_body}
 
     def predict(self, data: pd.DataFrame) -> pd.DataFrame:
 {predict_common_body}
