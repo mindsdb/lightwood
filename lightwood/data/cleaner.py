@@ -30,7 +30,7 @@ def cleaner(
     custom_cleaning_functions: Dict[str, str] = {}
 ) -> pd.DataFrame:
     """
-    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standaridzed type and all malformed or otherwise missing or invalid elements are turned into ``None``
+    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``
 
     :param data: The raw data
     :param dtype_dict: Type information for each column
