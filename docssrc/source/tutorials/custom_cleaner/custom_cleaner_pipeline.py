@@ -360,7 +360,7 @@ class Predictor(PredictorInterface):
         # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
 
         # Update the mixers with partial fit
-        if True:
+        if self.problem_definition.fit_on_validation:
 
             log.info("Adjustment on validation requested.")
             update_data = {
