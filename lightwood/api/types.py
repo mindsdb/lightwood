@@ -350,7 +350,7 @@ class ProblemDefinition:
         unbias_target = obj.get('unbias_target', True)
         seconds_per_mixer = obj.get('seconds_per_mixer', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
-        time_aim = obj.get('time_aim', 100)
+        time_aim = obj.get('time_aim', None)
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
         fixed_confidence = obj.get('fixed_confidence', None)
