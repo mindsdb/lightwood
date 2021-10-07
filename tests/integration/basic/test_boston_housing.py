@@ -19,8 +19,9 @@ class TestBasic(unittest.TestCase):
 
         # Make this a quantity
         df[target] = [f'{x}$' for x in df[target]]
+        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 200})
 
-        predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 200}))
+        predictor = predictor_from_problem(df, pdef)
         predictor.learn(df)
 
         assert predictor.model_analysis.dtypes[target] == dtype.quantity
@@ -31,3 +32,9 @@ class TestBasic(unittest.TestCase):
         self.assertTrue(r2_score([float(x.rstrip('$')) for x in df[target]], predictions['prediction']) > 0.8)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
         self.assertTrue(all([p['lower'] <= p['prediction'] <= p['upper'] for _, p in predictions.iterrows()]))
+
+        # check customizable ICP fixed confidence param
+        fixed_conf = 0.8
+        fixed_predictions = predictor.predict(df, {'fixed_confidence': fixed_conf})
+
+        assert all([v == fixed_conf for v in fixed_predictions['confidence'].values])

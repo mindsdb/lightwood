@@ -9,6 +9,7 @@ from lightwood.api.types import (
     TimeseriesSettings,
     ModelAnalysis,
     DataAnalysis,
+    PredictionArguments,
 )
 from lightwood.api.predictor import PredictorInterface
 from lightwood.api.high_level import (
@@ -37,6 +38,7 @@ __all__ = [
     "TimeseriesSettings",
     "ModelAnalysis",
     "DataAnalysis",
+    "PredictionArguments",
     "PredictorInterface",
     "dtype",
     "predictor_from_state",

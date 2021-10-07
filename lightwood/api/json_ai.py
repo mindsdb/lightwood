@@ -262,6 +262,7 @@ def generate_json_ai(
             'module': 'BestOf',
             'args': {
                 'accuracy_functions': '$accuracy_functions',
+                'args': '$pred_args',
                 'ts_analysis': 'self.ts_analysis' if is_ts else None
             }
         }
@@ -508,10 +509,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
              "args": {
                  "timeseries_settings": "$problem_definition.timeseries_settings",
                  "positive_domain": "$statistical_analysis.positive_domain",
-                 "fixed_confidence": "$problem_definition.fixed_confidence",
                  "anomaly_detection": "$problem_definition.anomaly_detection",
-                 "anomaly_error_rate": "$problem_definition.anomaly_error_rate",
-                 "anomaly_cooldown": "$problem_definition.anomaly_cooldown",
                  "data": "data",
                  "encoded_data": "encoded_data",
                  "predictions": "df",
@@ -519,7 +517,10 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                  "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
                  "target_name": "$target",
                  "target_dtype": "$dtype_dict[self.target]",
-                 "explainer_blocks": "$analysis_blocks"
+                 "explainer_blocks": "$analysis_blocks",
+                 "fixed_confidence": "self.pred_args.fixed_confidence",
+                 "anomaly_error_rate": "self.pred_args.anomaly_error_rate",
+                 "anomaly_cooldown": "self.pred_args.anomaly_cooldown",
              },
          }), ('analysis_blocks', [
              {
@@ -726,6 +727,7 @@ for mixer in self.mixers:
 self.mixers = trained_mixers
 
 log.info('Ensembling the mixer')
+self.pred_args = PredictionArguments()
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
 
@@ -755,22 +757,21 @@ data = {call(json_ai.cleaner)}
 
 encoded_ds = EncodedDs(self.encoders, data, self.target)
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
+
+self.pred_args = PredictionArguments.from_dict(args)
 """
     predict_common_body = align(predict_common_body, 2)
 
     predict_body = f"""
-df = self.ensemble(encoded_ds)
-insights, global_insights = {call(json_ai.explainer)}
-return insights
+df = self.ensemble(encoded_ds, args=self.pred_args)
+
+if self.pred_args.all_mixers:
+    return df
+else:
+    insights, global_insights = {call(json_ai.explainer)}
+    return insights
 """
     predict_body = align(predict_body, 2)
-
-    predict_proba_body = f"""
-df = self.ensemble(encoded_ds, predict_proba=True)
-insights, global_insights = {call(json_ai.explainer)}
-return insights
-"""
-    predict_proba_body = align(predict_proba_body, 2)
 
     predictor_code = f"""
 {IMPORTS}
@@ -795,14 +796,9 @@ class Predictor(PredictorInterface):
 {dataprep_body}
 {learn_body}
 
-    def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+    def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_common_body}
 {predict_body}
-
-
-    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
-{predict_common_body}
-{predict_proba_body}
 """
 
     predictor_code = black.format_str(predictor_code, mode=black.FileMode())
@@ -816,7 +812,7 @@ def validate_json_ai(json_ai: JsonAI) -> bool:
     
     :param json_ai: A ``JsonAI`` object
 
-    :returns: Wether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
+    :returns: Whether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
     """ # noqa
     from lightwood.api.high_level import predictor_from_code, code_from_json_ai
 
