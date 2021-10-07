@@ -27,7 +27,6 @@ except Exception:
     AmplitudeTsEncoder = None
 
 
-__ts_encoders__ = [TsNumericEncoder, TimeSeriesEncoder, ArrayEncoder]
 __all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder', 'TsNumericEncoder',
            'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder',
            'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder', 'MultiHotEncoder',

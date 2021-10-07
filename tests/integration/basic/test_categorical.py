@@ -35,12 +35,12 @@ class TestBasic(unittest.TestCase):
         return predictor
 
     def test_0_binary(self):
-        df = pd.read_csv('tests/data/adult.csv')[:300]
+        df = pd.read_csv('tests/data/adult.csv')[:100]
         target = 'income'
         predictor = self.setup_predictor(df, target)
         predictions = predictor.predict(df)
-
-        self.assertTrue(balanced_accuracy_score(df[target], predictions['prediction']) > 0.7)
+        acc = balanced_accuracy_score(df[target], predictions['prediction'])
+        self.assertTrue(acc > 0.5)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
 
     def test_1_categorical(self):
