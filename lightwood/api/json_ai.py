@@ -832,6 +832,10 @@ return train_test_data
 
     prepare_body = f"""
 
+
+if self.statistical_analysis is None:
+    raise Exception("Please run analyze_data first")
+    
 # Column to encoder mapping
 self.encoders = {inline_dict(encoder_dict)}
 
@@ -1105,6 +1109,9 @@ class Predictor(PredictorInterface):
         self.dependencies = {inline_dict(dependency_dict)}
 
         self.input_cols = [{input_cols}]
+
+        # Initial stats analysis
+        self.statistical_analysis = None
 
 
     def analyze_data(self, data: pd.DataFrame) -> None:
