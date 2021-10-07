@@ -97,7 +97,7 @@ class LightGBM(BaseMixer):
                 label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype == dtype.integer:
-                label_data = label_data.astype(int)
+                label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
             elif output_dtype in (dtype.float, dtype.quantity):
                 label_data = label_data.astype(float)
 
