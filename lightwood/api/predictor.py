@@ -97,12 +97,12 @@ class PredictorInterface:
         """ # noqa
         pass
 
-    def adjust(self, data: pd.DataFrame) -> None:
+    def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:
         """
         Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.
 
-        ..warnings:: Not tested yet - this is an experimental feature
-        :param data: New data used to adjust a previously trained model.
+        ..warnings:: This is experimental and subject to change. 
+        :param new_data: New data used to adjust a previously trained model.
 
         :returns: Nothing; adjusts best-fit model
         """ # noqa
