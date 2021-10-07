@@ -6,12 +6,25 @@ from typing import Dict
 # Interface that must be respected by predictor objects generated from JSON ML and/or compatible with Mindsdb
 class PredictorInterface:
     """
-    Abstraction of a Lightwood predictor. The PredictorInterface encompasses how Lightwood interacts with the full ML pipeline. Internally,
+    Abstraction of a Lightwood predictor. The ``PredictorInterface`` encompasses how Lightwood interacts with the full ML pipeline. Internally,
 
-    The ``PredictorInterface`` class must have 5 expected functions:
+    The ``PredictorInterface`` class must have several expected functions:
+    
+    - ``analyze_data``: Peform a statistical analysis on the unprocessed data; this helps inform downstream encoders and mixers on how to treat the data types.
+    - ``preprocess``: Apply cleaning functions to each of the columns within the dataset to prepare them for featurization
+    - ``split``: Split the input dataset into a train/dev/test set according to your splitter function
+    - ``prepare``: Create and, if necessary, train your encoders to create feature representations from each column of your data.
+    - ``featurize``: For input, pre-processed data, create feature vectors
+    - ``fit``: Train your mixer models to yield predictions from featurized data
+    - ``analyze_ensemble``: Evaluate the quality of fit for your mixer models
+    - ``adjust``: Incorporate new data to update pre-existing model(s).
 
-    - ``learn``: An end-to-end technique specifying how to pre-process, featurize, and train the model(s) of interest. The expected input is raw, untrained data. No explicit output is provided, but the Predictor object will "host" the trained model thus.
-    - ``adjust``: The manner to incorporate new data to update pre-existing model(s).
+    For simplification, we offer an end-to-end approach that allows you to input raw data and follow every step of the process until you reach a trained predictor with the ``learn`` function:
+
+        - ``learn``: An end-to-end technique specifying how to pre-process, featurize, and train the model(s) of interest. The expected input is raw, untrained data. No explicit output is provided, but the Predictor object will "host" the trained model thus.
+    
+    You can also use the predictor to now estimate new data:
+
     - ``predict``: Deploys the chosen best model, and evaluates the given data to provide target estimates.
     - ``predict_proba``: Deploys the chosen best model, and enables user to analyze how the model makes estimates. This depends on whether the models internally have "predict_proba" as a possible method (thus, only for classification).
     - ``save``: Saves the Predictor object for further use.
