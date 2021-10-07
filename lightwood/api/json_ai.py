@@ -835,7 +835,7 @@ return train_test_data
 
 if self.statistical_analysis is None:
     raise Exception("Please run analyze_data first")
-    
+
 # Column to encoder mapping
 self.encoders = {inline_dict(encoder_dict)}
 
@@ -1030,6 +1030,7 @@ self.analyze_ensemble(enc_train_test)
 # Update the mixers with partial fit
 if {json_ai.problem_definition.fit_on_validation}:
 
+    log.info("Adjustment on validation requested.")
     update_data = {{"new": enc_train_test["test"], "old": ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]])}}
 
     self.adjust(update_data)
