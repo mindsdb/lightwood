@@ -1028,7 +1028,7 @@ self.analyze_ensemble(enc_train_test)
 # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
 
 # Update the mixers with partial fit
-if {json_ai.problem_definition.fit_on_validation}:
+if self.problem_definition.fit_on_validation:
 
     log.info("Adjustment on validation requested.")
     update_data = {{"new": enc_train_test["test"], "old": ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]])}}
