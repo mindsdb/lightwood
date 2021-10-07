@@ -41,11 +41,11 @@ class PredictorInterface:
         """ # noqa
         pass
 
-    def split(self, clean_data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+    def split(self, data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
         """
         Categorizes the data into a training/testing split; if data is a classification problem, will stratify the data.
 
-        :param clean_data: Pre-processed data.
+        :param data: Pre-processed data, but generically any dataset to split into train/dev/test.
         :returns: Dictionary containing training/testing fraction
         """ # noqa
         pass

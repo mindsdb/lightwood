@@ -1115,7 +1115,7 @@ class Predictor(PredictorInterface):
         # Preprocess and clean data
 {clean_body}
 
-    def split(self, clean_data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+    def split(self, data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
         # Split the data into training/testing splits
 {split_body}
 
