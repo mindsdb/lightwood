@@ -71,9 +71,9 @@ class PredictorInterface:
 
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         """
-        Fits "mixer" models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them.
+        Fits "mixer" models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them. 
 
-        :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits.
+        :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits. Keys expected are "train", "dev", and "test"
         """
         pass
 
@@ -102,7 +102,7 @@ class PredictorInterface:
         Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.
 
         ..warnings:: This is experimental and subject to change. 
-        :param new_data: New data used to adjust a previously trained model.
+        :param new_data: New data used to adjust a previously trained model. Keys must reference "old" and "new" referencing to the old and new datasets. In some situations, the old data is still required to train a model (i.e. Regression) to ensure the new data doesn't entirely override it.
 
         :returns: Nothing; adjusts best-fit model
         """ # noqa
