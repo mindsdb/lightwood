@@ -2,7 +2,6 @@
 *.vec
 *.pkl
 *.dill
-*.ipy*
 *.test.*
 .cache*
 *.jar
