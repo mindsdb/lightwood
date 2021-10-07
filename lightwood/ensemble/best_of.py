@@ -40,7 +40,7 @@ class BestOf(BaseEnsemble):
         self.supports_proba = self.mixers[self.indexes_by_accuracy[0]].supports_proba
         log.info(f'Picked best mixer: {type(self.mixers[self.indexes_by_accuracy[0]]).__name__}')
 
-    def __call__(self, ds: EncodedDs) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
         for mixer_index in self.indexes_by_accuracy:
             try:
                 return self.mixers[mixer_index](ds, predict_proba=predict_proba)
