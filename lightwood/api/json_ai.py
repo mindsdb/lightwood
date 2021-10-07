@@ -891,10 +891,12 @@ for col_name, encoder in self.encoders.items():
     feature_body = f"""
 log.info('Featurizing the data')
 
-for key, data in split_data.items():
-    split_data[key] = EncodedDs(self.encoders, data, self.target)
+feature_data = {{key: None for key in split_data.keys()}}
 
-return split_data
+for key, data in split_data.items():
+    feature_data[key] = EncodedDs(self.encoders, data, self.target)
+
+return feature_data
     """
 
     feature_body = align(feature_body, 2)
@@ -909,9 +911,9 @@ return split_data
 # Extract data
 # --------------- #
 # Extract the featurized data into train/dev/test
-encoded_train_data = EncodedDs(self.encoders, enc_data['train'], self.target)
-encoded_dev_data = EncodedDs(self.encoders, enc_data['dev'], self.target)
-encoded_test_data = EncodedDs(self.encoders, enc_data['test'], self.target)
+encoded_train_data = enc_data['train']
+encoded_dev_data = enc_data['dev']
+encoded_test_data = enc_data['test']
 
 log.info('Training the mixers')
 
@@ -955,9 +957,9 @@ self.supports_proba = self.ensemble.supports_proba
 # Extract data
 # --------------- #
 # Extract the featurized data into train/dev/test
-encoded_train_data = EncodedDs(self.encoders, enc_data['train'], self.target)
-encoded_dev_data = EncodedDs(self.encoders, enc_data['dev'], self.target)
-encoded_test_data = EncodedDs(self.encoders, enc_data['test'], self.target)
+encoded_train_data = enc_data['train']
+encoded_dev_data = enc_data['dev']
+encoded_test_data = enc_data['test']
 
 # --------------- #
 # Analyze Ensembles
@@ -977,8 +979,8 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 # Extract data
 # --------------- #
 # Extract the featurized data
-encoded_old_data = EncodedDs(self.encoders, enc_data['old'], self.target)
-encoded_new_data = EncodedDs(self.encoders, enc_data['new'], self.target)
+encoded_old_data = new_data['old']
+encoded_new_data = new_data['new']
 
 # --------------- #
 # Adjust (Update) Mixers
@@ -1018,10 +1020,14 @@ self.fit(enc_train_test)
 self.analyze_ensemble(enc_train_test)
 
 # ------------------------ #
-# Enable partial fit of model AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits. This assumes that the predictor could be continuously evolved, hence including the reserved data may improve predictivity. MAKE `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
+# Enable partial fit of model AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits. This assumes that the predictor could be continuously evolved, hence including the reserved testing data may improve predictivity. 
+# SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
 
 # Update the mixers with partial fit
 if {json_ai.problem_definition.fit_on_validation}:
+
+    update_data = {{"new": enc_train_test["test"], "old": ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]])}}
+
     self.adjust(update_data)
 
 """
