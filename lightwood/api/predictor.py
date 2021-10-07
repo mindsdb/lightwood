@@ -114,7 +114,7 @@ class PredictorInterface:
         """
         Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.
 
-        ..warnings:: This is experimental and subject to change. 
+        ..warning:: This is experimental and subject to change. 
         :param new_data: New data used to adjust a previously trained model. Keys must reference "old" and "new" referencing to the old and new datasets. In some situations, the old data is still required to train a model (i.e. Regression) to ensure the new data doesn't entirely override it.
 
         :returns: Nothing; adjusts best-fit model
