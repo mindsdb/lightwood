@@ -48,12 +48,13 @@ def cleaner(
                            anomaly_detection, dtype_dict)
 
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
+        
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
         data[col] = data[col].replace(to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None)
+
         # If a column has too many None values, raise an Excpetion
-        # Figure out how to reintroduce later, maybe a custom flag, `crash for too much invalid data`?
         # _check_if_invalid(data[col], pct_invalid, col)
     return data
 
