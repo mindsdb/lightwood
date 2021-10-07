@@ -1,3 +1,4 @@
+from lightwood.api.dtype import dtype
 import unittest
 import pandas as pd
 from sklearn.metrics import r2_score
@@ -16,11 +17,17 @@ class TestBasic(unittest.TestCase):
         df = df.rename(columns={df.columns[3]: f'{{{df.columns[3]}\"'})
         target = 'MEDV'
 
+        # Make this a quantity
+        df[target] = [f'{x}$' for x in df[target]]
+
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 200}))
         predictor.learn(df)
+
+        assert predictor.model_analysis.dtypes[target] == dtype.quantity
+
         predictions = predictor.predict(df)
 
         # sanity checks
-        self.assertTrue(r2_score(df[target], predictions['prediction']) > 0.8)
+        self.assertTrue(r2_score([float(x.rstrip('$')) for x in df[target]], predictions['prediction']) > 0.8)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
         self.assertTrue(all([p['lower'] <= p['prediction'] <= p['upper'] for _, p in predictions.iterrows()]))

@@ -31,23 +31,23 @@ class LightGBMArray(BaseMixer):
         self.supports_proba = False
         self.stable = True
 
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
+    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Started fitting LGBM models for array prediction')
 
         for timestep in range(self.n_ts_predictions):
             if timestep > 0:
-                for idx in range(len(ds_arr)):
-                    ds_arr[idx].data_frame[self.target] = ds_arr[idx].data_frame[f'{self.target}_timestep_{timestep}']
-            self.models[timestep].fit(ds_arr)  # @TODO: this call could be parallelized
+                train_data.data_frame[self.target] = train_data.data_frame[f'{self.target}_timestep_{timestep}']
+                dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
 
-    def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
+            self.models[timestep].fit(train_data, dev_data)  # @TODO: this call could be parallelized
+
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Updating array of LGBM models...')
 
         for timestep in range(self.n_ts_predictions):
             if timestep > 0:
-                for data in train_data, dev_data:
-                    for idx in range(len(data)):
-                        data[idx].data_frame[self.target] = data[idx].data_frame[f'{self.target}_timestep_{timestep}']
+                train_data.data_frame[self.target] = train_data.data_frame[f'{self.target}_timestep_{timestep}']
+                dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
 
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 

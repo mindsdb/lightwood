@@ -1,5 +1,6 @@
 import os
 from types import ModuleType
+from typing import Union
 import dill
 import pandas as pd
 from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
@@ -14,9 +15,10 @@ import random
 import string
 import gc
 import time
+from lightwood.helpers.log import log
 
 
-def predictor_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> PredictorInterface:
+def predictor_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> PredictorInterface:
     """
     Creates a ready-to-train ``Predictor`` object from some raw data and a ``ProblemDefinition``. Do not use this if you want to edit the JsonAI first. Usually you'd want to next train this predictor by calling the ``learn`` method on the same dataframe used to create it.
 
@@ -28,11 +30,14 @@ def predictor_from_problem(df: pd.DataFrame, problem_definition: ProblemDefiniti
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
+    log.info(f'Dropping features: {problem_definition.ignore_features}')
+    df = df.drop(columns=problem_definition.ignore_features)
+
     predictor_class_str = code_from_problem(df, problem_definition)
     return predictor_from_code(predictor_class_str)
 
 
-def json_ai_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> JsonAI:
+def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> JsonAI:
     """
     Creates a JsonAI from your raw data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via `to_dict`, modify it, and then create a new object from it using `lightwood.JsonAI.from_dict`. It's usually better to generate the JsonAI using this function rather than writing it from scratch.
 
@@ -41,9 +46,11 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition
 
     :returns: A ``JsonAI`` object generated based on your data and problem specifications
     """ # noqa
-
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
+
+    log.info(f'Dropping features: {problem_definition.ignore_features}')
+    df = df.drop(columns=problem_definition.ignore_features)
 
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
     statistical_analysis = lightwood.data.statistical_analysis(
@@ -99,13 +106,18 @@ def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
     )
 
 
-def code_from_problem(df: pd.DataFrame, problem_definition: ProblemDefinition) -> str:
+def code_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> str:
     """
     :param df: The raw data
     :param problem_definition: The manual specifications for your predictive problem
 
     :returns: The text code generated based on your data and problem specifications
     """
+    if not isinstance(problem_definition, ProblemDefinition):
+        problem_definition = ProblemDefinition.from_dict(problem_definition)
+
+    log.info(f'Dropping features: {problem_definition.ignore_features}')
+    df = df.drop(columns=problem_definition.ignore_features)
     json_ai = json_ai_from_problem(df, problem_definition)
     predictor_code = code_from_json_ai(json_ai)
     return predictor_code
