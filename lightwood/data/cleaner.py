@@ -54,7 +54,7 @@ def cleaner(
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
         data[col] = data[col].replace(to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None)
 
-        # If a column has too many None values, raise an Excpetion
+        # If a column has too many None values, raise an Exception
         # _check_if_invalid(data[col], pct_invalid, col)
     return data
 
