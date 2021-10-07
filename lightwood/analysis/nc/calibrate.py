@@ -367,9 +367,9 @@ class ICP(BaseAnalysisBlock):
                 # Or if they even need handling yet
                 pass
             elif ns.target_dtype in (dtype.integer):
-                row_insights['prediction'] = row_insights['prediction'].astype(int)
-                row_insights['upper'] = row_insights['upper'].astype(int)
-                row_insights['lower'] = row_insights['lower'].astype(int)
+                row_insights['prediction'] = row_insights['prediction'].clip(-pow(2, 62), pow(2, 62)).astype(int)
+                row_insights['upper'] = row_insights['upper'].clip(-pow(2, 62), pow(2, 62)).astype(int)
+                row_insights['lower'] = row_insights['lower'].clip(-pow(2, 62), pow(2, 62)).astype(int)
             elif ns.target_dtype in (dtype.float, dtype.quantity):
                 row_insights['prediction'] = row_insights['prediction'].astype(float)
                 row_insights['upper'] = row_insights['upper'].astype(float)

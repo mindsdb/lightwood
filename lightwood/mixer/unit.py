@@ -24,12 +24,10 @@ class Unit(BaseMixer):
         self.supports_proba = False
         self.stable = True
 
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
+    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info("Unit Mixer just borrows from encoder")
 
-    def partial_fit(
-        self, train_data: List[EncodedDs], dev_data: List[EncodedDs]
-    ) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         pass
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:

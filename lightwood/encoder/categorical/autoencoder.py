@@ -8,6 +8,7 @@ from lightwood.encoder.categorical.gym import Gym
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.mixer.helpers.default_net import DefaultNet
+import pandas as pd
 
 
 class CategoricalAutoEncoder(BaseEncoder):
@@ -24,7 +25,6 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.desired_error = 0.01
         self.stop_after = stop_after
         # @TODO stop using instead of ONEHOT !!!@!
-        self.is_nn_encoder = True
         self.output_size = None
         self.max_encoded_length = max_encoded_length
 
@@ -36,7 +36,8 @@ class CategoricalAutoEncoder(BaseEncoder):
         labels = targets_c.to(self.net.device)
         return labels
 
-    def prepare(self, priming_data):
+    def prepare(self, train_priming_data, dev_priming_data):
+        priming_data = pd.concat([train_priming_data, dev_priming_data])
         random.seed(len(priming_data))
 
         if self._prepared:

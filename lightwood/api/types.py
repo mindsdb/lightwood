@@ -215,6 +215,7 @@ class TimeseriesSettings:
     historical_columns: List[str] = None
     target_type: str = (
         ""  # @TODO: is the current setter (outside of initialization) a sane option?
+        # @TODO: George: No, I don't think it is, we need to pass this some other way
     )
     allow_incomplete_history: bool = False
 
@@ -311,7 +312,6 @@ class ProblemDefinition:
     """
 
     target: str
-    nsubsets: int
     pct_invalid: float
     unbias_target: bool
     seconds_per_mixer: Union[int, None]
@@ -337,7 +337,6 @@ class ProblemDefinition:
         :returns: A populated ``ProblemDefinition`` object.
         """
         target = obj['target']
-        nsubsets = obj.get('nsubsets', 30)
         pct_invalid = obj.get('pct_invalid', 2)
         unbias_target = obj.get('unbias_target', True)
         seconds_per_mixer = obj.get('seconds_per_mixer', None)
@@ -353,7 +352,6 @@ class ProblemDefinition:
         seed_nr = obj.get('seed_nr', 420)
         problem_definition = ProblemDefinition(
             target=target,
-            nsubsets=nsubsets,
             pct_invalid=pct_invalid,
             unbias_target=unbias_target,
             seconds_per_mixer=seconds_per_mixer,

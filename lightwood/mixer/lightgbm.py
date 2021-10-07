@@ -14,7 +14,7 @@ from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.helpers.device import get_devices
 from lightwood.api.types import PredictionArguments
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.data.encoded_ds import EncodedDs
 
 
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
@@ -100,7 +100,7 @@ class LightGBM(BaseMixer):
                 label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype == dtype.integer:
-                label_data = label_data.astype(int)
+                label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
             elif output_dtype in (dtype.float, dtype.quantity):
                 label_data = label_data.astype(float)
 
@@ -108,16 +108,14 @@ class LightGBM(BaseMixer):
 
         return data
 
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
+    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Started fitting LGBM model')
-        train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
-        dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
         data = {
-            'train': {'ds': ConcatedEncodedDs(train_ds_arr), 'data': None, 'label_data': {}},
-            'dev': {'ds': ConcatedEncodedDs(dev_ds_arr), 'data': None, 'label_data': {}}
+            'train': {'ds': train_data, 'data': None, 'label_data': {}},
+            'dev': {'ds': dev_data, 'data': None, 'label_data': {}}
         }
         self.fit_data_len = len(data['train']['ds'])
-        self.positive_domain = getattr(train_ds_arr[0].encoders.get(self.target, None), 'positive_domain', False)
+        self.positive_domain = getattr(train_data.encoders.get(self.target, None), 'positive_domain', False)
 
         output_dtype = self.dtype_dict[self.target]
 
@@ -191,15 +189,14 @@ class LightGBM(BaseMixer):
         log.info(f'Lightgbm model contains {self.model.num_trees()} weak estimators')
 
         if self.fit_on_dev:
-            self.partial_fit(dev_ds_arr, train_ds_arr)
+            self.partial_fit(dev_data, train_data)
 
-    def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
-        ds = ConcatedEncodedDs(train_data)
-        pct_of_original = len(ds) / self.fit_data_len
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        pct_of_original = len(train_data) / self.fit_data_len
         iterations = max(1, int(self.num_iterations * pct_of_original) / 2)
 
-        data = {'retrain': {'ds': ds, 'data': None, 'label_data': {}}, 'dev': {
-            'ds': ConcatedEncodedDs(dev_data), 'data': None, 'label_data': {}}}
+        data = {'retrain': {'ds': train_data, 'data': None, 'label_data': {}}, 'dev': {
+            'ds': dev_data, 'data': None, 'label_data': {}}}
 
         output_dtype = self.dtype_dict[self.target]
         data = self._to_dataset(data, output_dtype)

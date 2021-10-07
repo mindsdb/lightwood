@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Union
+from typing import Dict, Union
 from sktime.forecasting.arima import AutoARIMA
 
 from lightwood.api import dtype
@@ -33,10 +33,10 @@ class SkTime(BaseMixer):
         self.supports_proba = False
         self.stable = True
 
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
+    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Started fitting sktime forecaster for array prediction')
 
-        all_subsets = ConcatedEncodedDs(ds_arr)
+        all_subsets = ConcatedEncodedDs([train_data, dev_data])
         df = all_subsets.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
         data = {'data': df[self.target],
                 'group_info': {gcol: df[gcol].tolist()
@@ -92,12 +92,14 @@ class SkTime(BaseMixer):
                 series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
+                forecaster = self.models[group] if self.models[group].is_fitted else self.models['__default']
+
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
 
                 for idx, _ in enumerate(series.iteritems()):
-                    ydf['prediction'].iloc[series_idxs[idx]] = self.models[group].predict(
+                    ydf['prediction'].iloc[series_idxs[idx]] = forecaster.predict(
                         np.arange(idx,  # +cutoff
                                   idx + self.n_ts_predictions)).tolist()  # +cutoff
 

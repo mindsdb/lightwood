@@ -14,7 +14,6 @@ class BaseEncoder:
         self.is_target = is_target
         self._prepared = False
         self.uses_subsets = False
-        self.is_nn_encoder = False
         self.dependencies = []
         self.output_size = None
 
