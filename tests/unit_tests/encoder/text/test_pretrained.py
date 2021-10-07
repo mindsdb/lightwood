@@ -5,6 +5,7 @@ from sklearn.metrics import r2_score
 from lightwood.encoder.numeric import NumericEncoder
 from lightwood.encoder.text import PretrainedLangEncoder
 from lightwood.api.dtype import dtype
+import pandas as pd
 
 
 class TestPretrainedLangEncoder(unittest.TestCase):
@@ -32,7 +33,7 @@ class TestPretrainedLangEncoder(unittest.TestCase):
 
         enc = PretrainedLangEncoder(stop_after=10)
 
-        enc.prepare(priming_data,
+        enc.prepare(pd.Series(priming_data), pd.Series(priming_data),
                     encoded_target_values={'targets': [
                         {'output_type': dtype.float, 'encoded_output': encoded_data_1},
                     ]})

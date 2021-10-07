@@ -15,10 +15,10 @@ from torch.optim.optimizer import Optimizer
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
-from lightwood.mixer.base import BaseMixer
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.data.encoded_ds import EncodedDs
+from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.helpers.ar_net import ArNet
 from lightwood.mixer.helpers.default_net import DefaultNet
 from lightwood.api.types import TimeseriesSettings, PredictionArguments
@@ -50,7 +50,7 @@ class Neural(BaseMixer):
         self.search_hyperparameters = search_hyperparameters
         self.stable = True
 
-    def _final_tuning(self, data_arr):
+    def _final_tuning(self, data):
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity):
             self.model = self.model.eval()
             with torch.no_grad():
@@ -59,17 +59,16 @@ class Neural(BaseMixer):
                     self.target_encoder.decode_log = decode_log
                     decoded_predictions = []
                     decoded_real_values = []
-                    for data in data_arr:
-                        for X, Y in data:
-                            X = X.to(self.model.device)
-                            Y = Y.to(self.model.device)
-                            Yh = self.model(X)
+                    for X, Y in data:
+                        X = X.to(self.model.device)
+                        Y = Y.to(self.model.device)
+                        Yh = self.model(X)
 
-                            Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
-                            Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
+                        Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
+                        Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
 
-                            decoded_predictions.extend(self.target_encoder.decode(Yh))
-                            decoded_real_values.extend(self.target_encoder.decode(Y))
+                        decoded_predictions.extend(self.target_encoder.decode(Yh))
+                        decoded_real_values.extend(self.target_encoder.decode(Y))
 
                     acc_dict[decode_log] = r2_score(decoded_real_values, decoded_predictions)
 
@@ -183,7 +182,6 @@ class Neural(BaseMixer):
                 running_losses.append(loss.item())
 
             train_error = np.mean(running_losses)
-
             epoch_error = self._error(dev_dl, criterion)
             running_errors.append(epoch_error)
             log.debug(f'Loss @ epoch {epoch}: {epoch_error}')
@@ -223,39 +221,34 @@ class Neural(BaseMixer):
                 running_losses.append(criterion(Yh, Y).item())
             return np.mean(running_losses)
 
-    def _init_net(self, ds_arr: List[EncodedDs]):
-        net_kwargs = {'input_size': len(ds_arr[0][0][0]),
-                      'output_size': len(ds_arr[0][0][1]),
+    def _init_net(self, ds: EncodedDs):
+        net_kwargs = {'input_size': len(ds[0][0]),
+                      'output_size': len(ds[0][1]),
                       'num_hidden': self.num_hidden,
                       'dropout': 0}
 
         if self.net_class == ArNet:
-            net_kwargs['encoder_span'] = ds_arr[0].encoder_spans
+            net_kwargs['encoder_span'] = ds.encoder_spans
             net_kwargs['target_name'] = self.target
 
         self.model = self.net_class(**net_kwargs)
 
     # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
     # @TODO: Writeup on the methodology for partial fitting
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
+    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         # ConcatedEncodedDs
-        train_ds_arr = ds_arr[0:int(len(ds_arr) * 0.9)]
-        dev_ds_arr = ds_arr[int(len(ds_arr) * 0.9):]
-
-        con_train_ds = ConcatedEncodedDs(train_ds_arr)
-        con_test_ds = ConcatedEncodedDs(dev_ds_arr)
-        self.batch_size = min(200, int(len(con_train_ds) / 10))
+        self.batch_size = min(200, int(len(train_data) / 10))
         self.batch_size = max(40, self.batch_size)
 
-        dev_dl = DataLoader(con_test_ds, batch_size=self.batch_size, shuffle=False)
-        train_dl = DataLoader(con_train_ds, batch_size=self.batch_size, shuffle=False)
+        dev_dl = DataLoader(dev_data, batch_size=self.batch_size, shuffle=False)
+        train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=False)
 
         self.lr = 1e-4
         self.num_hidden = 1
 
         # Find learning rate
         # keep the weights
-        self._init_net(ds_arr)
+        self._init_net(train_data)
         self.lr, self.model = self._find_lr(train_dl)
 
         # Keep on training
@@ -263,24 +256,19 @@ class Neural(BaseMixer):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        train_dl = DataLoader(ConcatedEncodedDs(train_ds_arr), batch_size=200, shuffle=True)
-
         self.model, epoch_to_best_model, err = self._max_fit(
             train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=20000)
 
         self.epochs_to_best += epoch_to_best_model
 
-        if len(con_test_ds) > 0:
-            if self.fit_on_dev:
-                self.partial_fit(dev_ds_arr, train_ds_arr)
-            self._final_tuning(dev_ds_arr)
+        if self.fit_on_dev:
+            self.partial_fit(dev_data, train_data)
+        self._final_tuning(dev_data)
 
-    def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly # noqa
-        train_ds = ConcatedEncodedDs(train_data)
-        dev_ds = ConcatedEncodedDs(dev_data + train_data)
-        train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
-        dev_dl = DataLoader(dev_ds, batch_size=self.batch_size, shuffle=True)
+        train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
+        dev_dl = DataLoader(dev_data, batch_size=self.batch_size, shuffle=True)
         optimizer = self._select_optimizer()
         criterion = self._select_criterion()
         scaler = GradScaler()

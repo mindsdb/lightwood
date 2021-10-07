@@ -49,7 +49,6 @@ class TimeSeriesEncoder(BaseEncoder):
         self._group_combinations = None
         self.original_type = original_type
         self.stop_after = stop_after
-        self.is_nn_encoder = True
         if encoder_type.lower() == 'rnn':
             self.encoder_class = EncoderRNNNumerical
         elif encoder_type.lower() == 'transformer':
@@ -147,7 +146,7 @@ class TimeSeriesEncoder(BaseEncoder):
         end = min(end, len(source))
         return source[start:end]
 
-    def prepare(self, priming_data, dependency_data={}, ts_analysis=None,
+    def prepare(self, train_priming_data: pd.Series, dev_priming_data: pd.Series, dependency_data={}, ts_analysis=None,
                 feedback_hoop_function=log.info, batch_size=256):
         """
         :param priming_data: a list of (self._n_dims)-dimensional time series [[dim1_data], ...]
@@ -156,6 +155,9 @@ class TimeSeriesEncoder(BaseEncoder):
         :param feedback_hoop_function: method to use if you want to get feedback on the training process
         :param batch_size
         """
+        priming_data = pd.concat([train_priming_data, dev_priming_data])
+        priming_data = list(priming_data.values)
+
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
         else:

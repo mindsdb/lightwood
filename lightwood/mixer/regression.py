@@ -1,5 +1,3 @@
-from typing import List
-
 import torch
 import pandas as pd
 from scipy.special import softmax
@@ -26,13 +24,13 @@ class Regression(BaseMixer):
         self.label_map = {}
         self.stable = False
 
-    def fit(self, ds_arr: List[EncodedDs]) -> None:
+    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         if self.target_dtype not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(f'Unspported {self.target_dtype} type for regression')
         log.info('Fitting Linear Regression model')
         X = []
         Y = []
-        for x, y in ConcatedEncodedDs(ds_arr):
+        for x, y in ConcatedEncodedDs([train_data, dev_data]):
             X.append(x.tolist())
             Y.append(y.tolist())
 
@@ -42,8 +40,8 @@ class Regression(BaseMixer):
         self.model = LinearRegression().fit(X, Y)
         log.info(f'Regression based correlation of: {self.model.score(X, Y)}')
 
-    def partial_fit(self, train_data: List[EncodedDs], dev_data: List[EncodedDs]) -> None:
-        self.fit(train_data + dev_data)
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        self.fit(train_data, dev_data)
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         X = []

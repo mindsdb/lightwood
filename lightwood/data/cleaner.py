@@ -22,7 +22,6 @@ def cleaner(
     data: pd.DataFrame,
     dtype_dict: Dict[str, str],
     pct_invalid: float,
-    ignore_features: List[str],
     identifiers: Dict[str, str],
     target: str,
     mode: str,
@@ -36,7 +35,6 @@ def cleaner(
     :param data: The raw data
     :param dtype_dict: Type information for each column
     :param pct_invalid: How much of each column can be invalid
-    :param ignore_features: Columns that we want to ignore
     :param identifiers: A dict containing all identifier typed columns
     :param target: The target columns
     :param mode: Can be "predict" or "train"
@@ -46,15 +44,14 @@ def cleaner(
     :returns: The cleaned data
     """ # noqa
 
-    data = _remove_columns(data, ignore_features, identifiers, target, mode, timeseries_settings,
+    data = _remove_columns(data, identifiers, target, mode, timeseries_settings,
                            anomaly_detection, dtype_dict)
 
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
-        for nan_val in VALUES_FOR_NAN_AND_NONE_IN_PANDAS:
-            data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
-                                        ).replace({nan_val: None})
+        data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
+        data[col] = data[col].replace(to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None)
         # If a column has too many None values, raise an Excpetion
         # Figure out how to reintroduce later, maybe a custom flag, `crash for too much invalid data`?
         # _check_if_invalid(data[col], pct_invalid, col)
@@ -247,7 +244,7 @@ def _rm_rows_w_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     return df
 
 
-def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers: Dict[str, object], target: str,
+def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: str,
                     mode: str, timeseries_settings: TimeseriesSettings, anomaly_detection: bool,
                     dtype_dict: Dict[str, dtype]) -> pd.DataFrame:
     """
@@ -255,7 +252,6 @@ def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers:
 
     :param data: The raw data
     :param dtype_dict: Type information for each column
-    :param ignore_features: Columns that we want to ignore
     :param identifiers: A dict containing all identifier typed columns
     :param target: The target columns
     :param mode: Can be "predict" or "train"
@@ -265,12 +261,10 @@ def _remove_columns(data: pd.DataFrame, ignore_features: List[str], identifiers:
     :returns: A (new) dataframe without the dropped columns
     """ # noqa
     data = deepcopy(data)
-    to_drop = [*ignore_features, *[x for x in identifiers.keys() if x != target],
+    to_drop = [*[x for x in identifiers.keys() if x != target],
                *[x for x in data.columns if x in dtype_dict and dtype_dict[x] == dtype.invalid]]
     exceptions = ["__mdb_make_predictions"]
-    for col in to_drop:
-        if col in data.columns:
-            data.drop(columns=[col], inplace=True)
+    data = data.drop(columns=to_drop)
 
     if mode == "train":
         data = _rm_rows_w_empty_targets(data, target)

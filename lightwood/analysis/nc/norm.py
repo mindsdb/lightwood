@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union
 
 import torch
 import numpy as np
@@ -30,7 +30,7 @@ class Normalizer(BaseMixer):
         self.bounds = (0.5, 1.5)
         self.error_fn = mean_absolute_error
 
-    def fit(self, data: List[EncodedDs]) -> None:
+    def fit(self, data: EncodedDs) -> None:
         try:
             data = ConcatedEncodedDs(data)
             preds = self.base_predictor(data, args=PredictionArguments.from_dict({'predict_proba': True}))

@@ -12,7 +12,6 @@ from lightwood.api.types import (
     PredictionArguments,
 )
 from lightwood.api.predictor import PredictorInterface
-from lightwood.api.encode import encode
 from lightwood.api.high_level import (
     analyze_dataset,
     code_from_problem,
@@ -41,7 +40,6 @@ __all__ = [
     "DataAnalysis",
     "PredictionArguments",
     "PredictorInterface",
-    "encode",
     "dtype",
     "predictor_from_state",
 ]
