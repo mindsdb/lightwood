@@ -11,6 +11,5 @@ The API module is how Lightwood interfaces with the user.
 
    api/dtype
    api/types
-   api/encode
    api/predictor
    api/json_ai
