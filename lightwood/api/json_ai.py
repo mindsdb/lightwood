@@ -1050,7 +1050,7 @@ if self.problem_definition.fit_on_validation:
     predict_body = f"""
 # Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-data = data.drop(columns=self.problem_definition.ignore_features)
+data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:
     if col not in data.columns:
         data[col] = [None] * len(data)
@@ -1135,6 +1135,8 @@ class Predictor(PredictorInterface):
 {analyze_ensemble}
 
     def learn(self, data: pd.DataFrame) -> None:
+        log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
+        data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
     def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:
