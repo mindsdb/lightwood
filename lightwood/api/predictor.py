@@ -1,7 +1,10 @@
-from lightwood.api.types import ModelAnalysis
 import dill
+from typing import Dict
+
 import pandas as pd
 from typing import Dict
+
+from lightwood.api.types import ModelAnalysis
 
 
 # Interface that must be respected by predictor objects generated from JSON ML and/or compatible with Mindsdb
@@ -27,7 +30,6 @@ class PredictorInterface:
     You can also use the predictor to now estimate new data:
 
     - ``predict``: Deploys the chosen best model, and evaluates the given data to provide target estimates.
-    - ``predict_proba``: Deploys the chosen best model, and enables user to analyze how the model makes estimates. This depends on whether the models internally have "predict_proba" as a possible method (thus, only for classification).
     - ``save``: Saves the Predictor object for further use.
 
     The ``PredictorInterface`` is created via J{ai}son's custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.
@@ -122,24 +124,15 @@ class PredictorInterface:
         """ # noqa
         pass
 
-    def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+    def predict(self, data: pd.DataFrame, args: Dict[str, object] = {}) -> pd.DataFrame:
         """
         Intakes raw data to provide predicted values for your trained model.
 
         :param data: Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.
+        :param args: parameters needed to update the predictor ``PredictionArguments`` object, which holds any parameters relevant for prediction.
 
         :returns: A dataframe of predictions of the same length of input.
-        """ # noqa
-        pass
-
-    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Intakes raw data to provide some element of confidence/explainability metric to gauge your model's predictive abilities.
-
-        :param data: Data that the model(s) will evaluate on; provides the some element of predictive strength (ex: how "confident" the model is).
-
-        :returns: A dataframe of confidence metrics for each datapoint provided in the input (n_samples, n_classes)
-        """ # noqa
+        """  # noqa
         pass
 
     def save(self, file_path: str) -> None:
