@@ -11,13 +11,25 @@
 from collections import Counter, defaultdict
 import string
 import json
+import re
 import hashlib
 import numpy as np
 import scipy.stats as st
 import langdetect
 import nltk
-from nltk.corpus import stopwords
 from lightwood.api.dtype import dtype
+
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
+try:
+    from nltk.corpus import stopwords
+    stopwords.words('english')
+except LookupError:
+    nltk.download('stopwords', quiet=True)
 
 
 def get_language_dist(data):
@@ -58,7 +70,6 @@ def analyze_sentences(data):
     nr_words = 0
     word_dist = defaultdict(int)
     nr_words_dist = defaultdict(int)
-    nltk.download('stopwords')
     stop_words = set(stopwords.words('english'))
     for text in map(str, data):
         text = text.lower()
@@ -247,13 +258,8 @@ def get_identifier_description(data, column_name, data_dtype):
     return None
 
 
-import re
 
 
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
 
 
 def contains_alnum(text):
