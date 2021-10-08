@@ -1004,6 +1004,8 @@ for mixer in self.mixers:
     # ----------------- #
 
     learn_body = f"""
+self.mode = 'train'
+
 # Perform stats analysis
 self.analyze_data(data)
 
