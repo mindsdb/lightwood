@@ -418,19 +418,15 @@ def _merge_implicit_values(field, implicit_value):
     if inspect.isclass(module):
         args = list(inspect.signature(module.__init__).parameters.keys())[1:]
     else:
-        # Attempt to add implicit values, if fails, returns field as-is
-        try:
-            args = module.__code__.co_varnames
+        args = module.__code__.co_varnames
 
-            for arg in args:
-                if "args" not in field:
-                    field["args"] = implicit_value["args"]
-                else:
-                    if arg not in field["args"]:
-                        if arg in implicit_value["args"]:
-                            field["args"][arg] = implicit_value["args"][arg]
-        except AttributeError:
-            pass
+    for arg in args:
+        if "args" not in field:
+            field["args"] = implicit_value["args"]
+        else:
+            if arg not in field["args"]:
+                if arg in implicit_value["args"]:
+                    field["args"][arg] = implicit_value["args"][arg]
 
     return field
 
