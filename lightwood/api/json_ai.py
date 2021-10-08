@@ -793,9 +793,6 @@ self.statistical_analysis = lightwood.data.statistical_analysis(data,
 
 # Instantiate post-training evaluation
 self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
-
-# Time-series blocks
-{ts_analyze_code}
     """
 
     analyze_data_body = align(analyze_data_body, 2)
@@ -810,6 +807,7 @@ data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
+{ts_analyze_code}
 
 return data
     """
