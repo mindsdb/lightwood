@@ -7,10 +7,11 @@ from lightwood.api.types import PredictionArguments
 class BaseMixer:
     fit_data_len: int
     stable: bool
+    supports_proba: bool
 
     def __init__(self, stop_after: int):
         self.stop_after = stop_after
-        self.supports_proba = None
+        self.supports_proba = False
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         raise NotImplementedError()
