@@ -24,7 +24,6 @@ github:
 	@touch ../docs
 	@rm -r ../docs
 	@cp -a build/html/. ../docs
-	@rm -r ../docs/tutorials
-	@cp -r source/tutorials ../docs
+	@cp -a source/tutorials ../docs
 	@rm -r build
 	@touch ../docs/.nojekyll
