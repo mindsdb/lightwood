@@ -745,7 +745,7 @@ for mixer in self.mixers:
 
     predict_common_body = f"""
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-data = data.drop(columns=self.problem_definition.ignore_features)
+data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:
     if col not in data.columns:
         data[col] = [None] * len(data)
@@ -792,7 +792,7 @@ class Predictor(PredictorInterface):
     def learn(self, data: pd.DataFrame) -> None:
         self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
         log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-        data = data.drop(columns=self.problem_definition.ignore_features)
+        data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {dataprep_body}
 {learn_body}
 
