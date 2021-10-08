@@ -829,7 +829,7 @@ return train_test_data
     # ----------------- #
 
     prepare_body = f"""
-
+self.mode = 'train'
 
 if self.statistical_analysis is None:
     raise Exception("Please run analyze_data first")
@@ -892,7 +892,6 @@ for col_name, encoder in self.encoders.items():
 
     feature_body = f"""
 log.info('Featurizing the data')
-
 feature_data = {{key: None for key in split_data.keys()}}
 
 for key, data in split_data.items():
@@ -908,6 +907,7 @@ return feature_data
     # ----------------- #
 
     fit_body = f"""
+self.mode = 'train'
 
 # --------------- #
 # Extract data
@@ -976,6 +976,7 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
     # ----------------- #
 
     adjust_body = f"""
+self.mode = 'train'
 
 # --------------- #
 # Extract data
@@ -1000,8 +1001,6 @@ for mixer in self.mixers:
     # ----------------- #
 
     learn_body = f"""
-self.mode = 'train'
-
 # Perform stats analysis
 self.analyze_data(data)
 
