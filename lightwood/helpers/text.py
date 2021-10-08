@@ -258,10 +258,6 @@ def get_identifier_description(data, column_name, data_dtype):
     return None
 
 
-
-
-
-
 def contains_alnum(text):
     for c in text:
         if c.isalnum():

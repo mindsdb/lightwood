@@ -783,14 +783,16 @@ if encoder.is_target:
 
     analyze_data_body = f"""
 log.info("Performing statistical analysis on data")
-self.statistical_analysis = lightwood.data.statistical_analysis(data, self.dtype_dict, {json_ai.identifiers}, self.problem_definition)
+self.statistical_analysis = lightwood.data.statistical_analysis(data,
+                                                                self.dtype_dict,
+                                                                {json_ai.identifiers},
+                                                                self.problem_definition)
 
 # Instantiate post-training evaluation
 self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
     """
 
     analyze_data_body = align(analyze_data_body, 2)
-
 
     # ----------------- #
     # Pre-processing Body
@@ -897,7 +899,7 @@ for key, data in split_data.items():
     feature_data[key] = EncodedDs(self.encoders, data, self.target)
 
 return feature_data
-    """
+"""  # noqa
 
     feature_body = align(feature_body, 2)
 
@@ -986,10 +988,11 @@ encoded_new_data = new_data['new']
 # Adjust (Update) Mixers
 # --------------- #
 log.info('Updating the mixers')
- 
+
 for mixer in self.mixers:
     mixer.partial_fit(encoded_new_data, encoded_old_data)
-"""
+"""  # noqa
+
     adjust_body = align(adjust_body, 2)
 
     # ----------------- #
@@ -1020,14 +1023,15 @@ self.fit(enc_train_test)
 self.analyze_ensemble(enc_train_test)
 
 # ------------------------ #
-# Enable partial fit of model AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits. This assumes that the predictor could be continuously evolved, hence including the reserved testing data may improve predictivity. 
+# Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.
+# This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.
 # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
 
 # Update the mixers with partial fit
 if self.problem_definition.fit_on_validation:
 
     log.info("Adjustment on validation requested.")
-    update_data = {{"new": enc_train_test["test"], "old": ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]])}}
+    update_data = {{"new": enc_train_test["test"], "old": ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]])}}  # noqa
 
     self.adjust(update_data)
 
@@ -1057,7 +1061,6 @@ encoded_ds = EncodedDs(self.encoders, data, self.target)
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 """
     predict_common_body = align(predict_common_body, 2)
-
 
     predict_body = f"""
 df = self.ensemble(encoded_ds)
