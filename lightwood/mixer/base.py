@@ -15,7 +15,8 @@ class BaseMixer:
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         raise NotImplementedError()
 
-    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs,
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         raise NotImplementedError()
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
