@@ -1,5 +1,7 @@
 import pandas as pd
+
 from lightwood.data.encoded_ds import EncodedDs
+from lightwood.api.types import PredictionArguments
 
 
 class BaseMixer:
@@ -13,7 +15,7 @@ class BaseMixer:
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         raise NotImplementedError()
 
-    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         raise NotImplementedError()
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:

@@ -21,7 +21,7 @@ def clean_df(df, target, is_classification, label_encoders):
             cats = enc.categories_[0].tolist()
             # the last element is "__mdb_unknown_cat"
             y = np.array([cats.index(i) if i in cats else len(cats) - 1 for i in y])
-        y = y.astype(int)
+        y = y.clip(-pow(2, 63), pow(2, 63)).astype(int)
     else:
         y = y.astype(float)
 

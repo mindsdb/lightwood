@@ -19,7 +19,9 @@ IMPORT_EXTERNAL_DIRS = """
 for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
         for file_name in list(os.walk(import_dir))[0][2]:
-            mod_name = file_name.rstrip('.py')
+            if file_name[-3:] != '.py':
+                continue
+            mod_name = file_name[:-3]
             loader = importlib.machinery.SourceFileLoader(mod_name,
                                                           os.path.join(import_dir, file_name))
             module = ModuleType(loader.name)
@@ -944,6 +946,7 @@ self.mixers = trained_mixers
 # --------------- #
 log.info('Ensembling the mixer')
 # Create an ensemble of mixers to identify best performing model
+self.pred_args = PredictionArguments()
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
 """
@@ -1041,7 +1044,7 @@ if self.problem_definition.fit_on_validation:
     # Predict Body
     # ----------------- #
 
-    predict_common_body = f"""
+    predict_body = f"""
 # Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features)
@@ -1059,31 +1062,17 @@ data = {call(json_ai.cleaner)}
 # Featurize the data
 encoded_ds = EncodedDs(self.encoders, data, self.target)
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
-"""
-    predict_common_body = align(predict_common_body, 2)
 
-    predict_body = f"""
-df = self.ensemble(encoded_ds)
-insights, global_insights = {call(json_ai.explainer)}
-return insights
+self.pred_args = PredictionArguments.from_dict(args)
+df = self.ensemble(encoded_ds, args=self.pred_args)
+
+if self.pred_args.all_mixers:
+    return df
+else:
+    insights, global_insights = {call(json_ai.explainer)}
+    return insights
 """
     predict_body = align(predict_body, 2)
-
-    # ----------------- #
-    # Predict Proba Body
-    # ----------------- #
-
-    predict_proba_body = f"""
-df = self.ensemble(encoded_ds, predict_proba=True)
-insights, global_insights = {call(json_ai.explainer)}
-return insights
-"""
-    predict_proba_body = align(predict_proba_body, 2)
-    # ----------------- #
-
-    # ----------------- #
-    # PREDICTOR BASE CODE
-    # ----------------- #
 
     predictor_code = f"""
 {IMPORTS}
@@ -1149,14 +1138,8 @@ class Predictor(PredictorInterface):
         # Update mixers with new information
 {adjust_body}
 
-    def predict(self, data: pd.DataFrame) -> pd.DataFrame:
-{predict_common_body}
+    def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_body}
-
-
-    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
-{predict_common_body}
-{predict_proba_body}
 """
 
     predictor_code = black.format_str(predictor_code, mode=black.FileMode())
@@ -1170,8 +1153,8 @@ def validate_json_ai(json_ai: JsonAI) -> bool:
 
     :param json_ai: A ``JsonAI`` object
 
-    :returns: Wether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
-    """  # noqa
+    :returns: Whether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
+    """ # noqa
     from lightwood.api.high_level import predictor_from_code, code_from_json_ai
 
     try:
