@@ -276,7 +276,8 @@ class Neural(BaseMixer):
         self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler,
                                          self.stop_after, max(1, int(self.epochs_to_best / 3)))
 
-    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs,
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         all_probs: List[List[float]] = []

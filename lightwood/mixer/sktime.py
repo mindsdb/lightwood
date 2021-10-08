@@ -67,7 +67,8 @@ class SkTime(BaseMixer):
             if self.grouped_by == ['__default']:
                 break
 
-    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], args: PredictionArguments) -> pd.DataFrame:
+    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         if args.predict_proba:
             log.warning('This model does not output probability estimates')
 

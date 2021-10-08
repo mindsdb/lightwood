@@ -30,7 +30,8 @@ class Unit(BaseMixer):
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         pass
 
-    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs,
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         if args.predict_proba:
             # @TODO: depending on the target encoder, this might be enabled
             log.warning('This model does not output probability estimates')
