@@ -45,8 +45,7 @@ jobs:
         CHECK_FOR_UPDATES: False
     - name: Lint with flake8
       run: |
-        python -m flake8 ./lightwood
-        python -m flake8 ./tests
+        python -m flake8 .
     - name: Test with unittest
       run: |
         python -m unittest discover tests
