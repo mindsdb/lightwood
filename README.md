@@ -6,7 +6,7 @@
 
 ## Beta Version -- Stayed tuned for the final release and the new documentation
 
-Stay tuned for documentation! A sneak peek is available [here](https://lightwood.io/)
+Stay tuned for documentation! A sneak peek is available [here](https://lightwood.io/).
 
 ### Current contributors 
 
