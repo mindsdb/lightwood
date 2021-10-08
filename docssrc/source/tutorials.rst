@@ -11,6 +11,10 @@ The following tutorial will walk you through a simple tabular dataset with JSON-
 
 | `How to use Lightwood for your data (Coming Soon!) <tutorials/pipeline.html>`_
 
+Additionally:
+
+| `Introduction to Lightwood statistical analysis for your data <tutorials/intro_to_stat_analysis.ipynb>`_
+
 Run models with more complex data types
 ------------------------------------------------
 
@@ -27,7 +31,7 @@ We support users bringing their custom methods. To learn how to build your own p
 | `Construct a custom preprocessor to clean your data <tutorials/custom_cleaner/custom_cleaner.html>`_
 | `Make your own train-test split (Coming Soon!) <tutorials/custom_splitter.html>`_
 | `Create your own encoder to featurize your data (Coming Soon!)<tutorials/custom_encoder.html>`_
-| `Design a custom mixer model (Coming Soon!) <tutorials/custom_mixer.html>`_
-| `Use your own explainer (Coming Soon!) <tutorials/custom_explainer.html>`_
+| `Design a custom mixer model (Coming Soon!) <tutorials/custom_mixer.ipynb>`_
+| `Use your own explainer <tutorials/custom_explainer.ipynb>`_
 
 
