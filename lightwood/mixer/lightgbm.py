@@ -214,7 +214,8 @@ class LightGBM(BaseMixer):
             verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
 
-    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs,
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         data = None
         for input_col in self.input_cols:
             if data is None:

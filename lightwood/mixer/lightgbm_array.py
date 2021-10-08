@@ -52,7 +52,8 @@ class LightGBMArray(BaseMixer):
 
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
-    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], args: PredictionArguments) -> pd.DataFrame:
+    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         if args.predict_proba:
             log.warning('This model does not output probability estimates')
 
