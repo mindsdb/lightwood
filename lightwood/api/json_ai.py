@@ -795,6 +795,10 @@ self.statistical_analysis = lightwood.data.statistical_analysis(data,
 
 # Instantiate post-training evaluation
 self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
+
+# Time-series blocks
+{ts_analyze_code}
+
     """
 
     analyze_data_body = align(analyze_data_body, 2)
@@ -809,7 +813,6 @@ data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
-{ts_analyze_code}
 
 return data
     """
@@ -1057,15 +1060,11 @@ for col in self.input_cols:
     if col not in data.columns:
         data[col] = [None] * len(data)
 
-# Clean the data
-self.mode = 'predict'
-log.info('Cleaning the data')
-data = {call(json_ai.cleaner)}
-
-{ts_transform_code}
+# Pre-process the data
+clean_data = self.preprocess(data)
 
 # Featurize the data
-encoded_ds = EncodedDs(self.encoders, data, self.target)
+encoded_ds = self.featurize({{"predict_data": clean_data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 self.pred_args = PredictionArguments.from_dict(args)
@@ -1077,6 +1076,7 @@ else:
     insights, global_insights = {call(json_ai.explainer)}
     return insights
 """
+
     predict_body = align(predict_body, 2)
 
     predictor_code = f"""
