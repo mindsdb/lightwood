@@ -3,6 +3,7 @@ import dill
 import pandas as pd
 from typing import Dict
 
+
 # Interface that must be respected by predictor objects generated from JSON ML and/or compatible with Mindsdb
 class PredictorInterface:
     """
@@ -65,12 +66,12 @@ class PredictorInterface:
 
     def prepare(self, data: Dict[str, pd.DataFrame]) -> None:
         """
-        Prepares the encoders for each column of data. 
+        Prepares the encoders for each column of data.
 
         :param data: Pre-processed data that has been split into train/test. Explicitly uses "train" and/or "dev" in preparation of encoders.
 
         :returns: Nothing; prepares the encoders for learned representations.
-        """
+        """  # noqa
 
     def featurize(self, split_data: Dict[str, pd.DataFrame]):
         """
@@ -87,7 +88,7 @@ class PredictorInterface:
         Fits "mixer" models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them. 
 
         :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits. Keys expected are "train", "dev", and "test"
-        """
+        """  # noqa
         pass
 
     def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -> None:
@@ -107,7 +108,7 @@ class PredictorInterface:
         :param data: (Unprocessed) Data used in training the model(s).
 
         :returns: Nothing; instantiates with best fit model from ensemble.
-        """ # noqa
+        """  # noqa
         pass
 
     def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:
