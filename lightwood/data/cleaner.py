@@ -30,7 +30,7 @@ def cleaner(
     custom_cleaning_functions: Dict[str, str] = {}
 ) -> pd.DataFrame:
     """
-    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standaridzed type and all malformed or otherwise missing or invalid elements are turned into ``None``
+    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``
 
     :param data: The raw data
     :param dtype_dict: Type information for each column
@@ -48,12 +48,13 @@ def cleaner(
                            anomaly_detection, dtype_dict)
 
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
+
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
         data[col] = data[col].replace(to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None)
-        # If a column has too many None values, raise an Excpetion
-        # Figure out how to reintroduce later, maybe a custom flag, `crash for too much invalid data`?
+
+        # If a column has too many None values, raise an Exception
         # _check_if_invalid(data[col], pct_invalid, col)
     return data
 
