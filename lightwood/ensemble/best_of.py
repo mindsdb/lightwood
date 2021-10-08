@@ -33,7 +33,7 @@ class BestOf(BaseEnsemble):
             if can_be_nan_numeric(avg_score):
                 avg_score = -pow(2, 63)
                 log.warning(f'Change the accuracy of mixer {type(mixer).__name__} to valid value: {avg_score}')
-            
+
             score_list.append(avg_score)
 
         self.indexes_by_accuracy = list(reversed(np.array(score_list).argsort()))
