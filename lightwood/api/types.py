@@ -11,11 +11,31 @@
 # TODO: Model Analysis
 # TODO: Analyzer
 from typing import Dict, List, Optional, Union
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
 import json
+
+
+# See: https://www.python.org/dev/peps/pep-0589/ for how this works
+# Not very intuitive but very powerful abstraction, might be useful in other places (@TODO)
+class Module(TypedDict):
+    """
+    Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.
+
+    :param module: Name of the module (function or class name)
+    :param args: Argument to pass to the function or constructor
+    """ # noqa
+    module: str
+    args: Dict[str, str]
 
 
 @dataclass
@@ -30,7 +50,7 @@ class Feature:
     depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
     """
 
-    encoder: str
+    encoder: Module
     data_dtype: str = None
     dependency: List[str] = None
 
@@ -299,16 +319,10 @@ class ProblemDefinition:
         encoders and models.
     :param target_weights:
     :param positive_domain: For numerical taks, force predictor output to be positive (integer or float).
-    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
-        that predictions, in average, are correct `alpha` percent of the time.
     :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for \
          available settings.
     :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-\
         series.
-    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
-        (respectively implies wider and tighter bounds, all other parameters being equal).
-    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
-        detector.
     :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
         found in this list will be automatically removed from subsequent steps in the ML pipeline.
     :param fit_on_validation: Whether to fit the model on the held-out validation data. Validation data is strictly \
@@ -325,11 +339,8 @@ class ProblemDefinition:
     time_aim: Union[int, None]
     target_weights: Union[List[float], None]
     positive_domain: bool
-    fixed_confidence: Union[int, float, None]
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
-    anomaly_error_rate: Union[float, None]
-    anomaly_cooldown: int
     ignore_features: List[str]
     fit_on_validation: bool
     strict_mode: bool
@@ -353,11 +364,8 @@ class ProblemDefinition:
         time_aim = obj.get('time_aim', None)
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
-        fixed_confidence = obj.get('fixed_confidence', None)
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         anomaly_detection = obj.get('anomaly_detection', True)
-        anomaly_error_rate = obj.get('anomaly_error_rate', None)
-        anomaly_cooldown = obj.get('anomaly_detection', 1)
         ignore_features = obj.get('ignore_features', [])
         fit_on_validation = obj.get('fit_on_validation', True)
         strict_mode = obj.get('strict_mode', True)
@@ -371,11 +379,8 @@ class ProblemDefinition:
             time_aim=time_aim,
             target_weights=target_weights,
             positive_domain=positive_domain,
-            fixed_confidence=fixed_confidence,
             timeseries_settings=timeseries_settings,
             anomaly_detection=anomaly_detection,
-            anomaly_error_rate=anomaly_error_rate,
-            anomaly_cooldown=anomaly_cooldown,
             ignore_features=ignore_features,
             fit_on_validation=fit_on_validation,
             strict_mode=strict_mode,
@@ -437,13 +442,13 @@ class JsonAI:
     outputs: Dict[str, Output]
     problem_definition: ProblemDefinition
     identifiers: Dict[str, str]
-    cleaner: Optional[object] = None
-    splitter: Optional[object] = None
-    analyzer: Optional[object] = None
-    explainer: Optional[object] = None
-    analysis_blocks: Optional[List[object]] = None
-    timeseries_transformer: Optional[object] = None
-    timeseries_analyzer: Optional[object] = None
+    cleaner: Optional[Module] = None
+    splitter: Optional[Module] = None
+    analyzer: Optional[Module] = None
+    explainer: Optional[Module] = None
+    analysis_blocks: Optional[List[Module]] = None
+    timeseries_transformer: Optional[Module] = None
+    timeseries_analyzer: Optional[Module] = None
     accuracy_functions: Optional[List[str]] = None
 
     @staticmethod
@@ -540,3 +545,64 @@ class ModelAnalysis:
     confusion_matrix: object
     histograms: object
     dtypes: object
+
+
+@dataclass
+class PredictionArguments:
+    """
+    This class contains all possible arguments that can be passed to a Lightwood predictor at inference time.
+    On each predict call, all arguments included in a parameter dictionary will update the respective fields
+    in the `PredictionArguments` instance that the predictor will have.
+    
+    :param predict_proba: triggers (where supported) predictions in raw probability output form. I.e. for classifiers,
+    instead of returning only the predicted class, the output additionally includes the assigned probability for
+    each class.   
+    :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers. 
+    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
+        that predictions, in average, are correct `alpha` percent of the time.
+    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
+        (respectively implies wider and tighter bounds, all other parameters being equal).
+    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
+        detector.
+    """  # noqa
+
+    predict_proba: bool = False
+    all_mixers: bool = False
+    fixed_confidence: Union[int, float, None] = None
+    anomaly_error_rate: Union[float, None] = None
+    anomaly_cooldown: int = 1
+
+    @staticmethod
+    def from_dict(obj: Dict):
+        """
+        Creates a ``PredictionArguments`` object from a python dictionary with necessary specifications.
+
+        :param obj: A python dictionary with the necessary features for the ``PredictionArguments`` class.
+
+        :returns: A populated ``PredictionArguments`` object.
+        """
+
+        # maybe this should be stateful instead, and save the latest used value for each field?
+        predict_proba = obj.get('predict_proba', PredictionArguments.predict_proba)
+        all_mixers = obj.get('all_mixers', PredictionArguments.all_mixers)
+        fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
+        anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
+        anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
+
+        pred_args = PredictionArguments(
+            predict_proba=predict_proba,
+            all_mixers=all_mixers,
+            fixed_confidence=fixed_confidence,
+            anomaly_error_rate=anomaly_error_rate,
+            anomaly_cooldown=anomaly_cooldown,
+        )
+
+        return pred_args
+
+    def to_dict(self, encode_json=False) -> Dict[str, Json]:
+        """
+        Creates a python dictionary from the ``PredictionArguments`` object
+
+        :returns: A python dictionary
+        """
+        return _asdict(self, encode_json=encode_json)
