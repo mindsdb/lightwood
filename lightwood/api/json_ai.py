@@ -273,6 +273,7 @@ def generate_json_ai(
             ensemble={
                 "module": "BestOf",
                 "args": {
+                    "args": "$pred_args",
                     "accuracy_functions": "$accuracy_functions",
                     "ts_analysis": "self.ts_analysis" if is_ts else None,
                 },
@@ -619,10 +620,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "args": {
                     "timeseries_settings": "$problem_definition.timeseries_settings",
                     "positive_domain": "$statistical_analysis.positive_domain",
-                    "fixed_confidence": "$problem_definition.fixed_confidence",
                     "anomaly_detection": "$problem_definition.anomaly_detection",
-                    "anomaly_error_rate": "$problem_definition.anomaly_error_rate",
-                    "anomaly_cooldown": "$problem_definition.anomaly_cooldown",
                     "data": "data",
                     "encoded_data": "encoded_data",
                     "predictions": "df",
@@ -631,6 +629,9 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                     "target_name": "$target",
                     "target_dtype": "$dtype_dict[self.target]",
                     "explainer_blocks": "$analysis_blocks",
+                    "fixed_confidence": "$pred_args.fixed_confidence",
+                    "anomaly_error_rate": "$pred_args.anomaly_error_rate",
+                    "anomaly_cooldown": "$pred_args.anomaly_cooldown",
                 },
             },
         ),
