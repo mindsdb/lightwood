@@ -800,13 +800,13 @@ self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_bl
 
     clean_body = f"""
 log.info('Cleaning the data')
-clean_data = {call(json_ai.cleaner)}
+data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
 {ts_analyze_code}
 
-return clean_data
+return data
     """
 
     clean_body = align(clean_body, 2)
