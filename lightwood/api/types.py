@@ -11,11 +11,31 @@
 # TODO: Model Analysis
 # TODO: Analyzer
 from typing import Dict, List, Optional, Union
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
 from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
 import json
+
+
+# See: https://www.python.org/dev/peps/pep-0589/ for how this works
+# Not very intuitive but very powerful abstraction, might be useful in other places (@TODO)
+class Module(TypedDict):
+    """
+    Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.
+
+    :param module: Name of the module (function or class name)
+    :param args: Argument to pass to the function or constructor
+    """ # noqa
+    module: str
+    args: Dict[str, str]
 
 
 @dataclass
@@ -30,7 +50,7 @@ class Feature:
     depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
     """
 
-    encoder: str
+    encoder: Module
     data_dtype: str = None
     dependency: List[str] = None
 
@@ -422,13 +442,13 @@ class JsonAI:
     outputs: Dict[str, Output]
     problem_definition: ProblemDefinition
     identifiers: Dict[str, str]
-    cleaner: Optional[object] = None
-    splitter: Optional[object] = None
-    analyzer: Optional[object] = None
-    explainer: Optional[object] = None
-    analysis_blocks: Optional[List[object]] = None
-    timeseries_transformer: Optional[object] = None
-    timeseries_analyzer: Optional[object] = None
+    cleaner: Optional[Module] = None
+    splitter: Optional[Module] = None
+    analyzer: Optional[Module] = None
+    explainer: Optional[Module] = None
+    analysis_blocks: Optional[List[Module]] = None
+    timeseries_transformer: Optional[Module] = None
+    timeseries_analyzer: Optional[Module] = None
     accuracy_functions: Optional[List[str]] = None
 
     @staticmethod
