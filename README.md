@@ -6,6 +6,8 @@
 
 ## Beta Version -- Stayed tuned for the final release and the new documentation
 
+Stay tuned for documentation! A sneak peek is available [here](https://lightwood.io/)
+
 ### Current contributors 
 
 <a href="https://github.com/mindsdb/lightwood/graphs/contributors">
