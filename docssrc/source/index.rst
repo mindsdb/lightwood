@@ -2,25 +2,15 @@
 .. lightwood_docs documentation master file, created by
    sphinx-quickstart on Tue Sep  7 13:07:48 2021.
    You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+   contain the root ``toctree`` directive.
 
 ****************************************
 Welcome to Lightwood's Documentation!
 ****************************************
+
 :Release: |release|
 :Date: |today|
-
-.. warning::
-   This project is under development; consider features in beta.
-   
-.. toctree::
-   :maxdepth: 1
-   :caption: Table of Contents:
-
-   lightwood_philosophy
-   tutorials
-   api
-
+| 
 Lightwood is an AutoML framework that enables you to generate and customize machine learning pipelines declarative syntax called JSON-AI.
 
 Our goal is to make the data science/machine learning (DS/ML) life cycle easier by allowing users to focus on **what** they want to do their data without needing to write repetitive boilerplate code around machine learning and data preparation. Instead, we enable you to focus on the parts of a model that are truly unique and custom.
@@ -29,14 +19,22 @@ Lightwood works with a variety of data types such as numbers, dates, categories,
 
 Our JSON-AI syntax allows users to change any and all parts of the models Lightwood automatically generates. The syntax outlines the specifics details in each step of the modeling pipeline. Users may override default values (for example, changing the type of a column) or alternatively, entirely replace steps with their own methods (ex: use a random forest model for a predictor). Lightwood creates a "JSON-AI" object from this syntax which can then be used to automatically generate python code to represent your pipeline.
 
-For details on how to generate JSON-AI syntax and how Lightwood works, check out the #TODO LIGHTWOODPHILO[Lightwood Philosophy](#Lightwood-Philosophy).
+For details as to how Lightwood works, check out the `Lightwood Philosophy <https://lightwood.io/lightwood_philosophy.html>`_ .
+
+Quick Guide
+=======================
+- :ref:`Installation <Installation>`
+- :ref:`Example Use Cases <Example Use Cases>`
+- :ref:`Contribute to Lightwood <Contribute to Lightwood>`
+- :ref:`Hacktoberfest 2021 <Hacktoberfest 2021>`
 
 Installation
 ============
 
 You can install Lightwood as follows:
 
-:: 
+.. code-block:: bash
+
    pip3 install lightwood
 
 .. note:: depending on your environment, you might have to use pip instead of pip3 in the above command.
@@ -46,11 +44,11 @@ However, we recommend creating a python virtual environment.
 Setting up a dev environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Clone lightwood
-- `cd lightwood && pip install requirements.txt`
-- Add it to your python path (e.g. by adding `export PYTHONPATH='/where/you/cloned/lightwood':$PYTHONPATH` as a newline at the end of your `~/.bashrc` file)
-- Check that the `unittest`s are passing by going into the directory where you cloned lightwood and running: `python -m unittest discover tests` 
+- Run ``cd lightwood && pip install requirements.txt``
+- Add it to your python path (e.g. by adding ``export PYTHONPATH='/where/you/cloned/lightwood':$PYTHONPATH`` as a newline at the end of your ``~/.bashrc`` file)
+- Check that the unit-tests are passing by going into the directory where you cloned lightwood and running: ``python -m unittest discover tests`` 
 
-> If `python` default to python2.x on your environment use `python3` and `pip3` instead
+.. warning:: If ``python`` default to python2.x on your environment use ``python3`` and ``pip3`` instead
 
 Currently, the preferred environment for working with lightwood is visual studio code, a very popular python IDE. However, any IDE should work. While we don't have guides for those, please feel free to use the following section as a template for VSCode, or to contribute your own tips and tricks to set up other IDEs.
 
@@ -59,25 +57,26 @@ Setting up a VSCode environment
 
 * Install and enable setting sync using github account (if you use multiple machines)
 * Install pylance (for types) and make sure to disable pyright
-* Go to `Python > Lint: Enabled` and disable everything *but* flake8
-* Set `python.linting.flake8Path` to the full path to flake8 (which flake8)
-* Set `Python › Formatting: Provider` to autopep8
-* Add `--global-config=<path_to>/lightwood/.flake8` and `--experimental` to `Python › Formatting: Autopep8 Args`
+* Go to ``Python > Lint: Enabled`` and disable everything *but* flake8
+* Set ``python.linting.flake8Path`` to the full path to flake8 (which flake8)
+* Set ``Python › Formatting: Provider`` to autopep8
+* Add ``--global-config=<path_to>/lightwood/.flake8`` and ``--experimental`` to ``Python › Formatting: Autopep8 Args``
 * Install live share and live share whiteboard
 
 
 Example Use Cases
 =======================
 
-Lightwood works with `pandas.DataFrames`. Once a DataFrame is loaded, defined a "ProblemDefinition" via a dictionary. The only thing a user needs to specify is the name of the column to predict (via the key `target`).
+Lightwood works with ``pandas.DataFrames``. Once a DataFrame is loaded, defined a "ProblemDefinition" via a dictionary. The only thing a user needs to specify is the name of the column to predict (via the key ``target``).
 
-Create a JSON-AI syntax from the command `json_ai_from_problem`. Lightwood can then use this object to *automatically generate python code filling in the steps of the ML pipeline* via `code_from_json_ai`. 
+Create a JSON-AI syntax from the command ``json_ai_from_problem``. Lightwood can then use this object to *automatically generate python code filling in the steps of the ML pipeline* via ``code_from_json_ai``. 
 
-You can make a `Predictor` object, instantiated with that code via `predictor_from_code`. 
+You can make a ``Predictor`` object, instantiated with that code via ``predictor_from_code``. 
 
-To train a `Predictor` end-to-end, starting with unprocessed data, users can use the `predictor.learn()` command with the data.
+To train a ``Predictor`` end-to-end, starting with unprocessed data, users can use the ``predictor.learn()`` command with the data.
 
-:: 
+.. code-block:: python
+
    import pandas as pd
    from lightwood.api.high_level import (
        ProblemDefinition,
@@ -126,7 +125,7 @@ BYOM: Bring your own models
 
 Lightwood supports user architectures/approaches so long as you follow the abstractions provided within each step. 
 
-Our #TODO[tutorials](https://lightwood.io/tutorials.html) provide specific use cases for how to introduce customization into your pipeline. Check out "custom cleaner", "custom splitter", "custom explainer", and "custom mixer". Stay tuned for further updates.
+Our `tutorials <https://lightwood.io/tutorials.html>`_ provide specific use cases for how to introduce customization into your pipeline. Check out "custom cleaner", "custom splitter", "custom explainer", and "custom mixer". Stay tuned for further updates.
 
 
 Contribute to Lightwood
@@ -147,3 +146,122 @@ How can you help us?
 * Discuss feature implementations
 * Submit a bug fix
 * Test Lightwood with your own data and let us know how it went!
+
+Code contributions
+^^^^^^^^^^^^^^^^^^^^^^^^
+In general, we follow the `fork-and-pull <https://docs.github.com/en/github/collaborating-with-pull-requests/getting-started/about-collaborative-development-models#fork-and-pull-model>`_ git workflow. Here are the steps:
+
+1. Fork the Lightwood repository
+2. Checkout the ``staging`` branch, which is the development version that gets released weekly (there can be exceptions, but make sure to ask and confirm with us).
+3. Make changes and commit them 
+4. Make sure that the CI tests pass. You can run the test suite locally with ``flake8 .`` to check style and ``python -m unittest discover tests`` to run the automated tests. This doesn't guarantee it will pass remotely since we run on multiple envs, but should work in most cases.
+5. Push your local branch to your fork
+6. Submit a pull request from your repo to the ``staging`` branch of ``mindsdb/lightwood`` so that we can review your changes. Be sure to merge the latest from staging before making a pull request!
+
+.. note:: You will need to sign a CLI agreement for the code since lightwood is under a GPL license. 
+
+
+Feature and Bug reports
+^^^^^^^^^^^^^^^^^^^^^^^^
+We use GitHub issues to track bugs and features. Report them by opening a `new issue <https://github.com/mindsdb/lightwood/issues/new/choose) and fill out all of the required inputs.>`_ and fill out all of the required inputs.
+
+
+Code review process
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Pull request (PR) reviews are done on a regular basis. **If your PR does not address a previous issue, please make an issue first**.
+
+If your change has a chance to affecting performance we will run our private benchmark suite to validate it.
+
+Please, make sure you respond to our feedback/questions.
+
+
+Community
+^^^^^^^^^^^^^^^^^^^^^^^^^
+If you have additional questions or you want to chat with MindsDB core team, you can join our community: 
+
+.. raw:: html
+
+    <embed>
+    <a href="https://join.slack.com/t/mindsdbcommunity/shared_invite/zt-o8mrmx3l-5ai~5H66s6wlxFfBMVI6wQ" target="_blank"><img src="https://img.shields.io/badge/slack-@mindsdbcommunity-blueviolet.svg?logo=slack " alt="MindsDB Community"></a>.
+    </embed>
+    
+To get updates on Lightwood and MindsDB’s latest announcements, releases, and events, sign up for our `Monthly Community Newsletter <https://mindsdb.com/newsletter/?utm_medium=community&utm_source=github&utm_campaign=lightwood%20repo>`_.
+
+Join our mission of democratizing machine learning and allowing developers to become data scientists!
+
+
+Hacktoberfest 2021
+=======================
+
+We are very excited that Lightwood is participating in this year's Hacktoberfest 2021 event. This month-long event through October gives you the chance to contribute to the Open Source codebase of Lightwood and MindsDB!
+
+The Lightwood core team has prepared several issues of different types that are ideal for first-time contributors and will be posted throughout the month. It's entirely up to you what you choose to work on and if you have your own great idea, feel free to suggest it by reaching out to us via our Slack community or by posting an issue with the `discussion` tag.
+
+**Our Major Incentive and SWAG!** 
+
+Make contributions and enter into the draw for a `Deep Learning Laptop <https://lambdalabs.com/deep-learning/laptops/tensorbook>`_ **powered by the NVIDIA RTX 3080 Max-Q GPU**. Pre-installed with TensorFlow, PyTorch, CUDA, cuDNN and more.
+
+.. image:: _static/logos/laptop.jpeg
+    :align: center
+    :alt: Tensorbook by Lambda Labs
+    :width: 455
+    :height: 400
+
+Also, we’d love to send you a special MindsDB SWAG gift pack:
+
+.. image:: _static/logos/swag.png
+    :align: center
+    :alt: MindsDB Swag
+
+Please make sure to read the :ref:`contributions-guidelines <Contribute to Lightwood>` first!
+
+How to participate
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Contribute by making pull requests to any of our open issues labeled with the `hacktoberfest` tag during October. All hacktoberfest issues will specify how many points a successfully merged PR is worth.
+2. Have a total score of at least 5 points in order to enter the big prize draw.
+3. Complete the form with links to all your completed PR’s so we know where to ship the gift pack to!
+
+Entries close at midnight (PST) Sunday, 31 October 2021 with the prize draw winner announced at an online event on Monday, 1st of November.
+
+
+Please check `MindsDB's hacktoberfest website <https://mindsdb.com/hacktoberfest>`_ for more details.
+
+.. note:: if you wish to contribute with something that is *not currently flagged* as a hacktoberfest issue, make an issue (or make a comment if an issue already exists), and let one of the core Lightwood team researchers approve it.
+
+
+Contributor Code of Conduct
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Please note that this project is released with a `Contributor Code of Conduct <https://github.com/mindsdb/lightwood/blob/stable/CODE_OF_CONDUCT.md>`_. By participating in this project, you agree to abide by its terms.
+
+
+Current contributors 
+=======================
+
+.. raw:: html
+
+    <embed>
+    <a href="https://github.com/mindsdb/lightwood/graphs/contributors">
+      <img src="https://contributors-img.web.app/image?repo=mindsdb/lightwood" />
+    </a>
+    </embed>
+
+
+License
+=======================
+
+| `PyPI License <https://img.shields.io/pypi/l/lightwood>`_ 
+| `Lightwood License <https://github.com/mindsdb/lightwood/blob/master/LICENSE>`_
+
+
+
+
+
+Other Links
+=======================
+.. toctree::
+   :maxdepth: 1
+
+   lightwood_philosophy
+   tutorials
+   api

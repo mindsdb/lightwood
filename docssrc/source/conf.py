@@ -109,7 +109,7 @@ html_theme_options = {
 }
 
 # Pygments syntax highlight themes
-pygments_style = 'default'
+pygments_style = 'sphinx'
 
 # to include decorated objects like __init__
 autoclass_content = 'both'
