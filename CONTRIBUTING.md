@@ -34,7 +34,7 @@ In general, we follow the ["fork-and-pull"](https://docs.github.com/en/github/co
 > Note: You will need to sign a CLI agreement for the code since lightwood is under a GPL license. 
 
 ## Feature and Bug reports
-We use GitHub issues to track bugs and features. Report them by opening a [new issue](https://github.com/mindsdb/mindsdb/issues/new/choose) and fill out all of the required inputs.
+We use GitHub issues to track bugs and features. Report them by opening a [new issue](https://github.com/mindsdb/lightwood/issues/new/choose) and fill out all of the required inputs.
 
 ## Code review process
 Pull request reviews are done on a regular basis. 
