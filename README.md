@@ -20,7 +20,9 @@ Lightwood abstracts the ML pipeline into 3 core steps:
 (2) Feature engineering
 (3) Model building and training
 
-<img src="/assets/lightwood_under_the_hood.png" alt="Lightwood internals" width="200"/>
+<p align="center">
+<img src="/assets/lightwood_under_the_hood.png" alt="Lightwood internals" width="600"/>
+</p>
 
 #### Pre-processing and cleaning
 For each column in your dataset, Lightwood will identify the suspected data type (numeric, categorical, etc.) via a brief statistical analysis. From this, it will generate a JSON-AI syntax. 
