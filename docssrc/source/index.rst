@@ -182,7 +182,7 @@ If you have additional questions or you want to chat with MindsDB core team, you
 .. raw:: html
 
     <embed>
-    <a href="https://join.slack.com/t/mindsdbcommunity/shared_invite/zt-o8mrmx3l-5ai~5H66s6wlxFfBMVI6wQ" target="_blank"><img src="https://img.shields.io/badge/slack-@mindsdbcommunity-blueviolet.svg?logo=slack " alt="MindsDB Community"></a>.
+    <a href="https://join.slack.com/t/mindsdbcommunity/shared_invite/zt-o8mrmx3l-5ai~5H66s6wlxFfBMVI6wQ" target="_blank"><img src="https://img.shields.io/badge/slack-@mindsdbcommunity-blueviolet.svg?logo=slack " alt="MindsDB Community"></a>
     </embed>
     
 To get updates on Lightwood and MindsDB’s latest announcements, releases, and events, sign up for our `Monthly Community Newsletter <https://mindsdb.com/newsletter/?utm_medium=community&utm_source=github&utm_campaign=lightwood%20repo>`_.
@@ -249,8 +249,12 @@ Current contributors
 
 License
 =======================
+.. raw:: html
 
-| `PyPI License <https://img.shields.io/pypi/l/lightwood>`_ 
+    <embed>
+    <img src="https://img.shields.io/pypi/l/lightwood" alt="PyPI - License">
+    </embed>
+
 | `Lightwood License <https://github.com/mindsdb/lightwood/blob/master/LICENSE>`_
 
 
