@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.predictor &mdash; lightwood 1.2.0 documentation</title>
+  <title>api.predictor &mdash; lightwood 1.3.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -66,7 +67,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.3.0
               </div>
             
           
@@ -162,22 +163,36 @@
            <div itemprop="articleBody">
             
   <h1>Source code for api.predictor</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="k">import</span> <span class="n">ModelAnalysis</span>
-<span class="kn">import</span> <span class="nn">dill</span>
+<span></span><span class="kn">import</span> <span class="nn">dill</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">ModelAnalysis</span>
 
 
 <span class="c1"># Interface that must be respected by predictor objects generated from JSON ML and/or compatible with Mindsdb</span>
 <div class="viewcode-block" id="PredictorInterface"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface">[docs]</a><span class="k">class</span> <span class="nc">PredictorInterface</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Abstraction of a Lightwood predictor. The PredictorInterface encompasses how Lightwood interacts with the full ML pipeline. Internally,</span>
+<span class="sd">    Abstraction of a Lightwood predictor. The ``PredictorInterface`` encompasses how Lightwood interacts with the full ML pipeline. Internally,</span>
 
-<span class="sd">    The ``PredictorInterface`` class must have 5 expected functions:</span>
+<span class="sd">    The ``PredictorInterface`` class must have several expected functions:</span>
+<span class="sd">    </span>
+<span class="sd">    - ``analyze_data``: Peform a statistical analysis on the unprocessed data; this helps inform downstream encoders and mixers on how to treat the data types.</span>
+<span class="sd">    - ``preprocess``: Apply cleaning functions to each of the columns within the dataset to prepare them for featurization</span>
+<span class="sd">    - ``split``: Split the input dataset into a train/dev/test set according to your splitter function</span>
+<span class="sd">    - ``prepare``: Create and, if necessary, train your encoders to create feature representations from each column of your data.</span>
+<span class="sd">    - ``featurize``: For input, pre-processed data, create feature vectors</span>
+<span class="sd">    - ``fit``: Train your mixer models to yield predictions from featurized data</span>
+<span class="sd">    - ``analyze_ensemble``: Evaluate the quality of fit for your mixer models</span>
+<span class="sd">    - ``adjust``: Incorporate new data to update pre-existing model(s).</span>
 
-<span class="sd">    - ``learn``: An end-to-end technique specifying how to pre-process, featurize, and train the model(s) of interest. The expected input is raw, untrained data. No explicit output is provided, but the Predictor object will &quot;host&quot; the trained model thus.</span>
-<span class="sd">    - ``adjust``: The manner to incorporate new data to update pre-existing model(s).</span>
+<span class="sd">    For simplification, we offer an end-to-end approach that allows you to input raw data and follow every step of the process until you reach a trained predictor with the ``learn`` function:</span>
+
+<span class="sd">        - ``learn``: An end-to-end technique specifying how to pre-process, featurize, and train the model(s) of interest. The expected input is raw, untrained data. No explicit output is provided, but the Predictor object will &quot;host&quot; the trained model thus.</span>
+<span class="sd">    </span>
+<span class="sd">    You can also use the predictor to now estimate new data:</span>
+
 <span class="sd">    - ``predict``: Deploys the chosen best model, and evaluates the given data to provide target estimates.</span>
-<span class="sd">    - ``predict_proba``: Deploys the chosen best model, and enables user to analyze how the model makes estimates. This depends on whether the models internally have &quot;predict_proba&quot; as a possible method (thus, only for classification).</span>
 <span class="sd">    - ``save``: Saves the Predictor object for further use.</span>
 
 <span class="sd">    The ``PredictorInterface`` is created via J{ai}son&#39;s custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.</span>
@@ -185,48 +200,102 @@
 
     <span class="n">model_analysis</span><span class="p">:</span> <span class="n">ModelAnalysis</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
+
+<div class="viewcode-block" id="PredictorInterface.analyze_data"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.analyze_data">[docs]</a>    <span class="k">def</span> <span class="nf">analyze_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a statistical analysis on the data to identify distributions, imbalanced classes, and other nuances within the data.</span>
+
+<span class="sd">        :param data: Data used in training the model(s).</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="PredictorInterface.preprocess"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.preprocess">[docs]</a>    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cleans the unprocessed dataset provided.</span>
+
+<span class="sd">        :param data: (Unprocessed) Data used in training the model(s).</span>
+<span class="sd">        :returns: The cleaned data frame</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="PredictorInterface.split"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Categorizes the data into a training/testing split; if data is a classification problem, will stratify the data.</span>
+
+<span class="sd">        :param data: Pre-processed data, but generically any dataset to split into train/dev/test.</span>
+<span class="sd">        :returns: Dictionary containing training/testing fraction</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="PredictorInterface.prepare"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepares the encoders for each column of data.</span>
+
+<span class="sd">        :param data: Pre-processed data that has been split into train/test. Explicitly uses &quot;train&quot; and/or &quot;dev&quot; in preparation of encoders.</span>
+
+<span class="sd">        :returns: Nothing; prepares the encoders for learned representations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span></div>
+
+<div class="viewcode-block" id="PredictorInterface.featurize"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.featurize">[docs]</a>    <span class="k">def</span> <span class="nf">featurize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides an encoded representation for each dataset in ``split_data``. Requires `self.encoders` to be prepared.</span>
+
+<span class="sd">        :param split_data: Pre-processed data from the dataset, split into train/test (or any other keys relevant)</span>
+
+<span class="sd">        :returns: For each dataset provided in ``split_data``, the encoded representations of the data.</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="PredictorInterface.fit"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enc_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits &quot;mixer&quot; models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them. </span>
+
+<span class="sd">        :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits. Keys expected are &quot;train&quot;, &quot;dev&quot;, and &quot;test&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="PredictorInterface.analyze_ensemble"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.analyze_ensemble">[docs]</a>    <span class="k">def</span> <span class="nf">analyze_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enc_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the quality of mixers within an ensemble of models.</span>
+
+<span class="sd">        :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="PredictorInterface.learn"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.learn">[docs]</a>    <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trains the attribute model starting from raw data. Raw data is pre-processed and cleaned accordingly. As data is assigned a particular type (ex: numerical, categorical, etc.), the respective feature encoder will convert it into a representation useable for training ML models. Of all ML models requested, these models are compiled and fit on the training data.</span>
 
-<span class="sd">        :param data: Data used in training the model(s).</span>
+<span class="sd">        This step amalgates ``preprocess`` -&gt; ``featurize`` -&gt; ``fit`` with the necessary splitting + analyze_data that occurs. </span>
 
-<span class="sd">        :returns: Provides best fit model.</span>
-<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">        :param data: (Unprocessed) Data used in training the model(s).</span>
+
+<span class="sd">        :returns: Nothing; instantiates with best fit model from ensemble.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="PredictorInterface.adjust"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.adjust">[docs]</a>    <span class="k">def</span> <span class="nf">adjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="PredictorInterface.adjust"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.adjust">[docs]</a>    <span class="k">def</span> <span class="nf">adjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.</span>
 
-<span class="sd">        ..warnings:: Not tested yet - this is an experimental feature</span>
-<span class="sd">        :param data: New data used to adjust a previously trained model.</span>
+<span class="sd">        .. warning:: This is experimental and subject to change. </span>
+<span class="sd">        :param new_data: New data used to adjust a previously trained model. Keys must reference &quot;old&quot; and &quot;new&quot; referencing to the old and new datasets. In some situations, the old data is still required to train a model (i.e. Regression) to ensure the new data doesn&#39;t entirely override it.</span>
 
-<span class="sd">        :returns: Adjusts best-fit model</span>
+<span class="sd">        :returns: Nothing; adjusts best-fit model</span>
 <span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="PredictorInterface.predict"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="PredictorInterface.predict"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intakes raw data to provide predicted values for your trained model.</span>
 
 <span class="sd">        :param data: Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.</span>
+<span class="sd">        :param args: parameters needed to update the predictor ``PredictionArguments`` object, which holds any parameters relevant for prediction.</span>
 
 <span class="sd">        :returns: A dataframe of predictions of the same length of input.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="PredictorInterface.predict_proba"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Intakes raw data to provide some element of confidence/explainability metric to gauge your model&#39;s predictive abilities.</span>
-
-<span class="sd">        :param data: Data that the model(s) will evaluate on; provides the some element of predictive strength (ex: how &quot;confident&quot; the model is).</span>
-
-<span class="sd">        :returns: A dataframe of confidence metrics for each datapoint provided in the input (n_samples, n_classes)</span>
-<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="PredictorInterface.save"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
