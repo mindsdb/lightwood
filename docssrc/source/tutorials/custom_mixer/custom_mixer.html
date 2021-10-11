@@ -3,7 +3,7 @@
 <head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>custom_cleaner</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>custom_mixer</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 
 
 
@@ -14259,14 +14259,27 @@ a.anchor-link {
 
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Using-your-own-pre-processing-methods-in-Lightwood">Using your own pre-processing methods in Lightwood<a class="anchor-link" href="#Using-your-own-pre-processing-methods-in-Lightwood">&#182;</a></h2><h4 id="Date:-2021.10.07">Date: 2021.10.07<a class="anchor-link" href="#Date:-2021.10.07">&#182;</a></h4><p>For the notebook below, we'll be exploring how to make <strong>custom pre-processing</strong> methods for our data. Lightwood has standard cleaning protocols to handle a variety of different data types, however, we want users to feel comfortable augmenting and addressing their own changes. To do so, we'll highlight the approach we would take below:</p>
-<p>We will use data from <a href="https://www.kaggle.com/c/commonlitreadabilityprize/data?select=train.csv">Kaggle</a>.</p>
-<p>The data has several columns, but ultimately aims to use text to predict a <em>readability score</em>. There are also some columns that I do not want to use when making predictions, such as <code>url_legal</code>, <code>license</code>, among others.</p>
-<p>In this tutorial, we're going to focus on making changes to 2 columns: 
-(1) <strong>excerpt</strong>, a text column, and ensuring we remove stop words using NLTK. <br>
-(2) <strong>target</strong>, the goal to predict; we will make this explicitly non-negative.</p>
-<p>Note, for this ACTUAL challenge, negative and positive are meaningful. We are using this as an example dataset to demonstrate how you can make changes to your underlying dataset and proceed to building powerful predictors.</p>
-<p>Let's get started!</p>
+<h1 id="Tutorial---Implementing-a-custom-mixer-in-Lightwood">Tutorial - Implementing a custom mixer in Lightwood<a class="anchor-link" href="#Tutorial---Implementing-a-custom-mixer-in-Lightwood">&#182;</a></h1><h2 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h2><p>Mixers are the center piece of lightwood, tasked with learning the mapping between the encoded feature and target representation</p>
+<h2 id="Objective">Objective<a class="anchor-link" href="#Objective">&#182;</a></h2><p>In this tutorial we'll be trying to implement a sklearn random forest as a mixer that handles categorical and binary targets.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Step-1:-The-Mixer-Interface">Step 1: The Mixer Interface<a class="anchor-link" href="#Step-1:-The-Mixer-Interface">&#182;</a></h2><p>The Mixer interface is defined by the <code>BaseMixer</code> class, a mixer needs methods for 4 tasks:</p>
+<ul>
+<li>fitting (<code>fit</code>)</li>
+<li>predicting (<code>__call__</code>)</li>
+<li>construction (<code>__init__</code>)</li>
+<li>partial fitting (<code>partial_fit</code>), though this one is optional</li>
+</ul>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Step-2:-Writing-our-mixer">Step 2: Writing our mixer<a class="anchor-link" href="#Step-2:-Writing-our-mixer">&#182;</a></h2><p>I'm going to create a file called <code>random_forest_mixer.py</code> inside <code>/etc/lightwood_modules</code>, this is where lightwood sources custom modules from.</p>
+<p>Inside of it I'm going to write the following code:</p>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
@@ -14275,21 +14288,57 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.mixer</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
+<span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
+<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">lightwood.encoder</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
+
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="c1"># Lightwood modules</span>
-<span class="kn">import</span> <span class="nn">lightwood</span> <span class="k">as</span> <span class="nn">lw</span>
-<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> \
-                      <span class="n">JsonAI</span><span class="p">,</span> \
-                      <span class="n">json_ai_from_problem</span><span class="p">,</span> \
-                      <span class="n">code_from_json_ai</span><span class="p">,</span> \
-                      <span class="n">predictor_from_code</span>
+<span class="k">class</span> <span class="nc">RandomForestMixer</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
+    <span class="n">clf</span><span class="p">:</span> <span class="n">RandomForestClassifier</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span> <span class="o">=</span> <span class="n">target_encoder</span>
+        <span class="c1"># Throw in case someone tries to use this for a problem that&#39;s not classification, I&#39;d fail anyway, but this way the error message is more intuitive</span>
+        <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;This mixer can only be used for classification problems! Got target dtype </span><span class="si">{</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="si">}</span><span class="s1"> instead!&#39;</span><span class="p">)</span>
+
+        <span class="c1"># We could also initialize this in `fit` if some of the parameters depend on the input data, since `fit` is called exactly once</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="c1"># By default mixers get some train data and a bit of dev data on which to do early stopping or hyper parameter optimization. For this mixer, we don&#39;t need dev data, so we&#39;re going to concat the two in order to get more training data. Then, we&#39;re going to turn them into an sklearn friendly foramat.</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">ConcatedEncodedDs</span><span class="p">([</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">]):</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">Y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span>
+                 <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="c1"># Turn the data into an sklearn friendly format</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="n">Yh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># Lightwood encoders are meant to decode torch tensors, so we have to cast the predictions first</span>
+        <span class="n">decoded_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">Yh</span><span class="p">))</span>
+
+        <span class="c1"># Finally, turn the decoded predictions into a dataframe with a single column called `prediction`. This is the standard behaviour all lightwood mixers use</span>
+        <span class="n">ydf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;prediction&#39;</span><span class="p">:</span> <span class="n">decoded_predictions</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">ydf</span>
+
+    
+    <span class="c1"># We&#39;ll skip implementing `partial_fit`, thus making this mixer unsuitable for online training tasks</span>
 </pre></div>
 
      </div>
@@ -14300,7 +14349,8 @@ a.anchor-link {
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="1)-Load-your-data">1) Load your data<a class="anchor-link" href="#1)-Load-your-data">&#182;</a></h3><p>Lightwood uses <code>pandas</code> in order to handle datasets, as this is a very standard package in datascience. We can load our dataset using pandas in the following manner (make sure your data is in the data folder!)</p>
+<h2 id="Step-3:-Using-our-mixer">Step 3: Using our mixer<a class="anchor-link" href="#Step-3:-Using-our-mixer">&#182;</a></h2><p>We're going to use our mixer for diagnosing heart disease using this dataset: <a href="https://github.com/mindsdb/benchmarks/blob/main/benchmarks/datasets/heart_disease/data.csv">https://github.com/mindsdb/benchmarks/blob/main/benchmarks/datasets/heart_disease/data.csv</a></p>
+<p>First, since we don't want to bother writing a Json AI for this dataset from scratch, we're going to let lightwood auto generate one.</p>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -14309,138 +14359,22 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Load the data</span>
-<span class="n">ddir</span> <span class="o">=</span> <span class="s2">&quot;data/&quot;</span>
-<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ddir</span><span class="p">,</span> <span class="s2">&quot;train.csv.zip&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> <span class="n">json_ai_from_problem</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
+<span class="c1"># read dataset</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/heart_disease/data.csv&#39;</span><span class="p">)</span>
 
-     </div>
-</div>
-</div>
-</div>
+<span class="c1"># define the predictive task</span>
+<span class="n">pdef</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="c1"># column you want to predict</span>
+<span class="p">})</span>
 
-<div class="jp-Cell-outputWrapper">
+<span class="c1"># generate the Json AI intermediate representation from the data and its corresponding settings</span>
+<span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">=</span><span class="n">pdef</span><span class="p">)</span>
 
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
-
-
-
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>id</th>
-      <th>url_legal</th>
-      <th>license</th>
-      <th>excerpt</th>
-      <th>target</th>
-      <th>standard_error</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>c12129c31</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>When the young people returned to the ballroom...</td>
-      <td>-0.340259</td>
-      <td>0.464009</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>85aa80a4c</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>All through dinner time, Mrs. Fayre was somewh...</td>
-      <td>-0.315372</td>
-      <td>0.480805</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>b69ac6792</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>As Roger had predicted, the snow departed as q...</td>
-      <td>-0.580118</td>
-      <td>0.476676</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>dd1000b26</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>And outside before the palace a great garden w...</td>
-      <td>-1.054013</td>
-      <td>0.450007</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>37c1b32fb</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>Once upon a time there were Three Bears who li...</td>
-      <td>0.247197</td>
-      <td>0.510845</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>We see <strong>6 columns</strong>, a variety which are numerical, missing numbers, text, and identifiers or "ids". For our predictive task, we are only interested in 2 such columns, the <strong>excerpt</strong> and <strong>target</strong> columns.</p>
-<h3 id="2)-Create-a-JSON-AI-default-object">2) Create a JSON-AI default object<a class="anchor-link" href="#2)-Create-a-JSON-AI-default-object">&#182;</a></h3><p>Before we create a custom cleaner object, let's first create JSON-AI syntax for our problem based on its specifications. We can do so by setting up a <code>ProblemDefinition</code>. The <code>ProblemDefinition</code> allows us to specify the target, the column we intend to predict, along with other details.</p>
-<p>The end goal of JSON-AI is to provide *<em>a set of instructions on how to compile a machine learning pipeline</em>.</p>
-<p>In this case, let's specify our target, the aptly named <strong>target</strong> column. We will also tell JSON-AI to throw away features we never intend to use, such as "url_legal", "license", and "standard_error". We can do so in the following lines:</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Setup the problem definition</span>
-<span class="n">problem_definition</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span>
-    <span class="s2">&quot;ignore_features&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;url_legal&quot;</span><span class="p">,</span> <span class="s2">&quot;license&quot;</span><span class="p">,</span> <span class="s2">&quot;standard_error&quot;</span><span class="p">]</span>
-<span class="p">}</span>
-
-<span class="c1"># Generate the j{ai}son syntax</span>
-<span class="n">default_json</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
+<span class="c1"># Print it (you can also put it in a file and edit it there)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -14460,20 +14394,40 @@ a.anchor-link {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>INFO:lightwood-50752:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]
-INFO:lightwood-50752:Analyzing a sample of 2478
-INFO:lightwood-50752:from a total population of 2834, this is equivalent to 87.4% of your data.
-INFO:lightwood-50752:Using 15 processes to deduct types.
-INFO:lightwood-50752:Infering type for: id
-INFO:lightwood-50752:Infering type for: target
-INFO:lightwood-50752:Infering type for: excerpt
-INFO:lightwood-50752:Column target has data type float
-INFO:lightwood-50752:Doing text detection for column: id
-INFO:lightwood-50752:Doing text detection for column: excerpt
-INFO:lightwood-50752:Column id has data type categorical
-WARNING:lightwood-50752:Column id is an identifier of type &#34;Hash-like identifier&#34;
-INFO:lightwood-50752:Starting statistical analysis
-INFO:lightwood-50752:Finished statistical analysis
+<pre>INFO:lightwood-56096:Dropping features: []
+INFO:lightwood-56096:Analyzing a sample of 298
+INFO:lightwood-56096:from a total population of 303, this is equivalent to 98.3% of your data.
+INFO:lightwood-56096:Using 15 processes to deduct types.
+INFO:lightwood-56096:Infering type for: age
+INFO:lightwood-56096:Infering type for: sex
+INFO:lightwood-56096:Infering type for: cp
+INFO:lightwood-56096:Infering type for: trestbps
+INFO:lightwood-56096:Infering type for: fbs
+INFO:lightwood-56096:Infering type for: chol
+INFO:lightwood-56096:Infering type for: thalach
+INFO:lightwood-56096:Infering type for: restecg
+INFO:lightwood-56096:Infering type for: exang
+INFO:lightwood-56096:Infering type for: ca
+INFO:lightwood-56096:Infering type for: slope
+INFO:lightwood-56096:Infering type for: thal
+INFO:lightwood-56096:Column age has data type integer
+INFO:lightwood-56096:Infering type for: target
+INFO:lightwood-56096:Column sex has data type binary
+INFO:lightwood-56096:Column fbs has data type binary
+INFO:lightwood-56096:Column cp has data type categorical
+INFO:lightwood-56096:Infering type for: oldpeak
+INFO:lightwood-56096:Column trestbps has data type integer
+INFO:lightwood-56096:Column chol has data type integer
+INFO:lightwood-56096:Column thalach has data type integer
+INFO:lightwood-56096:Column restecg has data type categorical
+INFO:lightwood-56096:Column exang has data type binary
+INFO:lightwood-56096:Column ca has data type categorical
+INFO:lightwood-56096:Column slope has data type categorical
+INFO:lightwood-56096:Column thal has data type categorical
+INFO:lightwood-56096:Column target has data type binary
+INFO:lightwood-56096:Column oldpeak has data type float
+INFO:lightwood-56096:Starting statistical analysis
+INFO:lightwood-56096:Finished statistical analysis
 </pre>
 </div>
 </div>
@@ -14485,76 +14439,97 @@ INFO:lightwood-50752:Finished statistical analysis
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>MyCustomCleaner.py
-MyCustomCleaner
-MyCustomSplitter.py
-MyCustomSplitter
-</pre>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
-<p>(1) It drops the features we specify in the <code>ignore_features</code> argument <br>
-(2) It takes a small sample of data from each column to <em>automatically infer the data type</em> <br>
-(3) For each column that was not ignored, it identifies the most likely data type.<br>
-(4) It notices that "ID" is a hash-like-identifier.<br>
-(5) It conducts a small statistical analysis on the distributions in order to generate syntax.<br></p>
-<p>As soon as you request a JSON-AI object, Lightwood automatically creates functional syntax from your data. You can see it as follows:</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">default_json</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>{
+<pre>random_forest_mixer.py
+random_forest_mixer
+{
     &#34;features&#34;: {
-        &#34;excerpt&#34;: {
+        &#34;age&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Rich_Text.PretrainedLangEncoder&#34;,
-                &#34;args&#34;: {
-                    &#34;output_type&#34;: &#34;$dtype_dict[$target]&#34;,
-                    &#34;stop_after&#34;: &#34;$problem_definition.seconds_per_encoder&#34;
-                }
+                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;sex&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Binary.BinaryEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;cp&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;trestbps&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;chol&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;fbs&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Binary.BinaryEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;restecg&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;thalach&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;exang&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Binary.BinaryEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;oldpeak&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Float.NumericEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;slope&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;ca&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;args&#34;: {}
+            }
+        },
+        &#34;thal&#34;: {
+            &#34;encoder&#34;: {
+                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;args&#34;: {}
             }
         }
     },
     &#34;outputs&#34;: {
         &#34;target&#34;: {
-            &#34;data_dtype&#34;: &#34;float&#34;,
+            &#34;data_dtype&#34;: &#34;binary&#34;,
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Float.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;Binary.BinaryEncoder&#34;,
                 &#34;args&#34;: {
                     &#34;is_target&#34;: &#34;True&#34;,
-                    &#34;positive_domain&#34;: &#34;$statistical_analysis.positive_domain&#34;
+                    &#34;target_class_distribution&#34;: &#34;$statistical_analysis.target_class_distribution&#34;
                 }
             },
             &#34;mixers&#34;: [
@@ -14594,9 +14569,9 @@ MyCustomSplitter
         &#34;target&#34;: &#34;target&#34;,
         &#34;pct_invalid&#34;: 2,
         &#34;unbias_target&#34;: true,
-        &#34;seconds_per_mixer&#34;: 1582,
-        &#34;seconds_per_encoder&#34;: 12749,
-        &#34;time_aim&#34;: 7780.458037514903,
+        &#34;seconds_per_mixer&#34;: 2364,
+        &#34;seconds_per_encoder&#34;: 0,
+        &#34;time_aim&#34;: 10642.1306731291,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
         &#34;timeseries_settings&#34;: {
@@ -14611,20 +14586,14 @@ MyCustomSplitter
             &#34;allow_incomplete_history&#34;: false
         },
         &#34;anomaly_detection&#34;: true,
-        &#34;ignore_features&#34;: [
-            &#34;url_legal&#34;,
-            &#34;license&#34;,
-            &#34;standard_error&#34;
-        ],
+        &#34;ignore_features&#34;: [],
         &#34;fit_on_validation&#34;: true,
         &#34;strict_mode&#34;: true,
         &#34;seed_nr&#34;: 420
     },
-    &#34;identifiers&#34;: {
-        &#34;id&#34;: &#34;Hash-like identifier&#34;
-    },
+    &#34;identifiers&#34;: {},
     &#34;accuracy_functions&#34;: [
-        &#34;r2_score&#34;
+        &#34;balanced_accuracy_score&#34;
     ]
 }
 </pre>
@@ -14638,18 +14607,25 @@ MyCustomSplitter
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The above shows the minimal syntax required to create a functional JSON-AI object. For each feature you consider in the dataset, we specify the name of the feature, the type of encoder (feature-engineering method) to process the feature, and key word arguments to process the encoder. For the output, we perform a similar operation, but specify the types of mixers, or algorithms used in making a predictor that can estimate the target. Lastly, we populate the "problem_definition" key with the ingredients for our ML pipeline.</p>
-<p>These are the only elements required to get off the ground with JSON-AI. However, we're interested in making a <em>custom</em> approach. So, let's make this syntax a file, and introduce our own changes.</p>
+<p>Now we have to edit the <code>mixers</code> key of this json ai to tell lightwood to use our custom mixer. We can use it together with the others, and have it ensembled with them at the end, or standalone. In this case I'm going to replace all existing mixers with this one</p>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;default.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-   <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">default_json</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mixers</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;random_forest_mixer.RandomForestMixer&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;stop_after&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.seconds_per_mixer&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dtype_dict&#39;</span><span class="p">:</span> <span class="s1">&#39;$dtype_dict&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;$target&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;target_encoder&#39;</span><span class="p">:</span> <span class="s1">&#39;$encoders[self.target]&#39;</span>
+
+    <span class="p">}</span>
+<span class="p">}]</span>
 </pre></div>
 
      </div>
@@ -14660,696 +14636,18 @@ MyCustomSplitter
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="3)-Build-your-own-cleaner-module">3) Build your own cleaner module<a class="anchor-link" href="#3)-Build-your-own-cleaner-module">&#182;</a></h3><p>Let's make a file called <code>MyCustomCleaner.py</code>. To write this file, we will use <code>lightwood.data.cleaner.cleaner</code> as inspiration.</p>
-<p>The goal output of the cleaner is to provide pre-processing to your dataset - the output is only a pandas DataFrame. In theory, any pre-processing can be done here. However, data can be highly irregular - our default <code>Cleaner</code> function has several main goals:</p>
-<p>(1) Strip away any identifier, etc. unwanted columns <br>
-(2) Apply a cleaning function to each column in the dataset, according to that column's data type <br>
-(3) Standardize NaN values within each column for appropriate downstream treatment <br></p>
-<p>You can choose to omit many of these details and completely write this module from scratch, but the easiest way to introduce your custom changes is to borrow the <code>Cleaner</code> function, and add core changes in a custom block.</p>
-<p>This can be done as follows</p>
-<p>You can see individual cleaning functions in <code>lightwood.data.cleaner</code>. If you want to entirely replace a cleaning technique given a particular data-type, we invite you to change <code>lightwood.data.cleaner.get_cleaning_func</code> using the argument <code>custom_cleaning_functions</code>; in this dictionary, for a datatype (specified in <code>api.dtype</code>), you can assign your own function to override our defaults.</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-
-<pre><code>import re
-from copy import deepcopy
-
-import numpy as np
-import pandas as pd
-
-# For time-series
-import datetime
-from dateutil.parser import parse as parse_dt
-
-from lightwood.api.dtype import dtype
-from lightwood.helpers import text
-from lightwood.helpers.log import log
-from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.numeric import can_be_nan_numeric
-
-# Import NLTK for stopwords
-import nltk
-from nltk.corpus import stopwords
-
-stop_words = set(stopwords.words("english"))
-
-from typing import Dict, List, Optional, Tuple, Callable, Union
-
-# Borrow functions from Lightwood's cleaner
-from lightwood.data.cleaner import (
-    _remove_columns,
-    _get_columns_to_clean,
-    get_cleaning_func,
-)
-
-# Use for standardizing NaNs
-VALUES_FOR_NAN_AND_NONE_IN_PANDAS = [np.nan, "nan", "NaN", "Nan", "None"]
-
-
-def cleaner(
-    data: pd.DataFrame,
-    dtype_dict: Dict[str, str],
-    identifiers: Dict[str, str],
-    target: str,
-    mode: str,
-    timeseries_settings: TimeseriesSettings,
-    anomaly_detection: bool,
-    custom_cleaning_functions: Dict[str, str] = {},
-) -&gt; pd.DataFrame:
-    """
-    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``
-
-    :param data: The raw data
-    :param dtype_dict: Type information for each column
-    :param identifiers: A dict containing all identifier typed columns
-    :param target: The target columns
-    :param mode: Can be "predict" or "train"
-    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
-    :param anomaly_detection: Are we detecting anomalies with this predictor?
-
-    :returns: The cleaned data
-    """  # noqa
-
-    data = _remove_columns(
-        data,
-        identifiers,
-        target,
-        mode,
-        timeseries_settings,
-        anomaly_detection,
-        dtype_dict,
-    )
-
-    for col in _get_columns_to_clean(data, dtype_dict, mode, target):
-
-        log.info("Cleaning column =" + str(col))
-        # Get and apply a cleaning function for each data type
-        # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
-        data[col] = data[col].apply(
-            get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
-        )
-
-        # ------------------------ #
-        # INTRODUCE YOUR CUSTOM BLOCK
-
-        # If column data type is a text type, remove stop-words
-        if dtype_dict[col] in (dtype.rich_text, dtype.short_text):
-            data[col] = data[col].apply(
-                lambda x: " ".join(
-                    [word for word in x.split() if word not in stop_words]
-                )
-            )
-
-        # Enforce numerical columns as non-negative
-        if dtype_dict[col] in (dtype.integer, dtype.float):
-            log.info("Converted " + str(col) + " into strictly non-negative")
-            data[col] = data[col].apply(lambda x: x if x &gt; 0 else 0.0)
-
-        # ------------------------ #
-        data[col] = data[col].replace(
-            to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None
-        )
-
-    return data</code></pre>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h4 id="Place-your-custom-module-in-~/lightwood_modules">Place your custom module in <code>~/lightwood_modules</code><a class="anchor-link" href="#Place-your-custom-module-in-~/lightwood_modules">&#182;</a></h4><p>We automatically search for custom scripts in your <code>~/lightwood_modules</code> path. Place your file there. Later, you'll see when we autogenerate code, that you can change your import location if you choose.</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="4)-Introduce-your-custom-cleaner-in-JSON-AI">4) Introduce your custom cleaner in JSON-AI<a class="anchor-link" href="#4)-Introduce-your-custom-cleaner-in-JSON-AI">&#182;</a></h3><p>Now let's introduce our custom cleaner. JSON-AI keeps a lightweight syntax but fills in many default modules (like splitting, cleaning).</p>
-<p>For the custom cleaner, we'll work by editing the "cleaner" key. We will change properties within it as follows:
-(1) "module" - place the name of the function. In our case it will be "MyCustomCleaner.cleaner"
-(2) "args" - any keyword argument specific to your cleaner's internals.</p>
-<p>This will look as follows:</p>
-
-<pre><code>    "cleaner": {
-        "module": "MyCustomCleaner.cleaner",
-        "args": {
-            "identifiers": "$identifiers",
-            "data": "data",
-            "dtype_dict": "$dtype_dict",
-            "target": "$target",
-            "mode": "$mode",
-            "timeseries_settings": "$problem_definition.timeseries_settings",
-            "anomaly_detection": "$problem_definition.anomaly_detection"
-        }</code></pre>
-<p>You may be wondering what the "$" variables reference. In certain cases, we'd like JSON-AI to auto-fill internal variables when automatically generating code, for example, we've already specified the "target" - it would be easier to simply refer in a modular sense what that term is. That is what these variables represent.</p>
-<p>As we borrowed most of the default <code>Cleaner</code>; we keep these arguments. In theory, if we were writing much of these details from scratch, we can customize these values as necessary.</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="5)-Generate-Python-code-representing-your-ML-pipeline">5) Generate Python code representing your ML pipeline<a class="anchor-link" href="#5)-Generate-Python-code-representing-your-ML-pipeline">&#182;</a></h3><p>Now we're ready to load up our custom JSON-AI and generate the predictor code!</p>
-<p>We can do this by first reading in our custom json-syntax, and then calling the function <code>code_from_json_ai</code>.</p>
+<p>Then we'll generate some code, and finally turn that code into a predictor object and fit it on the original data.</p>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Make changes to your JSON-file and load the custom version</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-   <span class="n">modified_json</span> <span class="o">=</span> <span class="n">JsonAI</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">code_from_json_ai</span><span class="p">,</span> <span class="n">predictor_from_code</span>
 
-<span class="c1">#Generate python code that fills in your pipeline</span>
-<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">modified_json</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-
-<span class="c1"># Save code to a file (Optional)</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom_cleaner_pipeline.py&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>MyCustomCleaner.py
-MyCustomCleaner
-MyCustomSplitter.py
-MyCustomSplitter
-import lightwood
-from lightwood.analysis import *
-from lightwood.api import *
-from lightwood.data import *
-from lightwood.encoder import *
-from lightwood.ensemble import *
-from lightwood.helpers.device import *
-from lightwood.helpers.general import *
-from lightwood.helpers.log import *
-from lightwood.helpers.numeric import *
-from lightwood.helpers.parallelism import *
-from lightwood.helpers.seed import *
-from lightwood.helpers.text import *
-from lightwood.helpers.torch import *
-from lightwood.mixer import *
-import pandas as pd
-from typing import Dict, List
-import os
-from types import ModuleType
-import importlib.machinery
-import sys
-
-
-for import_dir in [os.path.expanduser(&#34;~/lightwood_modules&#34;), &#34;/etc/lightwood_modules&#34;]:
-    if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
-        for file_name in list(os.walk(import_dir))[0][2]:
-            print(file_name)
-            if file_name[-3:] != &#34;.py&#34;:
-                continue
-            mod_name = file_name[:-3]
-            print(mod_name)
-            loader = importlib.machinery.SourceFileLoader(
-                mod_name, os.path.join(import_dir, file_name)
-            )
-            module = ModuleType(loader.name)
-            loader.exec_module(module)
-            sys.modules[mod_name] = module
-            exec(f&#34;import {mod_name}&#34;)
-
-
-class Predictor(PredictorInterface):
-    target: str
-    mixers: List[BaseMixer]
-    encoders: Dict[str, BaseEncoder]
-    ensemble: BaseEnsemble
-    mode: str
-
-    def __init__(self):
-        seed(420)
-        self.target = &#34;target&#34;
-        self.mode = &#34;inactive&#34;
-        self.problem_definition = ProblemDefinition.from_dict(
-            {
-                &#34;target&#34;: &#34;target&#34;,
-                &#34;pct_invalid&#34;: 2,
-                &#34;unbias_target&#34;: True,
-                &#34;seconds_per_mixer&#34;: 1582,
-                &#34;seconds_per_encoder&#34;: 12749,
-                &#34;time_aim&#34;: 7780.458037514903,
-                &#34;target_weights&#34;: None,
-                &#34;positive_domain&#34;: False,
-                &#34;timeseries_settings&#34;: {
-                    &#34;is_timeseries&#34;: False,
-                    &#34;order_by&#34;: None,
-                    &#34;window&#34;: None,
-                    &#34;group_by&#34;: None,
-                    &#34;use_previous_target&#34;: True,
-                    &#34;nr_predictions&#34;: None,
-                    &#34;historical_columns&#34;: None,
-                    &#34;target_type&#34;: &#34;&#34;,
-                    &#34;allow_incomplete_history&#34;: False,
-                },
-                &#34;anomaly_detection&#34;: True,
-                &#34;ignore_features&#34;: [&#34;url_legal&#34;, &#34;license&#34;, &#34;standard_error&#34;],
-                &#34;fit_on_validation&#34;: True,
-                &#34;strict_mode&#34;: True,
-                &#34;seed_nr&#34;: 420,
-            }
-        )
-        self.accuracy_functions = [&#34;r2_score&#34;]
-        self.identifiers = {&#34;id&#34;: &#34;Hash-like identifier&#34;}
-        self.dtype_dict = {&#34;target&#34;: &#34;float&#34;, &#34;excerpt&#34;: &#34;rich_text&#34;}
-
-        # Any feature-column dependencies
-        self.dependencies = {&#34;excerpt&#34;: []}
-
-        self.input_cols = [&#34;excerpt&#34;]
-
-        # Initial stats analysis
-        self.statistical_analysis = None
-
-    def analyze_data(self, data: pd.DataFrame) -&gt; None:
-        # Perform a statistical analysis on the unprocessed data
-
-        log.info(&#34;Performing statistical analysis on data&#34;)
-        self.statistical_analysis = lightwood.data.statistical_analysis(
-            data,
-            self.dtype_dict,
-            {&#34;id&#34;: &#34;Hash-like identifier&#34;},
-            self.problem_definition,
-        )
-
-        # Instantiate post-training evaluation
-        self.analysis_blocks = [
-            ICP(
-                fixed_significance=None,
-                confidence_normalizer=False,
-                positive_domain=self.statistical_analysis.positive_domain,
-            ),
-            AccStats(deps=[&#34;ICP&#34;]),
-            GlobalFeatureImportance(disable_column_importance=False),
-        ]
-
-    def preprocess(self, data: pd.DataFrame) -&gt; pd.DataFrame:
-        # Preprocess and clean data
-
-        log.info(&#34;Cleaning the data&#34;)
-        data = MyCustomCleaner.cleaner(
-            data=data,
-            identifiers=self.identifiers,
-            dtype_dict=self.dtype_dict,
-            target=self.target,
-            mode=self.mode,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-        )
-
-        # Time-series blocks
-
-        return data
-
-    def split(self, data: pd.DataFrame) -&gt; Dict[str, pd.DataFrame]:
-        # Split the data into training/testing splits
-
-        log.info(&#34;Splitting the data into train/test&#34;)
-        train_test_data = splitter(
-            data=data,
-            seed=1,
-            pct_train=80,
-            pct_dev=10,
-            pct_test=10,
-            tss=self.problem_definition.timeseries_settings,
-            target=self.target,
-            dtype_dict=self.dtype_dict,
-        )
-
-        return train_test_data
-
-    def prepare(self, data: Dict[str, pd.DataFrame]) -&gt; None:
-        # Prepare encoders to featurize data
-
-        self.mode = &#34;train&#34;
-
-        if self.statistical_analysis is None:
-            raise Exception(&#34;Please run analyze_data first&#34;)
-
-        # Column to encoder mapping
-        self.encoders = {
-            &#34;target&#34;: Float.NumericEncoder(
-                is_target=True,
-                positive_domain=self.statistical_analysis.positive_domain,
-            ),
-            &#34;excerpt&#34;: Rich_Text.PretrainedLangEncoder(
-                output_type=False,
-                stop_after=self.problem_definition.seconds_per_encoder,
-            ),
-        }
-
-        # Prepare the training + dev data
-        concatenated_train_dev = pd.concat([data[&#34;train&#34;], data[&#34;dev&#34;]])
-
-        log.info(&#34;Preparing the encoders&#34;)
-
-        encoder_prepping_dict = {}
-
-        # Prepare encoders that do not require learned strategies
-        for col_name, encoder in self.encoders.items():
-            if not encoder.is_trainable_encoder:
-                encoder_prepping_dict[col_name] = [
-                    encoder,
-                    concatenated_train_dev[col_name],
-                    &#34;prepare&#34;,
-                ]
-                log.info(
-                    f&#34;Encoder prepping dict length of: {len(encoder_prepping_dict)}&#34;
-                )
-
-        # Setup parallelization
-        parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
-        for col_name, encoder in parallel_prepped_encoders.items():
-            self.encoders[col_name] = encoder
-
-        # Prepare the target
-        if self.target not in parallel_prepped_encoders:
-            if self.encoders[self.target].is_trainable_encoder:
-                self.encoders[self.target].prepare(
-                    data[&#34;train&#34;][self.target], data[&#34;dev&#34;][self.target]
-                )
-            else:
-                self.encoders[self.target].prepare(
-                    pd.concat([data[&#34;train&#34;], data[&#34;dev&#34;]])[self.target]
-                )
-
-        # Prepare any non-target encoders that are learned
-        for col_name, encoder in self.encoders.items():
-            if encoder.is_trainable_encoder:
-                priming_data = pd.concat([data[&#34;train&#34;], data[&#34;dev&#34;]])
-                kwargs = {}
-                if self.dependencies[col_name]:
-                    kwargs[&#34;dependency_data&#34;] = {}
-                    for col in self.dependencies[col_name]:
-                        kwargs[&#34;dependency_data&#34;][col] = {
-                            &#34;original_type&#34;: self.dtype_dict[col],
-                            &#34;data&#34;: priming_data[col],
-                        }
-
-                # If an encoder representation requires the target, provide priming data
-                if hasattr(encoder, &#34;uses_target&#34;):
-                    kwargs[&#34;encoded_target_values&#34;] = parallel_prepped_encoders[
-                        self.target
-                    ].encode(priming_data[self.target])
-
-                encoder.prepare(
-                    data[&#34;train&#34;][col_name], data[&#34;dev&#34;][col_name], **kwargs
-                )
-
-    def featurize(self, split_data: Dict[str, pd.DataFrame]):
-        # Featurize data into numerical representations for models
-
-        log.info(&#34;Featurizing the data&#34;)
-        feature_data = {key: None for key in split_data.keys()}
-
-        for key, data in split_data.items():
-            feature_data[key] = EncodedDs(self.encoders, data, self.target)
-
-        return feature_data
-
-    def fit(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:
-        # Fit predictors to estimate target
-
-        self.mode = &#34;train&#34;
-
-        # --------------- #
-        # Extract data
-        # --------------- #
-        # Extract the featurized data into train/dev/test
-        encoded_train_data = enc_data[&#34;train&#34;]
-        encoded_dev_data = enc_data[&#34;dev&#34;]
-        encoded_test_data = enc_data[&#34;test&#34;]
-
-        log.info(&#34;Training the mixers&#34;)
-
-        # --------------- #
-        # Fit Models
-        # --------------- #
-        # Assign list of mixers
-        self.mixers = [
-            Neural(
-                fit_on_dev=True,
-                search_hyperparameters=True,
-                net=&#34;DefaultNet&#34;,
-                stop_after=self.problem_definition.seconds_per_mixer,
-                target_encoder=self.encoders[self.target],
-                target=self.target,
-                dtype_dict=self.dtype_dict,
-                input_cols=self.input_cols,
-                timeseries_settings=self.problem_definition.timeseries_settings,
-            ),
-            LightGBM(
-                fit_on_dev=True,
-                stop_after=self.problem_definition.seconds_per_mixer,
-                target=self.target,
-                dtype_dict=self.dtype_dict,
-                input_cols=self.input_cols,
-            ),
-            Regression(
-                stop_after=self.problem_definition.seconds_per_mixer,
-                target=self.target,
-                dtype_dict=self.dtype_dict,
-                target_encoder=self.encoders[self.target],
-            ),
-        ]
-
-        # Train mixers
-        trained_mixers = []
-        for mixer in self.mixers:
-            try:
-                mixer.fit(encoded_train_data, encoded_dev_data)
-                trained_mixers.append(mixer)
-            except Exception as e:
-                log.warning(f&#34;Exception: {e} when training mixer: {mixer}&#34;)
-                if True and mixer.stable:
-                    raise e
-
-        # Update mixers to trained versions
-        self.mixers = trained_mixers
-
-        # --------------- #
-        # Create Ensembles
-        # --------------- #
-        log.info(&#34;Ensembling the mixer&#34;)
-        # Create an ensemble of mixers to identify best performing model
-        self.pred_args = PredictionArguments()
-        self.ensemble = BestOf(
-            ts_analysis=None,
-            data=encoded_test_data,
-            accuracy_functions=self.accuracy_functions,
-            target=self.target,
-            mixers=self.mixers,
-        )
-        self.supports_proba = self.ensemble.supports_proba
-
-    def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:
-        # Evaluate quality of fit for the ensemble of mixers
-
-        # --------------- #
-        # Extract data
-        # --------------- #
-        # Extract the featurized data into train/dev/test
-        encoded_train_data = enc_data[&#34;train&#34;]
-        encoded_dev_data = enc_data[&#34;dev&#34;]
-        encoded_test_data = enc_data[&#34;test&#34;]
-
-        # --------------- #
-        # Analyze Ensembles
-        # --------------- #
-        log.info(&#34;Analyzing the ensemble of mixers&#34;)
-        self.model_analysis, self.runtime_analyzer = model_analyzer(
-            data=encoded_test_data,
-            train_data=encoded_train_data,
-            stats_info=self.statistical_analysis,
-            ts_cfg=self.problem_definition.timeseries_settings,
-            accuracy_functions=self.accuracy_functions,
-            predictor=self.ensemble,
-            target=self.target,
-            dtype_dict=self.dtype_dict,
-            analysis_blocks=self.analysis_blocks,
-        )
-
-    def learn(self, data: pd.DataFrame) -&gt; None:
-        log.info(f&#34;Dropping features: {self.problem_definition.ignore_features}&#34;)
-        data = data.drop(
-            columns=self.problem_definition.ignore_features, errors=&#34;ignore&#34;
-        )
-
-        self.mode = &#34;train&#34;
-
-        # Perform stats analysis
-        self.analyze_data(data)
-
-        # Pre-process the data
-        clean_data = self.preprocess(data)
-
-        # Create train/test (dev) split
-        train_dev_test = self.split(clean_data)
-
-        # Prepare encoders
-        self.prepare(train_dev_test)
-
-        # Create feature vectors from data
-        enc_train_test = self.featurize(train_dev_test)
-
-        # Prepare mixers
-        self.fit(enc_train_test)
-
-        # Analyze the ensemble
-        self.analyze_ensemble(enc_train_test)
-
-        # ------------------------ #
-        # Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.
-        # This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.
-        # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
-
-        # Update the mixers with partial fit
-        if self.problem_definition.fit_on_validation:
-
-            log.info(&#34;Adjustment on validation requested.&#34;)
-            update_data = {
-                &#34;new&#34;: enc_train_test[&#34;test&#34;],
-                &#34;old&#34;: ConcatedEncodedDs(
-                    [enc_train_test[&#34;train&#34;], enc_train_test[&#34;dev&#34;]]
-                ),
-            }  # noqa
-
-            self.adjust(update_data)
-
-    def adjust(self, new_data: Dict[str, pd.DataFrame]) -&gt; None:
-        # Update mixers with new information
-
-        self.mode = &#34;train&#34;
-
-        # --------------- #
-        # Extract data
-        # --------------- #
-        # Extract the featurized data
-        encoded_old_data = new_data[&#34;old&#34;]
-        encoded_new_data = new_data[&#34;new&#34;]
-
-        # --------------- #
-        # Adjust (Update) Mixers
-        # --------------- #
-        log.info(&#34;Updating the mixers&#34;)
-
-        for mixer in self.mixers:
-            mixer.partial_fit(encoded_new_data, encoded_old_data)
-
-    def predict(self, data: pd.DataFrame, args: Dict = {}) -&gt; pd.DataFrame:
-
-        # Remove columns that user specifies to ignore
-        log.info(f&#34;Dropping features: {self.problem_definition.ignore_features}&#34;)
-        data = data.drop(
-            columns=self.problem_definition.ignore_features, errors=&#34;ignore&#34;
-        )
-        for col in self.input_cols:
-            if col not in data.columns:
-                data[col] = [None] * len(data)
-
-        # Clean the data
-        self.mode = &#34;predict&#34;
-        log.info(&#34;Cleaning the data&#34;)
-        data = MyCustomCleaner.cleaner(
-            data=data,
-            identifiers=self.identifiers,
-            dtype_dict=self.dtype_dict,
-            target=self.target,
-            mode=self.mode,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-        )
-
-        # Featurize the data
-        encoded_ds = EncodedDs(self.encoders, data, self.target)
-        encoded_data = encoded_ds.get_encoded_data(include_target=False)
-
-        self.pred_args = PredictionArguments.from_dict(args)
-        df = self.ensemble(encoded_ds, args=self.pred_args)
-
-        if self.pred_args.all_mixers:
-            return df
-        else:
-            insights, global_insights = explain(
-                data=data,
-                encoded_data=encoded_data,
-                predictions=df,
-                ts_analysis=None,
-                timeseries_settings=self.problem_definition.timeseries_settings,
-                positive_domain=self.statistical_analysis.positive_domain,
-                anomaly_detection=self.problem_definition.anomaly_detection,
-                analysis=self.runtime_analyzer,
-                target_name=self.target,
-                target_dtype=self.dtype_dict[self.target],
-                explainer_blocks=self.analysis_blocks,
-                fixed_confidence=self.pred_args.fixed_confidence,
-                anomaly_error_rate=self.pred_args.anomaly_error_rate,
-                anomaly_cooldown=self.pred_args.anomaly_cooldown,
-            )
-            return insights
-
-</pre>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>As you can see, an end-to-end pipeline of our entire ML procedure has been generating. There are several abstracted functions to enable transparency as to what processes your data goes through in order to build these models.</p>
-<p>The key steps of the pipeline are as follows:</p>
-<p>(1) Run a <strong>statistical analysis</strong> with <code>analyze_data</code> <br>
-(2) Clean your data with <code>preprocess</code> <br>
-(3) Make a training/dev/testing split with <code>split</code> <br>
-(4) Prepare your feature-engineering pipelines with <code>prepare</code> <br>
-(5) Create your features with <code>featurize</code> <br>
-(6) Fit your predictor models with <code>fit</code> <br></p>
-<p>You can customize this further if necessary, but you have all the steps necessary to train a model!</p>
-<p>We recommend familiarizing with these steps by calling the above commands, ideally in order. Some commands (namely <code>prepare</code>, <code>featurize</code>, and <code>fit</code>) do depend on other steps.</p>
-<p>If you want to omit the individual steps, we recommend your simply call the <code>learn</code> method, which compiles all the necessary steps implemented to give your fully trained predictive models starting with unprocessed data!</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="6)-Call-python-to-run-your-code-and-see-your-preprocessed-outputs">6) Call python to run your code and see your preprocessed outputs<a class="anchor-link" href="#6)-Call-python-to-run-your-code-and-see-your-preprocessed-outputs">&#182;</a></h3><p>Once we have code, we can turn this into a python object by calling <code>predictor_from_code</code>. This instantiates the <code>PredictorInterface</code> object.</p>
-<p>This predictor object can be then used to run your pipeline.</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Turn the code above into a predictor object</span>
+<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
 <span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 
@@ -15370,10 +14668,8 @@ class Predictor(PredictorInterface):
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>MyCustomCleaner.py
-MyCustomCleaner
-MyCustomSplitter.py
-MyCustomSplitter
+<pre>random_forest_mixer.py
+random_forest_mixer
 </pre>
 </div>
 </div>
@@ -15385,13 +14681,10 @@ MyCustomSplitter
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Pre-process the data</span>
-<span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-<span class="n">cleaned_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">predictor</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -15411,94 +14704,77 @@ MyCustomSplitter
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>INFO:lightwood-50752:Cleaning the data
-INFO:lightwood-50752:Cleaning column =target
-INFO:lightwood-50752:Converted target into strictly non-negative
-INFO:lightwood-50752:Cleaning column =excerpt
+<pre>INFO:lightwood-56096:Dropping features: []
+INFO:lightwood-56096:Performing statistical analysis on data
+INFO:lightwood-56096:Starting statistical analysis
+INFO:lightwood-56096:Finished statistical analysis
+INFO:lightwood-56096:Cleaning the data
+INFO:lightwood-56096:Splitting the data into train/test
+INFO:lightwood-56096:Preparing the encoders
+INFO:lightwood-56096:Encoder prepping dict length of: 1
+INFO:lightwood-56096:Encoder prepping dict length of: 2
+INFO:lightwood-56096:Encoder prepping dict length of: 3
+INFO:lightwood-56096:Encoder prepping dict length of: 4
+INFO:lightwood-56096:Encoder prepping dict length of: 5
+INFO:lightwood-56096:Encoder prepping dict length of: 6
+INFO:lightwood-56096:Encoder prepping dict length of: 7
+INFO:lightwood-56096:Encoder prepping dict length of: 8
+INFO:lightwood-56096:Encoder prepping dict length of: 9
+INFO:lightwood-56096:Encoder prepping dict length of: 10
+INFO:lightwood-56096:Encoder prepping dict length of: 11
+INFO:lightwood-56096:Encoder prepping dict length of: 12
+INFO:lightwood-56096:Encoder prepping dict length of: 13
+INFO:lightwood-56096:Encoder prepping dict length of: 14
+INFO:lightwood-56096:Done running for: target
+INFO:lightwood-56096:Done running for: age
+INFO:lightwood-56096:Done running for: sex
+INFO:lightwood-56096:Done running for: cp
+INFO:lightwood-56096:Done running for: trestbps
+INFO:lightwood-56096:Done running for: chol
+INFO:lightwood-56096:Done running for: fbs
+INFO:lightwood-56096:Done running for: restecg
+INFO:lightwood-56096:Done running for: thalach
+INFO:lightwood-56096:Done running for: exang
+INFO:lightwood-56096:Done running for: oldpeak
+INFO:lightwood-56096:Done running for: slope
+INFO:lightwood-56096:Done running for: ca
+INFO:lightwood-56096:Done running for: thal
+INFO:lightwood-56096:Featurizing the data
+INFO:lightwood-56096:Training the mixers
+INFO:lightwood-56096:Ensembling the mixer
+INFO:lightwood-56096:Mixer: RandomForestMixer got accuracy: 0.8149038461538461
+INFO:lightwood-56096:Picked best mixer: RandomForestMixer
+INFO:lightwood-56096:Analyzing the ensemble of mixers
+INFO:lightwood-56096:Adjustment on validation requested.
+INFO:lightwood-56096:Updating the mixers
 </pre>
 </div>
 </div>
 
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
-
-
-
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>excerpt</th>
-      <th>target</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>When young people returned ballroom, presented...</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>All dinner time, Mrs. Fayre somewhat silent, e...</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>As Roger predicted, snow departed quickly came...</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>And outside palace great garden walled round, ...</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>Once upon time Three Bears lived together hous...</td>
-      <td>0.247197</td>
-    </tr>
-  </tbody>
-</table>
-</div>
 </div>
 
 </div>
 
 </div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Finally, we can use the trained predictor to make some predictions, or save it to a pickle for later use</p>
 
 </div>
-
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;Original Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">63</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="s1">&#39;sex&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="s1">&#39;thal&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">}))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Cleaned Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+<span class="n">predictor</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;my_custom_heart_disease_predictor.pickle&#39;</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -15517,28 +14793,26 @@ INFO:lightwood-50752:Cleaning column =excerpt
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>INFO:lightwood-56096:Dropping features: []
+INFO:lightwood-56096:Cleaning the data
+INFO:lightwood-56096:AccStats.explain() has not been implemented, no modifications will be done to the data insights.
+INFO:lightwood-56096:GlobalFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre><span class="ansi-bold">Original Data
-</span>
-Excerpt:
- When the young people returned to the ballroom, it presented a decidedly changed appearance. Instead of an interior scene, it was a winter landscape.
-The floor was covered with snow-white canvas, not laid on smoothly, but rumpled over bumps and hillocks, like a real snow field. The numerous palms and evergreens that had decorated the room, were powdered with flour and strewn with tufts of cotton, like snow. Also diamond dust had been lightly sprinkled on them, and glittering crystal icicles hung from the branches.
-At each end of the room, on the wall, hung a beautiful bear-skin rug.
-These rugs were for prizes, one for the girls and one for the boys. And this was the game.
-The girls were gathered at one end of the room and the boys at the other, and one end was called the North Pole, and the other the South Pole. Each player was given a small flag which they were to plant on reaching the Pole.
-This would have been an easy matter, but each traveller was obliged to wear snowshoes.
-
-Target:
- -0.340259125
-<span class="ansi-bold">
-
-Cleaned Data
-</span>
-Excerpt:
- When young people returned ballroom, presented decidedly changed appearance. Instead interior scene, winter landscape. The floor covered snow-white canvas, laid smoothly, rumpled bumps hillocks, like real snow field. The numerous palms evergreens decorated room, powdered flour strewn tufts cotton, like snow. Also diamond dust lightly sprinkled them, glittering crystal icicles hung branches. At end room, wall, hung beautiful bear-skin rug. These rugs prizes, one girls one boys. And game. The girls gathered one end room boys other, one end called North Pole, South Pole. Each player given small flag plant reaching Pole. This would easy matter, traveller obliged wear snowshoes.
-
-Target:
- 0.0
+<pre>  prediction truth  confidence
+0          0  None        0.95
+1          0  None        0.94
+2          1  None        0.97
 </pre>
 </div>
 </div>
@@ -15550,9 +14824,7 @@ Target:
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>As you can see, the cleaning-process we introduced cut out the stop-words from the Excerpt, and enforced the target data to stay positive.</p>
-<p>We hope this tutorial was informative on how to introduce a <strong>custom preprocessing method</strong> to your datasets! For more customization tutorials, please check our <a href="https://lightwood.io/tutorials.html">documentation</a>.</p>
-<p>If you want to download the Jupyter-notebook version of this tutorial, check out the source github location found here: <code>lightwood/docssrc/source/tutorials/custom_cleaner</code>.</p>
+<p>That's it, all it takes to solve a predictive problem with lightwood using your own custom mixer.</p>
 
 </div>
 </div>

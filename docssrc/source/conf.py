@@ -52,7 +52,8 @@ extensions = [
     'myst_parser',
     'sphinx_rtd_theme',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'nbsphinx'
 ]
 
 # Enable markdown usage
