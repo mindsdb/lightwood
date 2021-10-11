@@ -11,9 +11,11 @@ class Img2VecEncoder(BaseEncoder):
     def __init__(self, is_target: bool = False):
         super().__init__(is_target)
         self.model = None
+        # # I think we should make this an enum, something like: speed, balance, accuracy
+        # self.aim = aim
         self._prepared = False
 
-        self._scaler = transforms.Scale((224, 224))
+        self._scaler = transforms.Resize((224, 224))
         self._normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self._to_tensor = transforms.ToTensor()
         self._img_to_tensor = transforms.Compose([
