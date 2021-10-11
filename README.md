@@ -16,12 +16,12 @@ For details on how to generate JSON-AI syntax and how Lightwood works, check out
 
 Lightwood abstracts the ML pipeline into 3 core steps:
 
-(1) Pre-processing and data cleaning
-(2) Feature engineering
-(3) Model building and training
+(1) Pre-processing and data cleaning <br>
+(2) Feature engineering <br>
+(3) Model building and training <br>
 
 <p align="center">
-<img src="/assets/lightwood_under_the_hood.png" alt="Lightwood internals" width="600"/>
+<img src="/assets/lightwood_under_the_hood.png" alt="Lightwood internals" width="800"/>
 </p>
 
 #### Pre-processing and cleaning
