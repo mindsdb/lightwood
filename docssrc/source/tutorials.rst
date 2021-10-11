@@ -32,5 +32,4 @@ We support users bringing their custom methods. To learn how to build your own p
 | `Design a custom mixer model <tutorials/custom_mixer/custom_mixer.ipynb>`_
 | `Use your own model explainer <tutorials/custom_explainer/custom_explainer.ipynb>`_
 
-
-change for auto 1
+Test nr. 7
