@@ -45,7 +45,7 @@ We predominantly use PyTorch based approaches, but can support other models.
 
 ## Usage
 
-We invite you to check out our [documentation](https://lightwood.io/) for specific guidelines and tutorials! Please stay tuned for updates and changes. 
+We invite you to check out our [documentation](https://mindsdb.github.io/lightwood/) for specific guidelines and tutorials! Please stay tuned for updates and changes. 
 
 ### Quick use cases
 Lightwood works with `pandas.DataFrames`. Once a DataFrame is loaded, defined a "ProblemDefinition" via a dictionary. The only thing a user needs to specify is the name of the column to predict (via the key `target`).
@@ -105,7 +105,7 @@ print(preds)
 
 Lightwood supports user architectures/approaches so long as you follow the abstractions provided within each step. 
 
-Our [tutorials](https://lightwood.io/tutorials.html) provide specific use cases for how to introduce customization into your pipeline. Check out "custom cleaner", "custom splitter", "custom explainer", and "custom mixer". Stay tuned for further updates.
+Our [tutorials](https://mindsdb.github.io/lightwood/tutorials.html) provide specific use cases for how to introduce customization into your pipeline. Check out "custom cleaner", "custom splitter", "custom explainer", and "custom mixer". Stay tuned for further updates.
 
 
 ## Installation
