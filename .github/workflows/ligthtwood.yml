@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout
+    - name: checkout and set up
       uses: actions/checkout@v2
-
-    - name: build docs
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+
+    - name: build docs
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir -e .
