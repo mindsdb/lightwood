@@ -29,6 +29,6 @@ Encoders are assigned to each column of data based on the data type; users can o
 
 iii) Model Building and Training
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-We call a predictive model that intakes feature data and outputs a prediction for the target of interest a `mixer` model. Users can either use Lightwood's default mixers or create their own approaches inherited from the `BaseMixer` class.
+We call a predictive model that intakes *encoded* feature data and outputs a prediction for the target of interest a `mixer` model. Users can either use Lightwood's default mixers or create their own approaches inherited from the `BaseMixer` class.
 
 We predominantly use PyTorch based approaches, but can support other models.
