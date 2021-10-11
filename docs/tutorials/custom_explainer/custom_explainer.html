@@ -1,0 +1,960 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Tutorial - Implementing a custom analysis block in Lightwood &mdash; lightwood 1.3.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">lightwood</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Tutorial - Implementing a custom analysis block in Lightwood</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/tutorials/custom_explainer/custom_explainer.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Tutorial---Implementing-a-custom-analysis-block-in-Lightwood">
+<h1>Tutorial - Implementing a custom analysis block in Lightwood<a class="headerlink" href="#Tutorial---Implementing-a-custom-analysis-block-in-Lightwood" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Introduction">
+<h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h2>
+<p>As you might already know, Lightwood is designed to be a flexible machine learning (ML) library that is able to abstract and automate the entire ML pipeline. Crucially, it is also designed to be extended or modified very easily according to your needs, essentially offering the entire spectrum between fully automated AutoML and a lightweight wrapper for customized ML pipelines.</p>
+<p>As such, we can identify several different customizable “phases” in the process. The relevant phase for this tutorial is the “analysis” that comes after a predictor has been trained. The goal of this phase is to generate useful insights, like accuracy metrics, confusion matrices, feature importance, etc. These particular examples are all included in the core analysis procedure that Lightwood executes.</p>
+<p>However, the analysis procedure is structured into a sequential execution of “analysis blocks”. Each analysis block should generate a well-defined set of insights, as well as handling any actions regarding these at inference time.</p>
+<p>As an example, one of the core blocks is the Inductive Conformal Prediction (<code class="docutils literal notranslate"><span class="pre">ICP</span></code>) block, which handles the confidence estimation of all Lightwood predictors. The logic within can be complex at times, but thanks to the block abstraction we can deal with it in a structured manner. As this <code class="docutils literal notranslate"><span class="pre">ICP</span></code> block is used when generating predictions, it implements the two main methods that the <code class="docutils literal notranslate"><span class="pre">BaseAnalysisBlock</span></code> class specifies: <code class="docutils literal notranslate"><span class="pre">.analyze()</span></code> to setup everything that is needed, and <code class="docutils literal notranslate"><span class="pre">.explain()</span></code> to
+actually estimate the confidence in any given prediction.</p>
+</div>
+<div class="section" id="Objective">
+<h2>Objective<a class="headerlink" href="#Objective" title="Permalink to this headline">¶</a></h2>
+<p>In this tutorial, we will go through the steps required to implement your own analysis blocks to customize the insights of any Lightwood predictor!</p>
+<p>In particular, we will implement a “model correlation heatmap” block: we want to compare the predictions of all mixers inside a <code class="docutils literal notranslate"><span class="pre">BestOf</span></code> ensemble object, to understand how they might differ in their overall behavior.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>from typing import Dict, Tuple
+import pandas as pd
+import lightwood
+lightwood.__version__
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;1.3.0&#39;
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Step-1:-figuring-out-what-we-need">
+<h2>Step 1: figuring out what we need<a class="headerlink" href="#Step-1:-figuring-out-what-we-need" title="Permalink to this headline">¶</a></h2>
+<p>When designing an analysis block, an important choice needs to be made: will this block operate when calling the predictor? Or is it only going to describe its performance once in the held-out validation dataset?</p>
+<p>Being in the former case means we need to implement both <code class="docutils literal notranslate"><span class="pre">.analyze()</span></code> and <code class="docutils literal notranslate"><span class="pre">.explain()</span></code> methods, while the latter case only needs an <code class="docutils literal notranslate"><span class="pre">.analyze()</span></code> method. Our <code class="docutils literal notranslate"><span class="pre">ModelCorrelationHeatmap</span></code> belongs to this second category.</p>
+<p>Let’s start the implementation by inheriting from <code class="docutils literal notranslate"><span class="pre">BaseAnalysisBlock</span></code>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>from lightwood.analysis import BaseAnalysisBlock
+
+class ModelCorrelationHeatmap(BaseAnalysisBlock):
+    def __init__(self):
+        super().__init__()
+
+    def analyze(self, info: Dict[str, object], **kwargs) -&gt; Dict[str, object]:
+        return info
+
+    def explain(self,
+                row_insights: pd.DataFrame,
+                global_insights: Dict[str, object], **kwargs) -&gt; Tuple[pd.DataFrame, Dict[str, object]]:
+
+        return row_insights, global_insights
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>ModelCorrelationHeatmap()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;__main__.ModelCorrelationHeatmap at 0x7fa85c015970&gt;
+</pre></div></div>
+</div>
+<p>Right now, our newly created analysis block doesn’t do much, apart from returning the <code class="docutils literal notranslate"><span class="pre">info</span></code> and insights (<code class="docutils literal notranslate"><span class="pre">row_insights</span></code> and <code class="docutils literal notranslate"><span class="pre">global_insights</span></code>) exactly as it received them from the previous block.</p>
+<p>As previously discussed, we only need to implement a procedure that runs post-training, no action is required at inference time. This means we can use the default <code class="docutils literal notranslate"><span class="pre">.explain()</span></code> behavior in the parent class:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>class ModelCorrelationHeatmap(BaseAnalysisBlock):
+    def __init__(self):
+        super().__init__()
+
+    def analyze(self, info: Dict[str, object], **kwargs) -&gt; Dict[str, object]:
+        return info
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Step-2:-Implementing-the-custom-analysis-block">
+<h2>Step 2: Implementing the custom analysis block<a class="headerlink" href="#Step-2:-Implementing-the-custom-analysis-block" title="Permalink to this headline">¶</a></h2>
+<p>Okay, now for the fun bit: we have to implement a correlation heatmap between the predictions of all mixers inside a <code class="docutils literal notranslate"><span class="pre">BestOf</span></code> ensemble. This is currently the only ensemble implemented in Lightwood, but it is a good idea to explicitly check that the type of the ensemble is what we expect.</p>
+<p>A natural question to ask at this point is: what information do we have to implement the procedure? You’ll note that, apart from the <code class="docutils literal notranslate"><span class="pre">info</span></code> dictionary, we receive a <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> dictionary. You can check out the full documentation for more details, but the keys (and respective value types) exposed in this object by default are:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>kwargs = {
+        &#39;predictor&#39;: &#39;lightwood.ensemble.BaseEnsemble&#39;,
+        &#39;target&#39;: &#39;str&#39;,
+        &#39;input_cols&#39;: &#39;list&#39;,
+        &#39;dtype_dict&#39;: &#39;dict&#39;,
+        &#39;normal_predictions&#39;: &#39;pd.DataFrame&#39;,
+        &#39;data&#39;: &#39;pd.DataFrame&#39;,
+        &#39;train_data&#39;: &#39;lightwood.data.encoded_ds.EncodedDs&#39;,
+        &#39;encoded_val_data&#39;: &#39;lightwood.data.encoded_ds.EncodedDs&#39;,
+        &#39;is_classification&#39;: &#39;bool&#39;,
+        &#39;is_numerical&#39;: &#39;bool&#39;,
+        &#39;is_multi_ts&#39;: &#39;bool&#39;,
+        &#39;stats_info&#39;: &#39;lightwood.api.types.StatisticalAnalysis&#39;,
+        &#39;ts_cfg&#39;: &#39;lightwood.api.types.TimeseriesSettings&#39;,
+        &#39;accuracy_functions&#39;: &#39;list&#39;,
+        &#39;has_pretrained_text_enc&#39;: &#39;bool&#39;
+}
+</pre></div>
+</div>
+</div>
+<p>As you can see there is lots to work with, but for this example we will focus on using:</p>
+<ol class="arabic simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">predictor</span></code> ensemble</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">encoded_val_data</span></code> to generate predictions for each mixer inside the ensemble</p></li>
+</ol>
+<p>And the insight we’re want to produce is a matrix that compares the output of all mixers and computes the correlation between them.</p>
+<p>Let’s implement the algorithm:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>from typing import Dict
+from types import SimpleNamespace
+
+import numpy as np
+
+from lightwood.ensemble import BestOf
+from lightwood.analysis import BaseAnalysisBlock
+
+
+class ModelCorrelationHeatmap(BaseAnalysisBlock):
+    def __init__(self):
+        super().__init__()
+
+    def analyze(self, info: Dict[str, object], **kwargs) -&gt; Dict[str, object]:
+        ns = SimpleNamespace(**kwargs)
+
+        # only triggered with the right type of ensemble
+        if isinstance(ns.predictor, BestOf):
+
+            # store prediction from every mixer
+            all_predictions = []
+
+            for mixer in ns.predictor.mixers:
+                predictions = mixer(ns.encoded_val_data).values  # retrieve np.ndarray from the returned pd.DataFrame
+                all_predictions.append(predictions.flatten().astype(int))  # flatten and cast labels to int
+
+            # calculate correlation matrix
+            corrs = np.corrcoef(np.array(all_predictions))
+
+            # save inside `info` object
+            info[&#39;mixer_correlation&#39;] = corrs
+
+        return info
+
+</pre></div>
+</div>
+</div>
+<p>Notice the use of <code class="docutils literal notranslate"><span class="pre">SimpleNamespace</span></code> for dot notation accessors.</p>
+<p>The procedure above is fairly straightforward, as we leverage numpy’s <code class="docutils literal notranslate"><span class="pre">corrcoef()</span></code> function to generate the matrix.</p>
+<p>Finally, it is very important to add the output to <code class="docutils literal notranslate"><span class="pre">info</span></code> so that it is saved inside the actual predictor object.</p>
+</div>
+<div class="section" id="Step-3:-Exposing-the-block-to-Lightwood">
+<h2>Step 3: Exposing the block to Lightwood<a class="headerlink" href="#Step-3:-Exposing-the-block-to-Lightwood" title="Permalink to this headline">¶</a></h2>
+<p>To use this in an arbitrary script, we need to add the above class (and all necessary imports) to a <code class="docutils literal notranslate"><span class="pre">.py</span></code> file inside one of the following directories:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~/lightwood_modules</span></code> (where <code class="docutils literal notranslate"><span class="pre">~</span></code> is your home directory, e.g. <code class="docutils literal notranslate"><span class="pre">/Users/username/</span></code> for macOS and <code class="docutils literal notranslate"><span class="pre">/home/username/</span></code> for linux</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/etc/lightwood_modules</span></code></p></li>
+</ul>
+<p>Lightwood will scan these directories and import any class so that they can be found and used by the <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> code generating module.</p>
+<p><strong>To continue, please save the code cell above as ``model_correlation.py`` in one of the indicated directories.</strong></p>
+</div>
+<div class="section" id="Step-4:-Final-test-run">
+<h2>Step 4: Final test run<a class="headerlink" href="#Step-4:-Final-test-run" title="Permalink to this headline">¶</a></h2>
+<p>Ok! Everything looks set to try out our custom block. Let’s generate a predictor for <a class="reference external" href="https://github.com/mindsdb/lightwood/blob/stable/tests/data/hdi.csv">this</a> sample dataset, and see whether our new insights are any good.</p>
+<p>First, it is important to add our <code class="docutils literal notranslate"><span class="pre">ModelCorrelationHeatmap</span></code> to the <code class="docutils literal notranslate"><span class="pre">analysis_blocks</span></code> attribute of the Json AI object that will generate your predictor code.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
+
+# read dataset
+df = pd.read_csv(&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/hdi.csv&#39;)
+
+# define the predictive task
+pdef = ProblemDefinition.from_dict({
+    &#39;target&#39;: &#39;Development Index&#39;,         # column you want to predict
+    &#39;time_aim&#39;: 100,
+})
+
+# generate the Json AI intermediate representation from the data and its corresponding settings
+json_ai = json_ai_from_problem(df, problem_definition=pdef)
+
+# add the custom list of analysis blocks; in this case, composed of a single block
+json_ai.analysis_blocks = [{
+    &#39;module&#39;: &#39;model_correlation.ModelCorrelationHeatmap&#39;,
+    &#39;args&#39;: {}
+}]
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:lightwood-53131:Dropping features: []
+INFO:lightwood-53131:Analyzing a sample of 222
+INFO:lightwood-53131:from a total population of 225, this is equivalent to 98.7% of your data.
+INFO:lightwood-53131:Using 15 processes to deduct types.
+INFO:lightwood-53131:Infering type for: Population
+INFO:lightwood-53131:Infering type for: Area (sq. mi.)
+INFO:lightwood-53131:Infering type for: Pop. Density
+INFO:lightwood-53131:Infering type for: GDP ($ per capita)
+INFO:lightwood-53131:Infering type for: Literacy (%)
+INFO:lightwood-53131:Infering type for: Infant mortality
+INFO:lightwood-53131:Infering type for: Development Index
+INFO:lightwood-53131:Column Area (sq. mi.) has data type integer
+INFO:lightwood-53131:Column Population has data type integer
+INFO:lightwood-53131:Column Development Index has data type categorical
+INFO:lightwood-53131:Column Literacy (%) has data type float
+INFO:lightwood-53131:Column GDP ($ per capita) has data type integer
+INFO:lightwood-53131:Column Infant mortality  has data type float
+INFO:lightwood-53131:Column Pop. Density  has data type float
+INFO:lightwood-53131:Starting statistical analysis
+INFO:lightwood-53131:Finished statistical analysis
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model_correlation.py
+model_correlation
+</pre></div></div>
+</div>
+<p>We can take a look at the respective Json AI key just to confirm our newly added analysis block is in there:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>json_ai.analysis_blocks
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[{&#39;module&#39;: &#39;model_correlation.ModelCorrelationHeatmap&#39;, &#39;args&#39;: {}}]
+</pre></div></div>
+</div>
+<p>Now we are ready to create a predictor from this Json AI, and subsequently train it:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>from lightwood.api.high_level import code_from_json_ai, predictor_from_code
+
+code = code_from_json_ai(json_ai)
+predictor = predictor_from_code(code)
+
+predictor.learn(df)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:lightwood-53131:Dropping features: []
+INFO:lightwood-53131:Performing statistical analysis on data
+INFO:lightwood-53131:Starting statistical analysis
+INFO:lightwood-53131:Finished statistical analysis
+INFO:lightwood-53131:Cleaning the data
+INFO:lightwood-53131:Splitting the data into train/test
+WARNING:lightwood-53131:Cannot stratify, got subsets of length: [25, 24, 23, 22, 22, 22, 22, 22, 22, 21] | Splitting without stratification
+INFO:lightwood-53131:Preparing the encoders
+INFO:lightwood-53131:Encoder prepping dict length of: 1
+INFO:lightwood-53131:Encoder prepping dict length of: 2
+INFO:lightwood-53131:Encoder prepping dict length of: 3
+INFO:lightwood-53131:Encoder prepping dict length of: 4
+INFO:lightwood-53131:Encoder prepping dict length of: 5
+INFO:lightwood-53131:Encoder prepping dict length of: 6
+INFO:lightwood-53131:Encoder prepping dict length of: 7
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model_correlation.py
+model_correlation
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:lightwood-53131:Done running for: Development Index
+INFO:lightwood-53131:Done running for: Population
+INFO:lightwood-53131:Done running for: Area (sq. mi.)
+INFO:lightwood-53131:Done running for: Pop. Density
+INFO:lightwood-53131:Done running for: GDP ($ per capita)
+INFO:lightwood-53131:Done running for: Literacy (%)
+INFO:lightwood-53131:Done running for: Infant mortality
+INFO:lightwood-53131:Featurizing the data
+INFO:lightwood-53131:Training the mixers
+/home/natasha/mdb/lib/python3.8/site-packages/lightgbm/engine.py:151: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
+WARNING:lightwood-53131:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead
+INFO:lightwood-53131:Loss of 2.1644320487976074 with learning rate 0.0001
+INFO:lightwood-53131:Loss of 2.4373621940612793 with learning rate 0.00014
+INFO:lightwood-53131:Found learning rate of: 0.0001
+/home/natasha/mdb/lib/python3.8/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:
+        addcmul_(Number value, Tensor tensor1, Tensor tensor2)
+Consider using one of the following signatures instead:
+        addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at  /pytorch/torch/csrc/utils/python_arg_parser.cpp:1005.)
+  exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
+DEBUG:lightwood-53131:Loss @ epoch 1: 1.6043835878372192
+DEBUG:lightwood-53131:Loss @ epoch 2: 1.614564061164856
+DEBUG:lightwood-53131:Loss @ epoch 3: 1.6116881370544434
+DEBUG:lightwood-53131:Loss @ epoch 4: 1.6085857152938843
+DEBUG:lightwood-53131:Loss @ epoch 5: 1.5999916791915894
+DEBUG:lightwood-53131:Loss @ epoch 6: 1.5959053039550781
+DEBUG:lightwood-53131:Loss @ epoch 7: 1.5914497375488281
+DEBUG:lightwood-53131:Loss @ epoch 8: 1.586897850036621
+DEBUG:lightwood-53131:Loss @ epoch 9: 1.582642912864685
+DEBUG:lightwood-53131:Loss @ epoch 10: 1.5786747932434082
+DEBUG:lightwood-53131:Loss @ epoch 11: 1.5690934658050537
+DEBUG:lightwood-53131:Loss @ epoch 12: 1.5649737119674683
+DEBUG:lightwood-53131:Loss @ epoch 13: 1.5617222785949707
+DEBUG:lightwood-53131:Loss @ epoch 14: 1.5580050945281982
+DEBUG:lightwood-53131:Loss @ epoch 15: 1.55539071559906
+DEBUG:lightwood-53131:Loss @ epoch 16: 1.5526844263076782
+DEBUG:lightwood-53131:Loss @ epoch 17: 1.5471524000167847
+DEBUG:lightwood-53131:Loss @ epoch 18: 1.5454663038253784
+DEBUG:lightwood-53131:Loss @ epoch 19: 1.5436923503875732
+DEBUG:lightwood-53131:Loss @ epoch 20: 1.5420359373092651
+DEBUG:lightwood-53131:Loss @ epoch 21: 1.5407888889312744
+DEBUG:lightwood-53131:Loss @ epoch 22: 1.5401763916015625
+DEBUG:lightwood-53131:Loss @ epoch 23: 1.5390430688858032
+DEBUG:lightwood-53131:Loss @ epoch 24: 1.53862726688385
+DEBUG:lightwood-53131:Loss @ epoch 25: 1.5379230976104736
+DEBUG:lightwood-53131:Loss @ epoch 26: 1.5374646186828613
+DEBUG:lightwood-53131:Loss @ epoch 27: 1.5376394987106323
+DEBUG:lightwood-53131:Loss @ epoch 28: 1.5372562408447266
+DEBUG:lightwood-53131:Loss @ epoch 29: 1.537568211555481
+DEBUG:lightwood-53131:Loss @ epoch 1: 1.5716121435165404
+DEBUG:lightwood-53131:Loss @ epoch 2: 1.5647767543792725
+DEBUG:lightwood-53131:Loss @ epoch 3: 1.5728715658187866
+DEBUG:lightwood-53131:Loss @ epoch 4: 1.5768787622451783
+DEBUG:lightwood-53131:Loss @ epoch 5: 1.5729807138442993
+DEBUG:lightwood-53131:Loss @ epoch 6: 1.56294903755188
+DEBUG:lightwood-53131:Loss @ epoch 7: 1.5892131805419922
+INFO:lightwood-53131:Started fitting LGBM model
+/home/natasha/mdb/lib/python3.8/site-packages/lightgbm/engine.py:151: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
+INFO:lightwood-53131:A single GBM iteration takes 0.1 seconds
+INFO:lightwood-53131:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/home/natasha/mdb/lib/python3.8/site-packages/lightgbm/__init__.py&#39;&gt;) with 176 iterations given 22 seconds constraint
+/home/natasha/mdb/lib/python3.8/site-packages/lightgbm/engine.py:156: UserWarning: Found `early_stopping_rounds` in params. Will use it instead of argument
+  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
+INFO:lightwood-53131:Lightgbm model contains 880 weak estimators
+INFO:lightwood-53131:Updating lightgbm model with 10.5 iterations
+/home/natasha/mdb/lib/python3.8/site-packages/lightgbm/engine.py:151: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
+/home/natasha/mdb/lib/python3.8/site-packages/lightgbm/engine.py:156: UserWarning: Found `early_stopping_rounds` in params. Will use it instead of argument
+  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
+INFO:lightwood-53131:Model now has a total of 880 weak estimators
+WARNING:lightwood-53131:Exception: Unspported categorical type for regression when training mixer: &lt;lightwood.mixer.regression.Regression object at 0x7fa84c42f640&gt;
+INFO:lightwood-53131:Ensembling the mixer
+INFO:lightwood-53131:Mixer: Neural got accuracy: 0.2916666666666667
+INFO:lightwood-53131:Mixer: LightGBM got accuracy: 1.0
+INFO:lightwood-53131:Picked best mixer: LightGBM
+INFO:lightwood-53131:Analyzing the ensemble of mixers
+INFO:lightwood-53131:Adjustment on validation requested.
+INFO:lightwood-53131:Updating the mixers
+DEBUG:lightwood-53131:Loss @ epoch 1: 1.532525897026062
+DEBUG:lightwood-53131:Loss @ epoch 2: 1.6230510274569194
+DEBUG:lightwood-53131:Loss @ epoch 3: 1.529026726881663
+DEBUG:lightwood-53131:Loss @ epoch 4: 1.4609563549359639
+DEBUG:lightwood-53131:Loss @ epoch 5: 1.6120732029279072
+INFO:lightwood-53131:Updating lightgbm model with 10.5 iterations
+/home/natasha/mdb/lib/python3.8/site-packages/lightgbm/engine.py:151: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
+/home/natasha/mdb/lib/python3.8/site-packages/lightgbm/engine.py:156: UserWarning: Found `early_stopping_rounds` in params. Will use it instead of argument
+  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
+INFO:lightwood-53131:Model now has a total of 880 weak estimators
+</pre></div></div>
+</div>
+<p>Finally, we can visualize the mixer correlation matrix:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>import matplotlib.pyplot as plt
+
+mc = predictor.runtime_analyzer[&#39;mixer_correlation&#39;]  # newly produced insight
+
+mixer_names = [c.__class__.__name__ for c in predictor.ensemble.mixers]
+
+# plotting code
+fig, ax = plt.subplots()
+im = ax.imshow(mc, cmap=&#39;seismic&#39;)
+
+# set ticks
+ax.set_xticks(np.arange(mc.shape[0]))
+ax.set_yticks(np.arange(mc.shape[1]))
+
+# set tick labels
+ax.set_xticklabels(mixer_names)
+ax.set_yticklabels(mixer_names)
+
+# show cell values
+for i in range(len(mixer_names)):
+    for j in range(len(mixer_names)):
+        text = ax.text(j, i, round(mc[i, j], 3), ha=&quot;center&quot;, va=&quot;center&quot;, color=&quot;w&quot;)
+
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_custom_explainer_custom_explainer_20_0.png" src="../../_images/tutorials_custom_explainer_custom_explainer_20_0.png" />
+</div>
+</div>
+<p>Nice! We’ve just added an additional piece of insight regarding the predictor that Lightwood came up with for the task of predicting the Human Development Index of any given country.</p>
+<p>What this matrix is telling us is whether the predictions of both mixers stored in the ensemble – Neural and LightGBM – have a high correlation or not.</p>
+<p>This is, of course, a very simple example, but it shows the convenience of such an abstraction within the broader pipeline that Lightwood automates.</p>
+<p>For more complex examples, you can check out any of the three core analysis blocks that we use:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lightwood.analysis.nc.calibrate.ICP</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lightwood.analysis.helpers.acc_stats.AccStats</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lightwood.analysis.helpers.feature_importance.GlobalFeatureImportance</span></code></p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2017-2021, MindsDB.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
