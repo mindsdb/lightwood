@@ -21,7 +21,7 @@ Lightwood abstracts the ML pipeline into 3 core steps:
 (3) Model building and training <br>
 
 <p align="center">
-<img src="/assets/lightwood_under_the_hood.png" alt="Lightwood internals" width="800"/>
+<img src="/assets/lightwood.pdf" alt="Lightwood internals" width="800"/>
 </p>
 
 #### Pre-processing and cleaning
