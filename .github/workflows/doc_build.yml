@@ -1,6 +1,9 @@
 name: Lightwood tests workflow
 
 on:
+  push:
+    branches:
+      - stable
   pull_request:
     branches:
       - staging
