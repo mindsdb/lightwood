@@ -84,6 +84,13 @@ class TestTimeseries(unittest.TestCase):
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > latest_timestamp
 
+        # Check custom ICP params
+        test.pop('__mdb_make_predictions')
+        preds = pred.predict(test, {'fixed_confidence': 0.01, 'anomaly_cooldown': 100, 'anomaly_error_rate': 1})
+        assert all([all([v == 0.01 for v in f]) for f in preds['confidence'].values])
+        assert pred.pred_args.anomaly_error_rate == 1
+        assert pred.pred_args.anomaly_cooldown == 100
+
     def test_1_time_series_regression(self):
         data = pd.read_csv('tests/data/arrivals.csv')
         train, test = self.split_arrivals(data, grouped=False)

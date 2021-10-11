@@ -9,6 +9,7 @@ from sklearn.metrics import mean_absolute_error
 
 from lightwood.api.dtype import dtype
 from lightwood.mixer import BaseMixer
+from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
@@ -31,7 +32,8 @@ class Normalizer(BaseMixer):
 
     def fit(self, data: EncodedDs) -> None:
         try:
-            preds = self.base_predictor(data, predict_proba=True)
+            data = ConcatedEncodedDs(data)
+            preds = self.base_predictor(data, args=PredictionArguments.from_dict({'predict_proba': True}))
             truths = data.data_frame[self.target]
             labels = self.get_labels(preds, truths.values, data.encoders[self.target])
             enc_data = data.get_encoded_data(include_target=False).numpy()
@@ -40,7 +42,7 @@ class Normalizer(BaseMixer):
         except Exception:
             pass
 
-    def __call__(self, ds: Union[ConcatedEncodedDs, torch.Tensor], predict_proba: bool = False) -> np.ndarray:
+    def __call__(self, ds: Union[ConcatedEncodedDs, torch.Tensor], args: PredictionArguments) -> np.ndarray:
         if isinstance(ds, ConcatedEncodedDs):
             ds = ds.get_encoded_data(include_target=False)
 
