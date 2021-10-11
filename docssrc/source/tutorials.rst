@@ -33,3 +33,4 @@ We support users bringing their custom methods. To learn how to build your own p
 | `Use your own model explainer <tutorials/custom_explainer/custom_explainer.ipynb>`_
 
 
+change for auto 1
