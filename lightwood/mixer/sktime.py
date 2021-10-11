@@ -6,6 +6,7 @@ from sktime.forecasting.arima import AutoARIMA
 from lightwood.api import dtype
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
+from lightwood.api.types import PredictionArguments
 from lightwood.encoder.time_series.helpers.common import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
@@ -66,8 +67,9 @@ class SkTime(BaseMixer):
             if self.grouped_by == ['__default']:
                 break
 
-    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], predict_proba: bool = False) -> pd.DataFrame:
-        if predict_proba:
+    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
+        if args.predict_proba:
             log.warning('This model does not output probability estimates')
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)

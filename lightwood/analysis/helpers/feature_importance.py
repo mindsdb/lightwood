@@ -8,6 +8,7 @@ import numpy as np
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.helpers.general import evaluate_accuracy
 from lightwood.analysis.nc.util import t_softmax
+from lightwood.api.types import PredictionArguments
 
 
 class GlobalFeatureImportance(BaseAnalysisBlock):
@@ -44,10 +45,8 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
                 partial_data.clear_cache()
                 partial_data.data_frame[col] = [None] * len(partial_data.data_frame[col])
 
-                if not ns.is_classification:
-                    empty_input_preds = ns.predictor(partial_data)
-                else:
-                    empty_input_preds = ns.predictor(partial_data, predict_proba=True)
+                args = {'predict_proba': True} if ns.is_classification else {}
+                empty_input_preds = ns.predictor(partial_data, args=PredictionArguments.from_dict(args))
 
                 empty_input_accuracy[col] = np.mean(list(evaluate_accuracy(
                     ns.data,

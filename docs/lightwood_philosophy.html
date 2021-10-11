@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Lightwood Philosophy &mdash; lightwood 1.2.0 documentation</title>
+  <title>Lightwood Philosophy &mdash; lightwood 1.4.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.4.0
               </div>
             
           
@@ -93,9 +94,13 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#i-pre-processing-and-cleaning">i) Pre-processing and cleaning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ii-feature-engineering">ii) Feature Engineering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iii-model-building-and-training">iii) Model Building and Training</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
 </ul>
@@ -165,8 +170,56 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="lightwood-philosophy">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="lightwood-philosophy">
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code><a class="headerlink" href="#lightwood-philosophy" title="Permalink to this headline">¶</a></h1>
+<p>Lightwood abstracts the ML pipeline into 3 core steps:</p>
+<ol class="arabic simple">
+<li><p>Pre-processing and data cleaning</p></li>
+<li><p>Feature engineering</p></li>
+<li><p>Model building and training</p></li>
+</ol>
+<img alt="Lightwood &quot;under-the-hood&quot;" class="align-center" src="_images/lightwood.png" />
+<div class="section" id="i-pre-processing-and-cleaning">
+<h2>i) Pre-processing and cleaning<a class="headerlink" href="#i-pre-processing-and-cleaning" title="Permalink to this headline">¶</a></h2>
+<p>For each column in your dataset, Lightwood will identify the suspected data type (numeric, categorical, etc.) via a brief statistical analysis. From this, it will generate a JSON-AI syntax.</p>
+<p>If the user keeps default behavior, Lightwood will perform a brief pre-processing approach to clean each column according to its identified data type. From there, it will split the data into train/dev/test splits.</p>
+<p>The <cite>cleaner</cite> and <cite>splitter</cite> objects respectively refer to the pre-processing and the data splitting functions.</p>
+</div>
+<div class="section" id="ii-feature-engineering">
+<h2>ii) Feature Engineering<a class="headerlink" href="#ii-feature-engineering" title="Permalink to this headline">¶</a></h2>
+<p>Data can be converted into features via “encoders”. Encoders represent the rules for transforming pre-processed data into a numerical representations that a model can be used.</p>
+<p>Encoders can be <strong>rule-based</strong> or <strong>learned</strong>. A rule-based encoder transforms data per a specific set of instructions (ex: normalized numerical data) whereas a learned encoder produces a representation of the data after training (ex: a “[CLS]” token in a language model).</p>
+<p>Encoders are assigned to each column of data based on the data type; users can override this assignment either at the column-based level or at the data-type based level. Encoders inherit from the <cite>BaseEncoder</cite> class.</p>
+</div>
+<div class="section" id="iii-model-building-and-training">
+<h2>iii) Model Building and Training<a class="headerlink" href="#iii-model-building-and-training" title="Permalink to this headline">¶</a></h2>
+<p>We call a predictive model that intakes <em>encoded</em> feature data and outputs a prediction for the target of interest a <cite>mixer</cite> model. Users can either use Lightwood’s default mixers or create their own approaches inherited from the <cite>BaseMixer</cite> class.</p>
+<p>We predominantly use PyTorch based approaches, but can support other models.</p>
+</div>
 </div>
 
 

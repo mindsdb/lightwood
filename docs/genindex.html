@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Index &mdash; lightwood 1.2.0 documentation</title>
+  <title>Index &mdash; lightwood 1.4.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -66,7 +67,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.4.0
               </div>
             
           
@@ -91,8 +92,7 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
-<ul>
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
@@ -168,7 +168,6 @@
  <a href="#A"><strong>A</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
- | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#J"><strong>J</strong></a>
@@ -184,19 +183,14 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/json_ai.html#api.json_ai.add_implicit_values">add_implicit_values() (in module api.json_ai)</a>
-</li>
       <li><a href="api/predictor.html#api.predictor.PredictorInterface.adjust">adjust() (api.predictor.PredictorInterface method)</a>
+</li>
+      <li><a href="api/predictor.html#api.predictor.PredictorInterface.analyze_data">analyze_data() (api.predictor.PredictorInterface method)</a>
 </li>
       <li><a href="api/high_level.html#api.high_level.analyze_dataset">analyze_dataset() (in module api.high_level)</a>
 </li>
-      <li>
-    api.encode
-
-      <ul>
-        <li><a href="api/encode.html#module-api.encode">module</a>
+      <li><a href="api/predictor.html#api.predictor.PredictorInterface.analyze_ensemble">analyze_ensemble() (api.predictor.PredictorInterface method)</a>
 </li>
-      </ul></li>
       <li>
     api.high_level
 
@@ -258,23 +252,21 @@
   </ul></td>
 </tr></table>
 
-<h2 id="E">E</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/encode.html#api.encode.encode">encode() (in module api.encode)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/types.html#api.types.Feature">Feature (class in api.types)</a>
 </li>
+      <li><a href="api/predictor.html#api.predictor.PredictorInterface.featurize">featurize() (api.predictor.PredictorInterface method)</a>
+</li>
+      <li><a href="api/predictor.html#api.predictor.PredictorInterface.fit">fit() (api.predictor.PredictorInterface method)</a>
+</li>
       <li><a href="api/types.html#api.types.Feature.from_dict">from_dict() (api.types.Feature static method)</a>
 
       <ul>
         <li><a href="api/types.html#api.types.JsonAI.from_dict">(api.types.JsonAI static method)</a>
+</li>
+        <li><a href="api/types.html#api.types.PredictionArguments.from_dict">(api.types.PredictionArguments static method)</a>
 </li>
         <li><a href="api/types.html#api.types.ProblemDefinition.from_dict">(api.types.ProblemDefinition static method)</a>
 </li>
@@ -337,8 +329,6 @@
     module
 
       <ul>
-        <li><a href="api/encode.html#module-api.encode">api.encode</a>
-</li>
         <li><a href="api/high_level.html#module-api.high_level">api.high_level</a>
 </li>
         <li><a href="api/json_ai.html#module-api.json_ai">api.json_ai</a>
@@ -348,6 +338,10 @@
         <li><a href="api/types.html#module-api.types">api.types</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/types.html#api.types.Module">Module (class in api.types)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -364,17 +358,21 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/predictor.html#api.predictor.PredictorInterface.predict">predict() (api.predictor.PredictorInterface method)</a>
 </li>
-      <li><a href="api/predictor.html#api.predictor.PredictorInterface.predict_proba">predict_proba() (api.predictor.PredictorInterface method)</a>
+      <li><a href="api/types.html#api.types.PredictionArguments">PredictionArguments (class in api.types)</a>
 </li>
       <li><a href="api/high_level.html#api.high_level.predictor_from_code">predictor_from_code() (in module api.high_level)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/high_level.html#api.high_level.predictor_from_problem">predictor_from_problem() (in module api.high_level)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/high_level.html#api.high_level.predictor_from_state">predictor_from_state() (in module api.high_level)</a>
 </li>
       <li><a href="api/predictor.html#api.predictor.PredictorInterface">PredictorInterface (class in api.predictor)</a>
+</li>
+      <li><a href="api/predictor.html#api.predictor.PredictorInterface.prepare">prepare() (api.predictor.PredictorInterface method)</a>
+</li>
+      <li><a href="api/predictor.html#api.predictor.PredictorInterface.preprocess">preprocess() (api.predictor.PredictorInterface method)</a>
 </li>
       <li><a href="api/types.html#api.types.ProblemDefinition">ProblemDefinition (class in api.types)</a>
 </li>
@@ -388,6 +386,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/predictor.html#api.predictor.PredictorInterface.split">split() (api.predictor.PredictorInterface method)</a>
+</li>
       <li><a href="api/types.html#api.types.StatisticalAnalysis">StatisticalAnalysis (class in api.types)</a>
 </li>
   </ul></td>
@@ -402,6 +402,8 @@
 
       <ul>
         <li><a href="api/types.html#api.types.JsonAI.to_dict">(api.types.JsonAI method)</a>
+</li>
+        <li><a href="api/types.html#api.types.PredictionArguments.to_dict">(api.types.PredictionArguments method)</a>
 </li>
         <li><a href="api/types.html#api.types.ProblemDefinition.to_dict">(api.types.ProblemDefinition method)</a>
 </li>

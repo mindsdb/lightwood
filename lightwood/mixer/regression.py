@@ -7,6 +7,7 @@ from lightwood.helpers.log import log
 from lightwood.api.dtype import dtype
 from lightwood.mixer import BaseMixer
 from lightwood.encoder.base import BaseEncoder
+from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 
 
@@ -42,7 +43,8 @@ class Regression(BaseMixer):
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         self.fit(train_data, dev_data)
 
-    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs,
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         X = []
         for x, _ in ds:
             X.append(x.tolist())
@@ -53,7 +55,7 @@ class Regression(BaseMixer):
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})
 
-        if predict_proba and self.label_map:
+        if args.predict_proba and self.label_map:
             raw_predictions = softmax(Yh.squeeze(), axis=1)
             for idx, label in enumerate(self.target_encoder.rev_map.values()):
                 ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
