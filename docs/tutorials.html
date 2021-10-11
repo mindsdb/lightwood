@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorials &mdash; lightwood 1.2.0 documentation</title>
+  <title>Tutorials &mdash; lightwood 1.3.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.3.0
               </div>
             
           
@@ -98,11 +99,8 @@
 <li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#getting-started-with-lightwood-and-json-ai">Getting started with Lightwood and JSON-AI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#build-your-own-cleaner-data-pre-processing">Build your own Cleaner (Data Pre-Processing)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#customize-your-statistical-analysis-data-pre-processing">Customize your Statistical Analysis (Data Pre-Processing)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#create-your-own-encoder-feature-engineering">Create your own Encoder (Feature Engineering)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#make-your-own-mixer-model-building">Make your own Mixer (Model Building)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#import-a-custom-data-type">Import a custom data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-models-with-more-complex-data-types">Run models with more complex data types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bring-your-own-custom-methods">Bring your own custom methods</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
@@ -173,25 +171,61 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="tutorials">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="tutorials">
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code><a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
 <div class="section" id="getting-started-with-lightwood-and-json-ai">
 <h2>Getting started with Lightwood and JSON-AI<a class="headerlink" href="#getting-started-with-lightwood-and-json-ai" title="Permalink to this headline">¶</a></h2>
+<p>The following tutorial will walk you through a simple tabular dataset with JSON-AI.</p>
+<div class="line-block">
+<div class="line">How to use Lightwood for your data (Coming Soon!)</div>
+<div class="line"><a class="reference internal" href="tutorials/tutorial_data_analysis/tutorial_data_analysis.html"><span class="doc">Lightwood for a quick data analysis</span></a></div>
 </div>
-<div class="section" id="build-your-own-cleaner-data-pre-processing">
-<h2>Build your own Cleaner (Data Pre-Processing)<a class="headerlink" href="#build-your-own-cleaner-data-pre-processing" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="customize-your-statistical-analysis-data-pre-processing">
-<h2>Customize your Statistical Analysis (Data Pre-Processing)<a class="headerlink" href="#customize-your-statistical-analysis-data-pre-processing" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="run-models-with-more-complex-data-types">
+<h2>Run models with more complex data types<a class="headerlink" href="#run-models-with-more-complex-data-types" title="Permalink to this headline">¶</a></h2>
+<p>Below, you can see how Lightwood handles language and time-series data.</p>
+<div class="line-block">
+<div class="line">Using Language Models (Coming Soon!)</div>
+<div class="line">Make your own timeseries predictor (Coming Soon!)</div>
 </div>
-<div class="section" id="create-your-own-encoder-feature-engineering">
-<h2>Create your own Encoder (Feature Engineering)<a class="headerlink" href="#create-your-own-encoder-feature-engineering" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="make-your-own-mixer-model-building">
-<h2>Make your own Mixer (Model Building)<a class="headerlink" href="#make-your-own-mixer-model-building" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="bring-your-own-custom-methods">
+<h2>Bring your own custom methods<a class="headerlink" href="#bring-your-own-custom-methods" title="Permalink to this headline">¶</a></h2>
+<p>We support users bringing their custom methods. To learn how to build your own pipelines, check out the following notebooks:</p>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="tutorials/custom_cleaner/custom_cleaner.html"><span class="doc">Construct a custom preprocessor to clean your data</span></a></div>
+<div class="line"><a class="reference internal" href="tutorials/custom_splitter/custom_splitter.html"><span class="doc">Make your own train and test split</span></a></div>
+<div class="line">Create your own encoder to featurize your data (Coming Soon!)</div>
+<div class="line"><a class="reference internal" href="tutorials/custom_mixer/custom_mixer.html"><span class="doc">Design a custom mixer model</span></a></div>
+<div class="line"><a class="reference internal" href="tutorials/custom_explainer/custom_explainer.html"><span class="doc">Use your own model explainer</span></a></div>
 </div>
-<div class="section" id="import-a-custom-data-type">
-<h2>Import a custom data type<a class="headerlink" href="#import-a-custom-data-type" title="Permalink to this headline">¶</a></h2>
+<p>change for auto 1</p>
 </div>
 </div>
 

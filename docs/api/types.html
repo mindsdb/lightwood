@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Lightwood API Types &mdash; lightwood 1.2.0 documentation</title>
+  <title>Lightwood API Types &mdash; lightwood 1.3.0 documentation</title>
   
 
   
@@ -34,13 +34,14 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Encode your data" href="encode.html" />
+    <link rel="next" title="Predictor Interface" href="predictor.html" />
     <link rel="prev" title="Data Types (dtypes)" href="dtype.html" /> 
 </head>
 
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.3.0
               </div>
             
           
@@ -101,6 +102,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#the-lightwood-api-table-of-contents">The Lightwood API Table of Contents</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Lightwood API Types</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Module">Module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.types.Feature">Feature</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.types.Output">Output</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.types.TypeInformation">TypeInformation</a></li>
@@ -110,9 +112,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition">ProblemDefinition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI">JsonAI</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.types.ModelAnalysis">ModelAnalysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments">PredictionArguments</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="encode.html">Encode your data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
 </ul>
@@ -188,17 +190,55 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="lightwood-api-types">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="lightwood-api-types">
 <h1>Lightwood API Types<a class="headerlink" href="#lightwood-api-types" title="Permalink to this headline">¶</a></h1>
 <p>Lightwood consists of several high level abstractions to enable the data science/machine learning (DS/ML) pipeline in a step-by-step procedure.</p>
 <span class="target" id="module-api.types"></span><dl class="py class">
+<dt class="sig sig-object py" id="api.types.Module">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">Module</span></span><a class="reference internal" href="../_modules/api/types.html#Module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>module</strong> – Name of the module (function or class name)</p></li>
+<li><p><strong>args</strong> – Argument to pass to the function or constructor</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="api.types.Feature">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">Feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#Feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Feature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Within a dataframe, each column is considered its own “feature” (unless ignored etc.).         The following expects each feature to have descriptions of the following:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>encoder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the methodology for encoding a feature (a Lightwood Encoder)</p></li>
+<li><p><strong>encoder</strong> (<a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>) – the methodology for encoding a feature (a Lightwood Encoder)</p></li>
 <li><p><strong>data_dtype</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The type of information within this column (ex.: numerical, categorical, etc.)</p></li>
 <li><p><strong>dependency</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – Any custom attributes for this feature that may require non-standard processing. This highly    depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).</p></li>
 </ul>
@@ -281,8 +321,8 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data_dtype</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The type of information within the target column (ex.: numerical, categorical, etc.).</p></li>
 <li><p><strong>encoder</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the methodology for encoding the target feature (a Lightwood Encoder). There can only be one     encoder for the output target.</p></li>
-<li><p><strong>models</strong> – The list of ML algorithms that are trained for the target distribution.</p></li>
-<li><p><strong>ensemble</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For a panel of ML algorithms, the approach of selecting the best model, and the metrics used in     that evaluation.</p></li>
+<li><p><strong>mixers</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – The list of ML algorithms that are trained for the target distribution.</p></li>
+<li><p><strong>ensemble</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For a panel of ML algorithms, the approach of selecting the best mixer, and the metrics used in     that evaluation.</p></li>
 </ul>
 </dd>
 </dl>
@@ -335,7 +375,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.TimeseriesSettings">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">TimeseriesSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_previous_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_predictions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">historical_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">TimeseriesSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_previous_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_predictions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">historical_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_incomplete_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings" title="Permalink to this definition">¶</a></dt>
 <dd><p>For time-series specific problems, more specific treatment of the data is necessary. The following attributes         enable time-series tasks to be carried out properly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -405,7 +445,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.ProblemDefinition">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">ProblemDefinition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsubsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_invalid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unbias_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_mixer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_aim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_confidence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_error_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_cooldown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_validation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_nr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">ProblemDefinition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_invalid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unbias_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_mixer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_aim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_validation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_nr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition" title="Permalink to this definition">¶</a></dt>
 <dd><p>The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> object indicates details on how the models that predict the target are prepared.         The only required specification from a user is the <code class="docutils literal notranslate"><span class="pre">target</span></code>, which indicates the column within the input         data that the user is trying to predict. Within the <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, the user can specify aspects         about how long the feature-engineering preparation may take, and nuances about training the models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -419,11 +459,8 @@
 <li><p><strong>time_aim</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Time budget (in seconds) to train all needed components for the predictive tasks, including         encoders and models.</p></li>
 <li><p><strong>target_weights</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – </p></li>
 <li><p><strong>positive_domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – For numerical taks, force predictor output to be positive (integer or float).</p></li>
-<li><p><strong>fixed_confidence</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – For analyzer module, specifies a fixed <cite>alpha</cite> confidence for the model calibration so         that predictions, in average, are correct <cite>alpha</cite> percent of the time.</p></li>
 <li><p><strong>timeseries_settings</strong> (<a class="reference internal" href="#api.types.TimeseriesSettings" title="api.types.TimeseriesSettings"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code></a>) – TimeseriesSettings object for time-series tasks, refer to its documentation for          available settings.</p></li>
 <li><p><strong>anomaly_detection</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to conduct unsupervised anomaly detection; currently supported only for time-        series.</p></li>
-<li><p><strong>anomaly_error_rate</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99         (respectively implies wider and tighter bounds, all other parameters being equal).</p></li>
-<li><p><strong>anomaly_cooldown</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Sets the minimum amount of timesteps between consecutive firings of the the anomaly         detector.</p></li>
 <li><p><strong>ignore_features</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The names of the columns the user wishes to ignore in the ML pipeline. Any column name         found in this list will be automatically removed from subsequent steps in the ML pipeline.</p></li>
 <li><p><strong>fit_on_validation</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to fit the model on the held-out validation data. Validation data is strictly         used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new             incoming data over time, the user may train the model further using the entire dataset.</p></li>
 <li><p><strong>strict_mode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
@@ -493,7 +530,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.JsonAI">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">JsonAI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifiers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleaner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_transformer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">JsonAI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifiers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleaner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_transformer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI" title="Permalink to this definition">¶</a></dt>
 <dd><p>The JsonAI Class allows users to construct flexible JSON config to specify their ML pipeline. JSON-AI follows a     recipe of how to pre-process data, construct features, and train on the target column. To do so, the following     specifications are required internally.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -502,14 +539,14 @@
 <li><p><strong>outputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="#api.types.Output" title="api.types.Output"><code class="xref py py-class docutils literal notranslate"><span class="pre">Output</span></code></a>]) – The column name of the target and its <code class="docutils literal notranslate"><span class="pre">Output</span></code> object</p></li>
 <li><p><strong>problem_definition</strong> (<a class="reference internal" href="#api.types.ProblemDefinition" title="api.types.ProblemDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code></a>) – The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> criteria.</p></li>
 <li><p><strong>identifiers</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.</p></li>
-<li><p><strong>cleaner</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, “None” suggests Lightwood’s default approach in <code class="docutils literal notranslate"><span class="pre">data.cleaner</span></code>.</p></li>
-<li><p><strong>splitter</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – The Splitter object is the method in which the input data is split into training/validation/testing data.</p></li>
-<li><p><strong>analyzer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – The Analyzer object is used to evaluate how well a model performed on the predictive task.</p></li>
-<li><p><strong>explainer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.</p></li>
-<li><p><strong>imports</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – A list of custom packages, indicated through a str import statement, that a user can call.</p></li>
-<li><p><strong>timeseries_transformer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – </p></li>
-<li><p><strong>timeseries_analyzer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – </p></li>
-<li><p><strong>accuracy_functions</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – A list of performance metrics used to evaluate the best models.</p></li>
+<li><p><strong>cleaner</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>]) – The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, “None” suggests Lightwood’s default approach in <code class="docutils literal notranslate"><span class="pre">data.cleaner</span></code>.</p></li>
+<li><p><strong>splitter</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>]) – The Splitter object is the method in which the input data is split into training/validation/testing data.</p></li>
+<li><p><strong>analyzer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>]) – The Analyzer object is used to evaluate how well a model performed on the predictive task.</p></li>
+<li><p><strong>explainer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>]) – The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.</p></li>
+<li><p><strong>analysis_blocks</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>]]) – The blocks that get used in both analysis and inference inside the analyzer and explainer blocks.</p></li>
+<li><p><strong>timeseries_transformer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>]) – </p></li>
+<li><p><strong>timeseries_analyzer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>]) – </p></li>
+<li><p><strong>accuracy_functions</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – A list of performance metrics used to evaluate the best mixers.</p></li>
 </ul>
 </dd>
 </dl>
@@ -577,6 +614,57 @@ For each trained ML algorithm, we store:</p>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="api.types.PredictionArguments">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">PredictionArguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predict_proba</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_mixers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_error_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_cooldown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class contains all possible arguments that can be passed to a Lightwood predictor at inference time.
+On each predict call, all arguments included in a parameter dictionary will update the respective fields
+in the <cite>PredictionArguments</cite> instance that the predictor will have.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>predict_proba</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – triggers (where supported) predictions in raw probability output form. I.e. for classifiers,</p>
+</dd>
+</dl>
+<p>instead of returning only the predicted class, the output additionally includes the assigned probability for
+each class.
+:type all_mixers: <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>
+:param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers.
+:type fixed_confidence: <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]
+:param fixed_confidence: For analyzer module, specifies a fixed <cite>alpha</cite> confidence for the model calibration so         that predictions, in average, are correct <cite>alpha</cite> percent of the time.
+:type anomaly_error_rate: <code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]
+:param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99         (respectively implies wider and tighter bounds, all other parameters being equal).
+:type anomaly_cooldown: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>
+:param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly         detector.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.PredictionArguments.from_dict">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object from a python dictionary with necessary specifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – A python dictionary with the necessary features for the <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> class.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A populated <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.types.PredictionArguments.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a python dictionary from the <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A python dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -585,7 +673,7 @@ For each trained ML algorithm, we store:</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="encode.html" class="btn btn-neutral float-right" title="Encode your data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="predictor.html" class="btn btn-neutral float-right" title="Predictor Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="dtype.html" class="btn btn-neutral float-left" title="Data Types (dtypes)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
