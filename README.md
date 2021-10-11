@@ -196,11 +196,12 @@ The Lightwood core team has prepared several issues of different types that are 
 
 Make contributions and enter into the draw for a [Deep Learning Laptop](https://lambdalabs.com/deep-learning/laptops/tensorbook) **powered by the NVIDIA RTX 3080 Max-Q GPU**. Pre-installed with TensorFlow, PyTorch, CUDA, cuDNN and more.
 
-![Deep Learning Laptop](/assets/laptop.jpeg)
+<img src="/assets/laptop.jpeg" alt="Tensorbook" width="200"/>
 
-Also we’d love to send you a special MindsDB SWAG gift pack:
+Also, we’d love to send you a special MindsDB SWAG :sunglasses: gift pack:
 
-![MindsDB Swag](/assets/swag.png)
+<img src="/assets/swag.png" alt="MindsDB Swag" width="200"/>
+
 
 Please make sure to read the [contributions guidelines](#Contribute-to-Lightwood) first.
 
