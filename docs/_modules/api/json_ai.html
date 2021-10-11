@@ -92,8 +92,7 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
-<ul>
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
@@ -184,11 +183,9 @@
 <span class="s2">for import_dir in [os.path.expanduser(&#39;~/lightwood_modules&#39;), &#39;/etc/lightwood_modules&#39;]:</span>
 <span class="s2">    if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):</span>
 <span class="s2">        for file_name in list(os.walk(import_dir))[0][2]:</span>
-<span class="s2">            print(file_name)</span>
 <span class="s2">            if file_name[-3:] != &#39;.py&#39;:</span>
 <span class="s2">                continue</span>
 <span class="s2">            mod_name = file_name[:-3]</span>
-<span class="s2">            print(mod_name)</span>
 <span class="s2">            loader = importlib.machinery.SourceFileLoader(mod_name,</span>
 <span class="s2">                                                          os.path.join(import_dir, file_name))</span>
 <span class="s2">            module = ModuleType(loader.name)</span>
