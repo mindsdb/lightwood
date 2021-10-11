@@ -31,5 +31,3 @@ We support users bringing their custom methods. To learn how to build your own p
 | Create your own encoder to featurize your data (Coming Soon!)
 | `Design a custom mixer model <tutorials/custom_mixer/custom_mixer.ipynb>`_
 | `Use your own model explainer <tutorials/custom_explainer/custom_explainer.ipynb>`_
-
-Test nr. 7
