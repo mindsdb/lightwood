@@ -47,16 +47,16 @@ class Predictor(PredictorInterface):
 
     def __init__(self):
         seed(420)
-        self.target = "target"
+        self.target = "Class"
         self.mode = "inactive"
         self.problem_definition = ProblemDefinition.from_dict(
             {
-                "target": "target",
+                "target": "Class",
                 "pct_invalid": 2,
                 "unbias_target": True,
-                "seconds_per_mixer": 1582,
-                "seconds_per_encoder": 12749,
-                "time_aim": 7780.458037514903,
+                "seconds_per_mixer": 14354,
+                "seconds_per_encoder": 0,
+                "time_aim": 64593.50573948541,
                 "target_weights": None,
                 "positive_domain": False,
                 "timeseries_settings": {
@@ -71,20 +71,114 @@ class Predictor(PredictorInterface):
                     "allow_incomplete_history": False,
                 },
                 "anomaly_detection": True,
-                "ignore_features": ["url_legal", "license", "standard_error"],
+                "ignore_features": [],
                 "fit_on_validation": True,
                 "strict_mode": True,
                 "seed_nr": 420,
             }
         )
-        self.accuracy_functions = ["r2_score"]
-        self.identifiers = {"id": "Hash-like identifier"}
-        self.dtype_dict = {"target": "float", "excerpt": "rich_text"}
+        self.accuracy_functions = ["balanced_accuracy_score"]
+        self.identifiers = {}
+        self.dtype_dict = {
+            "Class": "binary",
+            "Time": "integer",
+            "V1": "float",
+            "V2": "float",
+            "V3": "float",
+            "V4": "float",
+            "V5": "float",
+            "V6": "float",
+            "V7": "float",
+            "V8": "float",
+            "V9": "float",
+            "V10": "float",
+            "V11": "float",
+            "V12": "float",
+            "V13": "float",
+            "V14": "float",
+            "V15": "float",
+            "V16": "float",
+            "V17": "float",
+            "V18": "float",
+            "V19": "float",
+            "V20": "float",
+            "V21": "float",
+            "V22": "float",
+            "V23": "float",
+            "V24": "float",
+            "V25": "float",
+            "V26": "float",
+            "V27": "float",
+            "V28": "float",
+            "Amount": "float",
+        }
 
         # Any feature-column dependencies
-        self.dependencies = {"excerpt": []}
+        self.dependencies = {
+            "Time": [],
+            "V1": [],
+            "V2": [],
+            "V3": [],
+            "V4": [],
+            "V5": [],
+            "V6": [],
+            "V7": [],
+            "V8": [],
+            "V9": [],
+            "V10": [],
+            "V11": [],
+            "V12": [],
+            "V13": [],
+            "V14": [],
+            "V15": [],
+            "V16": [],
+            "V17": [],
+            "V18": [],
+            "V19": [],
+            "V20": [],
+            "V21": [],
+            "V22": [],
+            "V23": [],
+            "V24": [],
+            "V25": [],
+            "V26": [],
+            "V27": [],
+            "V28": [],
+            "Amount": [],
+        }
 
-        self.input_cols = ["excerpt"]
+        self.input_cols = [
+            "Time",
+            "V1",
+            "V2",
+            "V3",
+            "V4",
+            "V5",
+            "V6",
+            "V7",
+            "V8",
+            "V9",
+            "V10",
+            "V11",
+            "V12",
+            "V13",
+            "V14",
+            "V15",
+            "V16",
+            "V17",
+            "V18",
+            "V19",
+            "V20",
+            "V21",
+            "V22",
+            "V23",
+            "V24",
+            "V25",
+            "V26",
+            "V27",
+            "V28",
+            "Amount",
+        ]
 
         # Initial stats analysis
         self.statistical_analysis = None
@@ -94,10 +188,7 @@ class Predictor(PredictorInterface):
 
         log.info("Performing statistical analysis on data")
         self.statistical_analysis = lightwood.data.statistical_analysis(
-            data,
-            self.dtype_dict,
-            {"id": "Hash-like identifier"},
-            self.problem_definition,
+            data, self.dtype_dict, {}, self.problem_definition
         )
 
         # Instantiate post-training evaluation
@@ -115,8 +206,9 @@ class Predictor(PredictorInterface):
         # Preprocess and clean data
 
         log.info("Cleaning the data")
-        data = MyCustomCleaner.cleaner(
+        data = cleaner(
             data=data,
+            pct_invalid=self.problem_definition.pct_invalid,
             identifiers=self.identifiers,
             dtype_dict=self.dtype_dict,
             target=self.target,
@@ -133,15 +225,8 @@ class Predictor(PredictorInterface):
         # Split the data into training/testing splits
 
         log.info("Splitting the data into train/test")
-        train_test_data = splitter(
-            data=data,
-            seed=1,
-            pct_train=80,
-            pct_dev=10,
-            pct_test=10,
-            tss=self.problem_definition.timeseries_settings,
-            target=self.target,
-            dtype_dict=self.dtype_dict,
+        train_test_data = MyCustomSplitter.MySplitter(
+            data=data, pct_train=0.8, pct_dev=0.1, seed=1, target=self.target
         )
 
         return train_test_data
@@ -156,14 +241,40 @@ class Predictor(PredictorInterface):
 
         # Column to encoder mapping
         self.encoders = {
-            "target": Float.NumericEncoder(
+            "Class": Binary.BinaryEncoder(
                 is_target=True,
-                positive_domain=self.statistical_analysis.positive_domain,
+                target_class_distribution=self.statistical_analysis.target_class_distribution,
             ),
-            "excerpt": Rich_Text.PretrainedLangEncoder(
-                output_type=False,
-                stop_after=self.problem_definition.seconds_per_encoder,
-            ),
+            "Time": Integer.NumericEncoder(),
+            "V1": Float.NumericEncoder(),
+            "V2": Float.NumericEncoder(),
+            "V3": Float.NumericEncoder(),
+            "V4": Float.NumericEncoder(),
+            "V5": Float.NumericEncoder(),
+            "V6": Float.NumericEncoder(),
+            "V7": Float.NumericEncoder(),
+            "V8": Float.NumericEncoder(),
+            "V9": Float.NumericEncoder(),
+            "V10": Float.NumericEncoder(),
+            "V11": Float.NumericEncoder(),
+            "V12": Float.NumericEncoder(),
+            "V13": Float.NumericEncoder(),
+            "V14": Float.NumericEncoder(),
+            "V15": Float.NumericEncoder(),
+            "V16": Float.NumericEncoder(),
+            "V17": Float.NumericEncoder(),
+            "V18": Float.NumericEncoder(),
+            "V19": Float.NumericEncoder(),
+            "V20": Float.NumericEncoder(),
+            "V21": Float.NumericEncoder(),
+            "V22": Float.NumericEncoder(),
+            "V23": Float.NumericEncoder(),
+            "V24": Float.NumericEncoder(),
+            "V25": Float.NumericEncoder(),
+            "V26": Float.NumericEncoder(),
+            "V27": Float.NumericEncoder(),
+            "V28": Float.NumericEncoder(),
+            "Amount": Float.NumericEncoder(),
         }
 
         # Prepare the training + dev data
@@ -418,8 +529,9 @@ class Predictor(PredictorInterface):
         # Clean the data
         self.mode = "predict"
         log.info("Cleaning the data")
-        data = MyCustomCleaner.cleaner(
+        data = cleaner(
             data=data,
+            pct_invalid=self.problem_definition.pct_invalid,
             identifiers=self.identifiers,
             dtype_dict=self.dtype_dict,
             target=self.target,
