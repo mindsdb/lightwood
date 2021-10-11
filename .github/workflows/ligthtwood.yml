@@ -14,11 +14,19 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: 3.9
-    - uses: ammaraskar/sphinx-action@master
+      - name: build docs
+      - run: |
+          # python -m pip install --upgrade pip
+          # pip install --no-cache-dir -e .
+          # pip install install 'Sphinx==4.1.2' 'sphinx-autoapi==1.8.4' 'sphinx-autodoc-typehints==1.12.0' 'sphinx-code-include==1.1.1' 'sphinx-rtd-theme==0.5.2' 'sphinxcontrib-applehelp==1.0.2' 'sphinxcontrib-devhelp==1.0.2' 'sphinxcontrib-htmlhelp==2.0.0' 'sphinxcontrib-jsmath==1.0.1' 'sphinxcontrib-napoleon==0.7' 'sphinxcontrib-qthelp==1.0.3' 'sphinxcontrib-serializinghtml==1.1.5' autoapi nbsphinx myst_parser
+          # cd docssrc && make github
+    - uses: EndBug/add-and-commit@v7
       with:
-        docs-folder: "docssrc/"
-        pre-build-command: "python -m pip install --upgrade pip && pip install --no-cache-dir -e . && pip install -r tests/requirements.txt && pip install install 'Sphinx==4.1.2' 'sphinx-autoapi==1.8.4' 'sphinx-autodoc-typehints==1.12.0' 'sphinx-code-include==1.1.1' 'sphinx-rtd-theme==0.5.2' 'sphinxcontrib-applehelp==1.0.2' 'sphinxcontrib-devhelp==1.0.2' 'sphinxcontrib-htmlhelp==2.0.0' 'sphinxcontrib-jsmath==1.0.1' 'sphinxcontrib-napoleon==0.7' 'sphinxcontrib-qthelp==1.0.3' 'sphinxcontrib-serializinghtml==1.1.5' autoapi nbsphinx myst_parser"
-        build-command: "make github"
+        add: 'docs'
+        author_name: Automated Author
+        author_email: info@mindsdb.com
+        message: updating docs
+
   test:
     runs-on: ${{ matrix.os }}
     needs: doc_build
