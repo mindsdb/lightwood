@@ -24,3 +24,4 @@ torch_optimizer == 0.1.0
 pmdarima >= 1.8.0
 black >= 21.9b0
 typing_extensions
+colorlog==6.5.0
