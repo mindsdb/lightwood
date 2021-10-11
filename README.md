@@ -39,7 +39,7 @@ Encoders can be **rule-based** or **learned**. A rule-based encoder transforms d
 Encoders are assigned to each column of data based on the data type; users can override this assignment either at the column-based level or at the data-type based level. Encoders inherit from the `BaseEncoder` class. 
 
 #### iii) Model Building and Training
-We call a predictive model that intakes feature data and outputs a prediction for the target of interest a `mixer` model. Users can either use Lightwood's default mixers or create their own approaches inherited from the `BaseMixer` class.
+We call a predictive model that intakes *encoded* feature data and outputs a prediction for the target of interest a `mixer` model. Users can either use Lightwood's default mixers or create their own approaches inherited from the `BaseMixer` class.
 
 We predominantly use PyTorch based approaches, but can support other models.
 
