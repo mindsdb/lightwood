@@ -807,12 +807,7 @@ data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
-
-
-log.error(self.mode)
-
 if self.mode != 'predict':
-    log.error('TS ANALYSIS CALLED!')
 {align(ts_analyze_code,1)}
 
 return data
