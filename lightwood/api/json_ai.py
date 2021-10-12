@@ -808,7 +808,7 @@ data = {call(json_ai.cleaner)}
 # Time-series blocks
 {ts_transform_code}
 if self.mode != 'predict':
-    {ts_analyze_code}
+{align(ts_analyze_code,1)}
 
 return data
     """
