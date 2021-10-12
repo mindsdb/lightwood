@@ -41,8 +41,8 @@ def splitter(
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
     # Split the data
-    train_cutoff = round(data.shape[0] * pct_train / 100)
-    dev_cutoff = train_cutoff + round(data.shape[0] * pct_dev / 100)
+    train_cutoff = round(data.shape[0] * pct_train)
+    dev_cutoff = train_cutoff + round(data.shape[0] * pct_dev)
 
     train = data[:train_cutoff]
     dev = data[train_cutoff:dev_cutoff]
