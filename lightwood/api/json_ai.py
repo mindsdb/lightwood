@@ -764,7 +764,7 @@ data = {call(json_ai.timeseries_transformer)}
         ts_analyze_code = f"""
 self.ts_analysis = {call(json_ai.timeseries_analyzer)}
 """
-
+    # @TODO: set these kwargs/properties in the json ai construction (if possible)
     if json_ai.timeseries_analyzer is not None:
         ts_encoder_code = """
 if encoder.is_timeseries_encoder:
@@ -793,10 +793,6 @@ self.statistical_analysis = lightwood.data.statistical_analysis(data,
 
 # Instantiate post-training evaluation
 self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]
-
-# Time-series blocks
-{ts_analyze_code}
-
     """
 
     analyze_data_body = align(analyze_data_body, 2)
@@ -811,6 +807,8 @@ data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
+if self.mode != 'predict':
+    {ts_analyze_code}
 
 return data
     """
