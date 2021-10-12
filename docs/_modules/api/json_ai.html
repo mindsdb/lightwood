@@ -918,7 +918,7 @@
     <span class="c1"># ----------------- #</span>
 
     <span class="n">ts_transform_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">ts_analyze_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">ts_analyze_code</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ts_encoder_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">timeseries_transformer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ts_transform_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
@@ -928,7 +928,7 @@
         <span class="n">ts_analyze_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">self.ts_analysis = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">timeseries_analyzer</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">&quot;&quot;&quot;</span>
-
+    <span class="c1"># @TODO: set these kwargs/properties in the json ai construction (if possible)</span>
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">timeseries_analyzer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ts_encoder_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">if encoder.is_timeseries_encoder:</span>
@@ -971,10 +971,14 @@
 
 <span class="s2"># Time-series blocks</span>
 <span class="si">{</span><span class="n">ts_transform_code</span><span class="si">}</span><span class="s2"></span>
-<span class="si">{</span><span class="n">ts_analyze_code</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ts_analyze_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">clean_body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">if self.mode != &#39;predict&#39;:</span>
+<span class="si">{</span><span class="n">align</span><span class="p">(</span><span class="n">ts_analyze_code</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">&quot;&quot;&quot;</span>
 
-<span class="s2">return data</span>
-<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">clean_body</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">return data&#39;</span>
 
     <span class="n">clean_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">clean_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
@@ -1175,10 +1179,10 @@
 <span class="s2">self.analyze_data(data)</span>
 
 <span class="s2"># Pre-process the data</span>
-<span class="s2">clean_data = self.preprocess(data)</span>
+<span class="s2">data = self.preprocess(data)</span>
 
 <span class="s2"># Create train/test (dev) split</span>
-<span class="s2">train_dev_test = self.split(clean_data)</span>
+<span class="s2">train_dev_test = self.split(data)</span>
 
 <span class="s2"># Prepare encoders</span>
 <span class="s2">self.prepare(train_dev_test)</span>
@@ -1213,21 +1217,18 @@
 
     <span class="n">predict_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2"># Remove columns that user specifies to ignore</span>
+<span class="s2">self.mode = &#39;predict&#39;</span>
 <span class="s2">log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
 <span class="s2">data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
 <span class="s2">for col in self.input_cols:</span>
 <span class="s2">    if col not in data.columns:</span>
 <span class="s2">        data[col] = [None] * len(data)</span>
 
-<span class="s2"># Clean the data</span>
-<span class="s2">self.mode = &#39;predict&#39;</span>
-<span class="s2">log.info(&#39;Cleaning the data&#39;)</span>
-<span class="s2">data = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">cleaner</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
-
-<span class="si">{</span><span class="n">ts_transform_code</span><span class="si">}</span><span class="s2"></span>
+<span class="s2"># Pre-process the data</span>
+<span class="s2">data = self.preprocess(data)</span>
 
 <span class="s2"># Featurize the data</span>
-<span class="s2">encoded_ds = EncodedDs(self.encoders, data, self.target)</span>
+<span class="s2">encoded_ds = self.featurize(</span><span class="se">{{</span><span class="s2">&quot;predict_data&quot;: data</span><span class="se">}}</span><span class="s2">)[&quot;predict_data&quot;]</span>
 <span class="s2">encoded_data = encoded_ds.get_encoded_data(include_target=False)</span>
 
 <span class="s2">self.pred_args = PredictionArguments.from_dict(args)</span>
@@ -1239,6 +1240,7 @@
 <span class="s2">    insights, global_insights = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">explainer</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">    return insights</span>
 <span class="s2">&quot;&quot;&quot;</span>
+
     <span class="n">predict_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">predict_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">predictor_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
