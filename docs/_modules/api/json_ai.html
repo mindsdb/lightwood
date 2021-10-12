@@ -918,7 +918,7 @@
     <span class="c1"># ----------------- #</span>
 
     <span class="n">ts_transform_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">ts_analyze_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">ts_analyze_code</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ts_encoder_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">timeseries_transformer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ts_transform_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
@@ -971,11 +971,14 @@
 
 <span class="s2"># Time-series blocks</span>
 <span class="si">{</span><span class="n">ts_transform_code</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ts_analyze_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">clean_body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">if self.mode != &#39;predict&#39;:</span>
 <span class="si">{</span><span class="n">align</span><span class="p">(</span><span class="n">ts_analyze_code</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">&quot;&quot;&quot;</span>
 
-<span class="s2">return data</span>
-<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">clean_body</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">return data&#39;</span>
 
     <span class="n">clean_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">clean_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
@@ -1176,10 +1179,10 @@
 <span class="s2">self.analyze_data(data)</span>
 
 <span class="s2"># Pre-process the data</span>
-<span class="s2">clean_data = self.preprocess(data)</span>
+<span class="s2">data = self.preprocess(data)</span>
 
 <span class="s2"># Create train/test (dev) split</span>
-<span class="s2">train_dev_test = self.split(clean_data)</span>
+<span class="s2">train_dev_test = self.split(data)</span>
 
 <span class="s2"># Prepare encoders</span>
 <span class="s2">self.prepare(train_dev_test)</span>
@@ -1222,10 +1225,10 @@
 <span class="s2">        data[col] = [None] * len(data)</span>
 
 <span class="s2"># Pre-process the data</span>
-<span class="s2">clean_data = self.preprocess(data)</span>
+<span class="s2">data = self.preprocess(data)</span>
 
 <span class="s2"># Featurize the data</span>
-<span class="s2">encoded_ds = self.featurize(</span><span class="se">{{</span><span class="s2">&quot;predict_data&quot;: clean_data</span><span class="se">}}</span><span class="s2">)[&quot;predict_data&quot;]</span>
+<span class="s2">encoded_ds = self.featurize(</span><span class="se">{{</span><span class="s2">&quot;predict_data&quot;: data</span><span class="se">}}</span><span class="s2">)[&quot;predict_data&quot;]</span>
 <span class="s2">encoded_data = encoded_ds.get_encoded_data(include_target=False)</span>
 
 <span class="s2">self.pred_args = PredictionArguments.from_dict(args)</span>
