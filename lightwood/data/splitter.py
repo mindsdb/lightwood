@@ -12,9 +12,9 @@ def splitter(
     tss: TimeseriesSettings,
     dtype_dict: Dict[str, str],
     seed: int,
-    pct_train: int,
-    pct_dev: int,
-    pct_test: int,
+    pct_train: float,
+    pct_dev: float,
+    pct_test: float,
     target: str
 ) -> Dict[str, pd.DataFrame]:
     """
@@ -32,8 +32,8 @@ def splitter(
 
     :returns: A dictionary containing the keys train, test and dev with their respective data frames, as well as the "stratified_on" key indicating which columns the data was stratified on (None if it wasn't stratified on anything)
     """ # noqa
-    if pct_train + pct_dev + pct_test != 100:
-        raise Exception('The train, dev and test percentage of the data needs to sum up to 100')
+    if sum(pct_train + pct_dev + pct_test) != 1:
+        raise Exception('The train, dev and test percentage of the data needs to sum up to 1')
 
     # Shuffle the data
     np.random.seed(seed)
