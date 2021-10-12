@@ -52,7 +52,8 @@ extensions = [
     'myst_parser',
     'sphinx_rtd_theme',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'nbsphinx'
 ]
 
 # Enable markdown usage
@@ -108,7 +109,7 @@ html_theme_options = {
 }
 
 # Pygments syntax highlight themes
-pygments_style = 'default'
+pygments_style = 'sphinx'
 
 # to include decorated objects like __init__
 autoclass_content = 'both'
