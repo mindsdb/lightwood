@@ -972,7 +972,7 @@
 <span class="s2"># Time-series blocks</span>
 <span class="si">{</span><span class="n">ts_transform_code</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">if self.mode != &#39;predict&#39;:</span>
-<span class="s2">    </span><span class="si">{</span><span class="n">ts_analyze_code</span><span class="si">}</span><span class="s2"></span>
+<span class="si">{</span><span class="n">align</span><span class="p">(</span><span class="n">ts_analyze_code</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
 
 <span class="s2">return data</span>
 <span class="s2">    &quot;&quot;&quot;</span>
