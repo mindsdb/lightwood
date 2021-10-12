@@ -24,7 +24,11 @@ import sys
 for import_dir in [os.path.expanduser("~/lightwood_modules"), "/etc/lightwood_modules"]:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
         for file_name in list(os.walk(import_dir))[0][2]:
-            mod_name = file_name.rstrip(".py")
+            print(file_name)
+            if file_name[-3:] != ".py":
+                continue
+            mod_name = file_name[:-3]
+            print(mod_name)
             loader = importlib.machinery.SourceFileLoader(
                 mod_name, os.path.join(import_dir, file_name)
             )
@@ -55,7 +59,6 @@ class Predictor(PredictorInterface):
                 "time_aim": 7780.458037514903,
                 "target_weights": None,
                 "positive_domain": False,
-                "fixed_confidence": None,
                 "timeseries_settings": {
                     "is_timeseries": False,
                     "order_by": None,
@@ -68,8 +71,6 @@ class Predictor(PredictorInterface):
                     "allow_incomplete_history": False,
                 },
                 "anomaly_detection": True,
-                "anomaly_error_rate": None,
-                "anomaly_cooldown": True,
                 "ignore_features": ["url_legal", "license", "standard_error"],
                 "fit_on_validation": True,
                 "strict_mode": True,
@@ -114,7 +115,7 @@ class Predictor(PredictorInterface):
         # Preprocess and clean data
 
         log.info("Cleaning the data")
-        clean_data = MyCustomCleaner.cleaner(
+        data = MyCustomCleaner.cleaner(
             data=data,
             identifiers=self.identifiers,
             dtype_dict=self.dtype_dict,
@@ -126,7 +127,7 @@ class Predictor(PredictorInterface):
 
         # Time-series blocks
 
-        return clean_data
+        return data
 
     def split(self, data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
         # Split the data into training/testing splits
@@ -147,6 +148,8 @@ class Predictor(PredictorInterface):
 
     def prepare(self, data: Dict[str, pd.DataFrame]) -> None:
         # Prepare encoders to featurize data
+
+        self.mode = "train"
 
         if self.statistical_analysis is None:
             raise Exception("Please run analyze_data first")
@@ -225,7 +228,6 @@ class Predictor(PredictorInterface):
         # Featurize data into numerical representations for models
 
         log.info("Featurizing the data")
-
         feature_data = {key: None for key in split_data.keys()}
 
         for key, data in split_data.items():
@@ -235,6 +237,8 @@ class Predictor(PredictorInterface):
 
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Fit predictors to estimate target
+
+        self.mode = "train"
 
         # --------------- #
         # Extract data
@@ -296,6 +300,7 @@ class Predictor(PredictorInterface):
         # --------------- #
         log.info("Ensembling the mixer")
         # Create an ensemble of mixers to identify best performing model
+        self.pred_args = PredictionArguments()
         self.ensemble = BestOf(
             ts_analysis=None,
             data=encoded_test_data,
@@ -333,6 +338,12 @@ class Predictor(PredictorInterface):
         )
 
     def learn(self, data: pd.DataFrame) -> None:
+        log.info(f"Dropping features: {self.problem_definition.ignore_features}")
+        data = data.drop(
+            columns=self.problem_definition.ignore_features, errors="ignore"
+        )
+
+        self.mode = "train"
 
         # Perform stats analysis
         self.analyze_data(data)
@@ -356,7 +367,8 @@ class Predictor(PredictorInterface):
         self.analyze_ensemble(enc_train_test)
 
         # ------------------------ #
-        # Enable partial fit of model AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits. This assumes that the predictor could be continuously evolved, hence including the reserved testing data may improve predictivity.
+        # Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.
+        # This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.
         # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
 
         # Update the mixers with partial fit
@@ -368,12 +380,14 @@ class Predictor(PredictorInterface):
                 "old": ConcatedEncodedDs(
                     [enc_train_test["train"], enc_train_test["dev"]]
                 ),
-            }
+            }  # noqa
 
             self.adjust(update_data)
 
     def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:
         # Update mixers with new information
+
+        self.mode = "train"
 
         # --------------- #
         # Extract data
@@ -390,11 +404,13 @@ class Predictor(PredictorInterface):
         for mixer in self.mixers:
             mixer.partial_fit(encoded_new_data, encoded_old_data)
 
-    def predict(self, data: pd.DataFrame) -> pd.DataFrame:
+    def predict(self, data: pd.DataFrame, args: Dict = {}) -> pd.DataFrame:
 
         # Remove columns that user specifies to ignore
         log.info(f"Dropping features: {self.problem_definition.ignore_features}")
-        data = data.drop(columns=self.problem_definition.ignore_features)
+        data = data.drop(
+            columns=self.problem_definition.ignore_features, errors="ignore"
+        )
         for col in self.input_cols:
             if col not in data.columns:
                 data[col] = [None] * len(data)
@@ -416,66 +432,26 @@ class Predictor(PredictorInterface):
         encoded_ds = EncodedDs(self.encoders, data, self.target)
         encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
-        df = self.ensemble(encoded_ds)
-        insights, global_insights = explain(
-            data=data,
-            encoded_data=encoded_data,
-            predictions=df,
-            ts_analysis=None,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            positive_domain=self.statistical_analysis.positive_domain,
-            fixed_confidence=self.problem_definition.fixed_confidence,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-            anomaly_error_rate=self.problem_definition.anomaly_error_rate,
-            anomaly_cooldown=self.problem_definition.anomaly_cooldown,
-            analysis=self.runtime_analyzer,
-            target_name=self.target,
-            target_dtype=self.dtype_dict[self.target],
-            explainer_blocks=self.analysis_blocks,
-        )
-        return insights
+        self.pred_args = PredictionArguments.from_dict(args)
+        df = self.ensemble(encoded_ds, args=self.pred_args)
 
-    def predict_proba(self, data: pd.DataFrame) -> pd.DataFrame:
-
-        # Remove columns that user specifies to ignore
-        log.info(f"Dropping features: {self.problem_definition.ignore_features}")
-        data = data.drop(columns=self.problem_definition.ignore_features)
-        for col in self.input_cols:
-            if col not in data.columns:
-                data[col] = [None] * len(data)
-
-        # Clean the data
-        self.mode = "predict"
-        log.info("Cleaning the data")
-        data = MyCustomCleaner.cleaner(
-            data=data,
-            identifiers=self.identifiers,
-            dtype_dict=self.dtype_dict,
-            target=self.target,
-            mode=self.mode,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-        )
-
-        # Featurize the data
-        encoded_ds = EncodedDs(self.encoders, data, self.target)
-        encoded_data = encoded_ds.get_encoded_data(include_target=False)
-
-        df = self.ensemble(encoded_ds, predict_proba=True)
-        insights, global_insights = explain(
-            data=data,
-            encoded_data=encoded_data,
-            predictions=df,
-            ts_analysis=None,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            positive_domain=self.statistical_analysis.positive_domain,
-            fixed_confidence=self.problem_definition.fixed_confidence,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-            anomaly_error_rate=self.problem_definition.anomaly_error_rate,
-            anomaly_cooldown=self.problem_definition.anomaly_cooldown,
-            analysis=self.runtime_analyzer,
-            target_name=self.target,
-            target_dtype=self.dtype_dict[self.target],
-            explainer_blocks=self.analysis_blocks,
-        )
-        return insights
+        if self.pred_args.all_mixers:
+            return df
+        else:
+            insights, global_insights = explain(
+                data=data,
+                encoded_data=encoded_data,
+                predictions=df,
+                ts_analysis=None,
+                timeseries_settings=self.problem_definition.timeseries_settings,
+                positive_domain=self.statistical_analysis.positive_domain,
+                anomaly_detection=self.problem_definition.anomaly_detection,
+                analysis=self.runtime_analyzer,
+                target_name=self.target,
+                target_dtype=self.dtype_dict[self.target],
+                explainer_blocks=self.analysis_blocks,
+                fixed_confidence=self.pred_args.fixed_confidence,
+                anomaly_error_rate=self.pred_args.anomaly_error_rate,
+                anomaly_cooldown=self.pred_args.anomaly_cooldown,
+            )
+            return insights
