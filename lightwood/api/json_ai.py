@@ -807,7 +807,12 @@ data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
+
+
+log.error(self.mode)
+
 if self.mode != 'predict':
+    log.error('TS ANALYSIS CALLED!')
 {align(ts_analyze_code,1)}
 
 return data
@@ -1012,10 +1017,10 @@ self.mode = 'train'
 self.analyze_data(data)
 
 # Pre-process the data
-clean_data = self.preprocess(data)
+data = self.preprocess(data)
 
 # Create train/test (dev) split
-train_dev_test = self.split(clean_data)
+train_dev_test = self.split(data)
 
 # Prepare encoders
 self.prepare(train_dev_test)
@@ -1058,10 +1063,10 @@ for col in self.input_cols:
         data[col] = [None] * len(data)
 
 # Pre-process the data
-clean_data = self.preprocess(data)
+data = self.preprocess(data)
 
 # Featurize the data
-encoded_ds = self.featurize({{"predict_data": clean_data}})["predict_data"]
+encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 self.pred_args = PredictionArguments.from_dict(args)
