@@ -19,7 +19,7 @@ def splitter(
 ) -> Dict[str, pd.DataFrame]:
     """
     Splits data into training, dev and testing datasets. 
-    Data is shuffled, and potentially stratified (if `target` is set).
+    Rows in the dataset are shuffled randomly. If a target value is provided and is of data type categorical/binary, then train/test/dev will be stratified to maintain the representative populations of each class.
 
     :param data: Input dataset to be split
     :param tss: time-series specific details for splitting
