@@ -18,7 +18,8 @@ def splitter(
     target: str
 ) -> Dict[str, pd.DataFrame]:
     """
-    Splits a dataset into stratified training/test. First shuffles the data within the dataframe (via ``df.sample``).
+    Splits data into training, dev and testing datasets. 
+    Data is shuffled, and potentially stratified (if `target` is set).
 
     :param data: Input dataset to be split
     :param tss: time-series specific details for splitting
@@ -34,13 +35,33 @@ def splitter(
     if pct_train + pct_dev + pct_test != 100:
         raise Exception('The train, dev and test percentage of the data needs to sum up to 100')
 
-    gcd = np.gcd(100, np.gcd(pct_test, np.gcd(pct_train, pct_dev)))
-    nr_subsets = int(100 / gcd)
-
     # Shuffle the data
     np.random.seed(seed)
     if not tss.is_timeseries:
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
+
+    # Split the data
+    train_cutoff = round(data.shape[0] * pct_train / 100)
+    dev_cutoff = train_cutoff + round(data.shape[0] * pct_dev / 100)
+
+    train = data[:train_cutoff]
+    dev = data[train_cutoff:dev_cutoff]
+    test = data[dev_cutoff:]
+
+    # Perform stratification if specified
+    pcts = (pct_train, pct_dev, pct_test)
+    train, dev, test, stratify_on = stratify(train, dev, test, target, pcts, dtype_dict, tss)
+
+    return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
+
+
+def stratify(train: pd.DataFrame,
+             dev: pd.DataFrame,
+             test: pd.DataFrame,
+             target: str,
+             pcts: (float, float, float),
+             dtype_dict: Dict[str, str],
+             tss: TimeseriesSettings) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, list):
 
     stratify_on = []
     if target is not None:
@@ -49,20 +70,23 @@ def splitter(
         if tss.is_timeseries and isinstance(tss.group_by, list):
             stratify_on += tss.group_by
 
-    if stratify_on:
-        subsets = stratify(data, nr_subsets, stratify_on)
-        subsets = randomize_uneven_stratification(data, subsets, nr_subsets, tss)
-    else:
-        subsets = np.array_split(data, nr_subsets)
+        if stratify_on:
+            pct_train, pct_dev, pct_test = pcts
+            data = pd.concat([train, dev, test])
+            gcd = np.gcd(100, np.gcd(pct_test, np.gcd(pct_train, pct_dev)))
+            nr_subsets = int(100 / gcd)
 
-    train = pd.concat(subsets[0:int(pct_train / gcd)])
-    dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
-    test = pd.concat(subsets[int(pct_train / gcd + pct_dev / gcd):])
+            subsets = _stratify(data, nr_subsets, stratify_on)
+            subsets = randomize_uneven_stratification(data, subsets, nr_subsets, tss)
 
-    return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
+            train = pd.concat(subsets[0:int(pct_train / gcd)])
+            dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
+            test = pd.concat(subsets[int(pct_train / gcd + pct_dev / gcd):])
+
+    return train, dev, test, stratify_on
 
 
-def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_alloc=False) -> List[pd.DataFrame]:
+def _stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_alloc=False) -> List[pd.DataFrame]:
     """
     Stratified data splitter.
     
