@@ -754,7 +754,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     # ----------------- #
 
     ts_transform_code = ""
-    ts_analyze_code = ""
+    ts_analyze_code = None
     ts_encoder_code = ""
     if json_ai.timeseries_transformer is not None:
         ts_transform_code = f"""
@@ -807,11 +807,14 @@ data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
+"""
+    if ts_analyze_code is not None:
+        clean_body += f"""
 if self.mode != 'predict':
 {align(ts_analyze_code,1)}
+"""
 
-return data
-    """
+    clean_body += '\nreturn data'
 
     clean_body = align(clean_body, 2)
 
