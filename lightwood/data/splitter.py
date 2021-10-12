@@ -90,8 +90,8 @@ def stratify_wrapper(train: pd.DataFrame,
             subsets = randomize_uneven_stratification(data, subsets, nr_subsets, tss)
 
             train = pd.concat(subsets[0:int(pct_train / gcd)])
-            dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
-            test = pd.concat(subsets[int(pct_train / gcd + pct_dev / gcd):])
+            dev = pd.concat(subsets[int(pct_train / gcd):int((pct_train + pct_dev) / gcd)])
+            test = pd.concat(subsets[int((pct_train + pct_dev) / gcd):])
 
     return train, dev, test, stratify_on
 
