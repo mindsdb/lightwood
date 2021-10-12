@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.high_level &mdash; lightwood 1.2.0 documentation</title>
+  <title>api.high_level &mdash; lightwood 1.4.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -66,7 +67,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.4.0
               </div>
             
           
@@ -91,8 +92,7 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
-<ul>
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
@@ -163,24 +163,26 @@
             
   <h1>Source code for api.high_level</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">types</span> <span class="k">import</span> <span class="n">ModuleType</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">ModuleType</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">dill</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="k">import</span> <span class="n">DataAnalysis</span><span class="p">,</span> <span class="n">JsonAI</span><span class="p">,</span> <span class="n">ProblemDefinition</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">DataAnalysis</span><span class="p">,</span> <span class="n">JsonAI</span><span class="p">,</span> <span class="n">ProblemDefinition</span>
 <span class="kn">import</span> <span class="nn">lightwood</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.predictor</span> <span class="k">import</span> <span class="n">PredictorInterface</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.json_ai</span> <span class="k">import</span> <span class="n">generate_json_ai</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.predictor</span> <span class="kn">import</span> <span class="n">PredictorInterface</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.json_ai</span> <span class="kn">import</span> <span class="n">generate_json_ai</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.json_ai</span> <span class="k">import</span> <span class="n">code_from_json_ai</span> <span class="k">as</span> <span class="n">_code_from_json_ai</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.json_ai</span> <span class="kn">import</span> <span class="n">code_from_json_ai</span> <span class="k">as</span> <span class="n">_code_from_json_ai</span>
 <span class="kn">import</span> <span class="nn">importlib.util</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 
 
-<div class="viewcode-block" id="predictor_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_problem">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">ProblemDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
+<div class="viewcode-block" id="predictor_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_problem">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a ready-to-train ``Predictor`` object from some raw data and a ``ProblemDefinition``. Do not use this if you want to edit the JsonAI first. Usually you&#39;d want to next train this predictor by calling the ``learn`` method on the same dataframe used to create it.</span>
 
@@ -192,11 +194,14 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">ProblemDefinition</span><span class="p">):</span>
         <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">)</span>
 
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">)</span>
+
     <span class="n">predictor_class_str</span> <span class="o">=</span> <span class="n">code_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">predictor_class_str</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="json_ai_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.json_ai_from_problem">[docs]</a><span class="k">def</span> <span class="nf">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">ProblemDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonAI</span><span class="p">:</span>
+<div class="viewcode-block" id="json_ai_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.json_ai_from_problem">[docs]</a><span class="k">def</span> <span class="nf">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">JsonAI</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a JsonAI from your raw data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via `to_dict`, modify it, and then create a new object from it using `lightwood.JsonAI.from_dict`. It&#39;s usually better to generate the JsonAI using this function rather than writing it from scratch.</span>
 
@@ -205,9 +210,11 @@
 
 <span class="sd">    :returns: A ``JsonAI`` object generated based on your data and problem specifications</span>
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">ProblemDefinition</span><span class="p">):</span>
         <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">)</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">)</span>
 
     <span class="n">type_information</span> <span class="o">=</span> <span class="n">lightwood</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">)</span>
     <span class="n">statistical_analysis</span> <span class="o">=</span> <span class="n">lightwood</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">statistical_analysis</span><span class="p">(</span>
@@ -263,13 +270,18 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="code_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.code_from_problem">[docs]</a><span class="k">def</span> <span class="nf">code_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">ProblemDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="code_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.code_from_problem">[docs]</a><span class="k">def</span> <span class="nf">code_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param df: The raw data</span>
 <span class="sd">    :param problem_definition: The manual specifications for your predictive problem</span>
 
 <span class="sd">    :returns: The text code generated based on your data and problem specifications</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">ProblemDefinition</span><span class="p">):</span>
+        <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">)</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">)</span>
     <span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
     <span class="n">predictor_code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">predictor_code</span></div>
