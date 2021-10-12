@@ -26,3 +26,4 @@ github:
 	@cp -a build/html/. ../docs
 	@rm -r build
 	@touch ../docs/.nojekyll
+	@echo 'lightwood.io' > ../docs/CNAME
