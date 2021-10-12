@@ -52,19 +52,29 @@ def splitter(
     stratify_on = []
     if target is not None:
         pcts = (pct_train, pct_dev, pct_test)
-        train, dev, test, stratify_on = stratify(train, dev, test, target, pcts, dtype_dict, tss)
+        train, dev, test, stratify_on = stratify_wrapper(train, dev, test, target, pcts, dtype_dict, tss)
 
     return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
 
-def stratify(train: pd.DataFrame,
-             dev: pd.DataFrame,
-             test: pd.DataFrame,
-             target: str,
-             pcts: (float, float, float),
-             dtype_dict: Dict[str, str],
-             tss: TimeseriesSettings) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, list):
+def stratify_wrapper(train: pd.DataFrame,
+                     dev: pd.DataFrame,
+                     test: pd.DataFrame,
+                     target: str,
+                     pcts: (float, float, float),
+                     dtype_dict: Dict[str, str],
+                     tss: TimeseriesSettings) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, list):
+    """
+    Simple wrapper that acts as bridge between `splitter` and the actual `stratify` method.
 
+    :param train: train dataset
+    :param dev: dev dataset
+    :param test: test dataset
+    :param target: Name of the target column; if specified, data will be stratified on this column
+    :param pcts: tuple with (train, dev, test) fractions of the data
+    :param dtype_dict: Dictionary with the data type of all columns
+    :param tss: time-series specific details for splitting
+    """
     stratify_on = []
     if dtype_dict[target] in (dtype.categorical, dtype.binary):
         stratify_on += [target]
@@ -77,7 +87,7 @@ def stratify(train: pd.DataFrame,
         gcd = np.gcd(100, np.gcd(pct_test, np.gcd(pct_train, pct_dev)))
         nr_subsets = int(100 / gcd)
 
-        subsets = _stratify(data, nr_subsets, stratify_on)
+        subsets = stratify(data, nr_subsets, stratify_on)
         subsets = randomize_uneven_stratification(data, subsets, nr_subsets, tss)
 
         train = pd.concat(subsets[0:int(pct_train / gcd)])
@@ -87,7 +97,7 @@ def stratify(train: pd.DataFrame,
     return train, dev, test, stratify_on
 
 
-def _stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_alloc=False) -> List[pd.DataFrame]:
+def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_alloc=False) -> List[pd.DataFrame]:
     """
     Stratified data splitter.
     
