@@ -1052,6 +1052,7 @@ if self.problem_definition.fit_on_validation:
 
     predict_body = f"""
 # Remove columns that user specifies to ignore
+self.mode = 'predict'
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:
