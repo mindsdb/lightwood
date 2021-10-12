@@ -49,10 +49,8 @@ def splitter(
     test = data[dev_cutoff:]
 
     # Perform stratification if specified
-    stratify_on = []
-    if target is not None:
-        pcts = (pct_train, pct_dev, pct_test)
-        train, dev, test, stratify_on = stratify_wrapper(train, dev, test, target, pcts, dtype_dict, tss)
+    pcts = (pct_train, pct_dev, pct_test)
+    train, dev, test, stratify_on = stratify_wrapper(train, dev, test, target, pcts, dtype_dict, tss)
 
     return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
@@ -76,23 +74,24 @@ def stratify_wrapper(train: pd.DataFrame,
     :param tss: time-series specific details for splitting
     """
     stratify_on = []
-    if dtype_dict[target] in (dtype.categorical, dtype.binary):
-        stratify_on += [target]
-    if tss.is_timeseries and isinstance(tss.group_by, list):
-        stratify_on += tss.group_by
+    if target is not None:
+        if dtype_dict[target] in (dtype.categorical, dtype.binary):
+            stratify_on += [target]
+        if tss.is_timeseries and isinstance(tss.group_by, list):
+            stratify_on += tss.group_by
 
-    if stratify_on:
-        pct_train, pct_dev, pct_test = pcts
-        data = pd.concat([train, dev, test])
-        gcd = np.gcd(100, np.gcd(pct_test, np.gcd(pct_train, pct_dev)))
-        nr_subsets = int(100 / gcd)
+        if stratify_on:
+            pct_train, pct_dev, pct_test = pcts
+            data = pd.concat([train, dev, test])
+            gcd = np.gcd(100, np.gcd(pct_test, np.gcd(pct_train, pct_dev)))
+            nr_subsets = int(100 / gcd)
 
-        subsets = stratify(data, nr_subsets, stratify_on)
-        subsets = randomize_uneven_stratification(data, subsets, nr_subsets, tss)
+            subsets = stratify(data, nr_subsets, stratify_on)
+            subsets = randomize_uneven_stratification(data, subsets, nr_subsets, tss)
 
-        train = pd.concat(subsets[0:int(pct_train / gcd)])
-        dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
-        test = pd.concat(subsets[int(pct_train / gcd + pct_dev / gcd):])
+            train = pd.concat(subsets[0:int(pct_train / gcd)])
+            dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
+            test = pd.concat(subsets[int(pct_train / gcd + pct_dev / gcd):])
 
     return train, dev, test, stratify_on
 
