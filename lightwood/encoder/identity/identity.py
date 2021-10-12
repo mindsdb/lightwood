@@ -18,6 +18,4 @@ class IdentityEncoder(BaseEncoder):
         return torch.Tensor(column_data)
 
     def decode(self, encoded_data) -> List[object]:
-        if type(encoded_data) == torch.Tensor:
-            return encoded_data.tolist()
-        return list(encoded_data)
+        return encoded_data.tolist()
