@@ -754,7 +754,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     # ----------------- #
 
     ts_transform_code = ""
-    ts_analyze_code = ""
+    ts_analyze_code = None
     ts_encoder_code = ""
     if json_ai.timeseries_transformer is not None:
         ts_transform_code = f"""
@@ -764,7 +764,7 @@ data = {call(json_ai.timeseries_transformer)}
         ts_analyze_code = f"""
 self.ts_analysis = {call(json_ai.timeseries_analyzer)}
 """
-
+    # @TODO: set these kwargs/properties in the json ai construction (if possible)
     if json_ai.timeseries_analyzer is not None:
         ts_encoder_code = """
 if encoder.is_timeseries_encoder:
@@ -807,10 +807,14 @@ data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
-{ts_analyze_code}
+"""
+    if ts_analyze_code is not None:
+        clean_body += f"""
+if self.mode != 'predict':
+{align(ts_analyze_code,1)}
+"""
 
-return data
-    """
+    clean_body += '\nreturn data'
 
     clean_body = align(clean_body, 2)
 
@@ -1011,10 +1015,10 @@ self.mode = 'train'
 self.analyze_data(data)
 
 # Pre-process the data
-clean_data = self.preprocess(data)
+data = self.preprocess(data)
 
 # Create train/test (dev) split
-train_dev_test = self.split(clean_data)
+train_dev_test = self.split(data)
 
 # Prepare encoders
 self.prepare(train_dev_test)
@@ -1049,21 +1053,18 @@ if self.problem_definition.fit_on_validation:
 
     predict_body = f"""
 # Remove columns that user specifies to ignore
+self.mode = 'predict'
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:
     if col not in data.columns:
         data[col] = [None] * len(data)
 
-# Clean the data
-self.mode = 'predict'
-log.info('Cleaning the data')
-data = {call(json_ai.cleaner)}
-
-{ts_transform_code}
+# Pre-process the data
+data = self.preprocess(data)
 
 # Featurize the data
-encoded_ds = EncodedDs(self.encoders, data, self.target)
+encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 self.pred_args = PredictionArguments.from_dict(args)
@@ -1075,6 +1076,7 @@ else:
     insights, global_insights = {call(json_ai.explainer)}
     return insights
 """
+
     predict_body = align(predict_body, 2)
 
     predictor_code = f"""
