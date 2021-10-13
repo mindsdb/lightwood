@@ -27,20 +27,20 @@ class BaseEncoder:
     
     """ # noqa
     is_target: bool
-    prepared: bool
+    is_prepared: bool
 
     is_timeseries_encoder: bool = False
     is_trainable_encoder: bool = False
 
     def __init__(self, is_target=False) -> None:
         self.is_target = is_target
-        self.prepared = False
+        self.is_prepared = False
         self.dependencies = []
         self.output_size = None
 
     # Not all encoders need to be prepared
     def prepare(self, priming_data) -> None:
-        self.prepared = True
+        self.is_prepared = True
 
     def encode(self, column_data) -> torch.Tensor:
         raise NotImplementedError
