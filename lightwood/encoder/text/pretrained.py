@@ -150,7 +150,7 @@ class PretrainedLangEncoder(BaseEncoder):
         os.environ['TOKENIZERS_PARALLELISM'] = 'true'
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         priming_data = priming_data.values
-        if self._prepared:
+        if self.is_prepared:
             raise Exception("Encoder is already prepared.")
 
         # TODO: Make tokenizer custom with partial function; feed custom->model
@@ -254,7 +254,7 @@ class PretrainedLangEncoder(BaseEncoder):
                 log.info("Embedding mode must be ON for non-classification targets.")
                 self.embed_mode = True
 
-        self._prepared = True
+        self.is_prepared = True
         encoded = self.encode(priming_data[0:1])
         self.output_size = len(encoded[0])
 
@@ -327,7 +327,7 @@ class PretrainedLangEncoder(BaseEncoder):
         Returns:
         encoded_representation:: [torch.Tensor] N_sentences x Nembed_dim
         """
-        if self._prepared is False:
+        if self.is_prepared is False:
             raise Exception("You need to first prepare the encoder.")
 
         # Set model to testing/eval mode.

@@ -24,7 +24,7 @@ class MultiHotEncoder(BaseEncoder):
         for arr in priming_data:
             for x in arr:
                 self._seen.add(x)
-        self._prepared = True
+        self.is_prepared = True
         self.output_size = len(self.encode(priming_data[0:1])[0])
 
     def encode(self, column_data):

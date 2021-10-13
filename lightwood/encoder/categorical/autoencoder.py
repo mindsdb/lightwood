@@ -16,7 +16,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
     def __init__(self, stop_after: int = 3600, is_target: bool = False, max_encoded_length: int = 100):
         super().__init__(is_target)
-        self._prepared = False
+        self.is_prepared = False
         self.name = 'Categorical Autoencoder'
         self.net = None
         self.encoder = None
@@ -40,7 +40,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         random.seed(len(priming_data))
 
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         self.onehot_encoder.prepare(priming_data)
@@ -89,7 +89,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         self.output_size = self.onehot_encoder._lang.n_words
         self.output_size = self.max_encoded_length
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, column_data):
         oh_encoded_tensor = self.onehot_encoder.encode(column_data)

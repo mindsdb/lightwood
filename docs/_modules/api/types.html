@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.types &mdash; lightwood 1.2.0 documentation</title>
+  <title>api.types &mdash; lightwood 1.4.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -66,7 +67,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.4.0
               </div>
             
           
@@ -91,8 +92,7 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
-<ul>
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
@@ -174,13 +174,32 @@
 <span class="c1"># TODO: Problem definition missing a few terms</span>
 <span class="c1"># TODO: Model Analysis</span>
 <span class="c1"># TODO: Analyzer</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="k">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="k">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">dataclasses_json</span> <span class="k">import</span> <span class="n">dataclass_json</span>
-<span class="kn">from</span> <span class="nn">dataclasses_json.core</span> <span class="k">import</span> <span class="n">_asdict</span><span class="p">,</span> <span class="n">Json</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">dataclasses_json</span> <span class="kn">import</span> <span class="n">dataclass_json</span>
+<span class="kn">from</span> <span class="nn">dataclasses_json.core</span> <span class="kn">import</span> <span class="n">_asdict</span><span class="p">,</span> <span class="n">Json</span>
 <span class="kn">import</span> <span class="nn">json</span>
+
+
+<span class="c1"># See: https://www.python.org/dev/peps/pep-0589/ for how this works</span>
+<span class="c1"># Not very intuitive but very powerful abstraction, might be useful in other places (@TODO)</span>
+<div class="viewcode-block" id="Module"><a class="viewcode-back" href="../../api/types.html#api.types.Module">[docs]</a><span class="k">class</span> <span class="nc">Module</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.</span>
+
+<span class="sd">    :param module: Name of the module (function or class name)</span>
+<span class="sd">    :param args: Argument to pass to the function or constructor</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+    <span class="n">module</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="Feature"><a class="viewcode-back" href="../../api/types.html#api.types.Feature">[docs]</a><span class="nd">@dataclass</span>
@@ -195,7 +214,7 @@
 <span class="sd">    depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">encoder</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">encoder</span><span class="p">:</span> <span class="n">Module</span>
     <span class="n">data_dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">dependency</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -270,8 +289,8 @@
 <span class="sd">    :param data_dtype: The type of information within the target column (ex.: numerical, categorical, etc.).</span>
 <span class="sd">    :param encoder: the methodology for encoding the target feature (a Lightwood Encoder). There can only be one \</span>
 <span class="sd">    encoder for the output target.</span>
-<span class="sd">    :param models: The list of ML algorithms that are trained for the target distribution.</span>
-<span class="sd">    :param ensemble: For a panel of ML algorithms, the approach of selecting the best model, and the metrics used in \</span>
+<span class="sd">    :param mixers: The list of ML algorithms that are trained for the target distribution.</span>
+<span class="sd">    :param ensemble: For a panel of ML algorithms, the approach of selecting the best mixer, and the metrics used in \</span>
 <span class="sd">    that evaluation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -298,7 +317,7 @@
     <span class="n">additional_info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span>
     <span class="n">identifiers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">additional_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">identifiers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
@@ -375,12 +394,14 @@
     <span class="n">order_by</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">group_by</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">use_previous_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">use_previous_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">nr_predictions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">historical_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">target_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s2">&quot;&quot;</span>  <span class="c1"># @TODO: is the current setter (outside of initialization) a sane option?</span>
+        <span class="c1"># @TODO: George: No, I don&#39;t think it is, we need to pass this some other way</span>
     <span class="p">)</span>
+    <span class="n">allow_incomplete_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="TimeseriesSettings.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
@@ -394,7 +415,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">mandatory_setting</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;order_by&quot;</span><span class="p">,</span> <span class="s2">&quot;window&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">mandatory_setting</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
-                    <span class="n">err</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;Missing mandatory timeseries setting: </span><span class="si">{mandatory_setting}</span><span class="s2">&quot;</span>
+                    <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Missing mandatory timeseries setting: </span><span class="si">{</span><span class="n">mandatory_setting</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
 
@@ -405,6 +426,7 @@
                 <span class="n">use_previous_target</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_previous_target&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                 <span class="n">historical_columns</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">nr_predictions</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nr_predictions&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">allow_incomplete_history</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;allow_incomplete_history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
                 <span class="n">timeseries_settings</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">setting</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="n">setting</span><span class="p">])</span>
@@ -461,26 +483,19 @@
 <span class="sd">        encoders and models.</span>
 <span class="sd">    :param target_weights:</span>
 <span class="sd">    :param positive_domain: For numerical taks, force predictor output to be positive (integer or float).</span>
-<span class="sd">    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \</span>
-<span class="sd">        that predictions, in average, are correct `alpha` percent of the time.</span>
 <span class="sd">    :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for \</span>
 <span class="sd">         available settings.</span>
 <span class="sd">    :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-\</span>
 <span class="sd">        series.</span>
-<span class="sd">    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \</span>
-<span class="sd">        (respectively implies wider and tighter bounds, all other parameters being equal).</span>
-<span class="sd">    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \</span>
-<span class="sd">        detector.</span>
 <span class="sd">    :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \</span>
 <span class="sd">        found in this list will be automatically removed from subsequent steps in the ML pipeline.</span>
-<span class="sd">    :param fit_on_validation: Whether to fit the model on the held-out validation data. Validation data is strictly \</span>
+<span class="sd">    :param fit_on_all: Whether to fit the model on the held-out validation data. Validation data is strictly \</span>
 <span class="sd">        used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new \</span>
 <span class="sd">            incoming data over time, the user may train the model further using the entire dataset.</span>
 <span class="sd">    :param strict_mode:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">nsubsets</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">pct_invalid</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">unbias_target</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">seconds_per_mixer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
@@ -488,13 +503,10 @@
     <span class="n">time_aim</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
     <span class="n">target_weights</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
     <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">fixed_confidence</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
     <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
     <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">anomaly_error_rate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-    <span class="n">anomaly_cooldown</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">ignore_features</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-    <span class="n">fit_on_validation</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">fit_on_all</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">strict_mode</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">seed_nr</span><span class="p">:</span> <span class="nb">int</span>
 
@@ -509,26 +521,21 @@
 <span class="sd">        :returns: A populated ``ProblemDefinition`` object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">target</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
-        <span class="n">nsubsets</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nsubsets&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
-        <span class="n">pct_invalid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pct_invalid&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">pct_invalid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pct_invalid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">unbias_target</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;unbias_target&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">seconds_per_mixer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seconds_per_mixer&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">seconds_per_encoder</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seconds_per_encoder&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">time_aim</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;time_aim&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">target_weights</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_weights&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">positive_domain</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;positive_domain&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="n">fixed_confidence</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fixed_confidence&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">timeseries_settings</span> <span class="o">=</span> <span class="n">TimeseriesSettings</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timeseries_settings&#39;</span><span class="p">,</span> <span class="p">{}))</span>
         <span class="n">anomaly_detection</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_detection&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">anomaly_error_rate</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_error_rate&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">anomaly_cooldown</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_detection&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">ignore_features</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ignore_features&#39;</span><span class="p">,</span> <span class="p">[])</span>
-        <span class="n">fit_on_validation</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fit_on_validation&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">fit_on_all</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fit_on_all&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">strict_mode</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strict_mode&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">seed_nr</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seed_nr&#39;</span><span class="p">,</span> <span class="mi">420</span><span class="p">)</span>
         <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="p">(</span>
             <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
-            <span class="n">nsubsets</span><span class="o">=</span><span class="n">nsubsets</span><span class="p">,</span>
             <span class="n">pct_invalid</span><span class="o">=</span><span class="n">pct_invalid</span><span class="p">,</span>
             <span class="n">unbias_target</span><span class="o">=</span><span class="n">unbias_target</span><span class="p">,</span>
             <span class="n">seconds_per_mixer</span><span class="o">=</span><span class="n">seconds_per_mixer</span><span class="p">,</span>
@@ -536,13 +543,10 @@
             <span class="n">time_aim</span><span class="o">=</span><span class="n">time_aim</span><span class="p">,</span>
             <span class="n">target_weights</span><span class="o">=</span><span class="n">target_weights</span><span class="p">,</span>
             <span class="n">positive_domain</span><span class="o">=</span><span class="n">positive_domain</span><span class="p">,</span>
-            <span class="n">fixed_confidence</span><span class="o">=</span><span class="n">fixed_confidence</span><span class="p">,</span>
             <span class="n">timeseries_settings</span><span class="o">=</span><span class="n">timeseries_settings</span><span class="p">,</span>
             <span class="n">anomaly_detection</span><span class="o">=</span><span class="n">anomaly_detection</span><span class="p">,</span>
-            <span class="n">anomaly_error_rate</span><span class="o">=</span><span class="n">anomaly_error_rate</span><span class="p">,</span>
-            <span class="n">anomaly_cooldown</span><span class="o">=</span><span class="n">anomaly_cooldown</span><span class="p">,</span>
             <span class="n">ignore_features</span><span class="o">=</span><span class="n">ignore_features</span><span class="p">,</span>
-            <span class="n">fit_on_validation</span><span class="o">=</span><span class="n">fit_on_validation</span><span class="p">,</span>
+            <span class="n">fit_on_all</span><span class="o">=</span><span class="n">fit_on_all</span><span class="p">,</span>
             <span class="n">strict_mode</span><span class="o">=</span><span class="n">strict_mode</span><span class="p">,</span>
             <span class="n">seed_nr</span><span class="o">=</span><span class="n">seed_nr</span>
         <span class="p">)</span>
@@ -592,25 +596,24 @@
 <span class="sd">    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.</span>
 <span class="sd">    :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.</span>
 <span class="sd">    :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.</span>
-<span class="sd">    :param imports: A list of custom packages, indicated through a str import statement, that a user can call.</span>
+<span class="sd">    :param analysis_blocks: The blocks that get used in both analysis and inference inside the analyzer and explainer blocks.</span>
 <span class="sd">    :param timeseries_transformer:</span>
 <span class="sd">    :param timeseries_analyzer:</span>
-<span class="sd">    :param accuracy_functions: A list of performance metrics used to evaluate the best models.</span>
+<span class="sd">    :param accuracy_functions: A list of performance metrics used to evaluate the best mixers.</span>
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
 
     <span class="n">features</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Feature</span><span class="p">]</span>
     <span class="n">outputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Output</span><span class="p">]</span>
     <span class="n">problem_definition</span><span class="p">:</span> <span class="n">ProblemDefinition</span>
     <span class="n">identifiers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
-    <span class="n">cleaner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">splitter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">analyzer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">explainer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">imports</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">timeseries_transformer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">timeseries_analyzer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cleaner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">splitter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">analyzer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">explainer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">analysis_blocks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Module</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">timeseries_transformer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">timeseries_analyzer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">accuracy_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">phases</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="JsonAI.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.JsonAI.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
@@ -625,11 +628,10 @@
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;splitter&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">analyzer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;analyzer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">explainer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;explainer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">imports</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;imports&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">analysis_blocks</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;analysis_blocks&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">timeseries_transformer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeseries_transformer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">timeseries_analyzer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeseries_analyzer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;accuracy_functions&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">phases</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;phases&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="n">json_ai</span> <span class="o">=</span> <span class="n">JsonAI</span><span class="p">(</span>
             <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
@@ -640,11 +642,10 @@
             <span class="n">splitter</span><span class="o">=</span><span class="n">splitter</span><span class="p">,</span>
             <span class="n">analyzer</span><span class="o">=</span><span class="n">analyzer</span><span class="p">,</span>
             <span class="n">explainer</span><span class="o">=</span><span class="n">explainer</span><span class="p">,</span>
-            <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">,</span>
+            <span class="n">analysis_blocks</span><span class="o">=</span><span class="n">analysis_blocks</span><span class="p">,</span>
             <span class="n">timeseries_transformer</span><span class="o">=</span><span class="n">timeseries_transformer</span><span class="p">,</span>
             <span class="n">timeseries_analyzer</span><span class="o">=</span><span class="n">timeseries_analyzer</span><span class="p">,</span>
             <span class="n">accuracy_functions</span><span class="o">=</span><span class="n">accuracy_functions</span><span class="p">,</span>
-            <span class="n">phases</span><span class="o">=</span><span class="n">phases</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">json_ai</span></div>
@@ -708,6 +709,67 @@
     <span class="n">confusion_matrix</span><span class="p">:</span> <span class="nb">object</span>
     <span class="n">histograms</span><span class="p">:</span> <span class="nb">object</span>
     <span class="n">dtypes</span><span class="p">:</span> <span class="nb">object</span></div>
+
+
+<div class="viewcode-block" id="PredictionArguments"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">PredictionArguments</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class contains all possible arguments that can be passed to a Lightwood predictor at inference time.</span>
+<span class="sd">    On each predict call, all arguments included in a parameter dictionary will update the respective fields</span>
+<span class="sd">    in the `PredictionArguments` instance that the predictor will have.</span>
+<span class="sd">    </span>
+<span class="sd">    :param predict_proba: triggers (where supported) predictions in raw probability output form. I.e. for classifiers,</span>
+<span class="sd">    instead of returning only the predicted class, the output additionally includes the assigned probability for</span>
+<span class="sd">    each class.   </span>
+<span class="sd">    :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers. </span>
+<span class="sd">    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \</span>
+<span class="sd">        that predictions, in average, are correct `alpha` percent of the time.</span>
+<span class="sd">    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \</span>
+<span class="sd">        (respectively implies wider and tighter bounds, all other parameters being equal).</span>
+<span class="sd">    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \</span>
+<span class="sd">        detector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+    <span class="n">predict_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">all_mixers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fixed_confidence</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomaly_error_rate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomaly_cooldown</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="PredictionArguments.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a ``PredictionArguments`` object from a python dictionary with necessary specifications.</span>
+
+<span class="sd">        :param obj: A python dictionary with the necessary features for the ``PredictionArguments`` class.</span>
+
+<span class="sd">        :returns: A populated ``PredictionArguments`` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># maybe this should be stateful instead, and save the latest used value for each field?</span>
+        <span class="n">predict_proba</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;predict_proba&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">)</span>
+        <span class="n">all_mixers</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;all_mixers&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">all_mixers</span><span class="p">)</span>
+        <span class="n">fixed_confidence</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fixed_confidence&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">fixed_confidence</span><span class="p">)</span>
+        <span class="n">anomaly_error_rate</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_error_rate&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">anomaly_error_rate</span><span class="p">)</span>
+        <span class="n">anomaly_cooldown</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_cooldown&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">anomaly_cooldown</span><span class="p">)</span>
+
+        <span class="n">pred_args</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">(</span>
+            <span class="n">predict_proba</span><span class="o">=</span><span class="n">predict_proba</span><span class="p">,</span>
+            <span class="n">all_mixers</span><span class="o">=</span><span class="n">all_mixers</span><span class="p">,</span>
+            <span class="n">fixed_confidence</span><span class="o">=</span><span class="n">fixed_confidence</span><span class="p">,</span>
+            <span class="n">anomaly_error_rate</span><span class="o">=</span><span class="n">anomaly_error_rate</span><span class="p">,</span>
+            <span class="n">anomaly_cooldown</span><span class="o">=</span><span class="n">anomaly_cooldown</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pred_args</span></div>
+
+<div class="viewcode-block" id="PredictionArguments.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a python dictionary from the ``PredictionArguments`` object</span>
+
+<span class="sd">        :returns: A python dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="n">encode_json</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

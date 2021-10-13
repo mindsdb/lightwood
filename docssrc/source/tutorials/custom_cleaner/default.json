@@ -46,6 +46,7 @@
             "ensemble": {
                 "module": "BestOf",
                 "args": {
+                    "args": "$pred_args",
                     "accuracy_functions": "$accuracy_functions",
                     "ts_analysis": null
                 }
@@ -61,7 +62,6 @@
         "time_aim": 7780.458037514903,
         "target_weights": null,
         "positive_domain": false,
-        "fixed_confidence": null,
         "timeseries_settings": {
             "is_timeseries": false,
             "order_by": null,
@@ -74,14 +74,12 @@
             "allow_incomplete_history": false
         },
         "anomaly_detection": true,
-        "anomaly_error_rate": null,
-        "anomaly_cooldown": 1,
         "ignore_features": [
             "url_legal",
             "license",
             "standard_error"
         ],
-        "fit_on_validation": true,
+        "fit_on_all": true,
         "strict_mode": true,
         "seed_nr": 420
     },

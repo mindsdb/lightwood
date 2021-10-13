@@ -325,7 +325,7 @@ class ProblemDefinition:
         series.
     :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
         found in this list will be automatically removed from subsequent steps in the ML pipeline.
-    :param fit_on_validation: Whether to fit the model on the held-out validation data. Validation data is strictly \
+    :param fit_on_all: Whether to fit the model on the held-out validation data. Validation data is strictly \
         used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new \
             incoming data over time, the user may train the model further using the entire dataset.
     :param strict_mode:
@@ -342,7 +342,7 @@ class ProblemDefinition:
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
     ignore_features: List[str]
-    fit_on_validation: bool
+    fit_on_all: bool
     strict_mode: bool
     seed_nr: int
 
@@ -367,7 +367,7 @@ class ProblemDefinition:
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         anomaly_detection = obj.get('anomaly_detection', True)
         ignore_features = obj.get('ignore_features', [])
-        fit_on_validation = obj.get('fit_on_validation', True)
+        fit_on_all = obj.get('fit_on_all', True)
         strict_mode = obj.get('strict_mode', True)
         seed_nr = obj.get('seed_nr', 420)
         problem_definition = ProblemDefinition(
@@ -382,7 +382,7 @@ class ProblemDefinition:
             timeseries_settings=timeseries_settings,
             anomaly_detection=anomaly_detection,
             ignore_features=ignore_features,
-            fit_on_validation=fit_on_validation,
+            fit_on_all=fit_on_all,
             strict_mode=strict_mode,
             seed_nr=seed_nr
         )
