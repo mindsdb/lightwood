@@ -35,8 +35,8 @@ class TestBasic(unittest.TestCase):
         return predictor
 
     def test_0_binary(self):
-        df = pd.read_csv('tests/data/adult.csv')[:100]
-        target = 'income'
+        df = pd.read_csv('tests/data/ionosphere.csv')[:100]
+        target = 'target'
         predictor = self.setup_predictor(df, target)
         predictions = predictor.predict(df)
         acc = balanced_accuracy_score(df[target], predictions['prediction'])
@@ -54,5 +54,4 @@ class TestBasic(unittest.TestCase):
 
         # test predict all mixers with some data
         predictions = predictor.predict(df[:10], args={'all_mixers': True})
-        assert '__mdb_mixer' in predictions.columns
-        assert '__mdb_best_mixer' in predictions.columns
+        assert '__mdb_mixer_Neural' in predictions.columns

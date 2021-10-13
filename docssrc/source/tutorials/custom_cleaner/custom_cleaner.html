@@ -14460,26 +14460,35 @@ a.anchor-link {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>INFO:lightwood-66742:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]
-INFO:lightwood-66742:Analyzing a sample of 2478
-INFO:lightwood-66742:from a total population of 2834, this is equivalent to 87.4% of your data.
-INFO:lightwood-66742:Using 15 processes to deduct types.
-INFO:lightwood-66742:Infering type for: id
-INFO:lightwood-66742:Infering type for: target
-INFO:lightwood-66742:Infering type for: excerpt
-INFO:lightwood-66742:Column target has data type float
-INFO:lightwood-66742:Doing text detection for column: id
-INFO:lightwood-66742:Doing text detection for column: excerpt
-[nltk_data] Downloading package stopwords to
-[nltk_data]     /home/natasha/nltk_data...
-[nltk_data]   Package stopwords is already up-to-date!
-[nltk_data] Downloading package stopwords to
-[nltk_data]     /home/natasha/nltk_data...
-[nltk_data]   Package stopwords is already up-to-date!
-INFO:lightwood-66742:Column id has data type categorical
-WARNING:lightwood-66742:Column id is an identifier of type &#34;Hash-like identifier&#34;
-INFO:lightwood-66742:Starting statistical analysis
-INFO:lightwood-66742:Finished statistical analysis
+<pre>INFO:lightwood-50752:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]
+INFO:lightwood-50752:Analyzing a sample of 2478
+INFO:lightwood-50752:from a total population of 2834, this is equivalent to 87.4% of your data.
+INFO:lightwood-50752:Using 15 processes to deduct types.
+INFO:lightwood-50752:Infering type for: id
+INFO:lightwood-50752:Infering type for: target
+INFO:lightwood-50752:Infering type for: excerpt
+INFO:lightwood-50752:Column target has data type float
+INFO:lightwood-50752:Doing text detection for column: id
+INFO:lightwood-50752:Doing text detection for column: excerpt
+INFO:lightwood-50752:Column id has data type categorical
+WARNING:lightwood-50752:Column id is an identifier of type &#34;Hash-like identifier&#34;
+INFO:lightwood-50752:Starting statistical analysis
+INFO:lightwood-50752:Finished statistical analysis
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>MyCustomCleaner.py
+MyCustomCleaner
+MyCustomSplitter.py
+MyCustomSplitter
 </pre>
 </div>
 </div>
@@ -14574,6 +14583,7 @@ INFO:lightwood-66742:Finished statistical analysis
             &#34;ensemble&#34;: {
                 &#34;module&#34;: &#34;BestOf&#34;,
                 &#34;args&#34;: {
+                    &#34;args&#34;: &#34;$pred_args&#34;,
                     &#34;accuracy_functions&#34;: &#34;$accuracy_functions&#34;,
                     &#34;ts_analysis&#34;: null
                 }
@@ -14589,7 +14599,6 @@ INFO:lightwood-66742:Finished statistical analysis
         &#34;time_aim&#34;: 7780.458037514903,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
-        &#34;fixed_confidence&#34;: null,
         &#34;timeseries_settings&#34;: {
             &#34;is_timeseries&#34;: false,
             &#34;order_by&#34;: null,
@@ -14602,14 +14611,12 @@ INFO:lightwood-66742:Finished statistical analysis
             &#34;allow_incomplete_history&#34;: false
         },
         &#34;anomaly_detection&#34;: true,
-        &#34;anomaly_error_rate&#34;: null,
-        &#34;anomaly_cooldown&#34;: 1,
         &#34;ignore_features&#34;: [
             &#34;url_legal&#34;,
             &#34;license&#34;,
             &#34;standard_error&#34;
         ],
-        &#34;fit_on_validation&#34;: true,
+        &#34;fit_on_all&#34;: true,
         &#34;strict_mode&#34;: true,
         &#34;seed_nr&#34;: 420
     },
@@ -14843,7 +14850,11 @@ def cleaner(
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>import lightwood
+<pre>MyCustomCleaner.py
+MyCustomCleaner
+MyCustomSplitter.py
+MyCustomSplitter
+import lightwood
 from lightwood.analysis import *
 from lightwood.api import *
 from lightwood.data import *
@@ -14869,7 +14880,11 @@ import sys
 for import_dir in [os.path.expanduser(&#34;~/lightwood_modules&#34;), &#34;/etc/lightwood_modules&#34;]:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
         for file_name in list(os.walk(import_dir))[0][2]:
-            mod_name = file_name.rstrip(&#34;.py&#34;)
+            print(file_name)
+            if file_name[-3:] != &#34;.py&#34;:
+                continue
+            mod_name = file_name[:-3]
+            print(mod_name)
             loader = importlib.machinery.SourceFileLoader(
                 mod_name, os.path.join(import_dir, file_name)
             )
@@ -14900,7 +14915,6 @@ class Predictor(PredictorInterface):
                 &#34;time_aim&#34;: 7780.458037514903,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
-                &#34;fixed_confidence&#34;: None,
                 &#34;timeseries_settings&#34;: {
                     &#34;is_timeseries&#34;: False,
                     &#34;order_by&#34;: None,
@@ -14913,10 +14927,8 @@ class Predictor(PredictorInterface):
                     &#34;allow_incomplete_history&#34;: False,
                 },
                 &#34;anomaly_detection&#34;: True,
-                &#34;anomaly_error_rate&#34;: None,
-                &#34;anomaly_cooldown&#34;: True,
                 &#34;ignore_features&#34;: [&#34;url_legal&#34;, &#34;license&#34;, &#34;standard_error&#34;],
-                &#34;fit_on_validation&#34;: True,
+                &#34;fit_on_all&#34;: True,
                 &#34;strict_mode&#34;: True,
                 &#34;seed_nr&#34;: 420,
             }
@@ -14959,7 +14971,7 @@ class Predictor(PredictorInterface):
         # Preprocess and clean data
 
         log.info(&#34;Cleaning the data&#34;)
-        clean_data = MyCustomCleaner.cleaner(
+        data = MyCustomCleaner.cleaner(
             data=data,
             identifiers=self.identifiers,
             dtype_dict=self.dtype_dict,
@@ -14971,7 +14983,7 @@ class Predictor(PredictorInterface):
 
         # Time-series blocks
 
-        return clean_data
+        return data
 
     def split(self, data: pd.DataFrame) -&gt; Dict[str, pd.DataFrame]:
         # Split the data into training/testing splits
@@ -14992,6 +15004,8 @@ class Predictor(PredictorInterface):
 
     def prepare(self, data: Dict[str, pd.DataFrame]) -&gt; None:
         # Prepare encoders to featurize data
+
+        self.mode = &#34;train&#34;
 
         if self.statistical_analysis is None:
             raise Exception(&#34;Please run analyze_data first&#34;)
@@ -15070,7 +15084,6 @@ class Predictor(PredictorInterface):
         # Featurize data into numerical representations for models
 
         log.info(&#34;Featurizing the data&#34;)
-
         feature_data = {key: None for key in split_data.keys()}
 
         for key, data in split_data.items():
@@ -15080,6 +15093,8 @@ class Predictor(PredictorInterface):
 
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:
         # Fit predictors to estimate target
+
+        self.mode = &#34;train&#34;
 
         # --------------- #
         # Extract data
@@ -15141,6 +15156,7 @@ class Predictor(PredictorInterface):
         # --------------- #
         log.info(&#34;Ensembling the mixer&#34;)
         # Create an ensemble of mixers to identify best performing model
+        self.pred_args = PredictionArguments()
         self.ensemble = BestOf(
             ts_analysis=None,
             data=encoded_test_data,
@@ -15178,6 +15194,12 @@ class Predictor(PredictorInterface):
         )
 
     def learn(self, data: pd.DataFrame) -&gt; None:
+        log.info(f&#34;Dropping features: {self.problem_definition.ignore_features}&#34;)
+        data = data.drop(
+            columns=self.problem_definition.ignore_features, errors=&#34;ignore&#34;
+        )
+
+        self.mode = &#34;train&#34;
 
         # Perform stats analysis
         self.analyze_data(data)
@@ -15201,11 +15223,12 @@ class Predictor(PredictorInterface):
         self.analyze_ensemble(enc_train_test)
 
         # ------------------------ #
-        # Enable partial fit of model AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits. This assumes that the predictor could be continuously evolved, hence including the reserved testing data may improve predictivity.
-        # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
+        # Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.
+        # This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.
+        # SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.
 
         # Update the mixers with partial fit
-        if self.problem_definition.fit_on_validation:
+        if self.problem_definition.fit_on_all:
 
             log.info(&#34;Adjustment on validation requested.&#34;)
             update_data = {
@@ -15213,12 +15236,14 @@ class Predictor(PredictorInterface):
                 &#34;old&#34;: ConcatedEncodedDs(
                     [enc_train_test[&#34;train&#34;], enc_train_test[&#34;dev&#34;]]
                 ),
-            }
+            }  # noqa
 
             self.adjust(update_data)
 
     def adjust(self, new_data: Dict[str, pd.DataFrame]) -&gt; None:
         # Update mixers with new information
+
+        self.mode = &#34;train&#34;
 
         # --------------- #
         # Extract data
@@ -15235,11 +15260,13 @@ class Predictor(PredictorInterface):
         for mixer in self.mixers:
             mixer.partial_fit(encoded_new_data, encoded_old_data)
 
-    def predict(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+    def predict(self, data: pd.DataFrame, args: Dict = {}) -&gt; pd.DataFrame:
 
         # Remove columns that user specifies to ignore
         log.info(f&#34;Dropping features: {self.problem_definition.ignore_features}&#34;)
-        data = data.drop(columns=self.problem_definition.ignore_features)
+        data = data.drop(
+            columns=self.problem_definition.ignore_features, errors=&#34;ignore&#34;
+        )
         for col in self.input_cols:
             if col not in data.columns:
                 data[col] = [None] * len(data)
@@ -15261,69 +15288,29 @@ class Predictor(PredictorInterface):
         encoded_ds = EncodedDs(self.encoders, data, self.target)
         encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
-        df = self.ensemble(encoded_ds)
-        insights, global_insights = explain(
-            data=data,
-            encoded_data=encoded_data,
-            predictions=df,
-            ts_analysis=None,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            positive_domain=self.statistical_analysis.positive_domain,
-            fixed_confidence=self.problem_definition.fixed_confidence,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-            anomaly_error_rate=self.problem_definition.anomaly_error_rate,
-            anomaly_cooldown=self.problem_definition.anomaly_cooldown,
-            analysis=self.runtime_analyzer,
-            target_name=self.target,
-            target_dtype=self.dtype_dict[self.target],
-            explainer_blocks=self.analysis_blocks,
-        )
-        return insights
+        self.pred_args = PredictionArguments.from_dict(args)
+        df = self.ensemble(encoded_ds, args=self.pred_args)
 
-    def predict_proba(self, data: pd.DataFrame) -&gt; pd.DataFrame:
-
-        # Remove columns that user specifies to ignore
-        log.info(f&#34;Dropping features: {self.problem_definition.ignore_features}&#34;)
-        data = data.drop(columns=self.problem_definition.ignore_features)
-        for col in self.input_cols:
-            if col not in data.columns:
-                data[col] = [None] * len(data)
-
-        # Clean the data
-        self.mode = &#34;predict&#34;
-        log.info(&#34;Cleaning the data&#34;)
-        data = MyCustomCleaner.cleaner(
-            data=data,
-            identifiers=self.identifiers,
-            dtype_dict=self.dtype_dict,
-            target=self.target,
-            mode=self.mode,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-        )
-
-        # Featurize the data
-        encoded_ds = EncodedDs(self.encoders, data, self.target)
-        encoded_data = encoded_ds.get_encoded_data(include_target=False)
-
-        df = self.ensemble(encoded_ds, predict_proba=True)
-        insights, global_insights = explain(
-            data=data,
-            encoded_data=encoded_data,
-            predictions=df,
-            ts_analysis=None,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            positive_domain=self.statistical_analysis.positive_domain,
-            fixed_confidence=self.problem_definition.fixed_confidence,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-            anomaly_error_rate=self.problem_definition.anomaly_error_rate,
-            anomaly_cooldown=self.problem_definition.anomaly_cooldown,
-            analysis=self.runtime_analyzer,
-            target_name=self.target,
-            target_dtype=self.dtype_dict[self.target],
-            explainer_blocks=self.analysis_blocks,
-        )
-        return insights
+        if self.pred_args.all_mixers:
+            return df
+        else:
+            insights, global_insights = explain(
+                data=data,
+                encoded_data=encoded_data,
+                predictions=df,
+                ts_analysis=None,
+                timeseries_settings=self.problem_definition.timeseries_settings,
+                positive_domain=self.statistical_analysis.positive_domain,
+                anomaly_detection=self.problem_definition.anomaly_detection,
+                analysis=self.runtime_analyzer,
+                target_name=self.target,
+                target_dtype=self.dtype_dict[self.target],
+                explainer_blocks=self.analysis_blocks,
+                fixed_confidence=self.pred_args.fixed_confidence,
+                anomaly_error_rate=self.pred_args.anomaly_error_rate,
+                anomaly_cooldown=self.pred_args.anomaly_cooldown,
+            )
+            return insights
 
 </pre>
 </div>
@@ -15356,7 +15343,7 @@ class Predictor(PredictorInterface):
 <p>This predictor object can be then used to run your pipeline.</p>
 
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
@@ -15369,6 +15356,30 @@ class Predictor(PredictorInterface):
      </div>
 </div>
 </div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>MyCustomCleaner.py
+MyCustomCleaner
+MyCustomSplitter.py
+MyCustomSplitter
+</pre>
+</div>
+</div>
+
+</div>
+
 </div>
 
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -15400,10 +15411,10 @@ class Predictor(PredictorInterface):
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>INFO:lightwood-66742:Cleaning the data
-INFO:lightwood-66742:Cleaning column =target
-INFO:lightwood-66742:Converted target into strictly non-negative
-INFO:lightwood-66742:Cleaning column =excerpt
+<pre>INFO:lightwood-50752:Cleaning the data
+INFO:lightwood-50752:Cleaning column =target
+INFO:lightwood-50752:Converted target into strictly non-negative
+INFO:lightwood-50752:Cleaning column =excerpt
 </pre>
 </div>
 </div>

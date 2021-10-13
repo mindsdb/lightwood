@@ -16,7 +16,7 @@ class NumericEncoder(BaseEncoder):
         self.output_size = 4 if not self.is_target else 3
 
     def prepare(self, priming_data):
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         value_type = 'int'
@@ -37,10 +37,10 @@ class NumericEncoder(BaseEncoder):
         self._type = value_type if self._type is None else self._type
         non_null_priming_data = [float(str(x).replace(',', '.')) for x in priming_data if x is not None]
         self._abs_mean = np.mean(np.abs(non_null_priming_data))
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, data):
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []
@@ -80,7 +80,7 @@ class NumericEncoder(BaseEncoder):
         return torch.Tensor(ret)
 
     def decode(self, encoded_values, decode_log=None) -> list:
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if decode_log is None:
