@@ -20,7 +20,7 @@ class BaseEncoder:
     :param is_trainable_encoder: Whether the encoder must return learned representations. Lightwood checks whether this flag is present in order to pass data to the feature representation via the ``prepare`` statement. 
     
     Class Attributes:
-    - _prepared: Internal flag to signal that the `prepare()` method has been successfully executed.
+    - is_prepared: Internal flag to signal that the `prepare()` method has been successfully executed.
     - is_nn_encoder: Whether the encoder is neural network-based.
     - dependencies: list of additional columns that the encoder might need to encode.
     - output_size: length of each encoding tensor for a single data point.
