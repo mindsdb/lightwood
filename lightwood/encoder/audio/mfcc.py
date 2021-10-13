@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import warnings
 from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.io import read_from_path_or_url
 from lightwood.helpers.log import log
 
 
@@ -15,19 +16,7 @@ class MFCCEncoder(BaseEncoder):
     def encode(self, column_data):
         encoded_audio_arr = []
         for path in column_data:
-            if path.startswith('http'):
-                response = requests.get(path)
-                with open(path.split('/')[-1], 'wb') as f:
-                    f.write(response.content)
-                try:
-                    y, sr = librosa.load(path.split('/')[-1])
-                except Exception as e:
-                    log.error(e)
-                finally:
-                    os.remove(path.split('/')[-1])
-            else:
-                # Will automatically resample to 22.05kHz and convert to mono
-                y, _ = librosa.load(path)
+            y, _ = read_from_path_or_url(path, librosa.load)
 
             # If the durations of the audio samples are highly variable, the
             # same coefficients will refer to time buckets of different lenghts.
