@@ -450,7 +450,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="section" id="Step-1:-load-the-dataset-and-define-the-predictive-task">
 <h2>Step 1: load the dataset and define the predictive task<a class="headerlink" href="#Step-1:-load-the-dataset-and-define-the-predictive-task" title="Permalink to this headline">¶</a></h2>
-<p>The first thing we need is a dataset to analyze. Let’s use the <code class="docutils literal notranslate"><span class="pre">adult</span></code> dataset (original source is <a class="reference external" href="https://archive.ics.uci.edu/ml/datasets/adult">here</a>).</p>
+<p>The first thing we need is a dataset to analyze. Let’s use Human Development Index information:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -458,7 +458,7 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>import pandas as pd
 
-df = pd.read_csv(&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/adult.csv&#39;)
+df = pd.read_csv(&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/hdi.csv&#39;)
 df.head()
 </pre></div>
 </div>
@@ -486,137 +486,89 @@ df.head()
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>age</th>
-      <th>workclass</th>
-      <th>fnlwgt</th>
-      <th>education</th>
-      <th>educational-num</th>
-      <th>marital-status</th>
-      <th>occupation</th>
-      <th>relationship</th>
-      <th>race</th>
-      <th>gender</th>
-      <th>capital-gain</th>
-      <th>capital-loss</th>
-      <th>hours-per-week</th>
-      <th>native-country</th>
-      <th>income</th>
+      <th>Population</th>
+      <th>Area (sq. mi.)</th>
+      <th>Pop. Density</th>
+      <th>GDP ($ per capita)</th>
+      <th>Literacy (%)</th>
+      <th>Infant mortality</th>
+      <th>Development Index</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>25</td>
-      <td>Private</td>
-      <td>226802</td>
-      <td>11th</td>
-      <td>7</td>
-      <td>Never-married</td>
-      <td>Machine-op-inspct</td>
-      <td>Own-child</td>
-      <td>Black</td>
-      <td>Male</td>
-      <td>0</td>
-      <td>0</td>
-      <td>40</td>
-      <td>United-States</td>
-      <td>&lt;=50K</td>
+      <td>9944201</td>
+      <td>1284000</td>
+      <td>7.7</td>
+      <td>1200</td>
+      <td>47.5</td>
+      <td>93.82</td>
+      <td>2</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>38</td>
-      <td>Private</td>
-      <td>89814</td>
-      <td>HS-grad</td>
-      <td>9</td>
-      <td>Married-civ-spouse</td>
-      <td>Farming-fishing</td>
-      <td>Husband</td>
-      <td>White</td>
-      <td>Male</td>
-      <td>0</td>
-      <td>0</td>
-      <td>50</td>
-      <td>United-States</td>
-      <td>&lt;=50K</td>
+      <td>5450661</td>
+      <td>43094</td>
+      <td>126.5</td>
+      <td>31100</td>
+      <td>100.0</td>
+      <td>4.56</td>
+      <td>4</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>28</td>
-      <td>Local-gov</td>
-      <td>336951</td>
-      <td>Assoc-acdm</td>
-      <td>12</td>
-      <td>Married-civ-spouse</td>
-      <td>Protective-serv</td>
-      <td>Husband</td>
-      <td>White</td>
-      <td>Male</td>
-      <td>0</td>
-      <td>0</td>
-      <td>40</td>
-      <td>United-States</td>
-      <td>&gt;50K</td>
+      <td>26783383</td>
+      <td>437072</td>
+      <td>61.3</td>
+      <td>1500</td>
+      <td>40.4</td>
+      <td>50.25</td>
+      <td>2</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>44</td>
-      <td>Private</td>
-      <td>160323</td>
-      <td>Some-college</td>
-      <td>10</td>
-      <td>Married-civ-spouse</td>
-      <td>Machine-op-inspct</td>
-      <td>Husband</td>
-      <td>Black</td>
-      <td>Male</td>
-      <td>7688</td>
-      <td>0</td>
-      <td>40</td>
-      <td>United-States</td>
-      <td>&gt;50K</td>
+      <td>9439</td>
+      <td>102</td>
+      <td>92.5</td>
+      <td>3400</td>
+      <td>97.0</td>
+      <td>7.35</td>
+      <td>4</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>18</td>
-      <td>?</td>
-      <td>103497</td>
-      <td>Some-college</td>
-      <td>10</td>
-      <td>Never-married</td>
-      <td>?</td>
-      <td>Own-child</td>
-      <td>White</td>
-      <td>Female</td>
-      <td>0</td>
-      <td>0</td>
-      <td>30</td>
-      <td>United-States</td>
-      <td>&lt;=50K</td>
+      <td>3431932</td>
+      <td>176220</td>
+      <td>19.5</td>
+      <td>12800</td>
+      <td>98.0</td>
+      <td>11.95</td>
+      <td>3</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
-<p>This dataset has information that belongs to a US census. Each row gives information about a person’s status in terms of their educational background, marital status, and current occupation, among others.</p>
-<p>We can see there are various columns with different data types, like integer (e.g. <code class="docutils literal notranslate"><span class="pre">age</span></code>) or categorical (e.g. <code class="docutils literal notranslate"><span class="pre">relationship</span></code>).</p>
-<p>The predictive task proposed by the authors of the dataset is to estimate whether a person has an income equal or larger than 50k US dollars.</p>
+<p>This dataset has a handful of important factors to each country’s development index, as well as the index itself (very high, high, medium or low). Each row gives information about a country’s status in terms of their population size, density, and GDP per capita, among others.</p>
+<p>We can see there are columns with integer (e.g. <code class="docutils literal notranslate"><span class="pre">Population</span></code>), float (<code class="docutils literal notranslate"><span class="pre">Pop.</span> <span class="pre">Density</span></code>) or categorical (e.g. <code class="docutils literal notranslate"><span class="pre">Development</span> <span class="pre">Index</span></code>) data.</p>
+<p>The task we will consider here is to predicting the development index of each nation based on the rest of the available information.</p>
 <p>Lightwood provides an abstraction called <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> to specify the target column of a dataset, along with other important parameters that you might want to define (for a complete list, check the documentation).</p>
 <p>We will create a simple one:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span>from lightwood.api.high_level import ProblemDefinition
 
-problem_definition = ProblemDefinition.from_dict({&#39;target&#39;: &#39;income&#39;})
+problem_definition = ProblemDefinition.from_dict({&#39;target&#39;: &#39;Development Index&#39;})
 </pre></div>
 </div>
 </div>
 <p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -627,12 +579,12 @@ problem_definition = ProblemDefinition.from_dict({&#39;target&#39;: &#39;income&
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;target&#39;: &#39;income&#39;,
+{&#39;target&#39;: &#39;Development Index&#39;,
  &#39;pct_invalid&#39;: 2,
  &#39;unbias_target&#39;: True,
  &#39;seconds_per_mixer&#39;: None,
@@ -651,7 +603,7 @@ problem_definition = ProblemDefinition.from_dict({&#39;target&#39;: &#39;income&
 <p>Notice how, even though we only defined what the <code class="docutils literal notranslate"><span class="pre">target</span></code> was, there are a bunch of additional parameters that have been assigned a default value. That is fine for our purposes, but remember that you can set any of these according to your own predictive needs.</p>
 <p>We also need to infer the type of each column. There is a method for this, <code class="docutils literal notranslate"><span class="pre">infer_types</span></code>, that we can use:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -669,43 +621,13 @@ type_information = infer_types(df, problem_definition.pct_invalid)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:lightwood-55329:Analyzing a sample of 14037
-INFO:lightwood-55329:from a total population of 48842, this is equivalent to 28.7% of your data.
-INFO:lightwood-55329:Using 15 processes to deduct types.
-INFO:lightwood-55329:Infering type for: age
-INFO:lightwood-55329:Infering type for: fnlwgt
-INFO:lightwood-55329:Infering type for: workclass
-INFO:lightwood-55329:Infering type for: educational-num
-INFO:lightwood-55329:Infering type for: education
-INFO:lightwood-55329:Infering type for: marital-status
-INFO:lightwood-55329:Infering type for: occupation
-INFO:lightwood-55329:Infering type for: relationship
-INFO:lightwood-55329:Infering type for: race
-INFO:lightwood-55329:Infering type for: capital-gain
-INFO:lightwood-55329:Infering type for: capital-loss
-INFO:lightwood-55329:Infering type for: gender
-INFO:lightwood-55329:Infering type for: hours-per-week
-INFO:lightwood-55329:Infering type for: native-country
-INFO:lightwood-55329:Infering type for: income
-INFO:lightwood-55329:Column age has data type integer
-INFO:lightwood-55329:Column fnlwgt has data type integer
-INFO:lightwood-55329:Column educational-num has data type integer
-INFO:lightwood-55329:Column hours-per-week has data type integer
-INFO:lightwood-55329:Column capital-gain has data type integer
-INFO:lightwood-55329:Column capital-loss has data type integer
-INFO:lightwood-55329:Column gender has data type binary
-INFO:lightwood-55329:Column native-country has data type categorical
-INFO:lightwood-55329:Column marital-status has data type categorical
-INFO:lightwood-55329:Column occupation has data type categorical
-INFO:lightwood-55329:Column income has data type binary
-INFO:lightwood-55329:Column workclass has data type categorical
-INFO:lightwood-55329:Column relationship has data type categorical
-INFO:lightwood-55329:Column race has data type categorical
-INFO:lightwood-55329:Column education has data type categorical
+<span class="ansi-green-fg">INFO:lightwood-42831:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:lightwood-42831:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-42831:Using 15 processes to deduct types.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -715,7 +637,7 @@ INFO:lightwood-55329:Column education has data type categorical
 </div>
 <p>We can now check the inferred types:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -724,26 +646,18 @@ INFO:lightwood-55329:Column education has data type categorical
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;age&#39;: &#39;integer&#39;,
- &#39;workclass&#39;: &#39;categorical&#39;,
- &#39;fnlwgt&#39;: &#39;integer&#39;,
- &#39;education&#39;: &#39;categorical&#39;,
- &#39;educational-num&#39;: &#39;integer&#39;,
- &#39;marital-status&#39;: &#39;categorical&#39;,
- &#39;occupation&#39;: &#39;categorical&#39;,
- &#39;relationship&#39;: &#39;categorical&#39;,
- &#39;race&#39;: &#39;categorical&#39;,
- &#39;gender&#39;: &#39;binary&#39;,
- &#39;capital-gain&#39;: &#39;integer&#39;,
- &#39;capital-loss&#39;: &#39;integer&#39;,
- &#39;hours-per-week&#39;: &#39;integer&#39;,
- &#39;native-country&#39;: &#39;categorical&#39;,
- &#39;income&#39;: &#39;binary&#39;}
+{&#39;Population&#39;: &#39;integer&#39;,
+ &#39;Area (sq. mi.)&#39;: &#39;integer&#39;,
+ &#39;Pop. Density &#39;: &#39;float&#39;,
+ &#39;GDP ($ per capita)&#39;: &#39;integer&#39;,
+ &#39;Literacy (%)&#39;: &#39;float&#39;,
+ &#39;Infant mortality &#39;: &#39;float&#39;,
+ &#39;Development Index&#39;: &#39;categorical&#39;}
 </pre></div></div>
 </div>
 <p>Looks OK!</p>
@@ -754,7 +668,7 @@ INFO:lightwood-55329:Column education has data type categorical
 <p>Afterwards, you would make modifications to the Json AI as needed (for some examples, check out the other tutorials in <code class="docutils literal notranslate"><span class="pre">lightwood/examples/json_ai</span></code>), and finally generate a predictor object to learn and predict the task.</p>
 <p>In this case though, we will call it directly:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -773,8 +687,8 @@ stan = statistical_analysis(df,
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:lightwood-55329:Starting statistical analysis
-INFO:lightwood-55329:Finished statistical analysis
+<span class="ansi-green-fg">INFO:lightwood-42831:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-42831:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>
@@ -782,7 +696,7 @@ INFO:lightwood-55329:Finished statistical analysis
 <h2>Step 3: Peeking inside<a class="headerlink" href="#Step-3:-Peeking-inside" title="Permalink to this headline">¶</a></h2>
 <p>Now that our analysis is complete, we can check what Lightwood thinks of this dataset:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -791,7 +705,7 @@ INFO:lightwood-55329:Finished statistical analysis
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -812,7 +726,7 @@ INFO:lightwood-55329:Finished statistical analysis
 <p>Some of these fields aren’t really applicable nor useful for this dataset, so let’s only check the ones that are.</p>
 <p>We can start with a very basic question: how many rows does the dataset have?</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -821,12 +735,12 @@ INFO:lightwood-55329:Finished statistical analysis
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-48842
+225
 </pre></div></div>
 </div>
 <p>Here are some other insights produced in the analysis:</p>
@@ -834,7 +748,7 @@ INFO:lightwood-55329:Finished statistical analysis
 <h3>Amount of missing information<a class="headerlink" href="#Amount-of-missing-information" title="Permalink to this headline">¶</a></h3>
 <p>Is there missing information in the dataset?</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -843,26 +757,18 @@ INFO:lightwood-55329:Finished statistical analysis
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;age&#39;: 0.0,
- &#39;workclass&#39;: 0.0,
- &#39;fnlwgt&#39;: 0.0,
- &#39;education&#39;: 0.0,
- &#39;educational-num&#39;: 0.0,
- &#39;marital-status&#39;: 0.0,
- &#39;occupation&#39;: 0.0,
- &#39;relationship&#39;: 0.0,
- &#39;race&#39;: 0.0,
- &#39;gender&#39;: 0.0,
- &#39;capital-gain&#39;: 0.0,
- &#39;capital-loss&#39;: 0.0,
- &#39;hours-per-week&#39;: 0.0,
- &#39;native-country&#39;: 0.0,
- &#39;income&#39;: 0.0}
+{&#39;Population&#39;: 0.0,
+ &#39;Area (sq. mi.)&#39;: 0.0,
+ &#39;Pop. Density &#39;: 0.0,
+ &#39;GDP ($ per capita)&#39;: 0.0,
+ &#39;Literacy (%)&#39;: 0.0,
+ &#39;Infant mortality &#39;: 0.0,
+ &#39;Development Index&#39;: 0.0}
 </pre></div></div>
 </div>
 <p>Seemingly not!</p>
@@ -873,44 +779,88 @@ INFO:lightwood-55329:Finished statistical analysis
 <p>Each categorical column gets a bucket per each observed class.</p>
 <p>Let’s check an example for one of each:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>stan.buckets[&#39;educational-num&#39;]
+<span></span>stan.buckets[&#39;Development Index&#39;]  # categorical
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10, 11, 12, 13, 14, 15]
+[&#39;3&#39;, &#39;4&#39;, &#39;2&#39;, &#39;1&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>stan.buckets[&#39;relationship&#39;]
+<span></span>stan.buckets[&#39;GDP ($ per capita)&#39;]  # numerical
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;Husband&#39;,
- &#39;Not-in-family&#39;,
- &#39;Own-child&#39;,
- &#39;Unmarried&#39;,
- &#39;Wife&#39;,
- &#39;Other-relative&#39;]
+[500,
+ 1592,
+ 2684,
+ 3776,
+ 4868,
+ 5960,
+ 7052,
+ 8144,
+ 9236,
+ 10328,
+ 11420,
+ 12512,
+ 13604,
+ 14696,
+ 15788,
+ 16880,
+ 17972,
+ 19064,
+ 20156,
+ 21248,
+ 22340,
+ 23432,
+ 24524,
+ 25616,
+ 26708,
+ 27800,
+ 28892,
+ 29984,
+ 31076,
+ 32168,
+ 33260,
+ 34352,
+ 35444,
+ 36536,
+ 37628,
+ 38720,
+ 39812,
+ 40904,
+ 41996,
+ 43088,
+ 44180,
+ 45272,
+ 46364,
+ 47456,
+ 48548,
+ 49640,
+ 50732,
+ 51824,
+ 52916,
+ 54008]
 </pre></div></div>
 </div>
 </div>
@@ -918,7 +868,7 @@ INFO:lightwood-55329:Finished statistical analysis
 <h3>Bias per column<a class="headerlink" href="#Bias-per-column" title="Permalink to this headline">¶</a></h3>
 <p>We can also check whether each column has buckets of data that exhibit some degree of bias:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -933,49 +883,25 @@ INFO:lightwood-55329:Finished statistical analysis
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&#39;age&#39; entropy: 0.896
+&#39;Population&#39; entropy: 0.212
+Biased buckets: [131403695, 78845027, 52565693, 26286360, 7026]
+
+&#39;Area (sq. mi.)&#39; entropy: 0.294
 
 
-&#39;workclass&#39; entropy: 0.523
+&#39;Pop. Density &#39; entropy: 0.143
+Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
+
+&#39;GDP ($ per capita)&#39; entropy: 0.76
 
 
-&#39;fnlwgt&#39; entropy: 0.656
+&#39;Literacy (%)&#39; entropy: 0.753
 
 
-&#39;education&#39; entropy: 0.733
+&#39;Infant mortality &#39; entropy: 0.767
 
 
-&#39;educational-num&#39; entropy: 0.726
-
-
-&#39;marital-status&#39; entropy: 0.654
-
-
-&#39;occupation&#39; entropy: 0.902
-
-
-&#39;relationship&#39; entropy: 0.834
-
-
-&#39;race&#39; entropy: 0.342
-
-
-&#39;gender&#39; entropy: 0.916
-
-
-&#39;capital-gain&#39; entropy: 0.108
-Biased buckets: [14000, 4000, 6000, 2000, 0]
-
-&#39;capital-loss&#39; entropy: 0.076
-Biased buckets: [1568, 1655, 1917, 1830, 0]
-
-&#39;hours-per-week&#39; entropy: 0.588
-
-
-&#39;native-country&#39; entropy: 0.173
-Biased buckets: [&#39;Philippines&#39;, &#39;?&#39;, &#39;Mexico&#39;, &#39;United-States&#39;]
-
-&#39;income&#39; entropy: 0.794
+&#39;Development Index&#39; entropy: 0.89
 
 
 </pre></div></div>
@@ -983,9 +909,9 @@ Biased buckets: [&#39;Philippines&#39;, &#39;?&#39;, &#39;Mexico&#39;, &#39;Unit
 </div>
 <div class="section" id="Column-histograms">
 <h3>Column histograms<a class="headerlink" href="#Column-histograms" title="Permalink to this headline">¶</a></h3>
-<p>Better yet, let’s plot the histograms for each column:</p>
+<p>Finally, let’s plot histograms for some columns:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -996,7 +922,8 @@ import matplotlib.pyplot as plt
 cmap = plt.cm.tab10
 colors = cmap(np.arange(len(df)) % cmap.N)
 
-# barplot for each column
+# column barplot
+columns = []
 for colname, hist in stan.histograms.items():
     fig, ax = plt.subplots(figsize=(18, 6))
 
@@ -1051,67 +978,11 @@ for colname, hist in stan.histograms.items():
 <img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_5.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_5.png" />
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_6.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_6.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_7.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_7.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_8.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_8.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_9.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_9.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_10.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_10.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_11.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_11.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_12.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_12.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_13.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_13.png" />
-</div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_14.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_14.png" />
+<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_6.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_6.png" />
 </div>
 </div>
 <p>This way, it is fairly easy to understand how imbalanced the target distribution might be, along with a quick pass to search for outliers, for example.</p>
@@ -1122,6 +993,15 @@ for colname, hist in stan.histograms.items():
 <h1>Final thoughts<a class="headerlink" href="#Final-thoughts" title="Permalink to this headline">¶</a></h1>
 <p>Lightwood automatically tries to leverage all the information provided by a <code class="docutils literal notranslate"><span class="pre">StatisticalAnalysis</span></code> instance when generating a predictor for any given dataset and problem definition. Additionally, it is a valuable tool to explore the data as a user.</p>
 <p>Finally, be aware that you can access these insights when creating custom blocks (e.g. encoders, mixers, or analyzers) if you want, you just need to pass whatever is necessary as arguments to these blocks inside the Json AI object.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
 </div>
 
 

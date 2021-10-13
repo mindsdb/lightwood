@@ -10,12 +10,12 @@ class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
         from lightwood.api.high_level import predictor_from_problem
 
-        df = pd.read_csv('tests/data/boston.csv')[:500]
+        df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
         # Mess with the names to also test if lightwood can deal /w weird names
         df = df.rename(columns={df.columns[1]: f'\'{df.columns[1]}\''})
         df = df.rename(columns={df.columns[2]: f'\'{df.columns[2]}}}'})
         df = df.rename(columns={df.columns[3]: f'{{{df.columns[3]}\"'})
-        target = 'MEDV'
+        target = 'concrete_strength'
 
         # Make this a quantity
         df[target] = [f'{x}$' for x in df[target]]
