@@ -21,7 +21,7 @@ def splitter(
     """
     Splits data into training, dev and testing datasets. 
     
-    The proportion of data for each split is user-defined. First, rows in the dataset are shuffled randomly. Then a simple split is done. If a target value is provided and is of data type categorical/binary, then the splits will be stratified to maintain the representative populations of each class.
+    The proportion of data for each split must be specified (JSON-AI sets defaults to 80/10/10). First, rows in the dataset are shuffled randomly. Then a simple split is done. If a target value is provided and is of data type categorical/binary, then the splits will be stratified to maintain the representative populations of each class.
 
     :param data: Input dataset to be split
     :param tss: time-series specific details for splitting
