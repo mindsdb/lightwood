@@ -54,5 +54,4 @@ class TestBasic(unittest.TestCase):
 
         # test predict all mixers with some data
         predictions = predictor.predict(df[:10], args={'all_mixers': True})
-        assert '__mdb_mixer' in predictions.columns
-        assert '__mdb_best_mixer' in predictions.columns
+        assert '__mdb_mixer_Neural' in predictions.columns
