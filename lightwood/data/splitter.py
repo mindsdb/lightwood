@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict
 from itertools import product
 
 import numpy as np
@@ -43,59 +43,32 @@ def splitter(
     if not tss.is_timeseries:
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
-    # Split the data
-    train_cutoff = round(data.shape[0] * pct_train)
-    dev_cutoff = train_cutoff + round(data.shape[0] * pct_dev)
-
-    train = data[:train_cutoff]
-    dev = data[train_cutoff:dev_cutoff]
-    test = data[dev_cutoff:]
-
-    # Perform stratification if specified
-    pcts = (pct_train, pct_dev, pct_test)
-    train, dev, test, stratify_on = stratify_wrapper(train, dev, test, target, pcts, dtype_dict, tss)
-
-    return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
-
-
-def stratify_wrapper(train: pd.DataFrame,
-                     dev: pd.DataFrame,
-                     test: pd.DataFrame,
-                     target: str,
-                     pcts: (float, float, float),
-                     dtype_dict: Dict[str, str],
-                     tss: TimeseriesSettings) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, list):
-    """
-    Simple wrapper that determines whether stratification is needed, based on the target type and/or other parameters.
-
-    :param train: Current train dataset, might be stratified depending on the criteria this method implements.
-    :param dev: Current dev dataset, might be stratified depending on the criteria this method implements.
-    :param test: Current test dataset, might be stratified depending on the criteria this method implements.
-    :param target: Name of the target column; if specified, data will be stratified on this column.
-    :param pcts: Tuple with (train, dev, test) fractions of the data.
-    :param dtype_dict: Dictionary with the data type of all columns.
-    :param tss: Time-series specific details for splitting.
-    
-    :returns Potentially stratified train, dev, test dataframes, along with a list of the columns by which the stratification was done.
-    """  # noqa
+    # Check if stratification should be done
     stratify_on = []
-
     if target is not None:
         if dtype_dict[target] in (dtype.categorical, dtype.binary):
             stratify_on += [target]
         if tss.is_timeseries and isinstance(tss.group_by, list):
             stratify_on += tss.group_by
 
-        if stratify_on:
-            train, dev, test = stratify(train, dev, test, pcts, stratify_on)
+    # Split the data
+    if stratify_on:
+        train, dev, test = stratify(data, pct_train, pct_dev, pct_test, stratify_on)
+    else:
+        train_cutoff = round(data.shape[0] * pct_train)
+        dev_cutoff = round(data.shape[0] * pct_dev) + train_cutoff
 
-    return train, dev, test, stratify_on
+        train = data[:train_cutoff]
+        dev = data[train_cutoff:dev_cutoff]
+        test = data[dev_cutoff:]
+
+    return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
 
-def stratify(train: pd.DataFrame,
-             dev: pd.DataFrame,
-             test: pd.DataFrame,
-             pcts: Tuple[float, float, float],
+def stratify(data: pd.DataFrame,
+             pct_train: float,
+             pct_dev: float,
+             pct_test: float,
              stratify_on: List[str]) -> List[pd.DataFrame]:
     """
     Stratified data splitter.
@@ -105,17 +78,15 @@ def stratify(train: pd.DataFrame,
 
     For grouped time series tasks, stratification is done based on the group-by columns.
 
-    :param train: Training data
-    :param dev: Dev data
-    :param test: Testing data
-    :param pcts: tuple with (train, dev, test) fractions of the data
+    :param data: dataframe with data to be split
+    :param pct_train: fraction of data to use for training split
+    :param pct_dev: fraction of data to use for dev split (used internally by mixers)
+    :param pct_test: fraction of data to use for test split (used post-training for analysis)
     :param stratify_on: Columns to consider when stratifying
 
     :returns Stratified train, dev, test dataframes
     """  # noqa
 
-    data = pd.concat([train, dev, test])
-    pct_train, pct_dev, pct_test = pcts
     train_st = pd.DataFrame(columns=data.columns)
     dev_st = pd.DataFrame(columns=data.columns)
     test_st = pd.DataFrame(columns=data.columns)
@@ -127,10 +98,11 @@ def stratify(train: pd.DataFrame,
             df = df[df[col] == group[idx]]
 
         train_cutoff = round(df.shape[0] * pct_train)
-        dev_cutoff = train_cutoff + round(df.shape[0] * pct_dev)
+        dev_cutoff = round(df.shape[0] * pct_dev) + train_cutoff
+        test_cutoff = round(df.shape[0] * pct_test) + dev_cutoff
 
         train_st = train_st.append(df[:train_cutoff])
         dev_st = dev_st.append(df[train_cutoff:dev_cutoff])
-        test_st = test_st.append(df[dev_cutoff:])
+        test_st = test_st.append(df[dev_cutoff:test_cutoff])
 
     return [train_st, dev_st, test_st]
