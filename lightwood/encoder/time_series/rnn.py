@@ -37,7 +37,7 @@ class TimeSeriesEncoder(BaseEncoder):
         self._stop_on_n_bad_epochs = 5  # stop training after N epochs where loss is worse than running avg
         self._epochs_running_avg = 5  # amount of epochs for running average
         self._pytorch_wrapper = torch.FloatTensor
-        self._prepared = False
+        self.is_prepared = False
         self._is_setup = False
         self._max_ts_length = 0
         self._sos = 0.0  # start of sequence for decoding
@@ -158,7 +158,7 @@ class TimeSeriesEncoder(BaseEncoder):
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         priming_data = list(priming_data.values)
 
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
         else:
             self.setup_nn(ts_analysis, dependency_data)
@@ -271,7 +271,7 @@ class TimeSeriesEncoder(BaseEncoder):
             elif (time.time() - started) > self.stop_after:
                 break
 
-        self._prepared = True
+        self.is_prepared = True
 
     def _encode_one(self, data, previous=None, initial_hidden=None, return_next_value=False):
         """
@@ -340,7 +340,7 @@ class TimeSeriesEncoder(BaseEncoder):
         :return: a list of encoded time series or if get_next_count !=0 two lists (encoded_values, projected_numbers)
         """
 
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if isinstance(column_data, pd.Series):
@@ -456,7 +456,7 @@ class TimeSeriesEncoder(BaseEncoder):
         If None, encoder will output the largest length encountered during training.
         :return: a list of reconstructed time series
         """
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []
