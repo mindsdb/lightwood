@@ -49,7 +49,7 @@ class ArrayEncoder(BaseEncoder):
         self.output_size *= self._normalizer.output_size
         self.is_prepared = True
 
-    def encode(self, column_data: Union[list, np.ndarray]) -> torch.Tensor:
+    def encode(self, column_data: Union[list, np.ndarray, torch.Tensor]) -> torch.Tensor:
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
@@ -63,4 +63,10 @@ class ArrayEncoder(BaseEncoder):
         data = torch.cat([self._normalizer.encode(column_data)], dim=-1)
         data[torch.isnan(data)] = 0.0
         data[torch.isinf(data)] = 0.0
+
+        
         return data
+
+    def decode(self, data) -> torch.tensor:
+        decoded = data.tolist()
+        return decoded 
