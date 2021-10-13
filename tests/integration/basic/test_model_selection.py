@@ -14,8 +14,8 @@ class TestMixerSelection(unittest.TestCase):
         return mixers
 
     def test_0_regression_task(self):
-        df = pd.read_csv('tests/data/boston.csv')
-        target = 'MEDV'
+        df = pd.read_csv('tests/data/concrete_strength.csv')
+        target = 'concrete_strength'
         expected_mixers = ['Neural', 'LightGBM', 'Regression']
         mixers = self.get_mixers(df, target)
         self.assertEqual(set(mixers), set(expected_mixers))
