@@ -14616,7 +14616,7 @@ MyCustomSplitter
             &#34;license&#34;,
             &#34;standard_error&#34;
         ],
-        &#34;fit_on_validation&#34;: true,
+        &#34;fit_on_all&#34;: true,
         &#34;strict_mode&#34;: true,
         &#34;seed_nr&#34;: 420
     },
@@ -14928,7 +14928,7 @@ class Predictor(PredictorInterface):
                 },
                 &#34;anomaly_detection&#34;: True,
                 &#34;ignore_features&#34;: [&#34;url_legal&#34;, &#34;license&#34;, &#34;standard_error&#34;],
-                &#34;fit_on_validation&#34;: True,
+                &#34;fit_on_all&#34;: True,
                 &#34;strict_mode&#34;: True,
                 &#34;seed_nr&#34;: 420,
             }
@@ -15225,10 +15225,10 @@ class Predictor(PredictorInterface):
         # ------------------------ #
         # Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.
         # This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.
-        # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
+        # SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.
 
         # Update the mixers with partial fit
-        if self.problem_definition.fit_on_validation:
+        if self.problem_definition.fit_on_all:
 
             log.info(&#34;Adjustment on validation requested.&#34;)
             update_data = {
