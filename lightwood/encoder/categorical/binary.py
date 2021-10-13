@@ -17,7 +17,7 @@ class BinaryEncoder(BaseEncoder):
             self.index_weights = None
 
     def prepare(self, priming_data):
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         for x in priming_data:
@@ -39,10 +39,10 @@ class BinaryEncoder(BaseEncoder):
 
             self.index_weights = torch.Tensor(self.index_weights)
 
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, column_data):
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         ret = []
 

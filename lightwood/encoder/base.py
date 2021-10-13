@@ -20,28 +20,27 @@ class BaseEncoder:
     :param is_trainable_encoder: Whether the encoder must return learned representations. Lightwood checks whether this flag is present in order to pass data to the feature representation via the ``prepare`` statement. 
     
     Class Attributes:
-    - _prepared: Internal flag to signal that the `prepare()` method has been successfully executed.
+    - is_prepared: Internal flag to signal that the `prepare()` method has been successfully executed.
     - is_nn_encoder: Whether the encoder is neural network-based.
     - dependencies: list of additional columns that the encoder might need to encode.
     - output_size: length of each encoding tensor for a single data point.
     
     """ # noqa
     is_target: bool
-    prepared: bool
+    is_prepared: bool
 
     is_timeseries_encoder: bool = False
     is_trainable_encoder: bool = False
 
     def __init__(self, is_target=False) -> None:
         self.is_target = is_target
-        self._prepared = False
-        self.uses_subsets = False
+        self.is_prepared = False
         self.dependencies = []
         self.output_size = None
 
     # Not all encoders need to be prepared
     def prepare(self, priming_data) -> None:
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, column_data) -> torch.Tensor:
         raise NotImplementedError
