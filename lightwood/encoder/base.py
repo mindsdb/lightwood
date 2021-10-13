@@ -34,14 +34,13 @@ class BaseEncoder:
 
     def __init__(self, is_target=False) -> None:
         self.is_target = is_target
-        self._prepared = False
-        self.uses_subsets = False
+        self.prepared = False
         self.dependencies = []
         self.output_size = None
 
     # Not all encoders need to be prepared
     def prepare(self, priming_data) -> None:
-        self._prepared = True
+        self.prepared = True
 
     def encode(self, column_data) -> torch.Tensor:
         raise NotImplementedError
