@@ -3,9 +3,10 @@
 
 Create a LabelEncoder that transforms categorical data into a label.
 """
-import numpy as np
-from lightwood.encoder import BaseEncoder
+import pandas as pd
+import torch
 
+from lightwood.encoder import BaseEncoder
 
 class LabelEncoder:
     """
@@ -13,13 +14,11 @@ class LabelEncoder:
 
     Class Attributes:
     - is_target: Whether this is used to encode the target
-    - _prepared: Whether the encoder rules have been set (after ``prepare`` is called)
-    - uses_subsets: Whether subsetted data is used 
-    - dependencies: Any external dependencies (None)
+    - is_prepared: Whether the encoder rules have been set (after ``prepare`` is called)
         
     """ # noqa
     is_target: bool
-    prepared: bool
+    is_prepared: bool
 
     is_timeseries_encoder: bool = False
     is_trainable_encoder: bool = False
@@ -31,27 +30,43 @@ class LabelEncoder:
         :param is_target: 
         """
         self.is_target = is_target
-        self._prepared = False
-        self.uses_subsets = False
-        self.dependencies = []
+        self.is_prepared = False
         self.output_size = None
 
     # Not all encoders need to be prepared
     def prepare(self, priming_data) -> None:
-        self._prepared = True
+        """
+        Create a LabelEncoder for categorical data.
 
-    def encode(self, column_data) -> torch.Tensor:
-        raise NotImplementedError
+        LabelDict creates a mapping where each index is associated to a category.
 
-    def decode(self, encoded_data) -> List[object]:
-        raise NotImplementedError
+        :param priming_data: Input column data that is categorical.
 
-    # Should work for all torch-based encoders, but custom behavior may have to be implemented for weird models
-    def to(self, device, available_devices):
-        # Find all nn.Module type objects and convert them
-        # @TODO: Make this work recursively
-        for v in vars(self):
-            attr = getattr(self, v)
-            if isinstance(attr, torch.nn.Module):
-                attr.to(device)
-        return self
+        :returns: Nothing; prepares encoder rules with `label_dict` and `ilabel_dict`
+        """
+
+        # Find all unique categories in the dataset
+        categories = priming_data.unique()
+
+        log.info("Categories Detected = " + str(len(categories)))
+
+        self.label_dict = {"Unknown": 0} # Include an unknown category
+        self.label_dict.update({cat: idx+1 for idx, cat in enumerate(categories)})
+        self.ilabel_dict = {idx: cat for cat, idx in self.label_dict.items()} 
+
+        self.is_prepared = True
+
+    def encode(self, column_data: pd.Series) -> torch.Tensor:
+        """
+        Convert pre-processed data into the labeled values
+
+        :param column_data: Pandas series to convert into labels
+        """
+        enc = column_data.apply(lambda x: self.label_dict.get(x, 0))
+        return torch.Tensor(enc.tolist()).int()
+
+    def decode(self, encoded_data: torch.Tensor) -> List[object]:
+        """
+        Convert torch.Tensor labels into categorical data
+        """
+        return [self.ilabel_dict[i.item()] for i in encoded_data]
