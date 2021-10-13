@@ -34,7 +34,7 @@ class ArrayEncoder(BaseEncoder):
             if priming_data[i] is None:
                 priming_data[i] = [0] * self.output_size
 
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         if self.original_type in (dtype.categorical, dtype.binary):
@@ -47,10 +47,10 @@ class ArrayEncoder(BaseEncoder):
 
         self._normalizer.prepare(priming_data)
         self.output_size *= self._normalizer.output_size
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, column_data: Union[list, np.ndarray]) -> torch.Tensor:
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if isinstance(column_data, pd.Series):
