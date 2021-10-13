@@ -37,7 +37,7 @@ class ShortTextEncoder(BaseEncoder):
         self._combine_fn = None
         self.max_words_per_sent = None
         self.cae = CategoricalAutoEncoder(is_target=is_target, max_encoded_length=100)
-        self._prepared = False
+        self.is_prepared = False
 
     def _unexpected_mode(self):
         raise ValueError('unexpected combine value (must be "mean" or "concat")')
@@ -69,7 +69,7 @@ class ShortTextEncoder(BaseEncoder):
         else:
             self._unexpected_mode()
 
-        self._prepared = True
+        self.is_prepared = True
         encoded = self.encode([priming_data[0]])
         self.output_size = len(encoded[0])
 
