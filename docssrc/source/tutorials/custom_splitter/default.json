@@ -246,7 +246,7 @@
         },
         "anomaly_detection": true,
         "ignore_features": [],
-        "fit_on_validation": true,
+        "fit_on_all": true,
         "strict_mode": true,
         "seed_nr": 420
     },

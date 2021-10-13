@@ -255,7 +255,7 @@
        " 'timeseries_settings': TimeseriesSettings(is_timeseries=False, order_by=None, window=None, group_by=None, use_previous_target=True, nr_predictions=None, historical_columns=None, target_type='', allow_incomplete_history=False),\n",
        " 'anomaly_detection': True,\n",
        " 'ignore_features': [],\n",
-       " 'fit_on_validation': True,\n",
+       " 'fit_on_all': True,\n",
        " 'strict_mode': True,\n",
        " 'seed_nr': 420}"
       ]
