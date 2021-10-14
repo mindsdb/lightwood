@@ -7,20 +7,22 @@ from lightwood.encoder.categorical.onehot import (
 
 
 class TestOnehot(unittest.TestCase):
-    def test_encode_and_decode(self):
+    def test_encode_and_decode_with_unknown_token(self):
         data = ['category 1', 'category 3', 'category 4', None]
 
         enc = OneHotEncoder()
 
         enc.prepare(data)
         encoded_data = enc.encode(data)
+        print(encoded_data)
         decoded_data = enc.decode(enc.encode(['category 2', 'category 1', 'category 3', None]))
+        print(decoded_data)
 
         self.assertTrue(len(encoded_data) == 4)
         self.assertTrue(decoded_data[1] == 'category 1')
         self.assertTrue(decoded_data[2] == 'category 3')
         for i in [0, 3]:
-            self.assertTrue(encoded_data[0][i] == UNCOMMON_TOKEN)
+            self.assertTrue(encoded_data[0][i] == 0)
             self.assertTrue(decoded_data[i] == UNCOMMON_WORD)
 
         # Test max_dimensions
