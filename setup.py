@@ -28,7 +28,7 @@ with open('requirements.txt') as req_file:
 extra_requirements = {}
 for fn in os.listdir('.'):
     if fn != 'requirements.txt' and fn.startswith('requirements') and fn.endswith('.txt'):
-        extra_name = fn.replace('requirements','').replace('.txt','')
+        extra_name = fn.replace('requirements', '').replace('.txt', '')
         with open(fn) as fp:
             extra = [req.strip() for req in fp.read().splitlines()]
         extra_requirements[extra_name] = extra
