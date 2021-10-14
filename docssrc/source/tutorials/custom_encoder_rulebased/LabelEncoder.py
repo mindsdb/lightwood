@@ -7,34 +7,39 @@ import pandas as pd
 import torch
 
 from lightwood.encoder import BaseEncoder
+from typing import List
 
-class LabelEncoder:
+class LabelEncoder(BaseEncoder):
     """
     Create a label representation for categorical data. The data will rely on sorted to organize the order of the labels.
 
     Class Attributes:
     - is_target: Whether this is used to encode the target
     - is_prepared: Whether the encoder rules have been set (after ``prepare`` is called)
-        
-    """ # noqa
+
+    """  # noqa
+
     is_target: bool
     is_prepared: bool
 
     is_timeseries_encoder: bool = False
     is_trainable_encoder: bool = False
 
-    def __init__(self, is_target: bool =False) -> None:
+    def __init__(self, is_target: bool = False) -> None:
         """
         Initialize the Label Encoder
 
-        :param is_target: 
+        :param is_target:
         """
         self.is_target = is_target
         self.is_prepared = False
-        self.output_size = None
+
+        # Size of the output encoded dimension per data point
+        # For LabelEncoder, this is always 1 (1 label per category)
+        self.output_size = 1
 
     # Not all encoders need to be prepared
-    def prepare(self, priming_data) -> None:
+    def prepare(self, priming_data: pd.Series) -> None:
         """
         Create a LabelEncoder for categorical data.
 
@@ -48,11 +53,12 @@ class LabelEncoder:
         # Find all unique categories in the dataset
         categories = priming_data.unique()
 
-        log.info("Categories Detected = " + str(len(categories)))
+        log.info("Categories Detected = " + str(self.output_size))
 
-        self.label_dict = {"Unknown": 0} # Include an unknown category
-        self.label_dict.update({cat: idx+1 for idx, cat in enumerate(categories)})
-        self.ilabel_dict = {idx: cat for cat, idx in self.label_dict.items()} 
+        # Create the Category labeller
+        self.label_dict = {"Unknown": 0}  # Include an unknown category
+        self.label_dict.update({cat: idx + 1 for idx, cat in enumerate(categories)})
+        self.ilabel_dict = {idx: cat for cat, idx in self.label_dict.items()}
 
         self.is_prepared = True
 
@@ -65,7 +71,7 @@ class LabelEncoder:
         enc = column_data.apply(lambda x: self.label_dict.get(x, 0))
         return torch.Tensor(enc.tolist()).int()
 
-    def decode(self, encoded_data: torch.Tensor) -> List[object]:
+    def decode(self, encoded_data) -> List[object]:
         """
         Convert torch.Tensor labels into categorical data
         """
