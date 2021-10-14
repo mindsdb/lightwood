@@ -4,19 +4,20 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
+from lightwood.helpers.log import log
 from lightwood.api.dtype import dtype
 from lightwood.api.types import TimeseriesSettings
 
 
 def splitter(
-    data: pd.DataFrame,
-    tss: TimeseriesSettings,
-    dtype_dict: Dict[str, str],
-    seed: int,
-    pct_train: float,
-    pct_dev: float,
-    pct_test: float,
-    target: str
+        data: pd.DataFrame,
+        tss: TimeseriesSettings,
+        dtype_dict: Dict[str, str],
+        seed: int,
+        pct_train: float,
+        pct_dev: float,
+        pct_test: float,
+        target: str
 ) -> Dict[str, pd.DataFrame]:
     """
     Splits data into training, dev and testing datasets. 
@@ -33,7 +34,7 @@ def splitter(
     :param target: Name of the target column; if specified, data will be stratified on this column
 
     :returns: A dictionary containing the keys train, test and dev with their respective data frames, as well as the "stratified_on" key indicating which columns the data was stratified on (None if it wasn't stratified on anything)
-    """ # noqa
+    """  # noqa
     pct_sum = pct_train + pct_dev + pct_test
     if not (np.isclose(pct_sum, 1, atol=0.001) and np.less(pct_sum, 1 + 1e-5)):
         raise Exception(f'The train, dev and test percentage of the data needs to sum up to 1 (got {pct_sum})')
@@ -55,14 +56,31 @@ def splitter(
     if stratify_on:
         train, dev, test = stratify(data, pct_train, pct_dev, pct_test, stratify_on)
     else:
-        train_cutoff = round(data.shape[0] * pct_train)
-        dev_cutoff = round(data.shape[0] * pct_dev) + train_cutoff
-
-        train = data[:train_cutoff]
-        dev = data[train_cutoff:dev_cutoff]
-        test = data[dev_cutoff:]
+        train, dev, test = simple_split(data, pct_train, pct_dev, pct_test)
 
     return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
+
+
+def simple_split(data: pd.DataFrame, pct_train: float, pct_dev: float, pct_test: float) -> List[pd.DataFrame]:
+    """
+    Simple split method to separate data into training, dev and testing datasets.
+
+    :param data: Input dataset to be split
+    :param pct_train: training fraction of data; must be less than 1
+    :param pct_dev: dev fraction of data; must be less than 1
+    :param pct_test: testing fraction of data; must be less than 1
+
+    :returns Train, dev, and test dataframes
+    """
+    train_cutoff = round(data.shape[0] * pct_train)
+    dev_cutoff = round(data.shape[0] * pct_dev) + train_cutoff
+    test_cutoff = round(data.shape[0] * pct_test) + dev_cutoff
+
+    train = data[:train_cutoff]
+    dev = data[train_cutoff:dev_cutoff]
+    test = data[dev_cutoff:test_cutoff]
+
+    return [train, dev, test]
 
 
 def stratify(data: pd.DataFrame,
@@ -104,5 +122,12 @@ def stratify(data: pd.DataFrame,
         train_st = train_st.append(df[:train_cutoff])
         dev_st = dev_st.append(df[train_cutoff:dev_cutoff])
         test_st = test_st.append(df[dev_cutoff:test_cutoff])
+
+    # check that stratified lengths conform to expected pcts
+    if not np.isclose(len(train_st) / len(data), pct_train, atol=0.01) or \
+            not np.isclose(len(dev_st) / len(data), pct_dev, atol=0.01) or \
+            not np.isclose(len(test_st) / len(data), pct_test, atol=0.01):
+        log.info("Could not stratify; reverting to simple split")
+        train_st, dev_st, test_st = simple_split(data, pct_train, pct_dev, pct_test)
 
     return [train_st, dev_st, test_st]
