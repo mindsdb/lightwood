@@ -176,3 +176,16 @@ def _module_from_code(code: str, module_name: str) -> ModuleType:
         spec.loader.exec_module(temp_module)
 
     return temp_module
+
+
+def predictor_from_json_ai(json_ai: JsonAI) -> PredictorInterface:
+    """
+    Creates a ready-to-train ``Predictor`` object based on the details you specified inside your JsonAI.
+
+    :param json_ai: A ``JsonAI`` object
+
+    :returns: A lightwood ``Predictor`` object
+    """  # noqa
+    code = code_from_json_ai(json_ai)
+    predictor = predictor_from_code(code)
+    return predictor
