@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from torch import Tensor
+import torch
 from typing import List
 from lightwood.encoder.identity.identity import IdentityEncoder
 
@@ -13,14 +13,14 @@ class TestIdentityEncoder(unittest.TestCase):
 
         encoded_vals = encoder.encode(data)
 
-        self.assertTrue(isinstance(encoded_vals, Tensor))
+        self.assertTrue(isinstance(encoded_vals, torch.Tensor))
 
-        for i in range(0, 5):
-            np.testing.assert_almost_equal(round(encoded_vals[i], 10), round(data[i], 10))
+        for i in range(len(encoded_vals)):
+            self.assertTrue(abs(encoded_vals[i].item() - data[i]) <= 1e-5)
 
         decoded_vals = encoder.decode(encoded_vals)
 
-        self.assertTrue(isinstance(decoded_vals, List[object]))
+        self.assertTrue(isinstance(decoded_vals, List))
 
-        for i in range(len(encoded_vals)):
-            np.testing.assert_almost_equal(round(decoded_vals[i], 10), round(data[i], 10))
+        for i in range(len(decoded_vals)):
+            self.assertTrue(abs(decoded_vals[i] - data[i]) <= 1e-5)
