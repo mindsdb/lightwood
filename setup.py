@@ -1,5 +1,6 @@
 import sys
 import setuptools
+import os
 
 
 def remove_requirements(requirements, name, replace=''):
@@ -24,13 +25,23 @@ with open("README.md", "r") as fh:
 with open('requirements.txt') as req_file:
     requirements = [req.strip() for req in req_file.read().splitlines()]
 
+extra_requirements = {}
+for fn in os.listdir('.'):
+    if fn != 'requirements.txt' and fn.startswith('requirements') and fn.endswith('.txt'):
+        extra_name = fn.replace('requirements','').replace('.txt','')
+        with open(fn) as fp:
+            extra = [req.strip() for req in fp.read().splitlines()]
+        extra_requirements[extra_name] = extra
+full_requirements = []
+for v in extra_requirements.values():
+    full_requirements += v
+extra_requirements['full'] = list(set(full_requirements))
 
 # Windows specific requirements
 if sys_platform in ['win32', 'cygwin', 'windows']:
     # These have to be installed manually or via the installers in windows
     requirements = remove_requirements(requirements, 'torch')
     requirements = remove_requirements(requirements, 'torchvision')
-
 
 setuptools.setup(
     name=about['__title__'],
@@ -46,6 +57,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_data={'project': ['requirements.txt']},
     install_requires=requirements,
+    extras_require=extra_requirements,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
