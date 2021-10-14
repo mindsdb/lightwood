@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from torch import Tensor
 from typing import List
-from lightwood.encoder.numeric import IdentityEncoder
+from lightwood.encoder.identity.identity import IdentityEncoder
 
 
 class TestIdentityEncoder(unittest.TestCase):
