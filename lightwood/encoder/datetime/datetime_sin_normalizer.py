@@ -20,17 +20,17 @@ class DatetimeNormalizerEncoder(BaseEncoder):
             self.output_size = 7
 
     def prepare(self, priming_data):
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, data):
         """
         :param data: # @TODO: receive a consistent data type here; currently either list of lists or pd.Series w/lists
         :return: encoded data
         """
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if isinstance(data, pd.Series):
