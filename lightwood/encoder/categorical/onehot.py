@@ -10,10 +10,16 @@ UNCOMMON_TOKEN = 0
 
 class OneHotEncoder(BaseEncoder):
 
-    def __init__(self, is_target=False, target_class_distribution=None):
+    def __init__(self, is_target=False, target_class_distribution=None, handle_unknown='unknown_token'):
         super().__init__(is_target)
         self._lang = None
         self.rev_map = {}
+
+        if handle_unknown not in {"unknown_token", "error"}:
+            raise ValueError(f"handle_unknown should be either 'unknown_token' or 'error', got {handle_unknown}")
+        else:
+            self.handle_unknown = handle_unknown
+
         if self.is_target:
             self.target_class_distribution = target_class_distribution
             self.index_weights = None
@@ -22,18 +28,28 @@ class OneHotEncoder(BaseEncoder):
         if self._prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        priming_data = [x if x is not None else UNCOMMON_WORD for x in priming_data]
         self._lang = Lang('default')
-        self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
-        self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
-        self._lang.word2count[UNCOMMON_WORD] = 0
-        self._lang.n_words = 1
+        if self.handle_unknown == "error":
+            priming_data = [x for x in priming_data if x is not None]
+            self._lang.index2word = {}
+            self._lang.word2index = {}
+            self._lang.n_words = 0
+        else:  # self.handle_unknown == "unknown_token"
+            priming_data = [x if x is not None else UNCOMMON_WORD for x in priming_data]
+            self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
+            self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
+            self._lang.word2count[UNCOMMON_WORD] = 0
+            self._lang.n_words = 1
+
         for category in priming_data:
             if category is not None:
                 self._lang.addWord(str(category))
 
         while self._lang.n_words > max_dimensions:
-            necessary_words = UNCOMMON_WORD
+            if self.handle_unknown == "error":
+                necessary_words = []
+            else:  # self.handle_unknown == "unknown_token"
+                necessary_words = [UNCOMMON_WORD]
             least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words) + 1)
 
             word_to_remove = None
@@ -72,7 +88,11 @@ class OneHotEncoder(BaseEncoder):
             if word is not None:
                 word = str(word)
                 index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
-                encoded_word[index] = 1
+                if self.handle_unknown == "error":
+                    if index == UNCOMMON_TOKEN:
+                        raise RuntimeError("")
+                else:  # self.handle_unknown == "unknown_token"
+                    encoded_word[index] = 1
 
             ret.append(encoded_word)
 
@@ -88,6 +108,9 @@ class OneHotEncoder(BaseEncoder):
             # But this explicitly operates on logits; it will take care of
             # the one hot (so you can pass something in the softmax logit space)
             # But will not affect something that is already OHE.
+
+            # TODO(Andrea): if handle_unknown == "error", then we have no way
+            # of distinguishing between [1, 0, 0, ...] and [0, 0, ...]
             ohe_index = np.argmax(vector)
             ret.append(self._lang.index2word[ohe_index])
 
