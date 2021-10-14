@@ -119,8 +119,9 @@ def code_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinit
     log.info(f'Dropping features: {problem_definition.ignore_features}')
     df = df.drop(columns=problem_definition.ignore_features)
     json_ai = json_ai_from_problem(df, problem_definition)
-    predictor_code = code_from_json_ai(json_ai)
-    return predictor_code
+    #predictor_code = code_from_json_ai(json_ai)
+    predictor = predictor_from_json_ai(json_ai) 
+    return predictor
 
 
 def predictor_from_state(state_file: str, code: str = None) -> PredictorInterface:
