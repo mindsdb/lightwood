@@ -22,7 +22,7 @@ class TestOnehot(unittest.TestCase):
         self.assertTrue(decoded_data[1] == 'category 1')
         self.assertTrue(decoded_data[2] == 'category 3')
         for i in [0, 3]:
-            self.assertTrue(encoded_data[0][i] == 0)
+            self.assertTrue(encoded_data[0][i] == UNCOMMON_TOKEN)
             self.assertTrue(decoded_data[i] == UNCOMMON_WORD)
 
         # Test max_dimensions
