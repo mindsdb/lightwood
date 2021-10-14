@@ -1,5 +1,4 @@
 import unittest
-import numpy as np
 import torch
 from typing import List
 from lightwood.encoder.identity.identity import IdentityEncoder
