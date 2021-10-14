@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from scipy.special import softmax
 from lightwood.encoder.text.helpers.rnn_helpers import Lang
+from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 
 UNCOMMON_WORD = '__mdb_unknown_cat'
@@ -15,8 +16,8 @@ class OneHotEncoder(BaseEncoder):
         self._lang = None
         self.rev_map = {}
 
-        if handle_unknown not in {"unknown_token", "error"}:
-            raise ValueError(f"handle_unknown should be either 'unknown_token' or 'error', got {handle_unknown}")
+        if handle_unknown not in {"unknown_token", "return_zeros"}:
+            raise ValueError(f"handle_unknown should be either 'unknown_token' or 'return_zeros', got {handle_unknown}")
         else:
             self.handle_unknown = handle_unknown
 
@@ -29,7 +30,7 @@ class OneHotEncoder(BaseEncoder):
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         self._lang = Lang('default')
-        if self.handle_unknown == "error":
+        if self.handle_unknown == "return_zeros":
             priming_data = [x for x in priming_data if x is not None]
             self._lang.index2word = {}
             self._lang.word2index = {}
@@ -46,7 +47,7 @@ class OneHotEncoder(BaseEncoder):
                 self._lang.addWord(str(category))
 
         while self._lang.n_words > max_dimensions:
-            if self.handle_unknown == "error":
+            if self.handle_unknown == "return_zeros":
                 necessary_words = []
             else:  # self.handle_unknown == "unknown_token"
                 necessary_words = [UNCOMMON_WORD]
@@ -87,11 +88,15 @@ class OneHotEncoder(BaseEncoder):
             encoded_word = [0] * v_len
             if word is not None:
                 word = str(word)
-                index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
-                if self.handle_unknown == "error":
-                    if index == UNCOMMON_TOKEN:
-                        raise RuntimeError("")
+                if self.handle_unknown == "return_zeros":
+                    if word in self._lang.word2index:
+                        index = self._lang.word2index[word]
+                        encoded_word[index] = 1
+                    else:
+                        # Encoding an unknown value will result in a vector of zeros
+                        log.warning('Trying to encode a value never seen before, returning vector of zeros')
                 else:  # self.handle_unknown == "unknown_token"
+                    index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
                     encoded_word[index] = 1
 
             ret.append(encoded_word)
@@ -109,10 +114,12 @@ class OneHotEncoder(BaseEncoder):
             # the one hot (so you can pass something in the softmax logit space)
             # But will not affect something that is already OHE.
 
-            # TODO(Andrea): if handle_unknown == "error", then we have no way
-            # of distinguishing between [1, 0, 0, ...] and [0, 0, ...]
-            ohe_index = np.argmax(vector)
-            ret.append(self._lang.index2word[ohe_index])
+            all_zeros = not np.any(vector)
+            if self.handle_unknown == "return_zeros" and all_zeros:
+                ret.append(UNCOMMON_WORD)
+            else:  # self.handle_unknown == "unknown_token"
+                ohe_index = np.argmax(vector)
+                ret.append(self._lang.index2word[ohe_index])
 
             if return_raw:
                 probs.append(softmax(vector).tolist())
