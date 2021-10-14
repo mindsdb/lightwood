@@ -19,7 +19,7 @@ class OneHotEncoder(BaseEncoder):
             self.index_weights = None
 
     def prepare(self, priming_data, max_dimensions=20000):
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         priming_data = [x if x is not None else UNCOMMON_WORD for x in priming_data]
@@ -59,10 +59,10 @@ class OneHotEncoder(BaseEncoder):
 
         self.output_size = self._lang.n_words
         self.rev_map = self._lang.index2word
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, column_data):
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         ret = []
         v_len = self._lang.n_words

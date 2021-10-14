@@ -1199,10 +1199,10 @@
 <span class="s2"># ------------------------ #</span>
 <span class="s2"># Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.</span>
 <span class="s2"># This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.</span>
-<span class="s2"># SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.</span>
+<span class="s2"># SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.</span>
 
 <span class="s2"># Update the mixers with partial fit</span>
-<span class="s2">if self.problem_definition.fit_on_validation:</span>
+<span class="s2">if self.problem_definition.fit_on_all:</span>
 
 <span class="s2">    log.info(&quot;Adjustment on validation requested.&quot;)</span>
 <span class="s2">    update_data = </span><span class="se">{{</span><span class="s2">&quot;new&quot;: enc_train_test[&quot;test&quot;], &quot;old&quot;: ConcatedEncodedDs([enc_train_test[&quot;train&quot;], enc_train_test[&quot;dev&quot;]])</span><span class="se">}}</span><span class="s2">  # noqa</span>

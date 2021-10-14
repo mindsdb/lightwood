@@ -13,7 +13,7 @@ class Img2VecEncoder(BaseEncoder):
         self.model = None
         # # I think we should make this an enum, something like: speed, balance, accuracy
         # self.aim = aim
-        self._prepared = False
+        self.is_prepared = False
 
         self._scaler = transforms.Resize((224, 224))
         self._normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -28,12 +28,12 @@ class Img2VecEncoder(BaseEncoder):
         pil_logger.setLevel(logging.ERROR)
 
     def prepare(self, priming_data):
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         if self.model is None:
             self.model = Img2Vec(model='resnext-50-small')
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, images):
         """
@@ -42,7 +42,7 @@ class Img2VecEncoder(BaseEncoder):
             :images : list of images, each image is a path to a file or a url
             :return: a torch.floatTensor
         """
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         img_tensors = [self._img_to_tensor(

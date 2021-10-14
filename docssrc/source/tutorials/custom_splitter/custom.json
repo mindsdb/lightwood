@@ -258,7 +258,7 @@
         "anomaly_error_rate": null,
         "anomaly_cooldown": 1,
         "ignore_features": [],
-        "fit_on_validation": true,
+        "fit_on_all": true,
         "strict_mode": true,
         "seed_nr": 420
     },
