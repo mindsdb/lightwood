@@ -1,12 +1,8 @@
-import os
 import librosa
-import requests
-import numpy as np
 import torch
 import warnings
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.io import read_from_path_or_url
-from lightwood.helpers.log import log
 
 
 class MFCCEncoder(BaseEncoder):

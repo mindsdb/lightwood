@@ -27,6 +27,14 @@ jobs:
         pip install -r tests/requirements.txt
         echo "$DATABASE_CREDENTIALS" > ~/.mindsdb_credentials.json
         sudo chmod 644 ~/.mindsdb_credentials.json
+    - name: Install dependencies Linux
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt-get install libsndfile1;
+        fi
+      shell: bash
+      env:
+        CHECK_FOR_UPDATES: False
     - name: Install dependencies Windows
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then

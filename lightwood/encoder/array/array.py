@@ -64,9 +64,8 @@ class ArrayEncoder(BaseEncoder):
         data[torch.isnan(data)] = 0.0
         data[torch.isinf(data)] = 0.0
 
-        
         return data
 
     def decode(self, data) -> torch.tensor:
         decoded = data.tolist()
-        return decoded 
+        return decoded
