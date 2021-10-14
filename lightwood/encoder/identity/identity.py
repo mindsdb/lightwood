@@ -1,3 +1,4 @@
+import pandas as pd
 from typing import List
 import torch
 from lightwood.encoder.base import BaseEncoder
@@ -23,7 +24,7 @@ class IdentityEncoder(BaseEncoder):
         super().__init__(is_target)
 
     # Not all encoders need to be prepared
-    def prepare(self, priming_data: pd.Series[object]) -> None:
+    def prepare(self, priming_data: pd.Series) -> None:
         self._prepared = True
 
     def encode(self, column_data: object) -> torch.Tensor:
