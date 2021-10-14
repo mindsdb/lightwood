@@ -17,7 +17,6 @@ class IdentityEncoder(BaseEncoder):
     Nonetypes are not supported.
 
     The decode function takes in a torch.Tensor and converts it to a list of numbers.
-
     """  # noqa
 
     def __init__(self, is_target=False) -> None:
