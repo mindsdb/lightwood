@@ -23,10 +23,10 @@ class IdentityEncoder(BaseEncoder):
         super().__init__(is_target)
 
     # Not all encoders need to be prepared
-    def prepare(self, priming_data) -> None:
+    def prepare(self, priming_data: pd.Series[object]) -> None:
         self._prepared = True
 
-    def encode(self, column_data: Union[torch.Tensor, np.ndarray, List[object]]) -> torch.Tensor:
+    def encode(self, column_data: object) -> torch.Tensor:
         if type(column_data) == torch.Tensor:
             return column_data
         return torch.Tensor(column_data)
