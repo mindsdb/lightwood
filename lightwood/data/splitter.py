@@ -53,15 +53,21 @@ def splitter(
             stratify_on = tss.group_by
 
     # Split the data
+    reshuffle = not tss.is_timeseries
     if stratify_on:
-        train, dev, test = stratify(data, pct_train, pct_dev, pct_test, stratify_on)
+        train, dev, test = stratify(data, pct_train, pct_dev, pct_test, seed, stratify_on, reshuffle)
     else:
-        train, dev, test = simple_split(data, pct_train, pct_dev, pct_test)
+        train, dev, test = simple_split(data, pct_train, pct_dev, pct_test, seed, reshuffle)
 
     return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
 
-def simple_split(data: pd.DataFrame, pct_train: float, pct_dev: float, pct_test: float) -> List[pd.DataFrame]:
+def simple_split(data: pd.DataFrame,
+                 pct_train: float,
+                 pct_dev: float,
+                 pct_test: float,
+                 seed: int,
+                 reshuffle: bool) -> List[pd.DataFrame]:
     """
     Simple split method to separate data into training, dev and testing datasets.
 
@@ -69,6 +75,8 @@ def simple_split(data: pd.DataFrame, pct_train: float, pct_dev: float, pct_test:
     :param pct_train: training fraction of data; must be less than 1
     :param pct_dev: dev fraction of data; must be less than 1
     :param pct_test: testing fraction of data; must be less than 1
+    :param seed: Random state for pandas data-frame shuffling
+    :param reshuffle: specify if reshuffling should be done post-split
 
     :returns Train, dev, and test dataframes
     """
@@ -80,6 +88,9 @@ def simple_split(data: pd.DataFrame, pct_train: float, pct_dev: float, pct_test:
     dev = data[train_cutoff:dev_cutoff]
     test = data[dev_cutoff:test_cutoff]
 
+    if reshuffle:
+        train, dev, test = [df.sample(frac=1, random_state=seed).reset_index(drop=True) for df in [train, dev, test]]
+
     return [train, dev, test]
 
 
@@ -87,7 +98,9 @@ def stratify(data: pd.DataFrame,
              pct_train: float,
              pct_dev: float,
              pct_test: float,
-             stratify_on: List[str]) -> List[pd.DataFrame]:
+             seed: int,
+             stratify_on: List[str],
+             reshuffle: bool) -> List[pd.DataFrame]:
     """
     Stratified data splitter.
 
@@ -100,7 +113,9 @@ def stratify(data: pd.DataFrame,
     :param pct_train: fraction of data to use for training split
     :param pct_dev: fraction of data to use for dev split (used internally by mixers)
     :param pct_test: fraction of data to use for test split (used post-training for analysis)
+    :param seed: Random state for pandas data-frame shuffling
     :param stratify_on: Columns to consider when stratifying
+    :param reshuffle: specify if reshuffling should be done post-split
 
     :returns Stratified train, dev, test dataframes
     """  # noqa
@@ -128,6 +143,10 @@ def stratify(data: pd.DataFrame,
             not np.isclose(len(dev_st) / len(data), pct_dev, atol=0.01) or \
             not np.isclose(len(test_st) / len(data), pct_test, atol=0.01):
         log.info("Could not stratify; reverting to simple split")
-        train_st, dev_st, test_st = simple_split(data, pct_train, pct_dev, pct_test)
+        train_st, dev_st, test_st = simple_split(data, pct_train, pct_dev, pct_test, seed, reshuffle=False)
+
+    if reshuffle:
+        train_st, dev_st, test_st = [df.sample(frac=1, random_state=seed).reset_index(drop=True)
+                                     for df in [train_st, dev_st, test_st]]
 
     return [train_st, dev_st, test_st]
