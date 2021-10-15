@@ -8,6 +8,10 @@ from lightwood.encoder.audio import MFCCEncoder
 
 class TestMFCCEncoder(unittest.TestCase):
     def test_encode(self):
+        if MFCCEncoder is None:
+            print('Skipping this test since the system for the encoder work are not installed')
+            return
+
         dir_path = os.path.dirname(os.path.realpath(__file__))
         audio_paths = [
             os.path.join(dir_path, 'test_audio_1.wav'),
