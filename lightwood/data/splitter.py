@@ -1,24 +1,28 @@
-from lightwood.api.dtype import dtype
-import pandas as pd
-import numpy as np
 from typing import List, Dict
 from itertools import product
-from lightwood.api.types import TimeseriesSettings
+
+import numpy as np
+import pandas as pd
+
 from lightwood.helpers.log import log
+from lightwood.api.dtype import dtype
+from lightwood.api.types import TimeseriesSettings
 
 
 def splitter(
-    data: pd.DataFrame,
-    tss: TimeseriesSettings,
-    dtype_dict: Dict[str, str],
-    seed: int,
-    pct_train: int,
-    pct_dev: int,
-    pct_test: int,
-    target: str
+        data: pd.DataFrame,
+        tss: TimeseriesSettings,
+        dtype_dict: Dict[str, str],
+        seed: int,
+        pct_train: float,
+        pct_dev: float,
+        pct_test: float,
+        target: str
 ) -> Dict[str, pd.DataFrame]:
     """
-    Splits a dataset into stratified training/test. First shuffles the data within the dataframe (via ``df.sample``).
+    Splits data into training, dev and testing datasets. 
+    
+    The proportion of data for each split must be specified (JSON-AI sets defaults to 80/10/10). First, rows in the dataset are shuffled randomly. Then a simple split is done. If a target value is provided and is of data type categorical/binary, then the splits will be stratified to maintain the representative populations of each class.
 
     :param data: Input dataset to be split
     :param tss: time-series specific details for splitting
@@ -30,102 +34,112 @@ def splitter(
     :param target: Name of the target column; if specified, data will be stratified on this column
 
     :returns: A dictionary containing the keys train, test and dev with their respective data frames, as well as the "stratified_on" key indicating which columns the data was stratified on (None if it wasn't stratified on anything)
-    """ # noqa
-    if pct_train + pct_dev + pct_test != 100:
-        raise Exception('The train, dev and test percentage of the data needs to sum up to 100')
-
-    gcd = np.gcd(100, np.gcd(pct_test, np.gcd(pct_train, pct_dev)))
-    nr_subsets = int(100 / gcd)
+    """  # noqa
+    pct_sum = pct_train + pct_dev + pct_test
+    if not (np.isclose(pct_sum, 1, atol=0.001) and np.less(pct_sum, 1 + 1e-5)):
+        raise Exception(f'The train, dev and test percentage of the data needs to sum up to 1 (got {pct_sum})')
 
     # Shuffle the data
     np.random.seed(seed)
     if not tss.is_timeseries:
         data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
+    # Check if stratification should be done
     stratify_on = []
     if target is not None:
-        if dtype_dict[target] in (dtype.categorical, dtype.binary):
-            stratify_on += [target]
+        if dtype_dict[target] in (dtype.categorical, dtype.binary) and not tss.is_timeseries:
+            stratify_on = [target]
         if tss.is_timeseries and isinstance(tss.group_by, list):
-            stratify_on += tss.group_by
+            stratify_on = tss.group_by
 
+    # Split the data
     if stratify_on:
-        subsets = stratify(data, nr_subsets, stratify_on)
-        subsets = randomize_uneven_stratification(data, subsets, nr_subsets, tss)
+        reshuffle = not tss.is_timeseries
+        train, dev, test = stratify(data, pct_train, pct_dev, pct_test, stratify_on, seed, reshuffle)
     else:
-        subsets = np.array_split(data, nr_subsets)
-
-    train = pd.concat(subsets[0:int(pct_train / gcd)])
-    dev = pd.concat(subsets[int(pct_train / gcd):int(pct_train / gcd + pct_dev / gcd)])
-    test = pd.concat(subsets[int(pct_train / gcd + pct_dev / gcd):])
+        train, dev, test = simple_split(data, pct_train, pct_dev, pct_test)
 
     return {"train": train, "test": test, "dev": dev, "stratified_on": stratify_on}
 
 
-def stratify(data: pd.DataFrame, nr_subset: int, stratify_on: List[str], random_alloc=False) -> List[pd.DataFrame]:
+def simple_split(data: pd.DataFrame,
+                 pct_train: float,
+                 pct_dev: float,
+                 pct_test: float) -> List[pd.DataFrame]:
+    """
+    Simple split method to separate data into training, dev and testing datasets.
+
+    :param data: Input dataset to be split
+    :param pct_train: training fraction of data; must be less than 1
+    :param pct_dev: dev fraction of data; must be less than 1
+    :param pct_test: testing fraction of data; must be less than 1
+
+    :returns Train, dev, and test dataframes
+    """
+    train_cutoff = round(data.shape[0] * pct_train)
+    dev_cutoff = round(data.shape[0] * pct_dev) + train_cutoff
+    test_cutoff = round(data.shape[0] * pct_test) + dev_cutoff
+
+    train = data[:train_cutoff]
+    dev = data[train_cutoff:dev_cutoff]
+    test = data[dev_cutoff:test_cutoff]
+
+    return [train, dev, test]
+
+
+def stratify(data: pd.DataFrame,
+             pct_train: float,
+             pct_dev: float,
+             pct_test: float,
+             stratify_on: List[str],
+             seed: int,
+             reshuffle: bool) -> List[pd.DataFrame]:
     """
     Stratified data splitter.
-    
-    The `stratify_on` columns yield a cartesian product by which every different subset will be stratified 
-    independently from the others, and recombined at the end. 
-    
-    For grouped time series tasks, each group yields a different time series. That is, the splitter generates
-    `nr_subsets` subsets from `data`, with equally-sized sub-series for each group.
 
-    :param data: Data to be split
-    :param nr_subset: Number of subsets to create
-    :param stratify_on: Columns to group-by on
-    :param random_alloc: Whether to allocate subsets randomly
+    The `stratify_on` columns yield a cartesian product by which every different subset will be stratified
+    independently from the others, and recombined at the end in fractions specified by `pcts`.
 
-    :returns A list of equally-sized data subsets that can be concatenated by the full data. This preserves the group-by columns.
+    For grouped time series tasks, stratification is done based on the group-by columns.
+
+    :param data: dataframe with data to be split
+    :param pct_train: fraction of data to use for training split
+    :param pct_dev: fraction of data to use for dev split (used internally by mixers)
+    :param pct_test: fraction of data to use for test split (used post-training for analysis)
+    :param stratify_on: Columns to consider when stratifying
+    :param seed: Random state for pandas data-frame shuffling
+    :param reshuffle: specify if reshuffling should be done post-split
+
+    :returns Stratified train, dev, test dataframes
     """  # noqa
-    # TODO: Make stratification work for regression via histogram bins??
+
+    train_st = pd.DataFrame(columns=data.columns)
+    dev_st = pd.DataFrame(columns=data.columns)
+    test_st = pd.DataFrame(columns=data.columns)
+
     all_group_combinations = list(product(*[data[col].unique() for col in stratify_on]))
-
-    subsets = [pd.DataFrame() for _ in range(nr_subset)]
     for group in all_group_combinations:
-        subframe = data
+        df = data
         for idx, col in enumerate(stratify_on):
-            subframe = subframe[subframe[col] == group[idx]]
+            df = df[df[col] == group[idx]]
 
-        subset = np.array_split(subframe, nr_subset)
+        train_cutoff = round(df.shape[0] * pct_train)
+        dev_cutoff = round(df.shape[0] * pct_dev) + train_cutoff
+        test_cutoff = round(df.shape[0] * pct_test) + dev_cutoff
 
-        # Allocate to subsets randomly
-        if random_alloc:
-            already_visited = []
-            for n in range(nr_subset):
-                i = np.random.randint(nr_subset)
-                while i in already_visited:
-                    i = np.random.randint(nr_subset)
-                already_visited.append(i)
-                subsets[n] = pd.concat([subsets[n], subset[i]])
-        else:
-            for n in range(nr_subset):
-                subsets[n] = pd.concat([subsets[n], subset[n]])
+        train_st = train_st.append(df[:train_cutoff])
+        dev_st = dev_st.append(df[train_cutoff:dev_cutoff])
+        test_st = test_st.append(df[dev_cutoff:test_cutoff])
 
-    return subsets
+    if reshuffle:
+        train_st, dev_st, test_st = [df.sample(frac=1, random_state=seed).reset_index(drop=True)
+                                     for df in [train_st, dev_st, test_st]]
 
+    # check that stratified lengths conform to expected percentages
+    if not np.isclose(len(train_st) / len(data), pct_train, atol=0.01) or \
+            not np.isclose(len(dev_st) / len(data), pct_dev, atol=0.01) or \
+            not np.isclose(len(test_st) / len(data), pct_test, atol=0.01):
+        log.info("Could not stratify; reverting to simple split")
+        train_st, dev_st, test_st = simple_split(data, pct_train, pct_dev, pct_test)
 
-def randomize_uneven_stratification(data: pd.DataFrame, subsets: List[pd.DataFrame], nr_subsets: int,
-                                    tss: TimeseriesSettings, len_threshold: int = 2):
-    """
-    Helper function reverts stratified data back to a normal split if the size difference between splits is larger
-    than a certain threshold.
-
-    :param data: Raw data
-    :param subsets: Stratified data
-    :param nr_subsets: Number of subsets
-    :param tss: TimeseriesSettings
-    :param len_threshold: size difference between subsets to revert the stratification process
-
-    :return: Inplace-modified subsets if threshold was passed. Else, subsets are returned unmodified.
-    """
-    if not tss.is_timeseries:
-        max_len = np.max([len(subset) for subset in subsets])
-        for subset in subsets:
-            if len(subset) < max_len - len_threshold:
-                subset_lengths = [len(subset) for subset in subsets]
-                log.warning(f'Cannot stratify, got subsets of length: {subset_lengths} | Splitting without stratification')  # noqa
-                subsets = np.array_split(data, nr_subsets)
-                break
-    return subsets
+    return [train_st, dev_st, test_st]
