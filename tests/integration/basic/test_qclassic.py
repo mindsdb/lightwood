@@ -24,7 +24,7 @@ class TestBasic(unittest.TestCase):
         neural_args["net"] = '"DefaultNet"'
 
         json_ai.outputs[target].mixers = [{
-            'module': 'lightwood.mixer.qclassic.QClassic',
+            'module': 'lightwood.mixer.QClassic',
             'args': neural_args 
         }]
 
