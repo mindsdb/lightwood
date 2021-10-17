@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from lightwood.encoder.base import BaseEncoder
 from lightwood.mixer.neural import Neural
-from lightwood.mixer.helper.qclassic_net import QClassicNet
+from lightwood.mixer.helpers.qclassic_net import QClassicNet
 from lightwood.api.types import TimeseriesSettings, PredictionArguments
 
 
