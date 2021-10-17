@@ -30,8 +30,6 @@ class QClassicNet(DefaultNet):
                          )
 
     def to(self, device=None, available_devices=None):
-        if self.ar_net:
-            self.ar_net.to(device)
         return super().to(device)
 
     def forward(self, input):
