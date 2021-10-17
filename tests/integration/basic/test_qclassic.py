@@ -5,9 +5,15 @@ from sklearn.metrics import accuracy_score
 from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
 from lightwood.api.high_level import code_from_json_ai, predictor_from_code
 
+from lightwood.mixer import QClassic
+
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
+        if QClassic is None:
+            print('Skipping this test since the system for the quantum are not installed')
+            return
+
         df = pd.read_csv('tests/data/hdi.csv')[:500]
         target = 'Development Index'
 
