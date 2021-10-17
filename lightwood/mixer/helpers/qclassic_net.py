@@ -7,6 +7,7 @@ from qiskit import transpile, assemble
 from lightwood.mixer.helpers.default_net import DefaultNet
 from lightwood.helpers.torch import LightwoodAutocast
 
+
 class QuantumCircuit:
     """
     This class provides a simple interface for interaction
@@ -33,9 +34,8 @@ class QuantumCircuit:
     def run(self, thetas):
         t_qc = transpile(self._circuit,
                          self.backend)
-        qobj = assemble(t_qc,
-                        shots=self.shots,
-                        parameter_binds = [{self.theta: theta} for theta in thetas])
+        qobj = assemble(t_qc, shots=self.shots,
+                        parameter_binds=[{self.theta: theta} for theta in thetas])
         job = self.backend.run(qobj)
         results = job.result().get_counts()
 
@@ -51,6 +51,7 @@ class QuantumCircuit:
             expectation = np.sum(states * probabilities)
             final.append(expectation)
         return np.array(final)
+
 
 class HybridSingleFunction(torch.autograd.Function):
     """ Hybrid quantum - classical function definition """
@@ -76,11 +77,12 @@ class HybridSingleFunction(torch.autograd.Function):
         shift_right = input_list + np.ones(input_list.shape) * ctx.shift
         shift_left = input_list - np.ones(input_list.shape) * ctx.shift
 
+        expectation_left = ctx.quantum_circuit.run(shift_left)
         expectation_right = ctx.quantum_circuit.run(shift_right)
-        expectation_left  = ctx.quantum_circuit.run(shift_left)
         gradients = torch.tensor([expectation_right]) - torch.tensor([expectation_left])
         gradients = np.array(gradients).T
         return torch.tensor(gradients).float() * grad_output.float(), None, None
+
 
 class HybridSingle(torch.nn.Module):
     """ Hybrid quantum - classical layer definition """
@@ -92,6 +94,7 @@ class HybridSingle(torch.nn.Module):
 
     def forward(self, input):
         return HybridSingleFunction.apply(input, self.quantum_circuit, self.shift)
+
 
 class QClassicNet(DefaultNet):
     """
@@ -111,7 +114,7 @@ class QClassicNet(DefaultNet):
                          shape=shape,
                          max_params=max_params,
                          num_hidden=num_hidden,
-                         dropout=dropout )
+                         dropout=dropout)
         self.fc = torch.nn.Linear(hidden_size, output_size)
         self.hybrid = HybridSingle(qiskit.Aer.get_backend('aer_simulator'), 100, np.pi / 2)
         self.softmax = torch.nn.Softmax(dim=-1)
