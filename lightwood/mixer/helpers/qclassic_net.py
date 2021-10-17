@@ -3,11 +3,9 @@ from torch import nn
 from lightwood.mixer.helpers.default_net import DefaultNet
 from lightwood.helpers.torch import LightwoodAutocast
 
-'''
 import qiskit
 from qiskit import transpile, assemble
 from qiskit.visualization import *
-'''
 
 class QClassicNet(DefaultNet):
     """
@@ -21,13 +19,14 @@ class QClassicNet(DefaultNet):
                  max_params: int = 3e7,
                  num_hidden: int = 1,
                  dropout: float = 0) -> None:
+        hidden_size = max([input_size * 2, output_size * 2, 400])
         super().__init__(input_size=input_size,
-                         output_size=output_size,
+                         output_size=hidden_size,
                          shape=shape,
                          max_params=max_params,
                          num_hidden=num_hidden,
-                         dropout=dropout
-                         )
+                         dropout=dropout )
+        self.fc = torch.nn.Linear(hidden_size, output_size)
 
     def to(self, device=None, available_devices=None):
         return super().to(device)
@@ -37,4 +36,5 @@ class QClassicNet(DefaultNet):
             if len(input.shape) == 1:
                 input = input.unsqueeze(0)
             classical_output = self.net(input)
-        return classical_output
+            full_output = self.fc(classical_output)
+        return full_output
