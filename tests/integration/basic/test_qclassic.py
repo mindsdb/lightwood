@@ -5,10 +5,9 @@ from sklearn.metrics import accuracy_score
 from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
 from lightwood.api.high_level import code_from_json_ai, predictor_from_code
 
+
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
-        from lightwood.api.high_level import predictor_from_problem
-
         df = pd.read_csv('tests/data/hdi.csv')[:500]
         target = 'Development Index'
 
@@ -25,7 +24,7 @@ class TestBasic(unittest.TestCase):
 
         json_ai.outputs[target].mixers = [{
             'module': 'lightwood.mixer.QClassic',
-            'args': neural_args 
+            'args': neural_args
         }]
 
         code = code_from_json_ai(json_ai)
