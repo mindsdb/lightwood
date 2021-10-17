@@ -5,6 +5,7 @@ from lightwood.mixer.lightgbm import LightGBM
 from lightwood.mixer.lightgbm_array import LightGBMArray
 from lightwood.mixer.sktime import SkTime
 from lightwood.mixer.regression import Regression
+from lightwood.mixer.qclassic import QClassic
 
 try:
     from lightwood.mixer.qclassic import QClassic
