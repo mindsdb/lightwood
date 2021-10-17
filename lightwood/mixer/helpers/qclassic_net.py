@@ -1,8 +1,6 @@
 import torch
-import numpy as np
-
 import qiskit
-from qiskit import transpile, assemble
+import numpy as np
 
 from lightwood.mixer.helpers.default_net import DefaultNet
 from lightwood.helpers.torch import LightwoodAutocast
@@ -32,11 +30,8 @@ class QuantumCircuit:
         self.shots = shots
 
     def run(self, thetas):
-        t_qc = transpile(self._circuit,
-                         self.backend)
-        qobj = assemble(t_qc, shots=self.shots,
-                        parameter_binds=[{self.theta: theta} for theta in thetas])
-        job = self.backend.run(qobj)
+        job = self.backend.run([self._circuit.bind_parameters({self.theta: t})
+                                for t in thetas], shots=self.shots)
         results = job.result().get_counts()
 
         final = []
