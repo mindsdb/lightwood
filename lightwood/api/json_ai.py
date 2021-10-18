@@ -899,7 +899,7 @@ for col_name, encoder in self.encoders.items():
 
     feature_body = f"""
 log.info('Featurizing the data')
-feature_data = {{key: None for key in split_data.keys()}}
+feature_data = {{key: None for key in split_data.keys() if key != "stratified_on"}}
 
 for key, data in split_data.items():
     if key != "stratified_on":
