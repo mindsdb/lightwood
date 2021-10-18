@@ -1063,10 +1063,11 @@
 
     <span class="n">feature_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">log.info(&#39;Featurizing the data&#39;)</span>
-<span class="s2">feature_data = </span><span class="se">{{</span><span class="s2">key: None for key in split_data.keys()</span><span class="se">}}</span><span class="s2"></span>
+<span class="s2">feature_data = </span><span class="se">{{</span><span class="s2">key: None for key in split_data.keys() if key != &quot;stratified_on&quot;</span><span class="se">}}</span><span class="s2"></span>
 
 <span class="s2">for key, data in split_data.items():</span>
-<span class="s2">    feature_data[key] = EncodedDs(self.encoders, data, self.target)</span>
+<span class="s2">    if key != &quot;stratified_on&quot;:</span>
+<span class="s2">        feature_data[key] = EncodedDs(self.encoders, data, self.target)</span>
 
 <span class="s2">return feature_data</span>
 <span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
