@@ -81,7 +81,7 @@ class OneHotEncoder(BaseEncoder):
     def encode(self, column_data):
         if not self._prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
-            
+
         ret = []
         v_len = self._lang.n_words
 
