@@ -18,7 +18,9 @@ import time
 from lightwood.helpers.log import log
 
 
-def predictor_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> PredictorInterface:
+def predictor_from_problem(
+    df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]
+) -> PredictorInterface:
     """
     Creates a ready-to-train ``Predictor`` object from some raw data and a ``ProblemDefinition``. Do not use this if you want to edit the JsonAI first. Usually you'd want to next train this predictor by calling the ``learn`` method on the same dataframe used to create it.
 
@@ -26,18 +28,20 @@ def predictor_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDe
     :param problem_definition: The manual specifications for your predictive problem
 
     :returns: A lightwood ``Predictor`` object
-    """ # noqa
+    """  # noqa
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
-    log.info(f'Dropping features: {problem_definition.ignore_features}')
+    log.info(f"Dropping features: {problem_definition.ignore_features}")
     df = df.drop(columns=problem_definition.ignore_features)
 
     predictor_class_str = code_from_problem(df, problem_definition)
     return predictor_from_code(predictor_class_str)
 
 
-def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> JsonAI:
+def json_ai_from_problem(
+    df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]
+) -> JsonAI:
     """
     Creates a JsonAI from your raw data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via `to_dict`, modify it, and then create a new object from it using `lightwood.JsonAI.from_dict`. It's usually better to generate the JsonAI using this function rather than writing it from scratch.
 
@@ -45,19 +49,22 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
     :param problem_definition: The manual specifications for your predictive problem
 
     :returns: A ``JsonAI`` object generated based on your data and problem specifications
-    """ # noqa
+    """  # noqa
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
-    log.info(f'Dropping features: {problem_definition.ignore_features}')
+    log.info(f"Dropping features: {problem_definition.ignore_features}")
     df = df.drop(columns=problem_definition.ignore_features)
 
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
     statistical_analysis = lightwood.data.statistical_analysis(
-        df, type_information.dtypes, type_information.identifiers, problem_definition)
+        df, type_information.dtypes, type_information.identifiers, problem_definition
+    )
     json_ai = generate_json_ai(
-        type_information=type_information, statistical_analysis=statistical_analysis,
-        problem_definition=problem_definition)
+        type_information=type_information,
+        statistical_analysis=statistical_analysis,
+        problem_definition=problem_definition,
+    )
 
     return json_ai
 
@@ -79,8 +86,8 @@ def predictor_from_code(code: str) -> PredictorInterface:
 
     :returns: A lightwood ``Predictor`` object
     """
-    module_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
-    module_name += str(time.time()).replace('.', '')
+    module_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=12))
+    module_name += str(time.time()).replace(".", "")
     predictor = _module_from_code(code, module_name).Predictor()
     return predictor
 
@@ -92,21 +99,23 @@ def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
     :param df: The raw data
 
     :returns: An object containing insights about the data (specifically the type information and statistical analysis)
-    """ # noqa
+    """  # noqa
 
-    problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0])})
+    problem_definition = ProblemDefinition.from_dict({"target": str(df.columns[0])})
 
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
     statistical_analysis = lightwood.data.statistical_analysis(
-        df, type_information.dtypes, type_information.identifiers, problem_definition)
+        df, type_information.dtypes, type_information.identifiers, problem_definition
+    )
 
     return DataAnalysis(
-        type_information=type_information,
-        statistical_analysis=statistical_analysis
+        type_information=type_information, statistical_analysis=statistical_analysis
     )
 
 
-def code_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> str:
+def code_from_problem(
+    df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]
+) -> str:
     """
     :param df: The raw data
     :param problem_definition: The manual specifications for your predictive problem
@@ -116,7 +125,7 @@ def code_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinit
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
-    log.info(f'Dropping features: {problem_definition.ignore_features}')
+    log.info(f"Dropping features: {problem_definition.ignore_features}")
     df = df.drop(columns=problem_definition.ignore_features)
     json_ai = json_ai_from_problem(df, problem_definition)
     predictor_code = code_from_json_ai(json_ai)
@@ -132,13 +141,14 @@ def predictor_from_state(state_file: str, code: str = None) -> PredictorInterfac
     """
     try:
         module_name = None
-        with open(state_file, 'rb') as fp:
+        with open(state_file, "rb") as fp:
             predictor = dill.load(fp)
     except Exception as e:
         module_name = str(e).lstrip("No module named '").split("'")[0]
         if code is None:
             raise Exception(
-                'Provide code when loading a predictor from outside the scope/script it was created in!')
+                "Provide code when loading a predictor from outside the scope/script it was created in!"
+            )
 
     if module_name is not None:
         try:
@@ -147,7 +157,7 @@ def predictor_from_state(state_file: str, code: str = None) -> PredictorInterfac
             pass
         gc.collect()
         _module_from_code(code, module_name)
-        with open(state_file, 'rb') as fp:
+        with open(state_file, "rb") as fp:
             predictor = dill.load(fp)
 
     return predictor
@@ -161,15 +171,15 @@ def _module_from_code(code: str, module_name: str) -> ModuleType:
     :param module_name: The name of the newly created module
 
     :returns: A python module object
-    """ # noqa
+    """  # noqa
     dirname = tempfile.gettempdir()
-    filename = os.urandom(24).hex() + str(time.time()).replace('.', '') + '.py'
+    filename = os.urandom(24).hex() + str(time.time()).replace(".", "") + ".py"
     path = os.path.join(dirname, filename)
-    if 'LIGHTWOOD_DEV_SAVE_TO' in os.environ:
-        path = os.environ['LIGHTWOOD_DEV_SAVE_TO']
+    if "LIGHTWOOD_DEV_SAVE_TO" in os.environ:
+        path = os.environ["LIGHTWOOD_DEV_SAVE_TO"]
 
-    with open(path, 'wb') as fp:
-        fp.write(code.encode('utf-8'))
+    with open(path, "wb") as fp:
+        fp.write(code.encode("utf-8"))
         spec = importlib.util.spec_from_file_location(module_name, fp.name)
         temp_module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = temp_module
