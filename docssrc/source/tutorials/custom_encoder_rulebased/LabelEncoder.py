@@ -8,6 +8,7 @@ import torch
 
 from lightwood.encoder import BaseEncoder
 from typing import List
+from lightwood.helpers.log import log
 
 class LabelEncoder(BaseEncoder):
     """
