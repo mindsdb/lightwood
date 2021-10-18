@@ -53,13 +53,22 @@ def json_ai_from_problem(
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
+    # Remove user-specified columns
     log.info(f"Dropping features: {problem_definition.ignore_features}")
     df = df.drop(columns=problem_definition.ignore_features)
 
+    # Identify types of each column
     type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
+
+    # Perform a stats analysis of the data
     statistical_analysis = lightwood.data.statistical_analysis(
-        df, type_information.dtypes, type_information.identifiers, problem_definition
+        df,
+        type_information.dtypes,
+        type_information.identifiers,
+        problem_definition
     )
+
+    # Generate the JSON-AI file
     json_ai = generate_json_ai(
         type_information=type_information,
         statistical_analysis=statistical_analysis,
