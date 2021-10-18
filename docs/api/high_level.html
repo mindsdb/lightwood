@@ -195,7 +195,7 @@
 <dd><p>You can use this to understand and visualize the data, it’s not a part of the pipeline one would use for creating and training predictive models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p>
+<dd class="field-odd"><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The unprocessed data</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAnalysis</span></code></p>
@@ -229,7 +229,7 @@
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
+<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The unprocessed data</p></li>
 <li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
 </ul>
 </dd>
@@ -245,11 +245,11 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="api.high_level.json_ai_from_problem">
 <span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">json_ai_from_problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#json_ai_from_problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.json_ai_from_problem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a JsonAI from your raw data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via <cite>to_dict</cite>, modify it, and then create a new object from it using <cite>lightwood.JsonAI.from_dict</cite>. It’s usually better to generate the JsonAI using this function rather than writing it from scratch.</p>
+<dd><p>Creates a JsonAI from your unprocessed data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via <cite>to_dict</cite>, modify it, and then create a new object from it using <cite>lightwood.JsonAI.from_dict</cite>. It’s usually better to generate the JsonAI using this function rather than writing it from scratch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
+<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The unprocessed data</p></li>
 <li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
 </ul>
 </dd>
@@ -298,11 +298,11 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="api.high_level.predictor_from_problem">
 <span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">predictor_from_problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#predictor_from_problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.predictor_from_problem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a ready-to-train <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object from some raw data and a <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>. Do not use this if you want to edit the JsonAI first. Usually you’d want to next train this predictor by calling the <code class="docutils literal notranslate"><span class="pre">learn</span></code> method on the same dataframe used to create it.</p>
+<dd><p>Creates a ready-to-train <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object from some unprocessed data and a <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>. Do not use this if you want to edit the JsonAI first. Usually you’d want to next train this predictor by calling the <code class="docutils literal notranslate"><span class="pre">learn</span></code> method on the same dataframe used to create it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
+<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The unprocessed data</p></li>
 <li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
 </ul>
 </dd>
