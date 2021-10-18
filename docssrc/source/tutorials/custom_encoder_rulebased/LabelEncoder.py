@@ -7,8 +7,9 @@ import pandas as pd
 import torch
 
 from lightwood.encoder import BaseEncoder
-from typing import List
+from typing import List, Union
 from lightwood.helpers.log import log
+
 
 class LabelEncoder(BaseEncoder):
     """
@@ -63,17 +64,23 @@ class LabelEncoder(BaseEncoder):
 
         self.is_prepared = True
 
-    def encode(self, column_data: pd.Series) -> torch.Tensor:
+    def encode(self, column_data: Union[pd.Series, list]) -> torch.Tensor:
         """
         Convert pre-processed data into the labeled values
 
         :param column_data: Pandas series to convert into labels
         """
-        enc = column_data.apply(lambda x: self.label_dict.get(x, 0))
-        return torch.Tensor(enc.tolist()).int()
+        if isinstance(column_data, pd.Series):
+            enc = column_data.apply(lambda x: self.label_dict.get(x, 0)).tolist()
+        else:
+            enc = [self.label_dict.get(x, 0) for x in column_data]
 
-    def decode(self, encoded_data) -> List[object]:
+        return torch.Tensor(enc).int().unsqueeze(1)
+
+    def decode(self, encoded_data: torch.Tensor) -> List[object]:
         """
         Convert torch.Tensor labels into categorical data
+
+        :param encoded_data: Encoded data in the form of a torch.Tensor
         """
         return [self.ilabel_dict[i.item()] for i in encoded_data]
