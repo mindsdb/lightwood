@@ -556,6 +556,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     ensemble["args"]["data"] = ensemble["args"].get("data", "encoded_test_data")
     ensemble["args"]["mixers"] = ensemble["args"].get("mixers", "$mixers")
 
+    # If the Feature data type not set, set based on encoder.
     for name in json_ai.features:
         if json_ai.features[name].dependency is None:
             json_ai.features[name].dependency = []
@@ -715,6 +716,8 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     # Instantiate Depedencies
     dependency_dict = {}
+
+    # Instantiate data type dictionary
     dtype_dict = {
         json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
     }
