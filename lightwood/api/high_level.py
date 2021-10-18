@@ -22,9 +22,9 @@ def predictor_from_problem(
     df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]
 ) -> PredictorInterface:
     """
-    Creates a ready-to-train ``Predictor`` object from some raw data and a ``ProblemDefinition``. Do not use this if you want to edit the JsonAI first. Usually you'd want to next train this predictor by calling the ``learn`` method on the same dataframe used to create it.
+    Creates a ready-to-train ``Predictor`` object from some unprocessed data and a ``ProblemDefinition``. Do not use this if you want to edit the JsonAI first. Usually you'd want to next train this predictor by calling the ``learn`` method on the same dataframe used to create it.
 
-    :param df: The raw data
+    :param df: The unprocessed data
     :param problem_definition: The manual specifications for your predictive problem
 
     :returns: A lightwood ``Predictor`` object
@@ -43,9 +43,9 @@ def json_ai_from_problem(
     df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]
 ) -> JsonAI:
     """
-    Creates a JsonAI from your raw data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via `to_dict`, modify it, and then create a new object from it using `lightwood.JsonAI.from_dict`. It's usually better to generate the JsonAI using this function rather than writing it from scratch.
+    Creates a JsonAI from your unprocessed data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via `to_dict`, modify it, and then create a new object from it using `lightwood.JsonAI.from_dict`. It's usually better to generate the JsonAI using this function rather than writing it from scratch.
 
-    :param df: The raw data
+    :param df: The unprocessed data
     :param problem_definition: The manual specifications for your predictive problem
 
     :returns: A ``JsonAI`` object generated based on your data and problem specifications
@@ -105,7 +105,7 @@ def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
     """
     You can use this to understand and visualize the data, it's not a part of the pipeline one would use for creating and training predictive models.
 
-    :param df: The raw data
+    :param df: The unprocessed data
 
     :returns: An object containing insights about the data (specifically the type information and statistical analysis)
     """  # noqa
@@ -126,7 +126,7 @@ def code_from_problem(
     df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]
 ) -> str:
     """
-    :param df: The raw data
+    :param df: The unprocessed data
     :param problem_definition: The manual specifications for your predictive problem
 
     :returns: The text code generated based on your data and problem specifications
