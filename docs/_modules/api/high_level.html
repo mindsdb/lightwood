@@ -182,46 +182,62 @@
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 
 
-<div class="viewcode-block" id="predictor_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_problem">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
+<div class="viewcode-block" id="predictor_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_problem">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_problem</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates a ready-to-train ``Predictor`` object from some raw data and a ``ProblemDefinition``. Do not use this if you want to edit the JsonAI first. Usually you&#39;d want to next train this predictor by calling the ``learn`` method on the same dataframe used to create it.</span>
+<span class="sd">    Creates a ready-to-train ``Predictor`` object from some unprocessed data and a ``ProblemDefinition``. Do not use this if you want to edit the JsonAI first. Usually you&#39;d want to next train this predictor by calling the ``learn`` method on the same dataframe used to create it.</span>
 
-<span class="sd">    :param df: The raw data</span>
+<span class="sd">    :param df: The unprocessed data</span>
 <span class="sd">    :param problem_definition: The manual specifications for your predictive problem</span>
 
 <span class="sd">    :returns: A lightwood ``Predictor`` object</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">ProblemDefinition</span><span class="p">):</span>
         <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">)</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">)</span>
 
     <span class="n">predictor_class_str</span> <span class="o">=</span> <span class="n">code_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">predictor_class_str</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="json_ai_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.json_ai_from_problem">[docs]</a><span class="k">def</span> <span class="nf">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">JsonAI</span><span class="p">:</span>
+<div class="viewcode-block" id="json_ai_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.json_ai_from_problem">[docs]</a><span class="k">def</span> <span class="nf">json_ai_from_problem</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonAI</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates a JsonAI from your raw data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via `to_dict`, modify it, and then create a new object from it using `lightwood.JsonAI.from_dict`. It&#39;s usually better to generate the JsonAI using this function rather than writing it from scratch.</span>
+<span class="sd">    Creates a JsonAI from your unprocessed data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via `to_dict`, modify it, and then create a new object from it using `lightwood.JsonAI.from_dict`. It&#39;s usually better to generate the JsonAI using this function rather than writing it from scratch.</span>
 
-<span class="sd">    :param df: The raw data</span>
+<span class="sd">    :param df: The unprocessed data</span>
 <span class="sd">    :param problem_definition: The manual specifications for your predictive problem</span>
 
 <span class="sd">    :returns: A ``JsonAI`` object generated based on your data and problem specifications</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">ProblemDefinition</span><span class="p">):</span>
         <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">)</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># Remove user-specified columns</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">)</span>
 
+    <span class="c1"># Identify types of each column</span>
     <span class="n">type_information</span> <span class="o">=</span> <span class="n">lightwood</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">)</span>
+
+    <span class="c1"># Perform a stats analysis of the data</span>
     <span class="n">statistical_analysis</span> <span class="o">=</span> <span class="n">lightwood</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">statistical_analysis</span><span class="p">(</span>
-        <span class="n">df</span><span class="p">,</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">type_information</span><span class="o">.</span><span class="n">identifiers</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span>
+        <span class="n">type_information</span><span class="o">.</span><span class="n">identifiers</span><span class="p">,</span>
+        <span class="n">problem_definition</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Generate the JSON-AI file</span>
     <span class="n">json_ai</span> <span class="o">=</span> <span class="n">generate_json_ai</span><span class="p">(</span>
-        <span class="n">type_information</span><span class="o">=</span><span class="n">type_information</span><span class="p">,</span> <span class="n">statistical_analysis</span><span class="o">=</span><span class="n">statistical_analysis</span><span class="p">,</span>
-        <span class="n">problem_definition</span><span class="o">=</span><span class="n">problem_definition</span><span class="p">)</span>
+        <span class="n">type_information</span><span class="o">=</span><span class="n">type_information</span><span class="p">,</span>
+        <span class="n">statistical_analysis</span><span class="o">=</span><span class="n">statistical_analysis</span><span class="p">,</span>
+        <span class="n">problem_definition</span><span class="o">=</span><span class="n">problem_definition</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">json_ai</span></div>
 
@@ -243,8 +259,8 @@
 
 <span class="sd">    :returns: A lightwood ``Predictor`` object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">module_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">12</span><span class="p">))</span>
-    <span class="n">module_name</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">module_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">12</span><span class="p">))</span>
+    <span class="n">module_name</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">predictor</span> <span class="o">=</span> <span class="n">_module_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module_name</span><span class="p">)</span><span class="o">.</span><span class="n">Predictor</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">predictor</span></div>
 
@@ -253,26 +269,28 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    You can use this to understand and visualize the data, it&#39;s not a part of the pipeline one would use for creating and training predictive models.</span>
 
-<span class="sd">    :param df: The raw data</span>
+<span class="sd">    :param df: The unprocessed data</span>
 
 <span class="sd">    :returns: An object containing insights about the data (specifically the type information and statistical analysis)</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
-    <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])})</span>
+    <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])})</span>
 
     <span class="n">type_information</span> <span class="o">=</span> <span class="n">lightwood</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">)</span>
     <span class="n">statistical_analysis</span> <span class="o">=</span> <span class="n">lightwood</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">statistical_analysis</span><span class="p">(</span>
-        <span class="n">df</span><span class="p">,</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">type_information</span><span class="o">.</span><span class="n">identifiers</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">,</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">type_information</span><span class="o">.</span><span class="n">identifiers</span><span class="p">,</span> <span class="n">problem_definition</span>
+    <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">DataAnalysis</span><span class="p">(</span>
-        <span class="n">type_information</span><span class="o">=</span><span class="n">type_information</span><span class="p">,</span>
-        <span class="n">statistical_analysis</span><span class="o">=</span><span class="n">statistical_analysis</span>
+        <span class="n">type_information</span><span class="o">=</span><span class="n">type_information</span><span class="p">,</span> <span class="n">statistical_analysis</span><span class="o">=</span><span class="n">statistical_analysis</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="code_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.code_from_problem">[docs]</a><span class="k">def</span> <span class="nf">code_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="code_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.code_from_problem">[docs]</a><span class="k">def</span> <span class="nf">code_from_problem</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :param df: The raw data</span>
+<span class="sd">    :param df: The unprocessed data</span>
 <span class="sd">    :param problem_definition: The manual specifications for your predictive problem</span>
 
 <span class="sd">    :returns: The text code generated based on your data and problem specifications</span>
@@ -280,7 +298,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">ProblemDefinition</span><span class="p">):</span>
         <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">)</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">)</span>
     <span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
     <span class="n">predictor_code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
@@ -296,13 +314,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">module_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">state_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">state_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
             <span class="n">predictor</span> <span class="o">=</span> <span class="n">dill</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">module_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;No module named &#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s1">&#39;Provide code when loading a predictor from outside the scope/script it was created in!&#39;</span><span class="p">)</span>
+                <span class="s2">&quot;Provide code when loading a predictor from outside the scope/script it was created in!&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">module_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -311,7 +330,7 @@
             <span class="k">pass</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
         <span class="n">_module_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module_name</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">state_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">state_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
             <span class="n">predictor</span> <span class="o">=</span> <span class="n">dill</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">predictor</span></div>
@@ -325,15 +344,15 @@
 <span class="sd">    :param module_name: The name of the newly created module</span>
 
 <span class="sd">    :returns: A python module object</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
     <span class="n">dirname</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">()</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.py&#39;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.py&quot;</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s1">&#39;LIGHTWOOD_DEV_SAVE_TO&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LIGHTWOOD_DEV_SAVE_TO&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;LIGHTWOOD_DEV_SAVE_TO&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;LIGHTWOOD_DEV_SAVE_TO&quot;</span><span class="p">]</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">fp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">temp_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_module</span>
