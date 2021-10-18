@@ -318,9 +318,11 @@ def generate_json_ai(
                 dependency.append(f"__mdb_ts_previous_{target}")
 
         if len(dependency) > 0:
-            feature = Feature(encoder=encoder, dependency=dependency)
+            feature = Feature(
+                encoder=encoder, dependency=dependency, data_dtype=col_dtype
+            )
         else:
-            feature = Feature(encoder=encoder)
+            feature = Feature(encoder=encoder, data_dtype=col_dtype)
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
@@ -814,7 +816,7 @@ if self.mode != 'predict':
 {align(ts_analyze_code,1)}
 """
 
-    clean_body += '\nreturn data'
+    clean_body += "\nreturn data"
 
     clean_body = align(clean_body, 2)
 
@@ -1161,7 +1163,7 @@ def validate_json_ai(json_ai: JsonAI) -> bool:
     :param json_ai: A ``JsonAI`` object
 
     :returns: Whether the JsonAI is valid, i.e. doesn't contain prohibited values, unknown values and can be turned into code.
-    """ # noqa
+    """  # noqa
     from lightwood.api.high_level import predictor_from_code, code_from_json_ai
 
     try:
