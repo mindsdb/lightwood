@@ -10,10 +10,14 @@ from lightwood.encoder.base import BaseEncoder
 class EncodedDs(Dataset):
     def __init__(self, encoders: List[BaseEncoder], data_frame: pd.DataFrame, target: str) -> None:
         """
-        Create a lightwood datasource from the data frame
-        :param data_frame:
-        :param config
-        """
+        Create a Lightwood datasource from a data frame and some encoders. This class inherits from `torch.utils.data.Dataset`.
+        
+        Note: normal behavior is to cache encoded representations to avoid duplicated computations. If you want an option to disable, this please open an issue.
+         
+        :param encoders: list of Lightwood encoders used to encode the data per each column.
+        :param data_frame: original dataframe.
+        :param target: name of the target column to predict.
+        """  # noqa
         self.data_frame = data_frame
         self.encoders = encoders
         self.target = target
@@ -31,12 +35,23 @@ class EncodedDs(Dataset):
 
     def __len__(self):
         """
-        return the length of the datasource (as in number of rows)
-        :return: number of rows
+        The length of an `EncodedDs` datasource equals the amount of rows of the original dataframe.
+
+        :return: length of the `EncodedDs`
         """
         return int(self.data_frame.shape[0])
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        The getter yields a tuple (X, y), where:
+          - `X `is a concatenation of all encoded representations of the row
+          - `y` is the encoded target
+          
+        :param idx: index of the row to access.
+        
+        :return: tuple (X, y) with encoded data.
+        
+        """  # noqa
         if self.cache_encoded:
             if self.cache[idx] is not None:
                 return self.cache[idx]
@@ -68,9 +83,21 @@ class EncodedDs(Dataset):
         return X, Y
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
+        """
+        Gets the original data for any given column of the `EncodedDs`.
+
+        :param column_name: name of the column.
+        :return:  A `pd.Series` with the original data stored in the `column_name` column.
+        """
         return self.data_frame[column_name]
 
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
+        """
+        Gets the encoded data for any given column of the `EncodedDs`.
+
+        :param column_name: name of the column.
+        :return: A `torch.Tensor` with the encoded data of the `column_name` column.
+        """
         kwargs = {}
         if 'dependency_data' in inspect.signature(self.encoders[column_name].encode).parameters:
             deps = [dep for dep in self.encoders[column_name].dependencies if dep in self.data_frame.columns]
@@ -83,6 +110,12 @@ class EncodedDs(Dataset):
         return encoded_data
 
     def get_encoded_data(self, include_target=True) -> torch.Tensor:
+        """
+        Gets all encoded data.
+
+        :param include_target: whether to include the target column in the output or not.
+        :return: A `torch.Tensor` with the encoded dataframe.
+        """
         encoded_dfs = []
         for col in self.data_frame.columns:
             if (include_target or col != self.target) and self.encoders.get(col, False):
@@ -91,12 +124,18 @@ class EncodedDs(Dataset):
         return torch.cat(encoded_dfs, 1)
 
     def clear_cache(self):
+        """
+        Clears the `EncodedDs` cache.
+        """
         self.cache = [None] * len(self.data_frame)
 
 
-# Abstract over multiple encoded datasources as if they were a single entitiy
 class ConcatedEncodedDs(EncodedDs):
+    """
+    `ConcatedEncodedDs` abstracts over multiple encoded datasources (`EncodedDs`) as if they were a single entity.
+    """  # noqa
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
+        # @TODO: missing super() call here?
         self.encoded_ds_arr = encoded_ds_arr
         self.encoded_ds_lenghts = [len(x) for x in self.encoded_ds_arr]
         self.encoders = self.encoded_ds_arr[0].encoders
@@ -104,9 +143,16 @@ class ConcatedEncodedDs(EncodedDs):
         self.target = self.encoded_ds_arr[0].target
 
     def __len__(self):
+        """
+        See `lightwood.data.encoded_ds.EncodedDs.__len__()`.
+        """
+        # @TODO: behavior here is not intuitive
         return max(0, np.sum(self.encoded_ds_lenghts) - 2)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        See `lightwood.data.encoded_ds.EncodedDs.__getitem__()`.
+        """
         for ds_idx, length in enumerate(self.encoded_ds_lenghts):
             if idx - length < 0:
                 return self.encoded_ds_arr[ds_idx][idx]
@@ -115,17 +161,33 @@ class ConcatedEncodedDs(EncodedDs):
         raise StopIteration()
 
     @property
-    def data_frame(self):
+    def data_frame(self) -> pd.DataFrame:
+        """
+        Property that concatenates all underlying `EncodedDs`'s dataframes and returns them.
+        
+        Note: be careful to not modify a `ConcatedEncodedDs`, as you can see in the source, it will not have an effect.
+        
+        :return: Dataframe with all original data.
+        """  # noqa
         return pd.concat([x.data_frame for x in self.encoded_ds_arr])
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
+        """
+        See `lightwood.data.encoded_ds.EncodedDs.get_column_original_data()`.
+        """
         encoded_df_arr = [x.get_column_original_data(column_name) for x in self.encoded_ds_arr]
         return pd.concat(encoded_df_arr)
 
     def get_encoded_column_data(self, column_name: str) -> torch.Tensor:
+        """
+        See `lightwood.data.encoded_ds.EncodedDs.get_encoded_column_data()`.
+        """
         encoded_df_arr = [x.get_encoded_column_data(column_name) for x in self.encoded_ds_arr]
         return torch.cat(encoded_df_arr, 0)
 
     def clear_cache(self):
+        """
+        See `lightwood.data.encoded_ds.EncodedDs.clear_cache()`.
+        """
         for ds in self.encoded_ds_arr:
             ds.clear_cache()
