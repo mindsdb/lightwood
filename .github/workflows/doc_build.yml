@@ -10,6 +10,7 @@ on:
 
 jobs:
   doc_build:
+    if: github.event.pull_request.merged == true or github.event.pull_request.merged == nil
     runs-on: ubuntu-latest
 
     steps:
