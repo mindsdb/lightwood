@@ -30,7 +30,8 @@ def clean_df(df, target, is_classification, label_encoders):
 
 def set_conf_range(
         X, icp, target_type, analysis_info, positive_domain=False, std_tol=1, group='__default', significance=None):
-    """ Sets confidence level and returns it plus predictions regions
+    """
+    Sets confidence level and returns it plus predictions regions
     significance: desired confidence level. can be preset 0 < x <= 0.99
     """
     # numerical
@@ -73,16 +74,17 @@ def set_conf_range(
 
 def get_numeric_conf_range(
         all_confs, df_std_dev=None, positive_domain=False, std_tol=1, group='__default', error_rate=None):
-    """ Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance
-        error_rate: pre-determined error rate for the ICP, used in anomaly detection tasks to adjust the
-        threshold sensitivity.
+    """
+    Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance
+    error_rate: pre-determined error rate for the ICP, used in anomaly detection tasks to adjust the
+    threshold sensitivity.
 
-        :param all_confs: numpy.ndarray, all possible bounds depending on confidence level
-        :param df_std_dev: dict
-        :param positive_domain: bool
-        :param std_tol: int
-        :param group: str
-        :param error_rate: float (1 >= , can be specified to bypass automatic confidence/bound detection
+    :param all_confs: numpy.ndarray, all possible bounds depending on confidence level
+    :param df_std_dev: dict
+    :param positive_domain: bool
+    :param std_tol: int
+    :param group: str
+    :param error_rate: float (1 >= , can be specified to bypass automatic confidence/bound detection
     """
     if not isinstance(error_rate, float):
         error_rate = None
@@ -125,8 +127,10 @@ def get_numeric_conf_range(
 
 
 def get_categorical_conf(all_confs, conf_candidates):
-    """ Gets ICP confidence estimation for categorical targets.
+    """
+    Gets ICP confidence estimation for categorical targets.
     Prediction set is always unitary and includes only the predicted label.
+
     :param all_confs: numpy.ndarray, all possible label sets depending on confidence level
     :param conf_candidates: list, includes preset confidence levels to check
     """
@@ -144,6 +148,15 @@ def get_categorical_conf(all_confs, conf_candidates):
 
 
 def get_anomalies(insights, observed_series, cooldown=1):
+    """
+    Simple procedure for unsupervised anomaly detection in time series forecasting. 
+    Uses ICP analysis block output so that any true value falling outside of the lower and upper bounds is tagged as anomalous.
+      
+    :param insights: dataframe with row insights used during the `.explain()` phase of all analysis blocks.  
+    :param observed_series: true values from the predicted time series. If empty, no anomalies are flagged.
+    :param cooldown: minimum amount of observations (assuming regular sampling frequency) that need to pass between two consecutive anomalies.
+    :return: list of boolean flags, indicating anomalous behavior for each predicted value.
+    """  # noqa
     anomalies = []
     counter = 0
 
