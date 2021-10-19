@@ -9,7 +9,24 @@ from lightwood.encoder.time_series.helpers.common import get_group_matches, gene
 
 
 def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
-                        timeseries_settings: TimeseriesSettings, target: str) -> (Dict, Dict):
+                        timeseries_settings: TimeseriesSettings, target: str) -> Dict:
+    """
+    This module analyzes (pre-processed) time series data and stores a few useful insights used in the rest of Lightwood's pipeline.
+    
+    :param data: dataframe with time series dataset. 
+    :param dtype_dict: dictionary with inferred types for every column.
+    :param timeseries_settings: A `TimeseriesSettings` object. For more details, check `lightwood.types.TimeseriesSettings`.
+    :param target: name of the target column.
+    
+    The following things are extracted from each time series inside the dataset:
+      - group_combinations: all observed combinations of values for the set of `group_by` columns. The length of this list determines how many time series are in the data.
+      - deltas: inferred sampling interval 
+      - ts_naive_residuals: Residuals obtained from the data by a naive forecaster that repeats the last-seen value. 
+      - ts_naive_mae: Mean residual value obtained from the data by a naive forecaster that repeats the last-seen value.
+      - target_normalizers: objects that may normalize the data within any given time series for effective learning. See `lightwood.encoder.time_series.helpers.common` for available choices.
+    
+    :return: Dictionary with the aforementioned insights and the `TimeseriesSettings` object for future references.
+    """  # noqa
     info = {
         'original_type': dtype_dict[target],
         'data': data[target].values

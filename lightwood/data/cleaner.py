@@ -59,8 +59,15 @@ def cleaner(
     return data
 
 
-def _check_if_invalid(new_data: pd.Series, pct_invalid: float, col_name: str) -> bool:
-    """ Checks how many invalid data points there are """
+def _check_if_invalid(new_data: pd.Series, pct_invalid: float, col_name: str):
+    """
+    Checks how many invalid data points there are.
+
+    :param new_data: data to check for invalid values.
+    :param pct_invalid: maximum percentage of invalid values. If this threshold is surpassed, an exception is raised.
+    :param col_name: name of the column to analyze.
+
+    """
 
     chk_invalid = (
         100
@@ -191,7 +198,7 @@ def _standardize_array(element: object) -> Optional[Union[List[float], float]]:
 
 def _clean_float(element: object) -> Optional[float]:
     """
-    Given an element, converts it into a numeric format. If element is NaN, or inf, then returns None.
+    Given an element, converts it into float numeric format. If element is NaN, or inf, then returns None.
     """
     try:
         cleaned_float = text.clean_float(element)
@@ -203,6 +210,9 @@ def _clean_float(element: object) -> Optional[float]:
 
 
 def _clean_int(element: object) -> Optional[int]:
+    """
+    Given an element, converts it into integer numeric format. If element is NaN, or inf, then returns None.
+    """
     element = _clean_float(element)
     if element is not None:
         element = int(element)
@@ -210,14 +220,23 @@ def _clean_int(element: object) -> Optional[int]:
 
 
 def _clean_quantity(element: object) -> Optional[float]:
+    """
+    Given a quantity, clean and convert it into float numeric format. If element is NaN, or inf, then returns None.
+    """
     element = float(re.sub("[^0-9.,]", "", str(element)).replace(",", "."))
     return _clean_float(element)
 
 
+# ------------------------- #
+# Text
+# ------------------------- #
 def _clean_text(element: object) -> str:
     return str(element)
 
 
+# ------------------------- #
+# Other helpers
+# ------------------------- #
 def _rm_rows_w_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     """
     Drop any rows that have targets as unknown. Targets are necessary to train.
