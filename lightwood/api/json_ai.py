@@ -1,7 +1,6 @@
 # TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
-import black
 from lightwood.api import dtype
 import numpy as np
 from lightwood.api.types import (
@@ -1149,7 +1148,13 @@ class Predictor(PredictorInterface):
 {predict_body}
 """
 
-    predictor_code = black.format_str(predictor_code, mode=black.FileMode())
+    try:
+        import black
+    except Exception:
+        black = None
+    
+    if black is not None:
+        predictor_code = black.format_str(predictor_code, mode=black.FileMode())
 
     return predictor_code
 
