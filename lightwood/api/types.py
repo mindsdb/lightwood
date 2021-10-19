@@ -4,12 +4,9 @@
 # TODO: Why does TimeSeriesSettings have an encode_json flag?
 # TODO: Because from_dict intakes "obj", it's incorrectly read in docs
 # TODO: DataAnalysis needs in-doc references [NATASHA]
-# TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should \
-# be renamed df_std_target_dev
+# TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should be renamed df_std_target_dev  # noqa
 # TODO: How do you specify a custom accuracy function when it's a str? I'm assuming via an import
-# TODO: Problem definition missing a few terms
-# TODO: Model Analysis
-# TODO: Analyzer
+
 from typing import Dict, List, Optional, Union
 import sys
 
@@ -308,16 +305,15 @@ class ProblemDefinition:
         about how long the feature-engineering preparation may take, and nuances about training the models.
 
     :param target: The name of the target column; this is the column that will be used as the goal of the prediction.
-    :param nfolds: Number of data subsets
     :param pct_invalid: Number of data points maximally tolerated as invalid/missing/unknown. \
         If the data cleaning process exceeds this number, no subsequent steps will be taken.
-    :param unbias_target:
-    :param seconds_per_model: Number of seconds maximum to spend PER model trained in the list of possible mixers.
+    :param unbias_target: all classes are automatically weighted inverse to how often they occur
+    :param seconds_per_mixer: Number of seconds maximum to spend PER mixer trained in the list of possible mixers.
     :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \
     learn a representation.
     :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \
         encoders and models.
-    :param target_weights:
+    :param target_weights: indicates to the accuracy functions how much to weight every target class.
     :param positive_domain: For numerical taks, force predictor output to be positive (integer or float).
     :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for \
          available settings.
@@ -328,7 +324,8 @@ class ProblemDefinition:
     :param fit_on_all: Whether to fit the model on the held-out validation data. Validation data is strictly \
         used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new \
             incoming data over time, the user may train the model further using the entire dataset.
-    :param strict_mode:
+    :param strict_mode: crash if an `unstable` block (mixer, encoder, etc.) fails to run.
+    :param seed_nr: custom seed to use when generating a predictor from this problem definition.
     """
 
     target: str
@@ -433,8 +430,8 @@ class JsonAI:
     :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.
     :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
     :param analysis_blocks: The blocks that get used in both analysis and inference inside the analyzer and explainer blocks.
-    :param timeseries_transformer:
-    :param timeseries_analyzer:
+    :param timeseries_transformer: Procedure used to transform any timeseries task dataframe into the format that lightwood expects for the rest of the pipeline.  
+    :param timeseries_analyzer: Procedure that extracts key insights from any timeseries in the data (e.g. measurement frequency, target distribution, etc).
     :param accuracy_functions: A list of performance metrics used to evaluate the best mixers.
     """ # noqa
 
