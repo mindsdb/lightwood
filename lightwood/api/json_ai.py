@@ -413,7 +413,15 @@ def generate_json_ai(
     )
 
 
-def _merge_implicit_values(field, implicit_value):
+def _merge_implicit_values(field: dict, implicit_value: dict) -> dict:
+    """
+    Helper function for `_populate_implicit_field`.
+    Takes a user-defined field along with its implicit value, and merges them together.
+
+    :param field: JsonAI field with user-defined parameters.
+    :param implicit_value: implicit values for the field.
+    :return: original field with implicit values merged into it.
+    """
     exec(IMPORTS, globals())
     exec(IMPORT_EXTERNAL_DIRS, globals())
     module = eval(field["module"])
