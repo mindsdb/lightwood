@@ -5,6 +5,8 @@ on:
     branches:
       - stable
       - staging
+  pull_request:
+    types: [ closed ]
 
 jobs:
   doc_build:
