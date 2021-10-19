@@ -58,18 +58,28 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
             }
 
 
-def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_cols: list):
+def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_cols: list) -> Dict[str, Dict]:
     """
-    Infer the sampling interval of each time series
-    """
+    Infer the sampling interval of each time series, by picking the most popular time interval observed in the training data.
+    
+    :param df: Dataframe with time series data.
+    :param ts_info: Dictionary used internally by `timeseries_analyzer`. Contains group-wise series information, among other things.
+    :param group_combinations: all tuples with distinct values for `TimeseriesSettings.group_by` columns, defining all available time series.
+    :param order_cols: all columns specified in `TimeseriesSettings.order_by`. 
+    
+    :return:
+    Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series, for each `order_col`.
+    """  # noqa
     deltas = {"__default": {}}
 
+    # get default delta for all data
     for col in order_cols:
         series = pd.Series([x[-1] for x in df[col]])
         rolling_diff = series.rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
-        delta = rolling_diff.value_counts(ascending=False).keys()[0]
+        delta = rolling_diff.value_counts(ascending=False).keys()[0]  # pick most popular
         deltas["__default"][col] = delta
 
+    # get group-wise deltas (if applicable)
     if ts_info.get('group_info', False):
         original_data = ts_info['data']
         for group in group_combinations:
@@ -101,8 +111,8 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
     :param target_data: observed time series targets
     :param m: season length. the naive forecasts will be the m-th previously seen value for each series
 
-    :returns: (list of naive residuals, average residual value)
-    """
+    :return: (list of naive residuals, average residual value)
+    """  # noqa
     residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
     scale_factor = np.average(residuals)
     return residuals.tolist(), scale_factor
@@ -110,8 +120,8 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
 
 def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[Dict, Dict]:
     """
-    Wraps `get_naive_residuals` for a dataframe with grouped time series.
-    """
+    Wraps `get_naive_residuals` for a dataframe with multiple co-existing time series.
+    """  # noqa
     group_residuals = {}
     group_scale_factors = {}
     for group in group_combinations:
