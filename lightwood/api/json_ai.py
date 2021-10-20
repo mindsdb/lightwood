@@ -1,7 +1,6 @@
 # TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
-import black
 from lightwood.api import dtype
 import numpy as np
 from lightwood.api.types import (
@@ -13,6 +12,8 @@ from lightwood.api.types import (
     ProblemDefinition,
 )
 import inspect
+from lightwood.helpers.log import log
+
 
 # For custom modules, we create a module loader with necessary imports below
 IMPORT_EXTERNAL_DIRS = """
@@ -1149,7 +1150,14 @@ class Predictor(PredictorInterface):
 {predict_body}
 """
 
-    predictor_code = black.format_str(predictor_code, mode=black.FileMode())
+    try:
+        import black
+    except Exception:
+        black = None
+
+    if black is not None:
+        log.info('Unable to import black formatter, predictor code might be a bit ugly.')
+        predictor_code = black.format_str(predictor_code, mode=black.FileMode())
 
     return predictor_code
 
