@@ -6,8 +6,8 @@ from lightwood.api.high_level import code_from_json_ai, json_ai_from_problem, pr
 from lightwood.api.types import ProblemDefinition
 
 
-class TestMeanEnsemble(unittest.TestCase):
-    def test_0_predict_file_flow(self):
+class TestBasic(unittest.TestCase):
+    def test_0_mean_ensemble(self):
 
         df = pd.read_csv('tests/data/concrete_strength.csv')
 
