@@ -12,7 +12,7 @@ from lightwood import dtype
 class MeanEnsemble(BaseEnsemble):
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict) -> None:
         super().__init__(target, mixers, data)
-        if dtype_dict[target] not in (dtype.float,):
+        if dtype_dict[target] not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(
                 f'This ensemble can only be used regression problems! Got target dtype {dtype_dict[target]} instead!')
 
