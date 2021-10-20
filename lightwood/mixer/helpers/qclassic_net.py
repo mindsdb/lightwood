@@ -112,7 +112,6 @@ class QClassicNet(DefaultNet):
                          dropout=dropout)
         self.fc = torch.nn.Linear(hidden_size, output_size)
         self.hybrid = HybridSingle(qiskit.Aer.get_backend('aer_simulator'), 100, np.pi / 2)
-        self.softmax = torch.nn.Softmax(dim=-1)
 
     def to(self, device=None, available_devices=None):
         return super().to(device)
@@ -123,4 +122,4 @@ class QClassicNet(DefaultNet):
                 input = input.unsqueeze(0)
             classical_output = self.fc(self.net(input))
             full_output = torch.stack([self.hybrid(i) for i in classical_output])
-        return self.softmax(full_output).float()
+        return full_output.float()
