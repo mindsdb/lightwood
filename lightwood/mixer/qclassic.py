@@ -16,4 +16,6 @@ class QClassic(Neural):
         super().__init__(stop_after, target, dtype_dict,
                          input_cols, timeseries_settings, target_encoder,
                          net, fit_on_dev, search_hyperparameters)
-        self.net_class = QClassicNet
+
+        quantum_nets = {"QClassic": QClassicNet}
+        self.net_class = quantum_nets.get(net, QClassicNet)
