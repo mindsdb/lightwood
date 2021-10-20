@@ -29,8 +29,8 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
 def add_tn_conf_bounds(data: pd.DataFrame, tss_args: TimeseriesSettings):
     """
     Add confidence (and bounds if applicable) to t+n predictions, for n>1
-        @TODO: active research question: how to guarantee 1-e coverage for t+n, n>1
-        for now, we replicate the width and conf obtained for t+1
+    @TODO: active research question: how to guarantee 1-e coverage for t+n, n>1
+    for now, we replicate the width and conf obtained for t+1
     """
     for col in ['confidence', 'lower', 'upper']:
         data[col] = data[col].astype(object)
