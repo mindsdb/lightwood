@@ -37,10 +37,10 @@ class Img2VecEncoder(BaseEncoder):
 
     def encode(self, images):
         """
-            Encode list of images
+        Encode list of images
 
-            :images : list of images, each image is a path to a file or a url
-            :return: a torch.floatTensor
+        :param images: list of images, each image is a path to a file or a url
+        :return: a torch.floatTensor
         """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
