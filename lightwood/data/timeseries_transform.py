@@ -118,10 +118,10 @@ def transform_timeseries(
         # Make type `object` so that dataframe cells can be python lists
         df_arr = pool.map(partial(_ts_to_obj, historical_columns=ob_arr + tss.historical_columns), df_arr)
         df_arr = pool.map(partial(_ts_order_col_to_cell_lists,
-                          historical_columns=ob_arr + tss.historical_columns), df_arr)
+                          order_cols=ob_arr + tss.historical_columns), df_arr)
         df_arr = pool.map(
             partial(
-                _ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window),
+                _ts_add_previous_rows, order_cols=ob_arr + tss.historical_columns, window=window),
             df_arr)
 
         df_arr = pool.map(partial(_ts_add_future_target, target=target, nr_predictions=tss.nr_predictions,
@@ -130,23 +130,20 @@ def transform_timeseries(
 
         if tss.use_previous_target:
             df_arr = pool.map(
-                partial(
-                    _ts_add_previous_target, target=target,
-                    window=tss.window, data_dtype=tss.target_type),
+                partial(_ts_add_previous_target, target=target, window=tss.window),
                 df_arr)
         pool.close()
         pool.join()
     else:
         for i in range(n_groups):
             df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
-            df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
+            df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], order_cols=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
-                                              historical_columns=ob_arr + tss.historical_columns, window=window)
+                                              order_cols=ob_arr + tss.historical_columns, window=window)
             df_arr[i] = _ts_add_future_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions,
                                               data_dtype=tss.target_type, mode=mode)
             if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window,
-                                                    data_dtype=tss.target_type)
+                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window)
 
     combined_df = pd.concat(df_arr)
 
@@ -286,7 +283,7 @@ def _ts_add_previous_rows(df: pd.DataFrame, order_cols: list, window: int) -> pd
     return df
 
 
-def _ts_add_previous_target(df: pd.DataFrame, target: str, window: int, data_dtype: dict) -> pd.DataFrame:
+def _ts_add_previous_target(df: pd.DataFrame, target: str, window: int) -> pd.DataFrame:
     """
     Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the target column.
 
