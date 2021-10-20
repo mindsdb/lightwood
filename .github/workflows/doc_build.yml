@@ -6,11 +6,13 @@ on:
       - stable
       - staging
   pull_request:
+    types: [ closed ]
     branches:
       - staging
 
 jobs:
   doc_build:
+    if: (github.event.pull_request.merged == true || github.event.pull_request.merged == nil)
     runs-on: ubuntu-latest
 
     steps:
