@@ -911,8 +911,6 @@ return feature_data
 
     feature_body = align(feature_body, 2)
 
-    feature_body = align(feature_body, 2)
-
     # ----------------- #
     # Fit Mixer Body
     # ----------------- #
