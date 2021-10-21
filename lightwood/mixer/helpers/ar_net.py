@@ -7,7 +7,7 @@ from lightwood.helpers.torch import LightwoodAutocast
 class ArNet(DefaultNet):
     """
     DefaultNet variant that adds a secondary stream (simple linear layer) with constrained
-    weights to learn autoregressive coefficients for numerical time series targets
+    weights to learn autoregressive coefficients for numerical time series targets.
     """
 
     def __init__(self,
