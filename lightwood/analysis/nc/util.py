@@ -35,7 +35,7 @@ def clean_df(df, target, is_classification, label_encoders):
 
 def set_conf_range(
         X: pd.DataFrame,
-        icp: BaseIcp,
+        icp,  # BaseIcp
         target_type: dtype,
         analysis_info: dict,
         positive_domain: bool = False,
