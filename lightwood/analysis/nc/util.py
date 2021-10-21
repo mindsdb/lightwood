@@ -34,7 +34,7 @@ def clean_df(df, target, is_classification, label_encoders):
 
 def set_conf_range(
         X: pd.DataFrame,
-        icp,  # BaseIcp
+        icp,
         target_type: dtype,
         analysis_info: dict,
         positive_domain: bool = False,
@@ -46,7 +46,7 @@ def set_conf_range(
     Automatically sets confidence level for numerical and categorical tasks.
 
     :param X: Validation data.
-    :param icp: Inductive conformal predictor that sets the confidence level.
+    :param icp: Inductive conformal predictor that sets the confidence level. Either IcpClassifier or IcpRegressor.
     :param target_type: dtype of the target column.
     :param analysis_info:
     :param positive_domain: Flag that indicates whether target is expected to be a positive number.
