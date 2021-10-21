@@ -177,7 +177,7 @@ def get_categorical_conf(all_confs: np.ndarray, conf_candidates: list):
     return significances
 
 
-def get_anomalies(insights: pd.Dataframe, observed_series: Union[pd.Series, list], cooldown: int = 1):
+def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list], cooldown: int = 1):
     """
     Simple procedure for unsupervised anomaly detection in time series forecasting. 
     Uses ICP analysis block output so that any true value falling outside of the lower and upper bounds is tagged as anomalous.
