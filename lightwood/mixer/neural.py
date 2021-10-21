@@ -35,9 +35,19 @@ class Neural(BaseMixer):
 
     def __init__(
             self, stop_after: int, target: str, dtype_dict: Dict[str, str],
-            input_cols: List[str],
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
             search_hyperparameters: bool):
+        """
+        The Neural mixer search the hyperparameters for and trains a fully connected neural networks to map our encoded features to the encoded outputs.
+
+        This process is baed in pa
+        :param model: etc
+        :param dtype_dict: etc
+        :param target: etc
+        :param epochs_to_best: etc
+        :param fit_on_dev: etc
+        :param supports_proba: etc
+        """
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
         self.target = target
