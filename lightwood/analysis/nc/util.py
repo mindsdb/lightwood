@@ -1,7 +1,12 @@
+from typing import Union, Optional
+
 import torch
 import numpy as np
+import pandas as pd
 from torch.nn.functional import softmax
+
 from lightwood.api.dtype import dtype
+from lightwood.analysis.nc.icp import BaseIcp
 
 
 def t_softmax(x, t=1.0, axis=1):
@@ -29,11 +34,29 @@ def clean_df(df, target, is_classification, label_encoders):
 
 
 def set_conf_range(
-        X, icp, target_type, analysis_info, positive_domain=False, std_tol=1, group='__default', significance=None):
+        X: pd.DataFrame,
+        icp: BaseIcp,
+        target_type: dtype,
+        analysis_info: dict,
+        positive_domain: bool = False,
+        std_tol: int = 1,
+        group: str = '__default',
+        significance: Optional[float] = None
+):
     """
-    Sets confidence level and returns it plus predictions regions
-    significance: desired confidence level. can be preset 0 < x <= 0.99
-    """
+    Automatically sets confidence level for numerical and categorical tasks.
+
+    :param X: Validation data.
+    :param icp: Inductive conformal predictor that sets the confidence level.
+    :param target_type: dtype of the target column.
+    :param analysis_info:
+    :param positive_domain: Flag that indicates whether target is expected to be a positive number.
+    :param std_tol: Tolerance for automatic confidence level selection; bigger tolerance means higher confidence, in general.
+    :param group: For tasks with multiple different target groups (where each may have a different std_dev), indicates what group is being considered.
+    :param significance: Desired confidence level. Can be preset (0 < x <= 0.99)
+
+    :return: set confidence plus predictions regions (for numerical tasks) or pvalues (for categorical tasks).
+    """  # noqa
     # numerical
     if target_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity):
 
@@ -73,19 +96,25 @@ def set_conf_range(
 
 
 def get_numeric_conf_range(
-        all_confs, df_std_dev=None, positive_domain=False, std_tol=1, group='__default', error_rate=None):
+        all_confs: np.ndarray,
+        df_std_dev: dict = {},
+        positive_domain: bool = False,
+        std_tol: int = 1,
+        group: Optional[str] = '__default',
+        error_rate: float = None
+):
     """
-    Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance
-    error_rate: pre-determined error rate for the ICP, used in anomaly detection tasks to adjust the
-    threshold sensitivity.
-
-    :param all_confs: numpy.ndarray, all possible bounds depending on confidence level
-    :param df_std_dev: dict
-    :param positive_domain: bool
-    :param std_tol: int
-    :param group: str
-    :param error_rate: float (1 >= , can be specified to bypass automatic confidence/bound detection
-    """
+    Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance.
+    
+    :param all_confs: All possible bounds depending on confidence level.
+    :param df_std_dev: Observed train standard deviation for each group target.
+    :param positive_domain: Flag that indicates whether target is expected to be a positive number.
+    :param std_tol: Tolerance for automatic confidence level selection; bigger tolerance means higher confidence, in general.
+    :param group: For tasks with multiple different target groups (where each may have a different std_dev), indicates what group is being considered.
+    :param error_rate: Pre-determined error rate for the ICP, 0-1 bounded. Can be specified to bypass automatic confidence/bound detection, or to adjust the threshold sensitivity in anomaly detection tasks.
+    
+    :return: array with confidence for each data instance, along with lower and upper bounds for each prediction.
+    """  # noqa
     if not isinstance(error_rate, float):
         error_rate = None
 
@@ -126,13 +155,15 @@ def get_numeric_conf_range(
     return np.array(significances), conf_ranges
 
 
-def get_categorical_conf(all_confs, conf_candidates):
+def get_categorical_conf(all_confs: np.ndarray, conf_candidates: list):
     """
     Gets ICP confidence estimation for categorical targets.
     Prediction set is always unitary and includes only the predicted label.
 
-    :param all_confs: numpy.ndarray, all possible label sets depending on confidence level
-    :param conf_candidates: list, includes preset confidence levels to check
+    :param all_confs: all possible label sets depending on confidence level
+    :param conf_candidates: includes preset confidence levels to check
+
+    :return: confidence for each data instance
     """
     significances = []
     for sample_idx in range(all_confs.shape[0]):
@@ -147,7 +178,7 @@ def get_categorical_conf(all_confs, conf_candidates):
     return significances
 
 
-def get_anomalies(insights, observed_series, cooldown=1):
+def get_anomalies(insights: pd.Dataframe, observed_series: Union[pd.Series, list], cooldown: int = 1):
     """
     Simple procedure for unsupervised anomaly detection in time series forecasting. 
     Uses ICP analysis block output so that any true value falling outside of the lower and upper bounds is tagged as anomalous.
@@ -155,6 +186,7 @@ def get_anomalies(insights, observed_series, cooldown=1):
     :param insights: dataframe with row insights used during the `.explain()` phase of all analysis blocks.  
     :param observed_series: true values from the predicted time series. If empty, no anomalies are flagged.
     :param cooldown: minimum amount of observations (assuming regular sampling frequency) that need to pass between two consecutive anomalies.
+    
     :return: list of boolean flags, indicating anomalous behavior for each predicted value.
     """  # noqa
     anomalies = []

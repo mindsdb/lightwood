@@ -22,8 +22,11 @@ class Normalizer(BaseMixer):
     normalizing factor to the conformal prediction framework, thus:
       - widening bounds at the same confidence level if a prediction is harder
       - tightening bounds at the same confidence level if a predictions is easier
+      
+    Reference:
+        Papadopoulos, H., Gammerman, A., & Vovk, V. (2008). Normalized nonconformity measures for regression Conformal Prediction.
 
-    """
+    """  # noqa
     def __init__(self, fit_params: dict):
         super(Normalizer, self).__init__(stop_after=fit_params['stop_after'])
 

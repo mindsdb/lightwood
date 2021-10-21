@@ -1,9 +1,12 @@
+from typing import List
 import logging
+
 import torch
 import torchvision.transforms as transforms
+from PIL import Image
+
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
 from lightwood.encoder.base import BaseEncoder
-from PIL import Image
 
 
 class Img2VecEncoder(BaseEncoder):
@@ -35,7 +38,7 @@ class Img2VecEncoder(BaseEncoder):
             self.model = Img2Vec(model='resnext-50-small')
         self.is_prepared = True
 
-    def encode(self, images):
+    def encode(self, images: List[str]) -> torch.Tensor:
         """
         Encode list of images
 

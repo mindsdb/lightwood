@@ -11,6 +11,9 @@ class ArrayEncoder(BaseEncoder):
     """
     Fits a normalizer for array data. To encode, `ArrayEncoder` returns a normalized window of previous data.
     It can be used for generic arrays, as well as for handling historical target values in time series tasks.
+
+    :param stop_after: time budget in seconds.
+    :param window: expected length of array data.
     """
 
     is_trainable_encoder: bool = True
