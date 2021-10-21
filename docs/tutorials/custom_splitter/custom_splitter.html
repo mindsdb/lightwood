@@ -451,24 +451,24 @@ as a final pass to see what models perform best.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import numpy as np
-import pandas as pd
-import torch
-import nltk
-import matplotlib.pyplot as plt
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-import os
-import sys
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
-# Lightwood modules
-import lightwood as lw
-from lightwood import ProblemDefinition, \
-                      JsonAI, \
-                      json_ai_from_problem, \
-                      code_from_json_ai, \
-                      predictor_from_code
+<span class="c1"># Lightwood modules</span>
+<span class="kn">import</span> <span class="nn">lightwood</span> <span class="k">as</span> <span class="nn">lw</span>
+<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> \
+                      <span class="n">JsonAI</span><span class="p">,</span> \
+                      <span class="n">json_ai_from_problem</span><span class="p">,</span> \
+                      <span class="n">code_from_json_ai</span><span class="p">,</span> \
+                      <span class="n">predictor_from_code</span>
 
-import imblearn # Vers 0.5.0 minimum requirement
+<span class="kn">import</span> <span class="nn">imblearn</span> <span class="c1"># Vers 0.5.0 minimum requirement</span>
 </pre></div>
 </div>
 </div>
@@ -480,12 +480,12 @@ import imblearn # Vers 0.5.0 minimum requirement
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Load the data
-ddir = &quot;data/&quot;
-filename = os.path.join(ddir, &quot;creditcard.csv.zip&quot;)
+<span></span><span class="c1"># Load the data</span>
+<span class="n">ddir</span> <span class="o">=</span> <span class="s2">&quot;data/&quot;</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ddir</span><span class="p">,</span> <span class="s2">&quot;creditcard.csv.zip&quot;</span><span class="p">)</span>
 
-data = pd.read_csv(filename)
-data.head()
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -668,14 +668,14 @@ data.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>f = plt.figure()
-ax = f.add_subplot(1,1,1)
-ax.hist(data[&#39;Class&#39;], bins = [-0.1, 0.1, 0.9, 1.1], log=True)
-ax.set_ylabel(&quot;Log Counts&quot;)
-ax.set_xticks([0, 1])
-ax.set_xticklabels([&quot;0&quot;, &quot;1&quot;])
-ax.set_xlabel(&quot;Class&quot;)
-ax.set_title(&quot;Distribution of Classes&quot;)
+<span></span><span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Distribution of Classes&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -706,13 +706,13 @@ Text(0.5, 1.0, &#39;Distribution of Classes&#39;)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Setup the problem definition
-problem_definition = {
-    &#39;target&#39;: &#39;Class&#39;,
-}
+<span></span><span class="c1"># Setup the problem definition</span>
+<span class="n">problem_definition</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Class&#39;</span><span class="p">,</span>
+<span class="p">}</span>
 
-# Generate the j{ai}son syntax
-default_json = json_ai_from_problem(data, problem_definition)
+<span class="c1"># Generate the j{ai}son syntax</span>
+<span class="n">default_json</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
 
 </pre></div>
 </div>
@@ -811,8 +811,8 @@ MyCustomSplitter
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>with open(&quot;default.json&quot;, &quot;w&quot;) as fp:
-   fp.write(default_json.to_json())
+<span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;default.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+   <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">default_json</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -917,18 +917,18 @@ def MySplitter(
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Make changes to your JSON-file and load the custom version
-with open(&#39;custom.json&#39;, &#39;r&#39;) as fp:
-   modified_json = JsonAI.from_json(fp.read())
+<span></span><span class="c1"># Make changes to your JSON-file and load the custom version</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+   <span class="n">modified_json</span> <span class="o">=</span> <span class="n">JsonAI</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
-#Generate python code that fills in your pipeline
-code = code_from_json_ai(modified_json)
+<span class="c1">#Generate python code that fills in your pipeline</span>
+<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">modified_json</span><span class="p">)</span>
 
-print(code)
+<span class="nb">print</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
-# Save code to a file (Optional)
-with open(&#39;custom_splitter_pipeline.py&#39;, &#39;w&#39;) as fp:
-    fp.write(code)
+<span class="c1"># Save code to a file (Optional)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom_splitter_pipeline.py&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1536,8 +1536,8 @@ class Predictor(PredictorInterface):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Turn the code above into a predictor object
-predictor = predictor_from_code(code)
+<span></span><span class="c1"># Turn the code above into a predictor object</span>
+<span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1557,9 +1557,9 @@ MyCustomSplitter
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Pre-process the data
-cleaned_data = predictor.preprocess(data)
-train_test_data = predictor.split(cleaned_data)
+<span></span><span class="c1"># Pre-process the data</span>
+<span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">train_test_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1589,38 +1589,38 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>plt.rcParams[&#39;font.size&#39;]=15
-f = plt.figure(figsize=(18, 5))
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">15</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 
-ax = f.add_subplot(1,3,1)
-ax.hist(train_test_data[&quot;train&quot;][&#39;Class&#39;], bins = [-0.1, 0.1, 0.9, 1.1], log=True)
-ax.set_ylabel(&quot;Log Counts&quot;)
-ax.set_xticks([0, 1])
-ax.set_xticklabels([&quot;0&quot;, &quot;1&quot;])
-ax.set_xlabel(&quot;Class&quot;)
-ax.set_title(&quot;Train:\nDistribution of Classes&quot;)
-ax.set_ylim([1, 1e6])
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Train:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
 
-ax = f.add_subplot(1,3,2)
-ax.hist(train_test_data[&quot;dev&quot;][&#39;Class&#39;], bins = [-0.1, 0.1, 0.9, 1.1], log=True, color=&#39;k&#39;)
-ax.set_ylabel(&quot;Log Counts&quot;)
-ax.set_xticks([0, 1])
-ax.set_xticklabels([&quot;0&quot;, &quot;1&quot;])
-ax.set_xlabel(&quot;Class&quot;)
-ax.set_title(&quot;Dev:\nDistribution of Classes&quot;)
-ax.set_ylim([1, 1e6])
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;dev&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Dev:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
 
 
-ax = f.add_subplot(1,3,3)
-ax.hist(train_test_data[&quot;test&quot;][&#39;Class&#39;], bins = [-0.1, 0.1, 0.9, 1.1], log=True, color=&#39;r&#39;)
-ax.set_ylabel(&quot;Log Counts&quot;)
-ax.set_xticks([0, 1])
-ax.set_xticklabels([&quot;0&quot;, &quot;1&quot;])
-ax.set_xlabel(&quot;Class&quot;)
-ax.set_title(&quot;Test:\nDistribution of Classes&quot;)
-ax.set_ylim([1, 1e6])
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Test:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
 
-f.tight_layout()
+<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
