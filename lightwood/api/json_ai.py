@@ -905,6 +905,8 @@ log.info('Featurizing the data')
 
 feature_data = {{ key: EncodedDs(self.encoders, data, self.target) for key, data in split_data.items() if key != "stratified_on"}}
 
+return feature_data
+
 """  # noqa
 
     feature_body = align(feature_body, 2)
