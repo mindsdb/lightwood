@@ -319,9 +319,11 @@ def generate_json_ai(
                 dependency.append(f"__mdb_ts_previous_{target}")
 
         if len(dependency) > 0:
-            feature = Feature(encoder=encoder, dependency=dependency)
+            feature = Feature(
+                encoder=encoder, dependency=dependency, data_dtype=col_dtype
+            )
         else:
-            feature = Feature(encoder=encoder)
+            feature = Feature(encoder=encoder, data_dtype=col_dtype)
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
