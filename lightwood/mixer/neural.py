@@ -38,11 +38,11 @@ class Neural(BaseMixer):
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
             search_hyperparameters: bool):
         """
-        The Neural mixer search the hyperparameters for and trains a fully connected neural networks to map the encoded features to the encoded outputs.
-
+        The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output. 
+        
         :param stop_after: How long the total fitting process should take
         :param target: Name of the target column
-        :param dtype_dict: etc
+        :param dtype_dict: Data type dictionary
         :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.
         :param target_encoder: Reference to the encoder used for the target
         :param net: The network type to use (`DeafultNet` or `ArNet`)
