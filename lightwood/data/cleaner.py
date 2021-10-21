@@ -68,7 +68,7 @@ def _check_if_invalid(new_data: pd.Series, pct_invalid: float, col_name: str):
     :param pct_invalid: maximum percentage of invalid values. If this threshold is surpassed, an exception is raised.
     :param col_name: name of the column to analyze.
 
-    """
+    """  # noqa
 
     chk_invalid = (
         100
