@@ -28,9 +28,10 @@ class TsArrayNumericEncoder(BaseEncoder):
         self.is_prepared = True
 
     def encode(self, data, dependency_data={}):
-        """dependency_data: dict with grouped_by column info,
-        to retrieve the correct normalizer for each datum
-        :return tensor with shape (batch, NxK) where N: self.data_window and K: sub-encoder # of output features"""
+        """
+        :param dependency_data: dict with grouped_by column info, to retrieve the correct normalizer for each datum
+        :return: tensor with shape (batch, NxK) where N: self.data_window and K: sub-encoder # of output features
+        """  # noqa
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         if not dependency_data:

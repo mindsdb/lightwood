@@ -17,6 +17,16 @@ def evaluate_accuracy(data: pd.DataFrame,
                       target: str,
                       accuracy_functions: List[str],
                       ts_analysis: Optional[dict] = {}) -> Dict[str, float]:
+    """
+    Dispatcher for accuracy evaluation.
+    
+    :param data: original dataframe.
+    :param predictions: output of a lightwood predictor for the input `data`.
+    :param target: target column name.
+    :param accuracy_functions: list of accuracy function names. Support currently exists for `scikit-learn`'s `metrics` module, plus any custom methods that Lightwood exposes.
+    :param ts_analysis: `lightwood.data.timeseries_analyzer` output, used to compute time series task accuracy.
+    :return: accuracy metric for a dataset and predictions.
+    """  # noqa
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
@@ -41,6 +51,13 @@ def evaluate_regression_accuracy(
         predictions,
         **kwargs
 ):
+    """
+    Evaluates accuracy for regression tasks.
+    If predictions have a lower and upper bound, then `within-bound` accuracy is computed: whether the ground truth value falls within the predicted region.
+    If not, then a (positive bounded) R2 score is returned instead.
+    
+    :return: accuracy score as defined above. 
+    """  # noqa
     if 'lower' and 'upper' in predictions:
         Y = np.array(true_values).astype(float)
         within = ((Y >= predictions['lower']) & (Y <= predictions['upper']))
@@ -51,6 +68,11 @@ def evaluate_regression_accuracy(
 
 
 def evaluate_multilabel_accuracy(true_values, predictions, **kwargs):
+    """
+    Evaluates accuracy for multilabel/tag prediction.
+
+    :return: weighted f1 score of predictions and ground truths.
+    """
     pred_values = predictions['prediction']
     return f1_score(true_values, pred_values, average='weighted')
 
