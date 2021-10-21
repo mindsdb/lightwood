@@ -901,9 +901,7 @@ for col_name, encoder in self.encoders.items():
     feature_body = f"""
 log.info('Featurizing the data')
 
-feature_data = {{
-    key: EncodedDs(self.encoders, data, self.target) of key, data in split_data.items() if key != "stratified_on"
-}}
+feature_data = {{ key: EncodedDs(self.encoders, data, self.target) of key, data in split_data.items() if key != "stratified_on"}}
 
 """  # noqa
 
