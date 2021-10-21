@@ -6,7 +6,6 @@ import pandas as pd
 from torch.nn.functional import softmax
 
 from lightwood.api.dtype import dtype
-from lightwood.analysis.nc.icp import BaseIcp
 
 
 def t_softmax(x, t=1.0, axis=1):
