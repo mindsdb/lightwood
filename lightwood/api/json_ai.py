@@ -506,9 +506,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
             )
-            mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
-                "input_cols", "$input_cols"
-            )
             mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
                 "timeseries_settings", "$problem_definition.timeseries_settings"
             )
