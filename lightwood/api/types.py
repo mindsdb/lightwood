@@ -1,11 +1,5 @@
 # TODO: type hint the returns
-# TODO: Issue with Feature.to_dict (2021.09.13 - NS)
-# TODO: Feature, TimeSeriesSettings, ProblemDefinition, Json_AI to_dict/to_json outputs don't look correct
-# TODO: Why does TimeSeriesSettings have an encode_json flag?
-# TODO: Because from_dict intakes "obj", it's incorrectly read in docs
-# TODO: DataAnalysis needs in-doc references [NATASHA]
 # TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should be renamed df_std_target_dev  # noqa
-# TODO: How do you specify a custom accuracy function when it's a str? I'm assuming via an import
 
 from typing import Dict, List, Optional, Union
 import sys
