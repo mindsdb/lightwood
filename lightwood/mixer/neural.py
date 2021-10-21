@@ -309,7 +309,7 @@ class Neural(BaseMixer):
         :param arg: Argument for predicting
 
         :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
-        """
+        """ # noqa
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         all_probs: List[List[float]] = []
