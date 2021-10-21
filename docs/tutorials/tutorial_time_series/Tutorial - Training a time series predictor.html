@@ -451,10 +451,10 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import pandas as pd
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-df = pd.read_csv(&quot;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/monthly_sunspots/data.csv&quot;)
-df
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/monthly_sunspots/data.csv&quot;</span><span class="p">)</span>
+<span class="n">df</span>
 </pre></div>
 </div>
 </div>
@@ -556,7 +556,7 @@ df
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from lightwood.api.high_level import ProblemDefinition
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span>
 </pre></div>
 </div>
 </div>
@@ -565,14 +565,14 @@ df
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>tss = {&#39;nr_predictions&#39;: 6,   # the predictor will learn to forecast what the next semester counts will look like (6 data points at monthly intervals -&gt; 6 months)
-       &#39;order_by&#39;: [&#39;Month&#39;], # what column is used to order the entire datset
-       &#39;window&#39;: 12           # how many past values to consider for emitting predictions
-      }
+<span></span><span class="n">tss</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nr_predictions&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>   <span class="c1"># the predictor will learn to forecast what the next semester counts will look like (6 data points at monthly intervals -&gt; 6 months)</span>
+       <span class="s1">&#39;order_by&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Month&#39;</span><span class="p">],</span> <span class="c1"># what column is used to order the entire datset</span>
+       <span class="s1">&#39;window&#39;</span><span class="p">:</span> <span class="mi">12</span>           <span class="c1"># how many past values to consider for emitting predictions</span>
+      <span class="p">}</span>
 
-pdef = ProblemDefinition.from_dict({&#39;target&#39;: &#39;Sunspots&#39;,         # specify the column to forecast
-                                    &#39;timeseries_settings&#39;: tss    # pass along all time series specific parameters
-                                   })
+<span class="n">pdef</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Sunspots&#39;</span><span class="p">,</span>         <span class="c1"># specify the column to forecast</span>
+                                    <span class="s1">&#39;timeseries_settings&#39;</span><span class="p">:</span> <span class="n">tss</span>    <span class="c1"># pass along all time series specific parameters</span>
+                                   <span class="p">})</span>
 </pre></div>
 </div>
 </div>
@@ -582,12 +582,12 @@ pdef = ProblemDefinition.from_dict({&#39;target&#39;: &#39;Sunspots&#39;,       
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>cutoff = int(len(df)*0.9)
+<span></span><span class="n">cutoff</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">*</span><span class="mf">0.9</span><span class="p">)</span>
 
-train = df[:cutoff]
-test = df[cutoff:]
+<span class="n">train</span> <span class="o">=</span> <span class="n">df</span><span class="p">[:</span><span class="n">cutoff</span><span class="p">]</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">cutoff</span><span class="p">:]</span>
 
-print(train.shape, test.shape)
+<span class="nb">print</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -608,18 +608,18 @@ print(train.shape, test.shape)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from lightwood.api.high_level import (
-    json_ai_from_problem,
-    code_from_json_ai,
-    predictor_from_code
-)
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">json_ai_from_problem</span><span class="p">,</span>
+    <span class="n">code_from_json_ai</span><span class="p">,</span>
+    <span class="n">predictor_from_code</span>
+<span class="p">)</span>
 
-json_ai = json_ai_from_problem(df, problem_definition=pdef)
-code = code_from_json_ai(json_ai)
-predictor = predictor_from_code(code)
+<span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">=</span><span class="n">pdef</span><span class="p">)</span>
+<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
+<span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
-# uncomment this to see the generated code:
-# print(code)
+<span class="c1"># uncomment this to see the generated code:</span>
+<span class="c1"># print(code)</span>
 </pre></div>
 </div>
 </div>
@@ -656,7 +656,7 @@ predictor = predictor_from_code(code)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>predictor.learn(train)
+<span></span><span class="n">predictor</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -921,7 +921,7 @@ Consider using one of the following signatures instead:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>forecasts = predictor.predict(test)
+<span></span><span class="n">forecasts</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -949,7 +949,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>forecasts.iloc[[10]]
+<span></span><span class="n">forecasts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="mi">10</span><span class="p">]]</span>
 </pre></div>
 </div>
 </div>
@@ -1011,7 +1011,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import matplotlib.pyplot as plt
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
 </div>
@@ -1020,16 +1020,16 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>plt.figure(figsize=(12, 8))
-plt.plot(forecasts[&#39;truth&#39;].iloc[-24:], color=&#39;green&#39;, label=&#39;observed series&#39;)
-plt.plot([None for _ in range(forecasts.shape[0])] + forecasts.iloc[-1][&#39;prediction&#39;], color=&#39;purple&#39;, label=&#39;point prediction&#39;)
-plt.plot([None for _ in range(forecasts.shape[0])] + forecasts.iloc[-1][&#39;lower&#39;], color=&#39;grey&#39;)
-plt.plot([None for _ in range(forecasts.shape[0])] + forecasts.iloc[-1][&#39;upper&#39;], color=&#39;grey&#39;)
-plt.xlabel(&#39;timestep&#39;)
-plt.ylabel(&#39;# sunspots&#39;)
-plt.title(&quot;Forecasted amount of sunspots for the next semester&quot;)
-plt.legend()
-plt.show()
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forecasts</span><span class="p">[</span><span class="s1">&#39;truth&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">24</span><span class="p">:],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;observed series&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">forecasts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">+</span> <span class="n">forecasts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;point prediction&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">forecasts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">+</span> <span class="n">forecasts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">forecasts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">+</span> <span class="n">forecasts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;upper&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;timestep&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;# sunspots&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Forecasted amount of sunspots for the next semester&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
