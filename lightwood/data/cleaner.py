@@ -61,7 +61,8 @@ def cleaner(
 
 def _check_if_invalid(new_data: pd.Series, pct_invalid: float, col_name: str):
     """
-    Checks how many invalid data points there are.
+    Checks how many invalid data points there are. Invalid data points are flagged as "Nones" from the cleaning processs (see data/cleaner.py for default).
+    If there are too many invalid data points (specified by `pct_invalid`), then an error message will pop up. This is used as a safeguard for very messy data.
 
     :param new_data: data to check for invalid values.
     :param pct_invalid: maximum percentage of invalid values. If this threshold is surpassed, an exception is raised.
