@@ -38,16 +38,17 @@ class Neural(BaseMixer):
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
             search_hyperparameters: bool):
         """
-        The Neural mixer search the hyperparameters for and trains a fully connected neural networks to map our encoded features to the encoded outputs.
+        The Neural mixer search the hyperparameters for and trains a fully connected neural networks to map the encoded features to the encoded outputs.
 
-        This process is baed in pa
-        :param model: etc
+        :param stop_after: How long the total fitting process should take
+        :param target: Name of the target column
         :param dtype_dict: etc
-        :param target: etc
-        :param epochs_to_best: etc
-        :param fit_on_dev: etc
-        :param supports_proba: etc
-        """
+        :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.
+        :param target_encoder: Reference to the encoder used for the target
+        :param net: The network type to use (`DeafultNet` or `ArNet`)
+        :param fit_on_dev: If we should fit on the dev dataset
+        :param search_hyperparameters: If the network should run a more through hyperparameter search (currently disabled)
+        """ # noqa
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
         self.target = target
@@ -246,6 +247,12 @@ class Neural(BaseMixer):
     # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
     # @TODO: Writeup on the methodology for partial fitting
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        Fits the Neural mixer on some data, making it ready to predit
+
+        :param train_data: The EncodedDs on which to train the network
+        :param dev_data: Data used for early stopping and hyperparameter determination
+        """
         # ConcatedEncodedDs
         self.batch_size = min(200, int(len(train_data) / 10))
         self.batch_size = max(40, self.batch_size)
@@ -276,6 +283,13 @@ class Neural(BaseMixer):
         self._final_tuning(dev_data)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        Augments the mixer's fit with new data, nr of epochs is based on the amount of epochs the original fitting took
+
+        :param train_data: The EncodedDs on which to train the network
+        :param dev_data: Data used for early stopping and hyperparameter determination
+        """
+
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly # noqa
         train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
         dev_dl = DataLoader(dev_data, batch_size=self.batch_size, shuffle=True)
@@ -288,6 +302,14 @@ class Neural(BaseMixer):
 
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
+        """
+        Make predictions based on datasource similar to the one used to fit (sans the target column)
+
+        :param ds: The EncodedDs for which to generate the predictions
+        :param arg: Argument for predicting
+
+        :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
+        """
         self.model = self.model.eval()
         decoded_predictions: List[object] = []
         all_probs: List[List[float]] = []
