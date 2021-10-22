@@ -8,13 +8,17 @@ from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNo
 
 
 class ArrayEncoder(BaseEncoder):
+    """
+    Fits a normalizer for array data. To encode, `ArrayEncoder` returns a normalized window of previous data.
+    It can be used for generic arrays, as well as for handling historical target values in time series tasks.
+
+    :param stop_after: time budget in seconds.
+    :param window: expected length of array data.
+    """
+
     is_trainable_encoder: bool = True
 
     def __init__(self, stop_after: int, window: int = None, is_target: bool = False, original_type: dtype = None):
-        """
-        Fits a normalizer for a time series previous historical data.
-        When encoding, it returns a normalized window of previous data.
-        """
         super().__init__(is_target)
         self.stop_after = stop_after
         self.original_type = original_type
