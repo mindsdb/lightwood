@@ -18,7 +18,8 @@ class MFCCEncoder(BaseEncoder):
 
     def prepare(self, priming_data: pd.Series):
         self.is_prepared = True
-        ele = self.encode([str(priming_data.iloc[0])])
+        priming_data = list(priming_data)
+        ele = self.encode([str(priming_data[0])])[0]
         self.output_size = len(ele)
 
     def encode(self, column_data):
@@ -52,7 +53,7 @@ class MFCCEncoder(BaseEncoder):
                 ).reshape(-1)
 
             encoded_audio_arr.append(mfcc_coefficients)
-
+        print(encoded_audio_arr)
         return torch.Tensor(encoded_audio_arr)
 
     def decode(self, _):
