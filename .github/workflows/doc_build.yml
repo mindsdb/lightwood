@@ -1,4 +1,4 @@
-name: Lightwood tests workflow
+name: Documentation Build Lightwood
 
 on:
   push:
