@@ -17,7 +17,7 @@ from lightwood.encoder.array.array import ArrayEncoder
 from lightwood.encoder.categorical.multihot import MultiHotEncoder
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
 from lightwood.encoder.type_encoder_maps import (Array, Binary, Categorical, Date, Datetime, Float, Image, Integer,
-                                                 TimeSeries, Quantity, Rich_Text, Short_Text, Tags, Audios)
+                                                 TimeSeries, Quantity, Rich_Text, Short_Text, Tags, Audio)
 
 from lightwood.encoder.audio import MFCCEncoder
 
