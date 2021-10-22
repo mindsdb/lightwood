@@ -53,7 +53,7 @@ class MFCCEncoder(BaseEncoder):
                 ).reshape(-1)
 
             encoded_audio_arr.append(mfcc_coefficients)
-        print(encoded_audio_arr)
+
         return torch.Tensor(encoded_audio_arr)
 
     def decode(self, _):
