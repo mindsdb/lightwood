@@ -1,0 +1,92 @@
+{
+    "features": {
+        "excerpt": {
+            "encoder": {
+                "module": "Rich_Text.PretrainedLangEncoder",
+                "args": {
+                    "output_type": "$dtype_dict[$target]",
+                    "stop_after": "$problem_definition.seconds_per_encoder"
+                }
+            }
+        }
+    },
+    "outputs": {
+        "target": {
+            "data_dtype": "float",
+            "encoder": {
+                "module": "Float.NumericEncoder",
+                "args": {
+                    "is_target": "True",
+                    "positive_domain": "$statistical_analysis.positive_domain"
+                }
+            },
+            "mixers": [
+                {
+                    "module": "Neural",
+                    "args": {
+                        "fit_on_dev": true,
+                        "stop_after": "$problem_definition.seconds_per_mixer",
+                        "search_hyperparameters": true
+                    }
+                },
+                {
+                    "module": "LightGBM",
+                    "args": {
+                        "stop_after": "$problem_definition.seconds_per_mixer",
+                        "fit_on_dev": true
+                    }
+                },
+                {
+                    "module": "Regression",
+                    "args": {
+                        "stop_after": "$problem_definition.seconds_per_mixer"
+                    }
+                }
+            ],
+            "ensemble": {
+                "module": "BestOf",
+                "args": {
+                    "args": "$pred_args",
+                    "accuracy_functions": "$accuracy_functions",
+                    "ts_analysis": null
+                }
+            }
+        }
+    },
+    "problem_definition": {
+        "target": "target",
+        "pct_invalid": 2,
+        "unbias_target": true,
+        "seconds_per_mixer": 1582,
+        "seconds_per_encoder": 12749,
+        "time_aim": 7780.458037514903,
+        "target_weights": null,
+        "positive_domain": false,
+        "timeseries_settings": {
+            "is_timeseries": false,
+            "order_by": null,
+            "window": null,
+            "group_by": null,
+            "use_previous_target": true,
+            "nr_predictions": null,
+            "historical_columns": null,
+            "target_type": "",
+            "allow_incomplete_history": false
+        },
+        "anomaly_detection": true,
+        "ignore_features": [
+            "url_legal",
+            "license",
+            "standard_error"
+        ],
+        "fit_on_all": true,
+        "strict_mode": true,
+        "seed_nr": 420
+    },
+    "identifiers": {
+        "id": "Hash-like identifier"
+    },
+    "accuracy_functions": [
+        "r2_score"
+    ]
+}

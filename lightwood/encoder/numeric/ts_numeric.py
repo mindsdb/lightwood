@@ -24,9 +24,10 @@ class TsNumericEncoder(NumericEncoder):
         self.output_size = 2 if is_target else 3
 
     def encode(self, data, dependency_data={}):
-        """dependency_data: dict with grouped_by column info,
-        to retrieve the correct normalizer for each datum"""
-        if not self._prepared:
+        """
+        :param dependency_data: dict with grouped_by column info, to retrieve the correct normalizer for each datum
+        """  # noqa
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         if not dependency_data:
             group_data = {k: {'__default': [None] * len(data)} for k in self.grouped_by}
@@ -85,8 +86,8 @@ class TsNumericEncoder(NumericEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_values, dependency_data=None):
-        if not self._prepared:
+    def decode(self, encoded_values, decode_log=None, dependency_data=None):
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         ret = []

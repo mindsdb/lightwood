@@ -1,17 +1,20 @@
-import pandas as pd
-from lightwood.data.encoded_ds import EncodedDs
-from lightwood.api import dtype
-from typing import Dict, List, Set
-import numpy as np
-import optuna.integration.lightgbm as optuna_lightgbm
-import lightgbm
-import optuna
-import torch
 import time
-from lightwood.helpers.log import log
+from typing import Dict, List, Set
+
+import torch
+import optuna
+import lightgbm
+import numpy as np
+import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
+import optuna.integration.lightgbm as optuna_lightgbm
+
+from lightwood.api import dtype
+from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.helpers.device import get_devices
+from lightwood.api.types import PredictionArguments
+from lightwood.data.encoded_ds import EncodedDs
 
 
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
@@ -83,7 +86,7 @@ class LightGBM(BaseMixer):
                 else:
                     enc_col = data[subset_name]['ds'].get_encoded_column_data(input_col)
                     data[subset_name]['data'] = torch.cat((data[subset_name]['data'], enc_col.to(self.device)), 1)
-            data[subset_name]['data'] = data[subset_name]['data'].tolist()
+            data[subset_name]['data'] = data[subset_name]['data'].numpy()
 
             label_data = data[subset_name]['ds'].get_column_original_data(self.target)
 
@@ -97,7 +100,7 @@ class LightGBM(BaseMixer):
                 label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype == dtype.integer:
-                label_data = label_data.astype(int)
+                label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
             elif output_dtype in (dtype.float, dtype.quantity):
                 label_data = label_data.astype(float)
 
@@ -211,7 +214,8 @@ class LightGBM(BaseMixer):
             verbose_eval=False, init_model=self.model)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
 
-    def __call__(self, ds: EncodedDs, predict_proba: bool = False) -> pd.DataFrame:
+    def __call__(self, ds: EncodedDs,
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         data = None
         for input_col in self.input_cols:
             if data is None:
@@ -219,7 +223,7 @@ class LightGBM(BaseMixer):
             else:
                 data = torch.cat((data, ds.get_encoded_column_data(input_col).to(self.device)), 1)
 
-        data = data.tolist()
+        data = data.numpy()
         raw_predictions = self.model.predict(data)
 
         if self.ordinal_encoder is not None:
@@ -233,7 +237,7 @@ class LightGBM(BaseMixer):
 
         ydf = pd.DataFrame({'prediction': decoded_predictions})
 
-        if predict_proba and self.ordinal_encoder is not None:
+        if args.predict_proba and self.ordinal_encoder is not None:
             for idx, label in enumerate(self.ordinal_encoder.categories_[0].tolist()):
                 ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
 

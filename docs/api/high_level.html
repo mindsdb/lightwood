@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>JSON-AI Config &mdash; lightwood 1.2.0 documentation</title>
+  <title>JSON-AI Config &mdash; lightwood 1.5.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -66,7 +67,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.5.0
               </div>
             
           
@@ -91,8 +92,7 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
-<ul>
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
@@ -163,7 +163,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-api.high_level">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-api.high_level">
 <span id="json-ai-config"></span><h1>JSON-AI Config<a class="headerlink" href="#module-api.high_level" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="api.high_level.analyze_dataset">
@@ -206,7 +230,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
-<li><p><strong>problem_definition</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>) – The manual specifications for your predictive problem</p></li>
+<li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -226,7 +250,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
-<li><p><strong>problem_definition</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>) – The manual specifications for your predictive problem</p></li>
+<li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -255,6 +279,23 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.predictor_from_json_ai">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">predictor_from_json_ai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_ai</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#predictor_from_json_ai"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.predictor_from_json_ai" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a ready-to-train <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object based on the details you specified inside your JsonAI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_ai</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">JsonAI</span></code>) – A <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictorInterface</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A lightwood <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="api.high_level.predictor_from_problem">
 <span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">predictor_from_problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#predictor_from_problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.predictor_from_problem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a ready-to-train <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object from some raw data and a <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>. Do not use this if you want to edit the JsonAI first. Usually you’d want to next train this predictor by calling the <code class="docutils literal notranslate"><span class="pre">learn</span></code> method on the same dataframe used to create it.</p>
@@ -262,7 +303,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
-<li><p><strong>problem_definition</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>) – The manual specifications for your predictive problem</p></li>
+<li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>JSON-AI Config &mdash; lightwood 1.2.0 documentation</title>
+  <title>JSON-AI Config &mdash; lightwood 1.5.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.5.0
               </div>
             
           
@@ -92,18 +93,15 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
-<ul class="current">
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#the-lightwood-api-table-of-contents">The Lightwood API Table of Contents</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="types.html">Lightwood API Types</a></li>
-<li class="toctree-l3"><a class="reference internal" href="encode.html">Encode your data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">JSON-AI Config</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.json_ai.add_implicit_values">add_implicit_values</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.json_ai.code_from_json_ai">code_from_json_ai</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.json_ai.generate_json_ai">generate_json_ai</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.json_ai.lookup_encoder">lookup_encoder</a></li>
@@ -183,25 +181,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-api.json_ai">
-<span id="json-ai-config"></span><h1>JSON-AI Config<a class="headerlink" href="#module-api.json_ai" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="api.json_ai.add_implicit_values">
-<span class="sig-prename descclassname"><span class="pre">api.json_ai.</span></span><span class="sig-name descname"><span class="pre">add_implicit_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_ai</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/json_ai.html#add_implicit_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.json_ai.add_implicit_values" title="Permalink to this definition">¶</a></dt>
-<dd><p>To enable brevity in writing, auto-generate the “unspecified/missing” details required in the ML pipeline.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Params</dt>
-<dd class="field-odd"><p>json_ai: <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> object that describes the ML pipeline that may not have every detail fully specified.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonAI</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">JSONAI</span></code> object with all necessary parameters that were previously left unmentioned filled in.</p>
-</dd>
-</dl>
-</dd></dl>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
 
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-api.json_ai">
+<span id="json-ai-config"></span><h1>JSON-AI Config<a class="headerlink" href="#module-api.json_ai" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="api.json_ai.code_from_json_ai">
 <span class="sig-prename descclassname"><span class="pre">api.json_ai.</span></span><span class="sig-name descname"><span class="pre">code_from_json_ai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_ai</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/json_ai.html#code_from_json_ai"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.json_ai.code_from_json_ai" title="Permalink to this definition">¶</a></dt>
@@ -242,9 +247,9 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="api.json_ai.lookup_encoder">
-<span class="sig-prename descclassname"><span class="pre">api.json_ai.</span></span><span class="sig-name descname"><span class="pre">lookup_encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_defintion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target_predicting_encoder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/json_ai.html#lookup_encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.json_ai.lookup_encoder" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">api.json_ai.</span></span><span class="sig-name descname"><span class="pre">lookup_encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_defintion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target_predicting_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statistical_analysis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/json_ai.html#lookup_encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.json_ai.lookup_encoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign a default encoder for a given column based on its data type, and whether it is a target. Encoders intake raw (but cleaned) data and return an feature representation. This function assigns, per data type, what the featurizer should be. This function runs on each column within the dataset available for model building to assign how it should be featurized.</p>
-<p>Users may override to create a custom encoder to enable their own featurization process. However, in order to generate a template JSON-AI, this code is run first. Users may edit the generated syntax and use custom approaches while model building.</p>
+<p>Users may override to create a custom encoder to enable their own featurization process. However, in order to generate template JSON-AI, this code runs automatically. Users may edit the generated syntax and use custom approaches while model building.</p>
 <p>For each encoder, “args” may be passed. These args depend an encoder requires during its preparation call.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -271,7 +276,7 @@
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Wether the JsonAI is valid, i.e. doesn’t contain prohibited values, unknown values and can be turned into code.</p>
+<dd class="field-odd"><p>Whether the JsonAI is valid, i.e. doesn’t contain prohibited values, unknown values and can be turned into code.</p>
 </dd>
 </dl>
 </dd></dl>

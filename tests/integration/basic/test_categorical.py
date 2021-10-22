@@ -28,15 +28,15 @@ class TestBasic(unittest.TestCase):
                 assert 'prediction' in predictions.columns
                 assert 'confidence' in predictions.columns
 
-                predictions = predictor.predict_proba(test)
+                predictions = predictor.predict(test, args={'predict_proba': True})
 
                 for label in df[target].unique():
                     assert f'__mdb_proba_{label}' in predictions.columns
         return predictor
 
     def test_0_binary(self):
-        df = pd.read_csv('tests/data/adult.csv')[:100]
-        target = 'income'
+        df = pd.read_csv('tests/data/ionosphere.csv')[:100]
+        target = 'target'
         predictor = self.setup_predictor(df, target)
         predictions = predictor.predict(df)
         acc = balanced_accuracy_score(df[target], predictions['prediction'])
@@ -51,3 +51,7 @@ class TestBasic(unittest.TestCase):
 
         self.assertTrue(balanced_accuracy_score(df[target].astype(int), predictions['prediction'].astype(int)) > 0.9)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
+
+        # test predict all mixers with some data
+        predictions = predictor.predict(df[:10], args={'all_mixers': True})
+        assert '__mdb_mixer_Neural' in predictions.columns

@@ -1,10 +1,11 @@
-name: Lightwood tests workflow
+name: Integration and Unit Tests Lightwood
 
 on:
   push:
   pull_request:
     branches:
       - stable
+      - staging
 
 jobs:
   test:

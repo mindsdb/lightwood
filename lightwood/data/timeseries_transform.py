@@ -15,6 +15,25 @@ from lightwood.api import dtype
 def transform_timeseries(
         data: pd.DataFrame, dtype_dict: Dict[str, str],
         timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
+    """
+    Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.
+    
+    The main transformations performed by this block are:
+      - Type casting (e.g. to numerical for `order_by` columns).
+      - Windowing functions for historical context based on `TimeseriesSettings.window` parameter.
+      - Explicitly add target columns according to the `TimeseriesSettings.nr_predictions` parameter.
+      - Flag all rows that are "predictable" based on all `TimeseriesSettings`.
+      - Plus, handle all logic for the streaming use case (where forecasts are only emitted for the last observed data point).
+    
+    :param data: Dataframe with data to transform.
+    :param dtype_dict: Dictionary with the types of each column.
+    :param timeseries_settings: A `TimeseriesSettings` object.
+    :param target: The name of the target column to forecast.
+    :param mode: Either "train" or "predict", depending on what phase is calling this procedure.
+    
+    :return: A dataframe with all the transformations applied.
+    """  # noqa
+
     tss = timeseries_settings
     original_df = copy.deepcopy(data)
     gb_arr = tss.group_by if tss.group_by is not None else []
@@ -57,7 +76,6 @@ def transform_timeseries(
                     try:
                         row[col] = dateutil.parser.parse(
                             row[col],
-                            # transaction.lmd.get('dateutil_parser_kwargs_per_column', {}).get(col, {}) # @TODO
                             **{}
                         )
                     except (TypeError, ValueError):
@@ -100,10 +118,10 @@ def transform_timeseries(
         # Make type `object` so that dataframe cells can be python lists
         df_arr = pool.map(partial(_ts_to_obj, historical_columns=ob_arr + tss.historical_columns), df_arr)
         df_arr = pool.map(partial(_ts_order_col_to_cell_lists,
-                          historical_columns=ob_arr + tss.historical_columns), df_arr)
+                          order_cols=ob_arr + tss.historical_columns), df_arr)
         df_arr = pool.map(
             partial(
-                _ts_add_previous_rows, historical_columns=ob_arr + tss.historical_columns, window=window),
+                _ts_add_previous_rows, order_cols=ob_arr + tss.historical_columns, window=window),
             df_arr)
 
         df_arr = pool.map(partial(_ts_add_future_target, target=target, nr_predictions=tss.nr_predictions,
@@ -112,23 +130,20 @@ def transform_timeseries(
 
         if tss.use_previous_target:
             df_arr = pool.map(
-                partial(
-                    _ts_add_previous_target, target=target,
-                    window=tss.window, data_dtype=tss.target_type),
+                partial(_ts_add_previous_target, target=target, window=tss.window),
                 df_arr)
         pool.close()
         pool.join()
     else:
         for i in range(n_groups):
             df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
-            df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
+            df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], order_cols=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
-                                              historical_columns=ob_arr + tss.historical_columns, window=window)
+                                              order_cols=ob_arr + tss.historical_columns, window=window)
             df_arr[i] = _ts_add_future_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions,
                                               data_dtype=tss.target_type, mode=mode)
             if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window,
-                                                    data_dtype=tss.target_type)
+                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window)
 
     combined_df = pd.concat(df_arr)
 
@@ -179,7 +194,16 @@ def transform_timeseries(
     return combined_df
 
 
-def _ts_infer_next_row(df, ob, last_index):
+def _ts_infer_next_row(df: pd.DataFrame, ob: str, last_index: int) -> pd.DataFrame:
+    """
+    Adds an inferred next row for streaming mode purposes.
+
+    :param df: dataframe from which next row is inferred.
+    :param ob: `order_by` column.
+    :param last_index: index number of the latest row in `df`.
+
+    :return: Modified `df` with the inferred row appended to it.
+    """
     last_row = df.iloc[[-1]].copy()
     if df.shape[0] > 1:
         butlast_row = df.iloc[[-2]]
@@ -194,26 +218,54 @@ def _ts_infer_next_row(df, ob, last_index):
     return df.append(last_row)
 
 
-def _make_pred(row):
+def _make_pred(row) -> bool:
+    """
+    Indicates whether a prediction should be made for `row` or not.
+    """
     return not hasattr(row, '__mdb_make_predictions') or row.make_predictions
 
 
-def _ts_to_obj(df, historical_columns):
+def _ts_to_obj(df: pd.DataFrame, historical_columns: list) -> pd.DataFrame:
+    """
+    Casts all historical columns in a dataframe to `object` type.
+
+    :param df: Input dataframe
+    :param historical_columns: Historical columns to type cast
+
+    :return: Dataframe with `object`-typed historical columns
+    """
     for hist_col in historical_columns:
         df.loc[:, hist_col] = df[hist_col].astype(object)
     return df
 
 
-def _ts_order_col_to_cell_lists(df, historical_columns):
-    for order_col in historical_columns:
+def _ts_order_col_to_cell_lists(df: pd.DataFrame, order_cols: list) -> pd.DataFrame:
+    """
+    Casts all data in `order_by` columns into cells.
+
+    :param df: Input dataframe
+    :param order_cols: `order_by` columns
+
+    :return: Dataframe with all `order_cols` modified so that their values are cells, e.g. `1` -> `[1]`
+    """
+    for order_col in order_cols:
         for ii in range(len(df)):
             label = df.index.values[ii]
             df.at[label, order_col] = [df.at[label, order_col]]
     return df
 
 
-def _ts_add_previous_rows(df, historical_columns, window):
-    for order_col in historical_columns:
+def _ts_add_previous_rows(df: pd.DataFrame, order_cols: list, window: int) -> pd.DataFrame:
+    """
+    Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of all `order_by` columns.
+
+    :param df: Input dataframe.
+    :param order_cols: `order_by` columns.
+    :param window: value of `TimeseriesSettings.window` parameter.
+    
+    :return: Dataframe with all `order_cols` modified so that their values are now arrays of historical context.
+    """  # noqa
+    for order_col in order_cols:
         for i in range(len(df)):
             previous_indexes = [*range(max(0, i - window), i)]
 
@@ -231,7 +283,16 @@ def _ts_add_previous_rows(df, historical_columns, window):
     return df
 
 
-def _ts_add_previous_target(df, target, window, data_dtype):
+def _ts_add_previous_target(df: pd.DataFrame, target: str, window: int) -> pd.DataFrame:
+    """
+    Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the target column.
+
+    :param df: Input dataframe.
+    :param target: target column name.
+    :param window: value of `TimeseriesSettings.window` parameter.
+
+    :return: Dataframe with new `__mdb_ts_previous_{target}` column that contains historical target context.
+    """  # noqa
     if target not in df:
         return df
     previous_target_values = list(df[target])
@@ -250,6 +311,17 @@ def _ts_add_previous_target(df, target, window, data_dtype):
 
 
 def _ts_add_future_target(df, target, nr_predictions, data_dtype, mode):
+    """
+    Adds as many columns to the input dataframe as the forecasting horizon asks for (as determined by `TimeseriesSettings.nr_predictions`).
+
+    :param df: Input dataframe.
+    :param target: target column name.
+    :param nr_predictions: value of `TimeseriesSettings.nr_predictions` parameter.
+    :param data_dtype: dictionary with types of all input columns
+    :param mode: either "train" or "predict". `Train` will drop rows with incomplet target info. `Predict` has no effect, for now.
+
+    :return: Dataframe with new `{target}_timestep_{i}'` columns that contains target labels at timestep `i` of a total `TimeseriesSettings.nr_predictions`.
+    """  # noqa
     if target not in df:
         return df
     if data_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):

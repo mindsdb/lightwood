@@ -25,20 +25,21 @@ class TsArrayNumericEncoder(BaseEncoder):
         self.output_size = self.data_window * self.sub_encoder.output_size
 
     def prepare(self, priming_data):
-        if self._prepared:
+        if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         self.sub_encoder.prepare(priming_data)
-        self._prepared = True
+        self.is_prepared = True
 
     def encode(self, data, dependency_data={}):
-        """dependency_data: dict with grouped_by column info,
-        to retrieve the correct normalizer for each datum
-        :return tensor with shape (batch, NxK) where N: self.data_window and K: sub-encoder # of output features"""
+        """
+        :param dependency_data: dict with grouped_by column info, to retrieve the correct normalizer for each datum
+        :return: tensor with shape (batch, NxK) where N: self.data_window and K: sub-encoder # of output features
+        """  # noqa
         if not self.sub_encoder.normalizers:
             self.sub_encoder.normalizers = self.normalizers
 
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         if not dependency_data:
             dependency_data = {'__default': [None] * len(data)}
@@ -56,7 +57,7 @@ class TsArrayNumericEncoder(BaseEncoder):
         return ret
 
     def decode(self, encoded_values, dependency_data=None, return_all=False):
-        if not self._prepared:
+        if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         encoded_values = encoded_values.reshape(encoded_values.shape[0],

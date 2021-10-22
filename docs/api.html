@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>API Module &mdash; lightwood 1.2.0 documentation</title>
+  <title>API Module &mdash; lightwood 1.5.0 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                1.2.0
+                1.5.0
               </div>
             
           
@@ -93,15 +94,13 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
-<ul class="current">
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-lightwood-api-table-of-contents">The Lightwood API Table of Contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/dtype.html">Data Types (dtypes)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/types.html">Lightwood API Types</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/encode.html">Encode your data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/predictor.html">Predictor Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/json_ai.html">JSON-AI Config</a></li>
 </ul>
@@ -175,7 +174,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-module">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="api-module">
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code><a class="headerlink" href="#api-module" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="the-lightwood-api-table-of-contents">
 <h2>The Lightwood API Table of Contents<a class="headerlink" href="#the-lightwood-api-table-of-contents" title="Permalink to this headline">¶</a></h2>
@@ -185,7 +208,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/dtype.html">Data Types (dtypes)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/types.html">Lightwood API Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/encode.html">Encode your data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/predictor.html">Predictor Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/json_ai.html">JSON-AI Config</a></li>
 </ul>

@@ -9,10 +9,24 @@ from sklearn.metrics import mean_absolute_error
 
 from lightwood.api.dtype import dtype
 from lightwood.mixer import BaseMixer
+from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
 class Normalizer(BaseMixer):
+    """
+    Companion class to the confidence estimation analysis block. A normalizer is a secondary machine learning model
+    tasked with learning to estimate the "difficulty" that the main predictor will have with any problem instance.
+
+    The idea is that this model should emit higher scores for tougher predictions. All scores will be passed as a
+    normalizing factor to the conformal prediction framework, thus:
+      - widening bounds at the same confidence level if a prediction is harder
+      - tightening bounds at the same confidence level if a predictions is easier
+      
+    Reference:
+        Papadopoulos, H., Gammerman, A., & Vovk, V. (2008). Normalized nonconformity measures for regression Conformal Prediction.
+
+    """  # noqa
     def __init__(self, fit_params: dict):
         super(Normalizer, self).__init__(stop_after=fit_params['stop_after'])
 
@@ -23,7 +37,7 @@ class Normalizer(BaseMixer):
         self.target_dtype = fit_params['dtype_dict'][fit_params['target']]
         self.multi_ts_task = fit_params['is_multi_ts']
 
-        self.model = Ridge()
+        self.model = Ridge()  # @TODO: enable underlying model selection from JsonAI
         self.prepared = False
         self.prediction_cache = None
         self.bounds = (0.5, 1.5)
@@ -31,7 +45,8 @@ class Normalizer(BaseMixer):
 
     def fit(self, data: EncodedDs) -> None:
         try:
-            preds = self.base_predictor(data, predict_proba=True)
+            data = ConcatedEncodedDs(data)
+            preds = self.base_predictor(data, args=PredictionArguments.from_dict({'predict_proba': True}))
             truths = data.data_frame[self.target]
             labels = self.get_labels(preds, truths.values, data.encoders[self.target])
             enc_data = data.get_encoded_data(include_target=False).numpy()
@@ -40,7 +55,7 @@ class Normalizer(BaseMixer):
         except Exception:
             pass
 
-    def __call__(self, ds: Union[ConcatedEncodedDs, torch.Tensor], predict_proba: bool = False) -> np.ndarray:
+    def __call__(self, ds: Union[ConcatedEncodedDs, torch.Tensor], args: PredictionArguments) -> np.ndarray:
         if isinstance(ds, ConcatedEncodedDs):
             ds = ds.get_encoded_data(include_target=False)
 

@@ -6,6 +6,7 @@ from lightwood.api import dtype
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.lightgbm import LightGBM
+from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
@@ -51,8 +52,9 @@ class LightGBMArray(BaseMixer):
 
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
-    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], predict_proba: bool = False) -> pd.DataFrame:
-        if predict_proba:
+    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
+                 args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
+        if args.predict_proba:
             log.warning('This model does not output probability estimates')
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
@@ -61,7 +63,7 @@ class LightGBMArray(BaseMixer):
                            columns=[f'prediction_{i}' for i in range(self.n_ts_predictions)])
 
         for timestep in range(self.n_ts_predictions):
-            ydf[f'prediction_{timestep}'] = self.models[timestep](ds)
+            ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)
 
         ydf['prediction'] = ydf.values.tolist()
         return ydf[['prediction']]

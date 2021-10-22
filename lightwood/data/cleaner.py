@@ -30,7 +30,7 @@ def cleaner(
     custom_cleaning_functions: Dict[str, str] = {}
 ) -> pd.DataFrame:
     """
-    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standaridzed type and all malformed or otherwise missing or invalid elements are turned into ``None``
+    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``
 
     :param data: The raw data
     :param dtype_dict: Type information for each column
@@ -48,18 +48,27 @@ def cleaner(
                            anomaly_detection, dtype_dict)
 
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
+
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
         data[col] = data[col].replace(to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None)
-        # If a column has too many None values, raise an Excpetion
-        # Figure out how to reintroduce later, maybe a custom flag, `crash for too much invalid data`?
+
+        # If a column has too many None values, raise an Exception
         # _check_if_invalid(data[col], pct_invalid, col)
     return data
 
 
-def _check_if_invalid(new_data: pd.Series, pct_invalid: float, col_name: str) -> bool:
-    """ Checks how many invalid data points there are """
+def _check_if_invalid(new_data: pd.Series, pct_invalid: float, col_name: str):
+    """
+    Checks how many invalid data points there are. Invalid data points are flagged as "Nones" from the cleaning processs (see data/cleaner.py for default).
+    If there are too many invalid data points (specified by `pct_invalid`), then an error message will pop up. This is used as a safeguard for very messy data.
+
+    :param new_data: data to check for invalid values.
+    :param pct_invalid: maximum percentage of invalid values. If this threshold is surpassed, an exception is raised.
+    :param col_name: name of the column to analyze.
+
+    """  # noqa
 
     chk_invalid = (
         100
@@ -190,7 +199,7 @@ def _standardize_array(element: object) -> Optional[Union[List[float], float]]:
 
 def _clean_float(element: object) -> Optional[float]:
     """
-    Given an element, converts it into a numeric format. If element is NaN, or inf, then returns None.
+    Given an element, converts it into float numeric format. If element is NaN, or inf, then returns None.
     """
     try:
         cleaned_float = text.clean_float(element)
@@ -202,6 +211,9 @@ def _clean_float(element: object) -> Optional[float]:
 
 
 def _clean_int(element: object) -> Optional[int]:
+    """
+    Given an element, converts it into integer numeric format. If element is NaN, or inf, then returns None.
+    """
     element = _clean_float(element)
     if element is not None:
         element = int(element)
@@ -209,14 +221,23 @@ def _clean_int(element: object) -> Optional[int]:
 
 
 def _clean_quantity(element: object) -> Optional[float]:
+    """
+    Given a quantity, clean and convert it into float numeric format. If element is NaN, or inf, then returns None.
+    """
     element = float(re.sub("[^0-9.,]", "", str(element)).replace(",", "."))
     return _clean_float(element)
 
 
+# ------------------------- #
+# Text
+# ------------------------- #
 def _clean_text(element: object) -> str:
     return str(element)
 
 
+# ------------------------- #
+# Other helpers
+# ------------------------- #
 def _rm_rows_w_empty_targets(df: pd.DataFrame, target: str) -> pd.DataFrame:
     """
     Drop any rows that have targets as unknown. Targets are necessary to train.
