@@ -28,9 +28,9 @@ class MFCCEncoder(BaseEncoder):
                 y, _ = read_from_path_or_url(path, librosa.load)
             except Exception as e:
                 log.error(f'Unable to read audio file {path}, error: {e}')
-                y = encoded_audio_arr = [0] * self.output_size
+                encoded_audio_arr = [0] * self.output_size
                 continue
-            
+
             # If the durations of the audio samples are highly variable, the
             # same coefficients will refer to time buckets of different lenghts.
             # This means that a model will find difficult to use temporal
