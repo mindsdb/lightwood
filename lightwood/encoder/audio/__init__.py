@@ -1,4 +1,7 @@
-from lightwood.encoder.audio.amplitude_ts import AmplitudeTsEncoder
+# This encoder is optional since it's underlying dependency (librosa) needs system dependencies
+try:
+    from lightwood.encoder.audio.mfcc import MFCCEncoder
+except Exception:
+    MFCCEncoder = None
 
-
-__all__ = ['AmplitudeTsEncoder']
+__all__ = ['MFCCEncoder']

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorial - Implementing a custom analysis block in Lightwood &mdash; lightwood 1.4.0 documentation</title>
+  <title>Tutorial - Implementing a custom analysis block in Lightwood &mdash; lightwood 1.5.0 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                1.4.0
+                1.5.0
               </div>
             
           
@@ -454,10 +454,10 @@ actually estimate the confidence in any given prediction.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from typing import Dict, Tuple
-import pandas as pd
-import lightwood
-lightwood.__version__
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">lightwood</span>
+<span class="n">lightwood</span><span class="o">.</span><span class="n">__version__</span>
 </pre></div>
 </div>
 </div>
@@ -481,20 +481,20 @@ lightwood.__version__
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from lightwood.analysis import BaseAnalysisBlock
+<span></span><span class="kn">from</span> <span class="nn">lightwood.analysis</span> <span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
 
-class ModelCorrelationHeatmap(BaseAnalysisBlock):
-    def __init__(self):
-        super().__init__()
+<span class="k">class</span> <span class="nc">ModelCorrelationHeatmap</span><span class="p">(</span><span class="n">BaseAnalysisBlock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-    def analyze(self, info: Dict[str, object], **kwargs) -&gt; Dict[str, object]:
-        return info
+    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">info</span>
 
-    def explain(self,
-                row_insights: pd.DataFrame,
-                global_insights: Dict[str, object], **kwargs) -&gt; Tuple[pd.DataFrame, Dict[str, object]]:
+    <span class="k">def</span> <span class="nf">explain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">row_insights</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                <span class="n">global_insights</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]:</span>
 
-        return row_insights, global_insights
+        <span class="k">return</span> <span class="n">row_insights</span><span class="p">,</span> <span class="n">global_insights</span>
 </pre></div>
 </div>
 </div>
@@ -503,7 +503,7 @@ class ModelCorrelationHeatmap(BaseAnalysisBlock):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>ModelCorrelationHeatmap()
+<span></span><span class="n">ModelCorrelationHeatmap</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -523,12 +523,12 @@ class ModelCorrelationHeatmap(BaseAnalysisBlock):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>class ModelCorrelationHeatmap(BaseAnalysisBlock):
-    def __init__(self):
-        super().__init__()
+<span></span><span class="k">class</span> <span class="nc">ModelCorrelationHeatmap</span><span class="p">(</span><span class="n">BaseAnalysisBlock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-    def analyze(self, info: Dict[str, object], **kwargs) -&gt; Dict[str, object]:
-        return info
+    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">info</span>
 </pre></div>
 </div>
 </div>
@@ -542,23 +542,23 @@ class ModelCorrelationHeatmap(BaseAnalysisBlock):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>kwargs = {
-        &#39;predictor&#39;: &#39;lightwood.ensemble.BaseEnsemble&#39;,
-        &#39;target&#39;: &#39;str&#39;,
-        &#39;input_cols&#39;: &#39;list&#39;,
-        &#39;dtype_dict&#39;: &#39;dict&#39;,
-        &#39;normal_predictions&#39;: &#39;pd.DataFrame&#39;,
-        &#39;data&#39;: &#39;pd.DataFrame&#39;,
-        &#39;train_data&#39;: &#39;lightwood.data.encoded_ds.EncodedDs&#39;,
-        &#39;encoded_val_data&#39;: &#39;lightwood.data.encoded_ds.EncodedDs&#39;,
-        &#39;is_classification&#39;: &#39;bool&#39;,
-        &#39;is_numerical&#39;: &#39;bool&#39;,
-        &#39;is_multi_ts&#39;: &#39;bool&#39;,
-        &#39;stats_info&#39;: &#39;lightwood.api.types.StatisticalAnalysis&#39;,
-        &#39;ts_cfg&#39;: &#39;lightwood.api.types.TimeseriesSettings&#39;,
-        &#39;accuracy_functions&#39;: &#39;list&#39;,
-        &#39;has_pretrained_text_enc&#39;: &#39;bool&#39;
-}
+<span></span><span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;predictor&#39;</span><span class="p">:</span> <span class="s1">&#39;lightwood.ensemble.BaseEnsemble&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;input_cols&#39;</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dtype_dict&#39;</span><span class="p">:</span> <span class="s1">&#39;dict&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;normal_predictions&#39;</span><span class="p">:</span> <span class="s1">&#39;pd.DataFrame&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="s1">&#39;pd.DataFrame&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;train_data&#39;</span><span class="p">:</span> <span class="s1">&#39;lightwood.data.encoded_ds.EncodedDs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;encoded_val_data&#39;</span><span class="p">:</span> <span class="s1">&#39;lightwood.data.encoded_ds.EncodedDs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;is_classification&#39;</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;is_numerical&#39;</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;is_multi_ts&#39;</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;stats_info&#39;</span><span class="p">:</span> <span class="s1">&#39;lightwood.api.types.StatisticalAnalysis&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ts_cfg&#39;</span><span class="p">:</span> <span class="s1">&#39;lightwood.api.types.TimeseriesSettings&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;accuracy_functions&#39;</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;has_pretrained_text_enc&#39;</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -574,39 +574,39 @@ class ModelCorrelationHeatmap(BaseAnalysisBlock):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from typing import Dict
-from types import SimpleNamespace
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
 
-import numpy as np
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-from lightwood.ensemble import BestOf
-from lightwood.analysis import BaseAnalysisBlock
+<span class="kn">from</span> <span class="nn">lightwood.ensemble</span> <span class="kn">import</span> <span class="n">BestOf</span>
+<span class="kn">from</span> <span class="nn">lightwood.analysis</span> <span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
 
 
-class ModelCorrelationHeatmap(BaseAnalysisBlock):
-    def __init__(self):
-        super().__init__()
+<span class="k">class</span> <span class="nc">ModelCorrelationHeatmap</span><span class="p">(</span><span class="n">BaseAnalysisBlock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-    def analyze(self, info: Dict[str, object], **kwargs) -&gt; Dict[str, object]:
-        ns = SimpleNamespace(**kwargs)
+    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        # only triggered with the right type of ensemble
-        if isinstance(ns.predictor, BestOf):
+        <span class="c1"># only triggered with the right type of ensemble</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ns</span><span class="o">.</span><span class="n">predictor</span><span class="p">,</span> <span class="n">BestOf</span><span class="p">):</span>
 
-            # store prediction from every mixer
-            all_predictions = []
+            <span class="c1"># store prediction from every mixer</span>
+            <span class="n">all_predictions</span> <span class="o">=</span> <span class="p">[]</span>
 
-            for mixer in ns.predictor.mixers:
-                predictions = mixer(ns.encoded_val_data).values  # retrieve np.ndarray from the returned pd.DataFrame
-                all_predictions.append(predictions.flatten().astype(int))  # flatten and cast labels to int
+            <span class="k">for</span> <span class="n">mixer</span> <span class="ow">in</span> <span class="n">ns</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">mixers</span><span class="p">:</span>
+                <span class="n">predictions</span> <span class="o">=</span> <span class="n">mixer</span><span class="p">(</span><span class="n">ns</span><span class="o">.</span><span class="n">encoded_val_data</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># retrieve np.ndarray from the returned pd.DataFrame</span>
+                <span class="n">all_predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>  <span class="c1"># flatten and cast labels to int</span>
 
-            # calculate correlation matrix
-            corrs = np.corrcoef(np.array(all_predictions))
+            <span class="c1"># calculate correlation matrix</span>
+            <span class="n">corrs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_predictions</span><span class="p">))</span>
 
-            # save inside `info` object
-            info[&#39;mixer_correlation&#39;] = corrs
+            <span class="c1"># save inside `info` object</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;mixer_correlation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrs</span>
 
-        return info
+        <span class="k">return</span> <span class="n">info</span>
 
 </pre></div>
 </div>
@@ -634,25 +634,25 @@ class ModelCorrelationHeatmap(BaseAnalysisBlock):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> <span class="n">json_ai_from_problem</span>
 
-# read dataset
-df = pd.read_csv(&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/hdi.csv&#39;)
+<span class="c1"># read dataset</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/hdi.csv&#39;</span><span class="p">)</span>
 
-# define the predictive task
-pdef = ProblemDefinition.from_dict({
-    &#39;target&#39;: &#39;Development Index&#39;,         # column you want to predict
-    &#39;time_aim&#39;: 100,
-})
+<span class="c1"># define the predictive task</span>
+<span class="n">pdef</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Development Index&#39;</span><span class="p">,</span>         <span class="c1"># column you want to predict</span>
+    <span class="s1">&#39;time_aim&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+<span class="p">})</span>
 
-# generate the Json AI intermediate representation from the data and its corresponding settings
-json_ai = json_ai_from_problem(df, problem_definition=pdef)
+<span class="c1"># generate the Json AI intermediate representation from the data and its corresponding settings</span>
+<span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">=</span><span class="n">pdef</span><span class="p">)</span>
 
-# add the custom list of analysis blocks; in this case, composed of a single block
-json_ai.analysis_blocks = [{
-    &#39;module&#39;: &#39;model_correlation.ModelCorrelationHeatmap&#39;,
-    &#39;args&#39;: {}
-}]
+<span class="c1"># add the custom list of analysis blocks; in this case, composed of a single block</span>
+<span class="n">json_ai</span><span class="o">.</span><span class="n">analysis_blocks</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;model_correlation.ModelCorrelationHeatmap&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{}</span>
+<span class="p">}]</span>
 </pre></div>
 </div>
 </div>
@@ -698,7 +698,7 @@ model_correlation
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>json_ai.analysis_blocks
+<span></span><span class="n">json_ai</span><span class="o">.</span><span class="n">analysis_blocks</span>
 </pre></div>
 </div>
 </div>
@@ -717,12 +717,12 @@ model_correlation
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from lightwood.api.high_level import code_from_json_ai, predictor_from_code
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">code_from_json_ai</span><span class="p">,</span> <span class="n">predictor_from_code</span>
 
-code = code_from_json_ai(json_ai)
-predictor = predictor_from_code(code)
+<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
+<span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
-predictor.learn(df)
+<span class="n">predictor</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -859,28 +859,28 @@ INFO:lightwood-53131:Model now has a total of 880 weak estimators
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import matplotlib.pyplot as plt
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-mc = predictor.runtime_analyzer[&#39;mixer_correlation&#39;]  # newly produced insight
+<span class="n">mc</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">runtime_analyzer</span><span class="p">[</span><span class="s1">&#39;mixer_correlation&#39;</span><span class="p">]</span>  <span class="c1"># newly produced insight</span>
 
-mixer_names = [c.__class__.__name__ for c in predictor.ensemble.mixers]
+<span class="n">mixer_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">predictor</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">mixers</span><span class="p">]</span>
 
-# plotting code
-fig, ax = plt.subplots()
-im = ax.imshow(mc, cmap=&#39;seismic&#39;)
+<span class="c1"># plotting code</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mc</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;seismic&#39;</span><span class="p">)</span>
 
-# set ticks
-ax.set_xticks(np.arange(mc.shape[0]))
-ax.set_yticks(np.arange(mc.shape[1]))
+<span class="c1"># set ticks</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
-# set tick labels
-ax.set_xticklabels(mixer_names)
-ax.set_yticklabels(mixer_names)
+<span class="c1"># set tick labels</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">mixer_names</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">mixer_names</span><span class="p">)</span>
 
-# show cell values
-for i in range(len(mixer_names)):
-    for j in range(len(mixer_names)):
-        text = ax.text(j, i, round(mc[i, j], 3), ha=&quot;center&quot;, va=&quot;center&quot;, color=&quot;w&quot;)
+<span class="c1"># show cell values</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mixer_names</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mixer_names</span><span class="p">)):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">mc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
 
 </pre></div>
 </div>

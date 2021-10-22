@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.high_level &mdash; lightwood 1.4.0 documentation</title>
+  <title>api.high_level &mdash; lightwood 1.5.0 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.4.0
+                1.5.0
               </div>
             
           
@@ -340,6 +340,19 @@
         <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">temp_module</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">temp_module</span>
+
+
+<div class="viewcode-block" id="predictor_from_json_ai"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_json_ai">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a ready-to-train ``Predictor`` object based on the details you specified inside your JsonAI.</span>
+
+<span class="sd">    :param json_ai: A ``JsonAI`` object</span>
+
+<span class="sd">    :returns: A lightwood ``Predictor`` object</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
+    <span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">predictor</span></div>
 </pre></div>
 
            </div>

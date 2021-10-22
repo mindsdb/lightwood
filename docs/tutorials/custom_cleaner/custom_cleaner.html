@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Using your own pre-processing methods in Lightwood &mdash; lightwood 1.4.0 documentation</title>
+  <title>Using your own pre-processing methods in Lightwood &mdash; lightwood 1.5.0 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                1.4.0
+                1.5.0
               </div>
             
           
@@ -450,21 +450,21 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>import numpy as np
-import pandas as pd
-import torch
-import nltk
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
 
-import os
-import sys
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
-# Lightwood modules
-import lightwood as lw
-from lightwood import ProblemDefinition, \
-                      JsonAI, \
-                      json_ai_from_problem, \
-                      code_from_json_ai, \
-                      predictor_from_code
+<span class="c1"># Lightwood modules</span>
+<span class="kn">import</span> <span class="nn">lightwood</span> <span class="k">as</span> <span class="nn">lw</span>
+<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> \
+                      <span class="n">JsonAI</span><span class="p">,</span> \
+                      <span class="n">json_ai_from_problem</span><span class="p">,</span> \
+                      <span class="n">code_from_json_ai</span><span class="p">,</span> \
+                      <span class="n">predictor_from_code</span>
 </pre></div>
 </div>
 </div>
@@ -476,12 +476,12 @@ from lightwood import ProblemDefinition, \
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Load the data
-ddir = &quot;data/&quot;
-filename = os.path.join(ddir, &quot;train.csv.zip&quot;)
+<span></span><span class="c1"># Load the data</span>
+<span class="n">ddir</span> <span class="o">=</span> <span class="s2">&quot;data/&quot;</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ddir</span><span class="p">,</span> <span class="s2">&quot;train.csv.zip&quot;</span><span class="p">)</span>
 
-data = pd.read_csv(filename)
-data.head()
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -578,14 +578,14 @@ data.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Setup the problem definition
-problem_definition = {
-    &#39;target&#39;: &#39;target&#39;,
-    &quot;ignore_features&quot;: [&quot;url_legal&quot;, &quot;license&quot;, &quot;standard_error&quot;]
-}
+<span></span><span class="c1"># Setup the problem definition</span>
+<span class="n">problem_definition</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span>
+    <span class="s2">&quot;ignore_features&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;url_legal&quot;</span><span class="p">,</span> <span class="s2">&quot;license&quot;</span><span class="p">,</span> <span class="s2">&quot;standard_error&quot;</span><span class="p">]</span>
+<span class="p">}</span>
 
-# Generate the j{ai}son syntax
-default_json = json_ai_from_problem(data, problem_definition)
+<span class="c1"># Generate the j{ai}son syntax</span>
+<span class="n">default_json</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
 
 </pre></div>
 </div>
@@ -636,7 +636,7 @@ MyCustomSplitter
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>print(default_json.to_json())
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">default_json</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -726,7 +726,7 @@ MyCustomSplitter
             &#34;license&#34;,
             &#34;standard_error&#34;
         ],
-        &#34;fit_on_validation&#34;: true,
+        &#34;fit_on_all&#34;: true,
         &#34;strict_mode&#34;: true,
         &#34;seed_nr&#34;: 420
     },
@@ -747,8 +747,8 @@ ingredients for our ML pipeline.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>with open(&quot;default.json&quot;, &quot;w&quot;) as fp:
-   fp.write(default_json.to_json())
+<span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;default.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+   <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">default_json</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -902,18 +902,18 @@ def cleaner(
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Make changes to your JSON-file and load the custom version
-with open(&#39;custom.json&#39;, &#39;r&#39;) as fp:
-   modified_json = JsonAI.from_json(fp.read())
+<span></span><span class="c1"># Make changes to your JSON-file and load the custom version</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+   <span class="n">modified_json</span> <span class="o">=</span> <span class="n">JsonAI</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
-#Generate python code that fills in your pipeline
-code = code_from_json_ai(modified_json)
+<span class="c1">#Generate python code that fills in your pipeline</span>
+<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">modified_json</span><span class="p">)</span>
 
-print(code)
+<span class="nb">print</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
-# Save code to a file (Optional)
-with open(&#39;custom_cleaner_pipeline.py&#39;, &#39;w&#39;) as fp:
-    fp.write(code)
+<span class="c1"># Save code to a file (Optional)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom_cleaner_pipeline.py&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1000,7 +1000,7 @@ class Predictor(PredictorInterface):
                 },
                 &#34;anomaly_detection&#34;: True,
                 &#34;ignore_features&#34;: [&#34;url_legal&#34;, &#34;license&#34;, &#34;standard_error&#34;],
-                &#34;fit_on_validation&#34;: True,
+                &#34;fit_on_all&#34;: True,
                 &#34;strict_mode&#34;: True,
                 &#34;seed_nr&#34;: 420,
             }
@@ -1297,10 +1297,10 @@ class Predictor(PredictorInterface):
         # ------------------------ #
         # Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.
         # This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.
-        # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
+        # SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.
 
         # Update the mixers with partial fit
-        if self.problem_definition.fit_on_validation:
+        if self.problem_definition.fit_on_all:
 
             log.info(&#34;Adjustment on validation requested.&#34;)
             update_data = {
@@ -1409,8 +1409,8 @@ class Predictor(PredictorInterface):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Turn the code above into a predictor object
-predictor = predictor_from_code(code)
+<span></span><span class="c1"># Turn the code above into a predictor object</span>
+<span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1430,10 +1430,10 @@ MyCustomSplitter
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span># Pre-process the data
-cleaned_data = predictor.preprocess(data)
+<span></span><span class="c1"># Pre-process the data</span>
+<span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-cleaned_data.head()
+<span class="n">cleaned_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1510,13 +1510,13 @@ INFO:lightwood-50752:Cleaning column =excerpt
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>print(&quot;\033[1m&quot;  + &quot;Original Data\n&quot; + &quot;\033[0m&quot;)
-print(&quot;Excerpt:\n&quot;, data.iloc[0][&quot;excerpt&quot;])
-print(&quot;\nTarget:\n&quot;, data.iloc[0][&quot;target&quot;])
+<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;Original Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
 
-print(&quot;\033[1m&quot;  + &quot;\n\nCleaned Data\n&quot; + &quot;\033[0m&quot;)
-print(&quot;Excerpt:\n&quot;, cleaned_data.iloc[0][&quot;excerpt&quot;])
-print(&quot;\nTarget:\n&quot;, cleaned_data.iloc[0][&quot;target&quot;])
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Cleaned Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>

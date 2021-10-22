@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorial - Implementing a custom mixer in Lightwood &mdash; lightwood 1.4.0 documentation</title>
+  <title>Tutorial - Implementing a custom mixer in Lightwood &mdash; lightwood 1.5.0 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                1.4.0
+                1.5.0
               </div>
             
           
@@ -458,57 +458,57 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from lightwood.mixer import BaseMixer
-from lightwood.api.types import PredictionArguments
-from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
-from lightwood import dtype
-from lightwood.encoder import BaseEncoder
+<span></span><span class="kn">from</span> <span class="nn">lightwood.mixer</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
+<span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
+<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">lightwood.encoder</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 
-import torch
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-
-
-class RandomForestMixer(BaseMixer):
-    clf: RandomForestClassifier
-
-    def __init__(self, stop_after: int, dtype_dict: dict, target: str, target_encoder: BaseEncoder):
-        super().__init__(stop_after)
-        self.target_encoder = target_encoder
-        # Throw in case someone tries to use this for a problem that&#39;s not classification, I&#39;d fail anyway, but this way the error message is more intuitive
-        if dtype_dict[target] not in (dtype.categorical, dtype.binary):
-            raise Exception(f&#39;This mixer can only be used for classification problems! Got target dtype {dtype_dict[target]} instead!&#39;)
-
-        # We could also initialize this in `fit` if some of the parameters depend on the input data, since `fit` is called exactly once
-        self.clf = RandomForestClassifier(max_depth=30)
-
-    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -&gt; None:
-        X, Y = [], []
-        # By default mixers get some train data and a bit of dev data on which to do early stopping or hyper parameter optimization. For this mixer, we don&#39;t need dev data, so we&#39;re going to concat the two in order to get more training data. Then, we&#39;re going to turn them into an sklearn friendly foramat.
-        for x, y in ConcatedEncodedDs([train_data, dev_data]):
-            X.append(x.tolist())
-            Y.append(y.tolist())
-        self.clf.fit(X, Y)
-
-    def __call__(self, ds: EncodedDs,
-                 args: PredictionArguments = PredictionArguments()) -&gt; pd.DataFrame:
-        # Turn the data into an sklearn friendly format
-        X = []
-        for x, _ in ds:
-            X.append(x.tolist())
-
-        Yh = self.clf.predict(X)
-
-        # Lightwood encoders are meant to decode torch tensors, so we have to cast the predictions first
-        decoded_predictions = self.target_encoder.decode(torch.Tensor(Yh))
-
-        # Finally, turn the decoded predictions into a dataframe with a single column called `prediction`. This is the standard behaviour all lightwood mixers use
-        ydf = pd.DataFrame({&#39;prediction&#39;: decoded_predictions})
-
-        return ydf
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
 
 
-    # We&#39;ll skip implementing `partial_fit`, thus making this mixer unsuitable for online training tasks
+<span class="k">class</span> <span class="nc">RandomForestMixer</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
+    <span class="n">clf</span><span class="p">:</span> <span class="n">RandomForestClassifier</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span> <span class="o">=</span> <span class="n">target_encoder</span>
+        <span class="c1"># Throw in case someone tries to use this for a problem that&#39;s not classification, I&#39;d fail anyway, but this way the error message is more intuitive</span>
+        <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;This mixer can only be used for classification problems! Got target dtype </span><span class="si">{</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="si">}</span><span class="s1"> instead!&#39;</span><span class="p">)</span>
+
+        <span class="c1"># We could also initialize this in `fit` if some of the parameters depend on the input data, since `fit` is called exactly once</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="c1"># By default mixers get some train data and a bit of dev data on which to do early stopping or hyper parameter optimization. For this mixer, we don&#39;t need dev data, so we&#39;re going to concat the two in order to get more training data. Then, we&#39;re going to turn them into an sklearn friendly foramat.</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">ConcatedEncodedDs</span><span class="p">([</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">]):</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">Y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span>
+                 <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="c1"># Turn the data into an sklearn friendly format</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="n">Yh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># Lightwood encoders are meant to decode torch tensors, so we have to cast the predictions first</span>
+        <span class="n">decoded_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">Yh</span><span class="p">))</span>
+
+        <span class="c1"># Finally, turn the decoded predictions into a dataframe with a single column called `prediction`. This is the standard behaviour all lightwood mixers use</span>
+        <span class="n">ydf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;prediction&#39;</span><span class="p">:</span> <span class="n">decoded_predictions</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">ydf</span>
+
+
+    <span class="c1"># We&#39;ll skip implementing `partial_fit`, thus making this mixer unsuitable for online training tasks</span>
 </pre></div>
 </div>
 </div>
@@ -522,22 +522,22 @@ class RandomForestMixer(BaseMixer):
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
-import pandas as pd
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> <span class="n">json_ai_from_problem</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-# read dataset
-df = pd.read_csv(&#39;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/heart_disease/data.csv&#39;)
+<span class="c1"># read dataset</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/heart_disease/data.csv&#39;</span><span class="p">)</span>
 
-# define the predictive task
-pdef = ProblemDefinition.from_dict({
-    &#39;target&#39;: &#39;target&#39;, # column you want to predict
-})
+<span class="c1"># define the predictive task</span>
+<span class="n">pdef</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="c1"># column you want to predict</span>
+<span class="p">})</span>
 
-# generate the Json AI intermediate representation from the data and its corresponding settings
-json_ai = json_ai_from_problem(df, problem_definition=pdef)
+<span class="c1"># generate the Json AI intermediate representation from the data and its corresponding settings</span>
+<span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">=</span><span class="n">pdef</span><span class="p">)</span>
 
-# Print it (you can also put it in a file and edit it there)
-print(json_ai.to_json())
+<span class="c1"># Print it (you can also put it in a file and edit it there)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -735,7 +735,7 @@ random_forest_mixer
         },
         &#34;anomaly_detection&#34;: true,
         &#34;ignore_features&#34;: [],
-        &#34;fit_on_validation&#34;: true,
+        &#34;fit_on_all&#34;: true,
         &#34;strict_mode&#34;: true,
         &#34;seed_nr&#34;: 420
     },
@@ -752,16 +752,16 @@ random_forest_mixer
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>json_ai.outputs[&#39;target&#39;].mixers = [{
-    &#39;module&#39;: &#39;random_forest_mixer.RandomForestMixer&#39;,
-    &#39;args&#39;: {
-        &#39;stop_after&#39;: &#39;$problem_definition.seconds_per_mixer&#39;,
-        &#39;dtype_dict&#39;: &#39;$dtype_dict&#39;,
-        &#39;target&#39;: &#39;$target&#39;,
-                &#39;target_encoder&#39;: &#39;$encoders[self.target]&#39;
+<span></span><span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mixers</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s1">&#39;random_forest_mixer.RandomForestMixer&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;stop_after&#39;</span><span class="p">:</span> <span class="s1">&#39;$problem_definition.seconds_per_mixer&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dtype_dict&#39;</span><span class="p">:</span> <span class="s1">&#39;$dtype_dict&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;$target&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;target_encoder&#39;</span><span class="p">:</span> <span class="s1">&#39;$encoders[self.target]&#39;</span>
 
-    }
-}]
+    <span class="p">}</span>
+<span class="p">}]</span>
 </pre></div>
 </div>
 </div>
@@ -771,10 +771,10 @@ random_forest_mixer
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>from lightwood.api.high_level import code_from_json_ai, predictor_from_code
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">code_from_json_ai</span><span class="p">,</span> <span class="n">predictor_from_code</span>
 
-code = code_from_json_ai(json_ai)
-predictor = predictor_from_code(code)
+<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
+<span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -792,7 +792,7 @@ random_forest_mixer
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>predictor.learn(df)
+<span></span><span class="n">predictor</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -852,14 +852,14 @@ INFO:lightwood-56096:Updating the mixers
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>predictions = predictor.predict(pd.DataFrame({
-    &#39;age&#39;: [63, 15, None],
-    &#39;sex&#39;: [1, 1, 0],
-    &#39;thal&#39;: [3, 1, 1]
-}))
-print(predictions)
+<span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">63</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="s1">&#39;sex&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="s1">&#39;thal&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">}))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
 
-predictor.save(&#39;my_custom_heart_disease_predictor.pickle&#39;)
+<span class="n">predictor</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;my_custom_heart_disease_predictor.pickle&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

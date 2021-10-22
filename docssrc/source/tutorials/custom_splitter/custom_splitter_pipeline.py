@@ -72,7 +72,7 @@ class Predictor(PredictorInterface):
                 },
                 "anomaly_detection": True,
                 "ignore_features": [],
-                "fit_on_validation": True,
+                "fit_on_all": True,
                 "strict_mode": True,
                 "seed_nr": 420,
             }
@@ -480,10 +480,10 @@ class Predictor(PredictorInterface):
         # ------------------------ #
         # Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.
         # This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.
-        # SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
+        # SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.
 
         # Update the mixers with partial fit
-        if self.problem_definition.fit_on_validation:
+        if self.problem_definition.fit_on_all:
 
             log.info("Adjustment on validation requested.")
             update_data = {

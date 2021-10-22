@@ -1,7 +1,6 @@
 # TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
-import black
 from lightwood.api import dtype
 import numpy as np
 from lightwood.api.types import (
@@ -13,6 +12,8 @@ from lightwood.api.types import (
     ProblemDefinition,
 )
 import inspect
+from lightwood.helpers.log import log
+
 
 # For custom modules, we create a module loader with necessary imports below
 IMPORT_EXTERNAL_DIRS = """
@@ -413,7 +414,15 @@ def generate_json_ai(
     )
 
 
-def _merge_implicit_values(field, implicit_value):
+def _merge_implicit_values(field: dict, implicit_value: dict) -> dict:
+    """
+    Helper function for `_populate_implicit_field`.
+    Takes a user-defined field along with its implicit value, and merges them together.
+
+    :param field: JsonAI field with user-defined parameters.
+    :param implicit_value: implicit values for the field.
+    :return: original field with implicit values merged into it.
+    """
     exec(IMPORTS, globals())
     exec(IMPORT_EXTERNAL_DIRS, globals())
     module = eval(field["module"])
@@ -503,9 +512,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
             )
-            mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
-                "input_cols", "$input_cols"
-            )
             mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
                 "timeseries_settings", "$problem_definition.timeseries_settings"
             )
@@ -590,9 +596,9 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                     "seed": 1,
                     "target": "$target",
                     "dtype_dict": "$dtype_dict",
-                    "pct_train": 80,
-                    "pct_dev": 10,
-                    "pct_test": 10,
+                    "pct_train": 0.8,
+                    "pct_dev": 0.1,
+                    "pct_test": 0.1,
                 },
             },
         ),
@@ -754,7 +760,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     # ----------------- #
 
     ts_transform_code = ""
-    ts_analyze_code = ""
+    ts_analyze_code = None
     ts_encoder_code = ""
     if json_ai.timeseries_transformer is not None:
         ts_transform_code = f"""
@@ -764,7 +770,7 @@ data = {call(json_ai.timeseries_transformer)}
         ts_analyze_code = f"""
 self.ts_analysis = {call(json_ai.timeseries_analyzer)}
 """
-
+    # @TODO: set these kwargs/properties in the json ai construction (if possible)
     if json_ai.timeseries_analyzer is not None:
         ts_encoder_code = """
 if encoder.is_timeseries_encoder:
@@ -807,10 +813,14 @@ data = {call(json_ai.cleaner)}
 
 # Time-series blocks
 {ts_transform_code}
-{ts_analyze_code}
+"""
+    if ts_analyze_code is not None:
+        clean_body += f"""
+if self.mode != 'predict':
+{align(ts_analyze_code,1)}
+"""
 
-return data
-    """
+    clean_body += '\nreturn data'
 
     clean_body = align(clean_body, 2)
 
@@ -1011,10 +1021,10 @@ self.mode = 'train'
 self.analyze_data(data)
 
 # Pre-process the data
-clean_data = self.preprocess(data)
+data = self.preprocess(data)
 
 # Create train/test (dev) split
-train_dev_test = self.split(clean_data)
+train_dev_test = self.split(data)
 
 # Prepare encoders
 self.prepare(train_dev_test)
@@ -1031,10 +1041,10 @@ self.analyze_ensemble(enc_train_test)
 # ------------------------ #
 # Enable model partial fit AFTER it is trained and evaluated for performance with the appropriate train/dev/test splits.
 # This assumes the predictor could continuously evolve, hence including reserved testing data may improve predictions.
-# SET `json_ai.problem_definition.fit_on_validation=False` TO TURN THIS BLOCK OFF.
+# SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.
 
 # Update the mixers with partial fit
-if self.problem_definition.fit_on_validation:
+if self.problem_definition.fit_on_all:
 
     log.info("Adjustment on validation requested.")
     update_data = {{"new": enc_train_test["test"], "old": ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]])}}  # noqa
@@ -1049,21 +1059,18 @@ if self.problem_definition.fit_on_validation:
 
     predict_body = f"""
 # Remove columns that user specifies to ignore
+self.mode = 'predict'
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:
     if col not in data.columns:
         data[col] = [None] * len(data)
 
-# Clean the data
-self.mode = 'predict'
-log.info('Cleaning the data')
-data = {call(json_ai.cleaner)}
-
-{ts_transform_code}
+# Pre-process the data
+data = self.preprocess(data)
 
 # Featurize the data
-encoded_ds = EncodedDs(self.encoders, data, self.target)
+encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 self.pred_args = PredictionArguments.from_dict(args)
@@ -1075,6 +1082,7 @@ else:
     insights, global_insights = {call(json_ai.explainer)}
     return insights
 """
+
     predict_body = align(predict_body, 2)
 
     predictor_code = f"""
@@ -1147,7 +1155,14 @@ class Predictor(PredictorInterface):
 {predict_body}
 """
 
-    predictor_code = black.format_str(predictor_code, mode=black.FileMode())
+    try:
+        import black
+    except Exception:
+        black = None
+
+    if black is not None:
+        log.info('Unable to import black formatter, predictor code might be a bit ugly.')
+        predictor_code = black.format_str(predictor_code, mode=black.FileMode())
 
     return predictor_code
 

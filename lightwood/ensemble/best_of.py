@@ -13,6 +13,10 @@ from lightwood.helpers.general import evaluate_accuracy
 
 
 class BestOf(BaseEnsemble):
+    """
+    This ensemble acts as a mixer selector. 
+    After evaluating accuracy for all internal mixers with the validation data, it sets the best mixer as the underlying model.
+    """  # noqa
     indexes_by_accuracy: List[float]
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
@@ -43,12 +47,10 @@ class BestOf(BaseEnsemble):
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         if args.all_mixers:
-            all_predictions = [self.mixers[index](ds, args=args) for index in range(len(self.mixers))]
-            for index, predictions in enumerate(all_predictions):
-                all_predictions[index]['__mdb_mixer'] = index
-                all_predictions[index]['__mdb_best_mixer'] = index == self.best_index
-            return pd.concat(all_predictions)
-
+            predictions = {}
+            for mixer in self.mixers:
+                predictions[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
+            return pd.DataFrame(predictions)
         else:
             for mixer_index in self.indexes_by_accuracy:
                 mixer = self.mixers[mixer_index]
