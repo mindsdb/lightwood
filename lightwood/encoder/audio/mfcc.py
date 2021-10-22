@@ -3,6 +3,7 @@ import torch
 import warnings
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.io import read_from_path_or_url
+import pandas as pd
 
 
 class MFCCEncoder(BaseEncoder):
@@ -13,6 +14,11 @@ class MFCCEncoder(BaseEncoder):
 
     def __init__(self, is_target: bool = False):
         super().__init__(is_target)
+
+    def prepare(self, priming_data: pd.Series):
+        self.is_prepared = True
+        ele = self.encode([str(priming_data.iloc[0])])
+        self.output_size = len(ele)
 
     def encode(self, column_data):
         encoded_audio_arr = []
@@ -41,7 +47,6 @@ class MFCCEncoder(BaseEncoder):
 
             encoded_audio_arr.append(mfcc_coefficients)
 
-        print(encoded_audio_arr, torch.Tensor(encoded_audio_arr))
         return torch.Tensor(encoded_audio_arr)
 
     def decode(self, _):
