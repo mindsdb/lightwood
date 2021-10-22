@@ -7,6 +7,12 @@ import numpy as np
 
 
 class DefaultNet(torch.nn.Module):
+    """
+    Default neural network module used in `Neural` mixer to learn the predictive task based on encoded feature representations.
+    
+    Small architecture with either a one or two linear layers. Hidden size might be constrained to have at most `max_params` in the network, trading off accuracy for speed.
+    """  # noqa
+
     def __init__(self,
                  input_size: int = None,
                  output_size: int = None,

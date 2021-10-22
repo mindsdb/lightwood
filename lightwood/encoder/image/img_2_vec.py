@@ -1,9 +1,12 @@
+from typing import List
 import logging
+
 import torch
 import torchvision.transforms as transforms
+from PIL import Image
+
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
 from lightwood.encoder.base import BaseEncoder
-from PIL import Image
 
 
 class Img2VecEncoder(BaseEncoder):
@@ -35,12 +38,12 @@ class Img2VecEncoder(BaseEncoder):
             self.model = Img2Vec(model='resnext-50-small')
         self.is_prepared = True
 
-    def encode(self, images):
+    def encode(self, images: List[str]) -> torch.Tensor:
         """
-            Encode list of images
+        Encode list of images
 
-            :images : list of images, each image is a path to a file or a url
-            :return: a torch.floatTensor
+        :param images: list of images, each image is a path to a file or a url
+        :return: a torch.floatTensor
         """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')

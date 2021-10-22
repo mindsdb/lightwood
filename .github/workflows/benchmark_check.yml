@@ -1,4 +1,4 @@
-name: Benchmark results check
+name: Benchmark Result Check Lightwood
 
 on:
   pull_request:

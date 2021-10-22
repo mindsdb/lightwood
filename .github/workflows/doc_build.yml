@@ -1,14 +1,9 @@
-name: Lightwood tests workflow
+name: Documentation Build Lightwood
 
 on:
   push:
     branches:
-      - stable
       - staging
-  pull_request:
-    branches:
-      - staging
-
 jobs:
   doc_build:
     runs-on: ubuntu-latest

@@ -6,6 +6,10 @@ from lightwood.helpers.io import read_from_path_or_url
 
 
 class MFCCEncoder(BaseEncoder):
+    """
+    Audio encoder. Uses `librosa` to compute the Mel-frequency spectral coefficients (MFCCs) of the audio file. They are a common feature used in speech and audio processing. The features are a 2D array, flattened into a 1D one.
+    """  # noqa
+
     def __init__(self, is_target: bool = False):
         super().__init__(is_target)
 
@@ -18,7 +22,7 @@ class MFCCEncoder(BaseEncoder):
             # same coefficients will refer to time buckets of different lenghts.
             # This means that a model will find difficult to use temporal
             # information
-            NUM_TIME_BUCKETS = 100
+            NUM_TIME_BUCKETS = 100  # audio file will be split into 100 sequential time intervals before computing the Fourier transform needed for the MFCCs. A value of `100` will split a 1s audio file in 10ms intervals, which are enough for speech recognition. It will also split a 3 minutes song in 1.8s intervals, which are still small enough to capture enough detail for genre recognition  # noqa
             N_MFCC_COEFFICIENTS = 20
 
             num_samples = y.shape[0]

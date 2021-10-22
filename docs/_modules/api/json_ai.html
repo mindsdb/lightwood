@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.json_ai &mdash; lightwood 1.4.0 documentation</title>
+  <title>api.json_ai &mdash; lightwood 1.5.0 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.4.0
+                1.5.0
               </div>
             
           
@@ -580,7 +580,15 @@
     <span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_merge_implicit_values</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">implicit_value</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_merge_implicit_values</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">implicit_value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function for `_populate_implicit_field`.</span>
+<span class="sd">    Takes a user-defined field along with its implicit value, and merges them together.</span>
+
+<span class="sd">    :param field: JsonAI field with user-defined parameters.</span>
+<span class="sd">    :param implicit_value: implicit values for the field.</span>
+<span class="sd">    :return: original field with implicit values merged into it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">exec</span><span class="p">(</span><span class="n">IMPORTS</span><span class="p">,</span> <span class="nb">globals</span><span class="p">())</span>
     <span class="n">exec</span><span class="p">(</span><span class="n">IMPORT_EXTERNAL_DIRS</span><span class="p">,</span> <span class="nb">globals</span><span class="p">())</span>
     <span class="n">module</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">])</span>
