@@ -4,6 +4,7 @@ import warnings
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.io import read_from_path_or_url
 import pandas as pd
+from lightwood.helpers.log import log
 
 
 class MFCCEncoder(BaseEncoder):
@@ -23,7 +24,11 @@ class MFCCEncoder(BaseEncoder):
     def encode(self, column_data):
         encoded_audio_arr = []
         for path in column_data:
-            y, _ = read_from_path_or_url(path, librosa.load)
+            try:
+                y, _ = read_from_path_or_url(path, librosa.load)
+            except Exception as e:
+                log.error(f'Unable to read audio file {path}, error: {e}')
+                encoded_audio_arr = [0] * self.output_size
 
             # If the durations of the audio samples are highly variable, the
             # same coefficients will refer to time buckets of different lenghts.
