@@ -26,7 +26,8 @@ class Img2Vec(nn.Module):
         self.device, _ = get_devices()
         self.model_name = model
 
-        self.model = self._get_model()
+        self.model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[: -1],
+                                         ChannelPoolAdaptiveAvg1d(output_size=512))
         self.model = self.model.to(self.device)
 
     def to(self, device, available_devices):
@@ -46,20 +47,3 @@ class Img2Vec(nn.Module):
                 if batch:
                     return embedding[:, :, 0, 0]
                 return embedding[0, :, 0, 0]
-
-    def _get_model(self):
-        if self.model_name == 'resnet-18':
-            model = torch.nn.Sequential(*list(models.resnet18(pretrained=True).children())[:-1])
-
-        elif self.model_name == 'resnext-50-small':
-            model = torch.nn.Sequential(
-                *list(models.resnext50_32x4d(pretrained=True).children())[: -1],
-                ChannelPoolAdaptiveAvg1d(output_size=512))
-
-        elif self.model_name == 'resnext-50':
-            model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1])
-
-        else:
-            raise Exception('Image encoding model ' + self.model_name + ' was not found')
-
-        return model

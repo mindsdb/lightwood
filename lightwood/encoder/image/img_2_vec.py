@@ -13,7 +13,6 @@ class Img2VecEncoder(BaseEncoder):
 
     def __init__(self, is_target: bool = False):
         super().__init__(is_target)
-        self.model = None
         # # I think we should make this an enum, something like: speed, balance, accuracy
         # self.aim = aim
         self.is_prepared = False
@@ -34,8 +33,7 @@ class Img2VecEncoder(BaseEncoder):
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        if self.model is None:
-            self.model = Img2Vec(model='resnext-50-small')
+        self.model = Img2Vec()
         self.is_prepared = True
 
     def encode(self, images: List[str]) -> torch.Tensor:
