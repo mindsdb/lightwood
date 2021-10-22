@@ -1,4 +1,4 @@
-name: Lightwood tests workflow
+name: Integration and Unit Tests Lightwood
 
 on:
   push:
