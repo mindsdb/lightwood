@@ -11,7 +11,7 @@ from lightwood.encoder.base import BaseEncoder
 class Img2VecEncoder(BaseEncoder):
     is_trainable_encoder: bool = True
 
-    def __init__(self, stop_after: int, is_target: bool = False):
+    def __init__(self, stop_after: int = 3600, is_target: bool = False):
         super().__init__(is_target)
         # # I think we should make this an enum, something like: speed, balance, accuracy
         # self.aim = aim
