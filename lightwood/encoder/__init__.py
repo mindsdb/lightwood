@@ -25,6 +25,6 @@ from lightwood.encoder.audio import MFCCEncoder
 __all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder', 'TsNumericEncoder',
            'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder',
            'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder', 'MultiHotEncoder',
-           'PretrainedLangEncoder', 'AmplitudeTsEncoder', 'BinaryEncoder', 'DatetimeNormalizerEncoder',
+           'PretrainedLangEncoder', 'BinaryEncoder', 'DatetimeNormalizerEncoder',
            'Array', 'TimeSeries', 'Binary', 'Categorical', 'Date', 'Datetime', 'Float', 'Image', 'Integer',
            'Quantity', 'Rich_Text', 'Short_Text', 'Tags', 'MFCCEncoder']
