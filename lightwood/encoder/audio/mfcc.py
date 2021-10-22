@@ -9,6 +9,7 @@ class MFCCEncoder(BaseEncoder):
     """
     Audio encoder. Uses `librosa` to compute the Mel-frequency spectral coefficients (MFCCs) of the audio file. They are a common feature used in speech and audio processing. The features are a 2D array, flattened into a 1D one.
     """  # noqa
+    is_trainable_encoder: bool = False
 
     def __init__(self, is_target: bool = False):
         super().__init__(is_target)
