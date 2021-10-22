@@ -40,6 +40,7 @@ class MFCCEncoder(BaseEncoder):
 
             encoded_audio_arr.append(mfcc_coefficients)
 
+        print(encoded_audio_arr, torch.Tensor(encoded_audio_arr))
         return torch.Tensor(encoded_audio_arr)
 
     def decode(self, _):

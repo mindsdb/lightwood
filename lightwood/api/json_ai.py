@@ -96,6 +96,7 @@ def lookup_encoder(
         dtype.array: "Array.ArrayEncoder",
         dtype.tsarray: "TimeSeries.TimeSeriesEncoder",
         dtype.quantity: "Quantity.NumericEncoder",
+        dtype.audio: "Audio.MFCCEncoder"
     }
 
     # If column is a target, only specific feature representations are allowed that enable supervised tasks
