@@ -1,7 +1,5 @@
 from typing import Dict, List, Tuple, Optional
 
-from torch._C import Block
-
 from lightwood.helpers.log import log
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
