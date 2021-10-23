@@ -63,6 +63,4 @@ class ShapleyValues(BaseAnalysisBlock):
 
         row_insights = pd.concat([row_insights, shap_values_df], axis='columns')
 
-        breakpoint()
-
         return row_insights, global_insights
