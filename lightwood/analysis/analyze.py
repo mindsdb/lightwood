@@ -1,5 +1,8 @@
 from typing import Dict, List, Tuple, Optional
 
+from torch._C import Block
+
+from lightwood.helpers.log import log
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -76,6 +79,7 @@ def model_analyzer(
     }
 
     for block in analysis_blocks:
+        log.info("The block %s is now running its analyze() method", block.__class__.__name__)
         runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
 
     # ------------------------- #
