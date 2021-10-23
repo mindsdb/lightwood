@@ -122,7 +122,7 @@ However, we recommend creating a python virtual environment.
 #### Setting up a dev environment
 
 - Clone lightwood
-- `cd lightwood && pip install -r requirements.txt`
+- `cd lightwood && pip install requirements.txt`
 - Add it to your python path (e.g. by adding `export PYTHONPATH='/where/you/cloned/lightwood':$PYTHONPATH` as a newline at the end of your `~/.bashrc` file)
 - Check that the `unittest`s are passing by going into the directory where you cloned lightwood and running: `python -m unittest discover tests` 
 
