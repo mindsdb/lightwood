@@ -7,6 +7,8 @@ from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.analysis.nc.calibrate import ICP
 from lightwood.analysis.helpers.acc_stats import AccStats
 from lightwood.analysis.helpers.feature_importance import GlobalFeatureImportance
+from lightwood.analysis.helpers.shap import ShapleyValues
 
 
-__all__ = ['model_analyzer', 'explain', 'ICP', 'AccStats', 'GlobalFeatureImportance', 'BaseAnalysisBlock']
+__all__ = ['model_analyzer', 'explain', 'ICP', 'AccStats',
+           'GlobalFeatureImportance', 'BaseAnalysisBlock', 'ShapleyValues']
