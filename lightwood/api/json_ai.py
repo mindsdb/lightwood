@@ -275,6 +275,7 @@ def generate_json_ai(
                 "module": "WeightedMeanEnsemble",
                 "args": {
                     "args": "$pred_args",
+                    "dtype_dict": "$dtype_dict",
                     "accuracy_functions": "$accuracy_functions",
                     "ts_analysis": "self.ts_analysis" if is_ts else None,
                 },

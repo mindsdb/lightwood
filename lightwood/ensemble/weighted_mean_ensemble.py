@@ -10,14 +10,18 @@ from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.helpers.general import evaluate_accuracy
+from lightwood import dtype
 
 
 class WeightedMeanEnsemble(BaseEnsemble):
     weights: List[float]
 
-    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
-                 args: PredictionArguments, ts_analysis: Optional[dict] = None) -> None:
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, args: PredictionArguments,
+                 dtype_dict: dict, accuracy_functions, ts_analysis: Optional[dict] = None) -> None:
         super().__init__(target, mixers, data)
+        if dtype_dict[target] not in (dtype.float, dtype.integer, dtype.quantity):
+            raise Exception(
+                f'This ensemble can only be used regression problems! Got target dtype {dtype_dict[target]} instead!')
 
         score_list = []
         for _, mixer in enumerate(mixers):
@@ -37,15 +41,13 @@ class WeightedMeanEnsemble(BaseEnsemble):
 
             score_list.append(avg_score)
 
-        self.weights = list(self.accuracies_to_weights(np.array(score_list)))
-        self.supports_proba = True
-        for mixer in self.mixers:
-            self.supports_proba = self.supports_proba and mixer.supports_proba
+        self.weights = list(self.accuracies_to_weights(np.array(score_list, dtype=np.float)))
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         df = pd.DataFrame()
         for mixer in self.mixers:
             df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
+
         avg_predictions_df = df.apply(lambda x: np.average(x, weights=self.weights), axis='columns')
         return pd.DataFrame(avg_predictions_df, columns=['prediction'])
 
