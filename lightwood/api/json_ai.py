@@ -272,7 +272,7 @@ def generate_json_ai(
             encoder=None,
             mixers=mixers,
             ensemble={
-                "module": "BestOf",
+                "module": "WeightedMeanEnsemble",
                 "args": {
                     "args": "$pred_args",
                     "accuracy_functions": "$accuracy_functions",
