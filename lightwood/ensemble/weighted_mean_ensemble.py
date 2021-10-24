@@ -43,10 +43,11 @@ class WeightedMeanEnsemble(BaseEnsemble):
             self.supports_proba = self.supports_proba and mixer.supports_proba
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
-        predictions_df = pd.DataFrame()
+        df = pd.DataFrame()
         for mixer in self.mixers:
-            predictions_df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
-        return pd.DataFrame(np.average(predictions_df, weights=self.weights, axis=1, dtype='float'), columns=['prediction'])
+            df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
+        avg_predictions = np.average(df, weights=self.weights, axis=1, dtype='float')
+        return pd.DataFrame(avg_predictions, columns=['prediction'])
 
     def accuracies_to_weights(self, x: np.array) -> np.array:
         # Converts accuracies to weights using the softmax function.
