@@ -2,7 +2,6 @@ from typing import List, Optional
 
 import numpy as np
 import pandas as pd
-from lightwood.ensemble.base import BaseEnsemble
 
 from lightwood.helpers.log import log
 from lightwood.helpers.numeric import can_be_nan_numeric
@@ -14,7 +13,7 @@ from lightwood.helpers.general import evaluate_accuracy
 
 
 class WeightedMeanEnsemble(BaseEnsemble):
-    weights_by_accuracy: List[float]
+    weights: List[float]
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
                  args: PredictionArguments, ts_analysis: Optional[dict] = None) -> None:
@@ -38,7 +37,7 @@ class WeightedMeanEnsemble(BaseEnsemble):
 
             score_list.append(avg_score)
 
-        self.weights_by_accuracy = list(self.accuracies_to_weights(np.array(score_list)))
+        self.weights = list(self.accuracies_to_weights(np.array(score_list)))
         self.supports_proba = True
         for mixer in self.mixers:
             self.supports_proba = self.supports_proba and mixer.supports_proba
@@ -47,7 +46,7 @@ class WeightedMeanEnsemble(BaseEnsemble):
         predictions_df = pd.DataFrame()
         for mixer in self.mixers:
             predictions_df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
-        return pd.DataFrame(np.average(predictions_df, weights=self.weights_by_accuracy, axis=1), columns=['prediction'])
+        return pd.DataFrame(np.average(predictions_df, weights=self.weights, axis=1), columns=['prediction'])
 
     def accuracies_to_weights(self, x: np.array) -> np.array:
         # Converts accuracies to weights using the softmax function.
