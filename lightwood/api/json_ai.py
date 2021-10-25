@@ -319,9 +319,11 @@ def generate_json_ai(
                 dependency.append(f"__mdb_ts_previous_{target}")
 
         if len(dependency) > 0:
-            feature = Feature(encoder=encoder, dependency=dependency)
+            feature = Feature(
+                encoder=encoder, dependency=dependency, data_dtype=col_dtype
+            )
         else:
-            feature = Feature(encoder=encoder)
+            feature = Feature(encoder=encoder, data_dtype=col_dtype)
         features[col_name] = feature
 
     # Decide on the accuracy functions to use
@@ -905,12 +907,11 @@ for col_name, encoder in self.encoders.items():
 
     feature_body = f"""
 log.info('Featurizing the data')
-feature_data = {{key: None for key in split_data.keys()}}
 
-for key, data in split_data.items():
-    feature_data[key] = EncodedDs(self.encoders, data, self.target)
+feature_data = {{ key: EncodedDs(self.encoders, data, self.target) for key, data in split_data.items() if key != "stratified_on"}}
 
 return feature_data
+
 """  # noqa
 
     feature_body = align(feature_body, 2)
