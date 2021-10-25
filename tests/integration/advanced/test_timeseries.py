@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import pandas as pd
+import time
 from typing import List
 
 from lightwood.api.types import ProblemDefinition
@@ -143,4 +144,33 @@ class TestTimeseries(unittest.TestCase):
                                                                         }))
 
         predictor.learn(train)
+        predictor.predict(test)
+
+    def test_3_time_aim(self):
+        from lightwood.api.high_level import predictor_from_problem
+
+        df = pd.read_csv('tests/data/arrivals.csv')
+        target = 'Traffic'
+        time_aim_expected = 30
+        df[target] = df[target] > 100000
+
+        train_idxs = np.random.rand(len(df)) < 0.8
+        train = df[train_idxs]
+        test = df[~train_idxs]
+
+        predictor = predictor_from_problem(df,
+                                           ProblemDefinition.from_dict({'target': target,
+                                                                        'time_aim': time_aim_expected,
+                                                                        'anomaly_detection': False,
+                                                                        'timeseries_settings': {
+                                                                            'order_by': ['T'],
+                                                                            'use_previous_target': True,
+                                                                            'window': 5
+                                                                        },
+                                                                        }))
+        start = time.process_time()
+        predictor.learn(train)
+        time_aim_actual = (time.process_time() - start)
+        if(time_aim_expected > time_aim_actual):
+            raise ValueError('time_aim is set to {time_aim_expected} seconds, however learning took {time_aim_actual}}')
         predictor.predict(test)
