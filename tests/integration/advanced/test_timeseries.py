@@ -156,7 +156,6 @@ class TestTimeseries(unittest.TestCase):
 
         train_idxs = np.random.rand(len(df)) < 0.8
         train = df[train_idxs]
-        test = df[~train_idxs]
 
         predictor = predictor_from_problem(df,
                                            ProblemDefinition.from_dict({'target': target,
@@ -172,5 +171,6 @@ class TestTimeseries(unittest.TestCase):
         predictor.learn(train)
         time_aim_actual = (time.process_time() - start)
         if(time_aim_expected > time_aim_actual):
-            raise ValueError('time_aim is set to {time_aim_expected} seconds, however learning took {time_aim_actual}}')
-        predictor.predict(test)
+            error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
+            raise ValueError(error)
+        assert time_aim_expected < time_aim_actual
