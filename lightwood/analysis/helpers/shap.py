@@ -16,6 +16,15 @@ import shap
 
 
 class ShapleyValues(BaseAnalysisBlock):
+    """
+    Analysis block that estimates column importance with SHAP (SHapley Additive exPlanations), a game theoretic approach
+    to explain the ouput of any machine learning model. SHAP assigns each feature an importance value for a particular
+    prediction.
+
+    Reference:
+        https://shap.readthedocs.io/en/stable/
+        https://proceedings.neurips.cc/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf
+    """
     label_encoder: LabelEncoder
 
     def __init__(self, deps: Optional[Tuple] = ...):
@@ -23,7 +32,7 @@ class ShapleyValues(BaseAnalysisBlock):
         self.label_encoder = LabelEncoder()
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
-        log.info('ShapleyValues analyze')
+        log.info('Preparing to compute feature importance values with SHAP')
         ns = SimpleNamespace(**kwargs)
 
         output_dtype = ns.dtype_dict[ns.target]
@@ -34,24 +43,20 @@ class ShapleyValues(BaseAnalysisBlock):
         elif output_dtype in (dtype.binary, dtype.categorical, dtype.tags):
             self.label_encoder.fit(train_data.data_frame[ns.target].values)
         else:
-            log.error(f'ShapleyValues analyzers not supported for type: {output_dtype}')
-            raise Exception(f'ShapleyValues analyzers not supported for type: {output_dtype}')
-
-        predictor: BaseEnsemble = ns.predictor
+            log.warning(f'ShapleyValues analyzers not supported for type: {output_dtype}')
+            return info
 
         def model(x: np.ndarray) -> np.ndarray:
             assert(isinstance(x, np.ndarray))
             df = pd.DataFrame(data=x, columns=train_data.data_frame.columns)
             ds = EncodedDs(encoders=train_data.encoders, data_frame=df, target=train_data.target)
 
-            decoded_predictions = predictor(ds=ds, args=PredictionArguments())
+            decoded_predictions = ns.predictor(ds=ds, args=PredictionArguments())
             encoded_predictions = self.label_encoder.transform(decoded_predictions['prediction'].values)
 
             return encoded_predictions
 
-        explainer = shap.KernelExplainer(model=model, data=train_data.data_frame)
-
-        info['shap_explainer'] = explainer
+        info['shap_explainer'] = shap.KernelExplainer(model=model, data=train_data.data_frame)
 
         return info
 
@@ -60,10 +65,12 @@ class ShapleyValues(BaseAnalysisBlock):
                 global_insights: Dict[str, object],
                 **kwargs
                 ) -> Tuple[pd.DataFrame, Dict[str, object]]:
-        log.info('ShapleyValues explain')
+        log.info('Computing feature importance values with Kernel SHAP method')
         ns = SimpleNamespace(**kwargs)
 
-        shap_explainer = ns.analysis['shap_explainer']
+        shap_explainer = ns.analysis.get('shap_explainer', None)
+        if shap_explainer is None:
+            return row_insights, global_insights
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
