@@ -1,0 +1,19 @@
+output-format: json
+
+ignore-paths:
+  - __pycache__
+  - .git
+
+strictness: medium
+test-warnings: true
+doc-warnings: true
+autodetect: true
+max-line-length: 120
+
+pylint:
+    run: true
+    disable:
+      - too-many-locals
+      - arguments-differ
+      - no-else-return
+      - inconsistent-return-statements
