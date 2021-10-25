@@ -8,7 +8,6 @@ from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.api import dtype
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
-from lightwood.ensemble import BaseEnsemble
 from lightwood.helpers.log import log
 from sklearn.preprocessing import LabelEncoder
 
