@@ -28,6 +28,7 @@ We support users bringing their custom methods. To learn how to build your own p
 
 | `Construct a custom preprocessor to clean your data <tutorials/custom_cleaner/custom_cleaner.ipynb>`_
 | `Make your own train and test split <tutorials/custom_splitter/custom_splitter.ipynb>`_
-| Create your own encoder to featurize your data (Coming Soon!)
+| `Create your own encoder to featurize your data <tutorials/custom_encoder_rulebased/custom_encoder_rulebased.ipynb>`_ (Rule-based)
+| Create your own encoder to featurize your data using a learned representation (Coming Soon!)
 | `Design a custom mixer model <tutorials/custom_mixer/custom_mixer.ipynb>`_
 | `Use your own model explainer <tutorials/custom_explainer/custom_explainer.ipynb>`_
