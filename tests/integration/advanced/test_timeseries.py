@@ -144,3 +144,56 @@ class TestTimeseries(unittest.TestCase):
 
         predictor.learn(train)
         predictor.predict(test)
+
+    def test_3_time_series_sktime_mixer(self):
+        """
+        Tests `sktime` mixer individually, as it has a special notion of absolute
+        temporal timestamps that we need to ensure are being used correctly. In
+        particular, given a train-dev-test split, any forecasts coming from a sktime
+        mixer should start from the latest observed data in the entire dataset.
+        """  # noqa
+
+        from sklearn.metrics import r2_score
+        from scipy import signal
+        from lightwood.api.high_level import (
+            ProblemDefinition,
+            json_ai_from_problem,
+            code_from_json_ai,
+            predictor_from_code,
+        )
+
+        # synth square wave
+        tsteps = 100
+        target = 'Value'
+        t = np.linspace(0, 1, tsteps, endpoint=False)
+        ts = signal.sawtooth(2 * np.pi * 5 * t, width=0.5)
+        df = pd.DataFrame(columns=['Time', target])
+        df['Time'] = t
+        df[target] = ts
+
+        train = df[:int(len(df) * 0.8)]
+        test = df[int(len(df) * 0.8):]
+
+        pdef = ProblemDefinition.from_dict({'target': target,
+                                            'time_aim': 10,
+                                            'timeseries_settings': {
+                                                'order_by': ['Time'],
+                                                'window': 5,
+                                                'nr_predictions': 20
+                                            }})
+
+        json_ai = json_ai_from_problem(df, problem_definition=pdef)
+        json_ai.outputs[target].mixers = [{
+            "module": "SkTime",
+            "args": {
+                "stop_after": "$problem_definition.seconds_per_mixer",
+                "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+            }}]
+
+        code = code_from_json_ai(json_ai)
+        predictor = predictor_from_code(code)
+
+        predictor.learn(train)
+        ps = predictor.predict(test)
+
+        assert r2_score(ps['truth'].values, ps['prediction'].iloc[0]) >= 0.95
