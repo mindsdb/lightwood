@@ -88,8 +88,6 @@ class SkTime(BaseMixer):
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
-        if not self.prepared:
-            log.warning('`sktime` mixer should call `partial_fit()` to get accurate forecasts, but this has not happened. Be aware that accuracy will be subpar')  # noqa
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
@@ -120,8 +118,8 @@ class SkTime(BaseMixer):
 
                 for idx, _ in enumerate(series.iteritems()):
                     ydf['prediction'].iloc[series_idxs[idx]] = forecaster.predict(
-                        np.arange(idx,  # +cutoff
-                                  idx + self.n_ts_predictions)).tolist()  # +cutoff
+                        np.arange(idx + self.cutoff_index[group],
+                                  idx + self.cutoff_index[group] + self.n_ts_predictions)).tolist()
 
             if self.grouped_by == ['__default']:
                 break
