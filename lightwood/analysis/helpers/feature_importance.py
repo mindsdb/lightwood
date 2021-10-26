@@ -64,7 +64,7 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
             # low 0.2 temperature to accentuate differences
             acc_increases = t_softmax(torch.Tensor([acc_increases]), t=0.2).tolist()[0]
             for col, inc in zip(ignorable_input_cols, acc_increases):
-                column_importances[col] = 10 * inc  # scores go from 0 to 10 in GUI
+                column_importances[col] = inc  # scores go from 0 to 1
 
             info['column_importances'] = column_importances
 
