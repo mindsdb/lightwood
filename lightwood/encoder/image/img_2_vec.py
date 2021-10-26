@@ -36,7 +36,7 @@ class Img2VecEncoder(BaseEncoder):
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         self.model = Img2Vec()
-        self.output_size = 512
+        self.output_size = self.model.output_size
         self.is_prepared = True
 
     def to(self, device, available_devices):
