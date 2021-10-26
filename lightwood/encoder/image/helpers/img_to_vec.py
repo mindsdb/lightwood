@@ -24,9 +24,9 @@ class Img2Vec(nn.Module):
         super(Img2Vec, self).__init__()
 
         self.device, _ = get_devices()
-
+        self.output_size = 512
         self.model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[: -1],
-                                         ChannelPoolAdaptiveAvg1d(output_size=512))
+                                         ChannelPoolAdaptiveAvg1d(output_size=self.output_size))
         self.model = self.model.to(self.device)
 
     def to(self, device, available_devices):
