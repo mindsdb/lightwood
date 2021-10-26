@@ -51,7 +51,10 @@ class ShapleyValues(BaseAnalysisBlock):
             ds = EncodedDs(encoders=train_data.encoders, data_frame=df, target=train_data.target)
 
             decoded_predictions = ns.predictor(ds=ds, args=PredictionArguments())
-            encoded_predictions = self.label_encoder.transform(decoded_predictions['prediction'].values)
+            if output_dtype in (dtype.integer, dtype.float, dtype.quantity):
+                encoded_predictions = decoded_predictions['prediction'].values
+            elif output_dtype in (dtype.binary, dtype.categorical, dtype.tags):
+                encoded_predictions = self.label_encoder.transform(decoded_predictions['prediction'].values)
 
             return encoded_predictions
 
