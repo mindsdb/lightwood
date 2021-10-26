@@ -571,129 +571,110 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             )
 
     # Add "hidden" fields
-    hidden_fields = [
-        (
-            "cleaner",
-            {
-                "module": "cleaner",
-                "args": {
-                    "pct_invalid": "$problem_definition.pct_invalid",
-                    "identifiers": "$identifiers",
-                    "data": "data",
-                    "dtype_dict": "$dtype_dict",
-                    "target": "$target",
-                    "mode": "$mode",
-                    "timeseries_settings": "$problem_definition.timeseries_settings",
-                    "anomaly_detection": "$problem_definition.anomaly_detection",
-                },
+    hidden_fields = {
+        "cleaner": {
+            "module": "cleaner",
+            "args": {
+                "pct_invalid": "$problem_definition.pct_invalid",
+                "identifiers": "$identifiers",
+                "data": "data",
+                "dtype_dict": "$dtype_dict",
+                "target": "$target",
+                "mode": "$mode",
+                "timeseries_settings": "$problem_definition.timeseries_settings",
+                "anomaly_detection": "$problem_definition.anomaly_detection",
             },
-        ),
-        (
-            "splitter",
-            {
-                "module": "splitter",
-                "args": {
-                    "tss": "$problem_definition.timeseries_settings",
-                    "data": "data",
-                    "seed": 1,
-                    "target": "$target",
-                    "dtype_dict": "$dtype_dict",
-                    "pct_train": 0.8,
-                    "pct_dev": 0.1,
-                    "pct_test": 0.1,
-                },
+        },
+        "splitter": {
+            "module": "splitter",
+            "args": {
+                "tss": "$problem_definition.timeseries_settings",
+                "data": "data",
+                "seed": 1,
+                "target": "$target",
+                "dtype_dict": "$dtype_dict",
+                "pct_train": 0.8,
+                "pct_dev": 0.1,
+                "pct_test": 0.1,
             },
-        ),
-        (
-            "analyzer",
-            {
-                "module": "model_analyzer",
-                "args": {
-                    "stats_info": "$statistical_analysis",
-                    "ts_cfg": "$problem_definition.timeseries_settings",
-                    "accuracy_functions": "$accuracy_functions",
-                    "predictor": "$ensemble",
-                    "data": "encoded_test_data",
-                    "train_data": "encoded_train_data",
-                    "target": "$target",
-                    "dtype_dict": "$dtype_dict",
-                    "analysis_blocks": "$analysis_blocks",
-                },
+        },
+        "analyzer": {
+            "module": "model_analyzer",
+            "args": {
+                "stats_info": "$statistical_analysis",
+                "ts_cfg": "$problem_definition.timeseries_settings",
+                "accuracy_functions": "$accuracy_functions",
+                "predictor": "$ensemble",
+                "data": "encoded_test_data",
+                "train_data": "encoded_train_data",
+                "target": "$target",
+                "dtype_dict": "$dtype_dict",
+                "analysis_blocks": "$analysis_blocks",
             },
-        ),
-        (
-            "explainer",
+        },
+        "explainer": {
+            "module": "explain",
+            "args": {
+                "timeseries_settings": "$problem_definition.timeseries_settings",
+                "positive_domain": "$statistical_analysis.positive_domain",
+                "anomaly_detection": "$problem_definition.anomaly_detection",
+                "data": "data",
+                "encoded_data": "encoded_data",
+                "predictions": "df",
+                "analysis": "$runtime_analyzer",
+                "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
+                "target_name": "$target",
+                "target_dtype": "$dtype_dict[self.target]",
+                "explainer_blocks": "$analysis_blocks",
+                "fixed_confidence": "$pred_args.fixed_confidence",
+                "anomaly_error_rate": "$pred_args.anomaly_error_rate",
+                "anomaly_cooldown": "$pred_args.anomaly_cooldown",
+            },
+        },
+        "analysis_blocks": [
             {
-                "module": "explain",
+                "module": "ICP",
                 "args": {
-                    "timeseries_settings": "$problem_definition.timeseries_settings",
+                    "fixed_significance": None,
+                    "confidence_normalizer": False,
                     "positive_domain": "$statistical_analysis.positive_domain",
-                    "anomaly_detection": "$problem_definition.anomaly_detection",
-                    "data": "data",
-                    "encoded_data": "encoded_data",
-                    "predictions": "df",
-                    "analysis": "$runtime_analyzer",
-                    "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
-                    "target_name": "$target",
-                    "target_dtype": "$dtype_dict[self.target]",
-                    "explainer_blocks": "$analysis_blocks",
-                    "fixed_confidence": "$pred_args.fixed_confidence",
-                    "anomaly_error_rate": "$pred_args.anomaly_error_rate",
-                    "anomaly_cooldown": "$pred_args.anomaly_cooldown",
                 },
             },
-        ),
-        (
-            "analysis_blocks",
-            [
-                {
-                    "module": "ICP",
-                    "args": {
-                        "fixed_significance": None,
-                        "confidence_normalizer": False,
-                        "positive_domain": "$statistical_analysis.positive_domain",
-                    },
-                },
-                {
-                    "module": "AccStats",
-                    "args": {"deps": ["ICP"]},
-                },
-                {
-                    "module": "GlobalFeatureImportance",
-                    "args": {
-                        "disable_column_importance": "False",
-                    },
-                },
-            ],
-        ),
-        (
-            "timeseries_transformer",
             {
-                "module": "transform_timeseries",
-                "args": {
-                    "timeseries_settings": "$problem_definition.timeseries_settings",
-                    "data": "data",
-                    "dtype_dict": "$dtype_dict",
-                    "target": "$target",
-                    "mode": "$mode",
-                },
+                "module": "AccStats",
+                "args": {"deps": ["ICP"]},
             },
-        ),
-        (
-            "timeseries_analyzer",
-            {
-                "module": "timeseries_analyzer",
-                "args": {
-                    "timeseries_settings": "$problem_definition.timeseries_settings",
-                    "data": "data",
-                    "dtype_dict": "$dtype_dict",
-                    "target": "$target",
-                },
+        ],
+        "timeseries_transformer": {
+            "module": "transform_timeseries",
+            "args": {
+                "timeseries_settings": "$problem_definition.timeseries_settings",
+                "data": "data",
+                "dtype_dict": "$dtype_dict",
+                "target": "$target",
+                "mode": "$mode",
             },
-        ),
-    ]
+        },
+        "timeseries_analyzer": {
+            "module": "timeseries_analyzer",
+            "args": {
+                "timeseries_settings": "$problem_definition.timeseries_settings",
+                "data": "data",
+                "dtype_dict": "$dtype_dict",
+                "target": "$target",
+            },
+        },
+    }
 
-    for field_name, implicit_value in hidden_fields:
+    if len(json_ai.features) < 60:
+        hidden_fields["analysis_blocks"].append({
+            "module": "GlobalFeatureImportance",
+            "args": {
+                "disable_column_importance": "False",
+            }
+        })
+
+    for field_name, implicit_value in hidden_fields.items():
         _populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
 
     return json_ai
