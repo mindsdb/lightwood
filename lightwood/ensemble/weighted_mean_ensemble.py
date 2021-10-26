@@ -36,12 +36,12 @@ class WeightedMeanEnsemble(BaseEnsemble):
             log.info(f'Mixer: {type(mixer).__name__} got accuracy: {avg_score}')
 
             if can_be_nan_numeric(avg_score):
+                log.warning(f'Could not compute a valid accuracy for mixer {type(mixer).__name__}, yielded invalid average score {avg_score}, resetting that to -pow(2,63) instead.')
                 avg_score = -pow(2, 63)
-                log.warning(f'Change the accuracy of mixer {type(mixer).__name__} to valid value: {avg_score}')
 
             score_list.append(avg_score)
 
-        self.weights = list(self.accuracies_to_weights(np.array(score_list, dtype=np.float)))
+        self.weights = list(self.accuracies_to_weights(np.array(score_list)))
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         df = pd.DataFrame()
