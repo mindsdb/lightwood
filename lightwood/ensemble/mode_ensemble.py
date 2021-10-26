@@ -23,7 +23,8 @@ class ModeEnsemble(BaseEnsemble):
 
         if dtype_dict[target] not in (dtype.binary, dtype.categorical, dtype.tags):
             raise Exception(
-                f'This ensemble can only be used in classification problems! Got target dtype {dtype_dict[target]} instead!')
+                'This ensemble can only be used in classification problems! ' +
+                f'Got target dtype {dtype_dict[target]} instead!')
 
         for _, mixer in enumerate(mixers):
             score_dict = evaluate_accuracy(
