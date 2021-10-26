@@ -15,7 +15,7 @@ class TestBasic(unittest.TestCase):
         df = pd.read_csv('tests/data/hdi.csv')
         target = 'Development Index'
 
-        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 10})
+        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 5})
         json_ai = json_ai_from_problem(df, problem_definition=pdef)
 
         json_ai.analysis_blocks = [{
@@ -27,7 +27,7 @@ class TestBasic(unittest.TestCase):
         predictor = predictor_from_code(code)
 
         predictor.learn(df)
-        predictions = predictor.predict(df)
+        predictions = predictor.predict(df.head())
 
         self.assertIn('shap_explainer', predictor.runtime_analyzer)
         self.assertIn('feature_4_impact', predictions.columns)
