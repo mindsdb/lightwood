@@ -27,7 +27,9 @@ class TestBasic(unittest.TestCase):
         predictor = predictor_from_code(code)
 
         predictor.learn(df)
-        predictor.predict(df)
+        predictions = predictor.predict(df)
 
-        assert 'shap_explainer' in predictor.runtime_analyzer
-
+        self.assertIn('shap_explainer', predictor.runtime_analyzer)
+        self.assertIn('feature_4_impact', predictions.columns)
+        # TODO: once global_insights is exposed, check that all feature impacts
+        # plus base_response sum up to the prediction value
