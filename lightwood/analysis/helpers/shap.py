@@ -81,7 +81,10 @@ class ShapleyValues(BaseAnalysisBlock):
         shap_values_df = pd.DataFrame(shap_values).rename(
             mapper=lambda i: f"feature_{i}_impact", axis='columns')
 
-        predictions = self.label_encoder.transform(row_insights['prediction'])
+        if kwargs.get('target_dtype', None) in (dtype.binary, dtype.categorical, dtype.tags):
+            predictions = self.label_encoder.transform(row_insights['prediction'])
+        else:
+            predictions = row_insights['prediction']
 
         base_response = (predictions - shap_values_df.sum(axis='columns')).mean()
         global_insights['base_response'] = base_response
