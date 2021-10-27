@@ -48,8 +48,7 @@ class WeightedMeanEnsemble(BaseEnsemble):
         for mixer in self.mixers:
             df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
 
-        log.warning(f'weights: {self.weights}')
-        avg_predictions_df = df.mean(axis='columns')
+        avg_predictions_df = df.apply(lambda x: np.average(x, weights=self.weights), axis='columns')
         return pd.DataFrame(avg_predictions_df, columns=['prediction'])
 
     def accuracies_to_weights(self, x: np.array) -> np.array:

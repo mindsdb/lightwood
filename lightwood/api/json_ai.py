@@ -273,7 +273,7 @@ def generate_json_ai(
             ensemble=None
         )
     }
-    if type_information.dtypes[target] in (dtype.float, dtype.integer):
+    if (not is_ts) and (type_information.dtypes[target] in (dtype.float, dtype.integer, dtype.quantity)):
         outputs[target].ensemble = {
             "module": "WeightedMeanEnsemble",
             "args": {
