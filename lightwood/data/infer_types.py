@@ -65,6 +65,10 @@ def get_binary_type(element: object) -> str:
 
         # @TODO: currently we don differentiate between audio and video
         is_audio = sndhdr.what(element)
+        # apparently `sndhdr` is really bad..
+        for audio_ext in ['.wav', '.mp3']:
+            if element.endswith(audio_ext):
+                is_audio = True
         if is_audio is not None:
             return dtype.audio
     except Exception:
