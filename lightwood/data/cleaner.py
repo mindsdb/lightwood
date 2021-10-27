@@ -116,6 +116,9 @@ def get_cleaning_func(data_dtype: dtype, custom_cleaning_functions: Dict[str, st
         dtype.rich_text,
         dtype.categorical,
         dtype.binary,
+        dtype.audio,
+        dtype.image,
+        dtype.video
     ):
         clean_func = _clean_text
 
