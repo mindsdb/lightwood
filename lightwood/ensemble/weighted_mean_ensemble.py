@@ -14,8 +14,6 @@ from lightwood import dtype
 
 
 class WeightedMeanEnsemble(BaseEnsemble):
-    weights: List[float]
-
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, args: PredictionArguments,
                  dtype_dict: dict, accuracy_functions, ts_analysis: Optional[dict] = None) -> None:
         super().__init__(target, mixers, data)
@@ -36,19 +34,22 @@ class WeightedMeanEnsemble(BaseEnsemble):
             log.info(f'Mixer: {type(mixer).__name__} got accuracy: {avg_score}')
 
             if can_be_nan_numeric(avg_score):
-                log.warning(f'Could not compute a valid accuracy for mixer {type(mixer).__name__}, yielded invalid average score {avg_score}, resetting that to -pow(2,63) instead.')
+                log.warning(f'Could not compute a valid accuracy for mixer: {type(mixer).__name__}, \
+                              functions: {accuracy_functions}, yielded invalid average score {avg_score}, \
+                              resetting that to -pow(2,63) instead.')
                 avg_score = -pow(2, 63)
 
             score_list.append(avg_score)
 
-        self.weights = list(self.accuracies_to_weights(np.array(score_list)))
+        self.weights = self.accuracies_to_weights(np.array(score_list))
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         df = pd.DataFrame()
         for mixer in self.mixers:
             df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
 
-        avg_predictions_df = df.apply(lambda x: np.average(x, weights=self.weights), axis='columns')
+        log.warning(f'weights: {self.weights}')
+        avg_predictions_df = df.mean(axis='columns')
         return pd.DataFrame(avg_predictions_df, columns=['prediction'])
 
     def accuracies_to_weights(self, x: np.array) -> np.array:
