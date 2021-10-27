@@ -46,17 +46,30 @@ class TestTimeseries(unittest.TestCase):
 
         return train, test
 
+    def calculate_duration(self, predictor, train, time_aim_expected):
+        time_aim_expected = (time_aim_expected * 1.2)
+        start = time.process_time()
+        predictor.learn(train)
+        time_aim_actual = (time.process_time() - start)
+        if(time_aim_expected < time_aim_actual):
+            error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
+            raise ValueError(error)
+        assert time_aim_expected >= time_aim_actual
+        
+        return predictor
+
     def test_0_time_series_grouped_regression(self):
         """Test grouped numerical predictions, with anomalies and forecast horizon > 1 """
         data = pd.read_csv('tests/data/arrivals.csv')
         train, test = self.split_arrivals(data, grouped=True)
         target = 'Traffic'
+        time_aim_expected = 30
         order_by = 'T'
         nr_preds = 2
         window = 5
         pred = predictor_from_problem(train,
                                       ProblemDefinition.from_dict({'target': target,
-                                                                   'time_aim': 30,
+                                                                   'time_aim': time_aim_expected,
                                                                    'anomaly_detection': True,
                                                                    'timeseries_settings': {
                                                                        'use_previous_target': True,
@@ -66,7 +79,7 @@ class TestTimeseries(unittest.TestCase):
                                                                        'order_by': [order_by],
                                                                        'window': window
                                                                    }}))
-        pred.learn(train)
+        pred = self.calculate_duration(pred, train, time_aim_expected)
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
@@ -126,36 +139,12 @@ class TestTimeseries(unittest.TestCase):
 
         df = pd.read_csv('tests/data/arrivals.csv')
         target = 'Traffic'
-        df[target] = df[target] > 100000
-
-        train_idxs = np.random.rand(len(df)) < 0.8
-        train = df[train_idxs]
-        test = df[~train_idxs]
-
-        predictor = predictor_from_problem(df,
-                                           ProblemDefinition.from_dict({'target': target,
-                                                                        'time_aim': 30,
-                                                                        'anomaly_detection': False,
-                                                                        'timeseries_settings': {
-                                                                            'order_by': ['T'],
-                                                                            'use_previous_target': True,
-                                                                            'window': 5
-                                                                        },
-                                                                        }))
-
-        predictor.learn(train)
-        predictor.predict(test)
-
-    def test_3_time_aim(self):
-        from lightwood.api.high_level import predictor_from_problem
-
-        df = pd.read_csv('tests/data/arrivals.csv')
-        target = 'Traffic'
         time_aim_expected = 30
         df[target] = df[target] > 100000
 
         train_idxs = np.random.rand(len(df)) < 0.8
         train = df[train_idxs]
+        test = df[~train_idxs]
 
         predictor = predictor_from_problem(df,
                                            ProblemDefinition.from_dict({'target': target,
@@ -167,10 +156,6 @@ class TestTimeseries(unittest.TestCase):
                                                                             'window': 5
                                                                         },
                                                                         }))
-        start = time.process_time()
-        predictor.learn(train)
-        time_aim_actual = (time.process_time() - start)
-        if(time_aim_expected < time_aim_actual):
-            error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
-            raise ValueError(error)
-        assert time_aim_expected >= time_aim_actual
+
+        predictor = self.calculate_duration(predictor, train, time_aim_expected)
+        predictor.predict(test)
