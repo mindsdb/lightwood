@@ -55,7 +55,6 @@ class TestTimeseries(unittest.TestCase):
             error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
             raise ValueError(error)
         assert time_aim_expected >= time_aim_actual
-        
         return predictor
 
     def test_0_time_series_grouped_regression(self):
