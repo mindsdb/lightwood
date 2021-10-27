@@ -89,7 +89,7 @@ class ICP(BaseAnalysisBlock):
 
             # setup prediction cache to avoid additional .predict() calls
             if ns.is_classification:
-                if ns.predictor.mixers[ns.predictor.best_index].supports_proba:
+                if ns.predictor.supports_proba:
                     icp.nc_function.model.prediction_cache = ns.normal_predictions[all_cat_cols].values
                 else:
                     predicted_classes = pd.get_dummies(
