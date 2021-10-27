@@ -14,7 +14,7 @@ class TestImg2VecEncoder(unittest.TestCase):
         )
 
         enc = Img2VecEncoder()
-        enc.prepare(priming_data=None)
+        enc.prepare([], [])
         encoded_images_tensor = enc.encode(images=[image_path])
 
         self.assertTrue(isinstance(encoded_images_tensor, Tensor))

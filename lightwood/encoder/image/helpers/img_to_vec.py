@@ -17,16 +17,16 @@ class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
 
 
 class Img2Vec(nn.Module):
-    def __init__(self, model):
+    def __init__(self):
         """ Img2Vec
         :param model: name of the model to use
         """
         super(Img2Vec, self).__init__()
 
         self.device, _ = get_devices()
-        self.model_name = model
-
-        self.model = self._get_model()
+        self.output_size = 512
+        self.model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[: -1],
+                                         ChannelPoolAdaptiveAvg1d(output_size=self.output_size))
         self.model = self.model.to(self.device)
 
     def to(self, device, available_devices):
@@ -38,28 +38,6 @@ class Img2Vec(nn.Module):
         with LightwoodAutocast():
             embedding = self.model(image.to(self.device))
 
-            if self.model_name in ('resnext-50-small'):
-                if batch:
-                    return embedding
-                return embedding[0, :]
-            else:
-                if batch:
-                    return embedding[:, :, 0, 0]
-                return embedding[0, :, 0, 0]
-
-    def _get_model(self):
-        if self.model_name == 'resnet-18':
-            model = torch.nn.Sequential(*list(models.resnet18(pretrained=True).children())[:-1])
-
-        elif self.model_name == 'resnext-50-small':
-            model = torch.nn.Sequential(
-                *list(models.resnext50_32x4d(pretrained=True).children())[: -1],
-                ChannelPoolAdaptiveAvg1d(output_size=512))
-
-        elif self.model_name == 'resnext-50':
-            model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[:-1])
-
-        else:
-            raise Exception('Image encoding model ' + self.model_name + ' was not found')
-
-        return model
+            if batch:
+                return embedding
+            return embedding[0, :]
