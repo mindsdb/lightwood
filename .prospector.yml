@@ -11,8 +11,7 @@ autodetect: true
 max-line-length: 120
 
 pylint:
-    options:
-      jobs: auto
+    run: false
     disable:
       - too-many-locals
       - arguments-differ
