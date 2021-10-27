@@ -2,6 +2,7 @@ from typing import Optional, List, Dict
 import torch
 import pandas as pd
 
+from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.ts import get_inferred_timestamps
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -85,6 +86,7 @@ def explain(data: pd.DataFrame,
     # Call explanation blocks
     # ------------------------- #
     for block in explainer_blocks:
+        log.info("The block %s is now running its explain() method", block.__class__.__name__)
         row_insights, global_insights = block.explain(row_insights, global_insights, **kwargs)
 
     return row_insights, global_insights
