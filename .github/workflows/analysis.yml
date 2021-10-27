@@ -17,10 +17,10 @@ jobs:
           pip install prospector
 
       - name: Run static code analysis using Prospector tool
-        run: prospector > tests/static_analysis.json
+        run: prospector > static_analysis.json
 
       - name: Deploy Static Analysis Result to GitHub Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: static_analysis_result
-          path: tests/static_analyis.json
+          path: static_analyis.json
