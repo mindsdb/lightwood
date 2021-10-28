@@ -5,3 +5,12 @@ requires = [
     "setuptools",
     "wheel",
 ]
+
+[tool.vulture]
+ignore_decorators = ["@app.route", "@require_*"]
+ignore_names = ["visit_*", "do_*"]
+make_whitelist = true
+min_confidence = 100 # 100% confidence
+paths = ["setup.py", "lightwood", "tests", "docssrc"]
+sort_by_size = true
+verbose = true

@@ -25,3 +25,5 @@ pmdarima >=1.8.0,<=1.8.3
 black >=21.9b0
 typing_extensions
 colorlog ==6.5.0
+vulture==2.3
+pre-commit==2.15.0
