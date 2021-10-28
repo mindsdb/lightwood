@@ -32,6 +32,7 @@ class SkTime(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.supports_proba = False
         self.stable = True
+        self.prepared = False
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Started fitting sktime forecaster for array prediction')
@@ -67,10 +68,26 @@ class SkTime(BaseMixer):
             if self.grouped_by == ['__default']:
                 break
 
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        Note: sktime asks for "specification of the time points for which forecasts are requested",
+        and this mixer complies by assuming forecasts will start immediately after the last observed
+        value.
+
+        Because of this, `partial_fit` ensures that both `dev` and `test` splits are used to fit the AutoARIMA model.
+
+        Due to how lightwood implements the `update` procedure, expected inputs are (for a train-dev-test split):
+
+        :param dev_data: original `test` split (used to validate and select model if ensemble is `BestOf`)
+        :param train_data: includes original `train` and `dev` split
+        """  # noqa
+        self.fit(dev_data, train_data)
+        self.prepared = True
+
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         if args.predict_proba:
-            log.warning('This model does not output probability estimates')
+            log.warning('This mixer does not output probability estimates')
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
@@ -101,8 +118,7 @@ class SkTime(BaseMixer):
 
                 for idx, _ in enumerate(series.iteritems()):
                     ydf['prediction'].iloc[series_idxs[idx]] = forecaster.predict(
-                        np.arange(idx,  # +cutoff
-                                  idx + self.n_ts_predictions)).tolist()  # +cutoff
+                        np.arange(idx, idx + self.n_ts_predictions)).tolist()
 
             if self.grouped_by == ['__default']:
                 break
