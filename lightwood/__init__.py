@@ -3,7 +3,7 @@ import logging
 logging.getLogger('matplotlib').setLevel(level=logging.WARNING)
 from lightwood.api import __all__ as api_all_list
 from lightwood.api import * # noqa
-import lightwood.data as data
+from lightwood import data
 from lightwood.data import infer_types, statistical_analysis
 from lightwood.__about__ import __package_name__ as name, __version__
 
