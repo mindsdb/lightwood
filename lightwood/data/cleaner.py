@@ -288,6 +288,7 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
     to_drop = [*[x for x in identifiers.keys() if x != target],
                *[x for x in data.columns if x in dtype_dict and dtype_dict[x] == dtype.invalid]]
     exceptions = ["__mdb_make_predictions"]
+    to_drop = [x for x in to_drop if x in data.columns]
     data = data.drop(columns=to_drop)
 
     if mode == "train":
