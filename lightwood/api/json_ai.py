@@ -266,33 +266,22 @@ def generate_json_ai(
                         }
                     ]
                 )
+
     outputs = {
         target: Output(
             data_dtype=type_information.dtypes[target],
             encoder=None,
             mixers=mixers,
-            ensemble=None
+            ensemble={
+                "module": "BestOf",
+                "args": {
+                    "args": "$pred_args",
+                    "accuracy_functions": "$accuracy_functions",
+                    "ts_analysis": "self.ts_analysis" if is_ts else None,
+                },
+            }
         )
     }
-    if (not is_ts) and (type_information.dtypes[target] in (dtype.float, dtype.integer, dtype.quantity)):
-        outputs[target].ensemble = {
-            "module": "WeightedMeanEnsemble",
-            "args": {
-                "args": "$pred_args",
-                "dtype_dict": "$dtype_dict",
-                "accuracy_functions": "$accuracy_functions",
-                "ts_analysis": "self.ts_analysis" if is_ts else None,
-            },
-        }
-    else:
-        outputs[target].ensemble = {
-            "module": "BestOf",
-            "args": {
-                "args": "$pred_args",
-                "accuracy_functions": "$accuracy_functions",
-                "ts_analysis": "self.ts_analysis" if is_ts else None,
-            },
-        }
 
     if tss.is_timeseries and tss.nr_predictions > 1:
         list(outputs.values())[0].data_dtype = dtype.tsarray
