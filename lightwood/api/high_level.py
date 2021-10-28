@@ -4,7 +4,8 @@ from typing import Union
 import dill
 import pandas as pd
 from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
-import lightwood
+from lightwood.data import statistical_analysis
+from lightwood.data import infer_types
 from lightwood.api.predictor import PredictorInterface
 from lightwood.api.json_ai import generate_json_ai
 import tempfile
@@ -52,11 +53,11 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
     log.info(f'Dropping features: {problem_definition.ignore_features}')
     df = df.drop(columns=problem_definition.ignore_features)
 
-    type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
-    statistical_analysis = lightwood.data.statistical_analysis(
+    type_information = infer_types(df, problem_definition.pct_invalid)
+    stats = statistical_analysis(
         df, type_information.dtypes, type_information.identifiers, problem_definition)
     json_ai = generate_json_ai(
-        type_information=type_information, statistical_analysis=statistical_analysis,
+        type_information=type_information, statistical_analysis=stats,
         problem_definition=problem_definition)
 
     return json_ai
@@ -96,13 +97,13 @@ def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
 
     problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0])})
 
-    type_information = lightwood.data.infer_types(df, problem_definition.pct_invalid)
-    statistical_analysis = lightwood.data.statistical_analysis(
+    type_information = infer_types(df, problem_definition.pct_invalid)
+    stats = statistical_analysis(
         df, type_information.dtypes, type_information.identifiers, problem_definition)
 
     return DataAnalysis(
         type_information=type_information,
-        statistical_analysis=statistical_analysis
+        statistical_analysis=stats
     )
 
 
