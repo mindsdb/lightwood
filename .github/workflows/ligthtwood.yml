@@ -2,14 +2,14 @@ name: Integration and Unit Tests Lightwood
 
 on:
   push:
+    branches: [ staging ]
   pull_request:
-    branches:
-      - stable
-      - staging
+    branches: [ staging ]
+
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [ubuntu-latest]
