@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.api.dtype import dtype
+from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 
 
 def get_group_matches(data, combination):
