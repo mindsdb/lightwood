@@ -63,7 +63,7 @@ class Img2VecEncoder(BaseEncoder):
             for img_tensor in img_tensors:
                 vec = self.model(img_tensor.unsqueeze(0), batch=False)
                 vec_arr.append(vec)
-        return torch.stack(vec_arr)
+        return torch.stack(vec_arr).to('cpu')
 
     def decode(self, encoded_values_tensor):
         raise Exception('This encoder is not bi-directional')

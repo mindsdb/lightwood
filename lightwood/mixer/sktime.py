@@ -7,7 +7,7 @@ from lightwood.api import dtype
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
-from lightwood.encoder.time_series.helpers.common import get_group_matches
+from lightwood.helpers.general import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 

@@ -3,6 +3,7 @@ import calendar
 from typing import Optional
 import torch
 from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.general import is_none
 
 
 class DatetimeEncoder(BaseEncoder):
@@ -42,7 +43,7 @@ class DatetimeEncoder(BaseEncoder):
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
         :return: a list of vectors
         """
-        if unix_timestamp is None:
+        if is_none(unix_timestamp):
             vector = [0] * len(self.fields)
         else:
             c = self.constants
