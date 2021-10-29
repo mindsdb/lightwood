@@ -189,6 +189,12 @@ def is_none(value):
     if is_nan_numeric(value):
         return True
 
+    if str(value) == '':
+        return True
+
+    if str(value) in ('None', 'nan', 'NaN', 'np.nan'):
+        return True
+
     return False
 
 
