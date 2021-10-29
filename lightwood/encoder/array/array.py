@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 import torch
 import pandas as pd
 import numpy as np
@@ -28,6 +28,13 @@ class ArrayEncoder(BaseEncoder):
         else:
             self.output_size = None
 
+    def _pad_and_strip(self, array: List[object]):
+        if len(array) < self.output_size:
+            array = array + [0] * (self.output_size - len(array))
+        if len(array) > self.output_size:
+            array = array[:self.output_size]
+        return array
+
     def prepare(self, train_priming_data, dev_priming_data):
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         priming_data = priming_data.values
@@ -49,6 +56,8 @@ class ArrayEncoder(BaseEncoder):
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values
 
+        priming_data = [self._pad_and_strip(list(x)) for x in priming_data]
+
         self._normalizer.prepare(priming_data)
         self.output_size *= self._normalizer.output_size
         self.is_prepared = True
@@ -63,6 +72,7 @@ class ArrayEncoder(BaseEncoder):
         for i in range(len(column_data)):
             if column_data[i] is None:
                 column_data[i] = [0] * self.output_size
+        column_data = [self._pad_and_strip(list(x)) for x in column_data]
 
         data = torch.cat([self._normalizer.encode(column_data)], dim=-1)
         data[torch.isnan(data)] = 0.0
