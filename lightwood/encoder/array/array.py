@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from lightwood.encoder.base import BaseEncoder
 from lightwood.api import dtype
-from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
+from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 
 
 class ArrayEncoder(BaseEncoder):
@@ -12,9 +12,12 @@ class ArrayEncoder(BaseEncoder):
     Fits a normalizer for array data. To encode, `ArrayEncoder` returns a normalized window of previous data.
     It can be used for generic arrays, as well as for handling historical target values in time series tasks.
 
+    Currently supported normalizing strategies are minmax for numerical arrays, and a simple one-hot for categorical arrays. See `lightwood.encoder.helpers` for more details on each approach.
+
     :param stop_after: time budget in seconds.
     :param window: expected length of array data.
-    """
+    :param original_dtype: element-wise data type
+    """  # noqa
 
     is_trainable_encoder: bool = True
 
