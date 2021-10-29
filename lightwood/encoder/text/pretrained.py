@@ -57,7 +57,7 @@ import time
 import torch
 from torch.utils.data import DataLoader
 import os
-import pandas as pd
+import modin.pandas as pd
 from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
 from lightwood.helpers.device import get_devices
 from lightwood.encoder.base import BaseEncoder

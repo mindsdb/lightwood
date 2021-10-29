@@ -2,7 +2,7 @@ import importlib
 from typing import List, Union, Dict, Optional
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error
 
 

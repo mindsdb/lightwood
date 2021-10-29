@@ -1,7 +1,7 @@
 import datetime
 import calendar
 import numpy as np
-import pandas as pd  # @TODO: remove?
+import modin.pandas as pd  # @TODO: remove?
 import torch
 from lightwood.encoder.base import BaseEncoder
 from collections.abc import Iterable

@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict
 
-import pandas as pd
+import modin.pandas as pd
 import numpy as np
 
 from lightwood.mixer.base import BaseMixer

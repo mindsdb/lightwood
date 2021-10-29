@@ -1,7 +1,7 @@
 import re
 from copy import deepcopy
 
-import pandas as pd
+import modin.pandas as pd
 import datetime
 from dateutil.parser import parse as parse_dt
 

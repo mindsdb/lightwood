@@ -1,6 +1,6 @@
 from typing import List
 
-import pandas as pd
+import modin.pandas as pd
 
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble

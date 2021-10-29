@@ -4,7 +4,7 @@ from typing import List
 from copy import deepcopy
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 import torch
 import torch.nn as nn
 from torch import optim

@@ -2,7 +2,7 @@ from typing import Union, Optional
 
 import torch
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 from torch.nn.functional import softmax
 
 from lightwood.api.dtype import dtype

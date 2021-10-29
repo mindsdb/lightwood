@@ -3,7 +3,7 @@ import torch
 import warnings
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.io import read_from_path_or_url
-import pandas as pd
+import modin.pandas as pd
 from lightwood.helpers.log import log
 
 

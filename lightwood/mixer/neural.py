@@ -4,7 +4,7 @@ from typing import Dict, List
 
 import torch
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 from torch import nn
 import torch_optimizer as ad_optim
 from sklearn.metrics import r2_score

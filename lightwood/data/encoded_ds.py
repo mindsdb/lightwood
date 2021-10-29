@@ -2,7 +2,7 @@ import inspect
 from typing import List, Tuple
 import torch
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 from torch.utils.data import Dataset
 from lightwood.encoder.base import BaseEncoder
 

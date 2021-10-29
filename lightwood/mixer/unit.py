@@ -8,7 +8,7 @@ the unity mixer just arg-maxes the output of the encoder.
 from typing import List
 
 import torch
-import pandas as pd
+import modin.pandas as pd
 
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer

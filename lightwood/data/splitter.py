@@ -2,7 +2,7 @@ from typing import List, Dict
 from itertools import product
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 
 from lightwood.helpers.log import log
 from lightwood.api.dtype import dtype

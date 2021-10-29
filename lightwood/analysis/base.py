@@ -1,6 +1,6 @@
 from typing import Tuple, Dict, Optional
 
-import pandas as pd
+import modin.pandas as pd
 from lightwood.helpers.log import log
 
 

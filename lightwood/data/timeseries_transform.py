@@ -2,7 +2,7 @@ import copy
 import datetime
 import dateutil
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 import multiprocessing as mp
 from lightwood.helpers.parallelism import get_nr_procs
 from functools import partial

@@ -5,7 +5,7 @@ import torch
 import optuna
 import lightgbm
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 import optuna.integration.lightgbm as optuna_lightgbm
 

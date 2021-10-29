@@ -1,7 +1,7 @@
 import dill
 from typing import Dict
 
-import pandas as pd
+import modin.pandas as pd
 from lightwood.api.types import ModelAnalysis
 
 

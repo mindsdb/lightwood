@@ -4,7 +4,7 @@ from lightwood.encoder import BaseEncoder
 from lightwood.encoder.categorical import CategoricalAutoEncoder
 from lightwood.helpers.text import tokenize_text
 from lightwood.helpers.torch import concat_vectors_and_pad, average_vectors
-import pandas as pd
+import modin.pandas as pd
 
 
 class ShortTextEncoder(BaseEncoder):

@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 
 from lightwood.helpers.log import log
 from lightwood.helpers.numeric import can_be_nan_numeric

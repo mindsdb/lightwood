@@ -2,7 +2,7 @@ import os
 from types import ModuleType
 from typing import Union
 import dill
-import pandas as pd
+import modin.pandas as pd
 from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
 from lightwood.data import statistical_analysis
 from lightwood.data import infer_types

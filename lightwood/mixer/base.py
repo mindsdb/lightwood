@@ -1,4 +1,4 @@
-import pandas as pd
+import modin.pandas as pd
 
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.api.types import PredictionArguments

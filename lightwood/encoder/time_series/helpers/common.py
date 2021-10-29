@@ -2,7 +2,7 @@ from itertools import product
 
 import torch
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
 
 from lightwood.api.dtype import dtype

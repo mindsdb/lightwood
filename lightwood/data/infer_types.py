@@ -3,7 +3,7 @@ import random
 from typing import List
 import dateutil
 from scipy.stats import norm
-import pandas as pd
+import modin.pandas as pd
 import numpy as np
 import imghdr
 import sndhdr

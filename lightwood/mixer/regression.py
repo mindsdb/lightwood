@@ -1,5 +1,5 @@
 import torch
-import pandas as pd
+import modin.pandas as pd
 from scipy.special import softmax
 from sklearn.linear_model import LinearRegression
 

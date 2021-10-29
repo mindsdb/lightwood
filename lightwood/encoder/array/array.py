@@ -1,6 +1,6 @@
 from typing import Union
 import torch
-import pandas as pd
+import modin.pandas as pd
 import numpy as np
 from lightwood.encoder.base import BaseEncoder
 from lightwood.api import dtype

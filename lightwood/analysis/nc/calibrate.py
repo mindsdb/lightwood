@@ -4,7 +4,7 @@ from typing import Dict, Tuple
 from types import SimpleNamespace
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api.dtype import dtype

@@ -1,5 +1,5 @@
 from typing import Dict
-import pandas as pd
+import modin.pandas as pd
 import numpy as np
 import datetime
 from dateutil.parser import parse as parse_dt

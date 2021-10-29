@@ -2,7 +2,7 @@ from typing import Union
 
 import torch
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 from scipy.stats import entropy
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error

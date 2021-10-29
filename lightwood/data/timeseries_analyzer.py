@@ -1,7 +1,7 @@
 from typing import Dict, Tuple, List
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype

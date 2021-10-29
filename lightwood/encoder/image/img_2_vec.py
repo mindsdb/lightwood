@@ -3,7 +3,7 @@ import logging
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
-import pandas as pd
+import modin.pandas as pd
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
 from lightwood.encoder.base import BaseEncoder
 

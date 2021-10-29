@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict
 import torch
-import pandas as pd
+import modin.pandas as pd
 
 from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
