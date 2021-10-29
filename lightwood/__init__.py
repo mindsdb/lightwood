@@ -1,6 +1,13 @@
 import os
 import logging
 logging.getLogger('matplotlib').setLevel(level=logging.WARNING)
+
+os.environ["MODIN_ENGINE"] = "ray"
+
+import ray
+
+ray.init()
+
 from lightwood.api import __all__ as api_all_list
 from lightwood.api import * # noqa
 from lightwood import data
