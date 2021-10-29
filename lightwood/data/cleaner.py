@@ -43,6 +43,12 @@ def cleaner(
     data = _remove_columns(data, identifiers, target, mode, timeseries_settings,
                            anomaly_detection, dtype_dict)
 
+    for col in _get_columns_to_clean(data, dtype_dict, mode, target):
+
+        # Get and apply a cleaning function for each data type
+        # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
+        data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
+
     return data
 
 
