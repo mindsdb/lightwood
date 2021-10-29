@@ -8,6 +8,7 @@ from lightwood.api.dtype import dtype
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 from lightwood.helpers.general import get_group_matches
 
+
 def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
                         timeseries_settings: TimeseriesSettings, target: str) -> Dict:
     """
