@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.helpers.log import log
-from lightwood.helpers.numeric import can_be_nan_numeric
+from lightwood.helpers.numeric import is_nan_numeric
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments
@@ -33,7 +33,7 @@ class WeightedMeanEnsemble(BaseEnsemble):
             avg_score = np.mean(list(score_dict.values()))
             log.info(f'Mixer: {type(mixer).__name__} got accuracy: {avg_score}')
 
-            if can_be_nan_numeric(avg_score):
+            if is_nan_numeric(avg_score):
                 log.warning(f'Could not compute a valid accuracy for mixer: {type(mixer).__name__}, \
                               functions: {accuracy_functions}, yielded invalid average score {avg_score}, \
                               resetting that to -pow(2,63) instead.')
