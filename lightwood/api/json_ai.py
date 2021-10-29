@@ -667,14 +667,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         },
     }
 
-    if len(json_ai.features) < 60:
-        hidden_fields["analysis_blocks"].append({
-            "module": "GlobalFeatureImportance",
-            "args": {
-                "disable_column_importance": "False",
-            }
-        })
-
     for field_name, implicit_value in hidden_fields.items():
         _populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
 
