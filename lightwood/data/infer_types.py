@@ -15,7 +15,7 @@ from lightwood.helpers.text import (get_identifier_description_mp, cast_string_t
                                     analyze_sentences)
 from lightwood.helpers.log import log
 import re
-from lightwood.helpers.numeric import can_be_nan_numeric
+from lightwood.helpers.numeric import is_nan_numeric
 from lightwood.helpers.seed import seed
 
 
@@ -92,7 +92,7 @@ def get_numeric_type(element: object) -> str:
         return dtype.integer
     else:
         try:
-            if can_be_nan_numeric(element):
+            if is_nan_numeric(element):
                 return dtype.integer
             else:
                 return None
