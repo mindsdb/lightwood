@@ -22,6 +22,11 @@ from lightwood.encoder.time_series.helpers.transformer_helpers import Transforme
 
 
 class TimeSeriesEncoder(BaseEncoder):
+    """
+    Time series encoder. This module can learn features for any `order_by` temporal column, both with and without accompanying target data.
+
+    The backbone of this encoder is either a recurrent neural network or a transformer; both structured in an encoder-decoder fashion.
+    """  # noqa
     is_timeseries_encoder: bool = True
     is_trainable_encoder: bool = True
 
