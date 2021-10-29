@@ -211,7 +211,7 @@ def is_none(value):
     
     When we assign ``None`` to a cell in a dataframe this might get turned to `nan` or other values, this function checks if a cell is ``None`` or any other values a pd.DataFrame might convert ``None`` to.
 
-    It also check some extra values (like ``''``), which I'm pretty sure pandas never converts ``None`` to, but lightwood would still consider those values "None values", and this will allow for more generic use later.
+    It also check some extra values (like ``''``) that pandas never converts ``None`` to (hopefully). But lightwood would still consider those values "None values", and this will allow for more generic use later.
     """ # noqa
     if value is None:
         return True
