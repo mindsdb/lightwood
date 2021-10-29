@@ -197,4 +197,3 @@ def is_none(value):
 
     return False
 
-

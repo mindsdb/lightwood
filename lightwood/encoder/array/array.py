@@ -5,6 +5,7 @@ import numpy as np
 from lightwood.encoder.base import BaseEncoder
 from lightwood.api import dtype
 from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer
+from lightwood.helpers.general import is_none
 
 
 class ArrayEncoder(BaseEncoder):
@@ -42,7 +43,7 @@ class ArrayEncoder(BaseEncoder):
         if self.output_size is None:
             self.output_size = np.max([len(x) for x in priming_data if x is not None])
         for i in range(len(priming_data)):
-            if priming_data[i] is None:
+            if is_none(priming_data[i]):
                 priming_data[i] = [0] * self.output_size
 
         if self.is_prepared:
@@ -70,7 +71,7 @@ class ArrayEncoder(BaseEncoder):
             column_data = column_data.values
 
         for i in range(len(column_data)):
-            if column_data[i] is None:
+            if is_none(column_data[i]):
                 column_data[i] = [0] * self.output_size
         column_data = [self._pad_and_strip(list(x)) for x in column_data]
 

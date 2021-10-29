@@ -5,6 +5,7 @@ import pandas as pd  # @TODO: remove?
 import torch
 from lightwood.encoder.base import BaseEncoder
 from collections.abc import Iterable
+from lightwood.helpers.general import is_none
 
 
 class DatetimeNormalizerEncoder(BaseEncoder):
@@ -50,7 +51,7 @@ class DatetimeNormalizerEncoder(BaseEncoder):
         """
         ret = []
         for unix_timestamp in data:
-            if unix_timestamp is None:
+            if is_none(unix_timestamp)
                 if self.sinusoidal:
                     vector = [0, 1] * len(self.fields)
                 else:
