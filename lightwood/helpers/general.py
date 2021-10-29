@@ -208,7 +208,10 @@ def is_none(value):
     Pandas has no way to guarantee "stability" for the type of a column, it choses to arbitrarily change it based on the values.
     Pandas also change the values in the columns based on the types.
     Lightwood relies on having ``None`` values for a cells that represent "missing" or "corrupt".
-    But since pandas dataframes can't keep ``None`` or ``nan`` or other such values consistent (they get intermixed by pandas, e.g. ``df[a] = [None]`` might or might not become ``df[a] == [np.nan]`` depending on veror any other "weird" sion or on other data in the array)
+    
+    When we assign ``None`` to a cell in a dataframe this might get turned to `nan` or other values, this function checks if a cell is ``None`` or any other values a pd.DataFrame might convert ``None`` to.
+
+    It also check some extra values (like ``''``), which I'm pretty sure pandas never converts ``None`` to, but lightwood would still consider those values "None values", and this will allow for more generic use later.
     """ # noqa
     if value is None:
         return True
