@@ -71,6 +71,7 @@ from transformers import (
     AdamW,
     get_linear_schedule_with_warmup,
 )
+from lightwood.helpers.general import is_none
 
 
 class PretrainedLangEncoder(BaseEncoder):
@@ -340,7 +341,7 @@ class PretrainedLangEncoder(BaseEncoder):
             for text in column_data:
 
                 # Omit NaNs
-                if text is None:
+                if is_none(text):
                     text = ""
 
                 # Tokenize the text with the built-in tokenizer.

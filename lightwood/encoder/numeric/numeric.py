@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
+from lightwood.helpers.general import is_none
 
 
 class NumericEncoder(BaseEncoder):
@@ -64,7 +65,7 @@ class NumericEncoder(BaseEncoder):
             else:
                 vector = [0] * 4
                 try:
-                    if real is None:
+                    if is_none(real):
                         vector[0] = 0
                     else:
                         vector[0] = 1
