@@ -6,6 +6,11 @@ from lightwood.encoder.base import BaseEncoder
 
 
 class DatetimeEncoder(BaseEncoder):
+    """
+    This encoder produces an encoded representation for timestamps.
+
+    The approach consists on decomposing the timestamp objects into its constituent units (e.g. day-of-week, month, year, etc), and describing each of those with a single value that represents the magnitude in a sensible cycle length.
+    """  # noqa
     def __init__(self, is_target: bool = False):
         super().__init__(is_target)
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']

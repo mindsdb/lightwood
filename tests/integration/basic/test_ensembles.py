@@ -58,3 +58,29 @@ class TestBasic(unittest.TestCase):
         predictions = predictor.predict(df)
 
         self.assertTrue(accuracy_score(df[target].astype(int), predictions['prediction'].astype(int)) > 0.5)
+
+    def test_2_weighted_mean_ensemble(self):
+        df = pd.read_csv('tests/data/concrete_strength.csv')
+
+        target = 'concrete_strength'
+
+        json_ai = json_ai_from_problem(df, ProblemDefinition.from_dict({
+            'target': target,
+            'time_aim': 80
+        }))
+
+        json_ai.outputs[target].ensemble = {
+            'module': 'WeightedMeanEnsemble',
+            "args": {
+                "args": "$pred_args",
+                'dtype_dict': '$dtype_dict',
+                "accuracy_functions": "$accuracy_functions",
+            }
+        }
+
+        code = code_from_json_ai(json_ai)
+        predictor = predictor_from_code(code)
+        predictor.learn(df)
+        predictions = predictor.predict(df)
+
+        self.assertTrue(r2_score(df[target], predictions['prediction']) > 0.5)
