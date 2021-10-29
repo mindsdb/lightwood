@@ -1,11 +1,9 @@
 import importlib
 from typing import List, Union, Dict, Optional
-
 import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error
-
-
+from lightwood.helpers.numeric import is_nan_numeric
 from lightwood.encoder.time_series.helpers.common import get_group_matches
 
 
@@ -175,3 +173,22 @@ def mase(trues, preds, scale_error, fh):
         agg += mean_absolute_error(true, pred)
 
     return (agg / fh) / scale_error
+
+
+def is_none(value):
+    """
+    We use pandas :(
+    Pandas has no way to guarantee "stability" for the type of a column, it choses to arbitrarily change it based on the values.
+    Pandas also change the values in the columns based on the types.
+    Lightwood relies on having ``None`` values for a cells that represent "missing" or "corrupt".
+    But since pandas dataframes can't keep ``None`` or ``nan`` or other such values consistent (they get intermixed by pandas, e.g. ``df[a] = [None]`` might or might not become ``df[a] == [np.nan]`` depending on veror any other "weird" sion or on other data in the array)
+    """ # noqa
+    if value is None:
+        return True
+
+    if is_nan_numeric(value):
+        return True
+
+    return False
+
+
