@@ -11,7 +11,6 @@ from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import is_nan_numeric
 
-import numpy as np
 from typing import Dict, List, Optional, Tuple, Callable, Union
 
 

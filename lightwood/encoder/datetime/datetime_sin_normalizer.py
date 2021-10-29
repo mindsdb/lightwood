@@ -51,7 +51,7 @@ class DatetimeNormalizerEncoder(BaseEncoder):
         """
         ret = []
         for unix_timestamp in data:
-            if is_none(unix_timestamp)
+            if is_none(unix_timestamp):
                 if self.sinusoidal:
                     vector = [0, 1] * len(self.fields)
                 else:
