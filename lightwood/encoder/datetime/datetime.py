@@ -43,7 +43,6 @@ class DatetimeEncoder(BaseEncoder):
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
         :return: a list of vectors
         """
-        print(unix_timestamp)
         if is_none(unix_timestamp):
             vector = [0] * len(self.fields)
         else:
