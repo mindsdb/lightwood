@@ -831,14 +831,6 @@
         <span class="p">},</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
-        <span class="n">hidden_fields</span><span class="p">[</span><span class="s2">&quot;analysis_blocks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;GlobalFeatureImportance&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;disable_column_importance&quot;</span><span class="p">:</span> <span class="s2">&quot;False&quot;</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">})</span>
-
     <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">implicit_value</span> <span class="ow">in</span> <span class="n">hidden_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">_populate_implicit_field</span><span class="p">(</span><span class="n">json_ai</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">implicit_value</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">)</span>
 
