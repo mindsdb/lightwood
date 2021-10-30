@@ -13,7 +13,6 @@ class MultiHotEncoder(BaseEncoder):
 
     @staticmethod
     def _clean_col_data(column_data):
-        print(column_data)
         column_data = [(arr if arr is not None else []) for arr in column_data]
         column_data = [[str(x) for x in arr] for arr in column_data]
         return column_data
