@@ -1,5 +1,4 @@
 # TODO: type hint the returns
-# TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should be renamed df_std_target_dev  # noqa
 
 from typing import Dict, List, Optional, Union
 import sys
@@ -159,7 +158,7 @@ class StatisticalAnalysis:
              in the information.
 
     :param nr_rows: Number of rows (samples) in the dataset
-    :param df_std_dev: The standard deviation of the target of the dataset
+    :param df_target_stddev: The standard deviation of the target of the dataset
     :param train_observed_classes:
     :param target_class_distribution:
     :param histograms:
@@ -172,7 +171,7 @@ class StatisticalAnalysis:
     """
 
     nr_rows: int
-    df_std_dev: Optional[float]
+    df_target_stddev: Optional[float]
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
     histograms: object  # Dict[str, Dict[str, List[object]]]
