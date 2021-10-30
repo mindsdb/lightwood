@@ -238,6 +238,12 @@ def generate_json_ai(
                             "stop_after": "$problem_definition.seconds_per_mixer",
                         },
                     },
+                    {
+                        "module": "RidgeRegression",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                        },
+                    },
                 ]
             )
         elif tss.nr_predictions > 1:
@@ -534,6 +540,14 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "input_cols", "$input_cols"
             )
         elif mixers[i]["module"] == "Regression":
+            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
+            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
+                "dtype_dict", "$dtype_dict"
+            )
+            mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
+                "target_encoder", "$encoders[self.target]"
+            )
+        elif mixers[i]["module"] == "RidgeRegression":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
