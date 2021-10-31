@@ -99,6 +99,7 @@ import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
 from lightwood.helpers.torch import LightwoodAutocast
+from lightwood.helpers.log import log
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -236,7 +237,7 @@ def normalizeString(s):
 #
 
 def readLangs(lang1, lang2, reverse=False):
-    print("Reading lines...")
+    log.debug("Reading lines...")
 
     # Read the file and split into lines
     lines = open('data/%s-%s.txt' % (lang1, lang2), encoding='utf-8').\
@@ -279,16 +280,16 @@ MAX_LENGTH = 100
 
 def prepareData(lang1, lang2, reverse=False):
     input_lang, output_lang, pairs = readLangs(lang1, lang2, reverse)
-    print("Read %s sentence pairs" % len(pairs))
+    log.debug("Read %s sentence pairs" % len(pairs))
     #pairs = filterPairs(pairs)
-    print("Trimmed to %s sentence pairs" % len(pairs))
-    print("Counting words...")
+    log.debug("Trimmed to %s sentence pairs" % len(pairs))
+    log.debug("Counting words...")
     for pair in pairs:
         input_lang.addSentence(pair[0])
         output_lang.addSentence(pair[1])
-    print("Counted words:")
-    print(input_lang.name, input_lang.n_words)
-    print(output_lang.name, output_lang.n_words)
+    log.debug("Counted words:")
+    log.debug(input_lang.name, input_lang.n_words)
+    log.debug(output_lang.name, output_lang.n_words)
     return input_lang, output_lang, pairs
 
 
@@ -674,7 +675,7 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
 
         if print_loss_avg < loss_breakpoint:
 
-            print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
+            log.debug('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
 
             break
@@ -682,7 +683,7 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
+            log.debug('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
 
         if iter % plot_every == 0:
@@ -748,12 +749,12 @@ def evaluate(encoder, decoder, input_lang, output_lang, sentence, max_length=MAX
 def evaluateRandomly(encoder, pairs, decoder, n=10, max_length=MAX_LENGTH):
     for i in range(n):
         pair = random.choice(pairs)
-        print('>', pair[0])
-        print('=', pair[1])
+        log.debug('>', pair[0])
+        log.debug('=', pair[1])
         output_words, attentions = evaluate(encoder, decoder, pair[0], max_length=MAX_LENGTH)
         output_sentence = ' '.join(output_words)
-        print('<', output_sentence)
-        print('')
+        log.debug('<', output_sentence)
+        log.debug('')
 
 
 ######################################################################
