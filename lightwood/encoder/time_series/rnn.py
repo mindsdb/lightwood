@@ -16,11 +16,17 @@ from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoder.datetime import DatetimeNormalizerEncoder
 from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerical, DecoderRNNNumerical
-from lightwood.encoder.time_series.helpers.common import MinMaxNormalizer, CatNormalizer, get_group_matches
+from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
+from lightwood.helpers.general import get_group_matches
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, get_chunk, len_to_mask
 
 
 class TimeSeriesEncoder(BaseEncoder):
+    """
+    Time series encoder. This module can learn features for any `order_by` temporal column, both with and without accompanying target data.
+
+    The backbone of this encoder is either a recurrent neural network or a transformer; both structured in an encoder-decoder fashion.
+    """  # noqa
     is_timeseries_encoder: bool = True
     is_trainable_encoder: bool = True
 

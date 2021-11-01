@@ -3,9 +3,15 @@ import calendar
 from typing import Optional
 import torch
 from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.general import is_none
 
 
 class DatetimeEncoder(BaseEncoder):
+    """
+    This encoder produces an encoded representation for timestamps.
+
+    The approach consists on decomposing the timestamp objects into its constituent units (e.g. day-of-week, month, year, etc), and describing each of those with a single value that represents the magnitude in a sensible cycle length.
+    """  # noqa
     def __init__(self, is_target: bool = False):
         super().__init__(is_target)
         self.fields = ['year', 'month', 'day', 'weekday', 'hour', 'minute', 'second']
@@ -37,7 +43,7 @@ class DatetimeEncoder(BaseEncoder):
         :param data: list of unix_timestamps (unix_timestamp resolution is seconds)
         :return: a list of vectors
         """
-        if unix_timestamp is None:
+        if is_none(unix_timestamp):
             vector = [0] * len(self.fields)
         else:
             c = self.constants

@@ -9,13 +9,9 @@ from lightwood.api.dtype import dtype
 from lightwood.helpers import text
 from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.numeric import can_be_nan_numeric
+from lightwood.helpers.numeric import is_nan_numeric
 
-import numpy as np
 from typing import Dict, List, Optional, Tuple, Callable, Union
-
-
-VALUES_FOR_NAN_AND_NONE_IN_PANDAS = [np.nan, 'nan', 'NaN', 'Nan', 'None']
 
 
 def cleaner(
@@ -52,10 +48,7 @@ def cleaner(
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
-        data[col] = data[col].replace(to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None)
 
-        # If a column has too many None values, raise an Exception
-        # _check_if_invalid(data[col], pct_invalid, col)
     return data
 
 
@@ -116,6 +109,9 @@ def get_cleaning_func(data_dtype: dtype, custom_cleaning_functions: Dict[str, st
         dtype.rich_text,
         dtype.categorical,
         dtype.binary,
+        dtype.audio,
+        dtype.image,
+        dtype.video
     ):
         clean_func = _clean_text
 
@@ -203,7 +199,7 @@ def _clean_float(element: object) -> Optional[float]:
     """
     try:
         cleaned_float = text.clean_float(element)
-        if can_be_nan_numeric(cleaned_float):
+        if is_nan_numeric(cleaned_float):
             return None
         return cleaned_float
     except Exception:
@@ -285,6 +281,7 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
     to_drop = [*[x for x in identifiers.keys() if x != target],
                *[x for x in data.columns if x in dtype_dict and dtype_dict[x] == dtype.invalid]]
     exceptions = ["__mdb_make_predictions"]
+    to_drop = [x for x in to_drop if x in data.columns]
     data = data.drop(columns=to_drop)
 
     if mode == "train":

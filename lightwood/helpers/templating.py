@@ -2,7 +2,6 @@
 
 '''
 def is_allowed(v):
-    print(v)
     if v is None:
         return True
 
