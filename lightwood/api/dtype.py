@@ -2,6 +2,7 @@ class dtype:
     """
     Definitions of all data types currently supported. Dtypes currently supported include:
 
+
     - **Numerical**: Data that should be represented in the form of a number. Currently ``integer``, ``float``, and ``quantity`` are supported.
     - **Categorical**: Data that represents a class or label and is discrete. Currently ``binary``, ``categorical``, and ``tags`` are supported.
     - **Date/Time**: Time-series data that is temporal/sequential. Currently ``date``, and ``datetime`` are supported.
