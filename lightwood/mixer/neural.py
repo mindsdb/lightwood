@@ -62,7 +62,7 @@ class Neural(BaseMixer):
         self.stable = True
 
     def _final_tuning(self, data):
-        # @TODO: should TS dependencies arrive here?
+        # @TODO: dependencies as input
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity):
             self.model = self.model.eval()
             with torch.no_grad():

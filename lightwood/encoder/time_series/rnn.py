@@ -66,7 +66,7 @@ class TimeSeriesEncoder(BaseEncoder):
             self._normalizer = DatetimeNormalizerEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields) * 2  # sinusoidal datetime components
         elif self.original_type in (dtype.float, dtype.integer):
-            self._normalizer = MinMaxNormalizer(ts_analysis['tss'].window)
+            self._normalizer = MinMaxNormalizer()
 
         total_dims = self._n_dims
         dec_hsize = self.output_size
@@ -91,7 +91,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     if dep['original_type'] in (dtype.categorical, dtype.binary):
                         self.dep_norms[dep_name]['__default'] = CatNormalizer()
                     else:
-                        self.dep_norms[dep_name]['__default'] = MinMaxNormalizer(ts_analysis['tss'].window)
+                        self.dep_norms[dep_name]['__default'] = MinMaxNormalizer()
 
                     self.dep_norms[dep_name]['__default'].prepare(dep['data'])
                     self._group_combinations = {'__default': None}
