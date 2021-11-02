@@ -71,7 +71,7 @@ def set_conf_range(
                 for significance in range(99):
                     ranges = all_ranges[:, :, significance]
                     spread = np.mean(ranges[:, 1] - ranges[:, 0])
-                    tolerance = analysis_info['df_std_dev'][group] * tol
+                    tolerance = analysis_info['df_target_stddev'][group] * tol
 
                     if spread <= tolerance:
                         confidence = (99 - significance) / 100
@@ -96,7 +96,7 @@ def set_conf_range(
 
 def get_numeric_conf_range(
         all_confs: np.ndarray,
-        df_std_dev: dict = {},
+        df_target_stddev: dict = {},
         positive_domain: bool = False,
         std_tol: int = 1,
         group: Optional[str] = '__default',
@@ -106,7 +106,7 @@ def get_numeric_conf_range(
     Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance.
     
     :param all_confs: All possible bounds depending on confidence level.
-    :param df_std_dev: Observed train standard deviation for each group target.
+    :param df_target_stddev: Observed train standard deviation for each group target.
     :param positive_domain: Flag that indicates whether target is expected to be a positive number.
     :param std_tol: Tolerance for automatic confidence level selection; bigger tolerance means higher confidence, in general.
     :param group: For tasks with multiple different target groups (where each may have a different std_dev), indicates what group is being considered.
@@ -120,7 +120,7 @@ def get_numeric_conf_range(
     if error_rate is None:
         significances = []
         conf_ranges = []
-        std_dev = df_std_dev[group]
+        std_dev = df_target_stddev[group]
         tolerance = std_dev * std_tol
 
         for sample_idx in range(all_confs.shape[0]):
