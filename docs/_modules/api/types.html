@@ -163,7 +163,6 @@
             
   <h1>Source code for api.types</h1><div class="highlight"><pre>
 <span></span><span class="c1"># TODO: type hint the returns</span>
-<span class="c1"># TODO: df_std_dev is not clear in behavior; this would imply all std. of each column but that is not true, it should be renamed df_std_target_dev  # noqa</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -323,7 +322,7 @@
 <span class="sd">             in the information.</span>
 
 <span class="sd">    :param nr_rows: Number of rows (samples) in the dataset</span>
-<span class="sd">    :param df_std_dev: The standard deviation of the target of the dataset</span>
+<span class="sd">    :param df_target_stddev: The standard deviation of the target of the dataset</span>
 <span class="sd">    :param train_observed_classes:</span>
 <span class="sd">    :param target_class_distribution:</span>
 <span class="sd">    :param histograms:</span>
@@ -336,7 +335,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">nr_rows</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">df_std_dev</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="n">df_target_stddev</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
     <span class="n">train_observed_classes</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Union[None, List[str]]</span>
     <span class="n">target_class_distribution</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, float]</span>
     <span class="n">histograms</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, Dict[str, List[object]]]</span>
