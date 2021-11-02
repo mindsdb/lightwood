@@ -196,7 +196,7 @@ class Neural(BaseMixer):
             train_error = np.mean(running_losses)
             epoch_error = self._error(dev_dl, criterion)
             running_errors.append(epoch_error)
-            log.debug(f'Loss @ epoch {epoch}: {epoch_error}')
+            log.info(f'Loss @ epoch {epoch}: {epoch_error}')
 
             if np.isnan(train_error) or np.isnan(
                     running_errors[-1]) or np.isinf(train_error) or np.isinf(

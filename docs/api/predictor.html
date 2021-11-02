@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Predictor Interface &mdash; lightwood 1.5.0 documentation</title>
+  <title>Predictor Interface &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                1.5.0
+                1.6.1
               </div>
             
           
@@ -97,19 +97,37 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#the-lightwood-api-table-of-contents">The Lightwood API Table of Contents</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="types.html">Lightwood API Types</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Predictor Interface</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface">PredictorInterface</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="high_level.html">JSON-AI Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html">Lightwood API Types</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Predictor Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#api.predictor.PredictorInterface">PredictorInterface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.adjust">adjust</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.analyze_data">analyze_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.analyze_ensemble">analyze_ensemble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.featurize">featurize</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.fit">fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.learn">learn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.predict">predict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.prepare">prepare</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.preprocess">preprocess</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.save">save</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.split">split</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encode.html">Encode your data</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
 </ul>
 
             
@@ -158,7 +176,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a> &raquo;</li>
+          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a> &raquo;</li>
         
       <li>Predictor Interface</li>
     

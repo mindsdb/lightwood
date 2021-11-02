@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.json_ai &mdash; lightwood 1.5.0 documentation</title>
+  <title>api.json_ai &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.5.0
+                1.6.1
               </div>
             
           
@@ -95,7 +95,13 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
 </ul>
 
             
@@ -260,6 +266,7 @@
         <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">:</span> <span class="s2">&quot;Array.ArrayEncoder&quot;</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span><span class="p">:</span> <span class="s2">&quot;TimeSeries.TimeSeriesEncoder&quot;</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">:</span> <span class="s2">&quot;Quantity.NumericEncoder&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">audio</span><span class="p">:</span> <span class="s2">&quot;Audio.MFCCEncoder&quot;</span>
     <span class="p">}</span>
 
     <span class="c1"># If column is a target, only specific feature representations are allowed that enable supervised tasks</span>
@@ -483,9 +490,11 @@
                 <span class="n">dependency</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;__mdb_ts_previous_</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dependency</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">feature</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span><span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">,</span> <span class="n">dependency</span><span class="o">=</span><span class="n">dependency</span><span class="p">)</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span>
+                <span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">,</span> <span class="n">dependency</span><span class="o">=</span><span class="n">dependency</span><span class="p">,</span> <span class="n">data_dtype</span><span class="o">=</span><span class="n">col_dtype</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">feature</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span><span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">)</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span><span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">,</span> <span class="n">data_dtype</span><span class="o">=</span><span class="n">col_dtype</span><span class="p">)</span>
         <span class="n">features</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature</span>
 
     <span class="c1"># Decide on the accuracy functions to use</span>
@@ -733,129 +742,102 @@
             <span class="p">)</span>
 
     <span class="c1"># Add &quot;hidden&quot; fields</span>
-    <span class="n">hidden_fields</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span>
-            <span class="s2">&quot;cleaner&quot;</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;cleaner&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;pct_invalid&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.pct_invalid&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;identifiers&quot;</span><span class="p">:</span> <span class="s2">&quot;$identifiers&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;$mode&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;anomaly_detection&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.anomaly_detection&quot;</span><span class="p">,</span>
-                <span class="p">},</span>
+    <span class="n">hidden_fields</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;cleaner&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;pct_invalid&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.pct_invalid&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;identifiers&quot;</span><span class="p">:</span> <span class="s2">&quot;$identifiers&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;$mode&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;anomaly_detection&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.anomaly_detection&quot;</span><span class="p">,</span>
             <span class="p">},</span>
-        <span class="p">),</span>
-        <span class="p">(</span>
-            <span class="s2">&quot;splitter&quot;</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;splitter&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;tss&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;pct_train&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
-                    <span class="s2">&quot;pct_dev&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
-                    <span class="s2">&quot;pct_test&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
-                <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;splitter&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;splitter&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;tss&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;pct_train&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+                <span class="s2">&quot;pct_dev&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                <span class="s2">&quot;pct_test&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
             <span class="p">},</span>
-        <span class="p">),</span>
-        <span class="p">(</span>
-            <span class="s2">&quot;analyzer&quot;</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;model_analyzer&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;stats_info&quot;</span><span class="p">:</span> <span class="s2">&quot;$statistical_analysis&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;ts_cfg&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;accuracy_functions&quot;</span><span class="p">:</span> <span class="s2">&quot;$accuracy_functions&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;predictor&quot;</span><span class="p">:</span> <span class="s2">&quot;$ensemble&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;encoded_test_data&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;train_data&quot;</span><span class="p">:</span> <span class="s2">&quot;encoded_train_data&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;analysis_blocks&quot;</span><span class="p">:</span> <span class="s2">&quot;$analysis_blocks&quot;</span><span class="p">,</span>
-                <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;analyzer&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;model_analyzer&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;stats_info&quot;</span><span class="p">:</span> <span class="s2">&quot;$statistical_analysis&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ts_cfg&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;accuracy_functions&quot;</span><span class="p">:</span> <span class="s2">&quot;$accuracy_functions&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;predictor&quot;</span><span class="p">:</span> <span class="s2">&quot;$ensemble&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;encoded_test_data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;train_data&quot;</span><span class="p">:</span> <span class="s2">&quot;encoded_train_data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;analysis_blocks&quot;</span><span class="p">:</span> <span class="s2">&quot;$analysis_blocks&quot;</span><span class="p">,</span>
             <span class="p">},</span>
-        <span class="p">),</span>
-        <span class="p">(</span>
-            <span class="s2">&quot;explainer&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;explainer&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;explain&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;positive_domain&quot;</span><span class="p">:</span> <span class="s2">&quot;$statistical_analysis.positive_domain&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;anomaly_detection&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.anomaly_detection&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;encoded_data&quot;</span><span class="p">:</span> <span class="s2">&quot;encoded_data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;predictions&quot;</span><span class="p">:</span> <span class="s2">&quot;df&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$runtime_analyzer&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ts_analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$ts_analysis&quot;</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;target_name&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target_dtype&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict[self.target]&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;explainer_blocks&quot;</span><span class="p">:</span> <span class="s2">&quot;$analysis_blocks&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;fixed_confidence&quot;</span><span class="p">:</span> <span class="s2">&quot;$pred_args.fixed_confidence&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;anomaly_error_rate&quot;</span><span class="p">:</span> <span class="s2">&quot;$pred_args.anomaly_error_rate&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;anomaly_cooldown&quot;</span><span class="p">:</span> <span class="s2">&quot;$pred_args.anomaly_cooldown&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;analysis_blocks&quot;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;explain&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;ICP&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;fixed_significance&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;confidence_normalizer&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="s2">&quot;positive_domain&quot;</span><span class="p">:</span> <span class="s2">&quot;$statistical_analysis.positive_domain&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;anomaly_detection&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.anomaly_detection&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;encoded_data&quot;</span><span class="p">:</span> <span class="s2">&quot;encoded_data&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;predictions&quot;</span><span class="p">:</span> <span class="s2">&quot;df&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$runtime_analyzer&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;ts_analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$ts_analysis&quot;</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;target_name&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;target_dtype&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict[self.target]&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;explainer_blocks&quot;</span><span class="p">:</span> <span class="s2">&quot;$analysis_blocks&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;fixed_confidence&quot;</span><span class="p">:</span> <span class="s2">&quot;$pred_args.fixed_confidence&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;anomaly_error_rate&quot;</span><span class="p">:</span> <span class="s2">&quot;$pred_args.anomaly_error_rate&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;anomaly_cooldown&quot;</span><span class="p">:</span> <span class="s2">&quot;$pred_args.anomaly_cooldown&quot;</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">},</span>
-        <span class="p">),</span>
-        <span class="p">(</span>
-            <span class="s2">&quot;analysis_blocks&quot;</span><span class="p">,</span>
-            <span class="p">[</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;ICP&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;fixed_significance&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="s2">&quot;confidence_normalizer&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="s2">&quot;positive_domain&quot;</span><span class="p">:</span> <span class="s2">&quot;$statistical_analysis.positive_domain&quot;</span><span class="p">,</span>
-                    <span class="p">},</span>
-                <span class="p">},</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;AccStats&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;deps&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ICP&quot;</span><span class="p">]},</span>
-                <span class="p">},</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;GlobalFeatureImportance&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;disable_column_importance&quot;</span><span class="p">:</span> <span class="s2">&quot;False&quot;</span><span class="p">,</span>
-                    <span class="p">},</span>
-                <span class="p">},</span>
-            <span class="p">],</span>
-        <span class="p">),</span>
-        <span class="p">(</span>
-            <span class="s2">&quot;timeseries_transformer&quot;</span><span class="p">,</span>
             <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;transform_timeseries&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;$mode&quot;</span><span class="p">,</span>
-                <span class="p">},</span>
+                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;AccStats&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;deps&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ICP&quot;</span><span class="p">]},</span>
             <span class="p">},</span>
-        <span class="p">),</span>
-        <span class="p">(</span>
-            <span class="s2">&quot;timeseries_analyzer&quot;</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;timeseries_analyzer&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
-                <span class="p">},</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;timeseries_transformer&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;transform_timeseries&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;$mode&quot;</span><span class="p">,</span>
             <span class="p">},</span>
-        <span class="p">),</span>
-    <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;timeseries_analyzer&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;timeseries_analyzer&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
 
-    <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">implicit_value</span> <span class="ow">in</span> <span class="n">hidden_fields</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">implicit_value</span> <span class="ow">in</span> <span class="n">hidden_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">_populate_implicit_field</span><span class="p">(</span><span class="n">json_ai</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">implicit_value</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">json_ai</span>
@@ -1069,12 +1051,11 @@
 
     <span class="n">feature_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">log.info(&#39;Featurizing the data&#39;)</span>
-<span class="s2">feature_data = </span><span class="se">{{</span><span class="s2">key: None for key in split_data.keys()</span><span class="se">}}</span><span class="s2"></span>
 
-<span class="s2">for key, data in split_data.items():</span>
-<span class="s2">    feature_data[key] = EncodedDs(self.encoders, data, self.target)</span>
+<span class="s2">feature_data = </span><span class="se">{{</span><span class="s2"> key: EncodedDs(self.encoders, data, self.target) for key, data in split_data.items() if key != &quot;stratified_on&quot;</span><span class="se">}}</span><span class="s2"></span>
 
 <span class="s2">return feature_data</span>
+
 <span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="n">feature_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">feature_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>

@@ -5,7 +5,8 @@ import pandas as pd
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
-from lightwood.encoder.time_series.helpers.common import get_group_matches, generate_target_group_normalizers
+from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
+from lightwood.helpers.general import get_group_matches
 
 
 def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],

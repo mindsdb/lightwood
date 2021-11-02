@@ -15,7 +15,7 @@ from lightwood.helpers.text import (get_identifier_description_mp, cast_string_t
                                     analyze_sentences)
 from lightwood.helpers.log import log
 import re
-from lightwood.helpers.numeric import can_be_nan_numeric
+from lightwood.helpers.numeric import is_nan_numeric
 from lightwood.helpers.seed import seed
 
 
@@ -65,6 +65,10 @@ def get_binary_type(element: object) -> str:
 
         # @TODO: currently we don differentiate between audio and video
         is_audio = sndhdr.what(element)
+        # apparently `sndhdr` is really bad..
+        for audio_ext in ['.wav', '.mp3']:
+            if element.endswith(audio_ext):
+                is_audio = True
         if is_audio is not None:
             return dtype.audio
     except Exception:
@@ -88,7 +92,7 @@ def get_numeric_type(element: object) -> str:
         return dtype.integer
     else:
         try:
-            if can_be_nan_numeric(element):
+            if is_nan_numeric(element):
                 return dtype.integer
             else:
                 return None

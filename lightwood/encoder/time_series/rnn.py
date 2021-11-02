@@ -16,11 +16,17 @@ from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoder.datetime import DatetimeNormalizerEncoder
 from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerical, DecoderRNNNumerical
-from lightwood.encoder.time_series.helpers.common import CatNormalizer, get_group_matches, AdaptiveMinMaxNormalizer
+from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
+from lightwood.helpers.general import get_group_matches
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, get_chunk, len_to_mask
 
 
 class TimeSeriesEncoder(BaseEncoder):
+    """
+    Time series encoder. This module can learn features for any `order_by` temporal column, both with and without accompanying target data.
+
+    The backbone of this encoder is either a recurrent neural network or a transformer; both structured in an encoder-decoder fashion.
+    """  # noqa
     is_timeseries_encoder: bool = True
     is_trainable_encoder: bool = True
 
@@ -60,7 +66,7 @@ class TimeSeriesEncoder(BaseEncoder):
             self._normalizer = DatetimeNormalizerEncoder(sinusoidal=True)
             self._n_dims *= len(self._normalizer.fields) * 2  # sinusoidal datetime components
         elif self.original_type in (dtype.float, dtype.integer):
-            self._normalizer = AdaptiveMinMaxNormalizer(ts_analysis['tss'].window)
+            self._normalizer = MinMaxNormalizer(ts_analysis['tss'].window)
 
         total_dims = self._n_dims
         dec_hsize = self.output_size
@@ -85,7 +91,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     if dep['original_type'] in (dtype.categorical, dtype.binary):
                         self.dep_norms[dep_name]['__default'] = CatNormalizer()
                     else:
-                        self.dep_norms[dep_name]['__default'] = AdaptiveMinMaxNormalizer(ts_analysis['tss'].window)
+                        self.dep_norms[dep_name]['__default'] = MinMaxNormalizer(ts_analysis['tss'].window)
 
                     self.dep_norms[dep_name]['__default'].prepare(dep['data'])
                     self._group_combinations = {'__default': None}

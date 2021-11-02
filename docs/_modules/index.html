@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Overview: module code &mdash; lightwood 1.5.0 documentation</title>
+  <title>Overview: module code &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.5.0
+                1.6.1
               </div>
             
           
@@ -95,7 +95,13 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
 </ul>
 
             
@@ -165,6 +171,46 @@
 <li><a href="api/json_ai.html">api.json_ai</a></li>
 <li><a href="api/predictor.html">api.predictor</a></li>
 <li><a href="api/types.html">api.types</a></li>
+<li><a href="data/cleaner.html">data.cleaner</a></li>
+<li><a href="lightwood/analysis/analyze.html">lightwood.analysis.analyze</a></li>
+<li><a href="lightwood/analysis/base.html">lightwood.analysis.base</a></li>
+<li><a href="lightwood/analysis/explain.html">lightwood.analysis.explain</a></li>
+<li><a href="lightwood/analysis/helpers/acc_stats.html">lightwood.analysis.helpers.acc_stats</a></li>
+<li><a href="lightwood/analysis/helpers/feature_importance.html">lightwood.analysis.helpers.feature_importance</a></li>
+<li><a href="lightwood/analysis/nc/calibrate.html">lightwood.analysis.nc.calibrate</a></li>
+<li><a href="lightwood/data/cleaner.html">lightwood.data.cleaner</a></li>
+<li><a href="lightwood/data/encoded_ds.html">lightwood.data.encoded_ds</a></li>
+<li><a href="lightwood/data/splitter.html">lightwood.data.splitter</a></li>
+<li><a href="lightwood/data/timeseries_analyzer.html">lightwood.data.timeseries_analyzer</a></li>
+<li><a href="lightwood/data/timeseries_transform.html">lightwood.data.timeseries_transform</a></li>
+<li><a href="lightwood/encoder/array/array.html">lightwood.encoder.array.array</a></li>
+<li><a href="lightwood/encoder/base.html">lightwood.encoder.base</a></li>
+<li><a href="lightwood/encoder/categorical/autoencoder.html">lightwood.encoder.categorical.autoencoder</a></li>
+<li><a href="lightwood/encoder/categorical/binary.html">lightwood.encoder.categorical.binary</a></li>
+<li><a href="lightwood/encoder/categorical/multihot.html">lightwood.encoder.categorical.multihot</a></li>
+<li><a href="lightwood/encoder/categorical/onehot.html">lightwood.encoder.categorical.onehot</a></li>
+<li><a href="lightwood/encoder/datetime/datetime.html">lightwood.encoder.datetime.datetime</a></li>
+<li><a href="lightwood/encoder/datetime/datetime_sin_normalizer.html">lightwood.encoder.datetime.datetime_sin_normalizer</a></li>
+<li><a href="lightwood/encoder/image/img_2_vec.html">lightwood.encoder.image.img_2_vec</a></li>
+<li><a href="lightwood/encoder/numeric/numeric.html">lightwood.encoder.numeric.numeric</a></li>
+<li><a href="lightwood/encoder/numeric/ts_array_numeric.html">lightwood.encoder.numeric.ts_array_numeric</a></li>
+<li><a href="lightwood/encoder/numeric/ts_numeric.html">lightwood.encoder.numeric.ts_numeric</a></li>
+<li><a href="lightwood/encoder/text/pretrained.html">lightwood.encoder.text.pretrained</a></li>
+<li><a href="lightwood/encoder/text/short.html">lightwood.encoder.text.short</a></li>
+<li><a href="lightwood/encoder/text/vocab.html">lightwood.encoder.text.vocab</a></li>
+<li><a href="lightwood/encoder/time_series/rnn.html">lightwood.encoder.time_series.rnn</a></li>
+<li><a href="lightwood/ensemble/base.html">lightwood.ensemble.base</a></li>
+<li><a href="lightwood/ensemble/best_of.html">lightwood.ensemble.best_of</a></li>
+<li><a href="lightwood/ensemble/mean_ensemble.html">lightwood.ensemble.mean_ensemble</a></li>
+<li><a href="lightwood/ensemble/mode_ensemble.html">lightwood.ensemble.mode_ensemble</a></li>
+<li><a href="lightwood/ensemble/weighted_mean_ensemble.html">lightwood.ensemble.weighted_mean_ensemble</a></li>
+<li><a href="lightwood/mixer/base.html">lightwood.mixer.base</a></li>
+<li><a href="lightwood/mixer/lightgbm.html">lightwood.mixer.lightgbm</a></li>
+<li><a href="lightwood/mixer/lightgbm_array.html">lightwood.mixer.lightgbm_array</a></li>
+<li><a href="lightwood/mixer/neural.html">lightwood.mixer.neural</a></li>
+<li><a href="lightwood/mixer/regression.html">lightwood.mixer.regression</a></li>
+<li><a href="lightwood/mixer/sktime.html">lightwood.mixer.sktime</a></li>
+<li><a href="lightwood/mixer/unit.html">lightwood.mixer.unit</a></li>
 </ul>
 
            </div>

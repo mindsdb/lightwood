@@ -1,5 +1,6 @@
 from typing import Dict, List, Tuple, Optional
 
+from lightwood.helpers.log import log
 from lightwood.api import dtype
 from lightwood.ensemble import BaseEnsemble
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -76,19 +77,20 @@ def model_analyzer(
     }
 
     for block in analysis_blocks:
+        log.info("The block %s is now running its analyze() method", block.__class__.__name__)
         runtime_analyzer = block.analyze(runtime_analyzer, **kwargs)
 
     # ------------------------- #
     # Populate ModelAnalysis object
     # ------------------------- #
     model_analysis = ModelAnalysis(
-        accuracies=runtime_analyzer['score_dict'],
-        accuracy_histogram=runtime_analyzer['acc_histogram'],
-        accuracy_samples=runtime_analyzer['acc_samples'],
+        accuracies=runtime_analyzer.get('score_dict', {}),
+        accuracy_histogram=runtime_analyzer.get('acc_histogram', {}),
+        accuracy_samples=runtime_analyzer.get('acc_samples', {}),
         train_sample_size=len(encoded_train_data),
         test_sample_size=len(encoded_val_data),
         confusion_matrix=runtime_analyzer['cm'],
-        column_importances=runtime_analyzer['column_importances'],
+        column_importances=runtime_analyzer.get('column_importances', {}),
         histograms=stats_info.histograms,
         dtypes=dtype_dict
     )

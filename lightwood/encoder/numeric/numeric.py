@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
+from lightwood.helpers.general import is_none
 
 
 class NumericEncoder(BaseEncoder):
@@ -35,7 +36,7 @@ class NumericEncoder(BaseEncoder):
                 value_type = 'float'
 
         self._type = value_type if self._type is None else self._type
-        non_null_priming_data = [float(str(x).replace(',', '.')) for x in priming_data if x is not None]
+        non_null_priming_data = [float(str(x).replace(',', '.')) for x in priming_data if not is_none(x)]
         self._abs_mean = np.mean(np.abs(non_null_priming_data))
         self.is_prepared = True
 
@@ -64,7 +65,7 @@ class NumericEncoder(BaseEncoder):
             else:
                 vector = [0] * 4
                 try:
-                    if real is None:
+                    if is_none(real):
                         vector[0] = 0
                     else:
                         vector[0] = 1

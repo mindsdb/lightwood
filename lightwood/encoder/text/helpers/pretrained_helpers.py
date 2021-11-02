@@ -42,6 +42,9 @@ def train_model(model, dataset, device, scheduler=None, log=None, optim=None, n_
     n_epochs - number of epochs to train
 
     """
+    if log is None:
+        from lightwood.helpers.log import log
+        log = log.debug
     losses = []
     model.train()
     if optim is None:
@@ -66,5 +69,5 @@ def train_model(model, dataset, device, scheduler=None, log=None, optim=None, n_
             if scheduler is not None:
                 scheduler.step()
 
-        print("Epoch", epoch + 1, "Loss", total_loss)
+        log("Epoch", epoch + 1, "Loss", total_loss)
     return model, losses
