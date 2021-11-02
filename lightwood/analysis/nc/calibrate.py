@@ -217,7 +217,7 @@ class ICP(BaseAnalysisBlock):
 
             is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.array)
             is_numerical = ns.target_dtype in [dtype.integer, dtype.float,
-                                               dtype.quantity] or ns.target_dtype == dtype.array
+                                               dtype.quantity] or ns.target_dtype in (dtype.array, dtype.tsarray)
             is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
 
             if (is_numerical or is_categorical) and ns.analysis['icp'].get('__mdb_active', False):
