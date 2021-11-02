@@ -97,29 +97,62 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#the-lightwood-api-table-of-contents">The Lightwood API Table of Contents</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Lightwood API Types</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.Module">Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature">Feature</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.Output">Output</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.TypeInformation">TypeInformation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.StatisticalAnalysis">StatisticalAnalysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.DataAnalysis">DataAnalysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings">TimeseriesSettings</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition">ProblemDefinition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI">JsonAI</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.ModelAnalysis">ModelAnalysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments">PredictionArguments</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="high_level.html">JSON-AI Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lightwood API Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.Module">Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.Feature">Feature</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature.to_json">to_json</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.Output">Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.TypeInformation">TypeInformation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.StatisticalAnalysis">StatisticalAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.DataAnalysis">DataAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.TimeseriesSettings">TimeseriesSettings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.ProblemDefinition">ProblemDefinition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.JsonAI">JsonAI</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.ModelAnalysis">ModelAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.PredictionArguments">PredictionArguments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments.to_dict">to_dict</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encode.html">Encode your data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
 </ul>
 
             
@@ -168,7 +201,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a> &raquo;</li>
+          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a> &raquo;</li>
         
       <li>Lightwood API Types</li>
     

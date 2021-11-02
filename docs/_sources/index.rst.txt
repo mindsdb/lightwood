@@ -269,3 +269,9 @@ Other Links
    lightwood_philosophy
    tutorials
    api
+   data
+   encoder
+   mixer
+   ensemble
+   analysis
+   helpers
