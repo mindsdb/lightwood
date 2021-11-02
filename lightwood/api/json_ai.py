@@ -139,10 +139,10 @@ def lookup_encoder(
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["module"] = "Integer.TsNumericEncoder"
             if col_dtype in [dtype.float]:
-                encoder_dict['args']['grouped_by'] = f"{gby}"
-                encoder_dict['module'] = 'Float.TsNumericEncoder'
+                encoder_dict["args"]["grouped_by"] = f"{gby}"
+                encoder_dict["module"] = "Float.TsNumericEncoder"
             if tss.use_previous_target and col_dtype in [dtype.integer, dtype.float]:
-                encoder_dict['args']['prev_target'] = f"'{col_name}'"
+                encoder_dict["args"]["prev_target"] = f"'{col_name}'"
             if tss.nr_predictions > 1:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["args"]["timesteps"] = f"{tss.nr_predictions}"
