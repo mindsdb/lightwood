@@ -318,11 +318,13 @@ class ICP(BaseAnalysisBlock):
                                 if is_numerical:
                                     all_confs = icp.predict(X.values)
                                     error_rate = ns.anomaly_error_rate if is_anomaly_task else None
-                                    significances, confs = get_numeric_conf_range(all_confs,
-                                                                                  df_target_stddev=ns.analysis['df_target_stddev'],
-                                                                                  positive_domain=self.positive_domain,
-                                                                                  group=frozenset(group),
-                                                                                  error_rate=error_rate)
+                                    significances, confs = get_numeric_conf_range(
+                                        all_confs,
+                                        df_target_stddev=ns.analysis['df_target_stddev'],
+                                        positive_domain=self.positive_domain,
+                                        group=frozenset(group),
+                                        error_rate=error_rate
+                                    )
 
                                     # only replace where grouped ICP is more informative (i.e. tighter)
                                     if ns.fixed_confidence is None:
