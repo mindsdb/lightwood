@@ -134,6 +134,8 @@ class Neural(BaseMixer):
                 Y = Y.to(self.model.device)
                 with LightwoodAutocast():
                     optimizer.zero_grad()
+                    print(list(X[0]))
+                    exit()
                     Yh = self.model(X)
                     loss = criterion(Yh, Y)
                     if LightwoodAutocast.active:
@@ -195,7 +197,7 @@ class Neural(BaseMixer):
             train_error = np.mean(running_losses)
             epoch_error = self._error(dev_dl, criterion)
             running_errors.append(epoch_error)
-            log.debug(f'Loss @ epoch {epoch}: {epoch_error}')
+            log.info(f'Loss @ epoch {epoch}: {epoch_error}')
 
             if np.isnan(train_error) or np.isnan(
                     running_errors[-1]) or np.isinf(train_error) or np.isinf(
