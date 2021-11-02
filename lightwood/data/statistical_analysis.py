@@ -164,7 +164,7 @@ def statistical_analysis(data: pd.DataFrame,
     log.info('Finished statistical analysis')
     return StatisticalAnalysis(
         nr_rows=nr_rows,
-        df_std_dev=df_std,
+        df_target_stddev=df_std,
         train_observed_classes=train_observed_classes,
         target_class_distribution=target_class_distribution,
         positive_domain=positive_domain,
