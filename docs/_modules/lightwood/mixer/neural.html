@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.neural &mdash; lightwood 1.6.0 documentation</title>
+  <title>lightwood.mixer.neural &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.6.0
+                1.6.1
               </div>
             
           
@@ -365,7 +365,7 @@
             <span class="n">train_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">running_losses</span><span class="p">)</span>
             <span class="n">epoch_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="n">dev_dl</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
             <span class="n">running_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">epoch_error</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loss @ epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">epoch_error</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loss @ epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">epoch_error</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">train_error</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span>
                     <span class="n">running_errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">train_error</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span>
