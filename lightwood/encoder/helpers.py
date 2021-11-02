@@ -72,3 +72,43 @@ class CatNormalizer:
 
     def decode(self, y):
         return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
+
+
+class AdaptiveMinMaxNormalizer(MinMaxNormalizer):
+    def __init__(self, window_size, combination=()):
+        super().__init__(combination)
+        self.window_size = window_size
+        self.mavg = None
+
+    def get_mavg(self, arr):
+        arr[np.isnan(arr)] = self.abs_mean  # if no info, assume absolute mean seen at training
+
+        if arr.shape[1] > self.window_size:
+            arr = arr[:, :self.window_size]
+        else:
+            arr = np.pad(arr, max(0, (arr.shape[1] - 1) - self.window_size), constant_values=self.abs_mean)
+
+        mean = arr.mean(axis=1).reshape(-1, 1)
+
+        return np.clip(mean, 1, max(1, max(mean)))
+
+    def encode(self, y) -> torch.Tensor:
+        if isinstance(y[0], list):
+            y = np.vstack(y)
+        if isinstance(y[0], torch.Tensor):
+            y = torch.stack(y).numpy()
+        if len(y.shape) < 2:
+            y = np.expand_dims(y, axis=1)
+
+        y = y.astype(float)
+        self.mavg = self.get_mavg(y)
+        y /= np.repeat(self.mavg, y.shape[1], axis=1)
+        return torch.Tensor(y)
+
+    def decode(self, y):
+        if self.mavg is None:
+            mavg = self.get_mavg(y)  # get mavg from current data
+        else:
+            mavg = self.mavg
+        decoded = y * mavg
+        return decoded
