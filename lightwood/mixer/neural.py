@@ -134,8 +134,6 @@ class Neural(BaseMixer):
                 Y = Y.to(self.model.device)
                 with LightwoodAutocast():
                     optimizer.zero_grad()
-                    print(list(X[0]))
-                    exit()
                     Yh = self.model(X)
                     loss = criterion(Yh, Y)
                     if LightwoodAutocast.active:
