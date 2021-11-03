@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Lightwood API Types &mdash; lightwood 1.6.0 documentation</title>
+  <title>Lightwood API Types &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                1.6.0
+                1.6.1
               </div>
             
           
@@ -97,29 +97,62 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#the-lightwood-api-table-of-contents">The Lightwood API Table of Contents</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Lightwood API Types</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.Module">Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature">Feature</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.Output">Output</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.TypeInformation">TypeInformation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.StatisticalAnalysis">StatisticalAnalysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.DataAnalysis">DataAnalysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings">TimeseriesSettings</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition">ProblemDefinition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI">JsonAI</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.ModelAnalysis">ModelAnalysis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments">PredictionArguments</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="high_level.html">JSON-AI Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lightwood API Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.Module">Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.Feature">Feature</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.Feature.to_json">to_json</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.Output">Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.TypeInformation">TypeInformation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.StatisticalAnalysis">StatisticalAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.DataAnalysis">DataAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.TimeseriesSettings">TimeseriesSettings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.ProblemDefinition">ProblemDefinition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.JsonAI">JsonAI</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.ModelAnalysis">ModelAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.PredictionArguments">PredictionArguments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments.to_dict">to_dict</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encode.html">Encode your data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
 </ul>
 
             
@@ -168,7 +201,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span> <span class="pre">Module</span></code></a> &raquo;</li>
+          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a> &raquo;</li>
         
       <li>Lightwood API Types</li>
     
@@ -345,13 +378,13 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.StatisticalAnalysis">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">StatisticalAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nr_rows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_std_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_observed_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_class_distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buckets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distinct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_words_per_sentence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#StatisticalAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.StatisticalAnalysis" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">StatisticalAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nr_rows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_target_stddev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_observed_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_class_distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buckets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distinct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_words_per_sentence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#StatisticalAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.StatisticalAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>The Statistical Analysis data class allows users to consider key descriptors of their data using simple         techniques such as histograms, mean and standard deviation, word count, missing values, and any detected bias             in the information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>nr_rows</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of rows (samples) in the dataset</p></li>
-<li><p><strong>df_std_dev</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The standard deviation of the target of the dataset</p></li>
+<li><p><strong>df_target_stddev</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The standard deviation of the target of the dataset</p></li>
 <li><p><strong>train_observed_classes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
 <li><p><strong>target_class_distribution</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>
 <li><p><strong>histograms</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>) – </p></li>

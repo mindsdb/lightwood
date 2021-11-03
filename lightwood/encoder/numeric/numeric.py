@@ -36,7 +36,7 @@ class NumericEncoder(BaseEncoder):
                 value_type = 'float'
 
         self._type = value_type if self._type is None else self._type
-        non_null_priming_data = [float(str(x).replace(',', '.')) for x in priming_data if x is not None]
+        non_null_priming_data = [float(str(x).replace(',', '.')) for x in priming_data if not is_none(x)]
         self._abs_mean = np.mean(np.abs(non_null_priming_data))
         self.is_prepared = True
 
