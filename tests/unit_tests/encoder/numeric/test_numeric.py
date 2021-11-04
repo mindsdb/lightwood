@@ -90,7 +90,7 @@ class TestNumericEncoder(unittest.TestCase):
         for array in invalid_data:
             encoder = NumericEncoder()
             encoder.prepare(array)
-        
+
             # Make sure the encoding has no nans or infs
             encoded_repr = encoder.encode(data)
             assert not torch.isnan(encoded_repr).any()
