@@ -9,7 +9,7 @@ from lightwood.encoder.datetime.datetime_sin_normalizer import DatetimeNormalize
 
 class TestDatetimeEncoder(unittest.TestCase):
     def test_decode(self):
-        data = [1555943147, None, 1555943147, '', np.nan, 'gibbersih']
+        data = [1555943147, None, 1555943147, '', np.nan]
 
         enc = DatetimeEncoder()
         enc.prepare([])
