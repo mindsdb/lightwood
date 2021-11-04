@@ -12,11 +12,21 @@ from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 
 
 class Regression(BaseMixer):
+    """
+    A mixer that runs a simple linear regression using the (Encoded) features to predict the target.
+    Supports all types because they are all encoded numerically.
+    """ # noqa
     model: LinearRegression
     label_map: dict
     supports_proba: bool
 
     def __init__(self, stop_after: int, target_encoder: BaseEncoder, dtype_dict: dict, target: str):
+        """
+        :param stop_after: Maximum amount of time it should train for, currently ignored
+        :param target_encoder: The encoder which will be used to decode the target
+        :param dtype_dict: Data type dictionary
+        :param target: Name of the target column
+        """ # noqa
         super().__init__(stop_after)
         self.target_encoder = target_encoder
         self.target_dtype = dtype_dict[target]
@@ -25,6 +35,12 @@ class Regression(BaseMixer):
         self.stable = False
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        Fits the linear regression on the data, making it ready to predit
+
+        :param train_data: The EncodedDs on which to train the network
+        :param dev_data: Data used for early stopping and hyperparameter determination
+        """
         if self.target_dtype not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(f'Unspported {self.target_dtype} type for regression')
         log.info('Fitting Linear Regression model')
@@ -41,10 +57,24 @@ class Regression(BaseMixer):
         log.info(f'Regression based correlation of: {self.model.score(X, Y)}')
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        Fits the Neural mixer on some data, this refits the model entirely rather than updating it
+
+        :param train_data: The EncodedDs on which to train the network
+        :param dev_data: Data used for early stopping and hyperparameter determination
+        """
         self.fit(train_data, dev_data)
 
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
+        """
+        Make predictions based on datasource similar to the one used to fit (sans the target column)
+
+        :param ds: The EncodedDs for which to generate the predictions
+        :param arg: Argument for predicting
+
+        :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
+        """ # noqa
         X = []
         for x, _ in ds:
             X.append(x.tolist())
