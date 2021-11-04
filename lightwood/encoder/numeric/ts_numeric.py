@@ -49,7 +49,7 @@ class TsNumericEncoder(NumericEncoder):
                 else:
                     mean = self._abs_mean
 
-                if is_none(real):
+                if not is_none(real):
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
                     vector[1] = real / mean if mean != 0 else real
                 else:
@@ -60,7 +60,7 @@ class TsNumericEncoder(NumericEncoder):
             else:
                 vector = [0] * 3
                 try:
-                    if is_none(real):
+                    if not is_none(real):
                         vector[0] = 1
                         vector[1] = 1 if real < 0 and not self.positive_domain else 0
                         vector[2] = real / self._abs_mean
