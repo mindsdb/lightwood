@@ -45,6 +45,9 @@ class Img2VecEncoder(BaseEncoder):
 
     def prepare(self, train_priming_data: pd.Series, dev_priming_data: pd.Series):
         # @TODO: finetune here? depending on time aim
+        """
+        Instances an `Img2Vec` object and sets the expected size for encoded representations.
+        """
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
@@ -53,6 +56,14 @@ class Img2VecEncoder(BaseEncoder):
         self.is_prepared = True
 
     def to(self, device, available_devices):
+        """
+        Moves the model to-and-from CPU and GPU.
+
+        :param device: will move the model to this device.
+        :param available_devices: all available devices as reported by lightwood.
+
+        :return: same object but moved to the target device.
+        """
         self.model.to(device, available_devices)
         return self
 
