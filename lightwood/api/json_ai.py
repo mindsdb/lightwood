@@ -134,27 +134,22 @@ def lookup_encoder(
             encoder_dict["args"]["original_type"] = f'"{col_dtype}"'
             encoder_dict["args"]["target"] = "self.target"
             encoder_dict["args"]["grouped_by"] = f"{gby}"
-            encoder_dict["args"]["data_dtype"] = col_dtype
 
         if is_target:
             if col_dtype in [dtype.integer]:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["module"] = "TsNumericEncoder"
-                encoder_dict["args"]["data_dtype"] = dtype.integer
             if col_dtype in [dtype.float]:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["module"] = "TsNumericEncoder"
-                encoder_dict["args"]["data_dtype"] = dtype.float
             if tss.nr_predictions > 1:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["args"]["timesteps"] = f"{tss.nr_predictions}"
                 encoder_dict["module"] = "TsArrayNumericEncoder"
-                encoder_dict["args"]["data_dtype"] = dtype.tsarray
         if "__mdb_ts_previous" in col_name:
             encoder_dict["module"] = "ArrayEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
             encoder_dict["args"]["window"] = f"{tss.window}"
-            encoder_dict["args"]["data_dtype"] = dtype.array
 
     # Set arguments for the encoder
     if encoder_dict["module"] == "Rich_Text.PretrainedLangEncoder" and not is_target:
