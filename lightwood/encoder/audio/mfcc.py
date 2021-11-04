@@ -20,16 +20,29 @@ class MFCCEncoder(BaseEncoder):
     is_trainable_encoder: bool = False
 
     def __init__(self, is_target: bool = False):
+        """
+        :param is_target: whether this encoder's column is the target. Should be false as encoder is not bi-directional. 
+        """  # noqa
         assert not is_target
         super().__init__(is_target)
 
     def prepare(self, priming_data: pd.Series):
+        """
+        Retrieves and stores the expected output_size.
+
+        :param priming_data: training data
+        """
         self.is_prepared = True
         priming_data = list(priming_data)
         ele = self.encode([str(priming_data[0])])[0]
         self.output_size = len(ele)
 
     def encode(self, column_data):
+        """
+        Encode a list of audio files.
+
+        :param column_data: list of paths or URLs to audio files that will be encoded.
+        """
         encoded_audio_arr = []
         for path in column_data:
             try:
