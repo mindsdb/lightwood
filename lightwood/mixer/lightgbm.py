@@ -47,6 +47,19 @@ class LightGBM(BaseMixer):
     use_optuna: bool
     supports_proba: bool
 
+    """
+    Gradient boosting mixer, uses LightGBM as backbone.
+    
+    This mixer is a good all-rounder, due to the generally great performance of tree-based ML algorithms for supervised learning tasks with tabular data.
+    If you want more information regarding the techniques that set apart LightGBM from other gradient boosters, please refer to their technical paper: "LightGBM: A Highly Efficient Gradient Boosting Decision Tree" (2017).
+    
+    We can basically think of this mixer as a wrapper to the LightGBM interface. To do so, there are a few things the user may want to be aware about:
+        * If you seek GPU utilization, LightGBM must be compiled from source instead of being installed through `pip`.
+        * Integer, float, and quantity `dtype`s are treated as regression tasks with `L2` loss. All other supported `dtype`s is casted as a multiclass task with `multi_logloss` loss.
+        * It has an automatic optuna-based hyperparameter search. This procedure triggers when a single iteration of LightGBM is deemed fast enough (given the time budget).
+        * A partial fit can be performed with the `dev` data split as part of `fit`, if specified with the `fit_on_dev` argument.
+    """  # noqa
+
     def __init__(
             self, stop_after: int, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
