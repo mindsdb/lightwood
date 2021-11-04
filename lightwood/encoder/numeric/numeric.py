@@ -1,14 +1,32 @@
 import math
+from typing import Iterable, List, Union
 import torch
 import numpy as np
+from torch.types import Number
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.helpers.general import is_none
+from lightwood.api.dtype import dtype
 
 
 class NumericEncoder(BaseEncoder):
+    """
+    The numeric encoder takes numbers (float or integer) and converts it into tensors of the form:
+    ``[is_none(number), is_positive(number), natural_log(abs(number)), number/absolute_mean]``
 
-    def __init__(self, data_type=None, is_target: bool = False, positive_domain: bool = False):
+    This representation is: ``[is_positive(number), natural_log(abs(number)), number/absolute_mean]]`` if encoding target values, since target values can't be none.
+
+    The ``absolute_mean`` is computed in the ``prepare`` method and is just the mean of the absolute values of all numbers feed to prepare (which are not none)
+
+    ``none`` stands for any number that is an actual python ``None`` value or any sort of non-numeric value (a string, nan, inf)
+    """ # noqa
+
+    def __init__(self, data_type: dtype = None, is_target: bool = False, positive_domain: bool = False):
+        """
+        :param data_type: The data type of the number (integer, float, quantity)
+        :param is_target: If we are encoding a target value or an input value (feature)
+        :param positive_domain: Forces the encoder to always output positive values
+        """
         super().__init__(is_target)
         self._type = data_type
         self._abs_mean = None
@@ -16,7 +34,10 @@ class NumericEncoder(BaseEncoder):
         self.decode_log = False
         self.output_size = 4 if not self.is_target else 3
 
-    def prepare(self, priming_data):
+    def prepare(self, priming_data: Iterable):
+        """
+        :param priming_data: an iterable data structure containing numbers numbers which will be used to compute the values used for normalizing the encoded representations
+        """ # noqa
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
@@ -40,7 +61,12 @@ class NumericEncoder(BaseEncoder):
         self._abs_mean = np.mean(np.abs(non_null_priming_data))
         self.is_prepared = True
 
-    def encode(self, data):
+    def encode(self, data: Iterable):
+        """
+        :param data: An iterable data structure containing the numbers to be encoded
+
+        :returns: A torch tensor with the representations of each number
+        """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
@@ -80,7 +106,13 @@ class NumericEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_values, decode_log=None) -> list:
+    def decode(self, encoded_values: Union[List[Number], torch.Tensor], decode_log: bool = None) -> list:
+        """
+        :param encoded_values: The encoded values to decode into single numbers
+        :param decode_log: Wether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
+
+        :returns: A number
+        """ # noqa
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
