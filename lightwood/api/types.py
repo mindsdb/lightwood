@@ -41,7 +41,7 @@ class Feature:
     """
 
     encoder: Module
-    data_dtype: str = None
+    data_dtype: str
     dependency: List[str] = None
 
     @staticmethod
