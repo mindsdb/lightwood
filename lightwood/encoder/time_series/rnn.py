@@ -431,7 +431,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 next.append(next_value)
 
             ret.append(encoded[0][0].cpu())
-
+        
         if get_next_count is None:
             return torch.stack(ret)
         else:
