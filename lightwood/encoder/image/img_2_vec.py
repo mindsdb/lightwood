@@ -9,12 +9,25 @@ from lightwood.encoder.base import BaseEncoder
 
 
 class Img2VecEncoder(BaseEncoder):
+    """
+    This encoder generates encoded representations for images using a pre-trained deep neural network.
+
+    All input images are rescaled to a standard size of 224x224, and normalized using the mean and standard deviation of the ImageNet dataset (as it was used to train the underlying NN).
+    
+    Note that this encoder does not have a .decode() method yet. As such, models that predict images as output are not supported at this time. 
+    
+    For more information about the neural network this encoder uses, refer to the `lightwood.encoder.image.helpers.img_to_vec.Img2Vec`.
+    """  # noqa
+
     is_trainable_encoder: bool = True
 
     def __init__(self, stop_after: int = 3600, is_target: bool = False):
+        """
+        :param stop_after: time budget, in seconds. 
+        :param is_target: whether the encoder corresponds to the target column. This is not currently possible for Img2VecEncoder.
+        """  # noqa
+        assert not is_target
         super().__init__(is_target)
-        # # I think we should make this an enum, something like: speed, balance, accuracy
-        # self.aim = aim
         self.is_prepared = False
 
         self._scaler = transforms.Resize((224, 224))
@@ -31,7 +44,7 @@ class Img2VecEncoder(BaseEncoder):
         pil_logger.setLevel(logging.ERROR)
 
     def prepare(self, train_priming_data: pd.Series, dev_priming_data: pd.Series):
-        # @TODO: Add a bit of training here (maybe? depending on time aim)
+        # @TODO: finetune here? depending on time aim
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
@@ -45,7 +58,7 @@ class Img2VecEncoder(BaseEncoder):
 
     def encode(self, images: List[str]) -> torch.Tensor:
         """
-        Encode list of images
+        Encode a list of images.
 
         :param images: list of images, each image is a path to a file or a url
         :return: a torch.floatTensor
