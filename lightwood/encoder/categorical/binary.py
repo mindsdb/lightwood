@@ -1,17 +1,34 @@
+"""
+The binary encoder creates a 2-element vector representing 0/1. 
+[1, 0] == 0
+[0, 1] == 1
+
+The 2-element representation is to calculate probabilities etc of assigning between the two states. 
+
+This is a specialized case of OHE; this is to explicitly enforce *no* possibility of an unknown class, as our default OHE does. When data is typed with Lightwood, this class is only deployed if the type is explicitly considered binary (i.e. the column has no missing values, otherwise it's considered via categorical one-hot or autoencoder).
+
+Given an encoder can represent a feature vector OR target, `target_class_distribution` helps identify weights for imbalanced populations. This is called when the statistical analysis is also called.
+
+TODO:
+- what is priming_data data type? (probs for all enc/mix)ls
+"""
+
 import torch
 import numpy as np
 from scipy.special import softmax
 from lightwood.encoder.base import BaseEncoder
 
+from typing import Dict
 
-# Exists mainly for datasets with loads of binary flags where OHE can be too slow to fit
 class BinaryEncoder(BaseEncoder):
 
-    def __init__(self, is_target=False, target_class_distribution=None):
+    def __init__(self, is_target: bool = False, target_class_distribution: Dict[str, float] = None):
         super().__init__(is_target)
         self.map = {}
         self.rev_map = {}
         self.output_size = 2
+
+        # Weight-balance for target-based encoders
         if self.is_target:
             self.target_class_distribution = target_class_distribution
             self.index_weights = None
