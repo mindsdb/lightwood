@@ -46,7 +46,7 @@ class TsArrayNumericEncoder(BaseEncoder):
 
         if padding_size > 0:
             ret = F.pad(ret, (0, padding_size))
-        
+
         return ret
 
     def decode(self, encoded_values, dependency_data=None, return_all=False):
