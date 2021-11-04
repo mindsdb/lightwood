@@ -152,7 +152,7 @@ def lookup_encoder(
             encoder_dict["args"]["window"] = f"{tss.window}"
 
     # Set arguments for the encoder
-    if encoder_dict["module"] == "Rich_Text.PretrainedLangEncoder" and not is_target:
+    if encoder_dict["module"] == "PretrainedLangEncoder" and not is_target:
         encoder_dict["args"]["output_type"] = "$dtype_dict[$target]"
 
     if eval(encoder_dict["module"]).is_trainable_encoder:
