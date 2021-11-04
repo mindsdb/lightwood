@@ -10,7 +10,7 @@ This is a specialized case of OHE; this is to explicitly enforce *no* possibilit
 Given an encoder can represent a feature vector OR target, `target_class_distribution` helps identify weights for imbalanced populations. This is called when the statistical analysis is also called.
 
 TODO:
-- what is priming_data data type? (probs for all enc/mix)ls
+- decode/encode data type hints?
 """
 
 import torch
@@ -18,47 +18,58 @@ import numpy as np
 from scipy.special import softmax
 from lightwood.encoder.base import BaseEncoder
 
-from typing import Dict
+from typing import Dict, List
+from pandas import Series
 
 class BinaryEncoder(BaseEncoder):
 
     def __init__(self, is_target: bool = False, target_class_distribution: Dict[str, float] = None):
         super().__init__(is_target)
-        self.map = {}
-        self.rev_map = {}
+        self.map = {} # category name -> index
+        self.rev_map = {} # index -> category name
         self.output_size = 2
 
-        # Weight-balance for target-based encoders
+        # Weight-balance info if encoder represents target
         if self.is_target:
             self.target_class_distribution = target_class_distribution
             self.index_weights = None
 
-    def prepare(self, priming_data):
+    def prepare(self, priming_data: Series):
+        """
+        Given priming data, create a map/inverse-map corresponding category name to index (and vice versa).
+
+        If encoder represents target, also includes `index_weights` which enables downstream models to weight classes.
+
+        :param priming_data: Binary data to encode
+        """
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        for x in priming_data:
-            x = str(x)
-            if x not in self.map:
-                self.map[x] = len(self.map)
-                self.rev_map[len(self.rev_map)] = x
+        # For each member in the series, map 
+        # Enforce strings
+        priming_data = priming_data.astype('str')
+        self.map = {cat: indx for indx, cat in enumerate(priming_data.unique())}
+        self.rev_map = {indx: cat for cat, indx in self.map.items()}
 
-            if len(self.map) == 2:
-                break
+        # Enforce only binary details
+        assert(len(self.map) == 2, 'Issue with dtype; data has > 2 classes.')
 
+        # For target-only, report on relative weights of classes
         if self.is_target:
-            self.index_weights = [None, None]
-            for word in self.map:
-                if self.target_class_distribution is not None:
-                    self.index_weights[self.map[word]] = 1 / self.target_class_distribution[word]
-                else:
-                    self.index_weights[self.map[word]] = 1
+            self.index_weights = torch.Tensor([1, 1]) # Equally wt. both classes
 
-            self.index_weights = torch.Tensor(self.index_weights)
+            # If imbalanced detected, re-weight by inverse
+            if self.target_class_distribution is not None:
+                for cat in self.map.keys():
+                    self.index_weights[self.map[cat]] = 1 / self.target_class_distribution[cat]
 
         self.is_prepared = True
 
     def encode(self, column_data):
+        """
+        Encodes categories as OHE binary; if an unknown class appears,
+        returns [0, 0].
+        """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         ret = []
@@ -72,6 +83,9 @@ class BinaryEncoder(BaseEncoder):
         return torch.Tensor(ret)
 
     def decode(self, encoded_data, return_raw=False):
+        """
+        Given encoded data, reverts back to the category names.
+        """
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
