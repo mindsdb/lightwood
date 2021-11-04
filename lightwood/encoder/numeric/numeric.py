@@ -43,21 +43,12 @@ class NumericEncoder(BaseEncoder):
 
         value_type = 'int'
         for number in priming_data:
-            try:
-                number = float(number)
-            except Exception:
-                continue
-
-            if np.isnan(number):
-                err = 'Lightwood does not support working with NaN values !'
-                log.warning(err)
-                continue
-
-            if int(number) != number:
-                value_type = 'float'
+            if not is_none(number):
+                if int(number) != number:
+                    value_type = 'float'
 
         self._type = value_type if self._type is None else self._type
-        non_null_priming_data = [float(str(x).replace(',', '.')) for x in priming_data if not is_none(x)]
+        non_null_priming_data = [x for x in priming_data if not is_none(x)]
         self._abs_mean = np.mean(np.abs(non_null_priming_data))
         self.is_prepared = True
 
@@ -75,10 +66,7 @@ class NumericEncoder(BaseEncoder):
             try:
                 real = float(real)
             except Exception:
-                try:
-                    real = float(real.replace(',', '.'))
-                except Exception:
-                    real = None
+                real = None
             if self.is_target:
                 vector = [0] * 3
                 if real is not None and self._abs_mean > 0:

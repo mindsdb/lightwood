@@ -1,10 +1,21 @@
 import unittest
 import numpy as np
+import torch
 from lightwood.encoder.numeric import NumericEncoder
 from lightwood.encoder.numeric import TsNumericEncoder
+from lightwood.helpers.general import is_none
+
+
+def _polute(array):
+    return [
+        array + [np.nan],
+        array + [np.inf],
+        array + [None]
+    ]
 
 
 class TestNumericEncoder(unittest.TestCase):
+    '''
     def test_encode_and_decode(self):
         data = [1, 1.1, 2, -8.6, None, 0]
 
@@ -53,3 +64,43 @@ class TestNumericEncoder(unittest.TestCase):
 
         for i in range(0, 70, 10):
             encoder.decode([[0, pow(2, i), 0]])
+    '''
+
+    def test_nan_encoding(self):
+        # Generate some numbers
+        data = list(range(-50, 50, 2))
+
+        # Add invalid values to the data
+        invalid_data = _polute(data)
+
+        # Prepare with the correct data and decode invalid data
+        encoder = NumericEncoder()
+        encoder.prepare(data)
+        for array in invalid_data:
+            # Make sure the encoding has no nans or infs
+            encoded_repr = encoder.encode(array)
+            print(encoded_repr)
+            assert not torch.isnan(encoded_repr).any()
+            assert not torch.isinf(encoded_repr).any()
+
+            # Make sure the invalid value is decoded as `None` and the rest as numbers
+            decoded_repr = encoder.decode(encoded_repr)
+            for x in decoded_repr[:-1]:
+                assert not is_none(x)
+            assert decoded_repr[-1] is None
+
+        # Prepare with the invalid data and decode the valid data
+        for array in invalid_data:
+            encoder = NumericEncoder()
+            encoder.prepare(array)
+        
+            # Make sure the encoding has no nans or infs
+            encoded_repr = encoder.encode(data)
+            print(encoded_repr)
+            assert not torch.isnan(encoded_repr).any()
+            assert not torch.isinf(encoded_repr).any()
+
+            # Make sure the invalid value is decoded as `None` and the rest as numbers
+            decoded_repr = encoder.decode(encoded_repr)
+            for x in decoded_repr:
+                assert not is_none(x)
