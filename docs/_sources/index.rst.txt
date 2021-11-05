@@ -270,8 +270,3 @@ Other Links
    tutorials
    api
    data
-   encoder
-   mixer
-   ensemble
-   analysis
-   helpers
