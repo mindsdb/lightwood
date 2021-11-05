@@ -13,6 +13,9 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
@@ -410,10 +413,124 @@
 <h2>Other Links<a class="headerlink" href="#other-links" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lightwood_philosophy.html#i-pre-processing-and-cleaning">i) Pre-processing and cleaning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lightwood_philosophy.html#ii-feature-engineering">ii) Feature Engineering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lightwood_philosophy.html#iii-model-building-and-training">iii) Model Building and Training</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#getting-started-with-lightwood-and-json-ai">Getting started with Lightwood and JSON-AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#run-models-with-more-complex-data-types">Run models with more complex data types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#bring-your-own-custom-methods">Bring your own custom methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/high_level.html">JSON-AI Config</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/high_level.html#api.high_level.analyze_dataset">analyze_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/high_level.html#api.high_level.code_from_json_ai">code_from_json_ai</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/high_level.html#api.high_level.code_from_problem">code_from_problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/high_level.html#api.high_level.json_ai_from_problem">json_ai_from_problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/high_level.html#api.high_level.predictor_from_code">predictor_from_code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/high_level.html#api.high_level.predictor_from_json_ai">predictor_from_json_ai</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/high_level.html#api.high_level.predictor_from_problem">predictor_from_problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/high_level.html#api.high_level.predictor_from_state">predictor_from_state</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dtype.html">Data Types (dtypes)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dtype.html#api.dtype.dtype">dtype</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html">Lightwood API Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.Module">Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.Feature">Feature</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.Feature.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.Feature.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.Feature.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.Feature.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.Output">Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.TypeInformation">TypeInformation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.StatisticalAnalysis">StatisticalAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.DataAnalysis">DataAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.TimeseriesSettings">TimeseriesSettings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.TimeseriesSettings.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.TimeseriesSettings.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.TimeseriesSettings.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.TimeseriesSettings.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.ProblemDefinition">ProblemDefinition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.ProblemDefinition.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.ProblemDefinition.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.ProblemDefinition.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.ProblemDefinition.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.JsonAI">JsonAI</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.JsonAI.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.JsonAI.from_json">from_json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.JsonAI.to_dict">to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.JsonAI.to_json">to_json</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.ModelAnalysis">ModelAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/types.html#api.types.PredictionArguments">PredictionArguments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.PredictionArguments.from_dict">from_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/types.html#api.types.PredictionArguments.to_dict">to_dict</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/predictor.html">Predictor Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface">PredictorInterface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.adjust">adjust</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.analyze_data">analyze_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.analyze_ensemble">analyze_ensemble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.featurize">featurize</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.fit">fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.learn">learn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.predict">predict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.prepare">prepare</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.preprocess">preprocess</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.save">save</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/predictor.html#api.predictor.PredictorInterface.split">split</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/json_ai.html">JSON-AI Config</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/json_ai.html#api.json_ai.code_from_json_ai">code_from_json_ai</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/json_ai.html#api.json_ai.generate_json_ai">generate_json_ai</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/json_ai.html#api.json_ai.lookup_encoder">lookup_encoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/json_ai.html#api.json_ai.validate_json_ai">validate_json_ai</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/encode.html">Encode your data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data.html#data.ConcatedEncodedDs">ConcatedEncodedDs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="data.html#data.ConcatedEncodedDs.clear_cache">clear_cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data.html#data.ConcatedEncodedDs.data_frame">data_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data.html#data.ConcatedEncodedDs.get_column_original_data">get_column_original_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data.html#data.ConcatedEncodedDs.get_encoded_column_data">get_encoded_column_data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#data.EncodedDs">EncodedDs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="data.html#data.EncodedDs.clear_cache">clear_cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data.html#data.EncodedDs.get_column_original_data">get_column_original_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data.html#data.EncodedDs.get_encoded_column_data">get_encoded_column_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data.html#data.EncodedDs.get_encoded_data">get_encoded_data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#data.cleaner">cleaner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#data.splitter">splitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#data.timeseries_analyzer">timeseries_analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#data.transform_timeseries">transform_timeseries</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
