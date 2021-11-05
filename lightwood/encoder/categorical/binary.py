@@ -8,7 +8,8 @@ Creates a 2-element vector representing categories :math:`A` and :math:`B` as su
 
 This is a specialized case of one-hot encoding (OHE); this is to explicitly enforce *no* possibility of an unknown class, as our default OHE does. When data is typed with Lightwood, this class is only deployed if the type is explicitly considered binary (i.e. the column has no missing values, otherwise it's considered via categorical one-hot or autoencoder).
 
-An encoder can also represent the target column; in this case, `is_target` is True, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations. 
+
+An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations. 
 """
 
 import torch
