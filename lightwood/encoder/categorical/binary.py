@@ -1,5 +1,5 @@
 """
-The binary encoder creates a 2-element vector representing categories :math:`A` and :math:`B` as such: 
+Creates a 2-element vector representing categories :math:`A` and :math:`B` as such: 
 
 .. math::
 
