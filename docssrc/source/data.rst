@@ -5,3 +5,4 @@ The focus of these modules is on storing, transforming, cleaning, splitting, mer
 
 .. automodule:: data
    :members:
+   :show-inheritance:

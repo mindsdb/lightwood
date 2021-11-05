@@ -264,7 +264,7 @@ License
 Other Links
 =======================
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 8
 
    lightwood_philosophy
    tutorials
