@@ -6,3 +6,7 @@
 ## Ref
 
 for how autosummary works: https://stackoverflow.com/questions/2701998/sphinx-autodoc-is-not-automatic-enough
+
+## Manual steps
+
+currently notebooks have to be built manually using: `find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;`
