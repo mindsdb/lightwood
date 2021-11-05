@@ -1,16 +1,14 @@
 """
-The binary encoder creates a 2-element vector representing 0/1. 
-[1, 0] == 0
-[0, 1] == 1
+The binary encoder creates a 2-element vector representing categories :math:`A` and :math:`B` as such: 
 
-The 2-element representation is to calculate probabilities etc of assigning between the two states. 
+.. math::
 
-This is a specialized case of OHE; this is to explicitly enforce *no* possibility of an unknown class, as our default OHE does. When data is typed with Lightwood, this class is only deployed if the type is explicitly considered binary (i.e. the column has no missing values, otherwise it's considered via categorical one-hot or autoencoder).
+   A &= [1, 0] \\
+   B &= [0, 1]
 
-Given an encoder can represent a feature vector OR target, `target_class_distribution` helps identify weights for imbalanced populations. This is called when the statistical analysis is also called.
+This is a specialized case of one-hot encoding (OHE); this is to explicitly enforce *no* possibility of an unknown class, as our default OHE does. When data is typed with Lightwood, this class is only deployed if the type is explicitly considered binary (i.e. the column has no missing values, otherwise it's considered via categorical one-hot or autoencoder).
 
-TODO:
-- decode/encode data type hints?
+An encoder can also represent the target column; in this case, `is_target` is True, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations. 
 """
 
 import torch
@@ -25,6 +23,7 @@ class BinaryEncoder(BaseEncoder):
 
     def __init__(self, is_target: bool = False, target_class_distribution: Dict[str, float] = None):
         super().__init__(is_target)
+
         self.map = {} # category name -> index
         self.rev_map = {} # index -> category name
         self.output_size = 2
@@ -38,7 +37,7 @@ class BinaryEncoder(BaseEncoder):
         """
         Given priming data, create a map/inverse-map corresponding category name to index (and vice versa).
 
-        If encoder represents target, also includes `index_weights` which enables downstream models to weight classes.
+        If encoder represents target, also instantiates `index_weights` which enables downstream models to weight classes.
 
         :param priming_data: Binary data to encode
         """
@@ -65,18 +64,21 @@ class BinaryEncoder(BaseEncoder):
 
         self.is_prepared = True
 
-    def encode(self, column_data):
+    def encode(self, column_data) -> torch.Tensor:
         """
-        Encodes categories as OHE binary; if an unknown class appears,
-        returns [0, 0].
+        Encodes categories as OHE binary. Unknown/unrecognized classes return [0,0].
+
+        :param column_data: Pre-processed data to encode
+        :returns Encoded data of form :math:`N_{rows} x 2`
         """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
         ret = []
 
         for word in column_data:
-            index = self.map.get(word, None)
             ret.append([0, 0])
+            index = self.map.get(word, None)
+            
             if index is not None:
                 ret[-1][index] = 1
 
@@ -84,7 +86,7 @@ class BinaryEncoder(BaseEncoder):
 
     def decode(self, encoded_data, return_raw=False):
         """
-        Given encoded data, reverts back to the category names.
+        Given encoded data, return in form of original category labels.
         """
         encoded_data_list = encoded_data.tolist()
         ret = []
