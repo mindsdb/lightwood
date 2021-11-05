@@ -1,16 +1,8 @@
 ## Compiling the docs
-`pip3 install 'Sphinx==4.1.2' 'sphinx-autoapi==1.8.4' 'sphinx-autodoc-typehints==1.12.0' 'sphinx-code-include==1.1.1' 'sphinx-rtd-theme==0.5.2' 'sphinxcontrib-applehelp==1.0.2' 'sphinxcontrib-devhelp==1.0.2' 'sphinxcontrib-htmlhelp==2.0.0' 'sphinxcontrib-jsmath==1.0.1' 'sphinxcontrib-napoleon==0.7' 'sphinxcontrib-qthelp==1.0.3' 'sphinxcontrib-serializinghtml==1.1.5' autoapi nbsphinx myst_parser`
-`cd docssrc`
-`make github`
-`cd ../docs && python3 -m http.server`
-Should now be available at: 0.0.0.0:8000
+- Make sure you are in `docssrc`, then follow the instructions under `run` in our [documentation building github actions job](https://github.com/mindsdb/lightwood/blob/staging/.github/workflows/doc_build.yml#L21)
+- Then go into the newly build docs and start a server to see them: `cd ../docs && python3 -m http.server`
+- Should now be available at: 0.0.0.0:8000 | Alternatively, you can just open the `index.html` with a browser and that should work too
 
+## Ref
 
-## Creating the docs
-*They are already created, you shouldn't have to do this unless you are restarting from scratch*
-
-First, make a new directory (should exist) named `docs`.
-
-Within `docssrc`, run sphinx-quickstart (https://www.sphinx-doc.org/en/master/usage/quickstart.html).
-
-I opted to separate source/build directories. This allows, in the long run, simplicity between code + build.
+for how autosummary works: https://stackoverflow.com/questions/2701998/sphinx-autodoc-is-not-automatic-enough
