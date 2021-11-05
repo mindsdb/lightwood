@@ -13,6 +13,9 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
@@ -215,7 +218,8 @@
 <span class="target" id="module-data"></span><dl class="py class">
 <dt class="sig sig-object py" id="data.ConcatedEncodedDs">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">ConcatedEncodedDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_ds_arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs" title="Permalink to this definition">¶</a></dt>
-<dd><p><cite>ConcatedEncodedDs</cite> abstracts over multiple encoded datasources (<cite>EncodedDs</cite>) as if they were a single entity.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<p><cite>ConcatedEncodedDs</cite> abstracts over multiple encoded datasources (<cite>EncodedDs</cite>) as if they were a single entity.</p>
 <p>Create a Lightwood datasource from a data frame and some encoders. This class inherits from <cite>torch.utils.data.Dataset</cite>.</p>
 <p>Note: normal behavior is to cache encoded representations to avoid duplicated computations. If you want an option to disable, this please open an issue.</p>
 <dl class="field-list simple">
@@ -275,7 +279,8 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="data.EncodedDs">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">EncodedDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a Lightwood datasource from a data frame and some encoders. This class inherits from <cite>torch.utils.data.Dataset</cite>.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<p>Create a Lightwood datasource from a data frame and some encoders. This class inherits from <cite>torch.utils.data.Dataset</cite>.</p>
 <p>Note: normal behavior is to cache encoded representations to avoid duplicated computations. If you want an option to disable, this please open an issue.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
