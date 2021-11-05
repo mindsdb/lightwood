@@ -37,11 +37,8 @@ class TsNumericEncoder(NumericEncoder):
                 try:
                     real = float(real.replace(',', '.'))
                 except Exception:
-                    print(f'[DEBUG] found value: {real}...!')
-                    try:
-                        real = float(real.replace(',', '.'))
-                    except Exception:
-                        real = None
+                    print(f'[DEBUG] found weird value: {real}')
+                    real = None
             if self.is_target:
                 vector = [0] * 2
                 if group is not None and self.normalizers is not None:
@@ -57,9 +54,9 @@ class TsNumericEncoder(NumericEncoder):
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
                     vector[1] = real / mean if mean != 0 else real
                 else:
-                    # pass
+                    pass
                     # This should raise an exception *once* we fix the TsEncoder such that this doesn't get feed `nan`
-                    raise Exception(f'Can\'t encode target value: {real}')
+                    # raise Exception(f'Can\'t encode target value: {real}')
 
             else:
                 vector = [0] * 3
