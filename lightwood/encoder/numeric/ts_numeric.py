@@ -37,7 +37,6 @@ class TsNumericEncoder(NumericEncoder):
                 try:
                     real = float(real.replace(',', '.'))
                 except Exception:
-                    print(f'[DEBUG] found weird value: {real}')
                     real = None
             if self.is_target:
                 vector = [0] * 2
