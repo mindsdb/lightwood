@@ -37,7 +37,11 @@ class TsNumericEncoder(NumericEncoder):
                 try:
                     real = float(real.replace(',', '.'))
                 except Exception:
-                    real = None
+                    print(f'[DEBUG] found value: {real}...!')
+                    try:
+                        real = float(real.replace(',', '.'))
+                    except Exception:
+                        real = None
             if self.is_target:
                 vector = [0] * 2
                 if group is not None and self.normalizers is not None:
