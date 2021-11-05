@@ -57,9 +57,9 @@ class TsNumericEncoder(NumericEncoder):
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
                     vector[1] = real / mean if mean != 0 else real
                 else:
-                    pass
+                    # pass
                     # This should raise an exception *once* we fix the TsEncoder such that this doesn't get feed `nan`
-                    # raise Exception(f'Can\'t encode target value: {real}')
+                    raise Exception(f'Can\'t encode target value: {real}')
 
             else:
                 vector = [0] * 3
