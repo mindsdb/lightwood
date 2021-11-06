@@ -67,7 +67,7 @@ class LightGBM(BaseMixer):
         # Disabled until fix for: https://github.com/microsoft/LightGBM/issues/3339
         # Or until we do a workaround
         # gpu_works = check_gpu_support()
-        # if gpu_works: 
+        # if gpu_works:
         # self.device = torch.device('cuda')
         # self.device_str = 'gpu'
         self.device = torch.device('cpu')
