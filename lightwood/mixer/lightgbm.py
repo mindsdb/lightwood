@@ -40,7 +40,6 @@ class LightGBM(BaseMixer):
     model: lightgbm.LGBMModel
     ordinal_encoder: OrdinalEncoder
     label_set: Set[str]
-    max_bin: int
     device: torch.device
     device_str: str
     num_iterations: int
@@ -65,17 +64,15 @@ class LightGBM(BaseMixer):
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
         self.stable = True
 
-        # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later # noqa
-        gpu_works = check_gpu_support()
-        if not gpu_works:
-            self.device = torch.device('cpu')
-            self.device_str = 'cpu'
-            log.warning('LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead') # noqa
-        else:
-            self.device = torch.device('cuda')
-            self.device_str = 'gpu'
-
-        self.max_bin = 255
+        # Disabled until fix for: https://github.com/microsoft/LightGBM/issues/3339
+        # Or until we do a workaround
+        # gpu_works = check_gpu_support()
+        # if gpu_works: 
+        # self.device = torch.device('cuda')
+        # self.device_str = 'gpu'
+        self.device = torch.device('cpu')
+        self.device_str = 'cpu'
+        log.warning('LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead') # noqa
 
     def _to_dataset(self, data, output_dtype):
         for subset_name in data.keys():
