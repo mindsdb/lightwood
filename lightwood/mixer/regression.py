@@ -30,7 +30,7 @@ class Regression(BaseMixer):
         """
         :param stop_after: Maximum amount of time it should train for, currently ignored
         :param target_encoder: The encoder which will be used to decode the target
-        :param dtype_dict: Data type dictionary
+        :param dtype_dict: A map of feature names and their data types
         :param target: Name of the target column
         """ # noqa
         super().__init__(stop_after)
