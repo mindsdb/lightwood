@@ -97,7 +97,7 @@ class NumericEncoder(BaseEncoder):
     def decode(self, encoded_values: Union[List[Number], torch.Tensor], decode_log: bool = None) -> list:
         """
         :param encoded_values: The encoded values to decode into single numbers
-        :param decode_log: Wether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
+        :param decode_log: Whether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
 
         :returns: A number
         """ # noqa
