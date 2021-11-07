@@ -24,7 +24,7 @@ class NumericEncoder(BaseEncoder):
     def __init__(self, data_type: dtype = None, is_target: bool = False, positive_domain: bool = False):
         """
         :param data_type: The data type of the number (integer, float, quantity)
-        :param is_target: If we are encoding a target value or an input value (feature)
+        :param is_target: Indicates whether the encoder refers to a target column or feature column (True==target)
         :param positive_domain: Forces the encoder to always output positive values
         """
         super().__init__(is_target)
