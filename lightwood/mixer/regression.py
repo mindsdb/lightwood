@@ -13,8 +13,14 @@ from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 
 class Regression(BaseMixer):
     """
-    A mixer that runs a simple linear regression using the (Encoded) features to predict the target.
-    Supports all types because they are all encoded numerically.
+    The `Regression` mixer inherits from scikit-learn's `LinearRegression` class
+    (https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)
+    
+    This class performs Ordinary Least-squares Regression (OLS) under the hood; 
+    this means it fits a set of coefficients (w_1, w_2, ..., w_N) for an N-length feature vector, that minimize the difference
+    between the predicted target value and the observed true value.
+  
+    This mixer intakes featurized (encoded) data to predict the target. It deploys if the target data-type is considered numerical/integer.
     """ # noqa
     model: LinearRegression
     label_map: dict
@@ -36,7 +42,7 @@ class Regression(BaseMixer):
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
-        Fits the linear regression on the data, making it ready to predit
+        Fits `LinearRegression` model on input feature data to provide predictions.
 
         :param train_data: The EncodedDs on which to train the network
         :param dev_data: Data used for early stopping and hyperparameter determination
