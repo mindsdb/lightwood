@@ -87,7 +87,7 @@ class LightGBM(BaseMixer):
                     enc_col = data[subset_name]['ds'].get_encoded_column_data(input_col)
                     data[subset_name]['data'] = torch.cat((data[subset_name]['data'], enc_col.to(self.device)), 1)
 
-            data[subset_name]['data'] = data[subset_name]['data'].numpy()
+            data[subset_name]['data'] = data[subset_name]['data'].cpu().numpy()
 
             label_data = data[subset_name]['ds'].get_column_original_data(self.target)
 
@@ -224,7 +224,7 @@ class LightGBM(BaseMixer):
             else:
                 data = torch.cat((data, ds.get_encoded_column_data(input_col).to(self.device)), 1)
 
-        data = data.numpy()
+        data = data.cpu().numpy()
         raw_predictions = self.model.predict(data)
 
         if self.ordinal_encoder is not None:
