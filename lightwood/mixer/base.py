@@ -28,8 +28,6 @@ class BaseMixer:
 
     def __init__(self, stop_after: int):
         """
-        Initializer a mixer.
-
         :param stop_after: Time budget to train this mixer.
         """
         self.stop_after = stop_after
