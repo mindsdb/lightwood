@@ -24,7 +24,7 @@ class NumericEncoder(BaseEncoder):
     def __init__(self, data_type: dtype = None, is_target: bool = False, positive_domain: bool = False):
         """
         :param data_type: The data type of the number (integer, float, quantity)
-        :param is_target: If we are encoding a target value or an input value (feature)
+        :param is_target: Indicates whether the encoder refers to a target column or feature column (True==target)
         :param positive_domain: Forces the encoder to always output positive values
         """
         super().__init__(is_target)
@@ -98,7 +98,7 @@ class NumericEncoder(BaseEncoder):
     def decode(self, encoded_values: Union[List[Number], torch.Tensor], decode_log: bool = None) -> list:
         """
         :param encoded_values: The encoded values to decode into single numbers
-        :param decode_log: Wether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
+        :param decode_log: Whether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
 
         :returns: The decoded number
         """ # noqa
