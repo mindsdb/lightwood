@@ -13,6 +13,9 @@
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
@@ -97,11 +100,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
 </ul>
 
             
@@ -195,7 +193,7 @@
 <span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.transform_corss_entropy_loss</span> <span class="kn">import</span> <span class="n">TransformCrossEntropyLoss</span>
 
 
-<div class="viewcode-block" id="Neural"><a class="viewcode-back" href="../../../mixer.html#mixer.Neural">[docs]</a><span class="k">class</span> <span class="nc">Neural</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
+<div class="viewcode-block" id="Neural"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.Neural">[docs]</a><span class="k">class</span> <span class="nc">Neural</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span>
     <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
@@ -416,7 +414,7 @@
 
     <span class="c1"># @TODO: Compare partial fitting fully on and fully off on the benchmarks!</span>
     <span class="c1"># @TODO: Writeup on the methodology for partial fitting</span>
-<div class="viewcode-block" id="Neural.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Neural.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Neural.fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.Neural.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fits the Neural mixer on some data, making it ready to predit</span>
 
@@ -452,7 +450,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">dev_data</span><span class="p">,</span> <span class="n">train_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_final_tuning</span><span class="p">(</span><span class="n">dev_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Neural.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Neural.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Neural.partial_fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.Neural.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Augments the mixer&#39;s fit with new data, nr of epochs is based on the amount of epochs the original fitting took</span>
 
