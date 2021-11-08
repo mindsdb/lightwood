@@ -251,7 +251,7 @@ class Neural(BaseMixer):
         """
         Fits the Neural mixer on some data, making it ready to predit
 
-        :param train_data: The EncodedDs on which to train the network
+        :param train_data: The network is fit/trained on this
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
         # ConcatedEncodedDs
@@ -287,7 +287,7 @@ class Neural(BaseMixer):
         """
         Augments the mixer's fit with new data, nr of epochs is based on the amount of epochs the original fitting took
 
-        :param train_data: The EncodedDs on which to train the network
+        :param train_data: The network is fit/trained on this
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
 
@@ -306,7 +306,7 @@ class Neural(BaseMixer):
         """
         Make predictions based on datasource with the same features as the ones used for fitting
 
-        :param ds: The EncodedDs for which to generate the predictions
+        :param ds: Predictions are generate from it
         :param arg: Argument for predicting
 
         :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
