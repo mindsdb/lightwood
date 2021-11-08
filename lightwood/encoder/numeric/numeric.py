@@ -71,7 +71,6 @@ class NumericEncoder(BaseEncoder):
                 real = None
             if self.is_target:
                 # Will crash if ``real`` is not a float, this is fine, targets should always have a value
-                
                 vector = [0] * 3
                 vector[0] = 1 if real < 0 and not self.positive_domain else 0
                 vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
@@ -103,7 +102,7 @@ class NumericEncoder(BaseEncoder):
         :returns: The decoded number
         """ # noqa
         if not self.is_prepared:
-            raisfe Exception('You need to call "prepare" before calling "encode" or "decode".')
+            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if decode_log is None:
             decode_log = self.decode_log
