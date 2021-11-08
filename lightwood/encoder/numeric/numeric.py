@@ -36,6 +36,8 @@ class NumericEncoder(BaseEncoder):
 
     def prepare(self, priming_data: Iterable):
         """
+        "NumericalEncoder" uses a rule-based form to prepare results on training (priming) data. The averages etc. are taken from this distribution.
+
         :param priming_data: an iterable data structure containing numbers numbers which will be used to compute the values used for normalizing the encoded representations
         """ # noqa
         if self.is_prepared:
