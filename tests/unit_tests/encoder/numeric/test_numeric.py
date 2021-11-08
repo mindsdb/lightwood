@@ -6,7 +6,7 @@ from lightwood.encoder.numeric import TsNumericEncoder
 from lightwood.helpers.general import is_none
 
 
-def _polute(array):
+def _pollute(array):
     return [
         array + [np.nan],
         array + [np.inf],
@@ -69,7 +69,7 @@ class TestNumericEncoder(unittest.TestCase):
         data = list(range(-50, 50, 2))
 
         # Add invalid values to the data
-        invalid_data = _polute(data)
+        invalid_data = _pollute(data)
 
         # Prepare with the correct data and decode invalid data
         encoder = NumericEncoder()
