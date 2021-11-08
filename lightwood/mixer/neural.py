@@ -210,7 +210,9 @@ class Neural(BaseMixer):
             if len(running_errors) >= 5:
                 delta_mean = np.average([running_errors[-i - 1] - running_errors[-i] for i in range(1, 5)],
                                         weights=[(1 / 2)**i for i in range(1, 5)])
-                if delta_mean <= 0:
+                if delta_mean <= -1:
+                    break
+                elif epoch > 3000:
                     break
             elif (time.time() - started) > stop_after:
                 break
