@@ -210,7 +210,12 @@ def get_identifier_description_mp(arg_tup):
 
 def get_identifier_description(data, column_name, data_dtype):
     data = list(data)
-    unquie_pct = len(set(data)) / len(data)
+    nr_unique = len(set(data))
+
+    if nr_unique == 1:
+        return 'No Information'
+
+    unquie_pct = nr_unique / len(data)
 
     spaces = [len(str(x).split(' ')) - 1 for x in data]
     mean_spaces = np.mean(spaces)
