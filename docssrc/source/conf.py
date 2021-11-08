@@ -118,17 +118,8 @@ autoclass_content = 'both'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_css_files = ['_static/custom.css']
+html_css_files = ['custom.css']
 
-html_context = {
-    'css_files': [
-        '_static/custom.css',  # overrides for wide tables in RTD theme
-    ]}
-
-html_theme_path = [
-    # msmb_theme.get_html_theme_path(),
-    sphinx_rtd_theme.get_html_theme_path()
-]
 
 # Brand logo
 html_logo = "_static/logos/mindsdblogo.png"
@@ -146,7 +137,7 @@ html_sidebars = {
 # Autodoc capability
 # ----------------- #
 autoapi_template_dir = '_autoapi_templates'
-autoapi_root = 'docs/api'
+autoapi_root = 'docs'
 autoapi_generate_api_docs = False
 
 autoapi_dirs = ['../../lightwood']
