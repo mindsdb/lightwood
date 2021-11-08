@@ -70,13 +70,12 @@ class NumericEncoder(BaseEncoder):
             except Exception:
                 real = None
             if self.is_target:
+                # Will crash if ``real`` is not a float, this is fine, targets should always have a value
+                
                 vector = [0] * 3
-                if real is not None and self._abs_mean > 0:
-                    vector[0] = 1 if real < 0 and not self.positive_domain else 0
-                    vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                    vector[2] = real / self._abs_mean
-                else:
-                    log.debug(f'Can\'t encode target value: {real}')
+                vector[0] = 1 if real < 0 and not self.positive_domain else 0
+                vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
+                vector[2] = real / self._abs_mean
 
             else:
                 vector = [0] * 4
