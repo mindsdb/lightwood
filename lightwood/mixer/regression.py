@@ -78,7 +78,7 @@ class Regression(BaseMixer):
         Make predictions based on datasource with the same features as the ones used for fitting
 
         :param ds: Predictions are generate from it
-        :param arg: Argument for predicting
+        :param arg: Any additional arguments used in predicting
 
         :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
         """ # noqa
