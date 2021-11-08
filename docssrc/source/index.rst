@@ -189,47 +189,6 @@ To get updates on Lightwood and MindsDB’s latest announcements, releases, and 
 
 Join our mission of democratizing machine learning and allowing developers to become data scientists!
 
-
-Hacktoberfest 2021
-=======================
-
-We are very excited that Lightwood is participating in this year's Hacktoberfest 2021 event. This month-long event through October gives you the chance to contribute to the Open Source codebase of Lightwood and MindsDB!
-
-The Lightwood core team has prepared several issues of different types that are ideal for first-time contributors and will be posted throughout the month. It's entirely up to you what you choose to work on and if you have your own great idea, feel free to suggest it by reaching out to us via our Slack community or by posting an issue with the `discussion` tag.
-
-**Our Major Incentive and SWAG!** 
-
-Make contributions and enter into the draw for a `Deep Learning Laptop <https://lambdalabs.com/deep-learning/laptops/tensorbook>`_ **powered by the NVIDIA RTX 3080 Max-Q GPU**. Pre-installed with TensorFlow, PyTorch, CUDA, cuDNN and more.
-
-.. image:: _static/logos/laptop.jpeg
-    :align: center
-    :alt: Tensorbook by Lambda Labs
-    :width: 455
-    :height: 400
-
-Also, we’d love to send you a special MindsDB SWAG gift pack:
-
-.. image:: _static/logos/swag.png
-    :align: center
-    :alt: MindsDB Swag
-
-Please make sure to read the :ref:`contributions-guidelines <Contribute to Lightwood>` first!
-
-How to participate
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-1. Contribute by making pull requests to any of our open issues labeled with the `hacktoberfest` tag during October. All hacktoberfest issues will specify how many points a successfully merged PR is worth.
-2. Have a total score of at least 5 points in order to enter the big prize draw.
-3. Complete the form with links to all your completed PR’s so we know where to ship the gift pack to!
-
-Entries close at midnight (PST) Sunday, 31 October 2021 with the prize draw winner announced at an online event on Monday, 1st of November.
-
-
-Please check `MindsDB's hacktoberfest website <https://mindsdb.com/hacktoberfest>`_ for more details.
-
-.. note:: if you wish to contribute with something that is *not currently flagged* as a hacktoberfest issue, make an issue (or make a comment if an issue already exists), and let one of the core Lightwood team researchers approve it.
-
-
 Contributor Code of Conduct
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Please note that this project is released with a `Contributor Code of Conduct <https://github.com/mindsdb/lightwood/blob/stable/CODE_OF_CONDUCT.md>`_. By participating in this project, you agree to abide by its terms.
@@ -264,7 +223,7 @@ License
 Other Links
 =======================
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 8
 
    lightwood_philosophy
    tutorials
