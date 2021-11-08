@@ -46,7 +46,7 @@ class Regression(BaseMixer):
         Fits `LinearRegression` model on input feature data to provide predictions.
 
         :param train_data: The EncodedDs on which to fit the regression
-        :param dev_data: Data used for early stopping and hyperparameter determination
+        :param dev_data: This just gets concatenated to the ``train_data``
         """
         if self.target_dtype not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(f'Unspported {self.target_dtype} type for regression')
@@ -68,7 +68,7 @@ class Regression(BaseMixer):
         Fits the linear regression on some data, this refits the model entirely rather than updating it
 
         :param train_data: The EncodedDs on which to fit the regression
-        :param dev_data: Data used for early stopping and hyperparameter determination
+        :param dev_data: This just gets concatenated to the ``train_data``
         """
         self.fit(train_data, dev_data)
 
