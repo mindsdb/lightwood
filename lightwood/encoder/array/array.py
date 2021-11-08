@@ -6,6 +6,7 @@ from lightwood.encoder.base import BaseEncoder
 from lightwood.api import dtype
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 from lightwood.helpers.general import is_none
+from lightwood.api.types import seconds
 
 
 class ArrayEncoder(BaseEncoder):
@@ -22,7 +23,7 @@ class ArrayEncoder(BaseEncoder):
 
     is_trainable_encoder: bool = True
 
-    def __init__(self, stop_after: int, window: int = None, is_target: bool = False, original_type: dtype = None):
+    def __init__(self, stop_after: seconds, window: int = None, is_target: bool = False, original_type: dtype = None):
         super().__init__(is_target)
         self.stop_after = stop_after
         self.original_type = original_type

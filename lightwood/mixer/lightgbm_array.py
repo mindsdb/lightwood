@@ -8,18 +8,19 @@ from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.lightgbm import LightGBM
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
+from lightwood.api.types import seconds
 
 
 class LightGBMArray(BaseMixer):
     """LightGBM-based model, intended for usage in time series tasks."""
     models: List[LightGBM]
     n_ts_predictions: int
-    submodel_stop_after: float
+    submodel_stop_after: seconds
     target: str
     supports_proba: bool
 
     def __init__(
-            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: seconds, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
             n_ts_predictions: int, fit_on_dev: bool):
         super().__init__(stop_after)
