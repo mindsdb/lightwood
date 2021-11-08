@@ -12,9 +12,9 @@ from lightwood.api.dtype import dtype
 class NumericEncoder(BaseEncoder):
     """
     The numeric encoder takes numbers (float or integer) and converts it into tensors of the form:
-    ``[is_none(number), is_positive(number), natural_log(abs(number)), number/absolute_mean]``
+    ``[0 if the number is none, otherwise 1, 1 if the number is positive, otherwise 0, natural_log(abs(number)), number/absolute_mean]``
 
-    This representation is: ``[is_positive(number), natural_log(abs(number)), number/absolute_mean]]`` if encoding target values, since target values can't be none.
+    This representation is: ``[1 if the number is positive, otherwise 0, natural_log(abs(number)), number/absolute_mean]]`` if encoding target values, since target values can't be none.
 
     The ``absolute_mean`` is computed in the ``prepare`` method and is just the mean of the absolute values of all numbers feed to prepare (which are not none)
 
