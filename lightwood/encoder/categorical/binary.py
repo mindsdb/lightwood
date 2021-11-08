@@ -1,16 +1,3 @@
-"""
-Creates a 2-element vector representing categories :math:`A` and :math:`B` as such: 
-
-.. math::
-
-   A &= [1, 0] \\
-   B &= [0, 1]
-
-This is a specialized case of one-hot encoding (OHE); this is to explicitly enforce *no* possibility of an unknown class, as our default OHE does. When data is typed with Lightwood, this class is only deployed if the type is explicitly considered binary (i.e. the column has no missing values, otherwise it's considered via categorical one-hot or autoencoder).
-
-
-An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations. 
-"""
 
 import torch
 import numpy as np
@@ -24,6 +11,21 @@ class BinaryEncoder(BaseEncoder):
 
     def __init__(self, is_target: bool = False, target_class_distribution: Dict[str, float] = None):
         super().__init__(is_target)
+        """
+        Creates a 2-element vector representing categories :math:`A` and :math:`B` as such: 
+
+        .. math::
+
+           A &= [1, 0] \\
+           B &= [0, 1]
+
+        This is a specialized case of one-hot encoding (OHE); this is to explicitly enforce *no* possibility of an unknown class, as our default OHE does. When data is typed with Lightwood, this class is only deployed if the type is explicitly considered binary (i.e. the column has no missing values, otherwise it's considered via categorical one-hot or autoencoder).
+
+        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations. 
+
+        :param is_target: Whether encoder featurizes target column
+        :param target_class_distribution: Percentage of total population represented by each category (from [0, 1])
+        """
 
         self.map = {} # category name -> index
         self.rev_map = {} # index -> category name
