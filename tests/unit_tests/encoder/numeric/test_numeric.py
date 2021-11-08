@@ -52,7 +52,6 @@ class TestNumericEncoder(unittest.TestCase):
 
     def test_log_overflow_and_none(self):
         data = list(range(-2000, 2000, 66))
-        data.extend([None] * 200)
         encoder = NumericEncoder()
 
         encoder.is_target = True
