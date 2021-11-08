@@ -45,7 +45,7 @@ class Regression(BaseMixer):
         """
         Fits `LinearRegression` model on input feature data to provide predictions.
 
-        :param train_data: The EncodedDs on which to fit the regression
+        :param train_data: Regression if fit on this
         :param dev_data: This just gets concatenated to the ``train_data``
         """
         if self.target_dtype not in (dtype.float, dtype.integer, dtype.quantity):
@@ -67,7 +67,7 @@ class Regression(BaseMixer):
         """
         Fits the linear regression on some data, this refits the model entirely rather than updating it
 
-        :param train_data: The EncodedDs on which to fit the regression
+        :param train_data: Regression is fit on this
         :param dev_data: This just gets concatenated to the ``train_data``
         """
         self.fit(train_data, dev_data)
@@ -77,7 +77,7 @@ class Regression(BaseMixer):
         """
         Make predictions based on datasource with the same features as the ones used for fitting
 
-        :param ds: The EncodedDs for which to generate the predictions
+        :param ds: Predictions are generate from it
         :param arg: Argument for predicting
 
         :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
