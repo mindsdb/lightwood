@@ -36,7 +36,7 @@ class Neural(BaseMixer):
     def __init__(
             self, stop_after: int, target: str, dtype_dict: Dict[str, str],
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
-            search_hyperparameters: bool, n_epochs: Optional[int]):
+            search_hyperparameters: bool, n_epochs: Optional[int] = None):
         """
         The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output. 
         
