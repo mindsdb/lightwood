@@ -75,7 +75,7 @@ class Regression(BaseMixer):
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         """
-        Make predictions based on datasource similar to the one used to fit (sans the target column)
+        Make predictions based on datasource with the same features as the ones used for fitting
 
         :param ds: The EncodedDs for which to generate the predictions
         :param arg: Argument for predicting
