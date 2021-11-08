@@ -39,7 +39,7 @@ class Regression(BaseMixer):
         """
         Fits the linear regression on the data, making it ready to predit
 
-        :param train_data: The EncodedDs on which to train the network
+        :param train_data: The EncodedDs on which to fit the regression
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
         if self.target_dtype not in (dtype.float, dtype.integer, dtype.quantity):
@@ -59,9 +59,9 @@ class Regression(BaseMixer):
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
-        Fits the Neural mixer on some data, this refits the model entirely rather than updating it
+        Fits the linear regression on some data, this refits the model entirely rather than updating it
 
-        :param train_data: The EncodedDs on which to train the network
+        :param train_data: The EncodedDs on which to fit the regression
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
         self.fit(train_data, dev_data)
