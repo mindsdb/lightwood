@@ -3,9 +3,11 @@ import torch
 import numpy as np
 from scipy.special import softmax
 from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.constants import _UNCOMMON_WORD, _UNCOMMON_TOKEN
 
 from typing import Dict, List
 from pandas import Series
+
 
 class BinaryEncoder(BaseEncoder):
 
@@ -18,8 +20,10 @@ class BinaryEncoder(BaseEncoder):
 
            A &= [1, 0] \\
            B &= [0, 1]
+        
+        This encoder is a specialized case of one-hot encoding (OHE); unknown categories are explicitly handled as [0, 0]. 
 
-        This is a specialized case of one-hot encoding (OHE); this is to explicitly enforce *no* possibility of an unknown class, as our default OHE does. When data is typed with Lightwood, this class is only deployed if the type is explicitly considered binary (i.e. the column has no missing values, otherwise it's considered via categorical one-hot or autoencoder).
+        When data is typed with Lightwood, this class is only deployed if an input data type is explicitly recognized as binary (i.e. the column has only 2 unique values like True/False). If future data shows a new category (thus the data is no longer truly binary), this encoder will no longer be appropriate unless you are comfortable mapping ALL new classes as [0, 0]. 
 
         An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations. 
 
@@ -53,7 +57,7 @@ class BinaryEncoder(BaseEncoder):
         self.map = {cat: indx for indx, cat in enumerate(priming_data.unique())}
         self.rev_map = {indx: cat for cat, indx in self.map.items()}
 
-        # Enforce only binary details
+        # Enforce only binary; map must have exactly 2 classes.
         assert(len(self.map) == 2, 'Issue with dtype; data has > 2 classes.')
 
         # For target-only, report on relative weights of classes
@@ -87,7 +91,7 @@ class BinaryEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data, return_raw=False):
+    def decode(self, encoded_data: torch.Tensor, return_raw=False):
         """
         Given encoded data, return in form of original category labels.
         """
@@ -96,7 +100,10 @@ class BinaryEncoder(BaseEncoder):
         probs = []
 
         for vector in encoded_data_list:
-            ret.append(self.rev_map[np.argmax(vector)])
+            if sum(vector) < 1: # Vector of all 0s -> unknown category
+                ret.append(_UNCOMMON_WORD)
+            else:
+                ret.append(self.rev_map[np.argmax(vector)])
 
             if return_raw:
                 probs.append(softmax(vector).tolist())
