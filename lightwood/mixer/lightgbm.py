@@ -15,6 +15,7 @@ from lightwood.mixer.base import BaseMixer
 from lightwood.helpers.device import get_devices
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
+from lightwood.api.types import seconds
 
 
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
@@ -48,7 +49,7 @@ class LightGBM(BaseMixer):
     supports_proba: bool
 
     def __init__(
-            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: seconds, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
             fit_on_dev: bool, use_optuna: bool = True):
         super().__init__(stop_after)
