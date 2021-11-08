@@ -100,10 +100,10 @@ class NumericEncoder(BaseEncoder):
         :param encoded_values: The encoded values to decode into single numbers
         :param decode_log: Wether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
 
-        :returns: A number
+        :returns: The decoded number
         """ # noqa
         if not self.is_prepared:
-            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
+            raisfe Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if decode_log is None:
             decode_log = self.decode_log
