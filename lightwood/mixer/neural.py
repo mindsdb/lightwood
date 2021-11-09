@@ -1,6 +1,6 @@
 import time
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import torch
 import numpy as np
@@ -36,7 +36,7 @@ class Neural(BaseMixer):
     def __init__(
             self, stop_after: int, target: str, dtype_dict: Dict[str, str],
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
-            search_hyperparameters: bool):
+            search_hyperparameters: bool, n_epochs: Optional[int] = None):
         """
         The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output. 
         
@@ -48,6 +48,7 @@ class Neural(BaseMixer):
         :param net: The network type to use (`DeafultNet` or `ArNet`)
         :param fit_on_dev: If we should fit on the dev dataset
         :param search_hyperparameters: If the network should run a more through hyperparameter search (currently disabled)
+        :param n_epochs: amount of epochs that the network will be trained for. Supersedes all other early stopping criteria if specified.
         """ # noqa
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
@@ -55,6 +56,7 @@ class Neural(BaseMixer):
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
         self.epochs_to_best = 0
+        self.n_epochs = n_epochs
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
@@ -207,15 +209,22 @@ class Neural(BaseMixer):
                 best_model = deepcopy(self.model)
                 epochs_to_best = epoch
 
-            if len(running_errors) >= 5:
-                delta_mean = np.average([running_errors[-i - 1] - running_errors[-i] for i in range(1, 5)],
-                                        weights=[(1 / 2)**i for i in range(1, 5)])
-                if delta_mean <= 0:
+            # manually set epoch limit
+            if self.n_epochs is not None:
+                if epoch > self.n_epochs:
                     break
-            elif (time.time() - started) > stop_after:
-                break
-            elif running_errors[-1] < 0.0001 or train_error < 0.0001:
-                break
+
+            # automated early stopping
+            else:
+                if len(running_errors) >= 5:
+                    delta_mean = np.average([running_errors[-i - 1] - running_errors[-i] for i in range(1, 5)],
+                                            weights=[(1 / 2)**i for i in range(1, 5)])
+                    if delta_mean <= 0:
+                        break
+                elif (time.time() - started) > stop_after:
+                    break
+                elif running_errors[-1] < 0.0001 or train_error < 0.0001:
+                    break
 
         if np.isnan(best_dev_error):
             best_dev_error = pow(2, 32)
