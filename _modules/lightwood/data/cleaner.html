@@ -1,0 +1,536 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>lightwood.data.cleaner &mdash; lightwood 1.6.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.6.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">lightwood</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>lightwood.data.cleaner</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for lightwood.data.cleaner</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">dateutil.parser</span> <span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_dt</span>
+
+<span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers</span> <span class="kn">import</span> <span class="n">text</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.numeric</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span>
+
+
+<div class="viewcode-block" id="cleaner"><a class="viewcode-back" href="../../../data.html#data.cleaner">[docs]</a><span class="k">def</span> <span class="nf">cleaner</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">pct_invalid</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">identifiers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span>
+    <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">custom_cleaning_functions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The cleaner is a function which takes in the raw data, plus additional information about it&#39;s types and about the problem. Based on this it generates a &quot;clean&quot; representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``</span>
+
+<span class="sd">    :param data: The raw data</span>
+<span class="sd">    :param dtype_dict: Type information for each column</span>
+<span class="sd">    :param pct_invalid: How much of each column can be invalid</span>
+<span class="sd">    :param identifiers: A dict containing all identifier typed columns</span>
+<span class="sd">    :param target: The target columns</span>
+<span class="sd">    :param mode: Can be &quot;predict&quot; or &quot;train&quot;</span>
+<span class="sd">    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object</span>
+<span class="sd">    :param anomaly_detection: Are we detecting anomalies with this predictor?</span>
+
+<span class="sd">    :returns: The cleaned data</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_columns</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">identifiers</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">timeseries_settings</span><span class="p">,</span>
+                           <span class="n">anomaly_detection</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">_get_columns_to_clean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+
+        <span class="c1"># Get and apply a cleaning function for each data type</span>
+        <span class="c1"># If you want to customize the cleaner, it&#39;s likely you can to modify ``get_cleaning_func``</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_cleaning_func</span><span class="p">(</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">custom_cleaning_functions</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<span class="k">def</span> <span class="nf">_check_if_invalid</span><span class="p">(</span><span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pct_invalid</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks how many invalid data points there are. Invalid data points are flagged as &quot;Nones&quot; from the cleaning processs (see data/cleaner.py for default).</span>
+<span class="sd">    If there are too many invalid data points (specified by `pct_invalid`), then an error message will pop up. This is used as a safeguard for very messy data.</span>
+
+<span class="sd">    :param new_data: data to check for invalid values.</span>
+<span class="sd">    :param pct_invalid: maximum percentage of invalid values. If this threshold is surpassed, an exception is raised.</span>
+<span class="sd">    :param col_name: name of the column to analyze.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+    <span class="n">chk_invalid</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">100</span>
+        <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_data</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_data</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]))</span>
+        <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_data</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">chk_invalid</span> <span class="o">&gt;</span> <span class="n">pct_invalid</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Too many (</span><span class="si">{</span><span class="n">chk_invalid</span><span class="si">}</span><span class="s1">%) invalid values in column </span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s1">nam&#39;</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_cleaning_func</span><span class="p">(</span><span class="n">data_dtype</span><span class="p">:</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">custom_cleaning_functions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For the provided data type, provide the appropriate cleaning function. Below are the defaults, users can either override this function OR impose a custom block.</span>
+
+<span class="sd">    :param data_dtype: The data-type (inferred from a column) as prescribed from ``api.dtype``</span>
+
+<span class="sd">    :returns: The appropriate function that will pre-process (clean) data of specified dtype.</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+    <span class="k">if</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="n">custom_cleaning_functions</span><span class="p">:</span>
+        <span class="n">clean_func</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">custom_cleaning_functions</span><span class="p">[</span><span class="n">data_dtype</span><span class="p">])</span>
+
+    <span class="k">elif</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+        <span class="n">clean_func</span> <span class="o">=</span> <span class="n">_standardize_datetime</span>
+
+    <span class="k">elif</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span><span class="p">):</span>
+        <span class="n">clean_func</span> <span class="o">=</span> <span class="n">_clean_float</span>
+
+    <span class="k">elif</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+        <span class="n">clean_func</span> <span class="o">=</span> <span class="n">_clean_int</span>
+
+    <span class="k">elif</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+        <span class="n">clean_func</span> <span class="o">=</span> <span class="n">_standardize_array</span>
+
+    <span class="k">elif</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">):</span>
+        <span class="n">clean_func</span> <span class="o">=</span> <span class="n">_tags_to_tuples</span>
+
+    <span class="k">elif</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">):</span>
+        <span class="n">clean_func</span> <span class="o">=</span> <span class="n">_clean_quantity</span>
+
+    <span class="k">elif</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">audio</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">video</span>
+    <span class="p">):</span>
+        <span class="n">clean_func</span> <span class="o">=</span> <span class="n">_clean_text</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_dtype</span><span class="si">}</span><span class="s2"> is not supported. Check lightwood.api.dtype&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">clean_func</span>
+
+
+<span class="c1"># ------------------------- #</span>
+<span class="c1"># Temporal Cleaning</span>
+<span class="c1"># ------------------------- #</span>
+
+
+<span class="k">def</span> <span class="nf">_standardize_datetime</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses an expected date-time element. Intakes an element that can in theory be anything.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="n">parse_dt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">date</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
+
+
+<span class="c1"># ------------------------- #</span>
+<span class="c1"># Tags/Sequences</span>
+<span class="c1"># ------------------------- #</span>
+
+<span class="c1"># TODO Make it split on something other than commas</span>
+<span class="k">def</span> <span class="nf">_tags_to_tuples</span><span class="p">(</span><span class="n">tags_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts comma-separated values into a tuple to preserve a sequence/array.</span>
+
+<span class="sd">    Ex:</span>
+<span class="sd">    &gt;&gt; x = &#39;apples, oranges, bananas&#39;</span>
+<span class="sd">    &gt;&gt; _tags_to_tuples(x)</span>
+<span class="sd">    &gt;&gt; (&#39;apples&#39;, &#39;oranges&#39;, &#39;bananas&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tags_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)])</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_standardize_array</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given an array of numbers in the form ``[1, 2, 3, 4]``, converts into a numerical sequence.</span>
+
+<span class="sd">    :param element: An array-like element in a sequence</span>
+<span class="sd">    :returns: standardized array OR scalar number IF edge case</span>
+
+<span class="sd">    Ex of edge case:</span>
+<span class="sd">    &gt;&gt; element = [1]</span>
+<span class="sd">    &gt;&gt; _standardize_array(element)</span>
+<span class="sd">    &gt;&gt; 1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="c1"># Handles cases where arrays are numbers</span>
+        <span class="k">if</span> <span class="s2">&quot; &quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">_clean_float</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">element</span>
+
+
+<span class="c1"># ------------------------- #</span>
+<span class="c1"># Integers/Floats/Quantities</span>
+<span class="c1"># ------------------------- #</span>
+
+<span class="k">def</span> <span class="nf">_clean_float</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given an element, converts it into float numeric format. If element is NaN, or inf, then returns None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cleaned_float</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">clean_float</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_nan_numeric</span><span class="p">(</span><span class="n">cleaned_float</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">cleaned_float</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">_clean_int</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given an element, converts it into integer numeric format. If element is NaN, or inf, then returns None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">_clean_float</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">element</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">element</span>
+
+
+<span class="k">def</span> <span class="nf">_clean_quantity</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a quantity, clean and convert it into float numeric format. If element is NaN, or inf, then returns None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[^0-9.,]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_clean_float</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+
+<span class="c1"># ------------------------- #</span>
+<span class="c1"># Text</span>
+<span class="c1"># ------------------------- #</span>
+<span class="k">def</span> <span class="nf">_clean_text</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+
+<span class="c1"># ------------------------- #</span>
+<span class="c1"># Other helpers</span>
+<span class="c1"># ------------------------- #</span>
+<span class="k">def</span> <span class="nf">_rm_rows_w_empty_targets</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Drop any rows that have targets as unknown. Targets are necessary to train.</span>
+
+<span class="sd">    :param df: The input dataframe including the target value</span>
+<span class="sd">    :param target: the column name that is the output target variable</span>
+
+<span class="sd">    :returns: Data with any target smissing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Compare length before/after</span>
+    <span class="n">len_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="c1"># Use Pandas ```dropna``` to omit any rows with missing values for targets; these cannot be trained</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
+
+    <span class="c1"># Compare length with after</span>
+    <span class="n">len_after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">nr_removed</span> <span class="o">=</span> <span class="n">len_before</span> <span class="o">-</span> <span class="n">len_after</span>
+
+    <span class="k">if</span> <span class="n">nr_removed</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Removed </span><span class="si">{</span><span class="n">nr_removed</span><span class="si">}</span><span class="s2"> rows because target was missing. Training on these rows is not possible.&quot;</span>
+        <span class="p">)</span>  <span class="c1"># noqa</span>
+
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="k">def</span> <span class="nf">_remove_columns</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">identifiers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                    <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">dtype</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Drop columns we don&#39;t want to use in order to train or predict</span>
+
+<span class="sd">    :param data: The raw data</span>
+<span class="sd">    :param dtype_dict: Type information for each column</span>
+<span class="sd">    :param identifiers: A dict containing all identifier typed columns</span>
+<span class="sd">    :param target: The target columns</span>
+<span class="sd">    :param mode: Can be &quot;predict&quot; or &quot;train&quot;</span>
+<span class="sd">    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object</span>
+<span class="sd">    :param anomaly_detection: Are we detecting anomalies with this predictor?</span>
+
+<span class="sd">    :returns: A (new) dataframe without the dropped columns</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">to_drop</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">identifiers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">target</span><span class="p">],</span>
+               <span class="o">*</span><span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dtype_dict</span> <span class="ow">and</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">invalid</span><span class="p">]]</span>
+    <span class="n">exceptions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;__mdb_make_predictions&quot;</span><span class="p">]</span>
+    <span class="n">to_drop</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">to_drop</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">to_drop</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_rm_rows_w_empty_targets</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;predict&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">target</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">use_previous_target</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">anomaly_detection</span>
+        <span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
+
+    <span class="c1"># Drop extra columns</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dtype_dict</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_get_columns_to_clean</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">dtype</span><span class="p">],</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param data: The raw data</span>
+<span class="sd">    :param dtype_dict: Type information for each column</span>
+<span class="sd">    :param target: The target columns</span>
+<span class="sd">    :param mode: Can be &quot;predict&quot; or &quot;train&quot;</span>
+
+<span class="sd">    :returns: A list of columns that we want to clean</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+
+    <span class="n">cleanable_columns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">dtype_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;predict&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">target</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">cleanable_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cleanable_columns</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2017-2021, MindsDB.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

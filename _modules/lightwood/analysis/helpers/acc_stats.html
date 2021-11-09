@@ -1,0 +1,400 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>lightwood.analysis.helpers.acc_stats &mdash; lightwood 1.6.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+          
+
+          
+            <a href="../../../../index.html">
+          
+
+          
+            
+            <img src="../../../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.6.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">lightwood</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>lightwood.analysis.helpers.acc_stats</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for lightwood.analysis.helpers.acc_stats</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span>
+
+<span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">lightwood.analysis.base</span> <span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.general</span> <span class="kn">import</span> <span class="n">evaluate_accuracy</span>
+
+
+<div class="viewcode-block" id="AccStats"><a class="viewcode-back" href="../../../../analysis.html#analysis.AccStats">[docs]</a><span class="k">class</span> <span class="nc">AccStats</span><span class="p">(</span><span class="n">BaseAnalysisBlock</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Computes accuracy stats and a confusion matrix for the validation dataset &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deps</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ICP&#39;</span><span class="p">,)):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">deps</span><span class="o">=</span><span class="n">deps</span><span class="p">)</span>  <span class="c1"># @TODO: enforce that this actually prevents early execution somehow</span>
+
+<div class="viewcode-block" id="AccStats.analyze"><a class="viewcode-back" href="../../../../analysis.html#analysis.AccStats.analyze">[docs]</a>    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># @TODO: maybe pass ts_analysis to trigger group-wise MASE instead of R2 mean, though it wouldn&#39;t be 0-1 bounded</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;score_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluate_accuracy</span><span class="p">(</span><span class="n">ns</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">ns</span><span class="o">.</span><span class="n">normal_predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
+                                               <span class="n">ns</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">ns</span><span class="o">.</span><span class="n">accuracy_functions</span><span class="p">)</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;normal_accuracy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;score_dict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;result_df&#39;</span><span class="p">])</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;val_overall_acc&#39;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;acc_histogram&#39;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;cm&#39;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;acc_samples&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_accuracy_stats</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">info</span></div>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns</span><span class="p">:</span> <span class="n">SimpleNamespace</span><span class="p">,</span> <span class="n">conf</span><span class="o">=</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_stats</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">dtype_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ns</span><span class="o">.</span><span class="n">dtype_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buckets</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">stats_info</span><span class="o">.</span><span class="n">buckets</span> <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">stats_info</span><span class="o">.</span><span class="n">buckets</span> <span class="k">else</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal_predictions_bucketized</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">real_values_bucketized</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">column_indexes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_cols</span><span class="p">):</span>
+            <span class="n">column_indexes</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+
+        <span class="n">real_present_inputs_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">ns</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">present_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_cols</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_cols</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">])</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;Nan&#39;</span><span class="p">,</span> <span class="s1">&#39;NAN&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">):</span>
+                    <span class="n">present_inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">real_present_inputs_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">present_inputs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ns</span><span class="o">.</span><span class="n">normal_predictions</span><span class="p">)):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="n">real_value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
+            <span class="n">predicted_value</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">normal_predictions</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predicted_value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c1"># T+N time series, for now we compare the T+1 prediction only @TODO: generalize</span>
+                <span class="n">predicted_value</span> <span class="o">=</span> <span class="n">predicted_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">predicted_value</span> <span class="o">=</span> <span class="n">predicted_value</span> \
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_stats</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">]</span> \
+                <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">predicted_value</span><span class="p">)</span>
+
+            <span class="n">real_value</span> <span class="o">=</span> <span class="n">real_value</span> \
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_stats</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">]</span> \
+                <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">real_value</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buckets</span><span class="p">:</span>
+                <span class="n">bucket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
+                <span class="n">predicted_value_b</span> <span class="o">=</span> <span class="n">get_value_bucket</span><span class="p">(</span><span class="n">predicted_value</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_stats</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
+                <span class="n">real_value_b</span> <span class="o">=</span> <span class="n">get_value_bucket</span><span class="p">(</span><span class="n">real_value</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_stats</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">predicted_value_b</span> <span class="o">=</span> <span class="n">predicted_value</span>
+                <span class="n">real_value_b</span> <span class="o">=</span> <span class="n">real_value</span>
+
+            <span class="k">if</span> <span class="n">conf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_stats</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">]:</span>
+                <span class="n">predicted_range</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">n</span><span class="p">][[</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">predicted_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">predicted_value_b</span><span class="p">,</span> <span class="n">predicted_value_b</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">real_values_bucketized</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">real_value_b</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normal_predictions_bucketized</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">predicted_value_b</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">conf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_stats</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">real_value</span><span class="p">,</span> <span class="n">predicted_range</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_accuracy_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_classification</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_numerical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">bucket_accuracy</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">bucket_acc_counts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">bucket</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal_predictions_bucketized</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">bucket</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bucket_acc_counts</span><span class="p">:</span>
+                <span class="n">bucket_acc_counts</span><span class="p">[</span><span class="n">bucket</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">bucket_acc_counts</span><span class="p">[</span><span class="n">bucket</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># noqa</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bucket_acc_counts</span><span class="p">[</span><span class="n">bucket</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">bucket</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">real_values_bucketized</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">bucket</span> <span class="ow">in</span> <span class="n">bucket_acc_counts</span><span class="p">:</span>
+            <span class="n">bucket_accuracy</span><span class="p">[</span><span class="n">bucket</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">bucket_acc_counts</span><span class="p">[</span><span class="n">bucket</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">bucket_acc_counts</span><span class="p">[</span><span class="n">bucket</span><span class="p">])</span>
+
+        <span class="n">accuracy_count</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">counts</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">bucket_acc_counts</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">accuracy_count</span> <span class="o">+=</span> <span class="n">counts</span>
+
+        <span class="n">overall_accuracy</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">accuracy_count</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">accuracy_count</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">bucket</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buckets</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">bucket</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bucket_accuracy</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">bucket</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">real_values_bucketized</span><span class="p">:</span>
+                    <span class="c1"># If it was never predicted, but it did exist as a real value, then assume 0% confidence when it does get predicted # noqa</span>
+                    <span class="n">bucket_accuracy</span><span class="p">[</span><span class="n">bucket</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">bucket</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buckets</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">bucket</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bucket_accuracy</span><span class="p">:</span>
+                <span class="c1"># If it wasn&#39;t seen either in the real values or in the predicted values, assume average confidence (maybe should be 0 instead ?) # noqa</span>
+                <span class="n">bucket_accuracy</span><span class="p">[</span><span class="n">bucket</span><span class="p">]</span> <span class="o">=</span> <span class="n">overall_accuracy</span>
+
+        <span class="n">accuracy_histogram</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;buckets&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">bucket_accuracy</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+            <span class="s1">&#39;accuracies&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">bucket_accuracy</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+            <span class="s1">&#39;is_classification&#39;</span><span class="p">:</span> <span class="n">is_classification</span><span class="p">,</span>
+            <span class="s1">&#39;is_numerical&#39;</span><span class="p">:</span> <span class="n">is_numerical</span>
+        <span class="p">}</span>
+
+        <span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">real_values_bucketized</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">normal_predictions_bucketized</span><span class="p">]))</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">real_values_bucketized</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_predictions_bucketized</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;nan&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">]</span>
+
+        <span class="n">target_bucket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
+        <span class="n">bucket_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">target_bucket</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_bucket</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+
+        <span class="n">cm</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;matrix&#39;</span><span class="p">:</span> <span class="n">matrix</span><span class="p">,</span>
+            <span class="s1">&#39;predicted&#39;</span><span class="p">:</span> <span class="n">bucket_values</span><span class="p">,</span>
+            <span class="s1">&#39;real&#39;</span><span class="p">:</span> <span class="n">bucket_values</span>
+        <span class="p">}</span>
+
+        <span class="n">accuracy_samples</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">nr_samples</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span><span class="p">))</span>
+            <span class="n">sampled_numerical_samples_arr</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_samples_arr</span><span class="p">,</span> <span class="n">nr_samples</span><span class="p">)</span>
+            <span class="n">accuracy_samples</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sampled_numerical_samples_arr</span><span class="p">],</span>
+                <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sampled_numerical_samples_arr</span><span class="p">]</span>
+            <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">overall_accuracy</span><span class="p">,</span> <span class="n">accuracy_histogram</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">accuracy_samples</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_value_bucket</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">buckets</span><span class="p">,</span> <span class="n">target_dtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: The bucket in the `histogram` in which our `value` falls</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">buckets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">target_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">buckets</span><span class="p">:</span>
+            <span class="n">bucket</span> <span class="o">=</span> <span class="n">buckets</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bucket</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buckets</span><span class="p">)</span>  <span class="c1"># for null values</span>
+
+    <span class="k">elif</span> <span class="n">target_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">):</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">closest</span><span class="p">(</span><span class="n">buckets</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buckets</span><span class="p">)</span>  <span class="c1"># for null values</span>
+
+    <span class="k">return</span> <span class="n">bucket</span>
+
+
+<span class="k">def</span> <span class="nf">closest</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: The index of the member of `arr` which is closest to `value`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ele</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ele</span> <span class="o">&gt;</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2017-2021, MindsDB.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

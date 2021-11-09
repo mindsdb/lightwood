@@ -1,0 +1,522 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Data &mdash; lightwood 1.6.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Encode your data" href="api/encode.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.6.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data.ConcatedEncodedDs">ConcatedEncodedDs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.clear_cache">clear_cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.data_frame">data_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.get_column_original_data">get_column_original_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.get_encoded_column_data">get_encoded_column_data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data.EncodedDs">EncodedDs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.clear_cache">clear_cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_column_original_data">get_column_original_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_encoded_column_data">get_encoded_column_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_encoded_data">get_encoded_data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data.cleaner">cleaner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data.splitter">splitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data.timeseries_analyzer">timeseries_analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data.transform_timeseries">transform_timeseries</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">lightwood</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/data.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="data">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code><a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
+<p>The focus of these modules is on storing, transforming, cleaning, splitting, merging, getting and removing data.</p>
+<span class="target" id="module-data"></span><dl class="py class">
+<dt class="sig sig-object py" id="data.ConcatedEncodedDs">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">ConcatedEncodedDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_ds_arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<p><cite>ConcatedEncodedDs</cite> abstracts over multiple encoded datasources (<cite>EncodedDs</cite>) as if they were a single entity.</p>
+<p>Create a Lightwood datasource from a data frame and some encoders. This class inherits from <cite>torch.utils.data.Dataset</cite>.</p>
+<p>Note: normal behavior is to cache encoded representations to avoid duplicated computations. If you want an option to disable, this please open an issue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoders</strong> – list of Lightwood encoders used to encode the data per each column.</p></li>
+<li><p><strong>data_frame</strong> – original dataframe.</p></li>
+<li><p><strong>target</strong> – name of the target column to predict.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="data.ConcatedEncodedDs.clear_cache">
+<span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.clear_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>lightwood.data.encoded_ds.EncodedDs.clear_cache()</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="data.ConcatedEncodedDs.data_frame">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">data_frame</span></span><em class="property"><span class="pre">:</span> <span class="pre">pandas.core.frame.DataFrame</span></em><a class="headerlink" href="#data.ConcatedEncodedDs.data_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property that concatenates all underlying <cite>EncodedDs</cite>’s dataframes and returns them.</p>
+<p>Note: be careful to not modify a <cite>ConcatedEncodedDs</cite>, as you can see in the source, it will not have an effect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dataframe with all original data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.ConcatedEncodedDs.get_column_original_data">
+<span class="sig-name descname"><span class="pre">get_column_original_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.get_column_original_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.get_column_original_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>lightwood.data.encoded_ds.EncodedDs.get_column_original_data()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.ConcatedEncodedDs.get_encoded_column_data">
+<span class="sig-name descname"><span class="pre">get_encoded_column_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.get_encoded_column_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.get_encoded_column_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>lightwood.data.encoded_ds.EncodedDs.get_encoded_column_data()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="data.EncodedDs">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">EncodedDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<p>Create a Lightwood datasource from a data frame and some encoders. This class inherits from <cite>torch.utils.data.Dataset</cite>.</p>
+<p>Note: normal behavior is to cache encoded representations to avoid duplicated computations. If you want an option to disable, this please open an issue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoders</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="encoder.html#encoder.BaseEncoder" title="lightwood.encoder.base.BaseEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEncoder</span></code></a>]) – list of Lightwood encoders used to encode the data per each column.</p></li>
+<li><p><strong>data_frame</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – original dataframe.</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column to predict.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="data.EncodedDs.clear_cache">
+<span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.clear_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the <cite>EncodedDs</cite> cache.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.EncodedDs.get_column_original_data">
+<span class="sig-name descname"><span class="pre">get_column_original_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_column_original_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_column_original_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the original data for any given column of the <cite>EncodedDs</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the column.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A <cite>pd.Series</cite> with the original data stored in the <cite>column_name</cite> column.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.EncodedDs.get_encoded_column_data">
+<span class="sig-name descname"><span class="pre">get_encoded_column_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_encoded_column_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_encoded_column_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the encoded data for any given column of the <cite>EncodedDs</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the column.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A <cite>torch.Tensor</cite> with the encoded data of the <cite>column_name</cite> column.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.EncodedDs.get_encoded_data">
+<span class="sig-name descname"><span class="pre">get_encoded_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_encoded_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_encoded_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all encoded data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>include_target</strong> – whether to include the target column in the output or not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A <cite>torch.Tensor</cite> with the encoded dataframe.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.cleaner">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">cleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_invalid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifiers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_cleaning_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/cleaner.html#cleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.cleaner" title="Permalink to this definition">¶</a></dt>
+<dd><p>The cleaner is a function which takes in the raw data, plus additional information about it’s types and about the problem. Based on this it generates a “clean” representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Type information for each column</p></li>
+<li><p><strong>pct_invalid</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – How much of each column can be invalid</p></li>
+<li><p><strong>identifiers</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – A dict containing all identifier typed columns</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The target columns</p></li>
+<li><p><strong>mode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Can be “predict” or “train”</p></li>
+<li><p><strong>timeseries_settings</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code>) – Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object</p></li>
+<li><p><strong>anomaly_detection</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Are we detecting anomalies with this predictor?</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The cleaned data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.splitter">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">splitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/splitter.html#splitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.splitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits data into training, dev and testing datasets.</p>
+<p>The proportion of data for each split must be specified (JSON-AI sets defaults to 80/10/10). First, rows in the dataset are shuffled randomly. Then a simple split is done. If a target value is provided and is of data type categorical/binary, then the splits will be stratified to maintain the representative populations of each class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Input dataset to be split</p></li>
+<li><p><strong>tss</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code>) – time-series specific details for splitting</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Dictionary with the data type of all columns</p></li>
+<li><p><strong>seed</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Random state for pandas data-frame shuffling</p></li>
+<li><p><strong>pct_train</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – training fraction of data; must be less than 1</p></li>
+<li><p><strong>pct_dev</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – dev fraction of data; must be less than 1</p></li>
+<li><p><strong>pct_test</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – testing fraction of data; must be less than 1</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the target column; if specified, data will be stratified on this column</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary containing the keys train, test and dev with their respective data frames, as well as the “stratified_on” key indicating which columns the data was stratified on (None if it wasn’t stratified on anything)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.timeseries_analyzer">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">timeseries_analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/timeseries_analyzer.html#timeseries_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.timeseries_analyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module analyzes (pre-processed) time series data and stores a few useful insights used in the rest of Lightwood’s pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – dataframe with time series dataset.</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dictionary with inferred types for every column.</p></li>
+<li><p><strong>timeseries_settings</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code>) – A <cite>TimeseriesSettings</cite> object. For more details, check <cite>lightwood.types.TimeseriesSettings</cite>.</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>The following things are extracted from each time series inside the dataset:</dt><dd><ul class="simple">
+<li><p>group_combinations: all observed combinations of values for the set of <cite>group_by</cite> columns. The length of this list determines how many time series are in the data.</p></li>
+<li><p>deltas: inferred sampling interval</p></li>
+<li><p>ts_naive_residuals: Residuals obtained from the data by a naive forecaster that repeats the last-seen value.</p></li>
+<li><p>ts_naive_mae: Mean residual value obtained from the data by a naive forecaster that repeats the last-seen value.</p></li>
+<li><p>target_normalizers: objects that may normalize the data within any given time series for effective learning. See <cite>lightwood.encoder.time_series.helpers.common</cite> for available choices.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary with the aforementioned insights and the <cite>TimeseriesSettings</cite> object for future references.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.transform_timeseries">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">transform_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/timeseries_transform.html#transform_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.transform_timeseries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.</p>
+<dl class="simple">
+<dt>The main transformations performed by this block are:</dt><dd><ul class="simple">
+<li><p>Type casting (e.g. to numerical for <cite>order_by</cite> columns).</p></li>
+<li><p>Windowing functions for historical context based on <cite>TimeseriesSettings.window</cite> parameter.</p></li>
+<li><p>Explicitly add target columns according to the <cite>TimeseriesSettings.nr_predictions</cite> parameter.</p></li>
+<li><p>Flag all rows that are “predictable” based on all <cite>TimeseriesSettings</cite>.</p></li>
+<li><p>Plus, handle all logic for the streaming use case (where forecasts are only emitted for the last observed data point).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Dataframe with data to transform.</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Dictionary with the types of each column.</p></li>
+<li><p><strong>timeseries_settings</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code>) – A <cite>TimeseriesSettings</cite> object.</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the target column to forecast.</p></li>
+<li><p><strong>mode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Either “train” or “predict”, depending on what phase is calling this procedure.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dataframe with all the transformations applied.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="api/encode.html" class="btn btn-neutral float-left" title="Encode your data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2017-2021, MindsDB.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
