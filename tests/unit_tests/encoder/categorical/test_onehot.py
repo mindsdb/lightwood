@@ -1,4 +1,5 @@
 import unittest
+import torch
 from torch import Tensor
 import numpy as np
 from lightwood.encoder.categorical.onehot import (
@@ -39,11 +40,6 @@ class TestOnehot(unittest.TestCase):
 
         # Check the decoded patterns correct
         decoded_data = enc.decode(enc.encode(test_data))
-        self.assertTrue(decoded_data[2] == 'category 1')
-        self.assertTrue(decoded_data[3] == 'category 3')
-
-
-        # Check decoded can handle different unknown cats
         for i in range(len(ytest)):
             self.assertTrue(decoded_data[i] == ytest[i])
 
@@ -106,5 +102,4 @@ class TestOnehot(unittest.TestCase):
         _, probs, _ = enc.decode_probabilities(wt_vec)
         self.assertTrue(np.all([np.isclose(sum(i), 1) for i in probs]))
 
-if __name__ == "__main__":
-    unittest.main()
+
