@@ -69,9 +69,9 @@ class Img2VecEncoder(BaseEncoder):
 
     def encode(self, images: List[str]) -> torch.Tensor:
         """
-        Encode a list of images.
+        Creates encodings for a list of images; each image is referenced by a filepath or url.
 
-        :param images: list of images, each image is a path to a file or a url
+        :param images: list of images, each image is a path to a file or a url.
         :return: a torch.floatTensor
         """
         if not self.is_prepared:
