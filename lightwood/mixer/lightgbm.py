@@ -47,10 +47,31 @@ class LightGBM(BaseMixer):
     use_optuna: bool
     supports_proba: bool
 
+    """
+    Gradient boosting mixer with a LightGBM backbone.
+    
+    This mixer is a good all-rounder, due to the generally great performance of tree-based ML algorithms for supervised learning tasks with tabular data.
+    If you want more information regarding the techniques that set apart LightGBM from other gradient boosters, please refer to their technical paper: "LightGBM: A Highly Efficient Gradient Boosting Decision Tree" (2017).
+    
+    We can basically think of this mixer as a wrapper to the LightGBM interface. To do so, there are a few caveats the user may want to be aware about:
+        * If you seek GPU utilization, LightGBM must be compiled from source instead of being installed through `pip`.
+        * Integer, float, and quantity `dtype`s are treated as regression tasks with `L2` loss. All other supported `dtype`s is casted as a multiclass task with `multi_logloss` loss.
+        * It has an automatic optuna-based hyperparameter search. This procedure triggers when a single iteration of LightGBM is deemed fast enough (given the time budget).
+        * A partial fit can be performed with the `dev` data split as part of `fit`, if specified with the `fit_on_dev` argument.
+    """  # noqa
+
     def __init__(
             self, stop_after: int, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
             fit_on_dev: bool, use_optuna: bool = True):
+        """
+        :param stop_after: time budget in seconds.
+        :param target: name of the target column that the mixer will learn to predict.
+        :param dtype_dict: dictionary with dtypes of all columns in the data.
+        :param input_cols: list of column names.
+        :param fit_on_dev: whether to perform a `partial_fit()` at the end of `fit()` using the `dev` data split.
+        :param use_optuna: whether to activate the automated hyperparameter search (optuna-based). Note that setting this flag to `True` does not guarantee the search will run, rather, the speed criteria will be checked first (i.e., if a single iteration is too slow with respect to the time budget, the search will not take place). 
+        """  # noqa
         super().__init__(stop_after)
         self.model = None
         self.ordinal_encoder = None
@@ -77,7 +98,14 @@ class LightGBM(BaseMixer):
 
         self.max_bin = 255
 
-    def _to_dataset(self, data, output_dtype):
+    def _to_dataset(self, data: Dict[str, Dict], output_dtype: str):
+        """
+        Helper method to wrangle data into the format that the underlying model requires.
+
+        :param data: Includes train and dev data datasources.
+        :param output_dtype
+        :return: modified `data` object that conforms to LightGBM's expected format.
+        """
         for subset_name in data.keys():
             for input_col in self.input_cols:
                 if data[subset_name]['data'] is None:
@@ -110,6 +138,12 @@ class LightGBM(BaseMixer):
         return data
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        Fits the LightGBM model.
+
+        :param train_data: encoded features for training dataset
+        :param dev_data: encoded features for dev dataset
+        """
         log.info('Started fitting LGBM model')
         data = {
             'train': {'ds': train_data, 'data': None, 'label_data': {}},
@@ -193,6 +227,12 @@ class LightGBM(BaseMixer):
             self.partial_fit(dev_data, train_data)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        Updates the LightGBM model.
+
+        :param train_data: encoded features for (new) training dataset
+        :param dev_data: encoded features for (new) dev dataset
+        """
         pct_of_original = len(train_data) / self.fit_data_len
         iterations = max(1, int(self.num_iterations * pct_of_original) / 2)
 
@@ -217,6 +257,14 @@ class LightGBM(BaseMixer):
 
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
+        """
+        Call a trained LightGBM mixer to output predictions for the target column.
+
+        :param ds: input data with values for all non-target columns.
+        :param args: inference-time arguments (e.g. whether to output predicted labels or probabilities).
+
+        :return: dataframe with predictions.
+        """
         data = None
         for input_col in self.input_cols:
             if data is None:
