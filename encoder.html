@@ -303,19 +303,54 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.Img2VecEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">Img2VecEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="encoder.Img2VecEncoder.encode">
-<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder.encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Encode list of images</p>
+<dd><p>This encoder generates encoded representations for images using a pre-trained deep neural network.</p>
+<p>All input images are rescaled to a standard size of 224x224, and normalized using the mean and standard deviation of the ImageNet dataset (as it was used to train the underlying NN).</p>
+<p>Note that this encoder does not have a .decode() method yet. As such, models that predict images as output are not supported at this time.</p>
+<p>For more information about the neural network this encoder uses, refer to the <cite>lightwood.encoder.image.helpers.img_to_vec.Img2Vec</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>images</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list of images, each image is a path to a file or a url</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – time budget, in seconds.</p></li>
+<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether the encoder corresponds to the target column. This is not currently possible for Img2VecEncoder.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.Img2VecEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates encodings for a list of images; each image is referenced by a filepath or url.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>images</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list of images, each image is a path to a file or a url.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a torch.floatTensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.Img2VecEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instances an <cite>Img2Vec</cite> object and sets the expected size for encoded representations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.Img2VecEncoder.to">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_devices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder.to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the model to-and-from CPU and GPU.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>device</strong> – will move the model to this device.</p></li>
+<li><p><strong>available_devices</strong> – all available devices as reported by lightwood.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>same object but moved to the target device.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -434,7 +469,7 @@ If None, encoder will output the largest length encountered during training.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TimeSeriesEncoder.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-1994</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-1921</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

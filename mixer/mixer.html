@@ -274,7 +274,14 @@
 <dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column that the mixer will learn to predict.</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dictionary with dtypes of all columns in the data.</p></li>
+<li><p><strong>input_cols</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list of column names.</p></li>
+<li><p><strong>fit_on_dev</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to perform a <cite>partial_fit()</cite> at the end of <cite>fit()</cite> using the <cite>dev</cite> data split.</p></li>
+<li><p><strong>use_optuna</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to activate the automated hyperparameter search (optuna-based). Note that setting this flag to <cite>True</cite> does not guarantee the search will run, rather, the speed criteria will be checked first (i.e., if a single iteration is too slow with respect to the time budget, the search will not take place).</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -290,12 +297,12 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.LightGBM.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/lightgbm.html#LightGBM.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.LightGBM.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fits/trains a mixer with training data.</p>
+<dd><p>Fits the LightGBM model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
-<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for training dataset</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for dev dataset</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -332,12 +339,12 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.LightGBM.partial_fit">
 <span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/lightgbm.html#LightGBM.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.LightGBM.partial_fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
+<dd><p>Updates the LightGBM model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
-<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for (new) training dataset</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for (new) dev dataset</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -349,7 +356,19 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mixer.LightGBM.supports_proba">
 <span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.LightGBM.supports_proba" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gradient boosting mixer with a LightGBM backbone.</p>
+<p>This mixer is a good all-rounder, due to the generally great performance of tree-based ML algorithms for supervised learning tasks with tabular data.
+If you want more information regarding the techniques that set apart LightGBM from other gradient boosters, please refer to their technical paper: “LightGBM: A Highly Efficient Gradient Boosting Decision Tree” (2017).</p>
+<dl class="simple">
+<dt>We can basically think of this mixer as a wrapper to the LightGBM interface. To do so, there are a few caveats the user may want to be aware about:</dt><dd><ul class="simple">
+<li><p>If you seek GPU utilization, LightGBM must be compiled from source instead of being installed through <cite>pip</cite>.</p></li>
+<li><p>Integer, float, and quantity <cite>dtype`s are treated as regression tasks with `L2</cite> loss. All other supported <cite>dtype`s is casted as a multiclass task with `multi_logloss</cite> loss.</p></li>
+<li><p>It has an automatic optuna-based hyperparameter search. This procedure triggers when a single iteration of LightGBM is deemed fast enough (given the time budget).</p></li>
+<li><p>A partial fit can be performed with the <cite>dev</cite> data split as part of <cite>fit</cite>, if specified with the <cite>fit_on_dev</cite> argument.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mixer.LightGBM.use_optuna">
