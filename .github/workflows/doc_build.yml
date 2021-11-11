@@ -3,7 +3,7 @@ name: Documentation Build Lightwood
 on:
   workflow_run:
     workflows: ["Integration and Unit Tests Lightwood"]
-    branches: [staging]
+    branches: [staging, jupyter_actions]
     types: 
       - completed
 jobs:
