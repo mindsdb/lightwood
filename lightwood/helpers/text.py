@@ -13,6 +13,7 @@ import string
 import json
 import re
 import hashlib
+from typing import Iterable
 import numpy as np
 import scipy.stats as st
 import langdetect
@@ -208,7 +209,7 @@ def get_identifier_description_mp(arg_tup):
     return get_identifier_description(data, column_name, data_dtype)
 
 
-def get_identifier_description(data, column_name, data_dtype):
+def get_identifier_description(data: Iterable, column_name: str, data_dtype: dtype):
     data = list(data)
     nr_unique = len(set(data))
 
