@@ -49,7 +49,10 @@ jobs:
         python -m flake8 .
     - name: Test with unittest
       run: |
+        # Run all the "standard" tests
         python -m unittest discover tests
+        # Run all the tutorials (Also serves to generate realted html, so this needs to run before docs deploy)
+        find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;
 
   deploy:
     runs-on: ubuntu-latest
