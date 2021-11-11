@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+
 from lightwood.encoder import BaseEncoder
 from lightwood.encoder.numeric import TsNumericEncoder
 
@@ -29,11 +30,14 @@ class TsArrayNumericEncoder(BaseEncoder):
 
     def encode(self, data, dependency_data={}):
         """
-        :param dependency_data: dict with grouped_by column info, to retrieve the correct normalizer for each datum
-        :return: tensor with shape (batch, NxK) where N: self.data_window and K: sub-encoder # of output features
+        :param data: list of numerical values to encode. Its length is determined by the tss.window parameter, and all data points belong to the same time series.
+        :param dependency_data: dict with values of each group_by column for the time series, used to retrieve the correct normalizer.
+        :return: tensor with shape (1, NxK) where N: self.data_window and K: sub-encoder # of output features
         """  # noqa
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
+        if self.sub_encoder.normalizers is None and self.normalizers is not None:
+            self.sub_encoder.normalizers = self.normalizers
         if not dependency_data:
             dependency_data = {'__default': [None] * len(data)}
 
