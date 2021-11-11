@@ -8,21 +8,40 @@ from lightwood.helpers.log import log
 
 
 class MFCCEncoder(BaseEncoder):
-    """
-    Audio encoder. Uses `librosa` to compute the Mel-frequency spectral coefficients (MFCCs) of the audio file. They are a common feature used in speech and audio processing. The features are a 2D array, flattened into a 1D one.
-    """  # noqa
     is_trainable_encoder: bool = False
 
     def __init__(self, is_target: bool = False):
+        """
+        Audio encoder.
+    
+        Uses `librosa` to compute the Mel-frequency spectral coefficients (MFCCs) of the audio file. They are a common feature used in speech and audio processing. Example: https://centaur.reading.ac.uk/88046/3/ESR_for_home_AI.pdf
+    
+        The output feature for any given audio file is a 2D array, flattened into a 1D one to comply with the expected format in lightwood mixers.
+    
+        Note that this encoder does not have a .decode() method. As such, models that predict audio as output are not supported at this time.
+    
+        :param is_target: whether this encoder's column is the target. Should be false as encoder is not bi-directional. 
+        """  # noqa
+        assert not is_target
         super().__init__(is_target)
 
     def prepare(self, priming_data: pd.Series):
+        """
+        The audio encoder undergoes rule-based processing. Thus, the prepare statement only returns the output dimension size.
+
+        :param priming_data: training data
+        """  # noqa
         self.is_prepared = True
         priming_data = list(priming_data)
         ele = self.encode([str(priming_data[0])])[0]
         self.output_size = len(ele)
 
     def encode(self, column_data):
+        """
+        Encode a list of audio files.
+
+        :param column_data: list of strings that point to paths or URLs of the audio files that will be encoded.
+        """
         encoded_audio_arr = []
         for path in column_data:
             try:

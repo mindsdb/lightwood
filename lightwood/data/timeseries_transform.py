@@ -162,7 +162,7 @@ def transform_timeseries(
         df_gb_list = list(combined_df.groupby(tss.group_by))
         df_gb_map = {}
         for gb, df in df_gb_list:
-            df_gb_map['_' + '_'.join(gb)] = df
+            df_gb_map['_' + '_'.join(str(gb))] = df
 
     timeseries_row_mapping = {}
     idx = 0
