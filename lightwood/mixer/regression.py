@@ -12,6 +12,8 @@ from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 
 
 class Regression(BaseMixer):
+    '''
+    '''
     model: LinearRegression
     label_map: dict
     supports_proba: bool
