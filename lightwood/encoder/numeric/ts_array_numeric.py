@@ -42,6 +42,14 @@ class TsArrayNumericEncoder(BaseEncoder):
             dependency_data = {'__default': [None] * len(data)}
 
         ret = []
+        for series in data:
+            ret.append(self.encode_one(series, dependency_data=dependency_data))
+
+        return torch.vstack(ret)
+
+    def encode_one(self, data, dependency_data={}):
+        ret = []
+
         for data_point in data:
             ret.append(self.sub_encoder.encode([data_point], dependency_data=dependency_data))
 
@@ -62,6 +70,16 @@ class TsArrayNumericEncoder(BaseEncoder):
                                                 self.sub_encoder.output_size)
 
         ret = []
-        for encoded_timestep in torch.split(encoded_values, 1, dim=1):
+        for tensor in torch.split(encoded_values, 1, dim=0):
+            ret.append(self.decode_one(tensor, dependency_data=dependency_data))
+
+        if encoded_values.shape[0] == 1:
+            return ret[0]  # for a single value, we omit wrapping inside a list (TBD in #744)
+        else:
+            return ret
+
+    def decode_one(self, encoded_value, dependency_data={}):
+        ret = []
+        for encoded_timestep in torch.split(encoded_value, 1, dim=1):
             ret.extend(self.sub_encoder.decode(encoded_timestep.squeeze(1), dependency_data=dependency_data))
         return ret
