@@ -73,10 +73,7 @@ class TsArrayNumericEncoder(BaseEncoder):
         for tensor in torch.split(encoded_values, 1, dim=0):
             ret.append(self.decode_one(tensor, dependency_data=dependency_data))
 
-        if encoded_values.shape[0] == 1:
-            return ret[0]  # for a single value, we omit wrapping inside a list (TBD in #744)
-        else:
-            return ret
+        return ret
 
     def decode_one(self, encoded_value, dependency_data={}):
         ret = []
