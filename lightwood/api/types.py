@@ -326,7 +326,7 @@ class ProblemDefinition:
     unbias_target: bool
     seconds_per_mixer: Union[int, None]
     seconds_per_encoder: Union[int, None]
-    time_aim: Union[seconds, None]
+    time_aim: Union[float, None]
     target_weights: Union[List[float], None]
     positive_domain: bool
     timeseries_settings: TimeseriesSettings

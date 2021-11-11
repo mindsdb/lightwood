@@ -2,6 +2,7 @@ import math
 import torch
 import numpy as np
 from lightwood.encoder.numeric import NumericEncoder
+from lightwood.helpers.general import is_none
 from lightwood.helpers.log import log
 
 
@@ -48,16 +49,18 @@ class TsNumericEncoder(NumericEncoder):
                 else:
                     mean = self._abs_mean
 
-                if real is not None:
+                if not is_none(real):
                     vector[0] = 1 if real < 0 and not self.positive_domain else 0
                     vector[1] = real / mean if mean != 0 else real
                 else:
-                    raise Exception(f'Can\'t encode target value: {real}')
+                    pass
+                    # This should raise an exception *once* we fix the TsEncoder such that this doesn't get feed `nan`
+                    # raise Exception(f'Can\'t encode target value: {real}')
 
             else:
                 vector = [0] * 3
                 try:
-                    if real is not None:
+                    if not is_none(real):
                         vector[0] = 1
                         vector[1] = 1 if real < 0 and not self.positive_domain else 0
                         vector[2] = real / self._abs_mean
