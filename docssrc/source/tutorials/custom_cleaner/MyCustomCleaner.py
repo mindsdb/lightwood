@@ -1,26 +1,16 @@
-import re
-from copy import deepcopy
-
 import numpy as np
 import pandas as pd
-
-# For time-series
-import datetime
-from dateutil.parser import parse as parse_dt
 
 from lightwood.api.dtype import dtype
 from lightwood.helpers import text
 from lightwood.helpers.log import log
 from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.numeric import can_be_nan_numeric
 
-# Import NLTK for stopwords
-import nltk
 from nltk.corpus import stopwords
 
 stop_words = set(stopwords.words("english"))
 
-from typing import Dict, List, Optional, Tuple, Callable, Union
+from typing import Dict
 
 # Borrow functions from Lightwood's cleaner
 from lightwood.data.cleaner import (
