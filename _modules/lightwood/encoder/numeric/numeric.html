@@ -167,16 +167,34 @@
             
   <h1>Source code for lightwood.encoder.numeric.numeric</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">torch.types</span> <span class="kn">import</span> <span class="n">Number</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.general</span> <span class="kn">import</span> <span class="n">is_none</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 
 
 <div class="viewcode-block" id="NumericEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.NumericEncoder">[docs]</a><span class="k">class</span> <span class="nc">NumericEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The numeric encoder takes numbers (float or integer) and converts it into tensors of the form:</span>
+<span class="sd">    ``[0 if the number is none, otherwise 1, 1 if the number is positive, otherwise 0, natural_log(abs(number)), number/absolute_mean]``</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="sd">    This representation is: ``[1 if the number is positive, otherwise 0, natural_log(abs(number)), number/absolute_mean]]`` if encoding target values, since target values can&#39;t be none.</span>
+
+<span class="sd">    The ``absolute_mean`` is computed in the ``prepare`` method and is just the mean of the absolute values of all numbers feed to prepare (which are not none)</span>
+
+<span class="sd">    ``none`` stands for any number that is an actual python ``None`` value or any sort of non-numeric value (a string, nan, inf)</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param data_type: The data type of the number (integer, float, quantity)</span>
+<span class="sd">        :param is_target: Indicates whether the encoder refers to a target column or feature column (True==target)</span>
+<span class="sd">        :param positive_domain: Forces the encoder to always output positive values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">data_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_abs_mean</span> <span class="o">=</span> <span class="kc">None</span>
@@ -184,31 +202,32 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_log</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span> <span class="k">else</span> <span class="mi">3</span>
 
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
+<div class="viewcode-block" id="NumericEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.NumericEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;NumericalEncoder&quot; uses a rule-based form to prepare results on training (priming) data. The averages etc. are taken from this distribution.</span>
+
+<span class="sd">        :param priming_data: an iterable data structure containing numbers numbers which will be used to compute the values used for normalizing the encoded representations</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
 
         <span class="n">value_type</span> <span class="o">=</span> <span class="s1">&#39;int&#39;</span>
         <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">priming_data</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">number</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
-                <span class="n">err</span> <span class="o">=</span> <span class="s1">&#39;Lightwood does not support working with NaN values !&#39;</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-                <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">number</span><span class="p">)</span> <span class="o">!=</span> <span class="n">number</span><span class="p">:</span>
-                <span class="n">value_type</span> <span class="o">=</span> <span class="s1">&#39;float&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_none</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">number</span><span class="p">)</span> <span class="o">!=</span> <span class="n">number</span><span class="p">:</span>
+                    <span class="n">value_type</span> <span class="o">=</span> <span class="s1">&#39;float&#39;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">value_type</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
-        <span class="n">non_null_priming_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">priming_data</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_none</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
+        <span class="n">non_null_priming_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">priming_data</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_none</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_abs_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">non_null_priming_data</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="NumericEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.NumericEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param data: An iterable data structure containing the numbers to be encoded</span>
+
+<span class="sd">        :returns: A torch tensor with the representations of each number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span><span class="p">)</span>
 
@@ -217,18 +236,13 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">real</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">real</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">real</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">real</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">real</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">real</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
+                <span class="c1"># Will crash if ``real`` is not a float, this is fine, targets should always have a value</span>
                 <span class="n">vector</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
-                <span class="k">if</span> <span class="n">real</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abs_mean</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">real</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">positive_domain</span> <span class="k">else</span> <span class="mi">0</span>
-                    <span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">real</span><span class="p">))</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">real</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">20</span>
-                    <span class="n">vector</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">real</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abs_mean</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Can</span><span class="se">\&#39;</span><span class="s1">t encode target value: </span><span class="si">{</span><span class="n">real</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">real</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">positive_domain</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">real</span><span class="p">))</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">real</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">20</span>
+                <span class="n">vector</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">real</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abs_mean</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">vector</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
@@ -246,9 +260,15 @@
 
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values</span><span class="p">,</span> <span class="n">decode_log</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<div class="viewcode-block" id="NumericEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.NumericEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">decode_log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param encoded_values: The encoded values to decode into single numbers</span>
+<span class="sd">        :param decode_log: Whether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part</span>
+
+<span class="sd">        :returns: The decoded number</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span><span class="p">)</span>
 
@@ -296,7 +316,7 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">real_value</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
                 <span class="n">real_value</span> <span class="o">=</span> <span class="n">real_value</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">real_value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ret</span></div>
+        <span class="k">return</span> <span class="n">ret</span></div></div>
 </pre></div>
 
            </div>

@@ -365,7 +365,64 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.NumericEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">NumericEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/numeric.html#NumericEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.NumericEncoder" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The numeric encoder takes numbers (float or integer) and converts it into tensors of the form:
+<code class="docutils literal notranslate"><span class="pre">[0</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">number</span> <span class="pre">is</span> <span class="pre">none,</span> <span class="pre">otherwise</span> <span class="pre">1,</span> <span class="pre">1</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">number</span> <span class="pre">is</span> <span class="pre">positive,</span> <span class="pre">otherwise</span> <span class="pre">0,</span> <span class="pre">natural_log(abs(number)),</span> <span class="pre">number/absolute_mean]</span></code></p>
+<p>This representation is: <code class="docutils literal notranslate"><span class="pre">[1</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">number</span> <span class="pre">is</span> <span class="pre">positive,</span> <span class="pre">otherwise</span> <span class="pre">0,</span> <span class="pre">natural_log(abs(number)),</span> <span class="pre">number/absolute_mean]]</span></code> if encoding target values, since target values can’t be none.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">absolute_mean</span></code> is computed in the <code class="docutils literal notranslate"><span class="pre">prepare</span></code> method and is just the mean of the absolute values of all numbers feed to prepare (which are not none)</p>
+<p><code class="docutils literal notranslate"><span class="pre">none</span></code> stands for any number that is an actual python <code class="docutils literal notranslate"><span class="pre">None</span></code> value or any sort of non-numeric value (a string, nan, inf)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]) – The data type of the number (integer, float, quantity)</p></li>
+<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Indicates whether the encoder refers to a target column or feature column (True==target)</p></li>
+<li><p><strong>positive_domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Forces the encoder to always output positive values</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.NumericEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decode_log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/numeric.html#NumericEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.NumericEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoded_values</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]) – The encoded values to decode into single numbers</p></li>
+<li><p><strong>decode_log</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – Whether to decode the <code class="docutils literal notranslate"><span class="pre">log</span></code> or <code class="docutils literal notranslate"><span class="pre">linear</span></code> part of the representation, since the encoded vector contains both a log and a linear part</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The decoded number</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.NumericEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/numeric.html#NumericEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.NumericEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>) – An iterable data structure containing the numbers to be encoded</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A torch tensor with the representations of each number</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.NumericEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/numeric.html#NumericEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.NumericEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>“NumericalEncoder” uses a rule-based form to prepare results on training (priming) data. The averages etc. are taken from this distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>) – an iterable data structure containing numbers numbers which will be used to compute the values used for normalizing the encoded representations</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.OneHotEncoder">
@@ -469,7 +526,7 @@ If None, encoder will output the largest length encountered during training.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TimeSeriesEncoder.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-1921</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-2005</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -514,6 +571,31 @@ If None, encoder will output the largest length encountered during training.
 <dt class="sig sig-object py" id="encoder.TsNumericEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">TsNumericEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouped_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_numeric.html#TsNumericEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsNumericEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Variant of vanilla numerical encoder, supports dynamic mean re-scaling</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_type</strong> – The data type of the number (integer, float, quantity)</p></li>
+<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Indicates whether the encoder refers to a target column or feature column (True==target)</p></li>
+<li><p><strong>positive_domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Forces the encoder to always output positive values</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.TsNumericEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decode_log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_numeric.html#TsNumericEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsNumericEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoded_values</strong> – The encoded values to decode into single numbers</p></li>
+<li><p><strong>decode_log</strong> – Whether to decode the <code class="docutils literal notranslate"><span class="pre">log</span></code> or <code class="docutils literal notranslate"><span class="pre">linear</span></code> part of the representation, since the encoded vector contains both a log and a linear part</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decoded number</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TsNumericEncoder.encode">
 <span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_numeric.html#TsNumericEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsNumericEncoder.encode" title="Permalink to this definition">¶</a></dt>
