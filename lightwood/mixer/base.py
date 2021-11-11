@@ -26,7 +26,7 @@ class BaseMixer:
     fit_data_len: int  # @TODO (Patricio): should this really be in `BaseMixer`?
     supports_proba: bool
 
-    def __init__(self, stop_after: int):
+    def __init__(self, stop_after: float):
         """
         :param stop_after: Time budget to train this mixer.
         """

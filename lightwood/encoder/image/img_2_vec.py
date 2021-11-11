@@ -21,7 +21,7 @@ class Img2VecEncoder(BaseEncoder):
 
     is_trainable_encoder: bool = True
 
-    def __init__(self, stop_after: int = 3600, is_target: bool = False):
+    def __init__(self, stop_after: float = 3600, is_target: bool = False):
         """
         :param stop_after: time budget, in seconds. 
         :param is_target: whether the encoder corresponds to the target column. This is not currently possible for Img2VecEncoder.
