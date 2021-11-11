@@ -19,7 +19,6 @@ from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerica
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 from lightwood.helpers.general import get_group_matches
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, get_chunk, len_to_mask
-from lightwood.api.types import seconds
 
 
 class TimeSeriesEncoder(BaseEncoder):
@@ -31,7 +30,7 @@ class TimeSeriesEncoder(BaseEncoder):
     is_timeseries_encoder: bool = True
     is_trainable_encoder: bool = True
 
-    def __init__(self, stop_after: seconds, is_target=False, original_type: str = None, target: str = None,
+    def __init__(self, stop_after: float, is_target=False, original_type: str = None, target: str = None,
                  grouped_by: List[str] = [], encoder_type='rnn'):
         super().__init__(is_target)
         self.device, _ = get_devices()

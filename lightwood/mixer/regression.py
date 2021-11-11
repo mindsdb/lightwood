@@ -9,7 +9,6 @@ from lightwood.mixer import BaseMixer
 from lightwood.encoder.base import BaseEncoder
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
-from lightwood.api.types import seconds
 
 
 class Regression(BaseMixer):
@@ -27,9 +26,9 @@ class Regression(BaseMixer):
     label_map: dict
     supports_proba: bool
 
-    def __init__(self, stop_after: seconds, target_encoder: BaseEncoder, dtype_dict: dict, target: str):
+    def __init__(self, stop_after: float, target_encoder: BaseEncoder, dtype_dict: dict, target: str):
         """
-        :param stop_after: Maximum amount of time it should train for, currently ignored
+        :param stop_after: Maximum amount of seconds it should fit for, currently ignored
         :param target_encoder: The encoder which will be used to decode the target
         :param dtype_dict: A map of feature names and their data types
         :param target: Name of the target column

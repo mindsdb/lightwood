@@ -6,13 +6,12 @@ from PIL import Image
 import pandas as pd
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
 from lightwood.encoder.base import BaseEncoder
-from lightwood.api.types import seconds
 
 
 class Img2VecEncoder(BaseEncoder):
     is_trainable_encoder: bool = True
 
-    def __init__(self, stop_after: seconds = 3600, is_target: bool = False):
+    def __init__(self, stop_after: float = 3600, is_target: bool = False):
         super().__init__(is_target)
         # # I think we should make this an enum, something like: speed, balance, accuracy
         # self.aim = aim

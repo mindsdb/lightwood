@@ -72,7 +72,6 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 from lightwood.helpers.general import is_none
-from lightwood.api.types import seconds
 
 
 class PretrainedLangEncoder(BaseEncoder):
@@ -96,7 +95,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
     def __init__(
         self,
-        stop_after: seconds,
+        stop_after: float,
         is_target=False,
         model_name="distilbert",
         custom_tokenizer=None,
