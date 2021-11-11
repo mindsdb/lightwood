@@ -23,7 +23,6 @@ from lightwood.mixer.helpers.ar_net import ArNet
 from lightwood.mixer.helpers.default_net import DefaultNet
 from lightwood.api.types import TimeseriesSettings, PredictionArguments
 from lightwood.mixer.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
-from lightwood.api.types import seconds
 
 
 class Neural(BaseMixer):
@@ -35,7 +34,7 @@ class Neural(BaseMixer):
     supports_proba: bool
 
     def __init__(
-            self, stop_after: seconds, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
             search_hyperparameters: bool):
         """

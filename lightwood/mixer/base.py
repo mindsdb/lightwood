@@ -2,7 +2,6 @@ import pandas as pd
 
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.api.types import PredictionArguments
-from lightwood.api.types import seconds
 
 
 class BaseMixer:
@@ -27,7 +26,7 @@ class BaseMixer:
     fit_data_len: int  # @TODO (Patricio): should this really be in `BaseMixer`?
     supports_proba: bool
 
-    def __init__(self, stop_after: seconds):
+    def __init__(self, stop_after: float):
         """
         :param stop_after: Time budget to train this mixer.
         """

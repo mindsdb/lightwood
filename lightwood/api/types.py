@@ -15,9 +15,6 @@ from dataclasses_json.core import _asdict, Json
 import json
 
 
-seconds = float
-
-
 # See: https://www.python.org/dev/peps/pep-0589/ for how this works
 # Not very intuitive but very powerful abstraction, might be useful in other places (@TODO)
 class Module(TypedDict):

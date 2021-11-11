@@ -9,7 +9,6 @@ from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
 from lightwood.helpers.general import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
-from lightwood.api.types import seconds
 
 
 class SkTime(BaseMixer):
@@ -19,7 +18,7 @@ class SkTime(BaseMixer):
     supports_proba: bool
 
     def __init__(
-            self, stop_after: seconds, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             n_ts_predictions: int, ts_analysis: Dict):
         super().__init__(stop_after)
         self.target = target
