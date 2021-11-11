@@ -14,12 +14,13 @@
     "features": {
         "excerpt": {
             "encoder": {
-                "module": "Rich_Text.PretrainedLangEncoder",
+                "module": "PretrainedLangEncoder",
                 "args": {
                     "output_type": "False",
                     "stop_after": "$problem_definition.seconds_per_encoder"
                 }
-            }
+            },
+            "data_dtype": "rich_text"
         }
     },
     "outputs": {
