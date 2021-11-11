@@ -17,6 +17,18 @@ import string
 import gc
 import time
 from lightwood.helpers.log import log
+from shutil import copyfile
+
+
+def load_custom_module(file_path: str):
+    modules_dir = os.path.join(os.path.expanduser('~/lightwood_modules'))
+    custom_module_path = os.path.join(modules_dir, os.path.split(file_path)[-1])
+    if not os.path.exists(modules_dir):
+        os.mkdir(modules_dir)
+    if os.path.exists(custom_module_path):
+        os.remove(custom_module_path)
+
+    copyfile(file_path, custom_module_path)
 
 
 def predictor_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> PredictorInterface:

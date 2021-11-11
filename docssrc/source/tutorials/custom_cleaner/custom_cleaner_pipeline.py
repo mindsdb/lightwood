@@ -24,11 +24,9 @@ import sys
 for import_dir in [os.path.expanduser("~/lightwood_modules"), "/etc/lightwood_modules"]:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
         for file_name in list(os.walk(import_dir))[0][2]:
-            print(file_name)
             if file_name[-3:] != ".py":
                 continue
             mod_name = file_name[:-3]
-            print(mod_name)
             loader = importlib.machinery.SourceFileLoader(
                 mod_name, os.path.join(import_dir, file_name)
             )
@@ -79,7 +77,7 @@ class Predictor(PredictorInterface):
         )
         self.accuracy_functions = ["r2_score"]
         self.identifiers = {"id": "Hash-like identifier"}
-        self.dtype_dict = {"target": "float", "excerpt": "rich_text"}
+        self.dtype_dict = {"target": "float", "excerpt": "None"}
 
         # Any feature-column dependencies
         self.dependencies = {"excerpt": []}
@@ -108,7 +106,6 @@ class Predictor(PredictorInterface):
                 positive_domain=self.statistical_analysis.positive_domain,
             ),
             AccStats(deps=["ICP"]),
-            GlobalFeatureImportance(disable_column_importance=False),
         ]
 
     def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -136,9 +133,9 @@ class Predictor(PredictorInterface):
         train_test_data = splitter(
             data=data,
             seed=1,
-            pct_train=80,
-            pct_dev=10,
-            pct_test=10,
+            pct_train=0.8,
+            pct_dev=0.1,
+            pct_test=0.1,
             tss=self.problem_definition.timeseries_settings,
             target=self.target,
             dtype_dict=self.dtype_dict,
@@ -228,10 +225,12 @@ class Predictor(PredictorInterface):
         # Featurize data into numerical representations for models
 
         log.info("Featurizing the data")
-        feature_data = {key: None for key in split_data.keys()}
 
-        for key, data in split_data.items():
-            feature_data[key] = EncodedDs(self.encoders, data, self.target)
+        feature_data = {
+            key: EncodedDs(self.encoders, data, self.target)
+            for key, data in split_data.items()
+            if key != "stratified_on"
+        }
 
         return feature_data
 
@@ -263,7 +262,6 @@ class Predictor(PredictorInterface):
                 target_encoder=self.encoders[self.target],
                 target=self.target,
                 dtype_dict=self.dtype_dict,
-                input_cols=self.input_cols,
                 timeseries_settings=self.problem_definition.timeseries_settings,
             ),
             LightGBM(
@@ -349,10 +347,10 @@ class Predictor(PredictorInterface):
         self.analyze_data(data)
 
         # Pre-process the data
-        clean_data = self.preprocess(data)
+        data = self.preprocess(data)
 
         # Create train/test (dev) split
-        train_dev_test = self.split(clean_data)
+        train_dev_test = self.split(data)
 
         # Prepare encoders
         self.prepare(train_dev_test)
@@ -407,6 +405,7 @@ class Predictor(PredictorInterface):
     def predict(self, data: pd.DataFrame, args: Dict = {}) -> pd.DataFrame:
 
         # Remove columns that user specifies to ignore
+        self.mode = "predict"
         log.info(f"Dropping features: {self.problem_definition.ignore_features}")
         data = data.drop(
             columns=self.problem_definition.ignore_features, errors="ignore"
@@ -415,21 +414,11 @@ class Predictor(PredictorInterface):
             if col not in data.columns:
                 data[col] = [None] * len(data)
 
-        # Clean the data
-        self.mode = "predict"
-        log.info("Cleaning the data")
-        data = MyCustomCleaner.cleaner(
-            data=data,
-            identifiers=self.identifiers,
-            dtype_dict=self.dtype_dict,
-            target=self.target,
-            mode=self.mode,
-            timeseries_settings=self.problem_definition.timeseries_settings,
-            anomaly_detection=self.problem_definition.anomaly_detection,
-        )
+        # Pre-process the data
+        data = self.preprocess(data)
 
         # Featurize the data
-        encoded_ds = EncodedDs(self.encoders, data, self.target)
+        encoded_ds = self.featurize({"predict_data": data})["predict_data"]
         encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
         self.pred_args = PredictionArguments.from_dict(args)
