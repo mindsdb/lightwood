@@ -289,7 +289,9 @@ class Neural(BaseMixer):
 
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
-        self._final_tuning(dev_data)
+
+        if not self.timeseries_settings.is_timeseries:
+            self._final_tuning(dev_data)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
