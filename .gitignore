@@ -61,3 +61,4 @@ assert.sh
 docssrc/build
 docssrc/build/*
 docssrc/source/tutorials/*.html
+docssrc/source/tutorials/*.pcikle
