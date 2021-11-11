@@ -19,7 +19,7 @@ class LightGBMArray(BaseMixer):
     supports_proba: bool
 
     def __init__(
-            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
             n_ts_predictions: int, fit_on_dev: bool):
         super().__init__(stop_after)

@@ -34,7 +34,7 @@ class Neural(BaseMixer):
     supports_proba: bool
 
     def __init__(
-            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
             search_hyperparameters: bool, n_epochs: Optional[int] = None):
         """
@@ -259,7 +259,7 @@ class Neural(BaseMixer):
         """
         Fits the Neural mixer on some data, making it ready to predit
 
-        :param train_data: The EncodedDs on which to train the network
+        :param train_data: The network is fit/trained on this
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
         # ConcatedEncodedDs
@@ -295,7 +295,7 @@ class Neural(BaseMixer):
         """
         Augments the mixer's fit with new data, nr of epochs is based on the amount of epochs the original fitting took
 
-        :param train_data: The EncodedDs on which to train the network
+        :param train_data: The network is fit/trained on this
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
 
@@ -312,10 +312,10 @@ class Neural(BaseMixer):
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         """
-        Make predictions based on datasource similar to the one used to fit (sans the target column)
+        Make predictions based on datasource with the same features as the ones used for fitting
 
-        :param ds: The EncodedDs for which to generate the predictions
-        :param arg: Argument for predicting
+        :param ds: Predictions are generate from it
+        :param arg: Any additional arguments used in predicting
 
         :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
         """ # noqa

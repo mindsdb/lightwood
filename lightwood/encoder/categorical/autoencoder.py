@@ -14,7 +14,7 @@ import pandas as pd
 class CategoricalAutoEncoder(BaseEncoder):
     is_trainable_encoder: bool = True
 
-    def __init__(self, stop_after: int = 3600, is_target: bool = False, max_encoded_length: int = 100):
+    def __init__(self, stop_after: float = 3600, is_target: bool = False, max_encoded_length: int = 100):
         super().__init__(is_target)
         self.is_prepared = False
         self.name = 'Categorical Autoencoder'

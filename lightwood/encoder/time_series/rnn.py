@@ -30,7 +30,7 @@ class TimeSeriesEncoder(BaseEncoder):
     is_timeseries_encoder: bool = True
     is_trainable_encoder: bool = True
 
-    def __init__(self, stop_after: int, is_target=False, original_type: str = None, target: str = None,
+    def __init__(self, stop_after: float, is_target=False, original_type: str = None, target: str = None,
                  grouped_by: List[str] = [], encoder_type='rnn'):
         super().__init__(is_target)
         self.device, _ = get_devices()

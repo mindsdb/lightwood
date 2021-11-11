@@ -61,7 +61,7 @@ class LightGBM(BaseMixer):
     """  # noqa
 
     def __init__(
-            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
             fit_on_dev: bool, use_optuna: bool = True):
         """
