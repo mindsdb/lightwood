@@ -77,7 +77,7 @@ class Predictor(PredictorInterface):
         )
         self.accuracy_functions = ["r2_score"]
         self.identifiers = {"id": "Hash-like identifier"}
-        self.dtype_dict = {"target": "float", "excerpt": "None"}
+        self.dtype_dict = {"target": "float", "excerpt": "rich_text"}
 
         # Any feature-column dependencies
         self.dependencies = {"excerpt": []}
@@ -157,7 +157,7 @@ class Predictor(PredictorInterface):
                 is_target=True,
                 positive_domain=self.statistical_analysis.positive_domain,
             ),
-            "excerpt": Rich_Text.PretrainedLangEncoder(
+            "excerpt": PretrainedLangEncoder(
                 output_type=False,
                 stop_after=self.problem_definition.seconds_per_encoder,
             ),
