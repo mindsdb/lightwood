@@ -46,7 +46,7 @@ def cleaner(
 
     :returns: The cleaned data
     """  # noqa
-
+    print(dtype_dict)
     data = _remove_columns(
         data,
         identifiers,
