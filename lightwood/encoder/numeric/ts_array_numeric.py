@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Optional
+from typing import List, Dict, Iterable, Optional
 
 import torch
 import torch.nn.functional as F
@@ -36,7 +36,7 @@ class TsArrayNumericEncoder(BaseEncoder):
         self.sub_encoder.prepare(priming_data)
         self.is_prepared = True
 
-    def encode(self, data: Iterable[Iterable], dependency_data: Optional[Dict[str, str]] = {}):
+    def encode(self, data: Iterable[Iterable], dependency_data: Optional[Dict[str, str]] = {}) -> torch.Tensor:
         """
         Encodes a list of time series arrays using the underlying time series numerical encoder.
         
@@ -58,7 +58,7 @@ class TsArrayNumericEncoder(BaseEncoder):
 
         return torch.vstack(ret)
 
-    def encode_one(self, data: Iterable, dependency_data: Optional[Dict[str, str]] = {}):
+    def encode_one(self, data: Iterable, dependency_data: Optional[Dict[str, str]] = {}) -> torch.Tensor:
         """
         Encodes a single windowed slice of any given time series.
 
@@ -81,7 +81,7 @@ class TsArrayNumericEncoder(BaseEncoder):
 
         return ret
 
-    def decode(self, encoded_values, dependency_data=None):
+    def decode(self, encoded_values, dependency_data=None) -> List[List]:
         """
         Decodes a list of encoded arrays into values in their original domains.
 
@@ -103,14 +103,14 @@ class TsArrayNumericEncoder(BaseEncoder):
 
         return ret
 
-    def decode_one(self, encoded_value, dependency_data={}):
+    def decode_one(self, encoded_value, dependency_data={}) -> List:
         """
         Decodes a single window of a time series into its original domain.
 
         :param encoded_value: encoded slice of a numerical time series.
         :param dependency_data: used to determine the correct normalizer for the input.
 
-        :return: an array of length TimeseriesSettings.window with decoded values for the forecasted time series.
+        :return: a list of length TimeseriesSettings.window with decoded values for the forecasted time series.
         """
         ret = []
         for encoded_timestep in torch.split(encoded_value, 1, dim=1):
