@@ -1,10 +1,11 @@
 name: Documentation Build Lightwood
 
 on:
-  push:
-    branches:
-      - staging
-      - separate_doc_branch
+  workflow_run:
+    workflows: ["Integration and Unit Tests Lightwood"]
+    branches: [staging]
+    types: 
+      - completed
 jobs:
   doc_build:
     runs-on: ubuntu-latest

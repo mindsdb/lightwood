@@ -2,19 +2,20 @@
     "features": {
         "excerpt": {
             "encoder": {
-                "module": "Rich_Text.PretrainedLangEncoder",
+                "module": "PretrainedLangEncoder",
                 "args": {
                     "output_type": "$dtype_dict[$target]",
                     "stop_after": "$problem_definition.seconds_per_encoder"
                 }
-            }
+            },
+            "data_dtype": "rich_text"
         }
     },
     "outputs": {
         "target": {
             "data_dtype": "float",
             "encoder": {
-                "module": "Float.NumericEncoder",
+                "module": "NumericEncoder",
                 "args": {
                     "is_target": "True",
                     "positive_domain": "$statistical_analysis.positive_domain"
