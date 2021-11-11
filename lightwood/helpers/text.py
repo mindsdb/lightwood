@@ -215,7 +215,7 @@ def get_identifier_description(data, column_name, data_dtype):
     if nr_unique == 1:
         return 'No Information'
 
-    unquie_pct = nr_unique / len(data)
+    unique_pct = nr_unique / len(data)
 
     spaces = [len(str(x).split(' ')) - 1 for x in data]
     mean_spaces = np.mean(spaces)
@@ -223,7 +223,7 @@ def get_identifier_description(data, column_name, data_dtype):
     # Detect auto incrementing index
     # -- some cases where I guess people do want to use this for learning, so ignoring this check for now...
     # if data_dtype == dtype.integer:
-    #    if get_pct_auto_increment(data) > 0.98 and unquie_pct > 0.99:
+    #    if get_pct_auto_increment(data) > 0.98 and unique_pct > 0.99:
     #        return 'Auto-incrementing identifier'
 
     # Detect hash
@@ -249,7 +249,7 @@ def get_identifier_description(data, column_name, data_dtype):
             return 'Foreign key'
 
     if _is_identifier_name(column_name) or data_dtype in (dtype.categorical, dtype.binary):
-        if unquie_pct > 0.98:
+        if unique_pct > 0.98:
             if is_uuid:
                 return 'UUID'
             else:
@@ -257,7 +257,7 @@ def get_identifier_description(data, column_name, data_dtype):
 
     # Everything is unique and it's too short to be rich text
     if data_dtype in (dtype.categorical, dtype.short_text, dtype.rich_text) and \
-            unquie_pct > 0.99999 and mean_spaces < 1:
+            unique_pct > 0.99999 and mean_spaces < 1:
         return 'Unknown identifier'
 
     return None
