@@ -214,7 +214,7 @@
 - supports_proba: For classification tasks, whether the mixer supports yielding per-class scores rather than only returning the predicted label.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -275,7 +275,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column that the mixer will learn to predict.</p></li>
 <li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dictionary with dtypes of all columns in the data.</p></li>
 <li><p><strong>input_cols</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list of column names.</p></li>
@@ -384,7 +384,7 @@ If you want more information regarding the techniques that set apart LightGBM fr
 <p>LightGBM-based model, intended for usage in time series tasks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -456,7 +456,7 @@ If you want more information regarding the techniques that set apart LightGBM fr
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – How long the total fitting process should take</p></li>
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – How long the total fitting process should take</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the target column</p></li>
 <li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Data type dictionary</p></li>
 <li><p><strong>timeseries_settings</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code>) – TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.</p></li>
@@ -485,7 +485,7 @@ If you want more information regarding the techniques that set apart LightGBM fr
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – The EncodedDs on which to train the network</p></li>
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – The network is fit/trained on this</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Data used for early stopping and hyperparameter determination</p></li>
 </ul>
 </dd>
@@ -512,7 +512,7 @@ If you want more information regarding the techniques that set apart LightGBM fr
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – The EncodedDs on which to train the network</p></li>
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – The network is fit/trained on this</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Data used for early stopping and hyperparameter determination</p></li>
 </ul>
 </dd>
@@ -538,20 +538,31 @@ If you want more information regarding the techniques that set apart LightGBM fr
 <dt class="sig sig-object py" id="mixer.Regression">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/regression.html#Regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
+<p>The <cite>Regression</cite> mixer inherits from scikit-learn’s <cite>LinearRegression</cite> class
+(<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html">https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html</a>)</p>
+<p>This class performs Ordinary Least-squares Regression (OLS) under the hood;
+this means it fits a set of coefficients (w_1, w_2, …, w_N) for an N-length feature vector, that minimize the difference
+between the predicted target value and the observed true value.</p>
+<p>This mixer intakes featurized (encoded) data to predict the target. It deploys if the target data-type is considered numerical/integer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Maximum amount of seconds it should fit for, currently ignored</p></li>
+<li><p><strong>target_encoder</strong> (<a class="reference internal" href="../encoder.html#encoder.BaseEncoder" title="lightwood.encoder.base.BaseEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEncoder</span></code></a>) – The encoder which will be used to decode the target</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – A map of feature names and their data types</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the target column</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Regression.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/regression.html#Regression.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fits/trains a mixer with training data.</p>
+<dd><p>Fits <cite>LinearRegression</cite> model on input feature data to provide predictions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
-<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Regression if fit on this</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – This just gets concatenated to the <code class="docutils literal notranslate"><span class="pre">train_data</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -573,12 +584,12 @@ If you want more information regarding the techniques that set apart LightGBM fr
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Regression.partial_fit">
 <span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/regression.html#Regression.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression.partial_fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
+<dd><p>Fits the linear regression on some data, this refits the model entirely rather than updating it</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
-<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Regression is fit on this</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – This just gets concatenated to the <code class="docutils literal notranslate"><span class="pre">train_data</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -600,7 +611,7 @@ If you want more information regarding the techniques that set apart LightGBM fr
 <dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -669,7 +680,7 @@ value.</p>
 <dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">

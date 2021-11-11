@@ -203,7 +203,7 @@ It can be used for generic arrays, as well as for handling historical target val
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
 <li><p><strong>window</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – expected length of array data.</p></li>
 <li><p><strong>original_dtype</strong> – element-wise data type</p></li>
 </ul>
@@ -310,7 +310,7 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – time budget, in seconds.</p></li>
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget, in seconds.</p></li>
 <li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether the encoder corresponds to the target column. This is not currently possible for Img2VecEncoder.</p></li>
 </ul>
 </dd>
@@ -526,7 +526,7 @@ If None, encoder will output the largest length encountered during training.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TimeSeriesEncoder.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-2004</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-1965</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
