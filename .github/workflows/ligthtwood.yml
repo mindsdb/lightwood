@@ -6,6 +6,7 @@ on:
     branches:
       - stable
       - staging
+      - jupyter_actions
 
 
 jobs:
@@ -51,12 +52,13 @@ jobs:
         python -m flake8 .
     - name: Test with unittest
       run: |
-        find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
-        cat out.txt
-        cat out.txt | grep -zvqi error && echo 'no' || exit
         # Run all the "standard" tests
         python -m unittest discover tests
-        # Run all the tutorials (Also serves to generate realted html, so this needs to run before docs deploy)
+    - name: Test using tutorial notebooks
+      run: |
+        find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
+        cat out.txt
+        cat out.txt | grep -zvqi exception && echo 'no errors detected' || exit
 
   deploy:
     runs-on: ubuntu-latest
