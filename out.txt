@@ -1,0 +1,62 @@
+[NbConvertApp] Converting notebook ./docssrc/source/tutorials/custom_explainer/custom_explainer.ipynb to notebook
+Traceback (most recent call last):
+  File "/home/george/.local/bin/jupyter-nbconvert", line 8, in <module>
+    sys.exit(main())
+  File "/home/george/.local/lib/python3.8/site-packages/jupyter_core/application.py", line 264, in launch_instance
+    return super(JupyterApp, cls).launch_instance(argv=argv, **kwargs)
+  File "/home/george/.local/lib/python3.8/site-packages/traitlets/config/application.py", line 846, in launch_instance
+    app.start()
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 361, in start
+    self.convert_notebooks()
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 533, in convert_notebooks
+    self.convert_single_notebook(notebook_filename)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 498, in convert_single_notebook
+    output, resources = self.export_single_notebook(notebook_filename, resources, input_buffer=input_buffer)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 427, in export_single_notebook
+    output, resources = self.exporter.from_filename(notebook_filename, resources=resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 181, in from_filename
+    return self.from_file(f, resources=resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 199, in from_file
+    return self.from_notebook_node(nbformat.read(file_stream, as_version=4), resources=resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/notebook.py", line 32, in from_notebook_node
+    nb_copy, resources = super().from_notebook_node(nb, resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 143, in from_notebook_node
+    nb_copy, resources = self._preprocess(nb_copy, resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 318, in _preprocess
+    nbc, resc = preprocessor(nbc, resc)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/base.py", line 47, in __call__
+    return self.preprocess(nb, resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/execute.py", line 84, in preprocess
+    self.preprocess_cell(cell, resources, index)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/execute.py", line 105, in preprocess_cell
+    cell = self.execute_cell(cell, index, store_history=True)
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/util.py", line 78, in wrapped
+    return just_run(coro(*args, **kwargs))
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/util.py", line 57, in just_run
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/client.py", line 862, in async_execute_cell
+    self._check_raise_for_error(cell, exec_reply)
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/client.py", line 765, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+from typing import Dict, Tuple
+import pandas as pd
+import lightwood
+lightwood.__version__
+
+CRASH!
+------------------
+
+[0;36m  File [0;32m"/tmp/ipykernel_911466/2801920142.py"[0;36m, line [0;32m6[0m
+[0;31m    CRASH![0m
+[0m         ^[0m
+[0;31mSyntaxError[0m[0;31m:[0m invalid syntax
+
+SyntaxError: invalid syntax (2801920142.py, line 6)
+
+[NbConvertApp] Converting notebook ./docssrc/source/tutorials/tutorial_data_analysis/tutorial_data_analysis.ipynb to notebook
+[NbConvertApp] Writing 352581 bytes to docssrc/source/tutorials/tutorial_data_analysis/tutorial_data_analysis.ipynb
+[NbConvertApp] Converting notebook ./docssrc/source/tutorials/custom_cleaner/custom_cleaner.ipynb to notebook
