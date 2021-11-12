@@ -1,8 +1,5 @@
 from typing import List, Iterable, Union
 import torch
-from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
-
-EncodedDataset = Union[EncodedDs, ConcatedEncodedDs]
 
 class BaseEncoder:
     """
@@ -63,7 +60,7 @@ class BaseEncoder:
         """
         raise NotImplementedError
 
-    def decode(self, encoded_data: EncodedDataset) -> List[object]:
+    def decode(self, encoded_data) -> List[object]:
         """
         Given an encoded representation, returns the decoded value.
 
