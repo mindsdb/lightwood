@@ -60,3 +60,153 @@ SyntaxError: invalid syntax (2801920142.py, line 6)
 [NbConvertApp] Converting notebook ./docssrc/source/tutorials/tutorial_data_analysis/tutorial_data_analysis.ipynb to notebook
 [NbConvertApp] Writing 352581 bytes to docssrc/source/tutorials/tutorial_data_analysis/tutorial_data_analysis.ipynb
 [NbConvertApp] Converting notebook ./docssrc/source/tutorials/custom_cleaner/custom_cleaner.ipynb to notebook
+[NbConvertApp] Writing 58055 bytes to docssrc/source/tutorials/custom_cleaner/custom_cleaner.ipynb
+[NbConvertApp] Converting notebook ./docssrc/source/tutorials/custom_encoder_rulebased/custom_encoder_rulebased.ipynb to notebook
+[NbConvertApp] Writing 37457 bytes to docssrc/source/tutorials/custom_encoder_rulebased/custom_encoder_rulebased.ipynb
+[NbConvertApp] Converting notebook ./docssrc/source/tutorials/tutorial_time_series/Tutorial - Training a time series predictor.ipynb to notebook
+Traceback (most recent call last):
+  File "/home/george/.local/bin/jupyter-nbconvert", line 8, in <module>
+    sys.exit(main())
+  File "/home/george/.local/lib/python3.8/site-packages/jupyter_core/application.py", line 264, in launch_instance
+    return super(JupyterApp, cls).launch_instance(argv=argv, **kwargs)
+  File "/home/george/.local/lib/python3.8/site-packages/traitlets/config/application.py", line 846, in launch_instance
+    app.start()
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 361, in start
+    self.convert_notebooks()
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 533, in convert_notebooks
+    self.convert_single_notebook(notebook_filename)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 498, in convert_single_notebook
+    output, resources = self.export_single_notebook(notebook_filename, resources, input_buffer=input_buffer)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 427, in export_single_notebook
+    output, resources = self.exporter.from_filename(notebook_filename, resources=resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 181, in from_filename
+    return self.from_file(f, resources=resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 199, in from_file
+    return self.from_notebook_node(nbformat.read(file_stream, as_version=4), resources=resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/notebook.py", line 32, in from_notebook_node
+    nb_copy, resources = super().from_notebook_node(nb, resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 143, in from_notebook_node
+    nb_copy, resources = self._preprocess(nb_copy, resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 318, in _preprocess
+    nbc, resc = preprocessor(nbc, resc)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/base.py", line 47, in __call__
+    return self.preprocess(nb, resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/execute.py", line 84, in preprocess
+    self.preprocess_cell(cell, resources, index)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/execute.py", line 105, in preprocess_cell
+    cell = self.execute_cell(cell, index, store_history=True)
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/util.py", line 78, in wrapped
+    return just_run(coro(*args, **kwargs))
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/util.py", line 57, in just_run
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 603, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 570, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 1823, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.8/selectors.py", line 468, in select
+    fd_event_list = self._selector.poll(timeout, max_ev)
+KeyboardInterrupt
+Task exception was never retrieved
+future: <Task finished name='Task-30' coro=<NotebookClient.async_execute_cell() done, defined at /home/george/.local/lib/python3.8/site-packages/nbclient/client.py:767> exception=CellExecutionError('An error occurred while executing the following cell:\n------------------\npredictor.learn(train)\n------------------\n\n\x1b[0;31m---------------------------------------------------------------------------\x1b[0m\n\x1b[0;31mKeyboardInterrupt\x1b[0m                         Traceback (most recent call last)\n\x1b[0;32m/tmp/ipykernel_912288/2237421078.py\x1b[0m in \x1b[0;36m<module>\x1b[0;34m\x1b[0m\n\x1b[0;32m----> 1\x1b[0;31m \x1b[0mpredictor\x1b[0m\x1b[0;34m.\x1b[0m\x1b[0mlearn\x1b[0m\x1b[0;34m(\x1b[0m\x1b[0mtrain\x1b[0m\x1b[0;34m)\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[0m\n\x1b[0;32m/tmp/b031ee8036c7ff3df0bb0bf2311d16550f1c568a3cd967301636692892444359.py\x1b[0m in \x1b[0;36mlearn\x1b[0;34m(self, data)\x1b[0m\n\x1b[1;32m    396\x1b[0m \x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    397\x1b[0m         \x1b[0;31m# Prepare encoders\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[0;32m--> 398\x1b[0;31m         \x1b[0mself\x1b[0m\x1b[0;34m.\x1b[0m\x1b[0mprepare\x1b[0m\x1b[0;34m(\x1b[0m\x1b[0mtrain_dev_test\x1b[0m\x1b[0;34m)\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[0m\x1b[1;32m    399\x1b[0m \x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    400\x1b[0m         \x1b[0;31m# Create feature vectors from data\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\n\x1b[0;32m/tmp/b031ee8036c7ff3df0bb0bf2311d16550f1c568a3cd967301636692892444359.py\x1b[0m in \x1b[0;36mprepare\x1b[0;34m(self, data)\x1b[0m\n\x1b[1;32m    253\x1b[0m                     ].encode(priming_data[self.target])\n\x1b[1;32m    254\x1b[0m \x1b[0;34m\x1b[0m\x1b[0m\n\x1b[0;32m--> 255\x1b[0;31m                 encoder.prepare(\n\x1b[0m\x1b[1;32m    256\x1b[0m                     \x1b[0mdata\x1b[0m\x1b[0;34m[\x1b[0m\x1b[0;34m"train"\x1b[0m\x1b[0;34m]\x1b[0m\x1b[0;34m[\x1b[0m\x1b[0mcol_name\x1b[0m\x1b[0;34m]\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0mdata\x1b[0m\x1b[0;34m[\x1b[0m\x1b[0;34m"dev"\x1b[0m\x1b[0;34m]\x1b[0m\x1b[0;34m[\x1b[0m\x1b[0mcol_name\x1b[0m\x1b[0;34m]\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0;34m**\x1b[0m\x1b[0mkwargs\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    257\x1b[0m                 )\n\n\x1b[0;32m~/lightwood/lightwood/encoder/time_series/rnn.py\x1b[0m in \x1b[0;36mprepare\x1b[0;34m(self, train_priming_data, dev_priming_data, dependency_data, ts_analysis, feedback_hoop_function, batch_size)\x1b[0m\n\x1b[1;32m    253\x1b[0m                         \x1b[0mloss\x1b[0m \x1b[0;34m+=\x1b[0m \x1b[0mdec_loss\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    254\x1b[0m \x1b[0;34m\x1b[0m\x1b[0m\n\x1b[0;32m--> 255\x1b[0;31m                 \x1b[0mloss\x1b[0m\x1b[0;34m.\x1b[0m\x1b[0mbackward\x1b[0m\x1b[0;34m(\x1b[0m\x1b[0;34m)\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[0m\x1b[1;32m    256\x1b[0m \x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    257\x1b[0m                 \x1b[0mself\x1b[0m\x1b[0;34m.\x1b[0m\x1b[0m_optimizer\x1b[0m\x1b[0;34m.\x1b[0m\x1b[0mstep\x1b[0m\x1b[0;34m(\x1b[0m\x1b[0;34m)\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\n\x1b[0;32m~/.local/lib/python3.8/site-packages/torch/_tensor.py\x1b[0m in \x1b[0;36mbackward\x1b[0;34m(self, gradient, retain_graph, create_graph, inputs)\x1b[0m\n\x1b[1;32m    253\x1b[0m                 \x1b[0mcreate_graph\x1b[0m\x1b[0;34m=\x1b[0m\x1b[0mcreate_graph\x1b[0m\x1b[0;34m,\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    254\x1b[0m                 inputs=inputs)\n\x1b[0;32m--> 255\x1b[0;31m         \x1b[0mtorch\x1b[0m\x1b[0;34m.\x1b[0m\x1b[0mautograd\x1b[0m\x1b[0;34m.\x1b[0m\x1b[0mbackward\x1b[0m\x1b[0;34m(\x1b[0m\x1b[0mself\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0mgradient\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0mretain_graph\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0mcreate_graph\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0minputs\x1b[0m\x1b[0;34m=\x1b[0m\x1b[0minputs\x1b[0m\x1b[0;34m)\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[0m\x1b[1;32m    256\x1b[0m \x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    257\x1b[0m     \x1b[0;32mdef\x1b[0m \x1b[0mregister_hook\x1b[0m\x1b[0;34m(\x1b[0m\x1b[0mself\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0mhook\x1b[0m\x1b[0;34m)\x1b[0m\x1b[0;34m:\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\n\x1b[0;32m~/.local/lib/python3.8/site-packages/torch/autograd/__init__.py\x1b[0m in \x1b[0;36mbackward\x1b[0;34m(tensors, grad_tensors, retain_graph, create_graph, grad_variables, inputs)\x1b[0m\n\x1b[1;32m    145\x1b[0m         \x1b[0mretain_graph\x1b[0m \x1b[0;34m=\x1b[0m \x1b[0mcreate_graph\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    146\x1b[0m \x1b[0;34m\x1b[0m\x1b[0m\n\x1b[0;32m--> 147\x1b[0;31m     Variable._execution_engine.run_backward(\n\x1b[0m\x1b[1;32m    148\x1b[0m         \x1b[0mtensors\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0mgrad_tensors_\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0mretain_graph\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0mcreate_graph\x1b[0m\x1b[0;34m,\x1b[0m \x1b[0minputs\x1b[0m\x1b[0;34m,\x1b[0m\x1b[0;34m\x1b[0m\x1b[0;34m\x1b[0m\x1b[0m\n\x1b[1;32m    149\x1b[0m         allow_unreachable=True, accumulate_grad=True)  # allow_unreachable flag\n\n\x1b[0;31mKeyboardInterrupt\x1b[0m: \nKeyboardInterrupt: \n')>
+Traceback (most recent call last):
+  File "/home/george/.local/bin/jupyter-nbconvert", line 8, in <module>
+    sys.exit(main())
+  File "/home/george/.local/lib/python3.8/site-packages/jupyter_core/application.py", line 264, in launch_instance
+    return super(JupyterApp, cls).launch_instance(argv=argv, **kwargs)
+  File "/home/george/.local/lib/python3.8/site-packages/traitlets/config/application.py", line 846, in launch_instance
+    app.start()
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 361, in start
+    self.convert_notebooks()
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 533, in convert_notebooks
+    self.convert_single_notebook(notebook_filename)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 498, in convert_single_notebook
+    output, resources = self.export_single_notebook(notebook_filename, resources, input_buffer=input_buffer)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/nbconvertapp.py", line 427, in export_single_notebook
+    output, resources = self.exporter.from_filename(notebook_filename, resources=resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 181, in from_filename
+    return self.from_file(f, resources=resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 199, in from_file
+    return self.from_notebook_node(nbformat.read(file_stream, as_version=4), resources=resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/notebook.py", line 32, in from_notebook_node
+    nb_copy, resources = super().from_notebook_node(nb, resources, **kw)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 143, in from_notebook_node
+    nb_copy, resources = self._preprocess(nb_copy, resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/exporters/exporter.py", line 318, in _preprocess
+    nbc, resc = preprocessor(nbc, resc)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/base.py", line 47, in __call__
+    return self.preprocess(nb, resources)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/execute.py", line 84, in preprocess
+    self.preprocess_cell(cell, resources, index)
+  File "/home/george/.local/lib/python3.8/site-packages/nbconvert/preprocessors/execute.py", line 105, in preprocess_cell
+    cell = self.execute_cell(cell, index, store_history=True)
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/util.py", line 78, in wrapped
+    return just_run(coro(*args, **kwargs))
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/util.py", line 57, in just_run
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 603, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 570, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 1823, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.8/selectors.py", line 468, in select
+    fd_event_list = self._selector.poll(timeout, max_ev)
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/client.py", line 862, in async_execute_cell
+    self._check_raise_for_error(cell, exec_reply)
+  File "/home/george/.local/lib/python3.8/site-packages/nbclient/client.py", line 765, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+predictor.learn(train)
+------------------
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mKeyboardInterrupt[0m                         Traceback (most recent call last)
+[0;32m/tmp/ipykernel_912288/2237421078.py[0m in [0;36m<module>[0;34m[0m
+[0;32m----> 1[0;31m [0mpredictor[0m[0;34m.[0m[0mlearn[0m[0;34m([0m[0mtrain[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m
+[0;32m/tmp/b031ee8036c7ff3df0bb0bf2311d16550f1c568a3cd967301636692892444359.py[0m in [0;36mlearn[0;34m(self, data)[0m
+[1;32m    396[0m [0;34m[0m[0m
+[1;32m    397[0m         [0;31m# Prepare encoders[0m[0;34m[0m[0;34m[0m[0;34m[0m[0m
+[0;32m--> 398[0;31m         [0mself[0m[0;34m.[0m[0mprepare[0m[0;34m([0m[0mtrain_dev_test[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m    399[0m [0;34m[0m[0m
+[1;32m    400[0m         [0;31m# Create feature vectors from data[0m[0;34m[0m[0;34m[0m[0;34m[0m[0m
+
+[0;32m/tmp/b031ee8036c7ff3df0bb0bf2311d16550f1c568a3cd967301636692892444359.py[0m in [0;36mprepare[0;34m(self, data)[0m
+[1;32m    253[0m                     ].encode(priming_data[self.target])
+[1;32m    254[0m [0;34m[0m[0m
+[0;32m--> 255[0;31m                 encoder.prepare(
+[0m[1;32m    256[0m                     [0mdata[0m[0;34m[[0m[0;34m"train"[0m[0;34m][0m[0;34m[[0m[0mcol_name[0m[0;34m][0m[0;34m,[0m [0mdata[0m[0;34m[[0m[0;34m"dev"[0m[0;34m][0m[0;34m[[0m[0mcol_name[0m[0;34m][0m[0;34m,[0m [0;34m**[0m[0mkwargs[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    257[0m                 )
+
+[0;32m~/lightwood/lightwood/encoder/time_series/rnn.py[0m in [0;36mprepare[0;34m(self, train_priming_data, dev_priming_data, dependency_data, ts_analysis, feedback_hoop_function, batch_size)[0m
+[1;32m    253[0m                         [0mloss[0m [0;34m+=[0m [0mdec_loss[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    254[0m [0;34m[0m[0m
+[0;32m--> 255[0;31m                 [0mloss[0m[0;34m.[0m[0mbackward[0m[0;34m([0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m    256[0m [0;34m[0m[0m
+[1;32m    257[0m                 [0mself[0m[0;34m.[0m[0m_optimizer[0m[0;34m.[0m[0mstep[0m[0;34m([0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+
+[0;32m~/.local/lib/python3.8/site-packages/torch/_tensor.py[0m in [0;36mbackward[0;34m(self, gradient, retain_graph, create_graph, inputs)[0m
+[1;32m    253[0m                 [0mcreate_graph[0m[0;34m=[0m[0mcreate_graph[0m[0;34m,[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    254[0m                 inputs=inputs)
+[0;32m--> 255[0;31m         [0mtorch[0m[0;34m.[0m[0mautograd[0m[0;34m.[0m[0mbackward[0m[0;34m([0m[0mself[0m[0;34m,[0m [0mgradient[0m[0;34m,[0m [0mretain_graph[0m[0;34m,[0m [0mcreate_graph[0m[0;34m,[0m [0minputs[0m[0;34m=[0m[0minputs[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m    256[0m [0;34m[0m[0m
+[1;32m    257[0m     [0;32mdef[0m [0mregister_hook[0m[0;34m([0m[0mself[0m[0;34m,[0m [0mhook[0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+
+[0;32m~/.local/lib/python3.8/site-packages/torch/autograd/__init__.py[0m in [0;36mbackward[0;34m(tensors, grad_tensors, retain_graph, create_graph, grad_variables, inputs)[0m
+[1;32m    145[0m         [0mretain_graph[0m [0;34m=[0m [0mcreate_graph[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    146[0m [0;34m[0m[0m
+[0;32m--> 147[0;31m     Variable._execution_engine.run_backward(
+[0m[1;32m    148[0m         [0mtensors[0m[0;34m,[0m [0mgrad_tensors_[0m[0;34m,[0m [0mretain_graph[0m[0;34m,[0m [0mcreate_graph[0m[0;34m,[0m [0minputs[0m[0;34m,[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    149[0m         allow_unreachable=True, accumulate_grad=True)  # allow_unreachable flag
+
+[0;31mKeyboardInterrupt[0m: 
+KeyboardInterrupt: 
+
