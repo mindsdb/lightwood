@@ -1,11 +1,10 @@
 name: Documentation Build Lightwood
 
 on:
-  workflow_run:
-    workflows: ["Integration and Unit Tests Lightwood"]
-    branches: [staging, jupyter_actions]
-    types: 
-      - completed
+  push:
+    branches:
+      - staging
+      - separate_doc_branch
 jobs:
   doc_build:
     runs-on: ubuntu-latest
@@ -19,15 +18,20 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: build docs
+    - name: install all dependencies
       run: |
+        sudo apt install jupyter
         sudo apt install pandoc
         python -m pip install --upgrade pip
         pip install --no-cache-dir -e .
         pip install install 'Sphinx==4.1.2' 'sphinx-autoapi==1.8.4' 'sphinx-autodoc-typehints==1.12.0' 'sphinx-code-include==1.1.1' 'sphinx-rtd-theme==0.5.2' 'sphinxcontrib-applehelp==1.0.2' 'sphinxcontrib-devhelp==1.0.2' 'sphinxcontrib-htmlhelp==2.0.0' 'sphinxcontrib-jsmath==1.0.1' 'sphinxcontrib-napoleon==0.7' 'sphinxcontrib-qthelp==1.0.3' 'sphinxcontrib-serializinghtml==1.1.5' autoapi nbsphinx myst_parser pandoc jupyter
+    - name: Re-run notebooks
+      run: |
+        find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;
+    - name: Make the docs
+      run: |
         cd docssrc && make github
-    
-    
+
     - name: Deploy to another branch
       uses: s0/git-publish-subdir-action@develop
       env:
