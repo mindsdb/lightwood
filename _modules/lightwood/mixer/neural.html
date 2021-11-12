@@ -457,7 +457,9 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_on_dev</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">dev_data</span><span class="p">,</span> <span class="n">train_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_final_tuning</span><span class="p">(</span><span class="n">dev_data</span><span class="p">)</span></div>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_final_tuning</span><span class="p">(</span><span class="n">dev_data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Neural.partial_fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.Neural.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -509,10 +511,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">decoded_prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">Yh</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">decoded_predictions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">decoded_prediction</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">decoded_predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decoded_prediction</span><span class="p">)</span>
+                <span class="n">decoded_predictions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">decoded_prediction</span><span class="p">)</span>
 
             <span class="n">ydf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;prediction&#39;</span><span class="p">:</span> <span class="n">decoded_predictions</span><span class="p">})</span>
 
