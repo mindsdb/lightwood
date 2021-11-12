@@ -52,7 +52,9 @@
     "from typing import Dict, Tuple\n",
     "import pandas as pd\n",
     "import lightwood\n",
-    "lightwood.__version__"
+    "lightwood.__version__\n",
+    "\n",
+    "asgas CRASH!!"
    ]
   },
   {
