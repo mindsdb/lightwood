@@ -484,11 +484,13 @@
    ]
   },
   {
-   "cell_type": "markdown",
-   "id": "comparable-diameter",
+   "cell_type": "code",
+   "execution_count": null,
    "metadata": {},
+   "outputs": [],
    "source": [
-    "```\n",
+    "%%writefile MyCustomSplitter.py\n",
+    "\n",
     "from lightwood.api.dtype import dtype\n",
     "import pandas as pd\n",
     "import numpy as np\n",
@@ -530,12 +532,12 @@
     "    y = data[target]  # .values\n",
     "\n",
     "    # Create a train/test split\n",
-    "    X_train, X_test, y_train, y_test = train_test_split(\n",
+    "    X2, X_test, y2, y_test = train_test_split(\n",
     "        X, y, train_size=pct_train, random_state=seed, stratify=data[target]\n",
     "    )\n",
     "\n",
     "    X_train, X_dev, y_train, y_dev = train_test_split(\n",
-    "        X, y, test_size=pct_dev, random_state=seed, stratify=y_train\n",
+    "        X2, y2, test_size=pct_dev, random_state=seed, stratify=y2\n",
     "    )\n",
     "\n",
     "    # Create a SMOTE model and bump up underbalanced class JUST for train data\n",
@@ -547,9 +549,7 @@
     "    X_test[target] = y_test\n",
     "    X_dev[target] = y_dev\n",
     "\n",
-    "    return {\"train\": Xtrain_mod, \"test\": X_test, \"dev\": X_dev}\n",
-    "\n",
-    "```"
+    "    return {\"train\": Xtrain_mod, \"test\": X_test, \"dev\": X_dev}\n"
    ]
   },
   {
@@ -560,6 +560,17 @@
     "#### Place your custom module in `~/lightwood_modules`\n",
     "\n",
     "We automatically search for custom scripts in your `~/lightwood_modules` path. Place your file there. Later, you'll see when we autogenerate code, that you can change your import location if you choose."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from lightwood import load_custom_module\n",
+    "\n",
+    "load_custom_module('MyCustomSplitter.py')"
    ]
   },
   {
