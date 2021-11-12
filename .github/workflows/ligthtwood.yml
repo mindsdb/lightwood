@@ -6,7 +6,6 @@ on:
     branches:
       - stable
       - staging
-      - jupyter_actions
 
 jobs:
   test:
