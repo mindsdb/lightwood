@@ -620,30 +620,29 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-53258:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Using 15 processes to deduct types.</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -665,56 +664,56 @@ div.rendered_html tbody tr:hover {
     &#34;features&#34;: {
         &#34;model&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;module&#34;: &#34;OneHotEncoder&#34;,
                 &#34;args&#34;: {}
             },
             &#34;data_dtype&#34;: &#34;categorical&#34;
         },
         &#34;year&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
             },
             &#34;data_dtype&#34;: &#34;integer&#34;
         },
         &#34;transmission&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;module&#34;: &#34;OneHotEncoder&#34;,
                 &#34;args&#34;: {}
             },
             &#34;data_dtype&#34;: &#34;categorical&#34;
         },
         &#34;mileage&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
             },
             &#34;data_dtype&#34;: &#34;integer&#34;
         },
         &#34;fuelType&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;module&#34;: &#34;OneHotEncoder&#34;,
                 &#34;args&#34;: {}
             },
             &#34;data_dtype&#34;: &#34;categorical&#34;
         },
         &#34;tax&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
             },
             &#34;data_dtype&#34;: &#34;integer&#34;
         },
         &#34;mpg&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Float.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
             },
             &#34;data_dtype&#34;: &#34;float&#34;
         },
         &#34;engineSize&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Float.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
             },
             &#34;data_dtype&#34;: &#34;float&#34;
@@ -724,7 +723,7 @@ div.rendered_html tbody tr:hover {
         &#34;price&#34;: {
             &#34;data_dtype&#34;: &#34;integer&#34;,
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {
                     &#34;is_target&#34;: &#34;True&#34;,
                     &#34;positive_domain&#34;: &#34;$statistical_analysis.positive_domain&#34;
@@ -926,6 +925,16 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Some additional notes: (1) The <code class="docutils literal notranslate"><span class="pre">encode()</span></code> call should be able to intake a list of values, it is optional to make it compatible with <code class="docutils literal notranslate"><span class="pre">pd.Series</span></code> or <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code> (2) The output of <code class="docutils literal notranslate"><span class="pre">encode()</span></code> must be a torch tensor with dimensionality <span class="math notranslate nohighlight">\(N_{rows} x N_{output}\)</span>.</p>
 <p>Now that the <code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code> is complete, move this to <code class="docutils literal notranslate"><span class="pre">~/lightwood_modules</span></code> and we’re ready to try this out!</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
+<span class="n">load_custom_module</span><span class="p">(</span><span class="s1">&#39;LabelEncoder.py&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 <div class="section" id="4)-Edit-JSON-AI">
@@ -953,7 +962,7 @@ assignments for a data type</p>
 </div>
 <p>We’ll go with the first approach for simplicity:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -968,7 +977,7 @@ assignments for a data type</p>
 <h1>5) Generate code and your predictor from JSON-AI<a class="headerlink" href="#5)-Generate-code-and-your-predictor-from-JSON-AI" title="Permalink to this headline">¶</a></h1>
 <p>Now, let’s use this JSON-AI object to generate code and make a predictor. This can be done in 2 simple lines, below:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -985,7 +994,7 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-53258:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <p>Now, let’s run our pipeline. To do so, let’s first:</p>
@@ -996,7 +1005,7 @@ assignments for a data type</p>
 <li><p>Featurize the data</p></li>
 </ol>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1022,39 +1031,39 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-53258:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Splitting the data into train/test</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Preparing the encoders</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 1</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 2</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 3</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 4</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 5</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 6</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 7</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 8</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Encoder prepping dict length of: 9</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: price</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Done running for: engineSize</span>
-<span class="ansi-green-fg">INFO:lightwood-53258:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Splitting the data into train/test</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Preparing the encoders</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 1</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 2</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 3</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 4</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 5</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 6</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 7</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 8</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Encoder prepping dict length of: 9</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: price</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Done running for: engineSize</span>
+<span class="ansi-green-fg">INFO:lightwood-3676:Featurizing the data</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1074,7 +1083,7 @@ assignments for a data type</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1132,7 +1141,7 @@ assignments for a data type</p>
 </div>
 <p>We can see what the label mapping is by inspecting our encoders as follows:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
