@@ -1,110 +1,110 @@
+
 import torch
 import numpy as np
-from scipy.special import softmax
 from lightwood.encoder.text.helpers.rnn_helpers import Lang
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.constants import _UNCOMMON_WORD
 
-UNCOMMON_WORD = '__mdb_unknown_cat'
-UNCOMMON_TOKEN = 0
+from typing import Dict, List
+from pandas import Series
 
 
 class OneHotEncoder(BaseEncoder):
+    def __init__(
+        self,
+        is_target: bool = False,
+        target_class_distribution: Dict[str, float] = None,
+        use_unknown: bool = True,
+    ):
+        """
+        Creates a one-hot encoding (OHE) of categorical data. This creates a vector where each individual dimension corresponds to a category. A category has a 1:1 mapping between dimension indicated by a "1" in that position. 
 
-    def __init__(self, is_target=False, target_class_distribution=None, handle_unknown='unknown_token'):
+        OHE operates in 2 modes:
+            (1) "use_unknown=True": Makes an :math:`N+1` length vector for :math:`N` categories, the first index always corresponds to the unknown category.
+
+            (2) "use_unknown=False": Makes an :math:`N` length vector for :math:`N` categories, where an empty vector of 0s indicates an unknown/missing category.
+
+        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations. 
+
+        :param is_target: True if this encoder featurizes the target column
+        :param target_class_distribution: Percentage of total population represented by each category (between [0, 1]).
+        :param mode: True uses an extra dimension to account for unknown/out-of-distribution categories
+        """ # noqa
         super().__init__(is_target)
-        self._lang = None
-        self.rev_map = {}
-
-        if handle_unknown not in {"unknown_token", "return_zeros"}:
-            raise ValueError(f"handle_unknown should be either 'unknown_token' or 'return_zeros', got {handle_unknown}")
-        else:
-            self.handle_unknown = handle_unknown
+        self.map = None # category name -> index
+        self.rev_map = None # index -> category name
+        self.use_unknown = use_unknown
 
         if self.is_target:
             self.target_class_distribution = target_class_distribution
             self.index_weights = None
 
-    def prepare(self, priming_data, max_dimensions=20000):
+    def prepare(self, priming_data: Series):
+        """
+        Prepares the OHE Encoder by creating a dictionary mapping.
+
+        Unknown categories must be explicitly handled as python `None` types.
+        """
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        self._lang = Lang('default')
-        if self.handle_unknown == "return_zeros":
-            priming_data = [x for x in priming_data if x is not None]
-            self._lang.index2word = {}
-            self._lang.word2index = {}
-            self._lang.n_words = 0
-        else:  # self.handle_unknown == "unknown_token"
-            priming_data = [x if x is not None else UNCOMMON_WORD for x in priming_data]
-            self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
-            self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
-            self._lang.word2count[UNCOMMON_WORD] = 0
-            self._lang.n_words = 1
+        unq_cats = np.unique([i for i in priming_data if i is not None]).tolist() 
+        if self.use_unknown:
+            log.info("Encoding UNK categories as index 0")
+            self.map = {cat: indx+1 for indx, cat in enumerate(unq_cats)}
+            self.map.update({_UNCOMMON_WORD: 0})
+            self.rev_map = {indx: cat for cat, indx in self.map.items()}
+        else:
+            log.info("Encoding UNK categories as vector of all 0s")
+            self.map = {cat: indx for indx, cat in enumerate(unq_cats)}
+            self.rev_map = {indx: cat for cat, indx in self.map.items()}
 
-        for category in priming_data:
-            if category is not None:
-                self._lang.addWord(str(category))
+        # Set the length of output
+        self.output_size = len(self.map)
 
-        while self._lang.n_words > max_dimensions:
-            if self.handle_unknown == "return_zeros":
-                necessary_words = []
-            else:  # self.handle_unknown == "unknown_token"
-                necessary_words = [UNCOMMON_WORD]
-            least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words) + 1)
-
-            word_to_remove = None
-            for word in least_occuring_words:
-                if word not in necessary_words:
-                    word_to_remove = word
-                    break
-
-            self._lang.removeWord(word_to_remove)
-
+        # For target-only, report on relative weights of classes
         if self.is_target:
-            self.index_weights = [None] * self._lang.n_words
-            if self.target_class_distribution is not None:
-                self.index_weights[0] = np.mean(list(self.target_class_distribution.values()))
-            else:
-                self.index_weights[0] = 1
-            for word in set(priming_data):
-                if self.target_class_distribution is not None:
-                    self.index_weights[self._lang.word2index[str(word)]] = 1 / self.target_class_distribution[word]
-                else:
-                    self.index_weights[self._lang.word2index[str(word)]] = 1
-            self.index_weights = torch.Tensor(self.index_weights)
+            # Equally wt. all classes
+            self.index_weights = torch.ones(size=(self.output_size,)) 
 
-        self.output_size = self._lang.n_words
-        self.rev_map = self._lang.index2word
+            # If imbalanced detected, re-weight by inverse
+            if self.target_class_distribution is not None:
+                for cat in self.map.keys():
+                    self.index_weights[self.map[cat]] = 1 / self.target_class_distribution[cat]
+
+                # If using an unknown category, then set this weight to 0
+                if self.mode:
+                    self.index_weights[0] = 0.0
+        
         self.is_prepared = True
 
-    def encode(self, column_data):
+    def encode(self, column_data) -> torch.Tensor:
+        """
+        Encodes pre-processed data into OHE. Unknown/unrecognized classes vector of all 0s.
+
+        :param column_data: Pre-processed data to encode
+        :returns Encoded data of form :math:`N_{rows} x N_{categories}`
+        """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
+        
+        ret = torch.zeros(size=(len(column_data), self.output_size))
 
-        ret = []
-        v_len = self._lang.n_words
+        for idx, word in enumerate(column_data):
+            index = self.map.get(word, None)
+            
+            if index is not None:
+                ret[idx, index] = 1
 
-        for word in column_data:
-            encoded_word = [0] * v_len
-            if word is not None:
-                word = str(word)
-                if self.handle_unknown == "return_zeros":
-                    if word in self._lang.word2index:
-                        index = self._lang.word2index[word]
-                        encoded_word[index] = 1
-                    else:
-                        # Encoding an unknown value will result in a vector of zeros
-                        log.warning('Trying to encode a value never seen before, returning vector of zeros')
-                else:  # self.handle_unknown == "unknown_token"
-                    index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
-                    encoded_word[index] = 1
-
-            ret.append(encoded_word)
+            if self.use_unknown and index is None:
+                ret[idx, 0] = 1
 
         return torch.Tensor(ret)
 
     def decode(self, encoded_data, return_raw=False):
+        """
+        """
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -116,11 +116,10 @@ class OneHotEncoder(BaseEncoder):
             # But will not affect something that is already OHE.
 
             all_zeros = not np.any(vector)
-            if self.handle_unknown == "return_zeros" and all_zeros:
-                ret.append(UNCOMMON_WORD)
-            else:  # self.handle_unknown == "unknown_token"
-                ohe_index = np.argmax(vector)
-                ret.append(self._lang.index2word[ohe_index])
+            if not self.use_unknown and all_zeros:
+                ret.append(_UNCOMMON_WORD)
+            else:  # UNK is a separate category
+                ret.append(self.rev_map[np.argmax(vector)])
 
             if return_raw:
                 probs.append(softmax(vector).tolist())
@@ -129,3 +128,35 @@ class OneHotEncoder(BaseEncoder):
             return ret, probs, self.rev_map
         else:
             return ret
+
+    def decode_probabilities(self, encoded_data: torch.Tensor):
+        """
+        Provides decoded answers, as well as a probability assignment to each data point.
+    
+        :param encoded_data: the output of a mixer model
+
+        :returns Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name
+        """
+        encoded_data_list = encoded_data.tolist()
+        ret = []
+        probs = []
+
+        for vector in encoded_data_list:
+            if not np.any(vector): # Vector of all 0s -> unknown category
+                ret.append(_UNCOMMON_WORD)
+            else:
+                ret.append(self.rev_map[np.argmax(vector)])
+
+            probs.append(self._norm_vec(vector))
+
+        return ret, probs, self.rev_map
+
+    @staticmethod
+    def _norm_vec(vec: List[float]):
+        """
+        Given a vector, normalizes so that the sum of elements is 1.
+
+        :param vec: Assigned weights for each category
+        """
+        total = sum(vec)
+        return [i/total for i in vec]
