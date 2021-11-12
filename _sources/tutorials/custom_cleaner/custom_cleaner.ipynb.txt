@@ -31,10 +31,10 @@
    "id": "happy-wheat",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:30:26.306888Z",
-     "iopub.status.busy": "2021-11-12T03:30:26.306167Z",
-     "iopub.status.idle": "2021-11-12T03:30:28.474477Z",
-     "shell.execute_reply": "2021-11-12T03:30:28.474951Z"
+     "iopub.execute_input": "2021-11-12T03:58:37.129320Z",
+     "iopub.status.busy": "2021-11-12T03:58:37.128718Z",
+     "iopub.status.idle": "2021-11-12T03:58:39.104473Z",
+     "shell.execute_reply": "2021-11-12T03:58:39.103827Z"
     }
    },
    "outputs": [],
@@ -72,10 +72,10 @@
    "id": "recognized-parish",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:30:28.483324Z",
-     "iopub.status.busy": "2021-11-12T03:30:28.482809Z",
-     "iopub.status.idle": "2021-11-12T03:30:28.550147Z",
-     "shell.execute_reply": "2021-11-12T03:30:28.550585Z"
+     "iopub.execute_input": "2021-11-12T03:58:39.109722Z",
+     "iopub.status.busy": "2021-11-12T03:58:39.108447Z",
+     "iopub.status.idle": "2021-11-12T03:58:39.175572Z",
+     "shell.execute_reply": "2021-11-12T03:58:39.175130Z"
     }
    },
    "outputs": [
@@ -209,10 +209,10 @@
    "id": "chicken-truth",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:30:28.555361Z",
-     "iopub.status.busy": "2021-11-12T03:30:28.554694Z",
-     "iopub.status.idle": "2021-11-12T03:31:16.061699Z",
-     "shell.execute_reply": "2021-11-12T03:31:16.062544Z"
+     "iopub.execute_input": "2021-11-12T03:58:39.180211Z",
+     "iopub.status.busy": "2021-11-12T03:58:39.179642Z",
+     "iopub.status.idle": "2021-11-12T03:59:23.187360Z",
+     "shell.execute_reply": "2021-11-12T03:59:23.187770Z"
     }
    },
    "outputs": [
@@ -220,19 +220,19 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-3793:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Analyzing a sample of 2478\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Infering type for: id\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Doing text detection for column: id\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Column id has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Infering type for: excerpt\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Doing text detection for column: excerpt\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Infering type for: target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Column target has data type float\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-3793:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-3713:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Analyzing a sample of 2478\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Infering type for: id\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Doing text detection for column: id\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Column id has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Infering type for: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Doing text detection for column: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Infering type for: target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Column target has data type float\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-3713:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -244,7 +244,7 @@
     "}\n",
     "\n",
     "# Generate the j{ai}son syntax\n",
-    "default_json = json_ai_from_problem(data, problem_definition)\n"
+    "json_ai = json_ai_from_problem(data, problem_definition)\n"
    ]
   },
   {
@@ -269,10 +269,10 @@
    "id": "designed-condition",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:31:16.066247Z",
-     "iopub.status.busy": "2021-11-12T03:31:16.065627Z",
-     "iopub.status.idle": "2021-11-12T03:31:16.074039Z",
-     "shell.execute_reply": "2021-11-12T03:31:16.074829Z"
+     "iopub.execute_input": "2021-11-12T03:59:23.190158Z",
+     "iopub.status.busy": "2021-11-12T03:59:23.189713Z",
+     "iopub.status.idle": "2021-11-12T03:59:23.194602Z",
+     "shell.execute_reply": "2021-11-12T03:59:23.195259Z"
     }
    },
    "outputs": [
@@ -377,7 +377,7 @@
     }
    ],
    "source": [
-    "print(default_json.to_json())"
+    "print(json_ai.to_json())"
    ]
   },
   {
@@ -388,24 +388,6 @@
     "The above shows the minimal syntax required to create a functional JSON-AI object. For each feature you consider in the dataset, we specify the name of the feature, the type of encoder (feature-engineering method) to process the feature, and key word arguments to process the encoder. For the output, we perform a similar operation, but specify the types of mixers, or algorithms used in making a predictor that can estimate the target. Lastly, we populate the \"problem_definition\" key with the ingredients for our ML pipeline.\n",
     "\n",
     "These are the only elements required to get off the ground with JSON-AI. However, we're interested in making a *custom* approach. So, let's make this syntax a file, and introduce our own changes."
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 5,
-   "id": "damaged-fluid",
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2021-11-12T03:31:16.078414Z",
-     "iopub.status.busy": "2021-11-12T03:31:16.077817Z",
-     "iopub.status.idle": "2021-11-12T03:31:16.083399Z",
-     "shell.execute_reply": "2021-11-12T03:31:16.084175Z"
-    }
-   },
-   "outputs": [],
-   "source": [
-    "with open(\"default.json\", \"w\") as fp:\n",
-    "   fp.write(default_json.to_json())"
    ]
   },
   {
@@ -432,34 +414,42 @@
    ]
   },
   {
-   "cell_type": "markdown",
-   "id": "front-preview",
-   "metadata": {},
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "325d8f1b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-11-12T03:59:23.202775Z",
+     "iopub.status.busy": "2021-11-12T03:59:23.201773Z",
+     "iopub.status.idle": "2021-11-12T03:59:23.209077Z",
+     "shell.execute_reply": "2021-11-12T03:59:23.209864Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Writing MyCustomCleaner.py\n"
+     ]
+    }
+   ],
    "source": [
-    "```\n",
-    "import re\n",
-    "from copy import deepcopy\n",
+    "%%writefile MyCustomCleaner.py\n",
     "\n",
     "import numpy as np\n",
     "import pandas as pd\n",
-    "\n",
-    "# For time-series\n",
-    "import datetime\n",
-    "from dateutil.parser import parse as parse_dt\n",
     "\n",
     "from lightwood.api.dtype import dtype\n",
     "from lightwood.helpers import text\n",
     "from lightwood.helpers.log import log\n",
     "from lightwood.api.types import TimeseriesSettings\n",
-    "from lightwood.helpers.numeric import can_be_nan_numeric\n",
     "\n",
-    "# Import NLTK for stopwords\n",
-    "import nltk\n",
     "from nltk.corpus import stopwords\n",
     "\n",
     "stop_words = set(stopwords.words(\"english\"))\n",
     "\n",
-    "from typing import Dict, List, Optional, Tuple, Callable, Union\n",
+    "from typing import Dict\n",
     "\n",
     "# Borrow functions from Lightwood's cleaner\n",
     "from lightwood.data.cleaner import (\n",
@@ -536,8 +526,7 @@
     "            to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None\n",
     "        )\n",
     "\n",
-    "    return data\n",
-    "```"
+    "    return data\n"
    ]
   },
   {
@@ -556,10 +545,10 @@
    "id": "f030f8ca",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:31:16.088384Z",
-     "iopub.status.busy": "2021-11-12T03:31:16.087413Z",
-     "iopub.status.idle": "2021-11-12T03:31:16.091869Z",
-     "shell.execute_reply": "2021-11-12T03:31:16.092579Z"
+     "iopub.execute_input": "2021-11-12T03:59:23.212820Z",
+     "iopub.status.busy": "2021-11-12T03:59:23.211859Z",
+     "iopub.status.idle": "2021-11-12T03:59:23.215746Z",
+     "shell.execute_reply": "2021-11-12T03:59:23.216375Z"
     }
    },
    "outputs": [],
@@ -621,10 +610,10 @@
    "id": "floating-patent",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:31:16.095965Z",
-     "iopub.status.busy": "2021-11-12T03:31:16.095373Z",
-     "iopub.status.idle": "2021-11-12T03:31:16.503780Z",
-     "shell.execute_reply": "2021-11-12T03:31:16.504509Z"
+     "iopub.execute_input": "2021-11-12T03:59:23.219396Z",
+     "iopub.status.busy": "2021-11-12T03:59:23.218446Z",
+     "iopub.status.idle": "2021-11-12T03:59:23.606371Z",
+     "shell.execute_reply": "2021-11-12T03:59:23.607075Z"
     }
    },
    "outputs": [
@@ -632,7 +621,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-3793:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-3713:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
      ]
     },
     {
@@ -794,12 +783,12 @@
       "\n",
       "        # Column to encoder mapping\n",
       "        self.encoders = {\n",
-      "            \"target\": Float.NumericEncoder(\n",
+      "            \"target\": NumericEncoder(\n",
       "                is_target=True,\n",
       "                positive_domain=self.statistical_analysis.positive_domain,\n",
       "            ),\n",
       "            \"excerpt\": PretrainedLangEncoder(\n",
-      "                output_type=False,\n",
+      "                output_type=self.dtype_dict[self.target],\n",
       "                stop_after=self.problem_definition.seconds_per_encoder,\n",
       "            ),\n",
       "        }\n",
@@ -943,6 +932,7 @@
       "        self.ensemble = BestOf(\n",
       "            ts_analysis=None,\n",
       "            data=encoded_test_data,\n",
+      "            args=self.pred_args,\n",
       "            accuracy_functions=self.accuracy_functions,\n",
       "            target=self.target,\n",
       "            mixers=self.mixers,\n",
@@ -1090,12 +1080,22 @@
     }
    ],
    "source": [
-    "# Make changes to your JSON-file and load the custom version\n",
-    "with open('custom.json', 'r') as fp:\n",
-    "   modified_json = JsonAI.from_json(fp.read())\n",
+    "# Make changes to your JSON-AI\n",
+    "json_ai.cleaner = {\n",
+    "        \"module\": \"MyCustomCleaner.cleaner\",\n",
+    "        \"args\": {\n",
+    "            \"identifiers\": \"$identifiers\",\n",
+    "            \"data\": \"data\",\n",
+    "            \"dtype_dict\": \"$dtype_dict\",\n",
+    "            \"target\": \"$target\",\n",
+    "            \"mode\": \"$mode\",\n",
+    "            \"timeseries_settings\": \"$problem_definition.timeseries_settings\",\n",
+    "            \"anomaly_detection\": \"$problem_definition.anomaly_detection\"\n",
+    "        }\n",
+    "}\n",
     "\n",
     "#Generate python code that fills in your pipeline\n",
-    "code = code_from_json_ai(modified_json)\n",
+    "code = code_from_json_ai(json_ai)\n",
     "\n",
     "print(code)\n",
     "\n",
@@ -1145,10 +1145,10 @@
    "id": "violent-guard",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:31:16.507989Z",
-     "iopub.status.busy": "2021-11-12T03:31:16.507481Z",
-     "iopub.status.idle": "2021-11-12T03:31:16.515526Z",
-     "shell.execute_reply": "2021-11-12T03:31:16.516223Z"
+     "iopub.execute_input": "2021-11-12T03:59:23.610387Z",
+     "iopub.status.busy": "2021-11-12T03:59:23.609449Z",
+     "iopub.status.idle": "2021-11-12T03:59:23.617440Z",
+     "shell.execute_reply": "2021-11-12T03:59:23.618095Z"
     }
    },
    "outputs": [],
@@ -1163,10 +1163,10 @@
    "id": "closing-episode",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:31:16.519572Z",
-     "iopub.status.busy": "2021-11-12T03:31:16.518698Z",
-     "iopub.status.idle": "2021-11-12T03:31:16.683921Z",
-     "shell.execute_reply": "2021-11-12T03:31:16.684685Z"
+     "iopub.execute_input": "2021-11-12T03:59:23.621080Z",
+     "iopub.status.busy": "2021-11-12T03:59:23.620141Z",
+     "iopub.status.idle": "2021-11-12T03:59:23.780781Z",
+     "shell.execute_reply": "2021-11-12T03:59:23.781463Z"
     }
    },
    "outputs": [
@@ -1174,13 +1174,13 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-3793:Performing statistical analysis on data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Finished statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Cleaning column =target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Converted target into strictly non-negative\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-3793:Cleaning column =excerpt\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-3713:Performing statistical analysis on data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Finished statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Cleaning column =target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Converted target into strictly non-negative\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-3713:Cleaning column =excerpt\u001b[0m\n"
      ]
     },
     {
@@ -1270,10 +1270,10 @@
    "id": "major-stake",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-11-12T03:31:16.688359Z",
-     "iopub.status.busy": "2021-11-12T03:31:16.687787Z",
-     "iopub.status.idle": "2021-11-12T03:31:16.697008Z",
-     "shell.execute_reply": "2021-11-12T03:31:16.697751Z"
+     "iopub.execute_input": "2021-11-12T03:59:23.784541Z",
+     "iopub.status.busy": "2021-11-12T03:59:23.783592Z",
+     "iopub.status.idle": "2021-11-12T03:59:23.791607Z",
+     "shell.execute_reply": "2021-11-12T03:59:23.792256Z"
     }
    },
    "outputs": [
