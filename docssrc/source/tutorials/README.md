@@ -14,4 +14,5 @@ Thus, the following standards are put in place for new and existing tutorials:
 4. Notebooks editing json-ai *must* do so inside the code (i.e. generate it, then accessed the required key and edit it), rather than loading the edited json-ai from a file. If you wish to display both versions and/or the diff between them just `print` it.
 5. Notebook must lack any code metadata, otherwise github actions will fail to run them (in the json representation, grep for `kernel` and you will find the global `metadata` key, set that to `{}`)
 
+
 If your totorial is anything more than a single `.ipynb` notebook and some accompanying .png or .jpg files expect it to be rejected.
