@@ -26,6 +26,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install --no-cache-dir -e .
         pip install flake8
+        sudo apt install jupyter
         pip install -r tests/requirements.txt
         echo "$DATABASE_CREDENTIALS" > ~/.mindsdb_credentials.json
         sudo chmod 644 ~/.mindsdb_credentials.json
