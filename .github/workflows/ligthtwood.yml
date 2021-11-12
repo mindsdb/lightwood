@@ -51,7 +51,9 @@ jobs:
         python -m flake8 .
     - name: Test with unittest
       run: |
-        find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;
+        find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
+        cat out.txt
+        cat out.txt | grep -zvqi error && echo 'no' || echo exit
         # Run all the "standard" tests
         python -m unittest discover tests
         # Run all the tutorials (Also serves to generate realted html, so this needs to run before docs deploy)
