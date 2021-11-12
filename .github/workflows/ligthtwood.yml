@@ -53,7 +53,7 @@ jobs:
       run: |
         find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
         cat out.txt
-        cat out.txt | grep -zvqi error && echo 'no' || echo exit
+        cat out.txt | grep -zvqi error && echo 'no' || exit
         # Run all the "standard" tests
         python -m unittest discover tests
         # Run all the tutorials (Also serves to generate realted html, so this needs to run before docs deploy)
