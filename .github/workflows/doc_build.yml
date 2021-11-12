@@ -32,6 +32,7 @@ jobs:
         find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
         cat out.txt
         cat out.txt | grep -zvqi error && echo 'no' || exit
+    - name: Make the docs
       run: |
         cd docssrc && make github
 
