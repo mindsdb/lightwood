@@ -289,7 +289,9 @@ class Neural(BaseMixer):
 
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
-        self._final_tuning(dev_data)
+
+        if not self.timeseries_settings.is_timeseries:
+            self._final_tuning(dev_data)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -341,10 +343,7 @@ class Neural(BaseMixer):
                 else:
                     decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
 
-                if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
-                    decoded_predictions.extend(decoded_prediction)
-                else:
-                    decoded_predictions.append(decoded_prediction)
+                decoded_predictions.extend(decoded_prediction)
 
             ydf = pd.DataFrame({'prediction': decoded_predictions})
 
