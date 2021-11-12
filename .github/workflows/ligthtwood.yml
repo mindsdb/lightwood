@@ -51,7 +51,6 @@ jobs:
         python -m flake8 .
     - name: Test with unittest
       run: |
-        set -e
         find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;
         # Run all the "standard" tests
         python -m unittest discover tests
