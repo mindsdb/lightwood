@@ -10,7 +10,10 @@ UNCOMMON_TOKEN = 0
 
 
 class OneHotEncoder(BaseEncoder):
+    """
 
+    Why are we handling target weighting inside encoders? Simple: we'd otherwise have to compute per-index weighting inside the mixers, rather than having that code unified inside 2x encoders. So moving this to the mixer will still involve having to pass the target encoder to the mixer, but will add the additional complexity of having to pass a weighting map to the mixer and adding class-to-index translation boilerplate + weight setting for each mixer
+    """ # noqa
     def __init__(self, is_target=False, target_weights=None, handle_unknown='unknown_token'):
         super().__init__(is_target)
         self._lang = None
