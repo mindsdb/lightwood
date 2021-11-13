@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mixers &mdash; lightwood 1.6.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+            <a href="../index.html">
+            <img src="../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.6.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">lightwood</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/mixer/mixer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="mixers">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code><a class="headerlink" href="#mixers" title="Permalink to this headline"></a></h1>
+<p>Machine learning models which learn to predict the target value using the encoded representations.</p>
+<span class="target" id="module-mixer"></span><dl class="py class">
+<dt class="sig sig-object py" id="mixer.BaseMixer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">BaseMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/base.html#BaseMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for all mixers.</p>
+<p>Mixers are the backbone of all Lightwood machine learning models. They intake encoded feature representations for every column, and are tasked with learning to fulfill the predictive requirements stated in a problem definition.</p>
+<dl class="simple">
+<dt>There are two important methods for any mixer to work:</dt><dd><ol class="arabic simple">
+<li><p><cite>fit()</cite> contains all logic to train the mixer with the training data that has been encoded by all the (already trained) Lightwood encoders for any given task.</p></li>
+<li><p><cite>__call__()</cite> is executed to generate predictions once the mixer has been trained using <cite>fit()</cite>.</p></li>
+</ol>
+</dd>
+</dl>
+<p>An additional <cite>partial_fit()</cite> method is used to update any mixer that has already been trained.</p>
+<p>Class Attributes:
+- stable: If set to <cite>True</cite>, this mixer should always work. Any mixer with <cite>stable=False</cite> can be expected to fail under some circumstances.
+- fit_data_len: Length of the training data.
+- supports_proba: For classification tasks, whether the mixer supports yielding per-class scores rather than only returning the predicted label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.BaseMixer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/base.html#BaseMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits/trains a mixer with training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.BaseMixer.fit_data_len">
+<span class="sig-name descname"><span class="pre">fit_data_len</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#mixer.BaseMixer.fit_data_len" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.BaseMixer.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/base.html#BaseMixer.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer.partial_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.BaseMixer.stable">
+<span class="sig-name descname"><span class="pre">stable</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.BaseMixer.stable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.BaseMixer.supports_proba">
+<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.BaseMixer.supports_proba" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.LightGBM">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">LightGBM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_optuna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/lightgbm.html#LightGBM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.LightGBM" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column that the mixer will learn to predict.</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dictionary with dtypes of all columns in the data.</p></li>
+<li><p><strong>input_cols</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list of column names.</p></li>
+<li><p><strong>fit_on_dev</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to perform a <cite>partial_fit()</cite> at the end of <cite>fit()</cite> using the <cite>dev</cite> data split.</p></li>
+<li><p><strong>use_optuna</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to activate the automated hyperparameter search (optuna-based). Note that setting this flag to <cite>True</cite> does not guarantee the search will run, rather, the speed criteria will be checked first (i.e., if a single iteration is too slow with respect to the time budget, the search will not take place).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.device">
+<span class="sig-name descname"><span class="pre">device</span></span><em class="property"><span class="pre">:</span> <span class="pre">torch.device</span></em><a class="headerlink" href="#mixer.LightGBM.device" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.device_str">
+<span class="sig-name descname"><span class="pre">device_str</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#mixer.LightGBM.device_str" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.LightGBM.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/lightgbm.html#LightGBM.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.LightGBM.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits the LightGBM model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for training dataset</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for dev dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.label_set">
+<span class="sig-name descname"><span class="pre">label_set</span></span><em class="property"><span class="pre">:</span> <span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mixer.LightGBM.label_set" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.max_bin">
+<span class="sig-name descname"><span class="pre">max_bin</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#mixer.LightGBM.max_bin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="pre">:</span> <span class="pre">lightgbm.sklearn.LGBMModel</span></em><a class="headerlink" href="#mixer.LightGBM.model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.num_iterations">
+<span class="sig-name descname"><span class="pre">num_iterations</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#mixer.LightGBM.num_iterations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.ordinal_encoder">
+<span class="sig-name descname"><span class="pre">ordinal_encoder</span></span><em class="property"><span class="pre">:</span> <span class="pre">sklearn.preprocessing._encoders.OrdinalEncoder</span></em><a class="headerlink" href="#mixer.LightGBM.ordinal_encoder" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.LightGBM.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/lightgbm.html#LightGBM.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.LightGBM.partial_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the LightGBM model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for (new) training dataset</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for (new) dev dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.supports_proba">
+<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.LightGBM.supports_proba" title="Permalink to this definition"></a></dt>
+<dd><p>Gradient boosting mixer with a LightGBM backbone.</p>
+<p>This mixer is a good all-rounder, due to the generally great performance of tree-based ML algorithms for supervised learning tasks with tabular data.
+If you want more information regarding the techniques that set apart LightGBM from other gradient boosters, please refer to their technical paper: “LightGBM: A Highly Efficient Gradient Boosting Decision Tree” (2017).</p>
+<dl class="simple">
+<dt>We can basically think of this mixer as a wrapper to the LightGBM interface. To do so, there are a few caveats the user may want to be aware about:</dt><dd><ul class="simple">
+<li><p>If you seek GPU utilization, LightGBM must be compiled from source instead of being installed through <cite>pip</cite>.</p></li>
+<li><p>Integer, float, and quantity <cite>dtype`s are treated as regression tasks with `L2</cite> loss. All other supported <cite>dtype`s is casted as a multiclass task with `multi_logloss</cite> loss.</p></li>
+<li><p>It has an automatic optuna-based hyperparameter search. This procedure triggers when a single iteration of LightGBM is deemed fast enough (given the time budget).</p></li>
+<li><p>A partial fit can be performed with the <cite>dev</cite> data split as part of <cite>fit</cite>, if specified with the <cite>fit_on_dev</cite> argument.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBM.use_optuna">
+<span class="sig-name descname"><span class="pre">use_optuna</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.LightGBM.use_optuna" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.LightGBMArray">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">LightGBMArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_ts_predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/lightgbm_array.html#LightGBMArray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.LightGBMArray" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
+<p>LightGBM-based model, intended for usage in time series tasks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.LightGBMArray.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/lightgbm_array.html#LightGBMArray.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.LightGBMArray.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits/trains a mixer with training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBMArray.models">
+<span class="sig-name descname"><span class="pre">models</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mixer.LightGBM" title="lightwood.mixer.lightgbm.LightGBM"><span class="pre">lightwood.mixer.lightgbm.LightGBM</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mixer.LightGBMArray.models" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBMArray.n_ts_predictions">
+<span class="sig-name descname"><span class="pre">n_ts_predictions</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#mixer.LightGBMArray.n_ts_predictions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.LightGBMArray.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/lightgbm_array.html#LightGBMArray.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.LightGBMArray.partial_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBMArray.submodel_stop_after">
+<span class="sig-name descname"><span class="pre">submodel_stop_after</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#mixer.LightGBMArray.submodel_stop_after" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBMArray.supports_proba">
+<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.LightGBMArray.supports_proba" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.LightGBMArray.target">
+<span class="sig-name descname"><span class="pre">target</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#mixer.LightGBMArray.target" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.Neural">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Neural</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/neural.html#Neural"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
+<p>The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – How long the total fitting process should take</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the target column</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Data type dictionary</p></li>
+<li><p><strong>timeseries_settings</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code>) – TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.</p></li>
+<li><p><strong>target_encoder</strong> (<a class="reference internal" href="../encoder.html#encoder.BaseEncoder" title="lightwood.encoder.base.BaseEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEncoder</span></code></a>) – Reference to the encoder used for the target</p></li>
+<li><p><strong>net</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The network type to use (<cite>DeafultNet</cite> or <cite>ArNet</cite>)</p></li>
+<li><p><strong>fit_on_dev</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If we should fit on the dev dataset</p></li>
+<li><p><strong>search_hyperparameters</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If the network should run a more through hyperparameter search (currently disabled)</p></li>
+<li><p><strong>n_epochs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – amount of epochs that the network will be trained for. Supersedes all other early stopping criteria if specified.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Neural.dtype_dict">
+<span class="sig-name descname"><span class="pre">dtype_dict</span></span><em class="property"><span class="pre">:</span> <span class="pre">dict</span></em><a class="headerlink" href="#mixer.Neural.dtype_dict" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Neural.epochs_to_best">
+<span class="sig-name descname"><span class="pre">epochs_to_best</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#mixer.Neural.epochs_to_best" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.Neural.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/neural.html#Neural.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits the Neural mixer on some data, making it ready to predit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – The EncodedDs on which to train the network</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Data used for early stopping and hyperparameter determination</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Neural.fit_on_dev">
+<span class="sig-name descname"><span class="pre">fit_on_dev</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.Neural.fit_on_dev" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Neural.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="pre">:</span> <span class="pre">torch.nn.modules.module.Module</span></em><a class="headerlink" href="#mixer.Neural.model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.Neural.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/neural.html#Neural.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural.partial_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Augments the mixer’s fit with new data, nr of epochs is based on the amount of epochs the original fitting took</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – The EncodedDs on which to train the network</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Data used for early stopping and hyperparameter determination</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Neural.supports_proba">
+<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.Neural.supports_proba" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Neural.target">
+<span class="sig-name descname"><span class="pre">target</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#mixer.Neural.target" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.Regression">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/regression.html#Regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.Regression.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/regression.html#Regression.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits/trains a mixer with training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Regression.label_map">
+<span class="sig-name descname"><span class="pre">label_map</span></span><em class="property"><span class="pre">:</span> <span class="pre">dict</span></em><a class="headerlink" href="#mixer.Regression.label_map" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Regression.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="pre">:</span> <span class="pre">sklearn.linear_model._base.LinearRegression</span></em><a class="headerlink" href="#mixer.Regression.model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.Regression.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/regression.html#Regression.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression.partial_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Regression.supports_proba">
+<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.Regression.supports_proba" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.SkTime">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">SkTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_ts_predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/sktime.html#SkTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.SkTime.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/sktime.html#SkTime.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits/trains a mixer with training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.SkTime.forecaster">
+<span class="sig-name descname"><span class="pre">forecaster</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#mixer.SkTime.forecaster" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.SkTime.n_ts_predictions">
+<span class="sig-name descname"><span class="pre">n_ts_predictions</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#mixer.SkTime.n_ts_predictions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.SkTime.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/sktime.html#SkTime.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime.partial_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Note: sktime asks for “specification of the time points for which forecasts are requested”,
+and this mixer complies by assuming forecasts will start immediately after the last observed
+value.</p>
+<p>Because of this, <cite>partial_fit</cite> ensures that both <cite>dev</cite> and <cite>test</cite> splits are used to fit the AutoARIMA model.</p>
+<p>Due to how lightwood implements the <cite>update</cite> procedure, expected inputs are (for a train-dev-test split):</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – original <cite>test</cite> split (used to validate and select model if ensemble is <cite>BestOf</cite>)</p></li>
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – includes original <cite>train</cite> and <cite>dev</cite> split</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.SkTime.supports_proba">
+<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.SkTime.supports_proba" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.SkTime.target">
+<span class="sig-name descname"><span class="pre">target</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#mixer.SkTime.target" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.Unit">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/unit.html#Unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mixer.BaseMixer" title="lightwood.mixer.base.BaseMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">lightwood.mixer.base.BaseMixer</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Time budget to train this mixer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.Unit.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/unit.html#Unit.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits/trains a mixer with training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Unit.fit_data_len">
+<span class="sig-name descname"><span class="pre">fit_data_len</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#mixer.Unit.fit_data_len" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.Unit.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightwood/mixer/unit.html#Unit.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit.partial_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="../data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Unit.stable">
+<span class="sig-name descname"><span class="pre">stable</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.Unit.stable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mixer.Unit.supports_proba">
+<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.Unit.supports_proba" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, MindsDB.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

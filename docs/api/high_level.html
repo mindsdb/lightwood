@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON-AI Config &mdash; lightwood 1.6.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data Types (dtypes)" href="dtype.html" />
+    <link rel="prev" title="API" href="../api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+            <a href="../index.html">
+            <img src="../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.6.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">JSON-AI Config</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#api.high_level.analyze_dataset">analyze_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.high_level.code_from_json_ai">code_from_json_ai</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.high_level.code_from_problem">code_from_problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.high_level.json_ai_from_problem">json_ai_from_problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.high_level.predictor_from_code">predictor_from_code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.high_level.predictor_from_json_ai">predictor_from_json_ai</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.high_level.predictor_from_problem">predictor_from_problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.high_level.predictor_from_state">predictor_from_state</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html">Lightwood API Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encode.html">Encode your data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">lightwood</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a> &raquo;</li>
+      <li>JSON-AI Config</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/high_level.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-api.high_level">
+<span id="json-ai-config"></span><h1>JSON-AI Config<a class="headerlink" href="#module-api.high_level" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.analyze_dataset">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">analyze_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#analyze_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.analyze_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>You can use this to understand and visualize the data, it’s not a part of the pipeline one would use for creating and training predictive models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAnalysis</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An object containing insights about the data (specifically the type information and statistical analysis)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.code_from_json_ai">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">code_from_json_ai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_ai</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#code_from_json_ai"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.code_from_json_ai" title="Permalink to this definition"></a></dt>
+<dd><p>Autogenerates custom code based on the details you specified inside your JsonAI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_ai</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">JsonAI</span></code>) – A <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Code (text) generate based on the <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> you created</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.code_from_problem">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">code_from_problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#code_from_problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.code_from_problem" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
+<li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The text code generated based on your data and problem specifications</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.json_ai_from_problem">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">json_ai_from_problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#json_ai_from_problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.json_ai_from_problem" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a JsonAI from your raw data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via <cite>to_dict</cite>, modify it, and then create a new object from it using <cite>lightwood.JsonAI.from_dict</cite>. It’s usually better to generate the JsonAI using this function rather than writing it from scratch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
+<li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonAI</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> object generated based on your data and problem specifications</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.predictor_from_code">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">predictor_from_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#predictor_from_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.predictor_from_code" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>code</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The <code class="docutils literal notranslate"><span class="pre">Predictor</span></code>’s code in text form</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictorInterface</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A lightwood <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.predictor_from_json_ai">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">predictor_from_json_ai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_ai</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#predictor_from_json_ai"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.predictor_from_json_ai" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a ready-to-train <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object based on the details you specified inside your JsonAI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_ai</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">JsonAI</span></code>) – A <code class="docutils literal notranslate"><span class="pre">JsonAI</span></code> object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictorInterface</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A lightwood <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.predictor_from_problem">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">predictor_from_problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#predictor_from_problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.predictor_from_problem" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a ready-to-train <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object from some raw data and a <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>. Do not use this if you want to edit the JsonAI first. Usually you’d want to next train this predictor by calling the <code class="docutils literal notranslate"><span class="pre">learn</span></code> method on the same dataframe used to create it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The raw data</p></li>
+<li><p><strong>problem_definition</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – The manual specifications for your predictive problem</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictorInterface</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A lightwood <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="api.high_level.predictor_from_state">
+<span class="sig-prename descclassname"><span class="pre">api.high_level.</span></span><span class="sig-name descname"><span class="pre">predictor_from_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/high_level.html#predictor_from_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.high_level.predictor_from_state" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_file</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The file containing the pickle resulting from calling <code class="docutils literal notranslate"><span class="pre">save</span></code> on a <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object</p></li>
+<li><p><strong>code</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The <code class="docutils literal notranslate"><span class="pre">Predictor</span></code>’s code in text form</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictorInterface</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A lightwood <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dtype.html" class="btn btn-neutral float-right" title="Data Types (dtypes)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, MindsDB.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
