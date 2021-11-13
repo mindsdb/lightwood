@@ -1,6 +1,5 @@
 import time
-from typing import Dict, List, Optional, Set
-
+from typing import Dict, List, Set
 import torch
 import optuna
 import lightgbm
@@ -191,10 +190,6 @@ class LightGBM(BaseMixer):
                                          weight=data['train']['weights'])
         dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
                                        weight=data['dev']['weights'])
-
-        if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
-            weights_per_row = 
-            train_dataset.set_weight()
 
         # Determine time per iterations
         start = time.time()

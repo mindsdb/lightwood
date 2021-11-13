@@ -55,7 +55,7 @@ class OneHotEncoder(BaseEncoder):
         while self._lang.n_words > max_dimensions:
             if self.handle_unknown == "return_zeros":
                 necessary_words = []
-            else:  # self.handle_unknown == "unknown_token"
+            elif self.handle_unknown == "unknown_token":
                 necessary_words = [UNCOMMON_WORD]
             least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words) + 1)
 

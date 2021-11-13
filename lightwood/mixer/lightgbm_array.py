@@ -27,7 +27,7 @@ class LightGBMArray(BaseMixer):
         self.submodel_stop_after = stop_after / n_ts_predictions
         self.target = target
         dtype_dict[target] = dtype.float
-        self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev, 
+        self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev,
                        False, target_encoder)
                        for _ in range(n_ts_predictions)]
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
