@@ -6,7 +6,6 @@ on:
     branches:
       - stable
       - staging
-      - jupyter_actions
 
 
 jobs:
@@ -26,7 +25,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir -e .
-        pip install flake8 jupyter
+        pip install flake8
         pip install -r tests/requirements.txt
         echo "$DATABASE_CREDENTIALS" > ~/.mindsdb_credentials.json
         sudo chmod 644 ~/.mindsdb_credentials.json
@@ -53,12 +52,6 @@ jobs:
       run: |
         # Run all the "standard" tests
         python -m unittest discover tests
-    - name: Test using tutorial notebooks
-      run: |
-        find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
-        cat out.txt
-        cat out.txt | grep -zvqi exception && echo 'no errors detected' || exit
-        cat out.txt | grep -zvqi error && echo 'no errors detected' || exit
 
   deploy:
     runs-on: ubuntu-latest
