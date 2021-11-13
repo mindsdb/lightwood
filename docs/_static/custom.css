@@ -1,0 +1,289 @@
+/* override css for readable.css */
+
+/*  styles/fonts to match http://mdanalysis.org (see public/css) */
+/* MindsDB --shamrock: #00b06d; */
+/* MindsDB --dark: #2c263f;  */
+/* MindsDB --aqua-marine: #4dd9ca;  */
+/* MindsDB --wheat: #fedc8c;  */
+/* MindsDB --watermelon: #f25c63;  */
+/* MindsDB --blueberry: #6751ad;  */
+/* MindsDB --white: #ffffff;  */
+/* MindsDB --slate-grey: #5d6970;  */
+
+/*
+.wy-nav-side {
+    font-size: 1.6em;
+    font-weight: 500;
+}
+*/
+
+.wy-nav-side .toctree-l1 {
+    font-size: 1.5em;
+    font-weight: 500;  
+}
+
+.wy-nav-side .toctree-l2 {
+    font-size: 0.7em !important;
+    font-weight: 400 !important;  
+}
+
+.wy-nav-side .toctree-l3 {
+    font-size: 0.9em !important;
+    font-weight: 400 !important;  
+}
+
+/* .rst-content dl.class dt, .rst-content dl.function dt */
+
+.field-list dt.field-odd {
+    font-size: 13px !important;
+    color:#2c263f !important;
+    padding-left: 0rem !important;
+}
+
+.field-list dt.field-even {
+    font-size: 13px !important;
+    color:#2c263f !important;
+    padding-left: 0rem !important;
+}
+
+.field-list dd.field-odd {
+    font-size: 13px !important;
+    color:#2c263f !important;
+    margin-left: 12px !important;
+}
+
+.field-list dd.field-even {
+    font-size: 13px !important;
+    color:#2c263f !important;
+    margin-left: 12px !important;
+}
+
+
+.sig {
+    background:rgba(254, 220, 140, 0.3) !important;
+    border-top: solid 0px #2c263f !important;
+    border-left: 0px !important;
+    padding-left: 8px;
+    padding-right: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.sig .sig-prename {
+    color: #2c263f;
+}
+
+.sig .sig-name {
+    color: #2c263f;
+}
+
+.sig .sig-paren {
+    color: rgb(93, 105, 112);
+}
+.sig .sig-param {
+    color: rgb(93, 105, 112);
+}
+
+.sig .property {
+    color: rgb(93, 105, 112);
+}
+
+div.rst-content a {
+    color: #00b06d;
+    text-decoration: none;
+}
+
+div.rst-content a:visited {
+    color: #00b06d;
+}
+ 
+a:hover {
+    color: #00b06d !important;
+    text-decoration: underline;
+}
+
+/*
+body {
+    font-family: 'PT Sans', Helvetica, Arial, 'sans-serif';
+    font-size: 17px;    
+}
+
+div.body {
+    color: #000000;
+}
+
+div.sphinxsidebar a:hover {
+    text-decoration: none !important;
+}
+
+div.sphinxsidebar p {
+    color: #2c263f;
+}
+
+// Home MDAnalysis colour
+.wy-side-nav-search > a {
+    color: #343131;
+}
+
+// Side MDAnalysis version colour
+.wy-side-nav-search > div.version {
+    color: #2c263f;
+}
+
+// Menubar caption colour
+div.wy-menu-vertical span.caption-text {
+    color: #00b06d;
+}
+
+// Mobile layout menubar option
+nav.wy-nav-top {
+    background: #343131;
+}
+
+// Menu search bar outline (default blue)
+.wy-side-nav-search input[type="text"] {
+    border-color: #2c263f;
+}
+
+
+// -- body styles ---------------------------------------------------------
+
+// Different coloured links for sidebar vs body)
+
+
+pre, tt, code {
+    font-family: Menlo, Monaco, 'Courier New', monospace
+}
+
+
+div.body h1 {
+    font-weight: bolder;
+}
+
+a.headerlink {
+    color: #2c263f;
+    font-size: 0.8em;
+    padding: 0 4px 0 4px;
+    text-decoration: none;
+}
+ 
+a.headerlink:hover {
+    background-color: #2c263f;
+    color: #fff;
+}
+
+// ------- admonition boxes ------- 
+
+div.admonition {
+    margin: 10px 0px;
+    padding: 10px 10px;
+}
+
+div.admonition p.admonition-title {
+    font-size: 100%;
+    font-weight: bolder;
+}
+
+// ----- Tables -----
+
+// override table width restrictions
+// wrap tables instead of scrolling 
+
+@media screen and (min-width: 767px) {
+
+    .wy-table-responsive table td, .wy-table-responsive table th {
+       // !important prevents the common CSS stylesheets from overriding
+          this as on RTD they are loaded after this stylesheet
+       white-space: normal !important;
+    }
+ 
+    .wy-table-responsive {
+       overflow: visible !important;
+       max-width: 100% !important;
+    }
+ }
+
+// ----- Field lists ------ 
+
+.section > dl.field-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+}
+
+dl.field-list > dt::after {
+    content: ":";
+}
+
+.rst-content dl:not(.docutils) dt {
+    background: none;
+    color: #000000;
+    border-top: none;
+}
+
+.section > dl.field-list dt {
+    margin: 0;
+    padding: 0;
+    flex-basis: 20%;
+    display: block;
+}
+
+.section > dl.field-list > dd {
+    flex-basis: 70%;
+    margin: 0;
+}
+
+.section > dl.field-list > dd p {
+    margin: 0;
+}
+
+// ----- MDAnalysis coloured elements ------ 
+
+.rst-content .viewcode-link, .rst-content .viewcode-back {
+    color: #2c263f;
+}
+
+.rst-content .guilabel {
+    background: #efefef;
+    border: 1px solid #2c263f;
+}
+
+
+.rst-content .seealso p.admonition-title {
+    background: #2c263f;
+}
+
+.rst-content .seealso {
+    background: #e3e3e3;
+}
+
+.rst-content  .error p.admonition-title, .rst-content  .warning p.admonition-title {
+    background: #F45F4B;
+}
+
+.rst-content .error, .rst-content .warning {
+    background: #FFEEED;
+}
+
+
+
+.rst-content .caution, .rst-content .note, .rst-content .important {
+    background: #FFEBD0;
+}
+
+.rst-content code:not(.xref).literal {
+    color: #ca6500;
+}
+
+.rst-content .caution p.admonition-title, .rst-content .note p.admonition-title, .rst-content .important p.admonition-title  {
+    background: #00b06d;
+}
+
+.rst-content dl.class dt, .rst-content dl.function dt {
+    color: #ca6500;
+    background: #FFEBD0;
+    border-top: solid 3px #00b06d;
+}
+
+*/

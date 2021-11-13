@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial - Introduction to Lightwood’s statistical analysis &mdash; lightwood 1.6.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+            <a href="../../index.html">
+            <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.6.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">lightwood</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial - Introduction to Lightwood’s statistical analysis</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/tutorials/tutorial_data_analysis/tutorial_data_analysis.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Tutorial---Introduction-to-Lightwood’s-statistical-analysis">
+<h1>Tutorial - Introduction to Lightwood’s statistical analysis<a class="headerlink" href="#Tutorial---Introduction-to-Lightwood’s-statistical-analysis" title="Permalink to this headline"></a></h1>
+<p>As you might already know, Lightwood is designed to be a flexible machine learning (ML) library that is able to abstract and automate the entire ML pipeline. Crucially, it is also designed to be extended or modified very easily according to your needs, essentially offering the entire spectrum between fully automated AutoML and a lightweight wrapper for customized ML pipelines.</p>
+<p>As such, we can identify several different customizable “phases” in the process. The relevant phase for this tutorial is the “statistical analysis” that is normally ran in two different places:</p>
+<ul class="simple">
+<li><p>To generate a Json AI object from some dataset and a problem definition</p></li>
+<li><p>To train a Lightwood predictor</p></li>
+</ul>
+<p>In both cases, we generate a <code class="docutils literal notranslate"><span class="pre">StatisticalAnalyzer</span></code> object to store key facts about the data we are using, and refer to them afterwards.</p>
+<section id="Objective">
+<h2>Objective<a class="headerlink" href="#Objective" title="Permalink to this headline"></a></h2>
+<p>In this tutorial, we will take a look at the automatically generated statistical analysis for a sample dataset.</p>
+</section>
+<section id="Step-1:-load-the-dataset-and-define-the-predictive-task">
+<h2>Step 1: load the dataset and define the predictive task<a class="headerlink" href="#Step-1:-load-the-dataset-and-define-the-predictive-task" title="Permalink to this headline"></a></h2>
+<p>The first thing we need is a dataset to analyze. Let’s use Human Development Index information:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/hdi.csv&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Population</th>
+      <th>Area (sq. mi.)</th>
+      <th>Pop. Density</th>
+      <th>GDP ($ per capita)</th>
+      <th>Literacy (%)</th>
+      <th>Infant mortality</th>
+      <th>Development Index</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>9944201</td>
+      <td>1284000</td>
+      <td>7.7</td>
+      <td>1200</td>
+      <td>47.5</td>
+      <td>93.82</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>5450661</td>
+      <td>43094</td>
+      <td>126.5</td>
+      <td>31100</td>
+      <td>100.0</td>
+      <td>4.56</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>26783383</td>
+      <td>437072</td>
+      <td>61.3</td>
+      <td>1500</td>
+      <td>40.4</td>
+      <td>50.25</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>9439</td>
+      <td>102</td>
+      <td>92.5</td>
+      <td>3400</td>
+      <td>97.0</td>
+      <td>7.35</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3431932</td>
+      <td>176220</td>
+      <td>19.5</td>
+      <td>12800</td>
+      <td>98.0</td>
+      <td>11.95</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>This dataset has a handful of important factors to each country’s development index, as well as the index itself (very high, high, medium or low). Each row gives information about a country’s status in terms of their population size, density, and GDP per capita, among others.</p>
+<p>We can see there are columns with integer (e.g. <code class="docutils literal notranslate"><span class="pre">Population</span></code>), float (<code class="docutils literal notranslate"><span class="pre">Pop.</span> <span class="pre">Density</span></code>) or categorical (e.g. <code class="docutils literal notranslate"><span class="pre">Development</span> <span class="pre">Index</span></code>) data.</p>
+<p>The task we will consider here is to predicting the development index of each nation based on the rest of the available information.</p>
+<p>Lightwood provides an abstraction called <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> to specify the target column of a dataset, along with other important parameters that you might want to define (for a complete list, check the documentation).</p>
+<p>We will create a simple one:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span>
+
+<span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Development Index&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">fields</span>
+
+<span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">ProblemDefinition</span><span class="p">)}</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;target&#39;: &#39;Development Index&#39;,
+ &#39;pct_invalid&#39;: 2,
+ &#39;unbias_target&#39;: True,
+ &#39;seconds_per_mixer&#39;: None,
+ &#39;seconds_per_encoder&#39;: None,
+ &#39;time_aim&#39;: None,
+ &#39;target_weights&#39;: None,
+ &#39;positive_domain&#39;: False,
+ &#39;timeseries_settings&#39;: TimeseriesSettings(is_timeseries=False, order_by=None, window=None, group_by=None, use_previous_target=True, nr_predictions=None, historical_columns=None, target_type=&#39;&#39;, allow_incomplete_history=False),
+ &#39;anomaly_detection&#39;: True,
+ &#39;ignore_features&#39;: [],
+ &#39;fit_on_all&#39;: True,
+ &#39;strict_mode&#39;: True,
+ &#39;seed_nr&#39;: 420}
+</pre></div></div>
+</div>
+<p>Notice how, even though we only defined what the <code class="docutils literal notranslate"><span class="pre">target</span></code> was, there are a bunch of additional parameters that have been assigned a default value. That is fine for our purposes, but remember that you can set any of these according to your own predictive needs.</p>
+<p>We also need to infer the type of each column. There is a method for this, <code class="docutils literal notranslate"><span class="pre">infer_types</span></code>, that we can use:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">lightwood.data</span> <span class="kn">import</span> <span class="n">infer_types</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
+
+<span class="n">type_information</span> <span class="o">=</span> <span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">)</span>
+
+<span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">TypeInformation</span><span class="p">)}</span>  <span class="c1"># show the fields this dataclass has</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+<span class="ansi-green-fg">INFO:lightwood-42831:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:lightwood-42831:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-42831:Using 15 processes to deduct types.</span>
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;additional_info&#39;, &#39;dtypes&#39;, &#39;identifiers&#39;}
+</pre></div></div>
+</div>
+<p>We can now check the inferred types:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;Population&#39;: &#39;integer&#39;,
+ &#39;Area (sq. mi.)&#39;: &#39;integer&#39;,
+ &#39;Pop. Density &#39;: &#39;float&#39;,
+ &#39;GDP ($ per capita)&#39;: &#39;integer&#39;,
+ &#39;Literacy (%)&#39;: &#39;float&#39;,
+ &#39;Infant mortality &#39;: &#39;float&#39;,
+ &#39;Development Index&#39;: &#39;categorical&#39;}
+</pre></div></div>
+</div>
+<p>Looks OK!</p>
+</section>
+<section id="Step-2:-Run-the-statistical-analysis">
+<h2>Step 2: Run the statistical analysis<a class="headerlink" href="#Step-2:-Run-the-statistical-analysis" title="Permalink to this headline"></a></h2>
+<p>We now have all the necessary ingredients to run the statistical analysis. Normally, you would ask Lightwood for a Json AI object to be generated according to the dataset and the problem definition. Internally, Lightwood will then run the statistical analysis for the provided dataset, and store it for later usage.</p>
+<p>Afterwards, you would make modifications to the Json AI as needed (for some examples, check out the other tutorials in <code class="docutils literal notranslate"><span class="pre">lightwood/examples/json_ai</span></code>), and finally generate a predictor object to learn and predict the task.</p>
+<p>In this case though, we will call it directly:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">StatisticalAnalysis</span>  <span class="c1"># the class where everything is stored</span>
+<span class="kn">from</span> <span class="nn">lightwood.data</span> <span class="kn">import</span> <span class="n">statistical_analysis</span>      <span class="c1"># generates an instance of the class</span>
+
+<span class="n">stan</span> <span class="o">=</span> <span class="n">statistical_analysis</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+                            <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span>
+                            <span class="n">type_information</span><span class="o">.</span><span class="n">identifiers</span><span class="p">,</span>
+                            <span class="n">problem_definition</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+<span class="ansi-green-fg">INFO:lightwood-42831:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-42831:Finished statistical analysis</span>
+</pre></div></div>
+</div>
+</section>
+<section id="Step-3:-Peeking-inside">
+<h2>Step 3: Peeking inside<a class="headerlink" href="#Step-3:-Peeking-inside" title="Permalink to this headline"></a></h2>
+<p>Now that our analysis is complete, we can check what Lightwood thinks of this dataset:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">StatisticalAnalysis</span><span class="p">)}</span>  <span class="c1"># show the fields this dataclass has</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;avg_words_per_sentence&#39;,
+ &#39;bias&#39;,
+ &#39;buckets&#39;,
+ &#39;df_std_dev&#39;,
+ &#39;distinct&#39;,
+ &#39;histograms&#39;,
+ &#39;missing&#39;,
+ &#39;nr_rows&#39;,
+ &#39;positive_domain&#39;,
+ &#39;target_class_distribution&#39;,
+ &#39;train_observed_classes&#39;}
+</pre></div></div>
+</div>
+<p>Some of these fields aren’t really applicable nor useful for this dataset, so let’s only check the ones that are.</p>
+<p>We can start with a very basic question: how many rows does the dataset have?</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">stan</span><span class="o">.</span><span class="n">nr_rows</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+225
+</pre></div></div>
+</div>
+<p>Here are some other insights produced in the analysis:</p>
+<section id="Amount-of-missing-information">
+<h3>Amount of missing information<a class="headerlink" href="#Amount-of-missing-information" title="Permalink to this headline"></a></h3>
+<p>Is there missing information in the dataset?</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">stan</span><span class="o">.</span><span class="n">missing</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;Population&#39;: 0.0,
+ &#39;Area (sq. mi.)&#39;: 0.0,
+ &#39;Pop. Density &#39;: 0.0,
+ &#39;GDP ($ per capita)&#39;: 0.0,
+ &#39;Literacy (%)&#39;: 0.0,
+ &#39;Infant mortality &#39;: 0.0,
+ &#39;Development Index&#39;: 0.0}
+</pre></div></div>
+</div>
+<p>Seemingly not!</p>
+</section>
+<section id="Buckets-per-column">
+<h3>Buckets per column<a class="headerlink" href="#Buckets-per-column" title="Permalink to this headline"></a></h3>
+<p>For numerical colums, values are bucketized into discrete ranges.</p>
+<p>Each categorical column gets a bucket per each observed class.</p>
+<p>Let’s check an example for one of each:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">stan</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="s1">&#39;Development Index&#39;</span><span class="p">]</span>  <span class="c1"># categorical</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;3&#39;, &#39;4&#39;, &#39;2&#39;, &#39;1&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">stan</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="s1">&#39;GDP ($ per capita)&#39;</span><span class="p">]</span>  <span class="c1"># numerical</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[500,
+ 1592,
+ 2684,
+ 3776,
+ 4868,
+ 5960,
+ 7052,
+ 8144,
+ 9236,
+ 10328,
+ 11420,
+ 12512,
+ 13604,
+ 14696,
+ 15788,
+ 16880,
+ 17972,
+ 19064,
+ 20156,
+ 21248,
+ 22340,
+ 23432,
+ 24524,
+ 25616,
+ 26708,
+ 27800,
+ 28892,
+ 29984,
+ 31076,
+ 32168,
+ 33260,
+ 34352,
+ 35444,
+ 36536,
+ 37628,
+ 38720,
+ 39812,
+ 40904,
+ 41996,
+ 43088,
+ 44180,
+ 45272,
+ 46364,
+ 47456,
+ 48548,
+ 49640,
+ 50732,
+ 51824,
+ 52916,
+ 54008]
+</pre></div></div>
+</div>
+</section>
+<section id="Bias-per-column">
+<h3>Bias per column<a class="headerlink" href="#Bias-per-column" title="Permalink to this headline"></a></h3>
+<p>We can also check whether each column has buckets of data that exhibit some degree of bias:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">colname</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">stan</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">colname</span><span class="si">}</span><span class="s2">&#39; entropy: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="s1">&#39;entropy&#39;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Biased buckets: </span><span class="si">{</span><span class="n">col</span><span class="p">[</span><span class="s1">&#39;biased_buckets&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="s1">&#39;biased_buckets&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;Population&#39; entropy: 0.212
+Biased buckets: [131403695, 78845027, 52565693, 26286360, 7026]
+
+&#39;Area (sq. mi.)&#39; entropy: 0.294
+
+
+&#39;Pop. Density &#39; entropy: 0.143
+Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
+
+&#39;GDP ($ per capita)&#39; entropy: 0.76
+
+
+&#39;Literacy (%)&#39; entropy: 0.753
+
+
+&#39;Infant mortality &#39; entropy: 0.767
+
+
+&#39;Development Index&#39; entropy: 0.89
+
+
+</pre></div></div>
+</div>
+</section>
+<section id="Column-histograms">
+<h3>Column histograms<a class="headerlink" href="#Column-histograms" title="Permalink to this headline"></a></h3>
+<p>Finally, let’s plot histograms for some columns:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># generate color map</span>
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="o">%</span> <span class="n">cmap</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+
+<span class="c1"># column barplot</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">colname</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="n">stan</span><span class="o">.</span><span class="n">histograms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])),</span> <span class="n">hist</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Histogram for column </span><span class="si">{</span><span class="n">colname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_0.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_1.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_2.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_2.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_3.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_3.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_4.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_4.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_5.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_5.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_6.png" src="../../_images/tutorials_tutorial_data_analysis_tutorial_data_analysis_28_6.png" />
+</div>
+</div>
+<p>This way, it is fairly easy to understand how imbalanced the target distribution might be, along with a quick pass to search for outliers, for example.</p>
+</section>
+</section>
+</section>
+<section id="Final-thoughts">
+<h1>Final thoughts<a class="headerlink" href="#Final-thoughts" title="Permalink to this headline"></a></h1>
+<p>Lightwood automatically tries to leverage all the information provided by a <code class="docutils literal notranslate"><span class="pre">StatisticalAnalysis</span></code> instance when generating a predictor for any given dataset and problem definition. Additionally, it is a valuable tool to explore the data as a user.</p>
+<p>Finally, be aware that you can access these insights when creating custom blocks (e.g. encoders, mixers, or analyzers) if you want, you just need to pass whatever is necessary as arguments to these blocks inside the Json AI object.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, MindsDB.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

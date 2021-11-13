@@ -7,14 +7,16 @@ from lightwood.encoder.base import BaseEncoder
 # Exists mainly for datasets with loads of binary flags where OHE can be too slow to fit
 class BinaryEncoder(BaseEncoder):
 
-    def __init__(self, is_target=False, target_class_distribution=None):
+    def __init__(self, is_target=False, target_weights=None):
         super().__init__(is_target)
         self.map = {}
         self.rev_map = {}
         self.output_size = 2
+
+        self.target_weights = None
+        self.index_weights = None
         if self.is_target:
-            self.target_class_distribution = target_class_distribution
-            self.index_weights = None
+            self.target_weights = target_weights
 
     def prepare(self, priming_data):
         if self.is_prepared:
@@ -32,8 +34,8 @@ class BinaryEncoder(BaseEncoder):
         if self.is_target:
             self.index_weights = [None, None]
             for word in self.map:
-                if self.target_class_distribution is not None:
-                    self.index_weights[self.map[word]] = 1 / self.target_class_distribution[word]
+                if self.target_weights is not None:
+                    self.index_weights[self.map[word]] = 1 / self.target_weights[word]
                 else:
                     self.index_weights[self.map[word]] = 1
 
