@@ -248,7 +248,7 @@ class LightGBM(BaseMixer):
         data = self._to_dataset(data, output_dtype)
 
         train_dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'],
-                                         weight=data['train']['weights'])
+                                         weight=data['retrain']['weights'])
         dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
                                        weight=data['dev']['weights'])
 
