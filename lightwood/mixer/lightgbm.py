@@ -188,6 +188,7 @@ class LightGBM(BaseMixer):
         # Prepare the data
         train_dataset = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'],
                                          weight=data['train']['weights'])
+
         dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
                                        weight=data['dev']['weights'])
 
