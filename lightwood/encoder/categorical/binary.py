@@ -5,6 +5,7 @@ from lightwood.helpers.constants import _UNCOMMON_WORD
 
 from typing import Dict, List, Iterable
 
+
 class BinaryEncoder(BaseEncoder):
     def __init__(
         self,
@@ -30,11 +31,11 @@ class BinaryEncoder(BaseEncoder):
 
         target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
 
-        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation.
+        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. 
 
         :param is_target: Whether encoder featurizes target column
         :param target_weights: Percentage of total population represented by each category (from [0, 1]).
-        """ # noqa
+        """  # noqa
 
         self.map = {}  # category name -> index
         self.rev_map = {}  # index -> category name
@@ -47,7 +48,6 @@ class BinaryEncoder(BaseEncoder):
         if self.is_target:
             self.target_weights = target_weights
 
-
     def prepare(self, priming_data: Iterable[str]):
         """
         Given priming data, create a map/inverse-map corresponding category name to index (and vice versa).
@@ -55,11 +55,11 @@ class BinaryEncoder(BaseEncoder):
         If encoder represents target, also instantiates `inv_target_weights` which enables downstream models to weight classes.
 
         :param priming_data: Binary data to encode
-        """ # noqa
+        """  # noqa
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        unq_cats = np.unique([i for i in priming_data if i is not None]).tolist() 
+        unq_cats = np.unique([i for i in priming_data if i is not None]).tolist()
         self.map = {cat: indx for indx, cat in enumerate(unq_cats)}
         self.rev_map = {indx: cat for cat, indx in self.map.items()}
 
@@ -69,6 +69,9 @@ class BinaryEncoder(BaseEncoder):
 
         # For target-only, report on relative weights of classes
         if self.is_target:
+
+            if sum([np.isclose(i, 0) for i in self.target_weights.values()]) > 0:
+                raise ValueError('Target weights cannot be 0')
 
             self.inv_target_weights = torch.Tensor([1, 1])  # Equally wt. both classes
 
@@ -87,7 +90,7 @@ class BinaryEncoder(BaseEncoder):
 
         :param column_data: Pre-processed data to encode
         :returns Encoded data of form :math:`N_{rows} x 2`
-        """ # noqa
+        """  # noqa
         if not self.is_prepared:
             raise Exception(
                 'You need to call "prepare" before calling "encode" or "decode".'
@@ -113,7 +116,7 @@ class BinaryEncoder(BaseEncoder):
         :param encoded_data: the output of a mixer model
 
         :returns: Decoded values for each data point
-        """ # noqa
+        """  # noqa
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -133,7 +136,7 @@ class BinaryEncoder(BaseEncoder):
         :param encoded_data: the output of a mixer model
 
         :returns: Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name
-        """ # noqa
+        """  # noqa
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
@@ -154,6 +157,6 @@ class BinaryEncoder(BaseEncoder):
         Given a vector, normalizes so that the sum of elements is 1.
 
         :param vec: Assigned weights for each category
-        """ # noqa
+        """  # noqa
         total = sum(vec)
         return [i / total for i in vec]
