@@ -20,7 +20,7 @@ class BinaryEncoder(BaseEncoder):
            A &= [1, 0] \\
            B &= [0, 1]
 
-        This encoder is a specialized case of one-hot encoding (OHE); unknown categories are explicitly handled as [0, 0].
+        This encoder is a specialized case of one-hot encoding (OHE); unknown categories are explicitly handled as [0, 0]. Unknowns may only be reported if the input row value is NULL (or python `None` type) or if new data, after the encoder is prepared, has examples outside the feature map.
 
         When data is typed with Lightwood, this class is only deployed if an input data type is explicitly recognized as binary (i.e. the column has only 2 unique values like True/False). If future data shows a new category (thus the data is no longer truly binary), this encoder will no longer be appropriate unless you are comfortable mapping ALL new classes as [0, 0].
 
