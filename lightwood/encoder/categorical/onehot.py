@@ -23,12 +23,19 @@ class OneHotEncoder(BaseEncoder):
 
             (2) "use_unknown=False": Makes an :math:`N` length vector for :math:`N` categories, where an empty vector of 0s indicates an unknown/missing category.
 
-        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`, from the `StatisticalAnalysis` phase. The `target_weights` provides the relative percentage of each class in the data which is important for imbalanced populations. 
+        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes. 
+
+        By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/10/10 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
+
+        target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
+
+        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation.
 
         :param is_target: True if this encoder featurizes the target column
         :param target_weights: Percentage of total population represented by each category (between [0, 1]).
         :param mode: True uses an extra dimension to account for unknown/out-of-distribution categories
         """ # noqa
+
         super().__init__(is_target)
         self.map = None # category name -> index
         self.rev_map = None # index -> category name
@@ -36,7 +43,8 @@ class OneHotEncoder(BaseEncoder):
 
         if self.is_target:
             self.target_weights = target_weights
-            self.index_weights = None
+            self.inv_target_weights = None
+
 
     def prepare(self, priming_data: Iterable[str]):
         """
@@ -62,19 +70,21 @@ class OneHotEncoder(BaseEncoder):
         self.output_size = len(self.map)
 
         # For target-only, report on relative weights of classes
+        # Each dimension of the inv_target_weights respects `map`
         if self.is_target:
             # Equally wt. all classes
-            self.index_weights = torch.ones(size=(self.output_size,)) 
+            self.inv_target_weights = torch.ones(size=(self.output_size,)) 
 
-            # If imbalanced detected, re-weight by inverse
+            # If imbalanced detected, weight by inverse
             if self.target_weights is not None:
                 for cat in self.map.keys():
-                    self.index_weights[self.map[cat]] = 1 / self.target_weights[cat]
+                    self.inv_target_weights[self.map[cat]] = 1 / self.target_weights[cat]
 
-                # If using an unknown category, then set this weight to 0
+                # If using an unknown category, set to smallest possible value
                 if self.mode:
-                    self.index_weights[0] = 0.0
-        
+                    self.inv_target_weights[0] = np.min(self.inv_target_weights)
+                    self.target_weights[_UNCOMMON_WORD] = np.min(self.target_weights)
+
         self.is_prepared = True
 
     def encode(self, column_data: Iterable[str]) -> torch.Tensor:
