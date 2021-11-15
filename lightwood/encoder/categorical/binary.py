@@ -31,7 +31,7 @@ class BinaryEncoder(BaseEncoder):
 
         target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
 
-        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. 
+        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
 
         :param is_target: Whether encoder featurizes target column
         :param target_weights: Percentage of total population represented by each category (from [0, 1]).
