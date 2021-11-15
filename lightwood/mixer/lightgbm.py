@@ -197,7 +197,7 @@ class LightGBM(BaseMixer):
         feature_fraction, val_score: inf:   0%|                                 | 0/7 [00:00<?, ?it/s]
         free(): double free detected in tcache 2
 
-        Olnly happens sometimes and I can find no pattern as to when, happens for multiple input and target types.
+        Only happens sometimes and I can find no pattern as to when, happens for multiple input and target types.
 
         Why does the following crash happen and what does it mean? No idea, closest relationships I can find is /w optuna modifying parameters after the dataset is create: https://github.com/microsoft/LightGBM/issues/4019 | But why this would apply here makes no sense. Could have to do with the `train` process of lightgbm itself setting a "set only once" property on a dataset when it starts. Dunno, if you find out replace this comment with the real reason.
         ''' # noqa
