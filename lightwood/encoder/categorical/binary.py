@@ -9,7 +9,7 @@ class BinaryEncoder(BaseEncoder):
     def __init__(
         self,
         is_target: bool = False,
-        target_class_distribution: Dict[str, float] = None,
+        target_weights: Dict[str, float] = None,
     ):
         super().__init__(is_target)
         """
@@ -24,10 +24,10 @@ class BinaryEncoder(BaseEncoder):
 
         When data is typed with Lightwood, this class is only deployed if an input data type is explicitly recognized as binary (i.e. the column has only 2 unique values like True/False). If future data shows a new category (thus the data is no longer truly binary), this encoder will no longer be appropriate unless you are comfortable mapping ALL new classes as [0, 0].
 
-        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations.
+        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`, from the `StatisticalAnalysis` phase. The `target_weights` provides the relative percentage of each class in the data which is important for imbalanced populations.
 
         :param is_target: Whether encoder featurizes target column
-        :param target_class_distribution: Percentage of total population represented by each category (from [0, 1]).
+        :param target_weights: Percentage of total population represented by each category (from [0, 1]).
         """ # noqa
 
         self.map = {}  # category name -> index
@@ -37,7 +37,7 @@ class BinaryEncoder(BaseEncoder):
 
         # Weight-balance info if encoder represents target
         if self.is_target:
-            self.target_class_distribution = target_class_distribution
+            self.target_weights = target_weights
             self.index_weights = None
 
     def prepare(self, priming_data: Iterable[str]):
@@ -64,10 +64,10 @@ class BinaryEncoder(BaseEncoder):
             self.index_weights = torch.Tensor([1, 1])  # Equally wt. both classes
 
             # If imbalanced detected, re-weight by inverse
-            if self.target_class_distribution is not None:
+            if self.target_weights is not None:
                 for cat in self.map.keys():
                     self.index_weights[self.map[cat]] = (
-                        1 / self.target_class_distribution[cat]
+                        1 / self.target_weights[cat]
                     )
 
         self.is_prepared = True

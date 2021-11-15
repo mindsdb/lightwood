@@ -12,7 +12,7 @@ class OneHotEncoder(BaseEncoder):
     def __init__(
         self,
         is_target: bool = False,
-        target_class_distribution: Dict[str, float] = None,
+        target_weights: Dict[str, float] = None,
         use_unknown: bool = True,
     ):
         """
@@ -23,10 +23,10 @@ class OneHotEncoder(BaseEncoder):
 
             (2) "use_unknown=False": Makes an :math:`N` length vector for :math:`N` categories, where an empty vector of 0s indicates an unknown/missing category.
 
-        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_class_distribution`, from the `StatisticalAnalysis` phase. The `target_class_distribution` provides the relative percentage of each class in the data which is important for imbalanced populations. 
+        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`, from the `StatisticalAnalysis` phase. The `target_weights` provides the relative percentage of each class in the data which is important for imbalanced populations. 
 
         :param is_target: True if this encoder featurizes the target column
-        :param target_class_distribution: Percentage of total population represented by each category (between [0, 1]).
+        :param target_weights: Percentage of total population represented by each category (between [0, 1]).
         :param mode: True uses an extra dimension to account for unknown/out-of-distribution categories
         """ # noqa
         super().__init__(is_target)
@@ -35,7 +35,7 @@ class OneHotEncoder(BaseEncoder):
         self.use_unknown = use_unknown
 
         if self.is_target:
-            self.target_class_distribution = target_class_distribution
+            self.target_weights = target_weights
             self.index_weights = None
 
     def prepare(self, priming_data: Iterable[str]):
@@ -67,9 +67,9 @@ class OneHotEncoder(BaseEncoder):
             self.index_weights = torch.ones(size=(self.output_size,)) 
 
             # If imbalanced detected, re-weight by inverse
-            if self.target_class_distribution is not None:
+            if self.target_weights is not None:
                 for cat in self.map.keys():
-                    self.index_weights[self.map[cat]] = 1 / self.target_class_distribution[cat]
+                    self.index_weights[self.map[cat]] = 1 / self.target_weights[cat]
 
                 # If using an unknown category, then set this weight to 0
                 if self.mode:
