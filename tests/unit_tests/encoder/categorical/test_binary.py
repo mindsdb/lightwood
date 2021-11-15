@@ -8,13 +8,14 @@ from lightwood.encoder.categorical.binary import (
 
 from lightwood.helpers.constants import _UNCOMMON_WORD, _UNCOMMON_TOKEN
 
+
 class TestBinary(unittest.TestCase):
     """ Test the OHE vector encoder """
 
     def test_encode_decode_with_binary(self):
         """
         Test binary example case.
-        """    
+        """
         # Generate categories with None
         data = ["apple", "apple", "orange", None, "apple", "orange"]
 
@@ -30,14 +31,39 @@ class TestBinary(unittest.TestCase):
         enc_data = enc.encode(data)
         dec_data = enc.decode(enc.encode(test_data))
 
-        self.assertTrue((enc_data == Tensor([
-            [1., 0.,],  # category 1
-            [1., 0.,],  # category 3
-            [0., 1.,],  # category 4
-            [0., 0.,],  # None
-            [1., 0.,],  # category 3
-            [0., 1.,],  # category 3
-        ])).all())
+        self.assertTrue(
+            (
+                enc_data
+                == Tensor(
+                    [
+                        [
+                            1.0,
+                            0.0,
+                        ],  # category 1
+                        [
+                            1.0,
+                            0.0,
+                        ],  # category 3
+                        [
+                            0.0,
+                            1.0,
+                        ],  # category 4
+                        [
+                            0.0,
+                            0.0,
+                        ],  # None
+                        [
+                            1.0,
+                            0.0,
+                        ],  # category 3
+                        [
+                            0.0,
+                            1.0,
+                        ],  # category 3
+                    ]
+                )
+            ).all()
+        )
 
         for i in range(len(ytest)):
             self.assertTrue(dec_data[i] == ytest[i])
@@ -62,7 +88,7 @@ class TestBinary(unittest.TestCase):
 
         # Make data to represent random weights that do not sum to 1
         torch.manual_seed(1)
-        wt_vec = torch.rand(size=(len(data), len(enc.map)))*10
+        wt_vec = torch.rand(size=(len(data), len(enc.map))) * 10
 
         _, probs, _ = enc.decode_probabilities(wt_vec)
         self.assertTrue(np.all([np.isclose(sum(i), 1) for i in probs]))
@@ -74,16 +100,16 @@ class TestBinary(unittest.TestCase):
         data = ["apple", "apple", "orange", "apple", "apple", "orange"]
 
         # Scaled weights (sum to 1)
-        tweights = {"apple": 4/6 , "orange": 2/6}
+        tweights = {"apple": 4 / 6, "orange": 2 / 6}
 
         # Get the ground-truth inverse weights
-        iweights = Tensor([1/i for i in tweights.values()])
+        iweights = Tensor([1 / i for i in tweights.values()])
 
         enc = BinaryEncoder(is_target=True, target_weights=tweights)
         enc.prepare(data)
 
         # Check inverse weights correct
-        self.assertTrue(np.all(((enc.inv_target_weights - iweights)==0).tolist()))
+        self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
 
     def test_distro_nonzeroweights(self):
         """
@@ -91,17 +117,16 @@ class TestBinary(unittest.TestCase):
 
         This handles cases where people may choose 1/class_size for weights
         """
-
         data = ["apple", "apple", "orange", "apple", "apple", "orange"]
         tweights = {"apple": 100, "orange": 5000}
 
         # Get the ground-truth inverse weights
-        iweights = Tensor([1/i for i in tweights.values()])
+        iweights = Tensor([1 / i for i in tweights.values()])
 
         enc = BinaryEncoder(is_target=True, target_weights=tweights)
         enc.prepare(data)
 
-        self.assertTrue(np.all(((enc.inv_target_weights - iweights)==0).tolist()))
+        self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
 
     def test_distro_zero(self):
         """ Tests edge cause where target weights have a 0 weight which is unacceptable for downstream processing (inverse weights will 1/0) """
@@ -114,6 +139,7 @@ class TestBinary(unittest.TestCase):
 
         # Check if 0-weight class is rejected
         self.assertRaises(ValueError, enc.prepare, data)
+
 
 if __name__ == "__main__":
     unittest.main()
