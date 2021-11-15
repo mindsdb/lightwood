@@ -74,8 +74,9 @@ class OneHotEncoder(BaseEncoder):
         if self.is_target:
             self.index_weights = [1] * self._lang.n_words
             if self.target_weights is not None:
-                self.index_weights[0] = np.mean(list(self.target_weights.values()))
-                self.target_weights[UNCOMMON_WORD] = self.index_weights[0]
+                uncommon_weight = np.min(list(self.target_weights.values()))
+                self.index_weights[0] = uncommon_weight
+                self.target_weights[UNCOMMON_WORD] = uncommon_weight
             for word in set(priming_data):
                 if self.target_weights is not None:
                     self.index_weights[self._lang.word2index[str(word)]] = 1 / self.target_weights[word]
