@@ -185,17 +185,25 @@ class LightGBM(BaseMixer):
         if self.device_str == 'gpu':
             self.params['gpu_use_dp'] = True
 
-        # Prepare the data
-        train_dataset = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'],
-                                         weight=data['train']['weights'])
-
-        dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
-                                       weight=data['dev']['weights'])
-
         # Determine time per iterations
         start = time.time()
         self.params['num_iterations'] = 1
-        self.model = lightgbm.train(self.params, train_dataset, verbose_eval=False)
+        '''
+        Why construst a dataset here instead of using the training dataset?
+
+        Because it guards against the following crash:
+
+        WARNING:lightwood-1613058:Exception: Cannot change feature_pre_filter after constructed Dataset handle. when training mixer: <lightwood.mixer.lightgbm.LightGBM object at 0x7f39148eae20>
+        feature_fraction, val_score: inf:   0%|                                 | 0/7 [00:00<?, ?it/s]
+        free(): double free detected in tcache 2
+
+        Olnly happens sometimes and I can find no pattern as to when, happens for multiple input and target types.
+
+        Why does the following crash happen and what does it mean? No idea, closest relationships I can find is /w optuna modifying parameters after the dataset is create: https://github.com/microsoft/LightGBM/issues/4019 | But why this would apply here makes no sense. Could have to do with the `train` process of lightgbm itself setting a "set only once" property on a dataset when it starts. Dunno, if you find out replace this comment with the real reason.
+        ''' # noqa
+
+        self.model = lightgbm.train(self.params, lightgbm.Dataset(data['train']['data'], label=data['train']
+                                    ['label_data'], weight=data['train']['weights']), verbose_eval=False)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
@@ -221,6 +229,13 @@ class LightGBM(BaseMixer):
         self.params['num_iterations'] = int(self.num_iterations)
 
         self.params['early_stopping_rounds'] = 5
+
+        # Prepare the data
+        train_dataset = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'],
+                                         weight=data['train']['weights'])
+
+        dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
+                                       weight=data['dev']['weights'])
 
         self.model = model_generator.train(
             self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
