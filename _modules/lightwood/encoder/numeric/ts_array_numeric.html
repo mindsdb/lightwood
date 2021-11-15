@@ -166,20 +166,26 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.encoder.numeric.ts_array_numeric</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
 <span class="kn">from</span> <span class="nn">lightwood.encoder</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.numeric</span> <span class="kn">import</span> <span class="n">TsNumericEncoder</span>
 
 
 <div class="viewcode-block" id="TsArrayNumericEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder">[docs]</a><span class="k">class</span> <span class="nc">TsArrayNumericEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Variant of vanilla numerical encoder, supports dynamic mean re-scaling</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This encoder handles arrays of numerical time series data by wrapping the numerical encoder with behavior specific to time series tasks.</span>
+<span class="sd">        </span>
+<span class="sd">        :param timesteps: length of forecasting horizon, as defined by TimeseriesSettings.window.</span>
+<span class="sd">        :param is_target: whether this encoder corresponds to the target column.</span>
+<span class="sd">        :param positive_domain: whether the column domain is expected to be positive numbers.</span>
+<span class="sd">        :param grouped_by: what columns, if any, are considered to group the original column and yield multiple time series.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">TsArrayNumericEncoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="n">is_target</span><span class="p">)</span>
-        <span class="c1"># time series normalization params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normalizers</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">group_combinations</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="n">grouped_by</span>
@@ -188,24 +194,50 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span> <span class="o">=</span> <span class="n">TsNumericEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="n">is_target</span><span class="p">,</span> <span class="n">positive_domain</span><span class="o">=</span><span class="n">positive_domain</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="n">grouped_by</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_window</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">output_size</span>
 
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
+<div class="viewcode-block" id="TsArrayNumericEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method prepares the underlying time series numerical encoder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="TsArrayNumericEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="p">{}):</span>
+<div class="viewcode-block" id="TsArrayNumericEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">],</span> <span class="n">dependency_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param dependency_data: dict with grouped_by column info, to retrieve the correct normalizer for each datum</span>
-<span class="sd">        :return: tensor with shape (batch, NxK) where N: self.data_window and K: sub-encoder # of output features</span>
+<span class="sd">        Encodes a list of time series arrays using the underlying time series numerical encoder.</span>
+<span class="sd">        </span>
+<span class="sd">        :param data: list of numerical values to encode. Its length is determined by the tss.window parameter, and all data points belong to the same time series.</span>
+<span class="sd">        :param dependency_data: dict with values of each group_by column for the time series, used to retrieve the correct normalizer.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: list of encoded time series arrays. Tensor is (len(data), N x K)-shaped, where N: self.data_window and K: sub-encoder # of output features.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">normalizers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalizers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">normalizers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalizers</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dependency_data</span><span class="p">:</span>
             <span class="n">dependency_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;__default&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encode_one</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="n">dependency_data</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TsArrayNumericEncoder.encode_one"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.encode_one">[docs]</a>    <span class="k">def</span> <span class="nf">encode_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">dependency_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encodes a single windowed slice of any given time series.</span>
+
+<span class="sd">        :param data: windowed slice of a numerical time series.</span>
+<span class="sd">        :param dependency_data: used to determine the correct normalizer for the input.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: an encoded time series array, as per the underlying `TsNumericEncoder` object. </span>
+<span class="sd">        The output of this encoder for all time steps is concatenated, so the final shape of the tensor is (1, NxK), where N: self.data_window and K: sub-encoder # of output features. </span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="k">for</span> <span class="n">data_point</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="n">data_point</span><span class="p">],</span> <span class="n">dependency_data</span><span class="o">=</span><span class="n">dependency_data</span><span class="p">))</span>
 
@@ -217,7 +249,15 @@
 
         <span class="k">return</span> <span class="n">ret</span></div>
 
-    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TsArrayNumericEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decodes a list of encoded arrays into values in their original domains.</span>
+
+<span class="sd">        :param encoded_values: encoded slices of numerical time series.</span>
+<span class="sd">        :param dependency_data: used to determine the correct normalizer for the input.</span>
+
+<span class="sd">        :return: a list of decoded time series arrays.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span><span class="p">)</span>
 
@@ -226,9 +266,24 @@
                                                 <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">output_size</span><span class="p">)</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">encoded_timestep</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">encoded_values</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoded_timestep</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">dependency_data</span><span class="o">=</span><span class="n">dependency_data</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">encoded_values</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decode_one</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="n">dependency_data</span><span class="p">))</span>
+
         <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="TsArrayNumericEncoder.decode_one"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.decode_one">[docs]</a>    <span class="k">def</span> <span class="nf">decode_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_value</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decodes a single window of a time series into its original domain.</span>
+
+<span class="sd">        :param encoded_value: encoded slice of a numerical time series.</span>
+<span class="sd">        :param dependency_data: used to determine the correct normalizer for the input.</span>
+
+<span class="sd">        :return: a list of length TimeseriesSettings.window with decoded values for the forecasted time series.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">encoded_timestep</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">encoded_value</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoded_timestep</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">dependency_data</span><span class="o">=</span><span class="n">dependency_data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ret</span></div></div>
 </pre></div>
 
            </div>

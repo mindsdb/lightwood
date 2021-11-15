@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Using your own pre-processing methods in Lightwood &mdash; lightwood 1.6.1 documentation</title>
+  <title>Build your own training/testing split &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -150,13 +150,13 @@
     
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Using your own pre-processing methods in Lightwood</li>
+      <li>Build your own training/testing split</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../../_sources/tutorials/custom_cleaner/custom_cleaner.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/tutorials/custom_splitter/custom_splitter.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -439,15 +439,16 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Using-your-own-pre-processing-methods-in-Lightwood">
-<h1>Using your own pre-processing methods in Lightwood<a class="headerlink" href="#Using-your-own-pre-processing-methods-in-Lightwood" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Build-your-own-training/testing-split">
+<h1>Build your own training/testing split<a class="headerlink" href="#Build-your-own-training/testing-split" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="Date:-2021.10.07">
 <h2>Date: 2021.10.07<a class="headerlink" href="#Date:-2021.10.07" title="Permalink to this headline">¶</a></h2>
-<p>For the notebook below, we’ll be exploring how to make <strong>custom pre-processing</strong> methods for our data. Lightwood has standard cleaning protocols to handle a variety of different data types, however, we want users to feel comfortable augmenting and addressing their own changes. To do so, we’ll highlight the approach we would take below:</p>
-<p>We will use data from <a class="reference external" href="https://www.kaggle.com/c/commonlitreadabilityprize/data?select=train.csv">Kaggle</a>.</p>
-<p>The data has several columns, but ultimately aims to use text to predict a <em>readability score</em>. There are also some columns that I do not want to use when making predictions, such as <code class="docutils literal notranslate"><span class="pre">url_legal</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>, among others.</p>
-<p>In this tutorial, we’re going to focus on making changes to 2 columns: (1) <strong>excerpt</strong>, a text column, and ensuring we remove stop words using NLTK. (2) <strong>target</strong>, the goal to predict; we will make this explicitly non-negative.</p>
-<p>Note, for this ACTUAL challenge, negative and positive are meaningful. We are using this as an example dataset to demonstrate how you can make changes to your underlying dataset and proceed to building powerful predictors.</p>
+<p>When working with machine learning data, splitting into a “train”, “dev” (or validation) and “test”) set is important. Models use <strong>train</strong> data to learn representations and update their parameters; <strong>dev</strong> or validation data is reserved to see how the model may perform on unknown predictions. While it may not be explicitly trained on, it can be used as a stopping criteria, for hyper-parameter tuning, or as a simple sanity check. Lastly, <strong>test</strong> data is always reserved, hidden from the model,
+as a final pass to see what models perform best.</p>
+<p>Lightwood supports a variety of <strong>encoders</strong> (Feature engineering procedures) and <strong>mixers</strong> (predictor algorithms that go from feature vectors to the target). Given the diversity of algorithms, it is appropriate to split data into these three categories when <em>preparing</em> encoders or <em>fitting</em> mixers.</p>
+<p>Our default approach stratifies labeled data to ensure your train, validation, and test sets are equally represented in all classes. However, in many instances you may want a custom technique to build your own splits. We’ve included the <code class="docutils literal notranslate"><span class="pre">splitter</span></code> functionality (default found in <code class="docutils literal notranslate"><span class="pre">lightwood.data.splitter</span></code>) to enable you to build your own.</p>
+<p>In the following problem, we shall work with a Kaggle dataset around credit card fraud (found <a class="reference external" href="https://www.kaggle.com/mlg-ulb/creditcardfraud">here</a>). Fraud detection is difficult because the events we are interested in catching are thankfully rare events. Because of that, there is a large <strong>imbalance of classes</strong> (in fact, in this dataset, less than 1% of the data are the rare-event).</p>
+<p>In a supervised technique, we may want to ensure our training data sees the rare event of interest. A random shuffle could potentially miss rare events. We will implement <strong>SMOTE</strong> to increase the number of positive classes in our training data.</p>
 <p>Let’s get started!</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -458,6 +459,7 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -469,12 +471,14 @@ div.rendered_html tbody tr:hover {
                       <span class="n">json_ai_from_problem</span><span class="p">,</span> \
                       <span class="n">code_from_json_ai</span><span class="p">,</span> \
                       <span class="n">predictor_from_code</span>
+
+<span class="kn">import</span> <span class="nn">imblearn</span> <span class="c1"># Vers 0.5.0 minimum requirement</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="1)-Load-your-data">
 <h3>1) Load your data<a class="headerlink" href="#1)-Load-your-data" title="Permalink to this headline">¶</a></h3>
-<p>Lightwood uses <code class="docutils literal notranslate"><span class="pre">pandas</span></code> in order to handle datasets, as this is a very standard package in datascience. We can load our dataset using pandas in the following manner (make sure your data is in the data folder!)</p>
+<p>Lightwood works with <code class="docutils literal notranslate"><span class="pre">pandas</span></code> DataFrames. We can use pandas to load our data. Please download the dataset from the above link and place it in a folder called <code class="docutils literal notranslate"><span class="pre">data/</span></code> where this notebook is located.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -482,7 +486,7 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Load the data</span>
 <span class="n">ddir</span> <span class="o">=</span> <span class="s2">&quot;data/&quot;</span>
-<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ddir</span><span class="p">,</span> <span class="s2">&quot;train.csv.zip&quot;</span><span class="p">)</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ddir</span><span class="p">,</span> <span class="s2">&quot;creditcard.csv.zip&quot;</span><span class="p">)</span>
 
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -512,80 +516,203 @@ div.rendered_html tbody tr:hover {
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>id</th>
-      <th>url_legal</th>
-      <th>license</th>
-      <th>excerpt</th>
-      <th>target</th>
-      <th>standard_error</th>
+      <th>Time</th>
+      <th>V1</th>
+      <th>V2</th>
+      <th>V3</th>
+      <th>V4</th>
+      <th>V5</th>
+      <th>V6</th>
+      <th>V7</th>
+      <th>V8</th>
+      <th>V9</th>
+      <th>...</th>
+      <th>V21</th>
+      <th>V22</th>
+      <th>V23</th>
+      <th>V24</th>
+      <th>V25</th>
+      <th>V26</th>
+      <th>V27</th>
+      <th>V28</th>
+      <th>Amount</th>
+      <th>Class</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>c12129c31</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>When the young people returned to the ballroom...</td>
-      <td>-0.340259</td>
-      <td>0.464009</td>
+      <td>0.0</td>
+      <td>-1.359807</td>
+      <td>-0.072781</td>
+      <td>2.536347</td>
+      <td>1.378155</td>
+      <td>-0.338321</td>
+      <td>0.462388</td>
+      <td>0.239599</td>
+      <td>0.098698</td>
+      <td>0.363787</td>
+      <td>...</td>
+      <td>-0.018307</td>
+      <td>0.277838</td>
+      <td>-0.110474</td>
+      <td>0.066928</td>
+      <td>0.128539</td>
+      <td>-0.189115</td>
+      <td>0.133558</td>
+      <td>-0.021053</td>
+      <td>149.62</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>85aa80a4c</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>All through dinner time, Mrs. Fayre was somewh...</td>
-      <td>-0.315372</td>
-      <td>0.480805</td>
+      <td>0.0</td>
+      <td>1.191857</td>
+      <td>0.266151</td>
+      <td>0.166480</td>
+      <td>0.448154</td>
+      <td>0.060018</td>
+      <td>-0.082361</td>
+      <td>-0.078803</td>
+      <td>0.085102</td>
+      <td>-0.255425</td>
+      <td>...</td>
+      <td>-0.225775</td>
+      <td>-0.638672</td>
+      <td>0.101288</td>
+      <td>-0.339846</td>
+      <td>0.167170</td>
+      <td>0.125895</td>
+      <td>-0.008983</td>
+      <td>0.014724</td>
+      <td>2.69</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>b69ac6792</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>As Roger had predicted, the snow departed as q...</td>
-      <td>-0.580118</td>
-      <td>0.476676</td>
+      <td>1.0</td>
+      <td>-1.358354</td>
+      <td>-1.340163</td>
+      <td>1.773209</td>
+      <td>0.379780</td>
+      <td>-0.503198</td>
+      <td>1.800499</td>
+      <td>0.791461</td>
+      <td>0.247676</td>
+      <td>-1.514654</td>
+      <td>...</td>
+      <td>0.247998</td>
+      <td>0.771679</td>
+      <td>0.909412</td>
+      <td>-0.689281</td>
+      <td>-0.327642</td>
+      <td>-0.139097</td>
+      <td>-0.055353</td>
+      <td>-0.059752</td>
+      <td>378.66</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>dd1000b26</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>And outside before the palace a great garden w...</td>
-      <td>-1.054013</td>
-      <td>0.450007</td>
+      <td>1.0</td>
+      <td>-0.966272</td>
+      <td>-0.185226</td>
+      <td>1.792993</td>
+      <td>-0.863291</td>
+      <td>-0.010309</td>
+      <td>1.247203</td>
+      <td>0.237609</td>
+      <td>0.377436</td>
+      <td>-1.387024</td>
+      <td>...</td>
+      <td>-0.108300</td>
+      <td>0.005274</td>
+      <td>-0.190321</td>
+      <td>-1.175575</td>
+      <td>0.647376</td>
+      <td>-0.221929</td>
+      <td>0.062723</td>
+      <td>0.061458</td>
+      <td>123.50</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>37c1b32fb</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>Once upon a time there were Three Bears who li...</td>
-      <td>0.247197</td>
-      <td>0.510845</td>
+      <td>2.0</td>
+      <td>-1.158233</td>
+      <td>0.877737</td>
+      <td>1.548718</td>
+      <td>0.403034</td>
+      <td>-0.407193</td>
+      <td>0.095921</td>
+      <td>0.592941</td>
+      <td>-0.270533</td>
+      <td>0.817739</td>
+      <td>...</td>
+      <td>-0.009431</td>
+      <td>0.798278</td>
+      <td>-0.137458</td>
+      <td>0.141267</td>
+      <td>-0.206010</td>
+      <td>0.502292</td>
+      <td>0.219422</td>
+      <td>0.215153</td>
+      <td>69.99</td>
+      <td>0</td>
     </tr>
   </tbody>
 </table>
+<p>5 rows × 31 columns</p>
 </div></div>
 </div>
-<p>We see <strong>6 columns</strong>, a variety which are numerical, missing numbers, text, and identifiers or “ids”. For our predictive task, we are only interested in 2 such columns, the <strong>excerpt</strong> and <strong>target</strong> columns.</p>
-</div>
-<div class="section" id="2)-Create-a-JSON-AI-default-object">
-<h3>2) Create a JSON-AI default object<a class="headerlink" href="#2)-Create-a-JSON-AI-default-object" title="Permalink to this headline">¶</a></h3>
-<p>Before we create a custom cleaner object, let’s first create JSON-AI syntax for our problem based on its specifications. We can do so by setting up a <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>. The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> allows us to specify the target, the column we intend to predict, along with other details.</p>
-<p>The end goal of JSON-AI is to provide **a set of instructions on how to compile a machine learning pipeline*.</p>
-<p>In this case, let’s specify our target, the aptly named <strong>target</strong> column. We will also tell JSON-AI to throw away features we never intend to use, such as “url_legal”, “license”, and “standard_error”. We can do so in the following lines:</p>
+<p>We see <strong>31 columns</strong>, most of these columns appear numerical. Due to confidentiality reasons, the Kaggle dataset mentions that the columns labeled <span class="math notranslate nohighlight">\(V_i\)</span> indicate principle components (PCs) from a PCA analysis of the original data from the credit card company. There is also a “Time” and “Amount”, two original features that remained. The time references time after the first transaction in the dataset, and amount is how much money was considered in the transaction.</p>
+<p>You can also see a heavy imbalance in the two classes below:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Distribution of Classes&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0.5, 1.0, &#39;Distribution of Classes&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_custom_splitter_custom_splitter_5_1.png" src="../../_images/tutorials_custom_splitter_custom_splitter_5_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="2)-Create-a-JSON-AI-default-object">
+<h3>2) Create a JSON-AI default object<a class="headerlink" href="#2)-Create-a-JSON-AI-default-object" title="Permalink to this headline">¶</a></h3>
+<p>We will now create JSON-AI syntax for our problem based on its specifications. We can do so by setting up a <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>. The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> allows us to specify the target, the column we intend to predict, along with other details.</p>
+<p>The end goal of JSON-AI is to provide **a set of instructions on how to compile a machine learning pipeline*.</p>
+<p>Our target here is called “<strong>Class</strong>”, which indicates “0” for no fraud and “1” for fraud. We’ll generate the JSON-AI with the minimal syntax:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Setup the problem definition</span>
 <span class="n">problem_definition</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span>
-    <span class="s2">&quot;ignore_features&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;url_legal&quot;</span><span class="p">,</span> <span class="s2">&quot;license&quot;</span><span class="p">,</span> <span class="s2">&quot;standard_error&quot;</span><span class="p">]</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Class&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># Generate the j{ai}son syntax</span>
@@ -599,20 +726,74 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:lightwood-50752:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]
-INFO:lightwood-50752:Analyzing a sample of 2478
-INFO:lightwood-50752:from a total population of 2834, this is equivalent to 87.4% of your data.
-INFO:lightwood-50752:Using 15 processes to deduct types.
-INFO:lightwood-50752:Infering type for: id
-INFO:lightwood-50752:Infering type for: target
-INFO:lightwood-50752:Infering type for: excerpt
-INFO:lightwood-50752:Column target has data type float
-INFO:lightwood-50752:Doing text detection for column: id
-INFO:lightwood-50752:Doing text detection for column: excerpt
-INFO:lightwood-50752:Column id has data type categorical
-WARNING:lightwood-50752:Column id is an identifier of type &#34;Hash-like identifier&#34;
-INFO:lightwood-50752:Starting statistical analysis
-INFO:lightwood-50752:Finished statistical analysis
+INFO:lightwood-51500:Dropping features: []
+INFO:lightwood-51500:Analyzing a sample of 18424
+INFO:lightwood-51500:from a total population of 284807, this is equivalent to 6.5% of your data.
+INFO:lightwood-51500:Using 15 processes to deduct types.
+INFO:lightwood-51500:Infering type for: Time
+INFO:lightwood-51500:Infering type for: V1
+INFO:lightwood-51500:Infering type for: V2
+INFO:lightwood-51500:Infering type for: V3
+INFO:lightwood-51500:Infering type for: V4
+INFO:lightwood-51500:Infering type for: V5
+INFO:lightwood-51500:Infering type for: V6
+INFO:lightwood-51500:Infering type for: V7
+INFO:lightwood-51500:Infering type for: V8
+INFO:lightwood-51500:Infering type for: V9
+INFO:lightwood-51500:Infering type for: V10
+INFO:lightwood-51500:Infering type for: V11
+INFO:lightwood-51500:Infering type for: V12
+INFO:lightwood-51500:Infering type for: V13
+INFO:lightwood-51500:Infering type for: V14
+INFO:lightwood-51500:Column Time has data type integer
+INFO:lightwood-51500:Infering type for: V15
+INFO:lightwood-51500:Column V4 has data type float
+INFO:lightwood-51500:Infering type for: V16
+INFO:lightwood-51500:Column V2 has data type float
+INFO:lightwood-51500:Infering type for: V17
+INFO:lightwood-51500:Column V3 has data type float
+INFO:lightwood-51500:Column V1 has data type float
+INFO:lightwood-51500:Infering type for: V18
+INFO:lightwood-51500:Infering type for: V19
+INFO:lightwood-51500:Column V6 has data type float
+INFO:lightwood-51500:Column V5 has data type float
+INFO:lightwood-51500:Infering type for: V20
+INFO:lightwood-51500:Column V7 has data type float
+INFO:lightwood-51500:Infering type for: V21
+INFO:lightwood-51500:Column V8 has data type float
+INFO:lightwood-51500:Infering type for: V22
+INFO:lightwood-51500:Infering type for: V23
+INFO:lightwood-51500:Column V9 has data type float
+INFO:lightwood-51500:Infering type for: V24
+INFO:lightwood-51500:Column V10 has data type float
+INFO:lightwood-51500:Column V13 has data type float
+INFO:lightwood-51500:Column V12 has data type float
+INFO:lightwood-51500:Infering type for: V25
+INFO:lightwood-51500:Column V11 has data type float
+INFO:lightwood-51500:Infering type for: V26
+INFO:lightwood-51500:Column V14 has data type float
+INFO:lightwood-51500:Infering type for: V28
+INFO:lightwood-51500:Infering type for: V27
+INFO:lightwood-51500:Infering type for: Amount
+INFO:lightwood-51500:Column V15 has data type float
+INFO:lightwood-51500:Infering type for: Class
+INFO:lightwood-51500:Column V16 has data type float
+INFO:lightwood-51500:Column V17 has data type float
+INFO:lightwood-51500:Column Class has data type binary
+INFO:lightwood-51500:Column Amount has data type float
+INFO:lightwood-51500:Column V23 has data type float
+INFO:lightwood-51500:Column V18 has data type float
+INFO:lightwood-51500:Column V19 has data type float
+INFO:lightwood-51500:Column V20 has data type float
+INFO:lightwood-51500:Column V28 has data type float
+INFO:lightwood-51500:Column V21 has data type float
+INFO:lightwood-51500:Column V22 has data type float
+INFO:lightwood-51500:Column V26 has data type float
+INFO:lightwood-51500:Column V24 has data type float
+INFO:lightwood-51500:Column V25 has data type float
+INFO:lightwood-51500:Column V27 has data type float
+INFO:lightwood-51500:Starting statistical analysis
+INFO:lightwood-51500:Finished statistical analysis
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -626,125 +807,8 @@ MyCustomSplitter.py
 MyCustomSplitter
 </pre></div></div>
 </div>
-<p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
-<ol class="arabic simple">
-<li><p>It drops the features we specify in the <code class="docutils literal notranslate"><span class="pre">ignore_features</span></code> argument</p></li>
-<li><p>It takes a small sample of data from each column to <em>automatically infer the data type</em></p></li>
-<li><p>For each column that was not ignored, it identifies the most likely data type.</p></li>
-<li><p>It notices that “ID” is a hash-like-identifier.</p></li>
-<li><p>It conducts a small statistical analysis on the distributions in order to generate syntax.</p></li>
-</ol>
-<p>As soon as you request a JSON-AI object, Lightwood automatically creates functional syntax from your data. You can see it as follows:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">default_json</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{
-    &#34;features&#34;: {
-        &#34;excerpt&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Rich_Text.PretrainedLangEncoder&#34;,
-                &#34;args&#34;: {
-                    &#34;output_type&#34;: &#34;$dtype_dict[$target]&#34;,
-                    &#34;stop_after&#34;: &#34;$problem_definition.seconds_per_encoder&#34;
-                }
-            }
-        }
-    },
-    &#34;outputs&#34;: {
-        &#34;target&#34;: {
-            &#34;data_dtype&#34;: &#34;float&#34;,
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Float.NumericEncoder&#34;,
-                &#34;args&#34;: {
-                    &#34;is_target&#34;: &#34;True&#34;,
-                    &#34;positive_domain&#34;: &#34;$statistical_analysis.positive_domain&#34;
-                }
-            },
-            &#34;mixers&#34;: [
-                {
-                    &#34;module&#34;: &#34;Neural&#34;,
-                    &#34;args&#34;: {
-                        &#34;fit_on_dev&#34;: true,
-                        &#34;stop_after&#34;: &#34;$problem_definition.seconds_per_mixer&#34;,
-                        &#34;search_hyperparameters&#34;: true
-                    }
-                },
-                {
-                    &#34;module&#34;: &#34;LightGBM&#34;,
-                    &#34;args&#34;: {
-                        &#34;stop_after&#34;: &#34;$problem_definition.seconds_per_mixer&#34;,
-                        &#34;fit_on_dev&#34;: true
-                    }
-                },
-                {
-                    &#34;module&#34;: &#34;Regression&#34;,
-                    &#34;args&#34;: {
-                        &#34;stop_after&#34;: &#34;$problem_definition.seconds_per_mixer&#34;
-                    }
-                }
-            ],
-            &#34;ensemble&#34;: {
-                &#34;module&#34;: &#34;BestOf&#34;,
-                &#34;args&#34;: {
-                    &#34;args&#34;: &#34;$pred_args&#34;,
-                    &#34;accuracy_functions&#34;: &#34;$accuracy_functions&#34;,
-                    &#34;ts_analysis&#34;: null
-                }
-            }
-        }
-    },
-    &#34;problem_definition&#34;: {
-        &#34;target&#34;: &#34;target&#34;,
-        &#34;pct_invalid&#34;: 2,
-        &#34;unbias_target&#34;: true,
-        &#34;seconds_per_mixer&#34;: 1582,
-        &#34;seconds_per_encoder&#34;: 12749,
-        &#34;time_aim&#34;: 7780.458037514903,
-        &#34;target_weights&#34;: null,
-        &#34;positive_domain&#34;: false,
-        &#34;timeseries_settings&#34;: {
-            &#34;is_timeseries&#34;: false,
-            &#34;order_by&#34;: null,
-            &#34;window&#34;: null,
-            &#34;group_by&#34;: null,
-            &#34;use_previous_target&#34;: true,
-            &#34;nr_predictions&#34;: null,
-            &#34;historical_columns&#34;: null,
-            &#34;target_type&#34;: &#34;&#34;,
-            &#34;allow_incomplete_history&#34;: false
-        },
-        &#34;anomaly_detection&#34;: true,
-        &#34;ignore_features&#34;: [
-            &#34;url_legal&#34;,
-            &#34;license&#34;,
-            &#34;standard_error&#34;
-        ],
-        &#34;fit_on_all&#34;: true,
-        &#34;strict_mode&#34;: true,
-        &#34;seed_nr&#34;: 420
-    },
-    &#34;identifiers&#34;: {
-        &#34;id&#34;: &#34;Hash-like identifier&#34;
-    },
-    &#34;accuracy_functions&#34;: [
-        &#34;r2_score&#34;
-    ]
-}
-</pre></div></div>
-</div>
-<p>The above shows the minimal syntax required to create a functional JSON-AI object. For each feature you consider in the dataset, we specify the name of the feature, the type of encoder (feature-engineering method) to process the feature, and key word arguments to process the encoder. For the output, we perform a similar operation, but specify the types of mixers, or algorithms used in making a predictor that can estimate the target. Lastly, we populate the “problem_definition” key with the
-ingredients for our ML pipeline.</p>
+<p>Lightwood looks at each of the many columns and indicates they are mostly float, with exception of “<strong>Class</strong>” which is binary.</p>
+<p>You can observe the JSON-AI if you run the command <code class="docutils literal notranslate"><span class="pre">print(default_json.to_json())</span></code>. Given there are many input features, we won’t print it out.</p>
 <p>These are the only elements required to get off the ground with JSON-AI. However, we’re interested in making a <em>custom</em> approach. So, let’s make this syntax a file, and introduce our own changes.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -757,118 +821,71 @@ ingredients for our ML pipeline.</p>
 </div>
 </div>
 </div>
-<div class="section" id="3)-Build-your-own-cleaner-module">
-<h3>3) Build your own cleaner module<a class="headerlink" href="#3)-Build-your-own-cleaner-module" title="Permalink to this headline">¶</a></h3>
-<p>Let’s make a file called <code class="docutils literal notranslate"><span class="pre">MyCustomCleaner.py</span></code>. To write this file, we will use <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner.cleaner</span></code> as inspiration.</p>
-<p>The goal output of the cleaner is to provide pre-processing to your dataset - the output is only a pandas DataFrame. In theory, any pre-processing can be done here. However, data can be highly irregular - our default <code class="docutils literal notranslate"><span class="pre">Cleaner</span></code> function has several main goals:</p>
-<ol class="arabic simple">
-<li><p>Strip away any identifier, etc. unwanted columns</p></li>
-<li><p>Apply a cleaning function to each column in the dataset, according to that column’s data type</p></li>
-<li><p>Standardize NaN values within each column for appropriate downstream treatment</p></li>
-</ol>
-<p>You can choose to omit many of these details and completely write this module from scratch, but the easiest way to introduce your custom changes is to borrow the <code class="docutils literal notranslate"><span class="pre">Cleaner</span></code> function, and add core changes in a custom block.</p>
-<p>This can be done as follows</p>
-<p>You can see individual cleaning functions in <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner</span></code>. If you want to entirely replace a cleaning technique given a particular data-type, we invite you to change <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner.get_cleaning_func</span></code> using the argument <code class="docutils literal notranslate"><span class="pre">custom_cleaning_functions</span></code>; in this dictionary, for a datatype (specified in <code class="docutils literal notranslate"><span class="pre">api.dtype</span></code>), you can assign your own function to override our defaults.</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>import re
-from copy import deepcopy
-
-import numpy as np
+<div class="section" id="3)-Build-your-own-splitter-module">
+<h3>3) Build your own splitter module<a class="headerlink" href="#3)-Build-your-own-splitter-module" title="Permalink to this headline">¶</a></h3>
+<p>For Lightwood, the goal of a splitter is to intake an initial dataset (pre-processed ideally, although you can run the pre-processor on each DataFrame within the splitter) and return a dictionary with the keys “train”, “test”, and “dev” (at minimum). Subsequent steps of the pipeline expect the keys “train”, “test”, and “dev”, so it’s important you assign datasets to these as necessary.</p>
+<p>We’re going to introduce SMOTE sampling in our splitter. SMOTE allows you to quickly learn an approximation to make extra “samples” that mimic the undersampled class.</p>
+<p>We will use the package <code class="docutils literal notranslate"><span class="pre">imblearn</span></code> and <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code> to quickly create a train/test split and apply SMOTE to our training data only.</p>
+<p><strong>NOTE</strong> This is simply an example of things you can do with the splitter; whether SMOTE sampling is ideal for your problem depends on the question you’re trying to answer!</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>from lightwood.api.dtype import dtype
 import pandas as pd
-
-# For time-series
-import datetime
-from dateutil.parser import parse as parse_dt
-
-from lightwood.api.dtype import dtype
-from lightwood.helpers import text
-from lightwood.helpers.log import log
+import numpy as np
+from typing import List, Dict
+from itertools import product
 from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.numeric import can_be_nan_numeric
-
-# Import NLTK for stopwords
-import nltk
-from nltk.corpus import stopwords
-
-stop_words = set(stopwords.words(&quot;english&quot;))
-
-from typing import Dict, List, Optional, Tuple, Callable, Union
-
-# Borrow functions from Lightwood&#39;s cleaner
-from lightwood.data.cleaner import (
-    _remove_columns,
-    _get_columns_to_clean,
-    get_cleaning_func,
-)
-
-# Use for standardizing NaNs
-VALUES_FOR_NAN_AND_NONE_IN_PANDAS = [np.nan, &quot;nan&quot;, &quot;NaN&quot;, &quot;Nan&quot;, &quot;None&quot;]
+from lightwood.helpers.log import log
 
 
-def cleaner(
+from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import train_test_split
+
+
+def MySplitter(
     data: pd.DataFrame,
-    dtype_dict: Dict[str, str],
-    identifiers: Dict[str, str],
     target: str,
-    mode: str,
-    timeseries_settings: TimeseriesSettings,
-    anomaly_detection: bool,
-    custom_cleaning_functions: Dict[str, str] = {},
-) -&gt; pd.DataFrame:
+    pct_train: float = 0.8,
+    pct_dev: float = 0.1,
+    seed: int = 1,
+) -&gt; Dict[str, pd.DataFrame]:
     &quot;&quot;&quot;
-    The cleaner is a function which takes in the raw data, plus additional information about it&#39;s types and about the problem. Based on this it generates a &quot;clean&quot; representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``
+    Custom splitting function
 
-    :param data: The raw data
-    :param dtype_dict: Type information for each column
-    :param identifiers: A dict containing all identifier typed columns
-    :param target: The target columns
-    :param mode: Can be &quot;predict&quot; or &quot;train&quot;
-    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
-    :param anomaly_detection: Are we detecting anomalies with this predictor?
 
-    :returns: The cleaned data
-    &quot;&quot;&quot;  # noqa
+    :param data: Input data
+    :param target: Name of the target
+    :param pct_train: Percentage of data reserved for training, taken out of full data
+    :param pct_dev: Percentage of data reserved for dev, taken out of train data
+    :param seed: Random seed for reproducibility
 
-    data = _remove_columns(
-        data,
-        identifiers,
-        target,
-        mode,
-        timeseries_settings,
-        anomaly_detection,
-        dtype_dict,
+    :returns: A dictionary containing the keys train, test and dev with their respective data frames.
+    &quot;&quot;&quot;
+
+    # Shuffle the data
+    data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
+
+    # Split into feature columns + target
+    X = data.iloc[:, data.columns != target]  # .values
+    y = data[target]  # .values
+
+    # Create a train/test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=pct_train, random_state=seed, stratify=data[target]
     )
 
-    for col in _get_columns_to_clean(data, dtype_dict, mode, target):
+    X_train, X_dev, y_train, y_dev = train_test_split(
+        X, y, test_size=pct_dev, random_state=seed, stratify=y_train
+    )
 
-        log.info(&quot;Cleaning column =&quot; + str(col))
-        # Get and apply a cleaning function for each data type
-        # If you want to customize the cleaner, it&#39;s likely you can to modify ``get_cleaning_func``
-        data[col] = data[col].apply(
-            get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
-        )
+    # Create a SMOTE model and bump up underbalanced class JUST for train data
+    SMOTE_model = SMOTE(random_state=seed)
 
-        # ------------------------ #
-        # INTRODUCE YOUR CUSTOM BLOCK
+    Xtrain_mod, ytrain_mod = SMOTE_model.fit_resample(X_train, y_train.ravel())
 
-        # If column data type is a text type, remove stop-words
-        if dtype_dict[col] in (dtype.rich_text, dtype.short_text):
-            data[col] = data[col].apply(
-                lambda x: &quot; &quot;.join(
-                    [word for word in x.split() if word not in stop_words]
-                )
-            )
+    Xtrain_mod[target] = ytrain_mod
+    X_test[target] = y_test
+    X_dev[target] = y_dev
 
-        # Enforce numerical columns as non-negative
-        if dtype_dict[col] in (dtype.integer, dtype.float):
-            log.info(&quot;Converted &quot; + str(col) + &quot; into strictly non-negative&quot;)
-            data[col] = data[col].apply(lambda x: x if x &gt; 0 else 0.0)
-
-        # ------------------------ #
-        data[col] = data[col].replace(
-            to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None
-        )
-
-    return data
+    return {&quot;train&quot;: Xtrain_mod, &quot;test&quot;: X_test, &quot;dev&quot;: X_dev}
 </pre></div>
 </div>
 </div>
@@ -876,26 +893,24 @@ def cleaner(
 <div class="section" id="Place-your-custom-module-in-~/lightwood_modules">
 <h2>Place your custom module in <code class="docutils literal notranslate"><span class="pre">~/lightwood_modules</span></code><a class="headerlink" href="#Place-your-custom-module-in-~/lightwood_modules" title="Permalink to this headline">¶</a></h2>
 <p>We automatically search for custom scripts in your <code class="docutils literal notranslate"><span class="pre">~/lightwood_modules</span></code> path. Place your file there. Later, you’ll see when we autogenerate code, that you can change your import location if you choose.</p>
-<div class="section" id="4)-Introduce-your-custom-cleaner-in-JSON-AI">
-<h3>4) Introduce your custom cleaner in JSON-AI<a class="headerlink" href="#4)-Introduce-your-custom-cleaner-in-JSON-AI" title="Permalink to this headline">¶</a></h3>
-<p>Now let’s introduce our custom cleaner. JSON-AI keeps a lightweight syntax but fills in many default modules (like splitting, cleaning).</p>
-<p>For the custom cleaner, we’ll work by editing the “cleaner” key. We will change properties within it as follows: (1) “module” - place the name of the function. In our case it will be “MyCustomCleaner.cleaner” (2) “args” - any keyword argument specific to your cleaner’s internals.</p>
+<div class="section" id="4)-Introduce-your-custom-splitter-in-JSON-AI">
+<h3>4) Introduce your custom splitter in JSON-AI<a class="headerlink" href="#4)-Introduce-your-custom-splitter-in-JSON-AI" title="Permalink to this headline">¶</a></h3>
+<p>Now let’s introduce our custom splitter. JSON-AI keeps a lightweight syntax but fills in many default modules (like splitting, cleaning).</p>
+<p>For the custom cleaner, we’ll work by editing the “splitter” key. We will change properties within it as follows: (1) “module” - place the name of the function. In our case it will be “MyCustomCleaner.cleaner” (2) “args” - any keyword argument specific to your cleaner’s internals.</p>
 <p>This will look as follows:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;cleaner&quot;: {
-    &quot;module&quot;: &quot;MyCustomCleaner.cleaner&quot;,
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;splitter&quot;: {
+    &quot;module&quot;: &quot;MyCustomSplitter.MySplitter&quot;,
     &quot;args&quot;: {
-        &quot;identifiers&quot;: &quot;$identifiers&quot;,
         &quot;data&quot;: &quot;data&quot;,
-        &quot;dtype_dict&quot;: &quot;$dtype_dict&quot;,
         &quot;target&quot;: &quot;$target&quot;,
-        &quot;mode&quot;: &quot;$mode&quot;,
-        &quot;timeseries_settings&quot;: &quot;$problem_definition.timeseries_settings&quot;,
-        &quot;anomaly_detection&quot;: &quot;$problem_definition.anomaly_detection&quot;
+        &quot;pct_train&quot;: 0.8,
+        &quot;pct_dev&quot;: 0.1,
+        &quot;seed&quot;: 1
     }
+},
 </pre></div>
 </div>
-<p>You may be wondering what the “$” variables reference. In certain cases, we’d like JSON-AI to auto-fill internal variables when automatically generating code, for example, we’ve already specified the “target” - it would be easier to simply refer in a modular sense what that term is. That is what these variables represent.</p>
-<p>As we borrowed most of the default <code class="docutils literal notranslate"><span class="pre">Cleaner</span></code>; we keep these arguments. In theory, if we were writing much of these details from scratch, we can customize these values as necessary.</p>
+<p>Let’s copy our file <code class="docutils literal notranslate"><span class="pre">default.json</span></code> into <code class="docutils literal notranslate"><span class="pre">custom.json</span></code> and add this block. Then, we can proceed as usual to create python code.</p>
 </div>
 <div class="section" id="5)-Generate-Python-code-representing-your-ML-pipeline">
 <h3>5) Generate Python code representing your ML pipeline<a class="headerlink" href="#5)-Generate-Python-code-representing-your-ML-pipeline" title="Permalink to this headline">¶</a></h3>
@@ -916,7 +931,7 @@ def cleaner(
 <span class="nb">print</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
 <span class="c1"># Save code to a file (Optional)</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom_cleaner_pipeline.py&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom_splitter_pipeline.py&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
     <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -979,16 +994,16 @@ class Predictor(PredictorInterface):
 
     def __init__(self):
         seed(420)
-        self.target = &#34;target&#34;
+        self.target = &#34;Class&#34;
         self.mode = &#34;inactive&#34;
         self.problem_definition = ProblemDefinition.from_dict(
             {
-                &#34;target&#34;: &#34;target&#34;,
+                &#34;target&#34;: &#34;Class&#34;,
                 &#34;pct_invalid&#34;: 2,
                 &#34;unbias_target&#34;: True,
-                &#34;seconds_per_mixer&#34;: 1582,
-                &#34;seconds_per_encoder&#34;: 12749,
-                &#34;time_aim&#34;: 7780.458037514903,
+                &#34;seconds_per_mixer&#34;: 14354,
+                &#34;seconds_per_encoder&#34;: 0,
+                &#34;time_aim&#34;: 64593.50573948541,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
                 &#34;timeseries_settings&#34;: {
@@ -1003,20 +1018,114 @@ class Predictor(PredictorInterface):
                     &#34;allow_incomplete_history&#34;: False,
                 },
                 &#34;anomaly_detection&#34;: True,
-                &#34;ignore_features&#34;: [&#34;url_legal&#34;, &#34;license&#34;, &#34;standard_error&#34;],
+                &#34;ignore_features&#34;: [],
                 &#34;fit_on_all&#34;: True,
                 &#34;strict_mode&#34;: True,
                 &#34;seed_nr&#34;: 420,
             }
         )
-        self.accuracy_functions = [&#34;r2_score&#34;]
-        self.identifiers = {&#34;id&#34;: &#34;Hash-like identifier&#34;}
-        self.dtype_dict = {&#34;target&#34;: &#34;float&#34;, &#34;excerpt&#34;: &#34;rich_text&#34;}
+        self.accuracy_functions = [&#34;balanced_accuracy_score&#34;]
+        self.identifiers = {}
+        self.dtype_dict = {
+            &#34;Class&#34;: &#34;binary&#34;,
+            &#34;Time&#34;: &#34;integer&#34;,
+            &#34;V1&#34;: &#34;float&#34;,
+            &#34;V2&#34;: &#34;float&#34;,
+            &#34;V3&#34;: &#34;float&#34;,
+            &#34;V4&#34;: &#34;float&#34;,
+            &#34;V5&#34;: &#34;float&#34;,
+            &#34;V6&#34;: &#34;float&#34;,
+            &#34;V7&#34;: &#34;float&#34;,
+            &#34;V8&#34;: &#34;float&#34;,
+            &#34;V9&#34;: &#34;float&#34;,
+            &#34;V10&#34;: &#34;float&#34;,
+            &#34;V11&#34;: &#34;float&#34;,
+            &#34;V12&#34;: &#34;float&#34;,
+            &#34;V13&#34;: &#34;float&#34;,
+            &#34;V14&#34;: &#34;float&#34;,
+            &#34;V15&#34;: &#34;float&#34;,
+            &#34;V16&#34;: &#34;float&#34;,
+            &#34;V17&#34;: &#34;float&#34;,
+            &#34;V18&#34;: &#34;float&#34;,
+            &#34;V19&#34;: &#34;float&#34;,
+            &#34;V20&#34;: &#34;float&#34;,
+            &#34;V21&#34;: &#34;float&#34;,
+            &#34;V22&#34;: &#34;float&#34;,
+            &#34;V23&#34;: &#34;float&#34;,
+            &#34;V24&#34;: &#34;float&#34;,
+            &#34;V25&#34;: &#34;float&#34;,
+            &#34;V26&#34;: &#34;float&#34;,
+            &#34;V27&#34;: &#34;float&#34;,
+            &#34;V28&#34;: &#34;float&#34;,
+            &#34;Amount&#34;: &#34;float&#34;,
+        }
 
         # Any feature-column dependencies
-        self.dependencies = {&#34;excerpt&#34;: []}
+        self.dependencies = {
+            &#34;Time&#34;: [],
+            &#34;V1&#34;: [],
+            &#34;V2&#34;: [],
+            &#34;V3&#34;: [],
+            &#34;V4&#34;: [],
+            &#34;V5&#34;: [],
+            &#34;V6&#34;: [],
+            &#34;V7&#34;: [],
+            &#34;V8&#34;: [],
+            &#34;V9&#34;: [],
+            &#34;V10&#34;: [],
+            &#34;V11&#34;: [],
+            &#34;V12&#34;: [],
+            &#34;V13&#34;: [],
+            &#34;V14&#34;: [],
+            &#34;V15&#34;: [],
+            &#34;V16&#34;: [],
+            &#34;V17&#34;: [],
+            &#34;V18&#34;: [],
+            &#34;V19&#34;: [],
+            &#34;V20&#34;: [],
+            &#34;V21&#34;: [],
+            &#34;V22&#34;: [],
+            &#34;V23&#34;: [],
+            &#34;V24&#34;: [],
+            &#34;V25&#34;: [],
+            &#34;V26&#34;: [],
+            &#34;V27&#34;: [],
+            &#34;V28&#34;: [],
+            &#34;Amount&#34;: [],
+        }
 
-        self.input_cols = [&#34;excerpt&#34;]
+        self.input_cols = [
+            &#34;Time&#34;,
+            &#34;V1&#34;,
+            &#34;V2&#34;,
+            &#34;V3&#34;,
+            &#34;V4&#34;,
+            &#34;V5&#34;,
+            &#34;V6&#34;,
+            &#34;V7&#34;,
+            &#34;V8&#34;,
+            &#34;V9&#34;,
+            &#34;V10&#34;,
+            &#34;V11&#34;,
+            &#34;V12&#34;,
+            &#34;V13&#34;,
+            &#34;V14&#34;,
+            &#34;V15&#34;,
+            &#34;V16&#34;,
+            &#34;V17&#34;,
+            &#34;V18&#34;,
+            &#34;V19&#34;,
+            &#34;V20&#34;,
+            &#34;V21&#34;,
+            &#34;V22&#34;,
+            &#34;V23&#34;,
+            &#34;V24&#34;,
+            &#34;V25&#34;,
+            &#34;V26&#34;,
+            &#34;V27&#34;,
+            &#34;V28&#34;,
+            &#34;Amount&#34;,
+        ]
 
         # Initial stats analysis
         self.statistical_analysis = None
@@ -1026,10 +1135,7 @@ class Predictor(PredictorInterface):
 
         log.info(&#34;Performing statistical analysis on data&#34;)
         self.statistical_analysis = lightwood.data.statistical_analysis(
-            data,
-            self.dtype_dict,
-            {&#34;id&#34;: &#34;Hash-like identifier&#34;},
-            self.problem_definition,
+            data, self.dtype_dict, {}, self.problem_definition
         )
 
         # Instantiate post-training evaluation
@@ -1047,8 +1153,9 @@ class Predictor(PredictorInterface):
         # Preprocess and clean data
 
         log.info(&#34;Cleaning the data&#34;)
-        data = MyCustomCleaner.cleaner(
+        data = cleaner(
             data=data,
+            pct_invalid=self.problem_definition.pct_invalid,
             identifiers=self.identifiers,
             dtype_dict=self.dtype_dict,
             target=self.target,
@@ -1065,15 +1172,8 @@ class Predictor(PredictorInterface):
         # Split the data into training/testing splits
 
         log.info(&#34;Splitting the data into train/test&#34;)
-        train_test_data = splitter(
-            data=data,
-            seed=1,
-            pct_train=80,
-            pct_dev=10,
-            pct_test=10,
-            tss=self.problem_definition.timeseries_settings,
-            target=self.target,
-            dtype_dict=self.dtype_dict,
+        train_test_data = MyCustomSplitter.MySplitter(
+            data=data, pct_train=0.8, pct_dev=0.1, seed=1, target=self.target
         )
 
         return train_test_data
@@ -1088,14 +1188,40 @@ class Predictor(PredictorInterface):
 
         # Column to encoder mapping
         self.encoders = {
-            &#34;target&#34;: Float.NumericEncoder(
+            &#34;Class&#34;: Binary.BinaryEncoder(
                 is_target=True,
-                positive_domain=self.statistical_analysis.positive_domain,
+                target_class_distribution=self.statistical_analysis.target_class_distribution,
             ),
-            &#34;excerpt&#34;: Rich_Text.PretrainedLangEncoder(
-                output_type=False,
-                stop_after=self.problem_definition.seconds_per_encoder,
-            ),
+            &#34;Time&#34;: Integer.NumericEncoder(),
+            &#34;V1&#34;: Float.NumericEncoder(),
+            &#34;V2&#34;: Float.NumericEncoder(),
+            &#34;V3&#34;: Float.NumericEncoder(),
+            &#34;V4&#34;: Float.NumericEncoder(),
+            &#34;V5&#34;: Float.NumericEncoder(),
+            &#34;V6&#34;: Float.NumericEncoder(),
+            &#34;V7&#34;: Float.NumericEncoder(),
+            &#34;V8&#34;: Float.NumericEncoder(),
+            &#34;V9&#34;: Float.NumericEncoder(),
+            &#34;V10&#34;: Float.NumericEncoder(),
+            &#34;V11&#34;: Float.NumericEncoder(),
+            &#34;V12&#34;: Float.NumericEncoder(),
+            &#34;V13&#34;: Float.NumericEncoder(),
+            &#34;V14&#34;: Float.NumericEncoder(),
+            &#34;V15&#34;: Float.NumericEncoder(),
+            &#34;V16&#34;: Float.NumericEncoder(),
+            &#34;V17&#34;: Float.NumericEncoder(),
+            &#34;V18&#34;: Float.NumericEncoder(),
+            &#34;V19&#34;: Float.NumericEncoder(),
+            &#34;V20&#34;: Float.NumericEncoder(),
+            &#34;V21&#34;: Float.NumericEncoder(),
+            &#34;V22&#34;: Float.NumericEncoder(),
+            &#34;V23&#34;: Float.NumericEncoder(),
+            &#34;V24&#34;: Float.NumericEncoder(),
+            &#34;V25&#34;: Float.NumericEncoder(),
+            &#34;V26&#34;: Float.NumericEncoder(),
+            &#34;V27&#34;: Float.NumericEncoder(),
+            &#34;V28&#34;: Float.NumericEncoder(),
+            &#34;Amount&#34;: Float.NumericEncoder(),
         }
 
         # Prepare the training + dev data
@@ -1350,8 +1476,9 @@ class Predictor(PredictorInterface):
         # Clean the data
         self.mode = &#34;predict&#34;
         log.info(&#34;Cleaning the data&#34;)
-        data = MyCustomCleaner.cleaner(
+        data = cleaner(
             data=data,
+            pct_invalid=self.problem_definition.pct_invalid,
             identifiers=self.identifiers,
             dtype_dict=self.dtype_dict,
             target=self.target,
@@ -1436,91 +1563,68 @@ MyCustomSplitter
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Pre-process the data</span>
 <span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-<span class="n">cleaned_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">train_test_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:lightwood-50752:Cleaning the data
-INFO:lightwood-50752:Cleaning column =target
-INFO:lightwood-50752:Converted target into strictly non-negative
-INFO:lightwood-50752:Cleaning column =excerpt
+INFO:lightwood-51500:Cleaning the data
+INFO:lightwood-51500:Splitting the data into train/test
+/home/natasha/lightwood_modules/MyCustomSplitter.py:56: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X_test[target] = y_test
+/home/natasha/lightwood_modules/MyCustomSplitter.py:57: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X_dev[target] = y_dev
 </pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>excerpt</th>
-      <th>target</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>When young people returned ballroom, presented...</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>All dinner time, Mrs. Fayre somewhat silent, e...</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>As Roger predicted, snow departed quickly came...</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>And outside palace great garden walled round, ...</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>Once upon time Three Bears lived together hous...</td>
-      <td>0.247197</td>
-    </tr>
-  </tbody>
-</table>
-</div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;Original Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">15</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Cleaned Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Train:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;dev&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Dev:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
+
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Test:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
+
+<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1528,33 +1632,12 @@ INFO:lightwood-50752:Cleaning column =excerpt
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-<span class="ansi-bold">Original Data
-</span>
-Excerpt:
- When the young people returned to the ballroom, it presented a decidedly changed appearance. Instead of an interior scene, it was a winter landscape.
-The floor was covered with snow-white canvas, not laid on smoothly, but rumpled over bumps and hillocks, like a real snow field. The numerous palms and evergreens that had decorated the room, were powdered with flour and strewn with tufts of cotton, like snow. Also diamond dust had been lightly sprinkled on them, and glittering crystal icicles hung from the branches.
-At each end of the room, on the wall, hung a beautiful bear-skin rug.
-These rugs were for prizes, one for the girls and one for the boys. And this was the game.
-The girls were gathered at one end of the room and the boys at the other, and one end was called the North Pole, and the other the South Pole. Each player was given a small flag which they were to plant on reaching the Pole.
-This would have been an easy matter, but each traveller was obliged to wear snowshoes.
-
-Target:
- -0.340259125
-<span class="ansi-bold">
-
-Cleaned Data
-</span>
-Excerpt:
- When young people returned ballroom, presented decidedly changed appearance. Instead interior scene, winter landscape. The floor covered snow-white canvas, laid smoothly, rumpled bumps hillocks, like real snow field. The numerous palms evergreens decorated room, powdered flour strewn tufts cotton, like snow. Also diamond dust lightly sprinkled them, glittering crystal icicles hung branches. At end room, wall, hung beautiful bear-skin rug. These rugs prizes, one girls one boys. And game. The girls gathered one end room boys other, one end called North Pole, South Pole. Each player given small flag plant reaching Pole. This would easy matter, traveller obliged wear snowshoes.
-
-Target:
- 0.0
-</pre></div></div>
+<img alt="../../_images/tutorials_custom_splitter_custom_splitter_21_0.png" src="../../_images/tutorials_custom_splitter_custom_splitter_21_0.png" />
 </div>
-<p>As you can see, the cleaning-process we introduced cut out the stop-words from the Excerpt, and enforced the target data to stay positive.</p>
-<p>We hope this tutorial was informative on how to introduce a <strong>custom preprocessing method</strong> to your datasets! For more customization tutorials, please check our <a class="reference external" href="https://lightwood.io/tutorials.html">documentation</a>.</p>
-<p>If you want to download the Jupyter-notebook version of this tutorial, check out the source github location found here: <code class="docutils literal notranslate"><span class="pre">lightwood/docssrc/source/tutorials/custom_cleaner</span></code>.</p>
+</div>
+<p>As you can see, our splitter has greatly increased the representation of the minority class within the training data, but not so for the testing or dev data.</p>
+<p>We hope this tutorial was informative on how to introduce a <strong>custom splitter method</strong> to your datasets! For more customization tutorials, please check our <a class="reference external" href="https://lightwood.io/tutorials.html">documentation</a>.</p>
+<p>If you want to download the Jupyter-notebook version of this tutorial, check out the source github location found here: <code class="docutils literal notranslate"><span class="pre">lightwood/docssrc/source/tutorials/custom_splitter</span></code>.</p>
 </div>
 </div>
 </div>
