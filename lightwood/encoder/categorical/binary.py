@@ -75,7 +75,7 @@ class BinaryEncoder(BaseEncoder):
 
             self.inv_target_weights = torch.Tensor([1, 1])  # Equally wt. both classes
 
-            # If imbalanced detected, re-weight by inverse
+            # If target weights provided, weight by inverse
             if self.target_weights is not None:
                 for cat in self.map.keys():
                     self.inv_target_weights[self.map[cat]] = (
