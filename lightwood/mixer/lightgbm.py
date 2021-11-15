@@ -1,6 +1,5 @@
 import time
 from typing import Dict, List, Set
-
 import torch
 import optuna
 import lightgbm
@@ -10,6 +9,7 @@ from sklearn.preprocessing import OrdinalEncoder
 import optuna.integration.lightgbm as optuna_lightgbm
 
 from lightwood.api import dtype
+from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.helpers.device import get_devices
@@ -63,7 +63,7 @@ class LightGBM(BaseMixer):
     def __init__(
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
-            fit_on_dev: bool, use_optuna: bool = True):
+            fit_on_dev: bool, use_optuna: bool, target_encoder: BaseEncoder):
         """
         :param stop_after: time budget in seconds.
         :param target: name of the target column that the mixer will learn to predict.
@@ -85,6 +85,7 @@ class LightGBM(BaseMixer):
         self.fit_on_dev = fit_on_dev
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
         self.stable = True
+        self.target_encoder = target_encoder
 
         # GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let's turn this off for now and we can put it behind some flag later # noqa
         gpu_works = check_gpu_support()
@@ -106,6 +107,8 @@ class LightGBM(BaseMixer):
         :param output_dtype
         :return: modified `data` object that conforms to LightGBM's expected format.
         """
+        weight_map = getattr(self.target_encoder, 'target_weights', None)
+
         for subset_name in data.keys():
             for input_col in self.input_cols:
                 if data[subset_name]['data'] is None:
@@ -119,6 +122,7 @@ class LightGBM(BaseMixer):
 
             label_data = data[subset_name]['ds'].get_column_original_data(self.target)
 
+            data[subset_name]['weights'] = None
             if output_dtype in (dtype.categorical, dtype.binary):
                 if subset_name == 'train':
                     self.ordinal_encoder = OrdinalEncoder()
@@ -127,6 +131,8 @@ class LightGBM(BaseMixer):
                     self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
 
                 label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
+                if weight_map is not None:
+                    data[subset_name]['weights'] = [weight_map[x] for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype == dtype.integer:
                 label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
@@ -182,10 +188,22 @@ class LightGBM(BaseMixer):
         # Determine time per iterations
         start = time.time()
         self.params['num_iterations'] = 1
-        self.model = lightgbm.train(self.params, lightgbm.Dataset(
-            data['train']['data'],
-            label=data['train']['label_data']),
-            verbose_eval=False)
+        '''
+        Why construst a dataset here instead of using the training dataset?
+
+        Because it guards against the following crash:
+
+        WARNING:lightwood-1613058:Exception: Cannot change feature_pre_filter after constructed Dataset handle. when training mixer: <lightwood.mixer.lightgbm.LightGBM object at 0x7f39148eae20>
+        feature_fraction, val_score: inf:   0%|                                 | 0/7 [00:00<?, ?it/s]
+        free(): double free detected in tcache 2
+
+        Only happens sometimes and I can find no pattern as to when, happens for multiple input and target types.
+
+        Why does the following crash happen and what does it mean? No idea, closest relationships I can find is /w optuna modifying parameters after the dataset is create: https://github.com/microsoft/LightGBM/issues/4019 | But why this would apply here makes no sense. Could have to do with the `train` process of lightgbm itself setting a "set only once" property on a dataset when it starts. Dunno, if you find out replace this comment with the real reason.
+        ''' # noqa
+
+        self.model = lightgbm.train(self.params, lightgbm.Dataset(data['train']['data'], label=data['train']
+                                    ['label_data'], weight=data['train']['weights']), verbose_eval=False)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
@@ -203,10 +221,6 @@ class LightGBM(BaseMixer):
         else:
             model_generator = lightgbm
 
-        # Prepare the data
-        train_dataset = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'])
-        dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'])
-
         # Train the models
         log.info(
             f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint') # noqa
@@ -215,6 +229,13 @@ class LightGBM(BaseMixer):
         self.params['num_iterations'] = int(self.num_iterations)
 
         self.params['early_stopping_rounds'] = 5
+
+        # Prepare the data
+        train_dataset = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'],
+                                         weight=data['train']['weights'])
+
+        dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
+                                       weight=data['dev']['weights'])
 
         self.model = model_generator.train(
             self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
@@ -242,8 +263,10 @@ class LightGBM(BaseMixer):
         output_dtype = self.dtype_dict[self.target]
         data = self._to_dataset(data, output_dtype)
 
-        train_dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'])
-        dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'])
+        train_dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'],
+                                         weight=data['retrain']['weights'])
+        dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
+                                       weight=data['dev']['weights'])
 
         log.info(f'Updating lightgbm model with {iterations} iterations')
         if iterations < 1:
