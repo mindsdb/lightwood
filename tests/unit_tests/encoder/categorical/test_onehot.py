@@ -144,6 +144,25 @@ class TestOnehot(unittest.TestCase):
         # Check inverse weights correct
         self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
 
+    def test_target_distro_with_unk(self):
+        """ Checks target distro with unknowns """
+        data = ["apple", "banana", "banana", "apple", "apple", "orange"]
+
+        # Scaled weights (sum to 1)
+        tweights = {"apple": 3 / 6, "orange": 1 / 6, "banana": 2 / 6}
+
+        enc = OneHotEncoder(is_target=True, target_weights=tweights)
+        enc.prepare(data)
+
+        # Get the ground-truth inverse weights
+        iweights = torch.ones(size=(len(tweights)+1, ))
+        for key, value in tweights.items():
+            iweights[enc.map[key]] = 1/value
+
+        # Check inverse weights correct
+        self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
+
+
     def test_distro_nonzeroweights(self):
         """
         Tests if target wts do not sum to 1 properly handled.
