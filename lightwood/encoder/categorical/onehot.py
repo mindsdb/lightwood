@@ -78,17 +78,16 @@ class OneHotEncoder(BaseEncoder):
             # Equally wt. all classes
             self.inv_target_weights = torch.ones(size=(self.output_size,))
 
-            # If imbalanced detected, weight by inverse
+            # If using an unknown category, set to smallest possible weight
+            if self.use_unknown:
+                lowest_value = np.min(list(self.target_weights.values()))
+                self.target_weights[_UNCOMMON_WORD] = lowest_value
+
             if self.target_weights is not None:
                 for cat in self.map.keys():
                     self.inv_target_weights[self.map[cat]] = (
                         1 / self.target_weights[cat]
                     )
-
-                # If using an unknown category, set to smallest possible value
-                if self.mode:
-                    self.inv_target_weights[0] = np.min(self.inv_target_weights)
-                    self.target_weights[_UNCOMMON_WORD] = np.min(self.target_weights)
 
         self.is_prepared = True
 
