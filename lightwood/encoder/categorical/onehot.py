@@ -29,7 +29,7 @@ class OneHotEncoder(BaseEncoder):
 
         target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
 
-        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation.
+        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
 
         :param is_target: True if this encoder featurizes the target column
         :param target_weights: Percentage of total population represented by each category (between [0, 1]).
@@ -78,16 +78,18 @@ class OneHotEncoder(BaseEncoder):
             # Equally wt. all classes
             self.inv_target_weights = torch.ones(size=(self.output_size,))
 
-            # If using an unknown category, set to smallest possible weight
-            if self.use_unknown:
-                lowest_value = np.min(list(self.target_weights.values()))
-                self.target_weights[_UNCOMMON_WORD] = lowest_value
-
+            # If imbalanced detected, weight by inverse
             if self.target_weights is not None:
                 for cat in self.map.keys():
-                    self.inv_target_weights[self.map[cat]] = (
-                        1 / self.target_weights[cat]
-                    )
+
+                    if cat != _UNCOMMON_WORD:
+                        self.inv_target_weights[self.map[cat]] = (
+                            1 / self.target_weights[cat]
+                        )
+
+                # If using an unknown category, set to smallest possible value
+                if self.use_unknown:
+                    self.inv_target_weights[0] = self.inv_target_weights.min().item()
 
         self.is_prepared = True
 
