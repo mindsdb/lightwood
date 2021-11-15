@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Dict, List, Union
 
 from lightwood.api import dtype
+from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.lightgbm import LightGBM
@@ -21,12 +22,13 @@ class LightGBMArray(BaseMixer):
     def __init__(
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
-            n_ts_predictions: int, fit_on_dev: bool):
+            n_ts_predictions: int, fit_on_dev: bool, target_encoder: BaseEncoder):
         super().__init__(stop_after)
         self.submodel_stop_after = stop_after / n_ts_predictions
         self.target = target
         dtype_dict[target] = dtype.float
-        self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev, use_optuna=False)
+        self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev,
+                       False, target_encoder)
                        for _ in range(n_ts_predictions)]
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
         self.supports_proba = False
