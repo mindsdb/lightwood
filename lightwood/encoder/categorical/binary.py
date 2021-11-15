@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 from scipy.special import softmax
-from lightwood.api import types
 from lightwood.encoder.base import BaseEncoder
 
 
