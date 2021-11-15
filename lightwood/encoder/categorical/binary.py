@@ -3,9 +3,7 @@ import numpy as np
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
 
-from typing import Dict, List
-from pandas import Series
-
+from typing import Dict, List, Iterable
 
 class BinaryEncoder(BaseEncoder):
     def __init__(
@@ -35,13 +33,14 @@ class BinaryEncoder(BaseEncoder):
         self.map = {}  # category name -> index
         self.rev_map = {}  # index -> category name
         self.output_size = 2
+        self.encoder_class_type = str
 
         # Weight-balance info if encoder represents target
         if self.is_target:
             self.target_class_distribution = target_class_distribution
             self.index_weights = None
 
-    def prepare(self, priming_data: Series):
+    def prepare(self, priming_data: Iterable[str]):
         """
         Given priming data, create a map/inverse-map corresponding category name to index (and vice versa).
 
@@ -73,7 +72,7 @@ class BinaryEncoder(BaseEncoder):
 
         self.is_prepared = True
 
-    def encode(self, column_data) -> torch.Tensor:
+    def encode(self, column_data: Iterable[str]) -> torch.Tensor:
         """
         Encodes categories as OHE binary. Unknown/unrecognized classes return [0,0].
 
@@ -104,7 +103,7 @@ class BinaryEncoder(BaseEncoder):
 
         :param encoded_data: the output of a mixer model
 
-        :returns Decoded values for each data point
+        :returns: Decoded values for each data point
         """ # noqa
         encoded_data_list = encoded_data.tolist()
         ret = []
@@ -124,7 +123,7 @@ class BinaryEncoder(BaseEncoder):
 
         :param encoded_data: the output of a mixer model
 
-        :returns Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name
+        :returns: Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name
         """ # noqa
         encoded_data_list = encoded_data.tolist()
         ret = []

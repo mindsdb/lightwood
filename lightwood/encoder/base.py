@@ -60,7 +60,7 @@ class BaseEncoder:
         """
         raise NotImplementedError
 
-    def decode(self, encoded_data) -> List[object]:
+    def decode(self, encoded_data: torch.Tensor) -> List[object]:
         """
         Given an encoded representation, returns the decoded value.
 

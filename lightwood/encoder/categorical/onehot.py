@@ -6,9 +6,7 @@ from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
 
-from typing import Dict, List
-from pandas import Series
-
+from typing import Dict, List, Iterable
 
 class OneHotEncoder(BaseEncoder):
     def __init__(
@@ -40,7 +38,7 @@ class OneHotEncoder(BaseEncoder):
             self.target_class_distribution = target_class_distribution
             self.index_weights = None
 
-    def prepare(self, priming_data: Series):
+    def prepare(self, priming_data: Iterable[str]):
         """
         Prepares the OHE Encoder by creating a dictionary mapping.
 
@@ -79,12 +77,12 @@ class OneHotEncoder(BaseEncoder):
         
         self.is_prepared = True
 
-    def encode(self, column_data) -> torch.Tensor:
+    def encode(self, column_data: Iterable[str]) -> torch.Tensor:
         """
         Encodes pre-processed data into OHE. Unknown/unrecognized classes vector of all 0s.
 
         :param column_data: Pre-processed data to encode
-        :returns Encoded data of form :math:`N_{rows} x N_{categories}`
+        :returns: Encoded data of form :math:`N_{rows} x N_{categories}`
         """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
@@ -102,32 +100,25 @@ class OneHotEncoder(BaseEncoder):
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data, return_raw=False):
+    def decode(self, encoded_data: torch.Tensor):
         """
+        Decodes OHE mapping into the original categories. Since this approach uses an argmax, decoding flexibly works either on logits or an explicitly OHE vector.
+
+        :param: encoded_data:
+        :returns Returns the original category names for encoded data.
         """
         encoded_data_list = encoded_data.tolist()
         ret = []
-        probs = []
 
         for vector in encoded_data_list:
-            # Logits and onehots are not the same in definition
-            # But this explicitly operates on logits; it will take care of
-            # the one hot (so you can pass something in the softmax logit space)
-            # But will not affect something that is already OHE.
 
             all_zeros = not np.any(vector)
             if not self.use_unknown and all_zeros:
                 ret.append(_UNCOMMON_WORD)
-            else:  # UNK is a separate category
+            else:  
                 ret.append(self.rev_map[np.argmax(vector)])
 
-            if return_raw:
-                probs.append(softmax(vector).tolist())
-
-        if return_raw:
-            return ret, probs, self.rev_map
-        else:
-            return ret
+        return ret
 
     def decode_probabilities(self, encoded_data: torch.Tensor):
         """
