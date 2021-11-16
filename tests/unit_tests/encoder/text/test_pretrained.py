@@ -1,60 +1,81 @@
 import unittest
 import random
 import torch
-from sklearn.metrics import r2_score
-from lightwood.encoder.numeric import NumericEncoder
+from torch.nn.functional import softmax
+from sklearn.metrics import accuracy_score
+from lightwood.encoder import BinaryEncoder
 from lightwood.encoder.text import PretrainedLangEncoder
 from lightwood.api.dtype import dtype
 import pandas as pd
 
+from nltk.corpus import opinion_lexicon
+
+
+def create_fake_language(n, ptrain=0.7, seed=2):
+    """
+    Returns "N" instances of a fake language.
+
+    Labels are 0/1; 0 -> negative sentiment, 1-> positive sentiment
+    
+    Creates a nonsense string of positive/negative words with some random subset of them.
+
+    :param n: the maximum character (n-1) in the string
+    """
+    # Pick positive/negative words
+    pos_list=list(opinion_lexicon.positive())
+    neg_list=list(opinion_lexicon.negative())
+
+    random.seed(seed)
+    data = []
+    label = []
+
+    for i in range(n):
+        
+        y = random.randint(0, 1)
+
+        # Negative words
+        if y == 0:
+            word = random.choice(neg_list)
+        # Positive words
+        else:
+            word = random.choice(pos_list)
+
+        data.append(word)
+        label.append(y)
+
+    Ntrain = int(n*ptrain)
+    train = pd.DataFrame([data[:Ntrain], label[:Ntrain]]).T
+    test = pd.DataFrame([data[Ntrain:], label[Ntrain:]]).T
+
+    train.columns = ["text", "label"]
+    test.columns = ["text", "label"]
+    return train, test
+
 
 class TestPretrainedLangEncoder(unittest.TestCase):
     def test_encode_and_decode(self):
-        random.seed(2)
-        priming_data = []
-        primting_target = []
-        test_data = []
-        test_target = []
-        for i in range(0, 300):
-            if random.randint(1, 5) == 3:
-                test_data.append(str(i) + ''.join(['n'] * i))
-                # test_data.append(str(i))
-                test_target.append(i)
-            # else:
-            priming_data.append(str(i) + ''.join(['n'] * i))
-            # priming_data.append(str(i))
-            primting_target.append(i)
+        """
+        Test end-to-end training of values. Performance metric doesn't matter,
+        just to check if it compiles properly
+        """
+        seed = 2
 
-        output_1_encoder = NumericEncoder(is_target=True)
-        output_1_encoder.prepare(primting_target)
+        # Make priming data:
+        train, test = create_fake_language(1000)
+        random.seed(seed)
+        output_enc = BinaryEncoder(is_target=True)
+        output_enc.prepare(train["label"])
+        encoded_target_values = output_enc.encode(train["label"])
 
-        encoded_data_1 = output_1_encoder.encode(primting_target)
-        encoded_data_1 = encoded_data_1.tolist()
+        # Prepare the language encoder
+        enc = PretrainedLangEncoder(stop_after=10, embed_mode=False, output_type='binary')
+        enc.prepare(train["text"], None, encoded_target_values=encoded_target_values)
 
-        enc = PretrainedLangEncoder(stop_after=10)
 
-        enc.prepare(pd.Series(priming_data), pd.Series(priming_data),
-                    encoded_target_values={'targets': [
-                        {'output_type': dtype.float, 'encoded_output': encoded_data_1},
-                    ]})
+        test_labels = test["label"].tolist()
+        pred_labels = softmax(enc.encode(test["text"]),dim=1).argmax(dim=1).tolist()
 
-        encoded_predicted_target = enc.encode(test_data).tolist()
+        encoder_accuracy = accuracy_score(test_labels, pred_labels)
 
-        predicted_targets_1 = output_1_encoder.decode(torch.tensor([x[:3] for x in encoded_predicted_target]))
-
-        for predicted_targets in [predicted_targets_1]:
-            real = list(test_target)
-            pred = list(predicted_targets)
-
-            # handle nan
-            for i in range(len(pred)):
-                try:
-                    float(pred[i])
-                except Exception:
-                    pred[i] = 0
-
-            print(real[0:25], '\n', pred[0:25])
-            encoder_accuracy = r2_score(real, pred)
-
-            print(f'Categorial encoder accuracy for: {encoder_accuracy} on testing dataset')
+        print(f'Categorial encoder accuracy for: {encoder_accuracy} on testing dataset')
             # assert(encoder_accuracy > 0.5)
