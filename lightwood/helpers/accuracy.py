@@ -1,4 +1,5 @@
 from sklearn.metrics import r2_score as sk_r2_score
+import numpy as np
 
 
 def r2_score(y_true, y_pred) -> float:
@@ -10,8 +11,7 @@ def r2_score(y_true, y_pred) -> float:
                     arr[i] = 0
                 if np.isinf(arr[i]):
                     arr[i] = pow(2, 63)
-            except Exception as e:
-                print(f'Strange value {arr[i]} caused exception: {e}')
+            except Exception:
                 arr[i] = 0
     acc = sk_r2_score(y_true, y_pred)
     return min(1, max(0, acc))
