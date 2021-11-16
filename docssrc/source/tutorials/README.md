@@ -1,18 +1,18 @@
 ## How to make a tutorial notebook?
 
-We run tutorial notebooks as tests, this is great, it gives us more test-cases and makes sure they can never be outdated. 
+We use some of our tutorial notebooks as unit-tests to ensure that our pipeline is up-to-date, and to keep our examples relevant. 
 
-In order to preserve our (and the reader's) sanity these need to behave in such a way that they can:
-1. Be ran by the CI tools
-2. Be executed locally by a user
+In order to preserve our (and the reader's) sanity these need to behave so that they can:
+1. Run via the CI tools
+2. Execute locally by a user
 
-Thus, the following standards are put in place for new and existing tutorials:
+To make things easier, the Lightwood team has proposed a general set of rules for tutorials:
 
-1. Source data from a link and load it in a dataframe using `pd.read_csv('{link}')`. This is waived if your tutorial works with weird data
-2. Custom code *must* be written as part of the notebook, not as a separate file. If you need to export it to a file (e.g. in order to load it as a lightwood module), use `%%writefile my_file.py` at the top of the jupyter codeblock, this will write the code into a file
-3. Notebooks *mustn't* save any files outside of custom lightwood modules (which I take as necessary evil). These can too easily get into git and become confusing. This is waived if for some reason your tutorial really requires saving files, otherwise just comment out those lines.
-4. Notebooks editing json-ai *must* do so inside the code (i.e. generate it, then accessed the required key and edit it), rather than loading the edited json-ai from a file. If you wish to display both versions and/or the diff between them just `print` it.
-5. Notebook must lack any code metadata, otherwise github actions will fail to run them (in the json representation, grep for `kernel` and you will find the global `metadata` key, set that to `{}`)
+1. If you are using an external dataset, please ensure there is a URL that links to it (i.e.: load it in a dataframe using `pd.read_csv('{link}')`). Exceptions can be made for custom data types if the download dataset link is provided. We try to avoid hosting large datasets via Github, but please contact us if you believe it should be in our benchmarking suite.
+3. Show any **custom code within the notebook**. If you need to export it to a file (e.g. in order to load it as a lightwood module), use `%%writefile my_file.py` at the top of the jupyter codeblock, this will write the code into a file.
+4. Please do not save any extra files within the notebook (`.json` files may be ok); if your tutorial really requires saving extra files, please contact us and we can help.
+6. Please edit json-ai within the notebook as opposed to externally (i.e. generate a default, then make changes based on the key you need). You can show the difference between default and custom json-ai via a `print` statement.
+7. Notebook must lack any code metadata, otherwise github actions will fail to run them (in the json representation, grep for `kernel` and you will find the global `metadata` key, set that to `{}`)
 
 
-If your totorial is anything more than a single `.ipynb` notebook and some accompanying .png or .jpg files expect it to be rejected.
+If your tutorial is anything more than a single `.ipynb` notebook and some accompanying .png or .jpg files, it may be rejected automatically. We would be more than happy to work with you to help adapt them to fit our automated notebooks. 
