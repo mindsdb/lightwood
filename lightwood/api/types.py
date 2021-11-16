@@ -357,7 +357,7 @@ class ProblemDefinition:
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         anomaly_detection = obj.get('anomaly_detection', True)
         ignore_features = obj.get('ignore_features', [])
-        fit_on_all = obj.get('fit_on_all', True)
+        fit_on_all = obj.get('fit_on_all', False)
         strict_mode = obj.get('strict_mode', True)
         seed_nr = obj.get('seed_nr', 420)
         problem_definition = ProblemDefinition(
