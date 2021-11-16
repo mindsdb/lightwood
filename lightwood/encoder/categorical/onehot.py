@@ -72,14 +72,16 @@ class OneHotEncoder(BaseEncoder):
         # Each dimension of the inv_target_weights respects `map`
         if self.is_target:
 
-            if sum([np.isclose(i, 0) for i in self.target_weights.values()]) > 0:
-                raise ValueError('Target weights cannot be 0')
-
             # Equally wt. all classes
             self.inv_target_weights = torch.ones(size=(self.output_size,))
 
             # If imbalanced detected, weight by inverse
             if self.target_weights is not None:
+
+                # Check target weights properly specified
+                if sum([np.isclose(i, 0) for i in self.target_weights.values()]) > 0:
+                    raise ValueError('Target weights cannot be 0')
+
                 for cat in self.map.keys():
 
                     if cat != _UNCOMMON_WORD:

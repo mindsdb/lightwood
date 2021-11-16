@@ -72,11 +72,13 @@ class BinaryEncoder(BaseEncoder):
 
             self.inv_target_weights = torch.Tensor([1, 1])  # Equally wt. both classes
 
-            if sum([np.isclose(i, 0) for i in self.target_weights.values()]) > 0:
-                raise ValueError('Target weights cannot be 0')
-
             # If target weights provided, weight by inverse
             if self.target_weights is not None:
+
+                # Check target weights properly specified
+                if sum([np.isclose(i, 0) for i in self.target_weights.values()]) > 0:
+                    raise ValueError('Target weights cannot be 0')
+                    
                 for cat in self.map.keys():
                     self.inv_target_weights[self.map[cat]] = (
                         1 / self.target_weights[cat]
