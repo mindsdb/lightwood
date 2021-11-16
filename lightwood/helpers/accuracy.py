@@ -1,5 +1,4 @@
 from sklearn.metrics import r2_score as sk_r2_score
-import numpy as np
 
 
 def r2_score(y_true, y_pred) -> float:
