@@ -289,6 +289,7 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
     if mode == "predict":
         if (
             target in data.columns
+            and timeseries_settings.is_timeseries
             and not timeseries_settings.use_previous_target
             and not anomaly_detection
         ):
