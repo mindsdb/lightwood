@@ -184,7 +184,7 @@ class TestTimeseries(unittest.TestCase):
         df = pd.DataFrame(columns=['Time', target])
         df['Time'] = t
         df[target] = ts
-        df[f'{target}_2x'] = 2*ts
+        df[f'{target}_2x'] = 2 * ts
 
         train = df[:int(len(df) * 0.8)]
         test = df[int(len(df) * 0.8):]
