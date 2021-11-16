@@ -281,7 +281,7 @@ class Neural(BaseMixer):
         optimizer = self._select_optimizer()
         criterion = self._select_criterion()
         scaler = GradScaler()
-
+        return
         self.model, epoch_to_best_model, err = self._max_fit(
             train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=20000)
 
