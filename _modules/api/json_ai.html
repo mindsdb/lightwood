@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.json_ai &mdash; lightwood 1.7.0 documentation</title>
+  <title>api.json_ai &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.7.0
+                1.6.1
               </div>
             
           
@@ -286,12 +286,8 @@
         <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">problem_defintion</span><span class="o">.</span><span class="n">unbias_target</span><span class="p">:</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span>
-                    <span class="s2">&quot;target_weights&quot;</span>
+                    <span class="s2">&quot;target_class_distribution&quot;</span>
                 <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;$statistical_analysis.target_class_distribution&quot;</span>
-            <span class="k">if</span> <span class="n">problem_defintion</span><span class="o">.</span><span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span>
-                    <span class="s2">&quot;target_weights&quot;</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="n">problem_defintion</span><span class="o">.</span><span class="n">target_weights</span>
 
         <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span><span class="p">):</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span>
@@ -705,10 +701,6 @@
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;input_cols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;input_cols&quot;</span><span class="p">,</span> <span class="s2">&quot;$input_cols&quot;</span>
             <span class="p">)</span>
-            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target_encoder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;target_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;$encoders[self.target]&quot;</span>
-            <span class="p">)</span>
-            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;use_optuna&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Regression&quot;</span><span class="p">:</span>
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;dtype_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
@@ -724,9 +716,6 @@
             <span class="p">)</span>
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;input_cols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;input_cols&quot;</span><span class="p">,</span> <span class="s2">&quot;$input_cols&quot;</span>
-            <span class="p">)</span>
-            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target_encoder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;target_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;$encoders[self.target]&quot;</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;SkTime&quot;</span><span class="p">:</span>
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>

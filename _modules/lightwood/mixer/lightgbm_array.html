@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.lightgbm_array &mdash; lightwood 1.7.0 documentation</title>
+  <title>lightwood.mixer.lightgbm_array &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.7.0
+                1.6.1
               </div>
             
           
@@ -171,7 +171,6 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
-<span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.lightgbm</span> <span class="kn">import</span> <span class="n">LightGBM</span>
@@ -188,15 +187,14 @@
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
             <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">):</span>
+            <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">submodel_stop_after</span> <span class="o">=</span> <span class="n">stop_after</span> <span class="o">/</span> <span class="n">n_ts_predictions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
         <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">LightGBM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submodel_stop_after</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">,</span> <span class="n">fit_on_dev</span><span class="p">,</span>
-                       <span class="kc">False</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">LightGBM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submodel_stop_after</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">,</span> <span class="n">fit_on_dev</span><span class="p">,</span> <span class="n">use_optuna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ts_predictions</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span> <span class="o">=</span> <span class="n">n_ts_predictions</span>  <span class="c1"># for time series tasks, how long is the forecast horizon</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>

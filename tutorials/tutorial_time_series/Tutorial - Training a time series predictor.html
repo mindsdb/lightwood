@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorial - Time series forecasting &mdash; lightwood 1.7.0 documentation</title>
+  <title>Tutorial - Time series forecasting &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                1.7.0
+                1.6.1
               </div>
             
           
@@ -451,7 +451,7 @@ div.rendered_html tbody tr:hover {
 <h2>Load data<a class="headerlink" href="#Load-data" title="Permalink to this headline">¶</a></h2>
 <p>Let’s begin by loading the dataset and looking at it:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -463,7 +463,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -555,8 +555,8 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Define-the-predictive-task">
 <h2>Define the predictive task<a class="headerlink" href="#Define-the-predictive-task" title="Permalink to this headline">¶</a></h2>
 <p>We will use Lightwood high level methods to state what we want to predict. As this is a time series task (because we want to leverage the notion of time to predict), we need to specify a set of arguments that will activate Lightwood’s time series pipeline:</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -564,8 +564,17 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+[nltk_data] Downloading package punkt to /home/runner/nltk_data...
+[nltk_data]   Unzipping tokenizers/punkt.zip.
+</pre></div></div>
+</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -582,7 +591,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Now, let’s do a very simple train-test split, leaving 10% of the data to check the forecasts that our predictor will produce:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -608,7 +617,7 @@ div.rendered_html tbody tr:hover {
 <h2>Generate the predictor object<a class="headerlink" href="#Generate-the-predictor-object" title="Permalink to this headline">¶</a></h2>
 <p>Now, we can generate code for a machine learning model by using our problem definition and the data:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -627,26 +636,23 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-46866:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Analyzing a sample of 2467</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:from a total population of 2820, this is equivalent to 87.5% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Using 15 processes to deduct types.</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Finished statistical analysis</span>
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;A2JDXXBL9A1E16341560437535849.Predictor at 0x15685d970&gt;
+<span class="ansi-green-fg">INFO:lightwood-1980:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Analyzing a sample of 2467</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:from a total population of 2820, this is equivalent to 87.5% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Infering type for: Month</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Column Month has data type date</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Infering type for: Sunspots</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Column Sunspots has data type float</span>
+/home/runner/work/lightwood/lightwood/lightwood/helpers/text.py:236: RuntimeWarning: invalid value encountered in double_scalars
+  randomness_per_index.append(S / np.log(N))
+<span class="ansi-green-fg">INFO:lightwood-1980:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 </div>
@@ -656,7 +662,7 @@ div.rendered_html tbody tr:hover {
 <p>Internally, lightwood cleans and reshapes the data, featurizes measurements and timestamps, and comes up with a handful of different models that will be evaluated to keep the one that produces the best forecasts.</p>
 <p>Let’s train the predictor. This should take a couple of minutes, at most:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -669,251 +675,588 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-46866:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Transforming timeseries data</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Using 15 processes to reshape.</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Splitting the data into train/test</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Preparing the encoders</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Encoder prepping dict length of: 1</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Done running for: Sunspots</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [1/100000] average_loss = 0.020042672178201507</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [2/100000] average_loss = 0.0077215013273975305</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [3/100000] average_loss = 0.0064399814919421546</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [4/100000] average_loss = 0.005441865690967493</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [5/100000] average_loss = 0.005300704742732801</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [6/100000] average_loss = 0.004992981385766414</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [7/100000] average_loss = 0.00491229374157755</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [8/100000] average_loss = 0.004856080601089879</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [9/100000] average_loss = 0.004799575188703704</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [10/100000] average_loss = 0.0047617426566910325</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [11/100000] average_loss = 0.004732183615366618</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [12/100000] average_loss = 0.004704843226232026</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [13/100000] average_loss = 0.004697896095744351</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [14/100000] average_loss = 0.004687661141679998</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [15/100000] average_loss = 0.004655592012823674</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [16/100000] average_loss = 0.004595928704529478</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [17/100000] average_loss = 0.004568418233018173</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [18/100000] average_loss = 0.004558674494425456</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [19/100000] average_loss = 0.004570525518634863</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [20/100000] average_loss = 0.004572713087525284</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [21/100000] average_loss = 0.004563712864591364</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [22/100000] average_loss = 0.004498099365778136</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [23/100000] average_loss = 0.004449873953534846</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [24/100000] average_loss = 0.004484773205037703</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [25/100000] average_loss = 0.004398583738427413</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [26/100000] average_loss = 0.004340721536100957</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [27/100000] average_loss = 0.004394709227377908</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [28/100000] average_loss = 0.004414253694969311</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [29/100000] average_loss = 0.0043628366892797905</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [30/100000] average_loss = 0.0042474141246394105</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [31/100000] average_loss = 0.004357850760744329</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [32/100000] average_loss = 0.004315985190240961</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [33/100000] average_loss = 0.00410254764975163</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [34/100000] average_loss = 0.004112129096399274</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [35/100000] average_loss = 0.004205447932084401</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [36/100000] average_loss = 0.004242659451668723</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [37/100000] average_loss = 0.0042895584252842685</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [38/100000] average_loss = 0.00440603481572971</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [39/100000] average_loss = 0.004132882597153647</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [40/100000] average_loss = 0.0040611259769975094</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [41/100000] average_loss = 0.00396897013772998</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [42/100000] average_loss = 0.003915625183205856</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [43/100000] average_loss = 0.003940282500626748</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:time series encoder epoch [44/100000] average_loss = 0.004178977953760247</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Featurizing the data</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Training the mixers</span>
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/engine.py:151: UserWarning: Found `num_iterations` in params. Will use it instead of argument
-  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
-<span class="ansi-yellow-fg">WARNING:lightwood-46866:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-46866:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-46866:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-46866:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-46866:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-46866:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/torch/cuda/amp/grad_scaler.py:116: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+<span class="ansi-green-fg">INFO:lightwood-1980:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Transforming timeseries data</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Using 1 processes to reshape.</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Splitting the data into train/test</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Preparing the encoders</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Encoder prepping dict length of: 1</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Done running for: Sunspots</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [1/100000] average_loss = 0.018331727630059517</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [2/100000] average_loss = 0.007308861256273445</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [3/100000] average_loss = 0.0055975783493708185</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [4/100000] average_loss = 0.0048074403736035835</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [5/100000] average_loss = 0.004469920428712517</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [6/100000] average_loss = 0.004401022663970117</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [7/100000] average_loss = 0.0042478864838439885</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [8/100000] average_loss = 0.004295934078305266</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [9/100000] average_loss = 0.004215001929167228</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [10/100000] average_loss = 0.004205311218234937</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [11/100000] average_loss = 0.0041679621998183085</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [12/100000] average_loss = 0.00416371502233943</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [13/100000] average_loss = 0.004155009658046854</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [14/100000] average_loss = 0.0041195882575038026</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [15/100000] average_loss = 0.004109016213829238</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [16/100000] average_loss = 0.004079995107211372</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [17/100000] average_loss = 0.004067434245633054</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [18/100000] average_loss = 0.004076994082654658</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [19/100000] average_loss = 0.004073939599610044</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [20/100000] average_loss = 0.004054778445546383</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [21/100000] average_loss = 0.003996188047424959</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [22/100000] average_loss = 0.0038654202429439584</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [23/100000] average_loss = 0.0038379723694095384</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [24/100000] average_loss = 0.00419188735776954</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [25/100000] average_loss = 0.003941598065122276</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [26/100000] average_loss = 0.003925148059318546</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [27/100000] average_loss = 0.003945235609223624</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [28/100000] average_loss = 0.0038574267343870114</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [29/100000] average_loss = 0.004085370575246606</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [30/100000] average_loss = 0.003909675109381213</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [31/100000] average_loss = 0.003918856722370163</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [32/100000] average_loss = 0.003947360100271201</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [33/100000] average_loss = 0.003898238079126282</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [34/100000] average_loss = 0.004050385499534088</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [35/100000] average_loss = 0.0038676341540356276</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [36/100000] average_loss = 0.003984114667625478</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [37/100000] average_loss = 0.0038277534682167992</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [38/100000] average_loss = 0.003739938264146297</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [39/100000] average_loss = 0.003687693825307882</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [40/100000] average_loss = 0.0035912523723684313</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [41/100000] average_loss = 0.00368940992384639</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [42/100000] average_loss = 0.003488364790865809</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [43/100000] average_loss = 0.003390322708675557</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:time series encoder epoch [44/100000] average_loss = 0.003680342380913688</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Training the mixers</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+[LightGBM] [Fatal] GPU Tree Learner was not enabled in this build.
+Please recompile with CMake option -DUSE_GPU=1
+<span class="ansi-yellow-fg">WARNING:lightwood-1980:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
+[LightGBM] [Fatal] GPU Tree Learner was not enabled in this build.
+Please recompile with CMake option -DUSE_GPU=1
+<span class="ansi-yellow-fg">WARNING:lightwood-1980:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
+[LightGBM] [Fatal] GPU Tree Learner was not enabled in this build.
+Please recompile with CMake option -DUSE_GPU=1
+<span class="ansi-yellow-fg">WARNING:lightwood-1980:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
+[LightGBM] [Fatal] GPU Tree Learner was not enabled in this build.
+Please recompile with CMake option -DUSE_GPU=1
+<span class="ansi-yellow-fg">WARNING:lightwood-1980:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
+[LightGBM] [Fatal] GPU Tree Learner was not enabled in this build.
+Please recompile with CMake option -DUSE_GPU=1
+<span class="ansi-yellow-fg">WARNING:lightwood-1980:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
+[LightGBM] [Fatal] GPU Tree Learner was not enabled in this build.
+Please recompile with CMake option -DUSE_GPU=1
+<span class="ansi-yellow-fg">WARNING:lightwood-1980:LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:115: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:
         addcmul_(Number value, Tensor tensor1, Tensor tensor2)
 Consider using one of the following signatures instead:
-        addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at  ../torch/csrc/utils/python_arg_parser.cpp:1005.)
+        addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at  ../torch/csrc/utils/python_arg_parser.cpp:1025.)
   exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
-<span class="ansi-green-fg">INFO:lightwood-46866:Loss of 0.539688229560852 with learning rate 0.0001</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Loss of 0.7796856760978699 with learning rate 0.00014</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Found learning rate of: 0.0001</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 1: 0.6908893585205078</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 2: 0.6882499903440475</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 3: 0.6850549429655075</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 4: 0.6813623607158661</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 5: 0.6772531270980835</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 6: 0.6728083938360214</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 7: 0.6652606427669525</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 8: 0.6601350754499435</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 9: 0.6548376232385635</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 10: 0.6494599282741547</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 11: 0.6441417187452316</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 12: 0.6389893442392349</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 13: 0.6309126764535904</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 14: 0.6257634907960892</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 15: 0.6205589026212692</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 16: 0.6152833849191666</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 17: 0.6099573820829391</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 18: 0.6046575754880905</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 19: 0.5962131917476654</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 20: 0.5909084677696228</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 21: 0.5856661349534988</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 22: 0.5805662572383881</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 23: 0.575617328286171</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 24: 0.5707968175411224</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 25: 0.5632813721895218</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 26: 0.5587586611509323</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 27: 0.554344117641449</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 28: 0.5499386340379715</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 29: 0.5455891937017441</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 30: 0.5413248538970947</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 31: 0.5345934927463531</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 32: 0.5304456949234009</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 33: 0.526373103260994</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 34: 0.5223924517631531</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 35: 0.5184392035007477</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 36: 0.5145991444587708</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 37: 0.5086493343114853</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 38: 0.5050476491451263</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 39: 0.5015637576580048</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 40: 0.49815742671489716</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 41: 0.4948585033416748</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 42: 0.49173182249069214</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 43: 0.48690974712371826</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 44: 0.4839773178100586</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 45: 0.4811210632324219</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 46: 0.4783552885055542</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 47: 0.4757150560617447</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 48: 0.47318898141384125</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 49: 0.46942955255508423</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 50: 0.4671967923641205</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 51: 0.4650762975215912</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 52: 0.4630257934331894</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 53: 0.46110378205776215</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 54: 0.45930930972099304</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 55: 0.45666399598121643</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 56: 0.4550795406103134</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 57: 0.4535674601793289</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 58: 0.45216208696365356</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 59: 0.45088090002536774</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 60: 0.4496418982744217</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 61: 0.4477883279323578</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 62: 0.4467353969812393</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 63: 0.4457828402519226</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 64: 0.4448719322681427</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 65: 0.44403648376464844</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 66: 0.44328153133392334</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 67: 0.44207488000392914</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 68: 0.4413738548755646</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 69: 0.44084450602531433</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 70: 0.4403578191995621</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 71: 0.4398685395717621</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 72: 0.43935835361480713</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 73: 0.43840254843235016</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 74: 0.4378361850976944</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 75: 0.4375789165496826</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 76: 0.43739429116249084</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 77: 0.4372607320547104</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 78: 0.43708017468452454</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 79: 0.4364318400621414</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 80: 0.43584632873535156</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 81: 0.4356466382741928</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 82: 0.4355204701423645</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 83: 0.43557313084602356</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 84: 0.43554021418094635</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 85: 0.43514105677604675</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 86: 0.43462760746479034</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 87: 0.43442972004413605</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 88: 0.43443459272384644</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 89: 0.4344787895679474</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 90: 0.4345344454050064</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 1: 0.329136921600862</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 2: 0.3284675722772425</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 3: 0.33007449995387683</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 4: 0.32765168764374475</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 5: 0.3260806582190774</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 6: 0.3272357068278573</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 7: 0.3281749730760401</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Started fitting LGBM models for array prediction</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Started fitting LGBM model</span>
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/engine.py:151: UserWarning: Found `num_iterations` in params. Will use it instead of argument
-  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
-<span class="ansi-green-fg">INFO:lightwood-46866:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/__init__.py&#39;&gt;) with 1325 iterations given 165.66666666666666 seconds constraint</span>
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/engine.py:156: UserWarning: Found `early_stopping_rounds` in params. Will use it instead of argument
-  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
-<span class="ansi-green-fg">INFO:lightwood-46866:Lightgbm model contains 1 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 2 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Started fitting LGBM model</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/__init__.py&#39;&gt;) with 1325 iterations given 165.66666666666666 seconds constraint</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Lightgbm model contains 1 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 2 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Started fitting LGBM model</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/__init__.py&#39;&gt;) with 1325 iterations given 165.66666666666666 seconds constraint</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Lightgbm model contains 1 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 2 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Started fitting LGBM model</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/__init__.py&#39;&gt;) with 1325 iterations given 165.66666666666666 seconds constraint</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Lightgbm model contains 1 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 2 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Started fitting LGBM model</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/__init__.py&#39;&gt;) with 1325 iterations given 165.66666666666666 seconds constraint</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Lightgbm model contains 1 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 2 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Started fitting LGBM model</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/__init__.py&#39;&gt;) with 1325 iterations given 165.66666666666666 seconds constraint</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Lightgbm model contains 1 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 2 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Mixer: Neural got accuracy: 0.19612012470445245</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Mixer: LightGBMArray got accuracy: 0.21013741093675975</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Picked best mixer: LightGBMArray</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Analyzing the ensemble of mixers</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Adjustment on validation requested.</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating the mixers</span>
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/torch/cuda/amp/grad_scaler.py:116: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss of 0.6578899621963501 with learning rate 0.0001</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss of 0.8831674456596375 with learning rate 0.00014</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Found learning rate of: 0.0001</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:115: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 1: 0.33339183280865353</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 2: 0.3303144524494807</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 3: 0.330986554423968</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 4: 0.3315189927816391</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 5: 0.33072087665398914</span>
-<span class="ansi-white-fg">DEBUG:lightwood-46866:Loss @ epoch 6: 0.33309372514486313</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating array of LGBM models...</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/engine.py:151: UserWarning: Found `num_iterations` in params. Will use it instead of argument
-  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/lightgbm/engine.py:156: UserWarning: Found `early_stopping_rounds` in params. Will use it instead of argument
-  warnings.warn(&#34;Found `{}` in params. Will use it instead of argument&#34;.format(alias))
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 3 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 3 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 3 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 3 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 3 weak estimators</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Updating lightgbm model with 1 iterations</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Model now has a total of 3 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 1: 0.794191300868988</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 2: 0.7909130454063416</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 3: 0.7869049608707428</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 4: 0.7822314202785492</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 5: 0.7769820690155029</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 6: 0.7712302207946777</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 7: 0.761167973279953</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 8: 0.754252165555954</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 9: 0.7469930350780487</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 10: 0.7394144833087921</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 11: 0.7315614819526672</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 12: 0.7234623432159424</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 13: 0.7099866271018982</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 14: 0.7011381387710571</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 15: 0.6920566856861115</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 16: 0.6827388554811478</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 17: 0.6732200533151627</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 18: 0.6635104417800903</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 19: 0.6474223881959915</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 20: 0.6368639469146729</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 21: 0.6259820610284805</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 22: 0.6147935688495636</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 23: 0.6033445000648499</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 24: 0.5917056947946548</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 25: 0.5726978778839111</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 26: 0.5607649236917496</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 27: 0.5490278005599976</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 28: 0.5377262532711029</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 29: 0.5269931256771088</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 30: 0.5169258266687393</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 31: 0.501435786485672</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 32: 0.49211347103118896</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 33: 0.4830145984888077</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 34: 0.4740293025970459</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 35: 0.4651787579059601</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 36: 0.45660361647605896</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 37: 0.4432009607553482</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 38: 0.4350021183490753</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 39: 0.4270183891057968</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 40: 0.419233500957489</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 41: 0.4116287901997566</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 42: 0.4042518585920334</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 43: 0.3928226828575134</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 44: 0.3859375864267349</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 45: 0.37924622744321823</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 46: 0.3727393075823784</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 47: 0.3664446249604225</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 48: 0.36040934920310974</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 49: 0.3510781154036522</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 50: 0.3454749882221222</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 51: 0.3400743305683136</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 52: 0.3349006325006485</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 53: 0.3299594596028328</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 54: 0.3252772018313408</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 55: 0.3181592524051666</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 56: 0.3139536380767822</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 57: 0.30994468182325363</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 58: 0.3061024844646454</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 59: 0.30241261422634125</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 60: 0.29898326098918915</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 61: 0.2937849164009094</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 62: 0.2907002866268158</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 63: 0.28769566863775253</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 64: 0.28476428240537643</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 65: 0.28191106021404266</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 66: 0.27923425287008286</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 67: 0.27513372153043747</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 68: 0.2726965993642807</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 69: 0.2703276500105858</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 70: 0.26800601929426193</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 71: 0.26572495698928833</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 72: 0.2635720819234848</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 73: 0.2602640464901924</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 74: 0.25826767832040787</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 75: 0.25633466988801956</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 76: 0.25449560582637787</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 77: 0.25271864235401154</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 78: 0.25102877616882324</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 79: 0.2483966425061226</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 80: 0.24675443023443222</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 81: 0.24516014009714127</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 82: 0.24359511584043503</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 83: 0.24204493314027786</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 84: 0.24057422578334808</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 85: 0.2383536919951439</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 86: 0.2370140701532364</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 87: 0.23570271581411362</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 88: 0.23439247906208038</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 89: 0.23310142755508423</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 90: 0.23186702281236649</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 91: 0.2300485149025917</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 92: 0.2289840430021286</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 93: 0.22798192501068115</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 94: 0.2270028367638588</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 95: 0.22603508085012436</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 96: 0.22509347647428513</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 97: 0.22369016706943512</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 98: 0.2228967547416687</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 99: 0.22214790433645248</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 100: 0.22144100815057755</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 101: 0.22076569497585297</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 102: 0.22012027353048325</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 103: 0.21916411072015762</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 104: 0.2186451181769371</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 105: 0.21814358234405518</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 106: 0.21771078556776047</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 107: 0.21731790155172348</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 108: 0.2169656604528427</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 109: 0.21646028012037277</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 110: 0.21619144827127457</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 111: 0.2159290909767151</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 112: 0.2156788483262062</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 113: 0.21548374742269516</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 114: 0.21527931839227676</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 115: 0.21496721357107162</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 116: 0.2147979438304901</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 117: 0.21463380753993988</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 118: 0.21446865051984787</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 119: 0.21434114128351212</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 120: 0.21418391913175583</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 121: 0.21391425281763077</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 122: 0.2137630134820938</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 123: 0.21363256871700287</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 124: 0.21350359171628952</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 125: 0.21340744942426682</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 126: 0.21326695382595062</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 127: 0.21300067007541656</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 128: 0.21284553408622742</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 129: 0.21269843727350235</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 130: 0.21253038942813873</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 131: 0.21239938586950302</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 132: 0.21223942190408707</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 133: 0.21195803582668304</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 134: 0.21180569380521774</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 135: 0.2116495743393898</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 136: 0.2114836648106575</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 137: 0.211345873773098</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 138: 0.21118243783712387</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 139: 0.21086521446704865</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 140: 0.2106979712843895</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 141: 0.21052152663469315</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 142: 0.21034333109855652</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 143: 0.21019646525382996</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 144: 0.21001803129911423</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 145: 0.20969098806381226</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 146: 0.20949269086122513</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 147: 0.209298774600029</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 148: 0.20911656320095062</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 149: 0.20897478610277176</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 150: 0.20879299938678741</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 151: 0.20846642553806305</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 152: 0.20827485620975494</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 153: 0.2080850601196289</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 154: 0.20789597183465958</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 155: 0.20774491131305695</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 156: 0.20758163183927536</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 157: 0.20725174993276596</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 158: 0.20706258714199066</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 159: 0.2068798989057541</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 160: 0.20668694376945496</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 161: 0.20653291046619415</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 162: 0.20636767148971558</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 163: 0.20606160163879395</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 164: 0.20588334649801254</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 165: 0.2056882381439209</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 166: 0.2055094838142395</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 167: 0.20535139739513397</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 168: 0.20519304275512695</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 169: 0.2048865482211113</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 170: 0.2046995535492897</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 171: 0.2045084908604622</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 172: 0.20432154089212418</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 173: 0.20416680723428726</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 174: 0.2039988413453102</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 175: 0.20368211716413498</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 176: 0.20350707322359085</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 177: 0.20333301275968552</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 178: 0.20314346998929977</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 179: 0.20298714935779572</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 180: 0.20281530916690826</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 181: 0.20249812304973602</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 182: 0.20232246071100235</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 183: 0.20212818682193756</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 184: 0.20195268094539642</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 185: 0.201801098883152</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 186: 0.20162908732891083</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 187: 0.2013242170214653</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 188: 0.20115947723388672</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 189: 0.20099885761737823</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 190: 0.20083379745483398</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 191: 0.20069324225187302</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 192: 0.2004924789071083</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 193: 0.2001749351620674</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 194: 0.1999947801232338</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 195: 0.19982508569955826</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 196: 0.19977394491434097</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 197: 0.19956737011671066</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 198: 0.19928598403930664</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 199: 0.19893600791692734</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 200: 0.1987873688340187</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 201: 0.19861424714326859</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 202: 0.1985575407743454</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 203: 0.19840071350336075</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 204: 0.19814734905958176</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 205: 0.19774387031793594</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 206: 0.19752704352140427</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 207: 0.19736991077661514</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 208: 0.19727404415607452</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 209: 0.19707010686397552</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 210: 0.19685098528862</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 211: 0.19653305411338806</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 212: 0.1963544562458992</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 213: 0.19621500372886658</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 214: 0.19616617262363434</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 215: 0.19597969204187393</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 216: 0.19572121649980545</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 217: 0.19530202448368073</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 218: 0.1951240375638008</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 219: 0.19497662037611008</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 220: 0.19492504745721817</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 221: 0.1947094053030014</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 222: 0.19440265744924545</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 223: 0.1940622553229332</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 224: 0.1939077228307724</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 225: 0.19378679245710373</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 226: 0.19384750723838806</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 227: 0.19356106221675873</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 228: 0.19324278831481934</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 229: 0.19286376237869263</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 230: 0.19265923649072647</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 231: 0.19262174516916275</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 232: 0.19268358498811722</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 233: 0.1922917515039444</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 234: 0.19198618084192276</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 235: 0.1916928067803383</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 236: 0.19152288883924484</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 237: 0.1914568841457367</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 238: 0.19140945374965668</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 239: 0.19116279482841492</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 240: 0.19087738543748856</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 241: 0.19053449481725693</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 242: 0.19033793359994888</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 243: 0.19028359651565552</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 244: 0.19025321304798126</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 245: 0.1899886354804039</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 246: 0.18969335407018661</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 247: 0.1894759088754654</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 248: 0.189275324344635</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 249: 0.18928217142820358</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 250: 0.189436636865139</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:115: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+  warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 1: 0.1539161286570809</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 2: 0.152943417429924</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 3: 0.15367839553139426</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 4: 0.14876615391536194</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 5: 0.1505670344287699</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 6: 0.14930834824388678</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 7: 0.15017100220376794</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting LGBM models for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting LGBM model</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/__init__.py&#39;&gt;) with 882 iterations given 110.33333333333333 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Lightgbm model contains 25 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1.5 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 26 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:40: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:41: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  dev_data.data_frame[self.target] = dev_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting LGBM model</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/__init__.py&#39;&gt;) with 882 iterations given 110.33333333333333 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Lightgbm model contains 21 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 22 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:40: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:41: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  dev_data.data_frame[self.target] = dev_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting LGBM model</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/__init__.py&#39;&gt;) with 882 iterations given 110.33333333333333 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Lightgbm model contains 18 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 19 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:40: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:41: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  dev_data.data_frame[self.target] = dev_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting LGBM model</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/__init__.py&#39;&gt;) with 882 iterations given 110.33333333333333 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Lightgbm model contains 18 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 19 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:40: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:41: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  dev_data.data_frame[self.target] = dev_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting LGBM model</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/__init__.py&#39;&gt;) with 882 iterations given 110.33333333333333 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Lightgbm model contains 18 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 19 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:40: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:41: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  dev_data.data_frame[self.target] = dev_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting LGBM model</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Training GBM (&lt;module &#39;lightgbm&#39; from &#39;/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/__init__.py&#39;&gt;) with 882 iterations given 110.33333333333333 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Lightgbm model contains 20 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 21 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting sktime forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Mixer: Neural got accuracy: 0.5206582085653144</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Mixer: LightGBMArray got accuracy: 0.44743922214788034</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/pmdarima/arima/arima.py:692: UserWarning: As of version 1.5.0 &#39;typ&#39; is no longer a valid arg for predict. In future versions this will raise a TypeError.
+  warnings.warn(&#34;As of version 1.5.0 &#39;typ&#39; is no longer a valid &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Mixer: SkTime got accuracy: 0.2025435825521946</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Picked best mixer: Neural</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Analyzing the ensemble of mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Adjustment on validation requested.</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating the mixers</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:115: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+  warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 1: 0.15459302688638368</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 2: 0.15278507893284163</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 3: 0.15368996188044548</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 4: 0.15381904567281404</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 5: 0.15337310979763666</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Loss @ epoch 6: 0.15403116742769876</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating array of LGBM models...</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1.5 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 27 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:50: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 23 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:50: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 20 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:50: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 20 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:50: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 20 weak estimators</span>
+/home/runner/work/lightwood/lightwood/lightwood/mixer/lightgbm_array.py:50: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  train_data.data_frame[self.target] = train_data.data_frame[f&#39;{self.target}_timestep_{timestep}&#39;]
+<span class="ansi-green-fg">INFO:lightwood-1980:Updating lightgbm model with 1 iterations</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:177: UserWarning: Found `num_iterations` in params. Will use it instead of argument
+  _log_warning(f&#34;Found `{alias}` in params. Will use it instead of argument&#34;)
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/lightgbm/engine.py:240: UserWarning: &#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. Pass &#39;log_evaluation()&#39; callback via &#39;callbacks&#39; argument instead.
+  _log_warning(&#34;&#39;verbose_eval&#39; argument is deprecated and will be removed in a future release of LightGBM. &#34;
+<span class="ansi-green-fg">INFO:lightwood-1980:Model now has a total of 22 weak estimators</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Started fitting sktime forecaster for array prediction</span>
 </pre></div></div>
 </div>
 </div>
@@ -921,7 +1264,7 @@ Consider using one of the following signatures instead:
 <h2>Predict<a class="headerlink" href="#Predict" title="Permalink to this headline">¶</a></h2>
 <p>Once the predictor has trained, we can use it to generate 6-month forecasts for each of the test set data points:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -934,22 +1277,23 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-46866:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Transforming timeseries data</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:Featurizing the data</span>
-/Users/Pato/Work/MindsDB/env/lib/python3.8/site-packages/pandas/core/indexing.py:1637: SettingWithCopyWarning:
+<span class="ansi-green-fg">INFO:lightwood-1980:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Transforming timeseries data</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:Featurizing the data</span>
+/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/pandas/core/indexing.py:1732: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   self._setitem_single_block(indexer, value, name)
-<span class="ansi-green-fg">INFO:lightwood-46866:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-46866:GlobalFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-1980:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
 </pre></div></div>
 </div>
 <p>Let’s check how a single row might look:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -958,7 +1302,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -992,13 +1336,13 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
   <tbody>
     <tr>
       <th>10</th>
-      <td>[51.28799878891615, 46.76867159945164, 52.0899...</td>
+      <td>[73.11902359652383, 72.49130566510362, 68.2849...</td>
       <td>51.0</td>
-      <td>[-272577600.0, -269899200.0, -267220800.0, -26...</td>
-      <td>[0.24, 0.24, 0.24, 0.24, 0.24, 0.24]</td>
-      <td>[30.80746268275371, 26.288135493289204, 31.609...</td>
-      <td>[71.76853489507859, 67.24920770561408, 72.5704...</td>
-      <td>False</td>
+      <td>[-272332800.0, -269654400.0, -266976000.0, -26...</td>
+      <td>[0.7, 0.7, 0.7, 0.7, 0.7, 0.7]</td>
+      <td>[51.96518665776537, 51.337468726345165, 47.131...</td>
+      <td>[94.27286053528229, 93.64514260386208, 89.4388...</td>
+      <td>True</td>
     </tr>
   </tbody>
 </table>
@@ -1011,7 +1355,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 <p>Okay, time series are much easier to appreciate through plots. Let’s make one:</p>
 <p>NOTE: We will use <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> to generate a simple plot of these forecasts. If you want to run this notebook locally, you will need to <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">matplotlib</span></code> for the following code to work.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1020,7 +1364,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[69]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>

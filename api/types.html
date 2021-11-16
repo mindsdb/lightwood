@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Lightwood API Types &mdash; lightwood 1.7.0 documentation</title>
+  <title>Lightwood API Types &mdash; lightwood 1.6.1 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                1.7.0
+                1.6.1
               </div>
             
           
@@ -485,7 +485,7 @@
 <li><p><strong>unbias_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – all classes are automatically weighted inverse to how often they occur</p></li>
 <li><p><strong>seconds_per_mixer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Number of seconds maximum to spend PER mixer trained in the list of possible mixers.</p></li>
 <li><p><strong>seconds_per_encoder</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Number of seconds maximum to spend when training an encoder that requires data to     learn a representation.</p></li>
-<li><p><strong>time_aim</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Time budget (in seconds) to train all needed components for the predictive tasks, including         encoders and models.</p></li>
+<li><p><strong>time_aim</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Time budget (in seconds) to train all needed components for the predictive tasks, including         encoders and models.</p></li>
 <li><p><strong>target_weights</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – indicates to the accuracy functions how much to weight every target class.</p></li>
 <li><p><strong>positive_domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – For numerical taks, force predictor output to be positive (integer or float).</p></li>
 <li><p><strong>timeseries_settings</strong> (<a class="reference internal" href="#api.types.TimeseriesSettings" title="api.types.TimeseriesSettings"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code></a>) – TimeseriesSettings object for time-series tasks, refer to its documentation for          available settings.</p></li>
