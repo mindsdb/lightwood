@@ -3,15 +3,13 @@ import numpy as np
 
 
 def r2_score(y_true, y_pred) -> float:
-    """ Wrapper for sklearn R2 score, lower capped at 0. """
-    for arr in (y_true, y_pred):
-        for i in range(len(arr)):
-            try:
-                if arr[i] is None or np.isnan(arr[i]):
-                    arr[i] = 0
-                if np.isinf(arr[i]):
-                    arr[i] = pow(2, 63)
-            except Exception:
-                arr[i] = 0
+    """ Wrapper for sklearn R2 score, lower capped between 0 and 1"""
     acc = sk_r2_score(y_true, y_pred)
-    return min(1, max(0, acc))
+    # Cap at 0
+    if acc < 0:
+        acc = 0
+    # Guard against overflow (> 1 means overflow of negative score)
+    if acc > 1:
+        acc = 0
+
+    return acc
