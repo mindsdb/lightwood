@@ -51,10 +51,10 @@ class TestTimeseries(unittest.TestCase):
         start = time.process_time()
         predictor.learn(train)
         time_aim_actual = (time.process_time() - start)
-        if((time_aim_expected * 5) < time_aim_actual):
+        if((time_aim_expected * 10) < time_aim_actual):
             error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
             raise ValueError(error)
-        assert (time_aim_expected * 5) >= time_aim_actual
+        assert (time_aim_expected * 10) >= time_aim_actual
         return predictor
 
     def test_0_time_series_grouped_regression(self):
@@ -184,6 +184,7 @@ class TestTimeseries(unittest.TestCase):
         df = pd.DataFrame(columns=['Time', target])
         df['Time'] = t
         df[target] = ts
+        df[f'{target}_2x'] = 2 * ts
 
         train = df[:int(len(df) * 0.8)]
         test = df[int(len(df) * 0.8):]
@@ -193,7 +194,8 @@ class TestTimeseries(unittest.TestCase):
                                             'timeseries_settings': {
                                                 'order_by': ['Time'],
                                                 'window': 5,
-                                                'nr_predictions': 20
+                                                'nr_predictions': 20,
+                                                'historical_columns': [f'{target}_2x']
                                             }})
 
         json_ai = json_ai_from_problem(df, problem_definition=pdef)
@@ -209,5 +211,11 @@ class TestTimeseries(unittest.TestCase):
 
         predictor.learn(train)
         ps = predictor.predict(test)
-
         assert r2_score(ps['truth'].values, ps['prediction'].iloc[0]) >= 0.95
+
+        # test historical columns asserts
+        test[f'{target}_2x'].iloc[0] = np.nan
+        self.assertRaises(Exception, predictor.predict, test)
+
+        test.pop(f'{target}_2x')
+        self.assertRaises(Exception, predictor.predict, test)

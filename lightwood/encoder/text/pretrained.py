@@ -95,7 +95,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
     def __init__(
         self,
-        stop_after: int,
+        stop_after: float,
         is_target=False,
         model_name="distilbert",
         custom_tokenizer=None,

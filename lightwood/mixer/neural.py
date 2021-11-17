@@ -1,6 +1,6 @@
 import time
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import torch
 import numpy as np
@@ -34,9 +34,9 @@ class Neural(BaseMixer):
     supports_proba: bool
 
     def __init__(
-            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
-            search_hyperparameters: bool):
+            search_hyperparameters: bool, n_epochs: Optional[int] = None):
         """
         The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output. 
         
@@ -48,6 +48,7 @@ class Neural(BaseMixer):
         :param net: The network type to use (`DeafultNet` or `ArNet`)
         :param fit_on_dev: If we should fit on the dev dataset
         :param search_hyperparameters: If the network should run a more through hyperparameter search (currently disabled)
+        :param n_epochs: amount of epochs that the network will be trained for. Supersedes all other early stopping criteria if specified.
         """ # noqa
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
@@ -55,6 +56,7 @@ class Neural(BaseMixer):
         self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
         self.epochs_to_best = 0
+        self.n_epochs = n_epochs
         self.fit_on_dev = fit_on_dev
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
@@ -207,15 +209,22 @@ class Neural(BaseMixer):
                 best_model = deepcopy(self.model)
                 epochs_to_best = epoch
 
-            if len(running_errors) >= 5:
-                delta_mean = np.average([running_errors[-i - 1] - running_errors[-i] for i in range(1, 5)],
-                                        weights=[(1 / 2)**i for i in range(1, 5)])
-                if delta_mean <= 0:
+            # manually set epoch limit
+            if self.n_epochs is not None:
+                if epoch > self.n_epochs:
                     break
-            elif (time.time() - started) > stop_after:
-                break
-            elif running_errors[-1] < 0.0001 or train_error < 0.0001:
-                break
+
+            # automated early stopping
+            else:
+                if len(running_errors) >= 5:
+                    delta_mean = np.average([running_errors[-i - 1] - running_errors[-i] for i in range(1, 5)],
+                                            weights=[(1 / 2)**i for i in range(1, 5)])
+                    if delta_mean <= 0:
+                        break
+                elif (time.time() - started) > stop_after:
+                    break
+                elif running_errors[-1] < 0.0001 or train_error < 0.0001:
+                    break
 
         if np.isnan(best_dev_error):
             best_dev_error = pow(2, 32)
@@ -250,7 +259,7 @@ class Neural(BaseMixer):
         """
         Fits the Neural mixer on some data, making it ready to predit
 
-        :param train_data: The EncodedDs on which to train the network
+        :param train_data: The network is fit/trained on this
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
         # ConcatedEncodedDs
@@ -280,13 +289,15 @@ class Neural(BaseMixer):
 
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
-        self._final_tuning(dev_data)
+
+        if not self.timeseries_settings.is_timeseries:
+            self._final_tuning(dev_data)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
         Augments the mixer's fit with new data, nr of epochs is based on the amount of epochs the original fitting took
 
-        :param train_data: The EncodedDs on which to train the network
+        :param train_data: The network is fit/trained on this
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
 
@@ -303,10 +314,10 @@ class Neural(BaseMixer):
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         """
-        Make predictions based on datasource similar to the one used to fit (sans the target column)
+        Make predictions based on datasource with the same features as the ones used for fitting
 
-        :param ds: The EncodedDs for which to generate the predictions
-        :param arg: Argument for predicting
+        :param ds: Predictions are generate from it
+        :param arg: Any additional arguments used in predicting
 
         :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
         """ # noqa
@@ -332,10 +343,7 @@ class Neural(BaseMixer):
                 else:
                     decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
 
-                if not self.timeseries_settings.is_timeseries or self.timeseries_settings.nr_predictions == 1:
-                    decoded_predictions.extend(decoded_prediction)
-                else:
-                    decoded_predictions.append(decoded_prediction)
+                decoded_predictions.extend(decoded_prediction)
 
             ydf = pd.DataFrame({'prediction': decoded_predictions})
 

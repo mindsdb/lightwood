@@ -2,17 +2,21 @@ import unittest
 from datetime import datetime
 import numpy as np
 from dateutil.parser import parse as parse_datetime
+import torch
 from lightwood.encoder.datetime.datetime import DatetimeEncoder
 from lightwood.encoder.datetime.datetime_sin_normalizer import DatetimeNormalizerEncoder
 
 
 class TestDatetimeEncoder(unittest.TestCase):
     def test_decode(self):
-        data = [1555943147, None, 1555943147]
+        data = [1555943147, None, 1555943147, '', np.nan]
 
         enc = DatetimeEncoder()
         enc.prepare([])
-        dec_data = enc.decode(enc.encode(data))
+        encoded_repr = enc.encode(data)
+        assert not torch.isinf(encoded_repr).any()
+        assert not torch.isnan(encoded_repr).any()
+        dec_data = enc.decode(encoded_repr)
         for d in dec_data:
             assert d in data
 

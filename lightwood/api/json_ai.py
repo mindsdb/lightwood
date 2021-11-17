@@ -80,29 +80,29 @@ def lookup_encoder(
 
     tss = problem_defintion.timeseries_settings
     encoder_lookup = {
-        dtype.integer: "Integer.NumericEncoder",
-        dtype.float: "Float.NumericEncoder",
-        dtype.binary: "Binary.BinaryEncoder",
-        dtype.categorical: "Categorical.CategoricalAutoEncoder"
+        dtype.integer: "NumericEncoder",
+        dtype.float: "NumericEncoder",
+        dtype.binary: "BinaryEncoder",
+        dtype.categorical: "CategoricalAutoEncoder"
         if statistical_analysis is None
         or len(statistical_analysis.histograms[col_name]) > 100
-        else "Categorical.OneHotEncoder",
-        dtype.tags: "Tags.MultiHotEncoder",
-        dtype.date: "Date.DatetimeEncoder",
-        dtype.datetime: "Datetime.DatetimeEncoder",
-        dtype.image: "Image.Img2VecEncoder",
-        dtype.rich_text: "Rich_Text.PretrainedLangEncoder",
-        dtype.short_text: "Short_Text.CategoricalAutoEncoder",
-        dtype.array: "Array.ArrayEncoder",
-        dtype.tsarray: "TimeSeries.TimeSeriesEncoder",
-        dtype.quantity: "Quantity.NumericEncoder",
-        dtype.audio: "Audio.MFCCEncoder"
+        else "OneHotEncoder",
+        dtype.tags: "MultiHotEncoder",
+        dtype.date: "DatetimeEncoder",
+        dtype.datetime: "DatetimeEncoder",
+        dtype.image: "Img2VecEncoder",
+        dtype.rich_text: "PretrainedLangEncoder",
+        dtype.short_text: "CategoricalAutoEncoder",
+        dtype.array: "ArrayEncoder",
+        dtype.tsarray: "TimeSeriesEncoder",
+        dtype.quantity: "NumericEncoder",
+        dtype.audio: "MFCCEncoder"
     }
 
     # If column is a target, only specific feature representations are allowed that enable supervised tasks
     target_encoder_lookup_override = {
-        dtype.rich_text: "Rich_Text.VocabularyEncoder",
-        dtype.categorical: "Categorical.OneHotEncoder",
+        dtype.rich_text: "VocabularyEncoder",
+        dtype.categorical: "OneHotEncoder",
     }
 
     # Assign a default encoder to each column.
@@ -118,8 +118,12 @@ def lookup_encoder(
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
                 encoder_dict["args"][
-                    "target_class_distribution"
+                    "target_weights"
                 ] = "$statistical_analysis.target_class_distribution"
+            if problem_defintion.target_weights is not None:
+                encoder_dict["args"][
+                    "target_weights"
+                ] = problem_defintion.target_weights
 
         if col_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
             encoder_dict["args"][
@@ -130,7 +134,7 @@ def lookup_encoder(
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
         if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict["module"] = col_dtype.capitalize() + ".TimeSeriesEncoder"
+            encoder_dict["module"] = "TimeSeriesEncoder"
             encoder_dict["args"]["original_type"] = f'"{col_dtype}"'
             encoder_dict["args"]["target"] = "self.target"
             encoder_dict["args"]["grouped_by"] = f"{gby}"
@@ -138,24 +142,24 @@ def lookup_encoder(
         if is_target:
             if col_dtype in [dtype.integer]:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
-                encoder_dict["module"] = "Integer.TsNumericEncoder"
+                encoder_dict["module"] = "TsNumericEncoder"
             if col_dtype in [dtype.float]:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
-                encoder_dict["module"] = "Float.TsNumericEncoder"
+                encoder_dict["module"] = "TsNumericEncoder"
             if tss.nr_predictions > 1:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["args"]["timesteps"] = f"{tss.nr_predictions}"
-                encoder_dict["module"] = "TimeSeries.TsArrayNumericEncoder"
+                encoder_dict["module"] = "TsArrayNumericEncoder"
         if "__mdb_ts_previous" in col_name:
-            encoder_dict["module"] = "Array.ArrayEncoder"
+            encoder_dict["module"] = "ArrayEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
             encoder_dict["args"]["window"] = f"{tss.window}"
 
     # Set arguments for the encoder
-    if encoder_dict["module"] == "Rich_Text.PretrainedLangEncoder" and not is_target:
+    if encoder_dict["module"] == "PretrainedLangEncoder" and not is_target:
         encoder_dict["args"]["output_type"] = "$dtype_dict[$target]"
 
-    if eval(encoder_dict["module"].split(".")[1]).is_trainable_encoder:
+    if eval(encoder_dict["module"]).is_trainable_encoder:
         encoder_dict["args"]["stop_after"] = "$problem_definition.seconds_per_encoder"
 
     if is_target_predicting_encoder:
@@ -310,7 +314,7 @@ def generate_json_ai(
 
         if (
             tss.is_timeseries
-            and eval(encoder["module"].split(".")[1]).is_timeseries_encoder
+            and eval(encoder["module"]).is_timeseries_encoder
         ):
             if tss.group_by is not None:
                 for group in tss.group_by:
@@ -383,7 +387,7 @@ def generate_json_ai(
             [
                 x
                 for x in features.values()
-                if eval(x.encoder["module"].split(".")[1]).is_trainable_encoder
+                if eval(x.encoder["module"]).is_trainable_encoder
             ]
         )
         nr_mixers = len(list(outputs.values())[0].mixers)
@@ -533,6 +537,10 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
             )
+            mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
+                "target_encoder", "$encoders[self.target]"
+            )
+            mixers[i]["args"]["use_optuna"] = True
         elif mixers[i]["module"] == "Regression":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
@@ -548,6 +556,9 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             )
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
+            )
+            mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
+                "target_encoder", "$encoders[self.target]"
             )
         elif mixers[i]["module"] == "SkTime":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
@@ -566,10 +577,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     for name in json_ai.features:
         if json_ai.features[name].dependency is None:
             json_ai.features[name].dependency = []
-        if json_ai.features[name].data_dtype is None:
-            json_ai.features[name].data_dtype = (
-                json_ai.features[name].encoder["module"].split(".")[0].lower()
-            )
 
     # Add "hidden" fields
     hidden_fields = {
@@ -723,8 +730,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
             )
         )
         dependency_dict[col_name] = []
-        dtype_dict[col_name] = f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
-        json_ai.features[col_name] = Feature(encoder=encoder_dict[col_name])
+        data_dtype = list(json_ai.outputs.values())[0].data_dtype
+        dtype_dict[col_name] = f"""'{data_dtype}'"""
+        json_ai.features[col_name] = Feature(encoder=encoder_dict[col_name], data_dtype=data_dtype)
 
     # ----------------- #
 

@@ -40,6 +40,13 @@ def transform_timeseries(
     ob_arr = tss.order_by
     window = tss.window
 
+    if tss.use_previous_target and target not in data.columns:
+        raise Exception(f"Cannot transform. Missing historical values for target column {target} (`use_previous_target` is set to True).")  # noqa
+
+    for hcol in tss.historical_columns:
+        if hcol not in data.columns or data[hcol].isna().any():
+            raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
+
     if '__mdb_make_predictions' in original_df.columns:
         index = original_df[original_df['__mdb_make_predictions'].map(
             {'True': True, 'False': False, True: True, False: False}).isin([True])]
@@ -162,7 +169,7 @@ def transform_timeseries(
         df_gb_list = list(combined_df.groupby(tss.group_by))
         df_gb_map = {}
         for gb, df in df_gb_list:
-            df_gb_map['_' + '_'.join(gb)] = df
+            df_gb_map['_' + '_'.join(str(gb))] = df
 
     timeseries_row_mapping = {}
     idx = 0
@@ -190,7 +197,6 @@ def transform_timeseries(
 
     del combined_df['original_index']
 
-    # return combined_df, secondary_type_dict, timeseries_row_mapping, df_gb_map
     return combined_df
 
 

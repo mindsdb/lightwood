@@ -18,7 +18,7 @@ from lightwood.api.types import PredictionArguments
 
 
 class Unit(BaseMixer):
-    def __init__(self, stop_after: int, target_encoder: BaseEncoder):
+    def __init__(self, stop_after: float, target_encoder: BaseEncoder):
         super().__init__(stop_after)
         self.target_encoder = target_encoder
         self.supports_proba = False
