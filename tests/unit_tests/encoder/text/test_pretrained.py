@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 import random
 import torch
 from torch.nn.functional import softmax
@@ -10,7 +11,7 @@ import pandas as pd
 
 from nltk.corpus import opinion_lexicon
 
-def create_synthetic_data(n, ptrain=0.7, seed=2):
+def create_synthetic_data(n, ptrain=0.7):
     """
     Returns "N" instances of a fake language.
 
@@ -24,7 +25,6 @@ def create_synthetic_data(n, ptrain=0.7, seed=2):
     pos_list=list(opinion_lexicon.positive())
     neg_list=list(opinion_lexicon.negative())
 
-    random.seed(seed)
     data = []
     label = []
 
@@ -60,9 +60,12 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         """
         seed = 2
 
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        random.seed(seed)
+
         # Make priming data:
         train, test = create_synthetic_data(1000)
-        random.seed(seed)
         output_enc = BinaryEncoder(is_target=True)
         output_enc.prepare(train["label"])
         encoded_target_values = output_enc.encode(train["label"])
@@ -87,9 +90,13 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         Checks if returned embeddings are of size N_rows x N_embed_dim
         """
         seed = 2
+
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        random.seed(seed)
+
         # Make priming data:
         train, test = create_synthetic_data(1000)
-        random.seed(seed)
         output_enc = BinaryEncoder(is_target=True)
         output_enc.prepare(train["label"])
         encoded_target_values = output_enc.encode(train["label"])
@@ -116,9 +123,13 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         - returns embedding size N_rows x N_embed_dim
         """
         seed = 5
+
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        random.seed(seed)
+        
         # Make priming data:
         train, test = create_synthetic_data(2000)
-        random.seed(seed)
         output_enc = NumericEncoder(is_target=True)
         output_enc.prepare(train["label"])
         encoded_target_values = output_enc.encode(train["label"])
