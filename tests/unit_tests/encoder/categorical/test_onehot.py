@@ -155,13 +155,12 @@ class TestOnehot(unittest.TestCase):
         enc.prepare(data)
 
         # Get the ground-truth inverse weights
-        iweights = torch.ones(size=(len(tweights)+1, ))
+        iweights = torch.ones(size=(len(tweights) + 1,))
         for key, value in tweights.items():
-            iweights[enc.map[key]] = 1/value
+            iweights[enc.map[key]] = 1 / value
 
         # Check inverse weights correct
         self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
-
 
     def test_distro_nonzeroweights(self):
         """
@@ -179,10 +178,10 @@ class TestOnehot(unittest.TestCase):
         enc.prepare(data)
 
         # Get the ground-truth inverse weights
-        iweights = torch.ones(size=(len(tweights), ))
+        iweights = torch.ones(size=(len(tweights),))
 
         for key, value in tweights.items():
-            iweights[enc.map[key]] = 1/value
+            iweights[enc.map[key]] = 1 / value
 
         # Reorder the weights with regards to the map
         self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
@@ -192,7 +191,7 @@ class TestOnehot(unittest.TestCase):
         data = ["apple", "apple", "banana", "apple", "apple", "orange"]
 
         # Arbitrary weights (ex: number of examples)
-        tweights = {"apple": 100,  "banana": 1, "orange": 0}
+        tweights = {"apple": 100, "banana": 1, "orange": 0}
 
         enc = OneHotEncoder(use_unknown=False, is_target=True, target_weights=tweights)
 
