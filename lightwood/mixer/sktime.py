@@ -18,7 +18,7 @@ class SkTime(BaseMixer):
     supports_proba: bool
 
     def __init__(
-            self, stop_after: int, target: str, dtype_dict: Dict[str, str],
+            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             n_ts_predictions: int, ts_analysis: Dict):
         super().__init__(stop_after)
         self.target = target

@@ -326,7 +326,7 @@ class ProblemDefinition:
     unbias_target: bool
     seconds_per_mixer: Union[int, None]
     seconds_per_encoder: Union[int, None]
-    time_aim: Union[int, None]
+    time_aim: Union[float, None]
     target_weights: Union[List[float], None]
     positive_domain: bool
     timeseries_settings: TimeseriesSettings
@@ -355,7 +355,7 @@ class ProblemDefinition:
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
-        anomaly_detection = obj.get('anomaly_detection', True)
+        anomaly_detection = obj.get('anomaly_detection', False)
         ignore_features = obj.get('ignore_features', [])
         fit_on_all = obj.get('fit_on_all', True)
         strict_mode = obj.get('strict_mode', True)

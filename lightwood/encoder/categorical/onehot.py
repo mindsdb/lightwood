@@ -10,8 +10,11 @@ UNCOMMON_TOKEN = 0
 
 
 class OneHotEncoder(BaseEncoder):
+    """
 
-    def __init__(self, is_target=False, target_class_distribution=None, handle_unknown='unknown_token'):
+    Why are we handling target weighting inside encoders? Simple: we'd otherwise have to compute per-index weighting inside the mixers, rather than having that code unified inside 2x encoders. So moving this to the mixer will still involve having to pass the target encoder to the mixer, but will add the additional complexity of having to pass a weighting map to the mixer and adding class-to-index translation boilerplate + weight setting for each mixer
+    """ # noqa
+    def __init__(self, is_target=False, target_weights=None, handle_unknown='unknown_token'):
         super().__init__(is_target)
         self._lang = None
         self.rev_map = {}
@@ -22,8 +25,14 @@ class OneHotEncoder(BaseEncoder):
             self.handle_unknown = handle_unknown
 
         if self.is_target:
-            self.target_class_distribution = target_class_distribution
-            self.index_weights = None
+            if self.handle_unknown != 'unknown_token':
+                raise ValueError(f'One Hot Encoders used for target encoding can only be used with `handle_unknown` \
+                                   set to `unknown_token`. The option: "{self.handle_unknown}" is not supported!')
+
+        self.target_weights = None
+        self.index_weights = None
+        if self.is_target:
+            self.target_weights = target_weights
 
     def prepare(self, priming_data, max_dimensions=20000):
         if self.is_prepared:
@@ -35,7 +44,7 @@ class OneHotEncoder(BaseEncoder):
             self._lang.index2word = {}
             self._lang.word2index = {}
             self._lang.n_words = 0
-        else:  # self.handle_unknown == "unknown_token"
+        elif self.handle_unknown == "unknown_token":
             priming_data = [x if x is not None else UNCOMMON_WORD for x in priming_data]
             self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
             self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
@@ -49,7 +58,7 @@ class OneHotEncoder(BaseEncoder):
         while self._lang.n_words > max_dimensions:
             if self.handle_unknown == "return_zeros":
                 necessary_words = []
-            else:  # self.handle_unknown == "unknown_token"
+            elif self.handle_unknown == "unknown_token":
                 necessary_words = [UNCOMMON_WORD]
             least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words) + 1)
 
@@ -61,17 +70,17 @@ class OneHotEncoder(BaseEncoder):
 
             self._lang.removeWord(word_to_remove)
 
+        # Note: Is target assume that we are operating in "unknown_token" mode
         if self.is_target:
-            self.index_weights = [None] * self._lang.n_words
-            if self.target_class_distribution is not None:
-                self.index_weights[0] = np.mean(list(self.target_class_distribution.values()))
-            else:
-                self.index_weights[0] = 1
+            self.index_weights = [1] * self._lang.n_words
+            if self.target_weights is not None:
+                uncommon_weight = np.min(list(self.target_weights.values()))
+                self.index_weights[0] = uncommon_weight
+                self.target_weights[UNCOMMON_WORD] = uncommon_weight
             for word in set(priming_data):
-                if self.target_class_distribution is not None:
-                    self.index_weights[self._lang.word2index[str(word)]] = 1 / self.target_class_distribution[word]
-                else:
-                    self.index_weights[self._lang.word2index[str(word)]] = 1
+                if self.target_weights is not None:
+                    self.index_weights[self._lang.word2index[str(word)]] = 1 / self.target_weights[word]
+
             self.index_weights = torch.Tensor(self.index_weights)
 
         self.output_size = self._lang.n_words

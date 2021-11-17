@@ -118,8 +118,12 @@ def lookup_encoder(
         if col_dtype in (dtype.categorical, dtype.binary):
             if problem_defintion.unbias_target:
                 encoder_dict["args"][
-                    "target_class_distribution"
+                    "target_weights"
                 ] = "$statistical_analysis.target_class_distribution"
+            if problem_defintion.target_weights is not None:
+                encoder_dict["args"][
+                    "target_weights"
+                ] = problem_defintion.target_weights
 
         if col_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
             encoder_dict["args"][
@@ -533,6 +537,10 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
             )
+            mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
+                "target_encoder", "$encoders[self.target]"
+            )
+            mixers[i]["args"]["use_optuna"] = True
         elif mixers[i]["module"] == "Regression":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
@@ -548,6 +556,9 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             )
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
+            )
+            mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
+                "target_encoder", "$encoders[self.target]"
             )
         elif mixers[i]["module"] == "SkTime":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
