@@ -52,8 +52,6 @@ class BinaryEncoder(BaseEncoder):
         """
         Given priming data, create a map/inverse-map corresponding category name to index (and vice versa).
 
-        If encoder represents target, also instantiates `inv_target_weights` which enables downstream models to weight classes.
-
         :param priming_data: Binary data to encode
         """  # noqa
         if self.is_prepared:
@@ -69,7 +67,7 @@ class BinaryEncoder(BaseEncoder):
 
         # For target-only, report on relative weights of classes
         if self.is_target:
-
+            
             self.inv_target_weights = torch.Tensor([1, 1])  # Equally wt. both classes
 
             # If target weights provided, weight by inverse

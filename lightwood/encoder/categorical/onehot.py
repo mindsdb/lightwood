@@ -41,9 +41,10 @@ class OneHotEncoder(BaseEncoder):
         self.rev_map = None  # index -> category name
         self.use_unknown = use_unknown
 
+        self.target_weights = None
+        self.index_weights = None
         if self.is_target:
             self.target_weights = target_weights
-            self.inv_target_weights = None
 
     def prepare(self, priming_data: Iterable[str]):
         """
@@ -92,7 +93,7 @@ class OneHotEncoder(BaseEncoder):
                 # If using an unknown category, set to smallest possible value
                 if self.use_unknown:
                     self.inv_target_weights[0] = self.inv_target_weights.min().item()
-
+                    
         self.is_prepared = True
 
     def encode(self, column_data: Iterable[str]) -> torch.Tensor:

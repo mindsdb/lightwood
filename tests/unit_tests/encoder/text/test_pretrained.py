@@ -3,15 +3,14 @@ import random
 import torch
 from torch.nn.functional import softmax
 from sklearn.metrics import accuracy_score
-from lightwood.encoder import BinaryEncoder
+from lightwood.encoder import BinaryEncoder, NumericEncoder
 from lightwood.encoder.text import PretrainedLangEncoder
 from lightwood.api.dtype import dtype
 import pandas as pd
 
 from nltk.corpus import opinion_lexicon
 
-
-def create_fake_language(n, ptrain=0.7, seed=2):
+def create_synthetic_data(n, ptrain=0.7, seed=2):
     """
     Returns "N" instances of a fake language.
 
@@ -55,20 +54,21 @@ def create_fake_language(n, ptrain=0.7, seed=2):
 class TestPretrainedLangEncoder(unittest.TestCase):
     def test_encode_and_decode(self):
         """
-        Test end-to-end training of values. Performance metric doesn't matter,
-        just to check if it compiles properly
+        Test end-to-end training of values. 
+
+        Uses labeled data with positive/negative sentiment. Model outputs logits, since embed_mode is false. Should be better than random, as transformer language models may actually capture semantics (This is a hypothesis from priming lit.)
         """
         seed = 2
 
         # Make priming data:
-        train, test = create_fake_language(1000)
+        train, test = create_synthetic_data(1000)
         random.seed(seed)
         output_enc = BinaryEncoder(is_target=True)
         output_enc.prepare(train["label"])
         encoded_target_values = output_enc.encode(train["label"])
 
         # Prepare the language encoder
-        enc = PretrainedLangEncoder(stop_after=10, embed_mode=False, output_type='binary')
+        enc = PretrainedLangEncoder(stop_after=10, embed_mode=False, output_type=dtype.binary)
         enc.prepare(train["text"], None, encoded_target_values=encoded_target_values)
 
 
@@ -78,4 +78,60 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         encoder_accuracy = accuracy_score(test_labels, pred_labels)
 
         print(f'Categorial encoder accuracy for: {encoder_accuracy} on testing dataset')
-            # assert(encoder_accuracy > 0.5)
+        
+        assert(encoder_accuracy > 0.5) # Should be non-random since models have primed associations to sentiment
+
+    def test_embed_mode(self):
+        """
+        Test if embed-mode is triggered when flagged.
+        Checks if returned embeddings are of size N_rows x N_embed_dim
+        """
+        seed = 2
+        # Make priming data:
+        train, test = create_synthetic_data(1000)
+        random.seed(seed)
+        output_enc = BinaryEncoder(is_target=True)
+        output_enc.prepare(train["label"])
+        encoded_target_values = output_enc.encode(train["label"])
+
+        # Prepare the language encoder
+        enc = PretrainedLangEncoder(stop_after=10, embed_mode=True, output_type=dtype.binary)
+        enc.prepare(train["text"], None, encoded_target_values=encoded_target_values)
+
+        # Embeddings of size N_vocab x N_embed_dim for most models (assumes distilbert)
+        N_embed_dim = enc._model.base_model.embeddings.word_embeddings.weight.shape[-1] 
+        embeddings = enc.encode(test["text"])
+        assert(embeddings.shape[0] == test.shape[0])
+        assert(embeddings.shape[1] == N_embed_dim)
+
+    def test_auto_embed_mode(self):
+        """
+        For regression (non-categorical type output), text defaults to embed mode as fine-tuning didn't seem to help. Check to see if the output is in fact the size of an embedding. 
+
+        We pretend "embed_mode" is not True, but it should auto-override.
+
+        Expected behavior:
+        - does not train the transformer
+        - flips transformer to 'embed_mode'
+        - returns embedding size N_rows x N_embed_dim
+        """
+        seed = 5
+        # Make priming data:
+        train, test = create_synthetic_data(2000)
+        random.seed(seed)
+        output_enc = NumericEncoder(is_target=True)
+        output_enc.prepare(train["label"])
+        encoded_target_values = output_enc.encode(train["label"])
+
+        # Prepare the language encoder
+        enc = PretrainedLangEncoder(stop_after=10, embed_mode=False, output_type=dtype.float)
+        enc.prepare(train["text"], None, encoded_target_values=encoded_target_values)
+
+        # Embeddings of size N_vocab x N_embed_dim for most models (assumes distilbert)
+        N_embed_dim = enc._model.base_model.embeddings.word_embeddings.weight.shape[-1] 
+        embeddings = enc.encode(test["text"])
+        assert(enc.embed_mode)
+        assert(embeddings.shape[0] == test.shape[0])
+        assert(embeddings.shape[1] == N_embed_dim)
+
+
