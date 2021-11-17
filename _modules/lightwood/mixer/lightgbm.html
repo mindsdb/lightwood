@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.lightgbm &mdash; lightwood 1.6.1 documentation</title>
+  <title>lightwood.mixer.lightgbm &mdash; lightwood 1.7.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.7.0
               </div>
             
           
@@ -168,7 +168,6 @@
   <h1>Source code for lightwood.mixer.lightgbm</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span>
-
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">optuna</span>
 <span class="kn">import</span> <span class="nn">lightgbm</span>
@@ -178,6 +177,7 @@
 <span class="kn">import</span> <span class="nn">optuna.integration.lightgbm</span> <span class="k">as</span> <span class="nn">optuna_lightgbm</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.device</span> <span class="kn">import</span> <span class="n">get_devices</span>
@@ -229,9 +229,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
             <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">use_optuna</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">use_optuna</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param stop_after: time budget in seconds.</span>
 <span class="sd">        :param target: name of the target column that the mixer will learn to predict.</span>
@@ -253,6 +253,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fit_on_dev</span> <span class="o">=</span> <span class="n">fit_on_dev</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span> <span class="o">=</span> <span class="n">target_encoder</span>
 
         <span class="c1"># GPU Only available via --install-option=--gpu with opencl-dev and libboost dev (a bunch of them) installed, so let&#39;s turn this off for now and we can put it behind some flag later # noqa</span>
         <span class="n">gpu_works</span> <span class="o">=</span> <span class="n">check_gpu_support</span><span class="p">()</span>
@@ -274,6 +275,8 @@
 <span class="sd">        :param output_dtype</span>
 <span class="sd">        :return: modified `data` object that conforms to LightGBM&#39;s expected format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">weight_map</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span><span class="p">,</span> <span class="s1">&#39;target_weights&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">subset_name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">input_col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_cols</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">subset_name</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -287,6 +290,7 @@
 
             <span class="n">label_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">subset_name</span><span class="p">][</span><span class="s1">&#39;ds&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_column_original_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
 
+            <span class="n">data</span><span class="p">[</span><span class="n">subset_name</span><span class="p">][</span><span class="s1">&#39;weights&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">subset_name</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">ordinal_encoder</span> <span class="o">=</span> <span class="n">OrdinalEncoder</span><span class="p">()</span>
@@ -295,6 +299,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">ordinal_encoder</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_set</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
                 <span class="n">label_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_set</span> <span class="k">else</span> <span class="s1">&#39;__mdb_unknown_cat&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">label_data</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">weight_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">subset_name</span><span class="p">][</span><span class="s1">&#39;weights&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">weight_map</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">label_data</span><span class="p">]</span>
                 <span class="n">label_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordinal_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">label_data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="k">elif</span> <span class="n">output_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">:</span>
                 <span class="n">label_data</span> <span class="o">=</span> <span class="n">label_data</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="o">-</span><span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">63</span><span class="p">),</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">63</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -350,10 +356,22 @@
         <span class="c1"># Determine time per iterations</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;num_iterations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span>
-            <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">]),</span>
-            <span class="n">verbose_eval</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Why construst a dataset here instead of using the training dataset?</span>
+
+<span class="sd">        Because it guards against the following crash:</span>
+
+<span class="sd">        WARNING:lightwood-1613058:Exception: Cannot change feature_pre_filter after constructed Dataset handle. when training mixer: &lt;lightwood.mixer.lightgbm.LightGBM object at 0x7f39148eae20&gt;</span>
+<span class="sd">        feature_fraction, val_score: inf:   0%|                                 | 0/7 [00:00&lt;?, ?it/s]</span>
+<span class="sd">        free(): double free detected in tcache 2</span>
+
+<span class="sd">        Only happens sometimes and I can find no pattern as to when, happens for multiple input and target types.</span>
+
+<span class="sd">        Why does the following crash happen and what does it mean? No idea, closest relationships I can find is /w optuna modifying parameters after the dataset is create: https://github.com/microsoft/LightGBM/issues/4019 | But why this would apply here makes no sense. Could have to do with the `train` process of lightgbm itself setting a &quot;set only once&quot; property on a dataset when it starts. Dunno, if you find out replace this comment with the real reason.</span>
+<span class="sd">        &#39;&#39;&#39;</span> <span class="c1"># noqa</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="s1">&#39;label_data&#39;</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;weights&#39;</span><span class="p">]),</span> <span class="n">verbose_eval</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="n">seconds_for_one_iteration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
 
@@ -371,10 +389,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">model_generator</span> <span class="o">=</span> <span class="n">lightgbm</span>
 
-        <span class="c1"># Prepare the data</span>
-        <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">])</span>
-        <span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">])</span>
-
         <span class="c1"># Train the models</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Training GBM (</span><span class="si">{</span><span class="n">model_generator</span><span class="si">}</span><span class="s1">) with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_iterations</span><span class="si">}</span><span class="s1"> iterations given </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="si">}</span><span class="s1"> seconds constraint&#39;</span><span class="p">)</span> <span class="c1"># noqa</span>
@@ -383,6 +397,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;num_iterations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_iterations</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;early_stopping_rounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="c1"># Prepare the data</span>
+        <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">],</span>
+                                         <span class="n">weight</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;weights&#39;</span><span class="p">])</span>
+
+        <span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">],</span>
+                                       <span class="n">weight</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;weights&#39;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model_generator</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">valid_sets</span><span class="o">=</span><span class="p">[</span><span class="n">dev_dataset</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">],</span>
@@ -410,8 +431,10 @@
         <span class="n">output_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_dataset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output_dtype</span><span class="p">)</span>
 
-        <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;retrain&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;retrain&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">])</span>
-        <span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">])</span>
+        <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;retrain&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;retrain&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">],</span>
+                                         <span class="n">weight</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;retrain&#39;</span><span class="p">][</span><span class="s1">&#39;weights&#39;</span><span class="p">])</span>
+        <span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;label_data&#39;</span><span class="p">],</span>
+                                       <span class="n">weight</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">][</span><span class="s1">&#39;weights&#39;</span><span class="p">])</span>
 
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Updating lightgbm model with </span><span class="si">{</span><span class="n">iterations</span><span class="si">}</span><span class="s1"> iterations&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">iterations</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>

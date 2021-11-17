@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.encoder.categorical.autoencoder &mdash; lightwood 1.6.1 documentation</title>
+  <title>lightwood.encoder.categorical.autoencoder &mdash; lightwood 1.7.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.7.0
               </div>
             
           
@@ -182,7 +182,7 @@
 <div class="viewcode-block" id="CategoricalAutoEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder">[docs]</a><span class="k">class</span> <span class="nc">CategoricalAutoEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
     <span class="n">is_trainable_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">max_encoded_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">max_encoded_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Categorical Autoencoder&#39;</span>

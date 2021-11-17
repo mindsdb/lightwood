@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.encoder.categorical.binary &mdash; lightwood 1.6.1 documentation</title>
+  <title>lightwood.encoder.categorical.binary &mdash; lightwood 1.7.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.7.0
               </div>
             
           
@@ -174,15 +174,20 @@
 
 <span class="c1"># Exists mainly for datasets with loads of binary flags where OHE can be too slow to fit</span>
 <div class="viewcode-block" id="BinaryEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.BinaryEncoder">[docs]</a><span class="k">class</span> <span class="nc">BinaryEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">target_class_distribution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="sd">    Why are we handling target weighting inside encoders? Simple: we&#39;d otherwise have to compute per-index weighting inside the mixers, rather than having that code unified inside 2x encoders. So moving this to the mixer will still involve having to pass the target encoder to the mixer, but will add the additional complexity of having to pass a weighting map to the mixer and adding class-to-index translation boilerplate + weight setting for each mixer</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">target_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_class_distribution</span> <span class="o">=</span> <span class="n">target_class_distribution</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="n">target_weights</span>
 
     <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
@@ -200,8 +205,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_class_distribution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">word</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_class_distribution</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">word</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">word</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
 

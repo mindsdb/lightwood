@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.data.timeseries_transform &mdash; lightwood 1.6.1 documentation</title>
+  <title>lightwood.data.timeseries_transform &mdash; lightwood 1.7.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.7.0
               </div>
             
           
@@ -207,6 +207,13 @@
     <span class="n">gb_arr</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="n">ob_arr</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
     <span class="n">window</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">window</span>
+
+    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span> <span class="ow">and</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot transform. Missing historical values for target column </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> (`use_previous_target` is set to True).&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
+
+    <span class="k">for</span> <span class="n">hcol</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">hcol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot transform. Missing values in historical column </span><span class="si">{</span><span class="n">hcol</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;__mdb_make_predictions&#39;</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">original_df</span><span class="p">[</span><span class="n">original_df</span><span class="p">[</span><span class="s1">&#39;__mdb_make_predictions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
@@ -358,7 +365,6 @@
 
     <span class="k">del</span> <span class="n">combined_df</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">]</span>
 
-    <span class="c1"># return combined_df, secondary_type_dict, timeseries_row_mapping, df_gb_map</span>
     <span class="k">return</span> <span class="n">combined_df</span></div>
 
 

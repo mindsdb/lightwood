@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.regression &mdash; lightwood 1.6.1 documentation</title>
+  <title>lightwood.mixer.regression &mdash; lightwood 1.7.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.7.0
               </div>
             
           
@@ -180,13 +180,27 @@
 
 
 <div class="viewcode-block" id="Regression"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.Regression">[docs]</a><span class="k">class</span> <span class="nc">Regression</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The `Regression` mixer inherits from scikit-learn&#39;s `LinearRegression` class</span>
+<span class="sd">    (https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)</span>
+<span class="sd">    </span>
+<span class="sd">    This class performs Ordinary Least-squares Regression (OLS) under the hood; </span>
+<span class="sd">    this means it fits a set of coefficients (w_1, w_2, ..., w_N) for an N-length feature vector, that minimize the difference</span>
+<span class="sd">    between the predicted target value and the observed true value.</span>
+<span class="sd">  </span>
+<span class="sd">    This mixer intakes featurized (encoded) data to predict the target. It deploys if the target data-type is considered numerical/integer.</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">LinearRegression</span>
     <span class="n">label_map</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param stop_after: Maximum amount of seconds it should fit for, currently ignored</span>
+<span class="sd">        :param target_encoder: The encoder which will be used to decode the target</span>
+<span class="sd">        :param dtype_dict: A map of feature names and their data types</span>
+<span class="sd">        :param target: Name of the target column</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span> <span class="o">=</span> <span class="n">target_encoder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_dtype</span> <span class="o">=</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
@@ -195,6 +209,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="Regression.fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.Regression.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits `LinearRegression` model on input feature data to provide predictions.</span>
+
+<span class="sd">        :param train_data: Regression if fit on this</span>
+<span class="sd">        :param dev_data: This just gets concatenated to the ``train_data``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_dtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unspported </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target_dtype</span><span class="si">}</span><span class="s1"> type for regression&#39;</span><span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Fitting Linear Regression model&#39;</span><span class="p">)</span>
@@ -211,10 +231,24 @@
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Regression based correlation of: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Regression.partial_fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.Regression.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits the linear regression on some data, this refits the model entirely rather than updating it</span>
+
+<span class="sd">        :param train_data: Regression is fit on this</span>
+<span class="sd">        :param dev_data: This just gets concatenated to the ``train_data``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make predictions based on datasource with the same features as the ones used for fitting</span>
+
+<span class="sd">        :param ds: Predictions are generate from it</span>
+<span class="sd">        :param arg: Any additional arguments used in predicting</span>
+
+<span class="sd">        :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
             <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>

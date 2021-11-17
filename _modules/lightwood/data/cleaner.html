@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.data.cleaner &mdash; lightwood 1.6.1 documentation</title>
+  <title>lightwood.data.cleaner &mdash; lightwood 1.7.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.7.0
               </div>
             
           
@@ -457,7 +457,7 @@
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;predict&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">target</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">use_previous_target</span>
+            <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">)</span>
             <span class="ow">and</span> <span class="ow">not</span> <span class="n">anomaly_detection</span>
         <span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
