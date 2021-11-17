@@ -22,7 +22,7 @@ class ArrayEncoder(BaseEncoder):
 
     is_trainable_encoder: bool = True
 
-    def __init__(self, stop_after: int, window: int = None, is_target: bool = False, original_type: dtype = None):
+    def __init__(self, stop_after: float, window: int = None, is_target: bool = False, original_type: dtype = None):
         super().__init__(is_target)
         self.stop_after = stop_after
         self.original_type = original_type
