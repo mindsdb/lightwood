@@ -65,7 +65,11 @@ def evaluate_accuracy(data: pd.DataFrame,
                                                                         ts_analysis=ts_analysis)
         else:
             true_values = data[target].tolist()
-            accuracy_function = getattr(importlib.import_module('sklearn.metrics'), accuracy_function_str)
+            if hasattr(importlib.import_module('lightwood.helpers.accuracy'), accuracy_function_str):
+                accuracy_function = getattr(importlib.import_module('lightwood.helpers.accuracy'),
+                                            accuracy_function_str)
+            else:
+                accuracy_function = getattr(importlib.import_module('sklearn.metrics'), accuracy_function_str)
             score_dict[accuracy_function_str] = accuracy_function(list(true_values), list(predictions))
 
     return score_dict
