@@ -42,7 +42,7 @@ class OneHotEncoder(BaseEncoder):
         self.use_unknown = use_unknown
 
         self.target_weights = None
-        self.index_weights = None
+        self.inv_target_weights = None
         if self.is_target:
             self.target_weights = target_weights
 
