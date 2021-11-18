@@ -26,7 +26,7 @@ class BinaryEncoder(BaseEncoder):
     target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
 
     Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
-    """
+    """ # noqa
     def __init__(
         self,
         is_target: bool = False,
@@ -68,7 +68,7 @@ class BinaryEncoder(BaseEncoder):
 
         # For target-only, report on relative weights of classes
         if self.is_target:
-            
+
             self.inv_target_weights = torch.Tensor([1, 1])  # Equally wt. both classes
 
             # If target weights provided, weight by inverse
@@ -77,7 +77,7 @@ class BinaryEncoder(BaseEncoder):
                 # Check target weights properly specified
                 if sum([np.isclose(i, 0) for i in self.target_weights.values()]) > 0:
                     raise ValueError('Target weights cannot be 0')
-                    
+
                 for cat in self.map.keys():
                     self.inv_target_weights[self.map[cat]] = (
                         1 / self.target_weights[cat]
@@ -120,7 +120,6 @@ class BinaryEncoder(BaseEncoder):
         """  # noqa
         encoded_data_list = encoded_data.tolist()
         ret = []
-        probs = []
 
         for vector in encoded_data_list:
             if not np.any(vector):  # Vector of all 0s -> unknown category
