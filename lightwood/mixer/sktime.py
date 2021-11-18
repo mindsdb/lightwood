@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from itertools import product
 from typing import Dict, Union
 from sktime.forecasting.arima import AutoARIMA
 
@@ -99,28 +100,33 @@ class SkTime(BaseMixer):
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
-        # all_idxs = list(range(length))  # @TODO: substract, and assign empty predictions to remainder
-
-        for group in self.ts_analysis['group_combinations']:
-
-            if self.grouped_by == ['__default']:
-                series_idxs = data['data'].index
-                series_data = data['data'].values
-            else:
-                series_idxs, series_data = get_group_matches(data, group)
+        pending_idxs = set(range(length))
+        all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
+        for group in all_group_combinations:
+            series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
+                group = frozenset(group)
+                series_idxs = sorted(series_idxs)
                 forecaster = self.models[group] if self.models[group].is_fitted else self.models['__default']
-
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
-                series = series.sort_index(ascending=True)
-                series = series.reset_index(drop=True)
+                ydf = self._call_groupmodel(ydf, forecaster, series)
+                pending_idxs -= set(series_idxs)
 
-                for idx, _ in enumerate(series.iteritems()):
-                    ydf['prediction'].iloc[series_idxs[idx]] = forecaster.predict(
-                        np.arange(idx, idx + self.n_ts_predictions)).tolist()
-
-            if self.grouped_by == ['__default']:
-                break
+        # apply default model in all remaining novel-group rows
+        if len(pending_idxs) > 0:
+            series = pd.Series(data['data'][list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
+            ydf = self._call_groupmodel(ydf, self.models['__default'], series)
 
         return ydf[['prediction']]
+
+    def _call_groupmodel(self, ydf, model, series):
+        original_index = series.index
+        series = series.reset_index(drop=True)
+
+        for idx, _ in enumerate(series.iteritems()):
+            # relative forecast horizon starts at 1 for unseen data, so we displace idx by 1
+            ydf['prediction'].iloc[original_index[idx]] = model.predict(
+                np.arange(idx + 1, idx + 1 + self.n_ts_predictions)).tolist()
+
+        return ydf
