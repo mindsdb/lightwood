@@ -19,8 +19,8 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 from lightwood.helpers.general import is_none
-
 from typing import Iterable, Optional
+
 
 class PretrainedLangEncoder(BaseEncoder):
     is_trainable_encoder: bool = True
@@ -30,14 +30,14 @@ class PretrainedLangEncoder(BaseEncoder):
 
     In certain text tasks, this model can use a transformer to automatically fine-tune on a class of interest (providing there is a 2 column dataset, where the input column is text).
 
-    """
+    """ # noqa
 
     def __init__(
         self,
         stop_after: float,
         is_target: bool = False,
         batch_size: int = 10,
-        max_position_embeddings:int = None,
+        max_position_embeddings: int = None,
         frozen: bool = False,
         epochs: int = 1,
         output_type: str = None,
@@ -52,7 +52,7 @@ class PretrainedLangEncoder(BaseEncoder):
         :param epochs: number of epochs to train model with
         :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.
         :param embed_mode: If True, assumes the output of the encode() step is the CLS embedding (this can be trained or not). If False, returns the logits of the tuned task.
-        """
+        """ # noqa
         super().__init__(is_target)
 
         self.output_type = output_type
@@ -85,7 +85,12 @@ class PretrainedLangEncoder(BaseEncoder):
         else:
             log.info("Embedding mode off. Logits are output of encode()")
 
-    def prepare(self, train_priming_data: pd.Series, dev_priming_data: Optional[pd.Series], encoded_target_values: torch.Tensor):
+    def prepare(
+        self,
+        train_priming_data: pd.Series,
+        dev_priming_data: Optional[pd.Series],
+        encoded_target_values: torch.Tensor,
+    ):
         """
         Fine-tunes a transformer on the priming data.
 
@@ -96,7 +101,7 @@ class PretrainedLangEncoder(BaseEncoder):
         :param train_priming_data: Text data in the train set
         :param dev_priming_data: Text data in the dev set (not currently supported)
         :param encoded_target_values: Encoded target labels in Nrows x N_output_dimension
-        """
+        """ # noqa
         if self.is_prepared:
             raise Exception("Encoder is already prepared.")
 
@@ -107,7 +112,7 @@ class PretrainedLangEncoder(BaseEncoder):
             priming_data = pd.concat([train_priming_data, dev_priming_data]).values
         else:
             priming_data = train_priming_data.tolist()
-        
+
         # Replaces empty strings with ''
         priming_data = [x if x is not None else "" for x in priming_data]
 
@@ -126,7 +131,7 @@ class PretrainedLangEncoder(BaseEncoder):
             # Construct the model
             self._model = self._classifier_model_class.from_pretrained(
                 self._pretrained_model_name,
-                num_labels=len(encoded_target_values[0]), # max classes to test
+                num_labels=len(encoded_target_values[0]),  # max classes to test
             ).to(self.device)
 
             # Construct the dataset for training
@@ -222,7 +227,7 @@ class PretrainedLangEncoder(BaseEncoder):
         scheduler - scheduling params
         n_epochs - number of epochs to train
 
-        """
+        """ # noqa
         self._model.train()
 
         if optim is None:
@@ -264,7 +269,7 @@ class PretrainedLangEncoder(BaseEncoder):
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
 
-    def encode(self, column_data: Iterable[str])-> torch.Tensor:
+    def encode(self, column_data: Iterable[str]) -> torch.Tensor:
         """
         Converts each text example in a column into encoded state. This can be either a vector embedding of the [CLS] token (represents the full text input) OR the logits prediction of the output.
 
@@ -277,7 +282,7 @@ class PretrainedLangEncoder(BaseEncoder):
 
         :param column_data: List of text data as strings
         :returns: Embedded vector N_rows x Nembed_dim OR logits vector N_rows x N_classes depending on if `embed_mode` is True or not.
-        """
+        """ # noqa
         if self.is_prepared is False:
             raise Exception("You need to first prepare the encoder.")
 
@@ -316,7 +321,7 @@ class PretrainedLangEncoder(BaseEncoder):
     def decode(self, encoded_values_tensor, max_length=100):
         """
         Text generation via decoding is not supported.
-        """
+        """ # noqa
         raise Exception("Decoder not implemented.")
 
     def to(self, device, available_devices):
@@ -324,7 +329,7 @@ class PretrainedLangEncoder(BaseEncoder):
         Converts encoder models to device specified (CPU/GPU)
 
         Transformers are LARGE models, please run on GPU for fastest implementation.
-        """
+        """ # noqa
         for v in vars(self):
             attr = getattr(self, v)
             if isinstance(attr, torch.nn.Module):
