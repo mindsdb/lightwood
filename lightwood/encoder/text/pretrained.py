@@ -30,15 +30,6 @@ class PretrainedLangEncoder(BaseEncoder):
 
     In certain text tasks, this model can use a transformer to automatically fine-tune on a class of interest (providing there is a 2 column dataset, where the input column is text).
 
-    Args:
-    :param is_target: Whether this encoder represents the target. NOT functional for text generation yet.
-    :param batch_size: size of batch while fine-tuning
-    :param max_position_embeddings: max sequence length of input text
-    :param custom_train: If True, trains model on target procided
-    :param frozen: If True, freezes transformer layers during training.
-    :param epochs: number of epochs to train model with
-    :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.
-    :param embed_mode: If True, assumes the output of the encode() step is the CLS embedding (this can be trained or not). If False, returns the logits of the tuned task.
     """
 
     def __init__(
@@ -52,6 +43,16 @@ class PretrainedLangEncoder(BaseEncoder):
         output_type: str = None,
         embed_mode: bool = True,
     ):
+        """
+        :param is_target: Whether this encoder represents the target. NOT functional for text generation yet.
+        :param batch_size: size of batch while fine-tuning
+        :param max_position_embeddings: max sequence length of input text
+        :param custom_train: If True, trains model on target procided
+        :param frozen: If True, freezes transformer layers during training.
+        :param epochs: number of epochs to train model with
+        :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.
+        :param embed_mode: If True, assumes the output of the encode() step is the CLS embedding (this can be trained or not). If False, returns the logits of the tuned task.
+        """
         super().__init__(is_target)
 
         self.output_type = output_type
