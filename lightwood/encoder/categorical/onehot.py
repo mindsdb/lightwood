@@ -9,6 +9,23 @@ from typing import Dict, List, Iterable
 
 
 class OneHotEncoder(BaseEncoder):
+    """
+    Creates a one-hot encoding (OHE) of categorical data. This creates a vector where each individual dimension corresponds to a category. A category has a 1:1 mapping between dimension indicated by a "1" in that position.
+
+    OHE operates in 2 modes:
+        (1) "use_unknown=True": Makes an :math:`N+1` length vector for :math:`N` categories, the first index always corresponds to the unknown category.
+
+        (2) "use_unknown=False": Makes an :math:`N` length vector for :math:`N` categories, where an empty vector of 0s indicates an unknown/missing category.
+
+    An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.
+
+    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/10/10 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
+
+    target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
+
+    Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
+
+    """
     def __init__(
         self,
         is_target: bool = False,
@@ -16,21 +33,6 @@ class OneHotEncoder(BaseEncoder):
         use_unknown: bool = True,
     ):
         """
-        Creates a one-hot encoding (OHE) of categorical data. This creates a vector where each individual dimension corresponds to a category. A category has a 1:1 mapping between dimension indicated by a "1" in that position.
-
-        OHE operates in 2 modes:
-            (1) "use_unknown=True": Makes an :math:`N+1` length vector for :math:`N` categories, the first index always corresponds to the unknown category.
-
-            (2) "use_unknown=False": Makes an :math:`N` length vector for :math:`N` categories, where an empty vector of 0s indicates an unknown/missing category.
-
-        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.
-
-        By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/10/10 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
-
-        target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
-
-        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
-
         :param is_target: True if this encoder featurizes the target column
         :param target_weights: Percentage of total population represented by each category (between [0, 1]).
         :param mode: True uses an extra dimension to account for unknown/out-of-distribution categories

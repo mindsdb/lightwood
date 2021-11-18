@@ -7,6 +7,26 @@ from typing import Dict, List, Iterable
 
 
 class BinaryEncoder(BaseEncoder):
+    """
+    Creates a 2-element vector representing categories :math:`A` and :math:`B` as such: 
+
+    .. math::
+
+       A &= [1, 0] \\
+       B &= [0, 1]
+
+    This encoder is a specialized case of one-hot encoding (OHE); unknown categories are explicitly handled as [0, 0]. Unknowns may only be reported if the input row value is NULL (or python `None` type) or if new data, after the encoder is prepared, has examples outside the feature map.
+
+    When data is typed with Lightwood, this class is only deployed if an input data type is explicitly recognized as binary (i.e. the column has only 2 unique values like True/False). If future data shows a new category (thus the data is no longer truly binary), this encoder will no longer be appropriate unless you are comfortable mapping ALL new classes as [0, 0].
+
+    An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes. 
+
+    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/10/10 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
+
+    target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
+
+    Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
+    """
     def __init__(
         self,
         is_target: bool = False,
@@ -14,25 +34,6 @@ class BinaryEncoder(BaseEncoder):
     ):
         super().__init__(is_target)
         """
-        Creates a 2-element vector representing categories :math:`A` and :math:`B` as such: 
-
-        .. math::
-
-           A &= [1, 0] \\
-           B &= [0, 1]
-
-        This encoder is a specialized case of one-hot encoding (OHE); unknown categories are explicitly handled as [0, 0]. Unknowns may only be reported if the input row value is NULL (or python `None` type) or if new data, after the encoder is prepared, has examples outside the feature map.
-
-        When data is typed with Lightwood, this class is only deployed if an input data type is explicitly recognized as binary (i.e. the column has only 2 unique values like True/False). If future data shows a new category (thus the data is no longer truly binary), this encoder will no longer be appropriate unless you are comfortable mapping ALL new classes as [0, 0].
-
-        An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes. 
-
-        By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/10/10 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
-
-        target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
-
-        Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
-
         :param is_target: Whether encoder featurizes target column
         :param target_weights: Percentage of total population represented by each category (from [0, 1]).
         """  # noqa
