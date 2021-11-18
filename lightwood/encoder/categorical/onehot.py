@@ -1,6 +1,5 @@
 import torch
 import numpy as np
-from lightwood.encoder.text.helpers.rnn_helpers import Lang
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
@@ -24,8 +23,7 @@ class OneHotEncoder(BaseEncoder):
     target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
 
     Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
-
-    """
+    """ # noqa
     def __init__(
         self,
         is_target: bool = False,
@@ -95,7 +93,7 @@ class OneHotEncoder(BaseEncoder):
                 # If using an unknown category, set to smallest possible value
                 if self.use_unknown:
                     self.inv_target_weights[0] = self.inv_target_weights.min().item()
-                    
+
         self.is_prepared = True
 
     def encode(self, column_data: Iterable[str]) -> torch.Tensor:
@@ -104,7 +102,7 @@ class OneHotEncoder(BaseEncoder):
 
         :param column_data: Pre-processed data to encode
         :returns: Encoded data of form :math:`N_{rows} x N_{categories}`
-        """
+        """ # noqa
         if not self.is_prepared:
             raise Exception(
                 'You need to call "prepare" before calling "encode" or "decode".'
@@ -129,7 +127,7 @@ class OneHotEncoder(BaseEncoder):
 
         :param: encoded_data:
         :returns Returns the original category names for encoded data.
-        """
+        """ # noqa
         encoded_data_list = encoded_data.tolist()
         ret = []
 
@@ -150,7 +148,7 @@ class OneHotEncoder(BaseEncoder):
         :param encoded_data: the output of a mixer model
 
         :returns Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name
-        """
+        """ # noqa
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
