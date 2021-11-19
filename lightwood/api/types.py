@@ -554,7 +554,6 @@ class PredictionArguments:
         (respectively implies wider and tighter bounds, all other parameters being equal).
     :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
         detector.
-    :param lw_phase: string that indicates calling phase (e.g. model analysis, inference, etc.)
     """  # noqa
 
     predict_proba: bool = False
@@ -562,7 +561,6 @@ class PredictionArguments:
     fixed_confidence: Union[int, float, None] = None
     anomaly_error_rate: Union[float, None] = None
     anomaly_cooldown: int = 1
-    lw_phase: str = 'predict'
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -580,7 +578,6 @@ class PredictionArguments:
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
         anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
-        lw_phase = obj.get('lw_phase', PredictionArguments.lw_phase)
 
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
@@ -588,7 +585,6 @@ class PredictionArguments:
             fixed_confidence=fixed_confidence,
             anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,
-            lw_phase=lw_phase
         )
 
         return pred_args

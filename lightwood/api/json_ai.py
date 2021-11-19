@@ -940,7 +940,7 @@ self.mixers = trained_mixers
 # --------------- #
 log.info('Ensembling the mixer')
 # Create an ensemble of mixers to identify best performing model
-self.pred_args = PredictionArguments.from_dict({{'lw_phase': 'ensembling'}})
+self.pred_args = PredictionArguments()
 self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
 self.supports_proba = self.ensemble.supports_proba
 """
