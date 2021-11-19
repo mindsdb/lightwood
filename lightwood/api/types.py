@@ -561,6 +561,7 @@ class PredictionArguments:
     fixed_confidence: Union[int, float, None] = None
     anomaly_error_rate: Union[float, None] = None
     anomaly_cooldown: int = 1
+    forecast_offset: int = 0
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -578,6 +579,7 @@ class PredictionArguments:
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
         anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
+        forecast_offset = obj.get('forecast_offset', PredictionArguments.forecast_offset)
 
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
@@ -585,6 +587,7 @@ class PredictionArguments:
             fixed_confidence=fixed_confidence,
             anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,
+            forecast_offset=forecast_offset,
         )
 
         return pred_args

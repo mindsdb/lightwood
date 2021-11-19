@@ -135,13 +135,13 @@ class SkTime(BaseMixer):
                 series_idxs = sorted(series_idxs)
                 forecaster = self.models[group] if self.models[group].is_fitted else self.models['__default']
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
-                ydf = self._call_groupmodel(ydf, forecaster, series)
+                ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
                 pending_idxs -= set(series_idxs)
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
             series = pd.Series(data['data'][list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
-            ydf = self._call_groupmodel(ydf, self.models['__default'], series)
+            ydf = self._call_groupmodel(ydf, self.models['__default'], series, offset=args.forecast_offset)
 
         return ydf[['prediction']]
 
