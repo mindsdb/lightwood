@@ -1,3 +1,4 @@
+import inspect
 import importlib
 from itertools import product
 from typing import Dict, Union
@@ -75,8 +76,11 @@ class SkTime(BaseMixer):
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
         for group in self.ts_analysis['group_combinations']:
-            # ignore warnings within statsmodels' stepwise procedure
-            self.models[group] = self.model_class(suppress_warnings=True)
+            # ignore warnings if possible
+            kwargs = {}
+            if 'suppress_warnings' in [p.name for p in inspect.signature(self.model_class).parameters.values()]:
+                kwargs['suppress_warnings'] = True
+            self.models[group] = self.model_class(**kwargs)
 
             if self.grouped_by == ['__default']:
                 series_idxs = data['data'].index
