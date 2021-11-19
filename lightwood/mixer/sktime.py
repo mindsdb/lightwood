@@ -1,7 +1,8 @@
-import numpy as np
-import pandas as pd
 from itertools import product
 from typing import Dict, Union
+
+import numpy as np
+import pandas as pd
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.arima import AutoARIMA
 
@@ -30,7 +31,6 @@ class SkTime(BaseMixer):
         self.n_ts_predictions = n_ts_predictions
         self.ts_analysis = ts_analysis
         self.fh = ForecastingHorizon(np.arange(1, self.n_ts_predictions + 1), is_relative=True)
-        self.cutoff_index = {}  # marks index at which training data stops and forecasting window starts
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.supports_proba = False
         self.stable = True
@@ -46,7 +46,7 @@ class SkTime(BaseMixer):
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
         for group in self.ts_analysis['group_combinations']:
-            # many warnings might be thrown inside of statsmodels during stepwise procedure
+            # ignore warnings within statsmodels' stepwise procedure
             self.models[group] = self.model_class(suppress_warnings=True)
 
             if self.grouped_by == ['__default']:
@@ -64,8 +64,6 @@ class SkTime(BaseMixer):
                 except ValueError:
                     self.models[group] = self.model_class(deseasonalize=False)
                     self.models[group].fit(series, fh=self.fh)
-
-                self.cutoff_index[group] = len(series)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -89,18 +87,12 @@ class SkTime(BaseMixer):
             log.warning('This mixer does not output probability estimates')
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
-        # global_start_idx = ds.data_frame[self.target].index.sort_values()[0]
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
                            columns=['prediction'],
                            dtype=object)
 
-        # this offset is to compensate dropped rows in the test split due to insufficient target data
-        offset = self.n_ts_predictions - 1
-        # offset *= -1 if args.lw_phase == 'ensembling' else 1  # (self.n_ts_predictions - 1)
-
-        data = {'data': ds.data_frame[self.target],  # .reset_index(drop=True),
-                # 'original_index': ds.data_frame[self.target].index,
+        data = {'data': ds.data_frame[self.target],
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
@@ -114,27 +106,24 @@ class SkTime(BaseMixer):
                 series_idxs = sorted(series_idxs)
                 forecaster = self.models[group] if self.models[group].is_fitted else self.models['__default']
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
-                # group_start_idx = data['original_index'][series_idxs][0]
-                # group_offset = group_start_idx - self.cutoff_index[group]
-                ydf = self._call_groupmodel(ydf, forecaster, series, offset)
+                ydf = self._call_groupmodel(ydf, forecaster, series)
                 pending_idxs -= set(series_idxs)
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
             series = pd.Series(data['data'][list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
-            # global_offset = global_start_idx - self.cutoff_index['__default']
-            ydf = self._call_groupmodel(ydf, self.models['__default'], series, offset)
+            ydf = self._call_groupmodel(ydf, self.models['__default'], series)
 
         return ydf[['prediction']]
 
-    def _call_groupmodel(self, ydf, model, series, offset=0):
+    def _call_groupmodel(self, ydf, model, series):
         original_index = series.index
         series = series.reset_index(drop=True)
 
         for idx, _ in enumerate(series.iteritems()):
-            # relative forecast horizon starts at 1 for unseen data, so we displace idx by 1
+            # displace by n_ts_predictions because test split has this many rows dropped due to insufficient target info
             ydf['prediction'].iloc[original_index[idx]] = model.predict(
-                np.arange((idx + 1) + offset,
-                          (idx + 1) + offset + self.n_ts_predictions)).tolist()
+                np.arange(idx + self.n_ts_predictions,
+                          idx + self.n_ts_predictions * 2)).tolist()
 
         return ydf
