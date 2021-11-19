@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from itertools import product
 from typing import Dict, Union
+from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.arima import AutoARIMA
 
 from lightwood.api import dtype
@@ -28,7 +29,7 @@ class SkTime(BaseMixer):
         self.models = {}
         self.n_ts_predictions = n_ts_predictions
         self.ts_analysis = ts_analysis
-        self.forecasting_horizon = np.arange(1, self.n_ts_predictions)
+        self.fh = ForecastingHorizon(np.arange(1, self.n_ts_predictions + 1), is_relative=True)
         self.cutoff_index = {}  # marks index at which training data stops and forecasting window starts
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.supports_proba = False
@@ -59,15 +60,12 @@ class SkTime(BaseMixer):
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
                 try:
-                    self.models[group].fit(series)
+                    self.models[group].fit(series, fh=self.fh)
                 except ValueError:
                     self.models[group] = self.model_class(deseasonalize=False)
-                    self.models[group].fit(series)
+                    self.models[group].fit(series, fh=self.fh)
 
                 self.cutoff_index[group] = len(series)
-
-            if self.grouped_by == ['__default']:
-                break
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -91,12 +89,18 @@ class SkTime(BaseMixer):
             log.warning('This mixer does not output probability estimates')
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+        # global_start_idx = ds.data_frame[self.target].index.sort_values()[0]
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
                            columns=['prediction'],
                            dtype=object)
 
-        data = {'data': ds.data_frame[self.target].reset_index(drop=True),
+        # this offset is to compensate dropped rows in the test split due to insufficient target data
+        offset = self.n_ts_predictions - 1
+        # offset *= -1 if args.lw_phase == 'ensembling' else 1  # (self.n_ts_predictions - 1)
+
+        data = {'data': ds.data_frame[self.target],  # .reset_index(drop=True),
+                # 'original_index': ds.data_frame[self.target].index,
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
@@ -110,23 +114,27 @@ class SkTime(BaseMixer):
                 series_idxs = sorted(series_idxs)
                 forecaster = self.models[group] if self.models[group].is_fitted else self.models['__default']
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
-                ydf = self._call_groupmodel(ydf, forecaster, series)
+                # group_start_idx = data['original_index'][series_idxs][0]
+                # group_offset = group_start_idx - self.cutoff_index[group]
+                ydf = self._call_groupmodel(ydf, forecaster, series, offset)
                 pending_idxs -= set(series_idxs)
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
             series = pd.Series(data['data'][list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
-            ydf = self._call_groupmodel(ydf, self.models['__default'], series)
+            # global_offset = global_start_idx - self.cutoff_index['__default']
+            ydf = self._call_groupmodel(ydf, self.models['__default'], series, offset)
 
         return ydf[['prediction']]
 
-    def _call_groupmodel(self, ydf, model, series):
+    def _call_groupmodel(self, ydf, model, series, offset=0):
         original_index = series.index
         series = series.reset_index(drop=True)
 
         for idx, _ in enumerate(series.iteritems()):
             # relative forecast horizon starts at 1 for unseen data, so we displace idx by 1
             ydf['prediction'].iloc[original_index[idx]] = model.predict(
-                np.arange(idx + 1, idx + 1 + self.n_ts_predictions)).tolist()
+                np.arange((idx + 1) + offset,
+                          (idx + 1) + offset + self.n_ts_predictions)).tolist()
 
         return ydf

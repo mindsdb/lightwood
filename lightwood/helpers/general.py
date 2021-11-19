@@ -147,6 +147,7 @@ def evaluate_array_accuracy(
                 preds = np.expand_dims(preds, axis=1)
 
             # only evaluate accuracy for rows with complete historical context
+            # @TODO: is this correct?
             if len(trues) > ts_analysis['tss'].window:
                 trues = trues[ts_analysis['tss'].window:]
                 preds = preds[ts_analysis['tss'].window:]
