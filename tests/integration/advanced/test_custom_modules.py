@@ -3,7 +3,6 @@ from lightwood.api.types import JsonAI, ProblemDefinition
 import unittest
 from mindsdb_datasources import FileDS
 import os
-import shutil
 
 
 test_err_message = 'This ! Is ! A ! Testing ! Error !'
