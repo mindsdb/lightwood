@@ -17,7 +17,7 @@ from lightwood.helpers.log import log
 
 # For custom modules, we create a module loader with necessary imports below
 IMPORT_EXTERNAL_DIRS = """
-for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
+for import_dir in [os.path.join(os.path.expanduser('~/lightwood_modules'), lightwood_version.replace('.', '_')), os.path.join('/etc/lightwood_modules', lightwood_version.replace('.', '_'))]:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
         for file_name in list(os.walk(import_dir))[0][2]:
             if file_name[-3:] != '.py':
@@ -29,10 +29,11 @@ for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_mo
             loader.exec_module(module)
             sys.modules[mod_name] = module
             exec(f'import {mod_name}')
-"""
+""" # noqa
 
 IMPORTS = """
 import lightwood
+from lightwood import __version__ as lightwood_version
 from lightwood.analysis import *
 from lightwood.api import *
 from lightwood.data import *
