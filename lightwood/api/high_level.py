@@ -18,10 +18,10 @@ import gc
 import time
 from lightwood.helpers.log import log
 from shutil import copyfile
-from lightwood import __version__ as lightwood_version
 
 
 def load_custom_module(file_path: str):
+    from lightwood import __version__ as lightwood_version
     modules_dir = os.path.join(os.path.expanduser('~/lightwood_modules'), lightwood_version.replace('.', '_'))
     custom_module_path = os.path.join(modules_dir, os.path.split(file_path)[-1])
     if not os.path.exists(modules_dir):
