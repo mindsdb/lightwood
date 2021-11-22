@@ -214,7 +214,9 @@ class TimeseriesSettings:
             considering their change through time.
     :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).
     :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
-    """
+    :param allow_incomplete_history: whether predictions can be made for rows with incomplete historical context (i.e. less than `window` rows have been observed for the datetime that has to be forecasted).
+    :param eval_cold_start: whether to include predictions with incomplete history (thus part of the cold start region for certain mixers) when evaluating mixer scores with the validation dataset.
+    """  # noqa
 
     is_timeseries: bool
     order_by: List[str] = None
@@ -228,6 +230,7 @@ class TimeseriesSettings:
         # @TODO: George: No, I don't think it is, we need to pass this some other way
     )
     allow_incomplete_history: bool = False
+    eval_cold_start: bool = True
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -252,7 +255,8 @@ class TimeseriesSettings:
                 use_previous_target=obj.get("use_previous_target", True),
                 historical_columns=[],
                 nr_predictions=obj.get("nr_predictions", 1),
-                allow_incomplete_history=obj.get('allow_incomplete_history', False)
+                allow_incomplete_history=obj.get('allow_incomplete_history', False),
+                eval_cold_start=obj.get('eval_cold_start', True)
             )
             for setting in obj:
                 timeseries_settings.__setattr__(setting, obj[setting])

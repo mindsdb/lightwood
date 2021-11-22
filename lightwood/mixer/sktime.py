@@ -88,10 +88,11 @@ class SkTime(BaseMixer):
             else:
                 series_idxs, series_data = get_group_matches(data, group)
 
-            if series_data.size > 0:
+            if series_data.size > self.ts_analysis['tss'].window:
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
+                series = series.loc[~pd.isnull(series.values)]  # remove NaN  # @TODO: benchmark imputation vs this?
                 try:
                     self.models[group].fit(series, fh=self.fh)
                 except ValueError:
@@ -137,7 +138,11 @@ class SkTime(BaseMixer):
             if series_data.size > 0:
                 group = frozenset(group)
                 series_idxs = sorted(series_idxs)
-                forecaster = self.models[group] if self.models[group].is_fitted else self.models['__default']
+                if self.models.get(group, False) and self.models[group].is_fitted:
+                    forecaster = self.models[group]
+                else:
+                    log.warning(f"Applying default forecaster for novel group {group}. Performance might be lower.")
+                    forecaster = self.models['__default']
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
                 ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
                 pending_idxs -= set(series_idxs)
@@ -154,9 +159,9 @@ class SkTime(BaseMixer):
         series = series.reset_index(drop=True)
 
         for idx, _ in enumerate(series.iteritems()):
-            # displace by n_ts_predictions because test split has this many rows dropped due to insufficient target info
-            ydf['prediction'].iloc[original_index[idx]] = model.predict(
-                np.arange(idx + offset + self.n_ts_predictions,
-                          idx + offset + self.n_ts_predictions * 2)).tolist()
+            # displace by 1 according to sktime ForecastHorizon usage
+            start_idx = 1 + idx + offset
+            end_idx = 1 + idx + offset + self.n_ts_predictions
+            ydf['prediction'].iloc[original_index[idx]] = model.predict(np.arange(start_idx, end_idx)).tolist()
 
         return ydf

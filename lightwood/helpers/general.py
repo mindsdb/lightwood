@@ -1,5 +1,5 @@
 import importlib
-from typing import List, Union, Dict, Optional
+from typing import List, Dict, Optional
 import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error
@@ -57,11 +57,13 @@ def evaluate_accuracy(data: pd.DataFrame,
     for accuracy_function_str in accuracy_functions:
         if accuracy_function_str == 'evaluate_array_accuracy':
             nr_predictions = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
-            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]
-            true_values = data[cols].values.tolist()
-            score_dict[accuracy_function_str] = evaluate_array_accuracy(list(true_values),
-                                                                        list(predictions),
-                                                                        data,
+            gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
+            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, nr_predictions)] + gby
+            true_values = data[cols]
+            predictions = predictions.apply(pd.Series)
+            score_dict[accuracy_function_str] = evaluate_array_accuracy(true_values,
+                                                                        predictions,
+                                                                        data[cols],
                                                                         ts_analysis=ts_analysis)
         else:
             true_values = data[target].tolist()
@@ -107,8 +109,8 @@ def evaluate_multilabel_accuracy(true_values, predictions, **kwargs):
 
 
 def evaluate_array_accuracy(
-        true_values: List[List[Union[int, float]]],
-        predictions: List[List[Union[int, float]]],
+        true_values: pd.DataFrame,
+        predictions: pd.DataFrame,
         data: pd.DataFrame,
         **kwargs
 ) -> float:
@@ -120,21 +122,25 @@ def evaluate_array_accuracy(
     Scores are computed for each timestep (as determined by `timeseries_settings.nr_predictions`),
     and the final accuracy is the reciprocal of the average score through all timesteps.
     """
-
     ts_analysis = kwargs.get('ts_analysis', {})
     naive_errors = ts_analysis.get('ts_naive_mae', {})
+    wrapped_data = {
+        'data': data.reset_index(drop=True),
+        'group_info': {gcol: data[gcol].tolist()
+                       for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
+    }
+
+    if ts_analysis['tss'].group_by:
+        [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
+
+    true_values = np.array(true_values)
+    predictions = np.array(predictions)
 
     if not naive_errors:
         # use mean R2 method if naive errors are not available
         return evaluate_array_r2_accuracy(true_values, predictions, ts_analysis=ts_analysis)
 
     mases = []
-    true_values = np.array(true_values)
-    predictions = np.array(predictions)
-    wrapped_data = {'data': data.reset_index(drop=True),
-                    'group_info': {gcol: data[gcol].tolist()
-                                   for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
-                    }
     for group in ts_analysis['group_combinations']:
         g_idxs, _ = get_group_matches(wrapped_data, group)
 
@@ -142,9 +148,6 @@ def evaluate_array_accuracy(
         if g_idxs:
             trues = true_values[g_idxs]
             preds = predictions[g_idxs]
-
-            if ts_analysis['tss'].nr_predictions == 1:
-                preds = np.expand_dims(preds, axis=1)
 
             # add MASE score for each group (__default only considered if the task is non-grouped)
             if len(ts_analysis['group_combinations']) == 1 or group != '__default':
@@ -154,8 +157,8 @@ def evaluate_array_accuracy(
 
 
 def evaluate_array_r2_accuracy(
-        true_values: List[List[Union[int, float]]],
-        predictions: List[List[Union[int, float]]],
+        true_values: np.ndarray,
+        predictions: np.ndarray,
         **kwargs
 ) -> float:
     """
@@ -164,17 +167,18 @@ def evaluate_array_r2_accuracy(
     """
     base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
 
-    aggregate = 0.0
+    nan_mask = (~np.isnan(true_values)).astype(int)
+    predictions *= nan_mask
+    true_values = np.nan_to_num(true_values, 0.0)
 
-    fh = 1 if not isinstance(predictions[0], list) else len(predictions[0])
-    if fh == 1:
-        predictions = [[p] for p in predictions]
+    fh = kwargs.get('ts_analysis', {}).get('tss', 1).nr_predictions
 
-    # only evaluate accuracy for rows with complete historical context
-    if kwargs.get('ts_analysis', {}).get('tss', False):
+    if kwargs.get('ts_analysis', {}).get('tss', False) and not kwargs['ts_analysis']['tss'].eval_cold_start:
+        # only evaluate accuracy for rows with complete historical context
         true_values = true_values[kwargs['ts_analysis']['tss'].window:]
         predictions = predictions[kwargs['ts_analysis']['tss'].window:]
 
+    aggregate = 0.0
     for i in range(fh):
         aggregate += base_acc_fn([t[i] for t in true_values], [p[i] for p in predictions])
 
@@ -192,10 +196,14 @@ def mase(trues, preds, scale_error, fh):
     if scale_error == 0:
         scale_error = 1  # cover (rare) case where series is constant
 
+    nan_mask = (~np.isnan(trues)).astype(int)
+    preds *= nan_mask
+    trues = np.nan_to_num(trues, 0.0)
+
     agg = 0.0
     for i in range(fh):
-        true = [t[i] for t in trues]
-        pred = [p[i] for p in preds]
+        true = trues[:, i]
+        pred = preds[:, i]
         agg += mean_absolute_error(true, pred)
 
     return (agg / fh) / scale_error

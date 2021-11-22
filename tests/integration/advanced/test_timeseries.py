@@ -165,8 +165,8 @@ class TestTimeseries(unittest.TestCase):
 
     def test_3_time_series_sktime_mixer(self):
         """
-        Tests `sktime` mixer individually, as it has a special notion of absolute
-        temporal timestamps that we need to ensure are being used correctly. In
+        Tests `sktime` mixer individually, as it has a special notion of
+        timestamps that we need to ensure are being used correctly. In
         particular, given a train-dev-test split, any forecasts coming from a sktime
         mixer should start from the latest observed data in the entire dataset.
         
