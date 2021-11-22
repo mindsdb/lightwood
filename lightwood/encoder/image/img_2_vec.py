@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
 import logging
 import torch
 import torchvision.transforms as transforms
