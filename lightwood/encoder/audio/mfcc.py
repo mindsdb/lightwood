@@ -21,7 +21,7 @@ class MFCCEncoder(BaseEncoder):
     
         This encoder currently does not support a `decode()` call; models with an audio output will not work. 
     
-        :param is_target: whether this encoder's column is the target. Should be false as encoder is not bi-directional. 
+        :param is_target: whether this encoder's column is the target. Is always false, as decoded audio is not available.
         """  # noqa
         assert not is_target
         super().__init__(is_target)
