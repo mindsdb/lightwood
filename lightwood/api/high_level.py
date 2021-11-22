@@ -25,7 +25,7 @@ def load_custom_module(file_path: str):
     modules_dir = os.path.join(os.path.expanduser('~/lightwood_modules'), lightwood_version.replace('.', '_'))
     custom_module_path = os.path.join(modules_dir, os.path.split(file_path)[-1])
     if not os.path.exists(modules_dir):
-        os.mkdir(modules_dir)
+        os.makedirs(modules_dir)
     if os.path.exists(custom_module_path):
         os.remove(custom_module_path)
 
