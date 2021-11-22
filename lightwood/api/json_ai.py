@@ -1043,6 +1043,10 @@ if self.problem_definition.fit_on_all:
 
     predict_body = f"""
 # Remove columns that user specifies to ignore
+truth = None
+if self.target in data.columns:
+    truth = list(data[self.target])
+
 self.mode = 'predict'
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
@@ -1061,9 +1065,13 @@ self.pred_args = PredictionArguments.from_dict(args)
 df = self.ensemble(encoded_ds, args=self.pred_args)
 
 if self.pred_args.all_mixers:
+    if truth is not None:
+        df['truth'] = truth
     return df
 else:
     insights, global_insights = {call(json_ai.explainer)}
+    if truth is not None:
+        insights['truth'] = truth
     return insights
 """
 
