@@ -568,6 +568,8 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
+            # enforce fit_on_all if this mixer is specified
+            problem_definition.fit_on_all = True
 
     ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
     ensemble["args"]["target"] = ensemble["args"].get("target", "$target")
