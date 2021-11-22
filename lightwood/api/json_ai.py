@@ -1046,6 +1046,8 @@ if self.problem_definition.fit_on_all:
 truth = None
 if self.target in data.columns:
     truth = list(data[self.target])
+    if problem_definition.timeseries_settings.is_timeseries:
+        truth = truth + [0] * (problem_definition.timeseries_settings.nr_predictions - 1)
 
 self.mode = 'predict'
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
