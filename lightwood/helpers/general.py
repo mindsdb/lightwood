@@ -171,7 +171,8 @@ def evaluate_array_r2_accuracy(
     predictions *= nan_mask
     true_values = np.nan_to_num(true_values, 0.0)
 
-    fh = kwargs.get('ts_analysis', {}).get('tss', 1).nr_predictions
+    fh = kwargs.get('ts_analysis', {}).get('tss', None)
+    fh = fh.nr_predictions if fh is not None else 1
 
     if kwargs.get('ts_analysis', {}).get('tss', False) and not kwargs['ts_analysis']['tss'].eval_cold_start:
         # only evaluate accuracy for rows with complete historical context
