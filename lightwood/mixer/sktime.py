@@ -28,7 +28,7 @@ class SkTime(BaseMixer):
             n_ts_predictions: int, ts_analysis: Dict, model_class: list = ('arima', 'AutoARIMA')):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
-        to other forecasting mixers, as it predicts based on indeces in a forecasting horizon that is defined with
+        to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
         respect to the last seen data point at training time.
         
         Due to this, the mixer is forced to "fit_on_all" and so the latest point in the validation split given by the
