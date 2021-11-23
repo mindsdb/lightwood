@@ -64,5 +64,9 @@ docssrc/source/tutorials/*.html
 docssrc/source/tutorials/*.pickle
 docssrc/source/tutorials/*.py
 docs
+<<<<<<< HEAD
 docs/*
 *.zip
+=======
+docs/*
+>>>>>>> d4886d12b0c879e5aa94d9a44122de45ce5f8c54
