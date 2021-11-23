@@ -596,19 +596,19 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2241:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2241:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2294:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -931,7 +931,7 @@ Writing MyCustomCleaner.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2241:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1354,25 +1354,9 @@ class Predictor(PredictorInterface):
 
     def predict(self, data: pd.DataFrame, args: Dict = {}) -&gt; pd.DataFrame:
 
-        # Remove columns that user specifies to ignore
-        truth = None
-        if self.target in data.columns:
-            truth = list(data[self.target])
-            # Do not set truth values when in &#34;infer&#34; mode
-            if (
-                self.problem_definition.timeseries_settings.is_timeseries
-                and &#34;__mdb_make_predictions&#34; in data.columns
-            ):
-                make_predictions = data[&#34;__mdb_make_predictions&#34;]
-                indexes = data[
-                    make_predictions.map(
-                        {&#34;True&#34;: True, &#34;False&#34;: False, True: True, False: False}
-                    ).isin([True])
-                ]
-                if indexes.shape[0] == 0:
-                    truth = None
-
         self.mode = &#34;predict&#34;
+
+        # Remove columns that user specifies to ignore
         log.info(f&#34;Dropping features: {self.problem_definition.ignore_features}&#34;)
         data = data.drop(
             columns=self.problem_definition.ignore_features, errors=&#34;ignore&#34;
@@ -1392,8 +1376,6 @@ class Predictor(PredictorInterface):
         df = self.ensemble(encoded_ds, args=self.pred_args)
 
         if self.pred_args.all_mixers:
-            if truth is not None:
-                df[&#34;truth&#34;] = truth
             return df
         else:
             insights, global_insights = explain(
@@ -1412,8 +1394,6 @@ class Predictor(PredictorInterface):
                 anomaly_error_rate=self.pred_args.anomaly_error_rate,
                 anomaly_cooldown=self.pred_args.anomaly_cooldown,
             )
-            if truth is not None:
-                insights[&#34;truth&#34;] = truth
             return insights
 
 </pre></div></div>
@@ -1468,13 +1448,13 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2241:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Converted target into strictly non-negative</span>
-<span class="ansi-green-fg">INFO:lightwood-2241:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Converted target into strictly non-negative</span>
+<span class="ansi-green-fg">INFO:lightwood-2294:Cleaning column =excerpt</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

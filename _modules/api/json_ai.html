@@ -1210,18 +1210,9 @@
     <span class="c1"># ----------------- #</span>
 
     <span class="n">predict_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2"># Remove columns that user specifies to ignore</span>
-<span class="s2">truth = None</span>
-<span class="s2">if self.target in data.columns:</span>
-<span class="s2">    truth = list(data[self.target])</span>
-<span class="s2">    # Do not set truth values when in &quot;infer&quot; mode</span>
-<span class="s2">    if self.problem_definition.timeseries_settings.is_timeseries and &#39;__mdb_make_predictions&#39; in data.columns:</span>
-<span class="s2">        make_predictions = data[&#39;__mdb_make_predictions&#39;]</span>
-<span class="s2">        indexes = data[make_predictions.map(</span><span class="se">{{</span><span class="s2">&#39;True&#39;: True, &#39;False&#39;: False, True: True, False: False</span><span class="se">}}</span><span class="s2">).isin([True])]</span>
-<span class="s2">        if indexes.shape[0] == 0:</span>
-<span class="s2">            truth = None</span>
-
 <span class="s2">self.mode = &#39;predict&#39;</span>
+
+<span class="s2"># Remove columns that user specifies to ignore</span>
 <span class="s2">log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
 <span class="s2">data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
 <span class="s2">for col in self.input_cols:</span>
@@ -1239,13 +1230,9 @@
 <span class="s2">df = self.ensemble(encoded_ds, args=self.pred_args)</span>
 
 <span class="s2">if self.pred_args.all_mixers:</span>
-<span class="s2">    if truth is not None:</span>
-<span class="s2">        df[&#39;truth&#39;] = truth</span>
 <span class="s2">    return df</span>
 <span class="s2">else:</span>
 <span class="s2">    insights, global_insights = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">explainer</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
-<span class="s2">    if truth is not None:</span>
-<span class="s2">        insights[&#39;truth&#39;] = truth</span>
 <span class="s2">    return insights</span>
 <span class="s2">&quot;&quot;&quot;</span>
 
