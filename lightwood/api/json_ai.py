@@ -1042,18 +1042,9 @@ if self.problem_definition.fit_on_all:
     # ----------------- #
 
     predict_body = f"""
-# Remove columns that user specifies to ignore
-truth = None
-if self.target in data.columns:
-    truth = list(data[self.target])
-    # Do not set truth values when in "infer" mode
-    if self.problem_definition.timeseries_settings.is_timeseries and '__mdb_make_predictions' in data.columns:
-        make_predictions = data['__mdb_make_predictions']
-        indexes = data[make_predictions.map({{'True': True, 'False': False, True: True, False: False}}).isin([True])]
-        if indexes.shape[0] == 0:
-            truth = None
-
 self.mode = 'predict'
+
+# Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:
@@ -1071,13 +1062,9 @@ self.pred_args = PredictionArguments.from_dict(args)
 df = self.ensemble(encoded_ds, args=self.pred_args)
 
 if self.pred_args.all_mixers:
-    if truth is not None:
-        df['truth'] = truth
     return df
 else:
     insights, global_insights = {call(json_ai.explainer)}
-    if truth is not None:
-        insights['truth'] = truth
     return insights
 """
 
