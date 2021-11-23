@@ -65,3 +65,4 @@ docssrc/source/tutorials/*.pickle
 docssrc/source/tutorials/*.py
 docs
 docs/*
+*.zip
