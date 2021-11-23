@@ -1046,8 +1046,12 @@ if self.problem_definition.fit_on_all:
 truth = None
 if self.target in data.columns:
     truth = list(data[self.target])
-    if self.problem_definition.timeseries_settings.is_timeseries:
-        truth = truth + [0] * (self.problem_definition.timeseries_settings.nr_predictions - 1)
+    # Do not set truth values when in "infer" mode
+    if self.problem_definition.timeseries_settings.is_timeseries and '__mdb_make_predictions' in data.columns:
+        make_predictions = data['__mdb_make_predictions']
+        indexes = data[make_predictions.map({{'True': True, 'False': False, True: True, False: False}}).isin([True])]
+        if indexes.shape[0] == 0:
+            truth = None
 
 self.mode = 'predict'
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
