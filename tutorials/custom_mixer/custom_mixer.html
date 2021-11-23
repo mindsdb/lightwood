@@ -457,12 +457,14 @@ div.rendered_html tbody tr:hover {
 <h2>Step 2: Writing our mixer<a class="headerlink" href="#Step-2:-Writing-our-mixer" title="Permalink to this headline">¶</a></h2>
 <p>I’m going to create a file called <code class="docutils literal notranslate"><span class="pre">random_forest_mixer.py</span></code> inside <code class="docutils literal notranslate"><span class="pre">/etc/lightwood_modules</span></code>, this is where lightwood sources custom modules from.</p>
 <p>Inside of it I’m going to write the following code:</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">lightwood.mixer</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
+<span></span><span class="o">%%writefile</span> random_forest_mixer.py
+
+<span class="kn">from</span> <span class="nn">lightwood.mixer</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
 <span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">dtype</span>
@@ -516,6 +518,14 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Writing random_forest_mixer.py
+</pre></div></div>
+</div>
 </div>
 <div class="section" id="Step-3:-Using-our-mixer">
 <h2>Step 3: Using our mixer<a class="headerlink" href="#Step-3:-Using-our-mixer" title="Permalink to this headline">¶</a></h2>
@@ -526,8 +536,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> <span class="n">json_ai_from_problem</span>
+<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> <span class="n">json_ai_from_problem</span><span class="p">,</span> <span class="n">load_custom_module</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1"># load the code</span>
+<span class="n">load_custom_module</span><span class="p">(</span><span class="s1">&#39;random_forest_mixer.py&#39;</span><span class="p">)</span>
 
 <span class="c1"># read dataset</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/heart_disease/data.csv&#39;</span><span class="p">)</span>
@@ -550,40 +563,39 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:lightwood-56096:Dropping features: []
-INFO:lightwood-56096:Analyzing a sample of 298
-INFO:lightwood-56096:from a total population of 303, this is equivalent to 98.3% of your data.
-INFO:lightwood-56096:Using 15 processes to deduct types.
-INFO:lightwood-56096:Infering type for: age
-INFO:lightwood-56096:Infering type for: sex
-INFO:lightwood-56096:Infering type for: cp
-INFO:lightwood-56096:Infering type for: trestbps
-INFO:lightwood-56096:Infering type for: fbs
-INFO:lightwood-56096:Infering type for: chol
-INFO:lightwood-56096:Infering type for: thalach
-INFO:lightwood-56096:Infering type for: restecg
-INFO:lightwood-56096:Infering type for: exang
-INFO:lightwood-56096:Infering type for: ca
-INFO:lightwood-56096:Infering type for: slope
-INFO:lightwood-56096:Infering type for: thal
-INFO:lightwood-56096:Column age has data type integer
-INFO:lightwood-56096:Infering type for: target
-INFO:lightwood-56096:Column sex has data type binary
-INFO:lightwood-56096:Column fbs has data type binary
-INFO:lightwood-56096:Column cp has data type categorical
-INFO:lightwood-56096:Infering type for: oldpeak
-INFO:lightwood-56096:Column trestbps has data type integer
-INFO:lightwood-56096:Column chol has data type integer
-INFO:lightwood-56096:Column thalach has data type integer
-INFO:lightwood-56096:Column restecg has data type categorical
-INFO:lightwood-56096:Column exang has data type binary
-INFO:lightwood-56096:Column ca has data type categorical
-INFO:lightwood-56096:Column slope has data type categorical
-INFO:lightwood-56096:Column thal has data type categorical
-INFO:lightwood-56096:Column target has data type binary
-INFO:lightwood-56096:Column oldpeak has data type float
-INFO:lightwood-56096:Starting statistical analysis
-INFO:lightwood-56096:Finished statistical analysis
+<span class="ansi-green-fg">INFO:lightwood-2103:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Analyzing a sample of 298</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:from a total population of 303, this is equivalent to 98.3% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: age</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column age has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: sex</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column sex has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: cp</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column cp has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: trestbps</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column trestbps has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: chol</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column chol has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: fbs</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column fbs has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: restecg</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column restecg has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: thalach</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column thalach has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: exang</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column exang has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: oldpeak</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column oldpeak has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: slope</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column slope has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: ca</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column ca has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: thal</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column thal has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Column target has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -591,97 +603,108 @@ INFO:lightwood-56096:Finished statistical analysis
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-random_forest_mixer.py
-random_forest_mixer
 {
     &#34;features&#34;: {
         &#34;age&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;integer&#34;
         },
         &#34;sex&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Binary.BinaryEncoder&#34;,
+                &#34;module&#34;: &#34;BinaryEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;binary&#34;
         },
         &#34;cp&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;module&#34;: &#34;OneHotEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;categorical&#34;
         },
         &#34;trestbps&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;integer&#34;
         },
         &#34;chol&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;integer&#34;
         },
         &#34;fbs&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Binary.BinaryEncoder&#34;,
+                &#34;module&#34;: &#34;BinaryEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;binary&#34;
         },
         &#34;restecg&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;module&#34;: &#34;OneHotEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;categorical&#34;
         },
         &#34;thalach&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Integer.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;integer&#34;
         },
         &#34;exang&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Binary.BinaryEncoder&#34;,
+                &#34;module&#34;: &#34;BinaryEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;binary&#34;
         },
         &#34;oldpeak&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Float.NumericEncoder&#34;,
+                &#34;module&#34;: &#34;NumericEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;float&#34;
         },
         &#34;slope&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;module&#34;: &#34;OneHotEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;categorical&#34;
         },
         &#34;ca&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;module&#34;: &#34;OneHotEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;categorical&#34;
         },
         &#34;thal&#34;: {
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Categorical.OneHotEncoder&#34;,
+                &#34;module&#34;: &#34;OneHotEncoder&#34;,
                 &#34;args&#34;: {}
-            }
+            },
+            &#34;data_dtype&#34;: &#34;categorical&#34;
         }
     },
     &#34;outputs&#34;: {
         &#34;target&#34;: {
             &#34;data_dtype&#34;: &#34;binary&#34;,
             &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;Binary.BinaryEncoder&#34;,
+                &#34;module&#34;: &#34;BinaryEncoder&#34;,
                 &#34;args&#34;: {
                     &#34;is_target&#34;: &#34;True&#34;,
-                    &#34;target_class_distribution&#34;: &#34;$statistical_analysis.target_class_distribution&#34;
+                    &#34;target_weights&#34;: &#34;$statistical_analysis.target_class_distribution&#34;
                 }
             },
             &#34;mixers&#34;: [
@@ -737,7 +760,7 @@ random_forest_mixer
             &#34;target_type&#34;: &#34;&#34;,
             &#34;allow_incomplete_history&#34;: false
         },
-        &#34;anomaly_detection&#34;: true,
+        &#34;anomaly_detection&#34;: false,
         &#34;ignore_features&#34;: [],
         &#34;fit_on_all&#34;: true,
         &#34;strict_mode&#34;: true,
@@ -785,10 +808,9 @@ random_forest_mixer
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-random_forest_mixer.py
-random_forest_mixer
+<span class="ansi-green-fg">INFO:lightwood-2103:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -805,49 +827,51 @@ random_forest_mixer
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:lightwood-56096:Dropping features: []
-INFO:lightwood-56096:Performing statistical analysis on data
-INFO:lightwood-56096:Starting statistical analysis
-INFO:lightwood-56096:Finished statistical analysis
-INFO:lightwood-56096:Cleaning the data
-INFO:lightwood-56096:Splitting the data into train/test
-INFO:lightwood-56096:Preparing the encoders
-INFO:lightwood-56096:Encoder prepping dict length of: 1
-INFO:lightwood-56096:Encoder prepping dict length of: 2
-INFO:lightwood-56096:Encoder prepping dict length of: 3
-INFO:lightwood-56096:Encoder prepping dict length of: 4
-INFO:lightwood-56096:Encoder prepping dict length of: 5
-INFO:lightwood-56096:Encoder prepping dict length of: 6
-INFO:lightwood-56096:Encoder prepping dict length of: 7
-INFO:lightwood-56096:Encoder prepping dict length of: 8
-INFO:lightwood-56096:Encoder prepping dict length of: 9
-INFO:lightwood-56096:Encoder prepping dict length of: 10
-INFO:lightwood-56096:Encoder prepping dict length of: 11
-INFO:lightwood-56096:Encoder prepping dict length of: 12
-INFO:lightwood-56096:Encoder prepping dict length of: 13
-INFO:lightwood-56096:Encoder prepping dict length of: 14
-INFO:lightwood-56096:Done running for: target
-INFO:lightwood-56096:Done running for: age
-INFO:lightwood-56096:Done running for: sex
-INFO:lightwood-56096:Done running for: cp
-INFO:lightwood-56096:Done running for: trestbps
-INFO:lightwood-56096:Done running for: chol
-INFO:lightwood-56096:Done running for: fbs
-INFO:lightwood-56096:Done running for: restecg
-INFO:lightwood-56096:Done running for: thalach
-INFO:lightwood-56096:Done running for: exang
-INFO:lightwood-56096:Done running for: oldpeak
-INFO:lightwood-56096:Done running for: slope
-INFO:lightwood-56096:Done running for: ca
-INFO:lightwood-56096:Done running for: thal
-INFO:lightwood-56096:Featurizing the data
-INFO:lightwood-56096:Training the mixers
-INFO:lightwood-56096:Ensembling the mixer
-INFO:lightwood-56096:Mixer: RandomForestMixer got accuracy: 0.8149038461538461
-INFO:lightwood-56096:Picked best mixer: RandomForestMixer
-INFO:lightwood-56096:Analyzing the ensemble of mixers
-INFO:lightwood-56096:Adjustment on validation requested.
-INFO:lightwood-56096:Updating the mixers
+<span class="ansi-green-fg">INFO:lightwood-2103:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Splitting the data into train/test</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Preparing the encoders</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 2</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 3</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 4</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 5</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 6</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 7</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 8</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 9</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 10</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 11</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 12</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 13</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Encoder prepping dict length of: 14</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: target</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: age</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: sex</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: cp</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: trestbps</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: chol</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: fbs</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: restecg</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: thalach</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: exang</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: oldpeak</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: slope</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: ca</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Done running for: thal</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Training the mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Mixer: RandomForestMixer got accuracy: 0.8705357142857143</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Picked best mixer: RandomForestMixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Analyzing the ensemble of mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Adjustment on validation requested.</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Updating the mixers</span>
 </pre></div></div>
 </div>
 <p>Finally, we can use the trained predictor to make some predictions, or save it to a pickle for later use</p>
@@ -872,10 +896,12 @@ INFO:lightwood-56096:Updating the mixers
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:lightwood-56096:Dropping features: []
-INFO:lightwood-56096:Cleaning the data
-INFO:lightwood-56096:AccStats.explain() has not been implemented, no modifications will be done to the data insights.
-INFO:lightwood-56096:GlobalFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.
+<span class="ansi-green-fg">INFO:lightwood-2103:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2103:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -883,10 +909,10 @@ INFO:lightwood-56096:GlobalFeatureImportance.explain() has not been implemented,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-  prediction truth  confidence
-0          0  None        0.95
-1          0  None        0.94
-2          1  None        0.97
+  prediction  confidence
+0          0        0.99
+1          0        0.99
+2          0        0.99
 </pre></div></div>
 </div>
 <p>That’s it, all it takes to solve a predictive problem with lightwood using your own custom mixer.</p>
