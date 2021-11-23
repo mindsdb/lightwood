@@ -612,7 +612,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             "module": "model_analyzer",
             "args": {
                 "stats_info": "$statistical_analysis",
-                "ts_cfg": "$problem_definition.timeseries_settings",
+                "tss": "$problem_definition.timeseries_settings",
                 "accuracy_functions": "$accuracy_functions",
                 "predictor": "$ensemble",
                 "data": "encoded_test_data",
