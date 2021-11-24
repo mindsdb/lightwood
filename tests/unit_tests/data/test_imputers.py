@@ -9,13 +9,13 @@ from lightwood.helpers.imputers import NumericalImputer, CategoricalImputer
 class TestImputers(unittest.TestCase):
     def _load_df(self, cols_to_cat=[]):
         def _to_cat(x):
-            return chr(int(x)+97) if x == x else x
+            return chr(int(x) + 97) if x == x else x
 
         df = pd.read_csv('tests/data/hdi.csv')
         for col in cols_to_cat:
             df[col] = df[col].apply(_to_cat).astype(str)
 
-        idxs = np.random.randint(0, high=len(df), size=(int(len(df)*0.2)))  # drop some rows at random
+        idxs = np.random.randint(0, high=len(df), size=(int(len(df) * 0.2)))  # drop some rows at random
         df.loc[idxs] = np.nan
         df.iloc[0] = np.nan  # force first row to be nan for filled value checks
         return df
