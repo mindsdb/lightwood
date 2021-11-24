@@ -185,17 +185,18 @@ def generate_json_ai(
     exec(IMPORT_EXTERNAL_DIRS, globals())
     target = problem_definition.target
     input_cols = []
+    tss = problem_definition.timeseries_settings
+
     for col_name, col_dtype in type_information.dtypes.items():
         if (
                 (col_name not in type_information.identifiers
                  and col_dtype not in (dtype.invalid, dtype.empty)
                  and col_name != target)
                 or
-                col_name in problem_definition.timeseries_settings.group_by
+                (tss.group_by is not None and col_name in tss.group_by)
         ):
             input_cols.append(col_name)
 
-    tss = problem_definition.timeseries_settings
     is_target_predicting_encoder = False
     is_ts = problem_definition.timeseries_settings.is_timeseries
     # Single text column classification
