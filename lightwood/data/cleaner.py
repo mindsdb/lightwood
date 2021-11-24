@@ -280,8 +280,8 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
     data = deepcopy(data)
     to_drop = [*[x for x in identifiers.keys() if x != target],
                *[x for x in data.columns if x in dtype_dict and dtype_dict[x] == dtype.invalid]]
-    exceptions = ["__mdb_make_predictions"]
-    to_drop = [x for x in to_drop if x in data.columns]
+    exceptions = ["__mdb_make_predictions", *timeseries_settings.group_by]
+    to_drop = [x for x in to_drop if x in data.columns and x not in exceptions]
     data = data.drop(columns=to_drop)
 
     if mode == "train":
@@ -298,7 +298,6 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
     for name in list(data.columns):
         if name not in dtype_dict and name not in exceptions:
             data = data.drop(columns=[name])
-
     return data
 
 

@@ -187,9 +187,11 @@ def generate_json_ai(
     input_cols = []
     for col_name, col_dtype in type_information.dtypes.items():
         if (
-            col_name not in type_information.identifiers
-            and col_dtype not in (dtype.invalid, dtype.empty)
-            and col_name != target
+                (col_name not in type_information.identifiers
+                 and col_dtype not in (dtype.invalid, dtype.empty)
+                 and col_name != target)
+                or
+                col_name in problem_definition.timeseries_settings.group_by
         ):
             input_cols.append(col_name)
 
