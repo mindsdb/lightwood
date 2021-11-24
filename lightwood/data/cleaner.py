@@ -283,7 +283,7 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
 
     exceptions = ["__mdb_make_predictions"]
     if timeseries_settings.group_by is not None:
-        exceptions += [group for group in timeseries_settings.group_by]
+        exceptions += timeseries_settings.group_by
 
     to_drop = [x for x in to_drop if x in data.columns and x not in exceptions]
     data = data.drop(columns=to_drop)
