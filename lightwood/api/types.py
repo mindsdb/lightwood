@@ -37,11 +37,13 @@ class Feature:
     :param encoder: the methodology for encoding a feature (a Lightwood Encoder)
     :param data_dtype: The type of information within this column (ex.: numerical, categorical, etc.)
     :param dependency: Any custom attributes for this feature that may require non-standard processing. This highly\
+    :param imputer: specifies what imputer class should handle missing values. Format: "[numerical/categorical].strategy" (e.g. "numerical.mean"). For all possible strategies, see the imputers documentation.
     depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
-    """
+    """  # noqa
 
     encoder: Module
     data_dtype: str
+    imputer: str = None
     dependency: List[str] = None
 
     @staticmethod
@@ -63,8 +65,9 @@ class Feature:
         encoder = obj["encoder"]
         data_dtype = obj.get("data_dtype", None)
         dependency = obj.get("dependency", None)
+        imputer = obj.get("imputer", None)
 
-        feature = Feature(encoder=encoder, data_dtype=data_dtype, dependency=dependency)
+        feature = Feature(encoder=encoder, data_dtype=data_dtype, dependency=dependency, imputer=imputer)
 
         return feature
 

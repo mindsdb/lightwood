@@ -27,6 +27,8 @@ class NumericalImputer(BaseImputer):
         """
         Imputer for numerical columns. Supports a handful of different approaches to define the imputation value.
         
+        String to invoke this class from the cleaner is "numerical.$value", with "value" one of the valid options defined below:
+        
         :param value: One of 'mean', 'median', 'zero', 'mode'.
         """  # noqa
         super().__init__(target_col, value, force_typecast)
@@ -45,13 +47,13 @@ class NumericalImputer(BaseImputer):
                 raise Exception(f'Numerical imputer used in non-numeric column {col} with dtype {data[col].dtype}!')
 
         if self.value == 'mean':
-            value = data[col].mean()
+            value = data[col].dropna().mean()
         elif self.value == 'median':
-            value = data[col].median()
+            value = data[col].dropna().median()
         elif self.value == 'mode':
             value = data[col].dropna().mode().iloc[0]  # if there's a tie, this chooses the smallest value
         else:
-            value = 0
+            value = 0.0
 
         data[col] = data[col].fillna(value=value)
 
@@ -59,11 +61,13 @@ class NumericalImputer(BaseImputer):
 
 
 class CategoricalImputer(BaseImputer):
-    def __init__(self, target_col: str, value: str = 'zero'):
+    def __init__(self, target_col: str, value: str = 'zero', **kwargs):
         """
         Imputer for categorical columns.
         
-        :param value: One of 'mode', 'unk'. The former replaces missing data with the most common label, and the latter with an "UNK" string. 
+        String to invoke this class from the cleaner is "categorical.$value", with "value" one of the valid options defined below.
+        
+        :param value: One of 'mode', 'unk'. The former replaces missing data with the most common label, and the latter with an "UNK" string.
         """  # noqa
         super().__init__(target_col, value)
 

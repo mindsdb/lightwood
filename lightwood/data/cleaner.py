@@ -8,6 +8,7 @@ from dateutil.parser import parse as parse_dt
 from lightwood.api.dtype import dtype
 from lightwood.helpers import text
 from lightwood.helpers.log import log
+from lightwood.helpers.imputers import NumericalImputer, CategoricalImputer
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import is_nan_numeric
 
@@ -23,10 +24,11 @@ def cleaner(
     mode: str,
     timeseries_settings: TimeseriesSettings,
     anomaly_detection: bool,
+    imputers: Dict[str, str] = {},
     custom_cleaning_functions: Dict[str, str] = {}
 ) -> pd.DataFrame:
     """
-    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``
+    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``. Optionally, these ``None`` values can be replaced with imputers.
 
     :param data: The raw data
     :param dtype_dict: Type information for each column
@@ -34,6 +36,7 @@ def cleaner(
     :param identifiers: A dict containing all identifier typed columns
     :param target: The target columns
     :param mode: Can be "predict" or "train"
+    :param imputers: Dictionary where keys are input columns, and values the respective strings that indicate which imputer will be used. String format should be $imputer_family.$mode. For options, refer to imputer documentation.
     :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
     :param anomaly_detection: Are we detecting anomalies with this predictor?
 
@@ -48,6 +51,12 @@ def cleaner(
         # Get and apply a cleaning function for each data type
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
+
+    for col, imputer in imputers.items():
+        imputer_name, mode = imputer.split(".")
+        imputer_class = NumericalImputer if imputer_name == 'numerical' else CategoricalImputer
+        imputer = imputer_class(target_col=col, value=mode, force_typecast=True)
+        data[col] = imputer.impute(data[[col]])
 
     return data
 
@@ -227,8 +236,13 @@ def _clean_quantity(element: object) -> Optional[float]:
 # ------------------------- #
 # Text
 # ------------------------- #
-def _clean_text(element: object) -> str:
-    return str(element)
+def _clean_text(element: object) -> Union[str, None]:
+    if isinstance(element, str):
+        return element
+    elif element is None or element != element:
+        return None
+    else:
+        return str(element)
 
 
 # ------------------------- #
