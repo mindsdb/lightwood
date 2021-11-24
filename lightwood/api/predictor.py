@@ -1,5 +1,5 @@
 import dill
-from typing import Dict
+from typing import Dict, Optional
 
 import pandas as pd
 from lightwood.api.types import ModelAnalysis
@@ -111,15 +111,16 @@ class PredictorInterface:
         """  # noqa
         pass
 
-    def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:
+    def adjust(self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None) -> None:
         """
         Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.
 
         .. warning:: This is experimental and subject to change. 
-        :param new_data: New data used to adjust a previously trained model. Keys must reference "old" and "new" referencing to the old and new datasets. In some situations, the old data is still required to train a model (i.e. Regression) to ensure the new data doesn't entirely override it.
+        :param new_data: New data used to adjust a previously trained model.
+        :param old_data: In some situations, the old data is still required to train a model (i.e. Regression mixer) to ensure the new data doesn't entirely override it.
 
         :returns: Nothing; adjusts best-fit model
-        """ # noqa
+        """  # noqa
         pass
 
     def predict(self, data: pd.DataFrame, args: Dict[str, object] = {}) -> pd.DataFrame:

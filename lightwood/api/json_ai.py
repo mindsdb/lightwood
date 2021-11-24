@@ -979,8 +979,8 @@ self.mode = 'train'
 # Extract data
 # --------------- #
 # Extract the featurized data
-encoded_old_data = new_data['old']
-encoded_new_data = new_data['new']
+encoded_old_data = old_data if old_data is not None else pd.DataFrame()
+encoded_new_data = new_data
 
 # --------------- #
 # Adjust (Update) Mixers
@@ -997,7 +997,7 @@ for mixer in self.mixers:
     # Learn Body
     # ----------------- #
 
-    learn_body = f"""
+    learn_body = """
 self.mode = 'train'
 
 # Perform stats analysis
@@ -1030,9 +1030,7 @@ self.analyze_ensemble(enc_train_test)
 if self.problem_definition.fit_on_all:
 
     log.info("Adjustment on validation requested.")
-    update_data = {{"new": enc_train_test["test"], "old": ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]])}}  # noqa
-
-    self.adjust(update_data)
+    self.adjust(enc_train_test["test"], ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]]))
 
 """
     learn_body = align(learn_body, 2)
@@ -1130,7 +1128,7 @@ class Predictor(PredictorInterface):
         data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
-    def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:
+    def adjust(self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None) -> None:
         # Update mixers with new information
 {adjust_body}
 
