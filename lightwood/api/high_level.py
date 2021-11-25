@@ -50,6 +50,8 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
+    started = time.time()
+
     log.info(f'Dropping features: {problem_definition.ignore_features}')
     df = df.drop(columns=problem_definition.ignore_features)
 
@@ -59,6 +61,12 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
     json_ai = generate_json_ai(
         type_information=type_information, statistical_analysis=stats,
         problem_definition=problem_definition)
+
+    duration = time.time() - started
+    if problem_definition.time_aim is not None:
+        problem_definition.time_aim -= duration
+        if problem_definition.time_aim < 10:
+            problem_definition.time_aim = 10
 
     return json_ai
 
