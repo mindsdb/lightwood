@@ -138,17 +138,26 @@ def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[D
     return group_residuals, group_scale_factors
 
 
-def detect_period(deltas, tss):
+def detect_period(deltas: dict, tss: TimeseriesSettings) -> dict:
+    """
+    Helper method that, based on the most popular interval for a time series, determines its seasonal peridiocity (sp).
+    This bit of information can be crucial for good modelling with methods like ARIMA.
+    
+    Note: all computations assume that the first provided `order_by` column is the one that specifies the sp.
+
+    :param deltas: output of `get_delta`, has the most popular interval for each time series.
+    :param tss: timeseries settings.
+    :return: dictionary with sp for all time series.
+    """  # noqa
     secs_to_period = {
-        'year': 60*60*24*365,
-        'semestral': 60*60*24*365//2,
-        'trimestral': 60*60*24*365//3,
-        'quarter': 60*60*24*365//4,
-        'bimonthly': 60*60*24*365//6,
-        'monthly': 60*60*24*31,
-        'weekly': 60*60*24*7,
-        'daily': 60*60*24,
-        'hourly': 60*60,
+        'year': 60 * 60 * 24 * 365,
+        'semestral': 60 * 60 * 24 * 365 // 2,
+        'quarter': 60 * 60 * 24 * 365 // 4,
+        'bimonthly': 60 * 60 * 24 * 365 // 6,
+        'monthly': 60 * 60 * 24 * 31,
+        'weekly': 60 * 60 * 24 * 7,
+        'daily': 60 * 60 * 24,
+        'hourly': 60 * 60,
         'minute': 60,
         'second': 1
     }
@@ -156,7 +165,6 @@ def detect_period(deltas, tss):
     period_to_seasonality = {
         'year': 1,
         'semestral': 2,
-        'trimestral': 3,
         'quarter': 4,
         'bimonthly': 6,
         'monthly': 12,
@@ -168,9 +176,10 @@ def detect_period(deltas, tss):
     }
 
     periods = {}
+    order_col_idx = 0
     for group in deltas.keys():
-        delta = deltas[group][tss.order_by[0]]    # @TODO: explicitly mention this choice in docs!
-        diffs = [(tag, abs(delta-secs)) for tag, secs in secs_to_period.items()]
+        delta = deltas[group][tss.order_by[order_col_idx]]
+        diffs = [(tag, abs(delta - secs)) for tag, secs in secs_to_period.items()]
         min_tag, min_diff = sorted(diffs, key=lambda x: x[1])[0]
         periods[group] = period_to_seasonality.get(min_tag, 1)
 
