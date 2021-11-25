@@ -82,7 +82,7 @@ class SkTime(BaseMixer):
 
         for group in self.ts_analysis['group_combinations']:
             # ignore warnings if possible
-            kwargs = {}
+            kwargs = {'sp': self.ts_analysis['periods'][group]}
             if 'suppress_warnings' in [p.name for p in inspect.signature(self.model_class).parameters.values()]:
                 kwargs['suppress_warnings'] = True
             self.models[group] = self.model_class(**kwargs)

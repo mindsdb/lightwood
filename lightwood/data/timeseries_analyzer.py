@@ -1,22 +1,12 @@
-from itertools import product
 from typing import Dict, Tuple, List
 
 import numpy as np
 import pandas as pd
-from scipy import signal
-from statsmodels.tsa.seasonal import STL
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 from lightwood.helpers.general import get_group_matches
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-from pandas.plotting import register_matplotlib_converters
-
-register_matplotlib_converters()
-sns.set_style("darkgrid")
 
 
 def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
@@ -53,15 +43,6 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.tsarray):
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
-
-        # detect period
-        # periods = detect_period(data[tss.order_by[0]])  # @TODO: explicitly say in docs that ordering priority is decreasing!  # noqa
-
-        # detect seasonality
-        if not tss.group_by:
-            seasonalities = detect_all_seasonalities(new_data)
-        else:
-            seasonalities = detect_all_seasonalities(new_data)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
 
@@ -70,13 +51,16 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
                        new_data['group_combinations'],
                        tss.order_by)
 
+    # detect period
+    periods = detect_period(deltas, tss)
+
     return {'target_normalizers': new_data['target_normalizers'],
             'deltas': deltas,
             'tss': tss,
             'group_combinations': new_data['group_combinations'],
             'ts_naive_residuals': naive_forecast_residuals,
             'ts_naive_mae': scale_factor,
-            'periods':
+            'periods': periods
             }
 
 
@@ -154,65 +138,40 @@ def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[D
     return group_residuals, group_scale_factors
 
 
-# def detect_period(data: pd.DataFrame):
-#     period_dict = {
-#         1: 1,
-#         60: 1,
-#
-#     }
-#
-#     diffed = data.rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
-#     mode_seconds = diffed.value_counts().iloc[0]
-#     return 0
+def detect_period(deltas, tss):
+    secs_to_period = {
+        'year': 60*60*24*365,
+        'semestral': 60*60*24*365//2,
+        'trimestral': 60*60*24*365//3,
+        'quarter': 60*60*24*365//4,
+        'bimonthly': 60*60*24*365//6,
+        'monthly': 60*60*24*31,
+        'weekly': 60*60*24*7,
+        'daily': 60*60*24,
+        'hourly': 60*60,
+        'minute': 60,
+        'second': 1
+    }
 
+    period_to_seasonality = {
+        'year': 1,
+        'semestral': 2,
+        'trimestral': 3,
+        'quarter': 4,
+        'bimonthly': 6,
+        'monthly': 12,
+        'weekly': 7,
+        'daily': 1,
+        'hourly': 24,
+        'minute': 1,
+        'second': 1
+    }
 
-def detect_all_seasonalities(data):
     periods = {}
-    all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
-    print(all_group_combinations)
-    for group in all_group_combinations:
-        if frozenset(group) in data['group_combinations']:
-            _, subset = get_group_matches(data, group)  # filter data
-            print(f'Group: {group}')
-            periods[group] = detect_seasonality(subset)
-        elif group == ():
-            periods['__default'] = detect_seasonality(data['data'])
+    for group in deltas.keys():
+        delta = deltas[group][tss.order_by[0]]    # @TODO: explicitly mention this choice in docs!
+        diffs = [(tag, abs(delta-secs)) for tag, secs in secs_to_period.items()]
+        min_tag, min_diff = sorted(diffs, key=lambda x: x[1])[0]
+        periods[group] = period_to_seasonality.get(min_tag, 1)
 
-
-def detect_seasonality(data):
-    subset = pd.DataFrame(data)
-    detrended = subset.diff()[1:].diff()[1:]  # rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
-    # detrended = pd.DataFrame(signal.detrend(subset))
-
-    # get spectral density
-    _, pwrspec = signal.welch(detrended.values.squeeze(), scaling='spectrum')
-    periods = pd.DataFrame(pwrspec).sort_values(by=0, ascending=False)
-    print(periods.head(n=10))
-    period = periods.index[0]
-
-    # decompose series
-    stl = STL(subset, period=period).fit()  # , period=2 --> how to auto determine it though?
-
-    plt.rc("figure", figsize=(16, 12))
-    plt.rc("font", size=13)
-
-    fig = stl.plot()
-    print(f'Period: {period}')
-    fig.show()
-
-    return period
-
-
-def autocorr(x):
-    # @TODO: rm?
-    n = x.size
-    norm = (x - np.mean(x))
-    result = np.correlate(norm, norm, mode='same')
-    acorr = result[n//2 + 1:] / (x.var() * np.arange(n-1, n//2, -1))
-    lag = np.abs(acorr).argmax() + 1
-    r = acorr[lag-1]
-    if np.abs(r) > 0.5:
-      print('Appears to be autocorrelated with r = {}, lag = {}'. format(r, lag))
-    else:
-      print('Appears to be not autocorrelated')
-    return r, lag
+    return periods
