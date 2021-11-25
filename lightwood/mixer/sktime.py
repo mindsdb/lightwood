@@ -25,7 +25,8 @@ class SkTime(BaseMixer):
 
     def __init__(
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
-            n_ts_predictions: int, ts_analysis: Dict, model_path: str = 'arima.AutoARIMA'):
+            n_ts_predictions: int, ts_analysis: Dict, model_path: str = 'arima.AutoARIMA',
+            hyperparam_search: bool = True):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
         to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
@@ -55,6 +56,7 @@ class SkTime(BaseMixer):
         self.fh = ForecastingHorizon(np.arange(1, self.n_ts_predictions + 1), is_relative=True)
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.supports_proba = False
+        self.hyperparam_search = hyperparam_search
         self.stable = True
         self.prepared = False
 
@@ -74,6 +76,15 @@ class SkTime(BaseMixer):
         """  # noqa
         log.info('Started fitting sktime forecaster for array prediction')
 
+        # do hyperparam search on two axis: amount of data, and algorithm family
+        if self.hyperparam_search:
+            pass
+            # 1) check if algo family was provided. if so, ignore search on that axis
+            # and make sure correct assignment happens in final pass
+            # 2) check w/binary search (or equivalent in optuna
+
+
+        # final pass with optimized hyperparams
         all_subsets = ConcatedEncodedDs([train_data, dev_data])
         df = all_subsets.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
         data = {'data': df[self.target],
@@ -118,6 +129,7 @@ class SkTime(BaseMixer):
         :param dev_data: original `test` split (used to validate and select model if ensemble is `BestOf`).
         :param train_data: concatenated original `train` and `dev` splits.
         """  # noqa
+        self.hyperparam_search = False
         self.fit(dev_data, train_data)
         self.prepared = True
 
