@@ -216,7 +216,7 @@ class TimeseriesSettings:
     :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
     :param allow_incomplete_history: whether predictions can be made for rows with incomplete historical context (i.e. less than `window` rows have been observed for the datetime that has to be forecasted).
     :param eval_cold_start: whether to include predictions with incomplete history (thus part of the cold start region for certain mixers) when evaluating mixer scores with the validation dataset.
-    :param interval_periods: dictionary with period length for all user-provided intervals. Default values will be added for intervals left unspecified. For interval options, check the `timeseries_analyzer.detect_period()` method documentation.
+    :param interval_periods: tuple of tuples with user-provided period lengths for time intervals. Default values will be added for intervals left unspecified. For interval options, check the `timeseries_analyzer.detect_period()` method documentation. e.g.: (('daily', 7),).
     """  # noqa
 
     is_timeseries: bool
@@ -232,7 +232,7 @@ class TimeseriesSettings:
     )
     allow_incomplete_history: bool = False
     eval_cold_start: bool = True
-    interval_periods: dict = {}
+    interval_periods: tuple = tuple()
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -259,7 +259,7 @@ class TimeseriesSettings:
                 nr_predictions=obj.get("nr_predictions", 1),
                 allow_incomplete_history=obj.get('allow_incomplete_history', False),
                 eval_cold_start=obj.get('eval_cold_start', True),
-                interval_periods=obj.get('interval_periods', {})
+                interval_periods=obj.get('interval_periods', tuple(tuple()))
             )
             for setting in obj:
                 timeseries_settings.__setattr__(setting, obj[setting])

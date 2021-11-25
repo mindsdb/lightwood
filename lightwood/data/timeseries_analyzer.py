@@ -162,7 +162,7 @@ def detect_period(deltas: dict, tss: TimeseriesSettings) -> dict:
 
     :return: dictionary with sp for all time series.
     """  # noqa
-    interval_to_period = tss.interval_periods
+    interval_to_period = {interval: period for (interval, period) in tss.interval_periods}
     secs_to_interval = {
         'year': 60 * 60 * 24 * 365,
         'semestral': 60 * 60 * 24 * 365 // 2,
