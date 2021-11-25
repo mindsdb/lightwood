@@ -58,15 +58,20 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
     type_information = infer_types(df, problem_definition.pct_invalid)
     stats = statistical_analysis(
         df, type_information.dtypes, type_information.identifiers, problem_definition)
-    json_ai = generate_json_ai(
-        type_information=type_information, statistical_analysis=stats,
-        problem_definition=problem_definition)
 
     duration = time.time() - started
     if problem_definition.time_aim is not None:
         problem_definition.time_aim -= duration
         if problem_definition.time_aim < 10:
             problem_definition.time_aim = 10
+
+    # Assume that the stuff besdies encoder and mixers takes about as long as analyzing did... bad, but let's see
+    if problem_definition.expected_additional_time is None:
+        problem_definition.expected_additional_time = duration
+    
+    json_ai = generate_json_ai(
+        type_information=type_information, statistical_analysis=stats,
+        problem_definition=problem_definition)
 
     return json_ai
 

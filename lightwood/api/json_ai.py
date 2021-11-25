@@ -53,6 +53,7 @@ import os
 from types import ModuleType
 import importlib.machinery
 import sys
+import time
 """
 
 
@@ -399,11 +400,12 @@ def generate_json_ai(
             problem_definition.seconds_per_encoder = 0
         else:
             problem_definition.seconds_per_encoder = int(
-                problem_definition.time_aim
+                (problem_definition.time_aim - problem_definition.expected_additional_time)
                 * (encoder_time_budget_pct / nr_trainable_encoders)
             )
         problem_definition.seconds_per_mixer = int(
-            problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_mixers)
+            (problem_definition.time_aim - problem_definition.expected_additional_time)
+            * (1 - encoder_time_budget_pct) / nr_mixers
         )
 
     return JsonAI(

@@ -324,10 +324,11 @@ class ProblemDefinition:
     target: str
     pct_invalid: float
     unbias_target: bool
-    seconds_per_mixer: Union[int, None]
-    seconds_per_encoder: Union[int, None]
-    time_aim: Union[float, None]
-    target_weights: Union[List[float], None]
+    seconds_per_mixer: Optional[int]
+    seconds_per_encoder: Optional[int]
+    expected_additional_time: Optional[int]
+    time_aim: Optional[float]
+    target_weights: Optional[List[float]]
     positive_domain: bool
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
@@ -351,6 +352,7 @@ class ProblemDefinition:
         unbias_target = obj.get('unbias_target', True)
         seconds_per_mixer = obj.get('seconds_per_mixer', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
+        expected_additional_time = obj.get('expected_additional_time', None)
 
         time_aim = obj.get('time_aim', None)
         if time_aim is not None and time_aim < 10:
@@ -370,6 +372,7 @@ class ProblemDefinition:
             unbias_target=unbias_target,
             seconds_per_mixer=seconds_per_mixer,
             seconds_per_encoder=seconds_per_encoder,
+            expected_additional_time=expected_additional_time,
             time_aim=time_aim,
             target_weights=target_weights,
             positive_domain=positive_domain,
