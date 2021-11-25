@@ -51,10 +51,10 @@ class TestTimeseries(unittest.TestCase):
         start = time.process_time()
         predictor.learn(train)
         time_aim_actual = (time.process_time() - start)
-        if((time_aim_expected * 10) < time_aim_actual):
+        if((time_aim_expected * 2) < time_aim_actual):
             error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
             raise ValueError(error)
-        assert (time_aim_expected * 10) >= time_aim_actual
+
         return predictor
 
     def test_0_time_series_grouped_regression(self):
