@@ -81,10 +81,13 @@ class SkTime(BaseMixer):
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
         for group in self.ts_analysis['group_combinations']:
-            # ignore warnings if possible
-            kwargs = {'sp': self.ts_analysis['periods'][group]}
+
+            kwargs = {
+                'sp': self.ts_analysis['periods'][group],
+                'error_action': 'raise',
+            }
             if 'suppress_warnings' in [p.name for p in inspect.signature(self.model_class).parameters.values()]:
-                kwargs['suppress_warnings'] = True
+                kwargs['suppress_warnings'] = True  # ignore warnings if possible
             self.models[group] = self.model_class(**kwargs)
 
             if self.grouped_by == ['__default']:
@@ -100,8 +103,8 @@ class SkTime(BaseMixer):
                 series = series.loc[~pd.isnull(series.values)]  # remove NaN  # @TODO: benchmark imputation vs this?
                 try:
                     self.models[group].fit(series, fh=self.fh)
-                except ValueError:
-                    self.models[group] = self.model_class(deseasonalize=False)
+                except Exception:
+                    self.models[group] = self.model_class(seasonal=False)
                     self.models[group].fit(series, fh=self.fh)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
