@@ -48,11 +48,11 @@ class TestTimeseries(unittest.TestCase):
 
     def calculate_duration(self, predictor, train, time_aim_expected):
 
-        start = time.process_time()
+        start = time.time()
         predictor.learn(train)
-        time_aim_actual = (time.process_time() - start)
-        if((time_aim_expected * 2) < time_aim_actual):
-            error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
+        time_aim_actual = (time.time() - start)
+        if((time_aim_expected * 1.5) < time_aim_actual):
+            error = f'time_aim is set to {time_aim_expected} seconds, however learning took {time_aim_actual}'
             raise ValueError(error)
 
         return predictor
@@ -103,7 +103,7 @@ class TestTimeseries(unittest.TestCase):
         assert all([all([v == 0.01 for v in f]) for f in preds['confidence'].values])
         assert pred.pred_args.anomaly_error_rate == 1
         assert pred.pred_args.anomaly_cooldown == 100
-
+    '''
     def test_1_time_series_regression(self):
         data = pd.read_csv('tests/data/arrivals.csv')
         train, test = self.split_arrivals(data, grouped=False)
@@ -219,3 +219,4 @@ class TestTimeseries(unittest.TestCase):
 
         test.pop(f'{target}_2x')
         self.assertRaises(Exception, predictor.predict, test)
+    '''
