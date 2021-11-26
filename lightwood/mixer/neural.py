@@ -193,7 +193,8 @@ class Neural(BaseMixer):
                         optimizer.step()
 
                 running_losses.append(loss.item())
-
+                if (time.time() - started) > stop_after:
+                    break
             train_error = np.mean(running_losses)
             epoch_error = self._error(dev_dl, criterion)
             running_errors.append(epoch_error)
