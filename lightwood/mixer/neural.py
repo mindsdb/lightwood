@@ -284,8 +284,9 @@ class Neural(BaseMixer):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        self.model, epoch_to_best_model, err = self._max_fit(
-            train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after * 0.8, return_model_after=20000)
+        self.model, epoch_to_best_model, _ = self._max_fit(
+            train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after * 0.8 - (time.time() - self.started),
+            return_model_after=20000)
 
         self.epochs_to_best += epoch_to_best_model
 
@@ -312,7 +313,7 @@ class Neural(BaseMixer):
         scaler = GradScaler()
 
         self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler,
-                                         self.stop_after * 0.2, max(1, int(self.epochs_to_best / 3)))
+                                         self.stop_after * 0.1, max(1, int(self.epochs_to_best / 3)))
 
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
