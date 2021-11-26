@@ -110,7 +110,7 @@ class TestTimeseries(unittest.TestCase):
                                                                        'order_by': [order_by],
                                                                        'window': window}
                                                                    }))
-        pred.learn(train_df)
+        train_and_check_time_aim(pred, train_df)
         preds = pred.predict(data[0:10])
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 

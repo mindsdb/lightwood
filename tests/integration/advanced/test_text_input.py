@@ -2,6 +2,7 @@ from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import predictor_from_problem
 import pandas as pd
 import unittest
+from tests.utils.timing import train_and_check_time_aim
 
 
 class TestText(unittest.TestCase):
@@ -10,7 +11,7 @@ class TestText(unittest.TestCase):
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({
             'target': 'Label', 'time_aim': 40
         }))
-        predictor.learn(df)
+        train_and_check_time_aim(predictor, df)
         predictions = predictor.predict(df)
         for x in predictions['prediction']:
             assert x is not None
@@ -20,7 +21,7 @@ class TestText(unittest.TestCase):
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({
             'target': 'label', 'time_aim': 60
         }))
-        predictor.learn(df)
+        train_and_check_time_aim(predictor, df)
         predictions = predictor.predict(df)
         for x in predictions['prediction']:
             assert x is not None

@@ -4,6 +4,7 @@ import unittest
 from mindsdb_datasources import FileDS
 import os
 import shutil
+from tests.utils.timing import train_and_check_time_aim
 
 
 test_err_message = 'This ! Is ! A ! Testing ! Error !'
@@ -55,7 +56,7 @@ def throwing_cleaner(data: pd.DataFrame, err_msg: str):
         code = code_from_json_ai(json_ai)
         predictor = predictor_from_code(code)
         try:
-            predictor.learn(df)
+            train_and_check_time_aim(predictor, df)
         except Exception as e:
             assert str(e) == test_err_message
             return
@@ -99,7 +100,7 @@ class {cname}(BaseAnalysisBlock):
         # create a predictor from it
         code = code_from_json_ai(json_ai)
         predictor = predictor_from_code(code)
-        predictor.learn(df)
+        train_and_check_time_aim(predictor, df)
         row_insights = predictor.predict(df)
 
         assert predictor.runtime_analyzer['test'] == 'test'
