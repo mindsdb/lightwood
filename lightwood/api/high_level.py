@@ -68,7 +68,6 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
     # Assume that the stuff besdies encoder and mixers takes about as long as analyzing did... bad, but let's see
     if problem_definition.expected_additional_time is None:
         problem_definition.expected_additional_time = duration
-    
     json_ai = generate_json_ai(
         type_information=type_information, statistical_analysis=stats,
         problem_definition=problem_definition)

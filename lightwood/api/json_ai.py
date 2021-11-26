@@ -392,7 +392,6 @@ def generate_json_ai(
             ]
         )
         nr_mixers = len(list(outputs.values())[0].mixers)
-        
         encoder_time_budget_pct = (2 + np.log(nr_trainable_encoders + 2)) / 5
         if encoder_time_budget_pct > 4 / 5:
             encoder_time_budget_pct = 4 / 5
