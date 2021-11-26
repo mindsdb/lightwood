@@ -290,8 +290,6 @@ class PretrainedLangEncoder(BaseEncoder):
         started = time.time()
         for epoch in range(n_epochs):
             total_loss = 0
-            if time.time() - started > self.stop_after:
-                break
 
             for batch in dataset:
                 optim.zero_grad()
@@ -309,7 +307,11 @@ class PretrainedLangEncoder(BaseEncoder):
                 optim.step()
                 if scheduler is not None:
                     scheduler.step()
+                if time.time() - started > self.stop_after:
+                    break
 
+            if time.time() - started > self.stop_after:
+                break
             self._train_callback(epoch, total_loss / len(dataset))
 
     def _train_callback(self, epoch, loss):
