@@ -51,6 +51,7 @@ class TestTimeseries(unittest.TestCase):
         start = time.time()
         predictor.learn(train)
         time_aim_actual = (time.time() - start)
+        print(time_aim_expected, time_aim_actual)
         if((time_aim_expected * 1.5) < time_aim_actual):
             error = f'time_aim is set to {time_aim_expected} seconds, however learning took {time_aim_actual}'
             raise ValueError(error)
