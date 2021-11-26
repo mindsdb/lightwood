@@ -4,6 +4,7 @@ import unittest
 from mindsdb_datasources import FileDS
 import multiprocessing as mp
 import os
+from tests.utils.timing import train_and_check_time_aim
 
 
 def save(predictor, path):
@@ -11,7 +12,7 @@ def save(predictor, path):
 
 
 def train(predictor, df):
-    predictor.learn(df)
+    train_and_check_time_aim(predictor, df)
 
 
 def execute_first_bit(code, df, path):
@@ -21,7 +22,7 @@ def execute_first_bit(code, df, path):
 
 def execute_second_bit(code, df, path):
     predictor_1 = predictor_from_state(path, code)
-    predictor_1.learn(data=df)
+    train_and_check_time_aim(predictor_1, df)
 
     save(predictor_1, path)
     execute_third_bit(code, df, path)

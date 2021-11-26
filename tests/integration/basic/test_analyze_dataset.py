@@ -114,6 +114,8 @@ class TestInferTypes(unittest.TestCase):
 
 
 '''
+    # These are native tests, we should adapt them to the new lightwood at some point.
+    # Not critical since we removed a bunch of these capacities, other are well tested in the new test above.
     def test_deduce_foreign_key(self):
         """Tests that basic cases of type deduction work correctly"""
         predictor = Predictor(name='test_deduce_foreign_key')

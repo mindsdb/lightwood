@@ -3,6 +3,7 @@ import unittest
 import pandas as pd
 from mindsdb_datasources.datasources.file_ds import FileDS
 from lightwood.api import predictor_from_problem
+from tests.utils.timing import train_and_check_time_aim
 
 
 class TestNestedDataset(unittest.TestCase):
@@ -64,7 +65,7 @@ class TestNestedDataset(unittest.TestCase):
 
         for col in expected_columns:
             assert col in ds.df.columns
-        pred.learn(ds.df)
+        train_and_check_time_aim(pred, ds.df)
 
         model_data = pred.model_analysis
         print(model_data)

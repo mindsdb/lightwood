@@ -2,6 +2,7 @@ import unittest
 import pandas as pd
 from lightwood.api.types import ProblemDefinition
 from lightwood import dtype
+from tests.utils.timing import train_and_check_time_aim
 
 
 class TestBasic(unittest.TestCase):
@@ -28,6 +29,6 @@ class TestBasic(unittest.TestCase):
 
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict(
                                            {'target': target, 'time_aim': 60, 'unbias_target': True}))
-        predictor.learn(df)
+        train_and_check_time_aim(predictor, df)
         assert predictor.model_analysis.dtypes['target'] == dtype.categorical
         predictor.predict(df)

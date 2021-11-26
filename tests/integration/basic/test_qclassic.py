@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 from sklearn.metrics import accuracy_score
-
+from tests.utils.timing import train_and_check_time_aim
 from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
 from lightwood.api.high_level import code_from_json_ai, predictor_from_code
 
@@ -36,7 +36,7 @@ class TestBasic(unittest.TestCase):
         code = code_from_json_ai(json_ai)
         predictor = predictor_from_code(code)
 
-        predictor.learn(df)
+        train_and_check_time_aim(predictor, df)
         predictions = predictor.predict(df)
         return
 
