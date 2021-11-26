@@ -1,10 +1,10 @@
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code
 from lightwood.api.types import JsonAI, ProblemDefinition
 import unittest
-from mindsdb_datasources import FileDS
 import os
 import shutil
 from tests.utils.timing import train_and_check_time_aim
+import pandas as pd
 
 
 test_err_message = 'This ! Is ! A ! Testing ! Error !'
@@ -38,7 +38,7 @@ def throwing_cleaner(data: pd.DataFrame, err_msg: str):
         create_custom_module(os.path.join(mdir, 'custom_cleaners.py'), module_code)
 
         # Create base json ai
-        df = FileDS('tests/data/hdi.csv').df.iloc[0:400]
+        df = pd.read_csv('tests/data/hdi.csv').iloc[0:400]
         json_ai = json_ai_from_problem(df, ProblemDefinition.from_dict({'target': 'Development Index', 'time_aim': 20}))
 
         # modify it
@@ -85,7 +85,7 @@ class {cname}(BaseAnalysisBlock):
         create_custom_module(os.path.join(mdir, f'{mname}.py'), module_code)
 
         # Create base json ai
-        df = FileDS('tests/data/hdi.csv').df.iloc[0:400]
+        df = pd.read_csv('tests/data/hdi.csv').iloc[0:400]
         json_ai = json_ai_from_problem(df, ProblemDefinition.from_dict({'target': 'Development Index', 'time_aim': 20}))
 
         # modify it

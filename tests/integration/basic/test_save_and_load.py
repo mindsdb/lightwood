@@ -1,10 +1,10 @@
 from lightwood.api.high_level import code_from_problem, predictor_from_code, predictor_from_state
 from lightwood.api.types import ProblemDefinition
 import unittest
-from mindsdb_datasources import FileDS
 import multiprocessing as mp
 import os
 from tests.utils.timing import train_and_check_time_aim
+import pandas as pd
 
 
 def save(predictor, path):
@@ -40,7 +40,7 @@ def execute_third_bit(code, df, path):
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
         ctx = mp.get_context('spawn')
-        df = FileDS('tests/data/hdi.csv').df.iloc[0:400]
+        df = pd.read_csv('tests/data/hdi.csv').iloc[0:400]
         code = code_from_problem(df, ProblemDefinition.from_dict({'target': 'Development Index', 'time_aim': 20}))
         path = 'test.pickle'
         try:
