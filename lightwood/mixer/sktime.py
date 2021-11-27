@@ -3,10 +3,12 @@ import importlib
 from itertools import product
 from typing import Dict, Union
 
+import optuna
 import numpy as np
 import pandas as pd
-from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
 from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
+from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
@@ -57,49 +59,75 @@ class SkTime(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.supports_proba = False
         self.hyperparam_search = hyperparam_search
+        self.hyperparam_dict = {}
+        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
+        self.n_trials = len(self.possible_models)
+        self.study = None
         self.stable = True
         self.prepared = False
-
-        # load sktime forecaster
         self.model_path = model_path
-        sktime_module = importlib.import_module('.'.join(['sktime', 'forecasting', self.model_path.split(".")[0]]))
-        try:
-            self.model_class = getattr(sktime_module, self.model_path.split(".")[1])
-        except AttributeError:
-            self.model_class = AutoARIMA
+        self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
         Fits a set of sktime forecasters. The number of models depends on how many groups are observed at training time.
 
-        Forecaster type can be specified by providing the `model_class` argument in `__init__()`.
+        Forecaster type can be specified by providing the `model_class` argument in `__init__()`. It can also be determined by hyperparameter optimization based on dev data validation error.
         """  # noqa
         log.info('Started fitting sktime forecaster for array prediction')
 
-        # do hyperparam search on two axis: amount of data, and algorithm family
+        # do hyperparam search on two axis: amount of data, and algorithm family?
         if self.hyperparam_search:
-            pass
-            # 1) check if algo family was provided. if so, ignore search on that axis
-            # and make sure correct assignment happens in final pass
-            # 2) check w/binary search (or equivalent in optuna
+            optuna.logging.set_verbosity(0)
+            search_space = {'class': self.possible_models}
+            self.study = optuna.create_study(direction='minimize', sampler=optuna.samplers.GridSampler(search_space))
+            self.study.optimize(lambda trial: self._get_best_model(trial, train_data, dev_data), n_trials=self.n_trials)
 
+            # 1) check if algo family was provided.
+            #   if yes, ignore search on that axis and make sure correct assignment happens in final pass
+            #   if no, check for AutoETS, AutoARIMA and ThetaForecaster
+            # 2) check w/binary search (or equivalent in optuna) the amount of train() data to pass
+            print(self.hyperparam_dict)
+            data = ConcatedEncodedDs([train_data, dev_data])
+            self._fit(data)
 
-        # final pass with optimized hyperparams
-        all_subsets = ConcatedEncodedDs([train_data, dev_data])
-        df = all_subsets.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
+        else:
+            data = ConcatedEncodedDs([train_data, dev_data])
+            self._fit(data)
+
+    def _fit(self, data):
+        df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
         data = {'data': df[self.target],
                 'group_info': {gcol: df[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
+        if not self.hyperparam_search and not self.study:
+            module_name = self.model_path
+        else:
+            #  self.hyperparam_dict.get('class', False) or not len(self.study.trials) == self.n_trials:
+            finished_study = sum([int(trial.state.is_finished()) for trial in self.study.trials]) == self.n_trials
+            if finished_study:
+                print(self.study.best_params)
+                module_name = self.study.best_params['class']
+            else:
+                module_name = self.hyperparam_dict['class']
+
+        sktime_module = importlib.import_module('.'.join(['sktime', 'forecasting', module_name.split(".")[0]]))
+        try:
+            model_class = getattr(sktime_module, module_name.split(".")[1])
+        except AttributeError:
+            model_class = AutoARIMA
+
         for group in self.ts_analysis['group_combinations']:
 
-            kwargs = {
-                'sp': self.ts_analysis['periods'][group],
-                'error_action': 'raise',
-            }
-            if 'suppress_warnings' in [p.name for p in inspect.signature(self.model_class).parameters.values()]:
+            kwargs = {'sp': self.ts_analysis['periods'][group]}
+
+            if 'suppress_warnings' in [p.name for p in inspect.signature(model_class).parameters.values()]:
                 kwargs['suppress_warnings'] = True  # ignore warnings if possible
-            self.models[group] = self.model_class(**kwargs)
+            if 'error_action' in [p.name for p in inspect.signature(model_class).parameters.values()]:
+                kwargs['error_action'] = 'raise'  # raise errors instead of fit() failing silently
+
+            self.models[group] = model_class(**kwargs)
 
             if self.grouped_by == ['__default']:
                 series_idxs = data['data'].index
@@ -115,7 +143,7 @@ class SkTime(BaseMixer):
                 try:
                     self.models[group].fit(series, fh=self.fh)
                 except Exception:
-                    self.models[group] = self.model_class(seasonal=False)
+                    self.models[group] = model_class(seasonal=False)
                     self.models[group].fit(series, fh=self.fh)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
@@ -199,3 +227,32 @@ class SkTime(BaseMixer):
             ydf['prediction'].iloc[original_index[idx]] = model.predict(np.arange(start_idx, end_idx)).tolist()
 
         return ydf
+
+    def _get_best_model(self, trial, train_data, test_data):
+        """
+        Helper function for Optuna hyperparameter optimization. For now, it uses dev data split to find the best:
+            - method family out of AutoARIMA, AutoETS and Theta
+            - amount of training data that should be used to fit (@TODO: pending confirmation)
+        """
+
+        # worst case scenario, use latest 0.1 train data
+        # for group in self.ts_analysis['group_combinations']:
+        #     self.hyperparam_dict[group] = {
+        #         'class': trial.suggest_categorical('class',
+        #         ['arima.AutoARIMA', 'ets.AutoETS', 'theta.ThetaForecaster'])
+        #         # 'train_data_amount': trial.suggest_float('start_idx', 0.0, 0.9, step=0.1)
+        #     }
+
+        self.hyperparam_dict = {
+            'class': trial.suggest_categorical('class', self.possible_models)
+        }
+
+        print(self.hyperparam_dict)
+
+        self._fit(train_data)
+        y_true = test_data.data_frame[self.target].values[:self.n_ts_predictions]
+        y_pred = self(test_data)['prediction'].iloc[0]
+
+        print(self.trial_error_fn(y_true, y_pred))
+
+        return self.trial_error_fn(y_true, y_pred)
