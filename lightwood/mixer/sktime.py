@@ -72,9 +72,9 @@ class SkTime(BaseMixer):
         self.hyperparam_dict = {}
         self.model_path = model_path
         self.hyperparam_search = hyperparam_search
-        self.n_trials = len(self.possible_models)
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
         self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
+        self.n_trials = len(self.possible_models)
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -244,11 +244,13 @@ class SkTime(BaseMixer):
             'class': trial.suggest_categorical('class', self.possible_models)
         }
         log.info(f'Starting trial with hyperparameters: {self.hyperparam_dict}')
-        self._fit(train_data)
+        try:
+            self._fit(train_data)
+            y_true = test_data.data_frame[self.target].values[:self.n_ts_predictions]
+            y_pred = self(test_data)['prediction'].iloc[0][:len(y_true)]
+            error = self.trial_error_fn(y_true, y_pred)
+        except Exception:
+            error = np.inf
 
-        y_true = test_data.data_frame[self.target].values[:self.n_ts_predictions]
-        y_pred = self(test_data)['prediction'].iloc[0]
-        error = self.trial_error_fn(y_true, y_pred)
         log.info(f'Trial got error: {error}')
-
         return error
