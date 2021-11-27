@@ -17,7 +17,8 @@ class TestText(unittest.TestCase):
             assert x is not None
 
     '''
-    # Comment back in when we can reduce the time for these more, for now this is impossible, datasource building for LGBM just takes too long
+    # Comment back in when we can reduce the time for these more, for now this is impossible
+    # Datasource building for LGBM /w text just takes too long
     def test_1_train_and_predict_model(self):
         df = pd.read_csv('tests/data/wine_reviews_binary_sample.csv')[:100]
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({
