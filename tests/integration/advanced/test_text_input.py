@@ -9,7 +9,7 @@ class TestText(unittest.TestCase):
     def test_0_train_and_predict_bypass(self):
         df = pd.read_csv('tests/data/tripadvisor_binary_sample.csv')[:100]
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({
-            'target': 'Label', 'time_aim': 150
+            'target': 'Label', 'time_aim': 100
         }))
         train_and_check_time_aim(predictor, df)
         predictions = predictor.predict(df)
