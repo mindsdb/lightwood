@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 import optuna.integration.lightgbm as optuna_lightgbm
-import time
 from lightwood.api import dtype
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
