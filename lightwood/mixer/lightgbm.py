@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 import optuna.integration.lightgbm as optuna_lightgbm
-
+import time
 from lightwood.api import dtype
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
@@ -150,6 +150,8 @@ class LightGBM(BaseMixer):
         :param train_data: encoded features for training dataset
         :param dev_data: encoded features for dev dataset
         """
+        started = time.time()
+
         log.info('Started fitting LGBM model')
         data = {
             'train': {'ds': train_data, 'data': None, 'label_data': {}},
@@ -207,6 +209,7 @@ class LightGBM(BaseMixer):
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
+        self.stop_after = max(1, self.stop_after - (time.time() - started))
         # Determine nr of iterations
         log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
         self.num_iterations = int(self.stop_after * 0.8 / seconds_for_one_iteration)
