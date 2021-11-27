@@ -51,7 +51,7 @@ class TestTimeseries(unittest.TestCase):
         data = pd.read_csv('tests/data/arrivals.csv')
         train, test = self.split_arrivals(data, grouped=True)
         target = 'Traffic'
-        time_aim_expected = 30
+        time_aim_expected = 60
         order_by = 'T'
         nr_preds = 2
         window = 5
@@ -127,7 +127,7 @@ class TestTimeseries(unittest.TestCase):
 
         df = pd.read_csv('tests/data/arrivals.csv')
         target = 'Traffic'
-        time_aim_expected = 30
+        time_aim_expected = 60
         df[target] = df[target] > 100000
 
         train_idxs = np.random.rand(len(df)) < 0.8
