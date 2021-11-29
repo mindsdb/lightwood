@@ -33,13 +33,13 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
 
-        if self.disable_column_importance or ns.ts_cfg.is_timeseries or ns.has_pretrained_text_enc:
+        if self.disable_column_importance or ns.tss.is_timeseries or ns.has_pretrained_text_enc:
             info['column_importances'] = None
         else:
             empty_input_accuracy = {}
-            ignorable_input_cols = [x for x in ns.input_cols if (not ns.ts_cfg.is_timeseries or
-                                                                 (x not in ns.ts_cfg.order_by and
-                                                                  x not in ns.ts_cfg.historical_columns))]
+            ignorable_input_cols = [x for x in ns.input_cols if (not ns.tss.is_timeseries or
+                                                                 (x not in ns.tss.order_by and
+                                                                  x not in ns.tss.historical_columns))]
             for col in ignorable_input_cols:
                 partial_data = deepcopy(ns.encoded_val_data)
                 partial_data.clear_cache()

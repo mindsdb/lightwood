@@ -162,7 +162,7 @@ def transform_timeseries(
         if tss.allow_incomplete_history:
             log.warning("Forecasting with incomplete historical context, predictions might be subpar")
         else:
-            raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size. If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` timeseries setting to `True`, but this might lead to subpar predictions.') # noqa
+            raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size - currently (number_rows, window_size) = ({min(group_lengths)}, {tss.window}). If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` timeseries setting to `True`, but this might lead to subpar predictions depending on the mixer.') # noqa
 
     df_gb_map = None
     if n_groups > 1:
@@ -341,12 +341,5 @@ def _ts_add_future_target(df, target, nr_predictions, data_dtype, mode):
         col_name = f'{target}_timestep_{timestep_index}'
         df[col_name] = next_target_value_arr
         df[col_name] = df[col_name].fillna(value=np.nan)
-
-    # drop rows with incomplete target info.
-    if mode == 'train':
-        for col in [f'{target}_timestep_{i}' for i in range(1, nr_predictions)]:
-            if '__mdb_make_predictions' not in df.columns:
-                df['__mdb_make_predictions'] = True
-            df.loc[df[col].isna(), ['__mdb_make_predictions']] = False
 
     return df
