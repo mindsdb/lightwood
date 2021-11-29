@@ -117,8 +117,8 @@ class SkTime(BaseMixer):
                 series = series.reset_index(drop=True)
 
                 for idx, _ in enumerate(series.iteritems()):
-                    ydf['prediction'].iloc[series_idxs[idx]] = forecaster.predict(
-                        np.arange(idx, idx + self.n_ts_predictions)).tolist()
+                    preds = forecaster.predict(np.arange(idx, idx + self.n_ts_predictions)).squeeze()
+                    ydf['prediction'].iloc[series_idxs[idx]] = preds.tolist()
 
             if self.grouped_by == ['__default']:
                 break
