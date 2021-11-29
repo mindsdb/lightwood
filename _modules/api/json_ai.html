@@ -739,6 +739,8 @@
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;ts_analysis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;ts_analysis&quot;</span><span class="p">,</span> <span class="s2">&quot;$ts_analysis&quot;</span>
             <span class="p">)</span>
+            <span class="c1"># enforce fit_on_all if this mixer is specified</span>
+            <span class="n">problem_definition</span><span class="o">.</span><span class="n">fit_on_all</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">ensemble</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">ensemble</span>
     <span class="n">ensemble</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
@@ -781,7 +783,7 @@
             <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;model_analyzer&quot;</span><span class="p">,</span>
             <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;stats_info&quot;</span><span class="p">:</span> <span class="s2">&quot;$statistical_analysis&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;ts_cfg&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;tss&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;accuracy_functions&quot;</span><span class="p">:</span> <span class="s2">&quot;$accuracy_functions&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;predictor&quot;</span><span class="p">:</span> <span class="s2">&quot;$ensemble&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;encoded_test_data&quot;</span><span class="p">,</span>

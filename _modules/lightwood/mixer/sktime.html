@@ -166,9 +166,14 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.mixer.sktime</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sktime.forecasting.base</span> <span class="kn">import</span> <span class="n">ForecastingHorizon</span><span class="p">,</span> <span class="n">BaseForecaster</span>
 <span class="kn">from</span> <span class="nn">sktime.forecasting.arima</span> <span class="kn">import</span> <span class="n">AutoARIMA</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
@@ -184,25 +189,61 @@
     <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">model_path</span> <span class="o">=</span> <span class="nb">str</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-            <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+            <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;arima.AutoARIMA&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared</span>
+<span class="sd">        to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with</span>
+<span class="sd">        respect to the last seen data point at training time.</span>
+<span class="sd">        </span>
+<span class="sd">        Due to this, the mixer is forced to &quot;fit_on_all&quot; and so the latest point in the validation split given by the</span>
+<span class="sd">        mixer marks the difference between training data and where forecasts will start. This effectively means that for</span>
+<span class="sd">        correct forecasts, you need to specify how much time has passed since the aforementioned timestamp. By default,</span>
+<span class="sd">        it assumes predictions are for the very next timestamp post-training.</span>
+<span class="sd">        </span>
+<span class="sd">        If the task has groups (i.e. &#39;TimeseriesSettings.group_by&#39; is not empty), the mixer will spawn one forecaster </span>
+<span class="sd">        object per each different group observed at training time, plus an additional default forecaster fit with all data.</span>
+<span class="sd">        </span>
+<span class="sd">        :param stop_after: time budget in seconds.</span>
+<span class="sd">        :param target: column to forecast.</span>
+<span class="sd">        :param dtype_dict: dtypes of all columns in the data.</span>
+<span class="sd">        :param n_ts_predictions: length of forecasted horizon.</span>
+<span class="sd">        :param ts_analysis: dictionary with miscellaneous time series info, as generated by &#39;lightwood.data.timeseries_analyzer&#39;.</span>
+<span class="sd">        :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format &quot;$module.$class&#39; where &#39;$module&#39; is inside `sktime.forecasting`. Default is &#39;arima.AutoARIMA&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
         <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span> <span class="o">=</span> <span class="n">AutoARIMA</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span> <span class="o">=</span> <span class="n">n_ts_predictions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">ts_analysis</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">forecasting_horizon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_index</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># marks index at which training data stops and forecasting window starts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="c1"># sktime forecast horizon object is made relative to the end of the latest data point seen at training time</span>
+        <span class="c1"># the default assumption is to forecast the next `self.n_ts_predictions` after said data point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fh</span> <span class="o">=</span> <span class="n">ForecastingHorizon</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">is_relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># load sktime forecaster</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span>
+        <span class="n">sktime_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;sktime&#39;</span><span class="p">,</span> <span class="s1">&#39;forecasting&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sktime_module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find specified method </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="si">}</span><span class="s2">. Using AutoARIMA instead...&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span> <span class="o">=</span> <span class="n">AutoARIMA</span>
+
 <div class="viewcode-block" id="SkTime.fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.SkTime.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits a set of sktime forecasters. The number of models depends on how many groups are observed at training time.</span>
+
+<span class="sd">        Forecaster type can be specified by providing the `model_class` argument in `__init__()`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Started fitting sktime forecaster for array prediction&#39;</span><span class="p">)</span>
 
         <span class="n">all_subsets</span> <span class="o">=</span> <span class="n">ConcatedEncodedDs</span><span class="p">([</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">])</span>
@@ -212,8 +253,14 @@
                                <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">}</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="p">{}}</span>
 
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
-            <span class="c1"># many warnings might be thrown inside of statsmodels during stepwise procedure</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span><span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;sp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">],</span>
+                <span class="s1">&#39;error_action&#39;</span><span class="p">:</span> <span class="s1">&#39;raise&#39;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="s1">&#39;suppress_warnings&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;suppress_warnings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># ignore warnings if possible</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]:</span>
                 <span class="n">series_idxs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
@@ -221,39 +268,40 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">series_idxs</span><span class="p">,</span> <span class="n">series_data</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">series_data</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">series_data</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">window</span><span class="p">:</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">series_data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="n">series_idxs</span><span class="p">)</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>  <span class="c1"># remove NaN  # @TODO: benchmark imputation vs this?</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span><span class="n">deseasonalize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_index</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]:</span>
-                <span class="k">break</span></div>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span><span class="n">seasonal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SkTime.partial_fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.SkTime.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Note: sktime asks for &quot;specification of the time points for which forecasts are requested&quot;,</span>
-<span class="sd">        and this mixer complies by assuming forecasts will start immediately after the last observed</span>
-<span class="sd">        value.</span>
+<span class="sd">        Note: sktime asks for &quot;specification of the time points for which forecasts are requested&quot;, and this mixer complies by assuming forecasts will start immediately after the last observed value.</span>
 
-<span class="sd">        Because of this, `partial_fit` ensures that both `dev` and `test` splits are used to fit the AutoARIMA model.</span>
+<span class="sd">        Because of this, `ProblemDefinition.fit_on_all` is set to True so that `partial_fit` uses both `dev` and `test` splits to fit the models.</span>
 
-<span class="sd">        Due to how lightwood implements the `update` procedure, expected inputs are (for a train-dev-test split):</span>
+<span class="sd">        Due to how lightwood implements the `update` procedure, expected inputs for this method are:</span>
 
-<span class="sd">        :param dev_data: original `test` split (used to validate and select model if ensemble is `BestOf`)</span>
-<span class="sd">        :param train_data: includes original `train` and `dev` split</span>
+<span class="sd">        :param dev_data: original `test` split (used to validate and select model if ensemble is `BestOf`).</span>
+<span class="sd">        :param train_data: concatenated original `train` and `dev` splits.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dev_data</span><span class="p">,</span> <span class="n">train_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span><span class="p">],</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calls the mixer to emit forecasts.</span>
+<span class="sd">        </span>
+<span class="sd">        If there are groups that were not observed at training, a default forecaster (trained on all available data) is used, warning the user that performance might not be optimal.</span>
+<span class="sd">        </span>
+<span class="sd">        Latest data point in `train_data` passed to `fit()` determines the starting point for predictions. Relative offsets can be provided to forecast through the `args.forecast_offset` argument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;This mixer does not output probability estimates&#39;</span><span class="p">)</span>
 
@@ -263,35 +311,54 @@
                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
                            <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">],</span>
                 <span class="s1">&#39;group_info&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="n">gcol</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                                <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">}</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="p">{}}</span>
 
-        <span class="c1"># all_idxs = list(range(length))  # @TODO: substract, and assign empty predictions to remainder</span>
-
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]:</span>
-                <span class="n">series_idxs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
-                <span class="n">series_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">series_idxs</span><span class="p">,</span> <span class="n">series_data</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+        <span class="n">pending_idxs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+        <span class="n">all_group_combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;group_info&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">all_group_combinations</span><span class="p">:</span>
+            <span class="n">series_idxs</span><span class="p">,</span> <span class="n">series_data</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">series_data</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">forecaster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">is_fitted</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]</span>
-
+                <span class="n">group</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+                <span class="n">series_idxs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">series_idxs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
+                    <span class="n">forecaster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying default forecaster for novel group </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">. Performance might not be optimal.&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
+                    <span class="n">forecaster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">series_data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="n">series_idxs</span><span class="p">)</span>
-                <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">ydf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_groupmodel</span><span class="p">(</span><span class="n">ydf</span><span class="p">,</span> <span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">forecast_offset</span><span class="p">)</span>
+                <span class="n">pending_idxs</span> <span class="o">-=</span> <span class="nb">set</span><span class="p">(</span><span class="n">series_idxs</span><span class="p">)</span>
 
-                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()):</span>
-                    <span class="n">preds</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span><span class="p">))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-                    <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">series_idxs</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">preds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># apply default model in all remaining novel-group rows</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pending_idxs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="nb">list</span><span class="p">(</span><span class="n">pending_idxs</span><span class="p">)]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pending_idxs</span><span class="p">)))</span>
+            <span class="n">ydf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_groupmodel</span><span class="p">(</span><span class="n">ydf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">],</span> <span class="n">series</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">forecast_offset</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]:</span>
-                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">ydf</span><span class="p">[[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]]</span>
 
-        <span class="k">return</span> <span class="n">ydf</span><span class="p">[[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]]</span></div>
+    <span class="k">def</span> <span class="nf">_call_groupmodel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                         <span class="n">ydf</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                         <span class="n">model</span><span class="p">:</span> <span class="n">BaseForecaster</span><span class="p">,</span>
+                         <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+                         <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inner method that calls a `sktime.BaseForecaster`.</span>
+
+<span class="sd">        :param offset: indicates relative offset to the latest data point seen during model training.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">original_index</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()):</span>
+            <span class="c1"># displace by 1 according to sktime ForecastHorizon usage</span>
+            <span class="n">start_idx</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">offset</span>
+            <span class="n">end_idx</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span>
+            <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">original_index</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_idx</span><span class="p">,</span> <span class="n">end_idx</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">ydf</span></div>
 </pre></div>
 
            </div>

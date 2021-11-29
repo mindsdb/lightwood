@@ -196,12 +196,13 @@
 <span class="sd">    </span>
 <span class="sd">    :return: Dictionary with the aforementioned insights and the `TimeseriesSettings` object for future references.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    <span class="n">tss</span> <span class="o">=</span> <span class="n">timeseries_settings</span>
     <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;original_type&#39;</span><span class="p">:</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">],</span>
         <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="p">}</span>
-    <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;group_info&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">gcol</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span><span class="p">}</span>  <span class="c1"># group col values</span>
+    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;group_info&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">gcol</span><span class="p">]</span> <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">}</span>  <span class="c1"># group col values</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;group_info&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -213,17 +214,21 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">naive_forecast_residuals</span><span class="p">,</span> <span class="n">scale_factor</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
 
-    <span class="n">deltas</span> <span class="o">=</span> <span class="n">get_delta</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">order_by</span><span class="p">],</span>
+    <span class="n">deltas</span> <span class="o">=</span> <span class="n">get_delta</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">],</span>
                        <span class="n">info</span><span class="p">,</span>
                        <span class="n">new_data</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">],</span>
-                       <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">order_by</span><span class="p">)</span>
+                       <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">)</span>
+
+    <span class="c1"># detect period</span>
+    <span class="n">periods</span> <span class="o">=</span> <span class="n">detect_period</span><span class="p">(</span><span class="n">deltas</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;target_normalizers&#39;</span><span class="p">:</span> <span class="n">new_data</span><span class="p">[</span><span class="s1">&#39;target_normalizers&#39;</span><span class="p">],</span>
             <span class="s1">&#39;deltas&#39;</span><span class="p">:</span> <span class="n">deltas</span><span class="p">,</span>
-            <span class="s1">&#39;tss&#39;</span><span class="p">:</span> <span class="n">timeseries_settings</span><span class="p">,</span>
+            <span class="s1">&#39;tss&#39;</span><span class="p">:</span> <span class="n">tss</span><span class="p">,</span>
             <span class="s1">&#39;group_combinations&#39;</span><span class="p">:</span> <span class="n">new_data</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">],</span>
             <span class="s1">&#39;ts_naive_residuals&#39;</span><span class="p">:</span> <span class="n">naive_forecast_residuals</span><span class="p">,</span>
-            <span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">:</span> <span class="n">scale_factor</span>
+            <span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">:</span> <span class="n">scale_factor</span><span class="p">,</span>
+            <span class="s1">&#39;periods&#39;</span><span class="p">:</span> <span class="n">periods</span>
             <span class="p">}</span></div>
 
 
@@ -299,6 +304,60 @@
         <span class="n">group_residuals</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">residuals</span>
         <span class="n">group_scale_factors</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale_factor</span>
     <span class="k">return</span> <span class="n">group_residuals</span><span class="p">,</span> <span class="n">group_scale_factors</span>
+
+
+<span class="k">def</span> <span class="nf">detect_period</span><span class="p">(</span><span class="n">deltas</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper method that, based on the most popular interval for a time series, determines its seasonal peridiocity (sp).</span>
+<span class="sd">    This bit of information can be crucial for good modelling with methods like ARIMA.</span>
+<span class="sd">    </span>
+<span class="sd">    Supported time intervals are:</span>
+<span class="sd">        * &#39;year&#39;</span>
+<span class="sd">        * &#39;semestral&#39;</span>
+<span class="sd">        * &#39;quarter&#39;</span>
+<span class="sd">        * &#39;bimonthly&#39;</span>
+<span class="sd">        * &#39;monthly&#39;</span>
+<span class="sd">        * &#39;weekly&#39;</span>
+<span class="sd">        * &#39;daily&#39;</span>
+<span class="sd">        * &#39;hourly&#39;</span>
+<span class="sd">        * &#39;minute&#39;</span>
+<span class="sd">        * &#39;second&#39;</span>
+
+<span class="sd">    Note: all computations assume that the first provided `order_by` column is the one that specifies the sp.</span>
+
+<span class="sd">    :param deltas: output of `get_delta`, has the most popular interval for each time series.</span>
+<span class="sd">    :param tss: timeseries settings.</span>
+
+<span class="sd">    :return: dictionary with sp for all time series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    <span class="n">interval_to_period</span> <span class="o">=</span> <span class="p">{</span><span class="n">interval</span><span class="p">:</span> <span class="n">period</span> <span class="k">for</span> <span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">interval_periods</span><span class="p">}</span>
+    <span class="n">secs_to_interval</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span>
+        <span class="s1">&#39;semestral&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;quarter&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">&#39;bimonthly&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span> <span class="o">//</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s1">&#39;monthly&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">31</span><span class="p">,</span>
+        <span class="s1">&#39;weekly&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">7</span><span class="p">,</span>
+        <span class="s1">&#39;daily&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span><span class="p">,</span>
+        <span class="s1">&#39;hourly&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="s1">&#39;minute&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="s1">&#39;second&#39;</span><span class="p">:</span> <span class="mi">1</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">period</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;semestral&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;quarter&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;bimonthly&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;monthly&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;weekly&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;daily&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;hourly&#39;</span><span class="p">,</span> <span class="mi">24</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;minute&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;second&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">interval_to_period</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">interval_to_period</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">period</span>
+
+    <span class="n">periods</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">order_col_idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">deltas</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">[</span><span class="n">order_col_idx</span><span class="p">]]</span>
+        <span class="n">diffs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tag</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="n">secs</span><span class="p">))</span> <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">secs</span> <span class="ow">in</span> <span class="n">secs_to_interval</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">min_tag</span><span class="p">,</span> <span class="n">min_diff</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">diffs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">periods</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval_to_period</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">min_tag</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">periods</span>
 </pre></div>
 
            </div>

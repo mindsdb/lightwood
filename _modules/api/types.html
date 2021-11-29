@@ -382,7 +382,10 @@
 <span class="sd">            considering their change through time.</span>
 <span class="sd">    :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).</span>
 <span class="sd">    :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    :param allow_incomplete_history: whether predictions can be made for rows with incomplete historical context (i.e. less than `window` rows have been observed for the datetime that has to be forecasted).</span>
+<span class="sd">    :param eval_cold_start: whether to include predictions with incomplete history (thus part of the cold start region for certain mixers) when evaluating mixer scores with the validation dataset.</span>
+<span class="sd">    :param interval_periods: tuple of tuples with user-provided period lengths for time intervals. Default values will be added for intervals left unspecified. For interval options, check the `timeseries_analyzer.detect_period()` method documentation. e.g.: ((&#39;daily&#39;, 7),).</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="n">is_timeseries</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">order_by</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -396,6 +399,8 @@
         <span class="c1"># @TODO: George: No, I don&#39;t think it is, we need to pass this some other way</span>
     <span class="p">)</span>
     <span class="n">allow_incomplete_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">eval_cold_start</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">interval_periods</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
 
 <div class="viewcode-block" id="TimeseriesSettings.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
@@ -420,7 +425,9 @@
                 <span class="n">use_previous_target</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_previous_target&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                 <span class="n">historical_columns</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">nr_predictions</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nr_predictions&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-                <span class="n">allow_incomplete_history</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;allow_incomplete_history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="n">allow_incomplete_history</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;allow_incomplete_history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                <span class="n">eval_cold_start</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;eval_cold_start&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="n">interval_periods</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;interval_periods&#39;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">()))</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
                 <span class="n">timeseries_settings</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">setting</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="n">setting</span><span class="p">])</span>
@@ -729,6 +736,7 @@
     <span class="n">fixed_confidence</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">anomaly_error_rate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">anomaly_cooldown</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">forecast_offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="PredictionArguments.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
@@ -746,6 +754,7 @@
         <span class="n">fixed_confidence</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fixed_confidence&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">fixed_confidence</span><span class="p">)</span>
         <span class="n">anomaly_error_rate</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_error_rate&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">anomaly_error_rate</span><span class="p">)</span>
         <span class="n">anomaly_cooldown</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_cooldown&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">anomaly_cooldown</span><span class="p">)</span>
+        <span class="n">forecast_offset</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;forecast_offset&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">forecast_offset</span><span class="p">)</span>
 
         <span class="n">pred_args</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">(</span>
             <span class="n">predict_proba</span><span class="o">=</span><span class="n">predict_proba</span><span class="p">,</span>
@@ -753,6 +762,7 @@
             <span class="n">fixed_confidence</span><span class="o">=</span><span class="n">fixed_confidence</span><span class="p">,</span>
             <span class="n">anomaly_error_rate</span><span class="o">=</span><span class="n">anomaly_error_rate</span><span class="p">,</span>
             <span class="n">anomaly_cooldown</span><span class="o">=</span><span class="n">anomaly_cooldown</span><span class="p">,</span>
+            <span class="n">forecast_offset</span><span class="o">=</span><span class="n">forecast_offset</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pred_args</span></div>
