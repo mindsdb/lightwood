@@ -38,8 +38,7 @@ class BinaryEncoder(BaseEncoder):
             self.index_weights = [None, None]
             for word in self.map:
                 if self.target_weights is not None:
-                    self.index_weights[self.map[word]] = \
-                        self.target_weights[word] / np.max(list(self.target_weights.values()))
+                    self.index_weights[self.map[word]] = self.target_weights[word]
                 else:
                     self.index_weights[self.map[word]] = 1
 
