@@ -3,6 +3,7 @@ import numpy as np
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
+from copy import deepcopy as dc
 
 from typing import Dict, List, Iterable
 
@@ -51,7 +52,7 @@ class OneHotEncoder(BaseEncoder):
         self.target_weights = None
         self.index_weights = None  # vector-weights, mapped by class id
         if self.is_target:
-            self.target_weights = target_weights
+            self.target_weights = dc(target_weights)
 
     def prepare(self, priming_data: Iterable[str]):
         """

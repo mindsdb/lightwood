@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
+from copy import deepcopy as dc
 
 from typing import Dict, List, Iterable
 
@@ -47,7 +48,7 @@ class BinaryEncoder(BaseEncoder):
         self.target_weights = None
         self.index_weights = None
         if self.is_target:
-            self.target_weights = target_weights
+            self.target_weights = dc(target_weights)
 
     def prepare(self, priming_data: Iterable[str]):
         """
