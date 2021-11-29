@@ -10,7 +10,12 @@ from lightwood.helpers.constants import _UNCOMMON_WORD, _UNCOMMON_TOKEN
 
 
 class TestOnehot(unittest.TestCase):
-    """ Test the OHE vector encoder """
+    """
+    Test the OHE vector encoder
+
+    NOTE, this is sensitive to the mapping of enc.map. If your unit-tests are failing, check to see if the enc.map order matches what the encoded_data should be; this is based on the mapped-place. Using np.unique() inadvertently sorts the data neatly, hence allowing an intuitive place of which order each category is.
+
+    """
 
     def test_encode_and_decode_with_unknown_token(self):
         """
@@ -135,11 +140,13 @@ class TestOnehot(unittest.TestCase):
         # Scaled weights (sum to 1)
         tweights = {"apple": 4 / 6, "banana": 1 / 6, "orange": 1 / 6}
 
-        # Get the ground-truth inverse weights
-        iweights = Tensor(list(tweights.values()))
-
         enc = OneHotEncoder(use_unknown=False, is_target=True, target_weights=tweights)
         enc.prepare(data)
+
+        # Get the ground-truth weights
+        iweights = torch.ones(size=(len(tweights),))
+        for key, value in tweights.items():  # accounts for order
+            iweights[enc.map[key]] = value
 
         # Check inverse weights correct
         self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
@@ -159,6 +166,8 @@ class TestOnehot(unittest.TestCase):
         for key, value in tweights.items():  # accounts for order
             iweights[enc.map[key]] = value
 
+        iweights[0] = min(iweights[1:]) #assign the smallest weight
+
         # Check inverse weights correct
         self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
 
@@ -177,8 +186,10 @@ class TestOnehot(unittest.TestCase):
         enc = OneHotEncoder(use_unknown=False, is_target=True, target_weights=tweights)
         enc.prepare(data)
 
-        # Get the ground-truth inverse weights
+        # Get the ground-truth weights
         iweights = torch.ones(size=(len(tweights),))
+        for key, value in tweights.items():  # accounts for order
+            iweights[enc.map[key]] = value
 
         for key, value in tweights.items():  # accounts for order
             iweights[enc.map[key]] = value
