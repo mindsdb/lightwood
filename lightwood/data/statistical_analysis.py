@@ -137,9 +137,9 @@ def statistical_analysis(data: pd.DataFrame,
     assumed_target_class_weight = None
     if dtypes[target] in (dtype.categorical, dtype.binary):
         target_class_distribution = dict(df[target].value_counts().apply(lambda x: x / len(df[target])))
-        assumed_target_class_weight = deepcopy(target_class_distribution)
-        for k in assumed_target_class_weight:
-            assumed_target_class_weight[k] = 1 / assumed_target_class_weight[k]
+        assumed_target_class_weight = {}
+        for k in target_class_distribution:
+            assumed_target_class_weight[k] = 1 / target_class_distribution[k]
         train_observed_classes = list(target_class_distribution.keys())
     elif dtypes[target] == dtype.tags:
         train_observed_classes = None  # @TODO: pending call to tags logic -> get all possible tags
