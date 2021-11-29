@@ -109,8 +109,8 @@ def evaluate_multilabel_accuracy(true_values, predictions, **kwargs):
 
 
 def evaluate_array_accuracy(
-        true_values: pd.DataFrame,
-        predictions: pd.DataFrame,
+        true_values: pd.Series,
+        predictions: pd.Series,
         data: pd.DataFrame,
         **kwargs
 ) -> float:

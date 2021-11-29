@@ -52,11 +52,14 @@ class SkTime(BaseMixer):
         self.models = {}
         self.n_ts_predictions = n_ts_predictions
         self.ts_analysis = ts_analysis
-        self.fh = ForecastingHorizon(np.arange(1, self.n_ts_predictions + 1), is_relative=True)
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.supports_proba = False
         self.stable = True
         self.prepared = False
+
+        # sktime forecast horizon object is made relative to the end of the latest data point seen at training time
+        # the default assumption is to forecast the next `self.n_ts_predictions` after said data point
+        self.fh = ForecastingHorizon(np.arange(1, self.n_ts_predictions + 1), is_relative=True)
 
         # load sktime forecaster
         self.model_path = model_path
@@ -64,6 +67,7 @@ class SkTime(BaseMixer):
         try:
             self.model_class = getattr(sktime_module, self.model_path.split(".")[1])
         except AttributeError:
+            log.warning(f"Could not find specified method {self.model_path}. Using AutoARIMA instead...")
             self.model_class = AutoARIMA
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
