@@ -47,10 +47,12 @@ class OneHotEncoder(BaseEncoder):
         self.rev_map = None  # index -> category name
         self.use_unknown = use_unknown
 
+        # Weight-balance info if encoder represents target
         self.target_weights = None
-        self.inv_target_weights = None
+        self.index_weights = None # vector-weights, mapped by class id
         if self.is_target:
             self.target_weights = target_weights
+
 
     def prepare(self, priming_data: Iterable[str]):
         """
@@ -81,7 +83,7 @@ class OneHotEncoder(BaseEncoder):
         if self.is_target:
 
             # Equally wt. all classes
-            self.inv_target_weights = torch.ones(size=(self.output_size,))
+            self.index_weights = torch.ones(size=(self.output_size,))
 
             # If imbalanced detected, weight by inverse
             if self.target_weights is not None:
@@ -91,15 +93,14 @@ class OneHotEncoder(BaseEncoder):
                     raise ValueError('Target weights cannot be 0')
 
                 for cat in self.map.keys():
-
                     if cat != _UNCOMMON_WORD:
-                        self.inv_target_weights[self.map[cat]] = (
-                            1 / self.target_weights[cat]
-                        )
+                        self.index_weights[self.map[cat]] = self.target_weights[cat]
 
                 # If using an unknown category, set to smallest possible value
                 if self.use_unknown:
-                    self.inv_target_weights[0] = self.inv_target_weights.min().item()
+                    self.target_weights[_UNCOMMON_WORD] = np.min(list(self.target_weights.values()))
+                    self.index_weights[0] = self.target_weights[_UNCOMMON_WORD] 
+
 
         self.is_prepared = True
 

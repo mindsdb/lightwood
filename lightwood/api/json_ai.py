@@ -119,7 +119,7 @@ def lookup_encoder(
             if problem_defintion.unbias_target:
                 encoder_dict["args"][
                     "target_weights"
-                ] = "$statistical_analysis.target_class_distribution"
+                ] = "$statistical_analysis.target_weights"
             if problem_defintion.target_weights is not None:
                 encoder_dict["args"][
                     "target_weights"
@@ -571,6 +571,8 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
+            # enforce fit_on_all if this mixer is specified
+            problem_definition.fit_on_all = True
 
     ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
     ensemble["args"]["target"] = ensemble["args"].get("target", "$target")
@@ -613,7 +615,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             "module": "model_analyzer",
             "args": {
                 "stats_info": "$statistical_analysis",
-                "ts_cfg": "$problem_definition.timeseries_settings",
+                "tss": "$problem_definition.timeseries_settings",
                 "accuracy_functions": "$accuracy_functions",
                 "predictor": "$ensemble",
                 "data": "encoded_test_data",

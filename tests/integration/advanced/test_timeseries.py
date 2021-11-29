@@ -4,8 +4,12 @@ import pandas as pd
 import time
 from typing import List
 
+from sktime.forecasting.base import ForecastingHorizon
+from sktime.forecasting.arima import AutoARIMA
+
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import predictor_from_problem
+from lightwood.mixer.sktime import SkTime
 
 np.random.seed(0)
 
@@ -161,10 +165,12 @@ class TestTimeseries(unittest.TestCase):
 
     def test_3_time_series_sktime_mixer(self):
         """
-        Tests `sktime` mixer individually, as it has a special notion of absolute
-        temporal timestamps that we need to ensure are being used correctly. In
+        Tests `sktime` mixer individually, as it has a special notion of
+        timestamps that we need to ensure are being used correctly. In
         particular, given a train-dev-test split, any forecasts coming from a sktime
         mixer should start from the latest observed data in the entire dataset.
+        
+        This test also compares against manual use of sktime to ensure equal results.
         """  # noqa
 
         from sklearn.metrics import r2_score
@@ -179,12 +185,13 @@ class TestTimeseries(unittest.TestCase):
         # synth square wave
         tsteps = 100
         target = 'Value'
+        n_preds = 20
         t = np.linspace(0, 1, tsteps, endpoint=False)
-        ts = signal.sawtooth(2 * np.pi * 5 * t, width=0.5)
+        ts = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * t, width=0.5))]
         df = pd.DataFrame(columns=['Time', target])
         df['Time'] = t
         df[target] = ts
-        df[f'{target}_2x'] = 2 * ts
+        df[f'{target}_2x'] = [2 * elt for elt in ts]
 
         train = df[:int(len(df) * 0.8)]
         test = df[int(len(df) * 0.8):]
@@ -194,7 +201,7 @@ class TestTimeseries(unittest.TestCase):
                                             'timeseries_settings': {
                                                 'order_by': ['Time'],
                                                 'window': 5,
-                                                'nr_predictions': 20,
+                                                'nr_predictions': n_preds,
                                                 'historical_columns': [f'{target}_2x']
                                             }})
 
@@ -219,3 +226,12 @@ class TestTimeseries(unittest.TestCase):
 
         test.pop(f'{target}_2x')
         self.assertRaises(Exception, predictor.predict, test)
+
+        # compare vs sktime manual usage
+        if isinstance(predictor.ensemble.mixers[predictor.ensemble.best_index], SkTime):
+            forecaster = AutoARIMA()
+            fh = ForecastingHorizon([i for i in range(int(tsteps * 0.8))], is_relative=True)
+            forecaster.fit(train[target], fh=fh)
+            manual_preds = forecaster.predict(fh[1:n_preds + 1]).tolist()
+            lw_preds = [p[0] for p in ps['prediction']]
+            assert np.allclose(manual_preds, lw_preds, atol=1)

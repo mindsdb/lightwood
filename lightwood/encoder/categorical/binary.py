@@ -35,7 +35,7 @@ class BinaryEncoder(BaseEncoder):
         super().__init__(is_target)
         """
         :param is_target: Whether encoder featurizes target column
-        :param target_weights: Percentage of total population represented by each category (from [0, 1]).
+        :param target_weights: Percentage of total population represented by each category (from [0, 1]), as a dictionary.
         """  # noqa
 
         self.map = {}  # category name -> index
@@ -45,7 +45,7 @@ class BinaryEncoder(BaseEncoder):
 
         # Weight-balance info if encoder represents target
         self.target_weights = None
-        self.inv_target_weights = None
+        self.index_weights = None
         if self.is_target:
             self.target_weights = target_weights
 
@@ -70,7 +70,7 @@ class BinaryEncoder(BaseEncoder):
         # For target-only, report on relative weights of classes
         if self.is_target:
 
-            self.inv_target_weights = torch.Tensor([1, 1])  # Equally wt. both classes
+            self.index_weights = torch.Tensor([1, 1])  # Equally wt. both classes
 
             # If target weights provided, weight by inverse
             if self.target_weights is not None:
@@ -79,10 +79,11 @@ class BinaryEncoder(BaseEncoder):
                 if sum([np.isclose(i, 0) for i in self.target_weights.values()]) > 0:
                     raise ValueError('Target weights cannot be 0')
 
+                # Ensure all classes are specified in the weights criteria
+                assert(set(self.target_weights.keys()) == set(self.map.keys()))
+                
                 for cat in self.map.keys():
-                    self.inv_target_weights[self.map[cat]] = (
-                        1 / self.target_weights[cat]
-                    )
+                    self.index_weights[self.map[cat]] = self.target_weights[cat]
 
         self.is_prepared = True
 
@@ -104,8 +105,12 @@ class BinaryEncoder(BaseEncoder):
             index = self.map.get(word, None)
 
             if index is not None:
+<<<<<<< HEAD
                 ret[idx, index] = 1
 
+=======
+                ret[-1][index] = 1
+>>>>>>> staging
         return torch.Tensor(ret)
 
     def decode(self, encoded_data: torch.Tensor):
