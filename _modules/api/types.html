@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.types &mdash; lightwood 1.7.0 documentation</title>
+  <title>api.types &mdash; lightwood 1.8.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.7.0
+                1.8.0
               </div>
             
           
@@ -329,6 +329,7 @@
 <span class="sd">    :param df_target_stddev: The standard deviation of the target of the dataset</span>
 <span class="sd">    :param train_observed_classes:</span>
 <span class="sd">    :param target_class_distribution:</span>
+<span class="sd">    :param target_weights: What weight the analysis suggests to assign each class by in the case of classification problems. Note: target_weights in the problem definition overides this</span>
 <span class="sd">    :param histograms:</span>
 <span class="sd">    :param buckets:</span>
 <span class="sd">    :param missing:</span>
@@ -336,12 +337,13 @@
 <span class="sd">    :param bias:</span>
 <span class="sd">    :param avg_words_per_sentence:</span>
 <span class="sd">    :param positive_domain:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
 
     <span class="n">nr_rows</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">df_target_stddev</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
     <span class="n">train_observed_classes</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Union[None, List[str]]</span>
     <span class="n">target_class_distribution</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, float]</span>
+    <span class="n">target_weights</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, float]</span>
     <span class="n">histograms</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, Dict[str, List[object]]]</span>
     <span class="n">buckets</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, Dict[str, List[object]]]</span>
     <span class="n">missing</span><span class="p">:</span> <span class="nb">object</span>
