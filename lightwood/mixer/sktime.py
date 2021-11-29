@@ -124,16 +124,15 @@ class SkTime(BaseMixer):
             model_class = AutoETS  # use AutoETS when the provided class does not exist
 
         for group in self.ts_analysis['group_combinations']:
+            kwargs = {}
+            options = {
+                'sp': self.ts_analysis['periods'][group],  # seasonality period
+                'suppress_warnings': True,                 # ignore warnings if possible
+                'error_action': 'raise',                   # raise errors instead of fit() failing silently
+            }
 
-            kwargs = {'sp': self.ts_analysis['periods'][group]}
-
-            if 'suppress_warnings' in [p.name for p in inspect.signature(model_class).parameters.values()]:
-                # ignore warnings if possible
-                kwargs['suppress_warnings'] = True
-
-            if 'error_action' in [p.name for p in inspect.signature(model_class).parameters.values()]:
-                # raise errors instead of fit() failing silently
-                kwargs['error_action'] = 'raise'
+            for k, v in options.items():
+                kwargs = self._add_forecaster_kwarg(model_class, kwargs, k, v)
 
             self.models[group] = model_class(**kwargs)
 
@@ -251,8 +250,18 @@ class SkTime(BaseMixer):
             y_true = test_data.data_frame[self.target].values[:self.n_ts_predictions]
             y_pred = self(test_data)['prediction'].iloc[0][:len(y_true)]
             error = self.trial_error_fn(y_true, y_pred)
-        except Exception:
+        except Exception as e:
+            log.debug(e)
             error = np.inf
 
         log.info(f'Trial got error: {error}')
         return error
+
+    def _add_forecaster_kwarg(self, forecaster: BaseForecaster, kwargs: dict, key: str, value):
+        """
+        Adds arguments to the `kwargs` dictionary if the key-value pair is valid for the `forecaster` class signature.
+        """
+        if key in [p.name for p in inspect.signature(forecaster).parameters.values()]:
+            kwargs[key] = value
+
+        return kwargs
