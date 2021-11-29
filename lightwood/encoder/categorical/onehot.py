@@ -49,17 +49,16 @@ class OneHotEncoder(BaseEncoder):
 
         # Weight-balance info if encoder represents target
         self.target_weights = None
-        self.index_weights = None # vector-weights, mapped by class id
+        self.index_weights = None  # vector-weights, mapped by class id
         if self.is_target:
             self.target_weights = target_weights
-
 
     def prepare(self, priming_data: Iterable[str]):
         """
         Prepares the OHE Encoder by creating a dictionary mapping.
 
         Unknown categories must be explicitly handled as python `None` types.
-        """
+        """ # noqa
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
@@ -99,8 +98,7 @@ class OneHotEncoder(BaseEncoder):
                 # If using an unknown category, set to smallest possible value
                 if self.use_unknown:
                     self.target_weights[_UNCOMMON_WORD] = np.min(list(self.target_weights.values()))
-                    self.index_weights[0] = self.target_weights[_UNCOMMON_WORD] 
-
+                    self.index_weights[0] = self.target_weights[_UNCOMMON_WORD]
 
         self.is_prepared = True
 

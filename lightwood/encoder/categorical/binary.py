@@ -81,7 +81,7 @@ class BinaryEncoder(BaseEncoder):
 
                 # Ensure all classes are specified in the weights criteria
                 assert(set(self.target_weights.keys()) == set(self.map.keys()))
-                
+
                 for cat in self.map.keys():
                     self.index_weights[self.map[cat]] = self.target_weights[cat]
 
