@@ -32,6 +32,7 @@ class BestOf(BaseEnsemble):
                 accuracy_functions,
                 ts_analysis=ts_analysis
             )
+            print(mixer, score_dict)
             avg_score = np.mean(list(score_dict.values()))
             log.info(f'Mixer: {type(mixer).__name__} got accuracy: {avg_score}')
 

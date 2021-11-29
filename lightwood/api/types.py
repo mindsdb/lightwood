@@ -174,6 +174,7 @@ class StatisticalAnalysis:
     df_target_stddev: Optional[float]
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
+    assumed_target_class_weight: object  # Dict[str, float]
     histograms: object  # Dict[str, Dict[str, List[object]]]
     buckets: object  # Dict[str, Dict[str, List[object]]]
     missing: object
