@@ -35,7 +35,6 @@ class BinaryEncoder(BaseEncoder):
                 break
 
         if self.is_target:
-            print(self.target_weights)
             self.index_weights = [None, None]
             for word in self.map:
                 if self.target_weights is not None:
@@ -58,7 +57,6 @@ class BinaryEncoder(BaseEncoder):
             ret.append([0, 0])
             if index is not None:
                 ret[-1][index] = 1
-        print(ret, self.index_weights)
         return torch.Tensor(ret)
 
     def decode(self, encoded_data, return_raw=False):
