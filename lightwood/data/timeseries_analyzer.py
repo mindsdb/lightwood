@@ -138,7 +138,7 @@ def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[D
     return group_residuals, group_scale_factors
 
 
-def detect_period(deltas: dict, tss: TimeseriesSettings) -> dict:
+def detect_period(deltas: dict, tss: TimeseriesSettings) -> Dict[str, float]:
     """
     Helper method that, based on the most popular interval for a time series, determines its seasonal peridiocity (sp).
     This bit of information can be crucial for good modelling with methods like ARIMA.

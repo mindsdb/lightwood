@@ -63,7 +63,6 @@ class SkTime(BaseMixer):
 
         self.ts_analysis = ts_analysis
         self.n_ts_predictions = n_ts_predictions
-        self.fh = ForecastingHorizon(np.arange(1, self.n_ts_predictions + 1), is_relative=True)
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
 
         # optuna hyperparameter tuning
@@ -76,6 +75,10 @@ class SkTime(BaseMixer):
         self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
         self.n_trials = len(self.possible_models)
 
+        # sktime forecast horizon object is made relative to the end of the latest data point seen at training time
+        # the default assumption is to forecast the next `self.n_ts_predictions` after said data point
+        self.fh = ForecastingHorizon(np.arange(1, self.n_ts_predictions + 1), is_relative=True)
+
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
         Fits a set of sktime forecasters. The number of models depends on how many groups are observed at training time.
@@ -85,7 +88,6 @@ class SkTime(BaseMixer):
         log.info('Started fitting sktime forecaster for array prediction')
 
         if self.hyperparam_search:
-            optuna.logging.set_verbosity(0)
             search_space = {'class': self.possible_models}
             self.study = optuna.create_study(direction='minimize', sampler=optuna.samplers.GridSampler(search_space))
             self.study.optimize(lambda trial: self._get_best_model(trial, train_data, dev_data), n_trials=self.n_trials)
