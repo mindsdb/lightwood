@@ -105,12 +105,8 @@ class BinaryEncoder(BaseEncoder):
             index = self.map.get(word, None)
 
             if index is not None:
-<<<<<<< HEAD
                 ret[idx, index] = 1
 
-=======
-                ret[-1][index] = 1
->>>>>>> staging
         return torch.Tensor(ret)
 
     def decode(self, encoded_data: torch.Tensor):
