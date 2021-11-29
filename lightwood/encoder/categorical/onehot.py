@@ -63,7 +63,7 @@ class OneHotEncoder(BaseEncoder):
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        unq_cats = set(list([i for i in priming_data if i is not None]))
+        unq_cats = np.unique([i for i in priming_data if i is not None]).tolist()
 
         if self.use_unknown:
             log.info("Encoding UNK categories as index 0")

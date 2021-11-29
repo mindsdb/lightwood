@@ -59,7 +59,7 @@ class BinaryEncoder(BaseEncoder):
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        unq_cats = set(list([i for i in priming_data if i is not None]))
+        unq_cats = np.unique([i for i in priming_data if i is not None]).tolist()
 
         self.map = {cat: indx for indx, cat in enumerate(unq_cats)}
         self.rev_map = {indx: cat for cat, indx in self.map.items()}
