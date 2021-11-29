@@ -161,7 +161,7 @@ class StatisticalAnalysis:
     :param df_target_stddev: The standard deviation of the target of the dataset
     :param train_observed_classes:
     :param target_class_distribution:
-    :param suggested_target_class_weight: What weight the analysis suggests to assign each class by in the case of classification problems. Note: target_weights in the problem definition overides this
+    :param target_weights: What weight the analysis suggests to assign each class by in the case of classification problems. Note: target_weights in the problem definition overides this
     :param histograms:
     :param buckets:
     :param missing:
@@ -175,7 +175,7 @@ class StatisticalAnalysis:
     df_target_stddev: Optional[float]
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
-    suggested_target_class_weight: object  # Dict[str, float]
+    target_weights: object  # Dict[str, float]
     histograms: object  # Dict[str, Dict[str, List[object]]]
     buckets: object  # Dict[str, Dict[str, List[object]]]
     missing: object

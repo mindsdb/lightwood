@@ -119,7 +119,7 @@ def lookup_encoder(
             if problem_defintion.unbias_target:
                 encoder_dict["args"][
                     "target_weights"
-                ] = "$statistical_analysis.suggested_target_class_weight"
+                ] = "$statistical_analysis.target_weights"
             if problem_defintion.target_weights is not None:
                 encoder_dict["args"][
                     "target_weights"
