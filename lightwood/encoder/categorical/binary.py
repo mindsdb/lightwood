@@ -8,7 +8,7 @@ from typing import Dict, List, Iterable
 
 class BinaryEncoder(BaseEncoder):
     """
-    Creates a 2-element vector representing categories :math:`A` and :math:`B` as such: 
+   Creates a one-hot-encoding for binary class data. Assume two arbitrary categories :math:`A` and :math:`B`; representation for them will be as such:
 
     .. math::
 
@@ -19,11 +19,11 @@ class BinaryEncoder(BaseEncoder):
 
     When data is typed with Lightwood, this class is only deployed if an input data type is explicitly recognized as binary (i.e. the column has only 2 unique values like True/False). If future data shows a new category (thus the data is no longer truly binary), this encoder will no longer be appropriate unless you are comfortable mapping ALL new classes as [0, 0].
 
-    An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes. 
+    An encoder can represent a feature column or target column; in this case it represents a target, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes. 
 
-    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/10/10 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
+    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/15 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
 
-    target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
+    target_weights = {"class1": 0.8, "class2": 0.15}
 
     Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
     """ # noqa
@@ -58,7 +58,8 @@ class BinaryEncoder(BaseEncoder):
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        unq_cats = np.unique([i for i in priming_data if i is not None]).tolist()
+        unq_cats = set(list([i for i in priming_data if i is not None]))
+
         self.map = {cat: indx for indx, cat in enumerate(unq_cats)}
         self.rev_map = {indx: cat for cat, indx in self.map.items()}
 

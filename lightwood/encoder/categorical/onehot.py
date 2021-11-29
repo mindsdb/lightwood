@@ -9,18 +9,24 @@ from typing import Dict, List, Iterable
 
 class OneHotEncoder(BaseEncoder):
     """
-    Creates a one-hot encoding (OHE) of categorical data. This creates a vector where each individual dimension corresponds to a category. A category has a 1:1 mapping between dimension indicated by a "1" in that position.
+    Creates a one-hot encoding (OHE) for categorical data. One-hot encoding represents categorical information as a vector where each individual dimension corresponds to a category. A category has a 1:1 mapping between dimension indicated by a "1" in that position. For example, imagine 3 categories, :math:`A`, :math:`B`, and :math:`C`; these can be represented as follows:
 
-    OHE operates in 2 modes:
+    .. math::
+
+       A &= [1, 0, 0] \\
+       B &= [0, 1, 0] \\
+       C &= [0, 0, 1]
+    
+    The OHE encoder operates in 2 modes:
         (1) "use_unknown=True": Makes an :math:`N+1` length vector for :math:`N` categories, the first index always corresponds to the unknown category.
 
         (2) "use_unknown=False": Makes an :math:`N` length vector for :math:`N` categories, where an empty vector of 0s indicates an unknown/missing category.
 
-    An encoder can also represent the target column; in this case, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.
+    An encoder can represent a feature column or target column; in this case it represents a target, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.
 
-    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/10/10 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
+    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/05/15 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
 
-    target_weights = {"class1": 0.9, "class2": 0.1, "class3": 0.1}
+    target_weights = {"class1": 0.8, "class2": 0.05, "class3": 0.15}
 
     Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
     """ # noqa
@@ -55,7 +61,8 @@ class OneHotEncoder(BaseEncoder):
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        unq_cats = np.unique([i for i in priming_data if i is not None]).tolist()
+        unq_cats = set(list([i for i in priming_data if i is not None]))
+
         if self.use_unknown:
             log.info("Encoding UNK categories as index 0")
             self.map = {cat: indx + 1 for indx, cat in enumerate(unq_cats)}
