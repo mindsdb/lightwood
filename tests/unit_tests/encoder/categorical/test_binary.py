@@ -102,11 +102,13 @@ class TestBinary(unittest.TestCase):
         # Scaled weights (sum to 1)
         tweights = {"apple": 4 / 6, "orange": 2 / 6}
 
-        # Get the ground-truth inverse weights
-        iweights = Tensor(list(tweights.values()))
-
         enc = BinaryEncoder(is_target=True, target_weights=tweights)
         enc.prepare(data)
+
+        # Get the ground-truth weights
+        iweights = torch.ones(size=(len(tweights),))
+        for key, value in tweights.items():  # accounts for order
+            iweights[enc.map[key]] = value
 
         # Check inverse weights correct
         self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
@@ -120,11 +122,13 @@ class TestBinary(unittest.TestCase):
         data = ["apple", "apple", "orange", "apple", "apple", "orange"]
         tweights = {"apple": 100, "orange": 5000}
 
-        # Get the ground-truth inverse weights
-        iweights = Tensor(list(tweights.values()))
-
         enc = BinaryEncoder(is_target=True, target_weights=tweights)
         enc.prepare(data)
+
+        # Get the ground-truth weights
+        iweights = torch.ones(size=(len(tweights),))
+        for key, value in tweights.items():  # accounts for order
+            iweights[enc.map[key]] = value
 
         self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
 
