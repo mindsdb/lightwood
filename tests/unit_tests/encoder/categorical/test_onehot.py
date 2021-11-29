@@ -136,13 +136,13 @@ class TestOnehot(unittest.TestCase):
         tweights = {"apple": 4 / 6, "banana": 1 / 6, "orange": 1 / 6}
 
         # Get the ground-truth inverse weights
-        iweights = Tensor([1 / i for i in tweights.values()])
+        iweights = Tensor(list(tweights.values()))
 
         enc = OneHotEncoder(use_unknown=False, is_target=True, target_weights=tweights)
         enc.prepare(data)
 
         # Check inverse weights correct
-        self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
+        self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
 
     def test_target_distro_with_unk(self):
         """ Checks target distro with unknowns """
@@ -156,11 +156,11 @@ class TestOnehot(unittest.TestCase):
 
         # Get the ground-truth inverse weights
         iweights = torch.ones(size=(len(tweights) + 1,))
-        for key, value in tweights.items():
-            iweights[enc.map[key]] = 1 / value
+        for key, value in tweights.items():  # accounts for order
+            iweights[enc.map[key]] = value
 
         # Check inverse weights correct
-        self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
+        self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
 
     def test_distro_nonzeroweights(self):
         """
@@ -180,11 +180,11 @@ class TestOnehot(unittest.TestCase):
         # Get the ground-truth inverse weights
         iweights = torch.ones(size=(len(tweights),))
 
-        for key, value in tweights.items():
-            iweights[enc.map[key]] = 1 / value
+        for key, value in tweights.items():  # accounts for order
+            iweights[enc.map[key]] = value
 
         # Reorder the weights with regards to the map
-        self.assertTrue(np.all(((enc.inv_target_weights - iweights) == 0).tolist()))
+        self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
 
     def test_distro_zero(self):
         """ Tests edge cause where target weights have a 0 weight which is unacceptable for downstream processing (inverse weights will 1/0) """
