@@ -89,7 +89,7 @@ class Neural(BaseMixer):
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
-            criterion = TransformCrossEntropyLoss(weight=self.target_encoder.inv_target_weights.to(self.model.device))
+            criterion = TransformCrossEntropyLoss(weight=self.target_encoder.index_weights.to(self.model.device))
         elif self.dtype_dict[self.target] in (dtype.tags):
             criterion = nn.BCEWithLogitsLoss()
         elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.tsarray, dtype.quantity)
