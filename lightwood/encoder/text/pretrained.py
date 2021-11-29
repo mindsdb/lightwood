@@ -87,8 +87,8 @@ class PretrainedLangEncoder(BaseEncoder):
 
     def prepare(
         self,
-        train_priming_data: pd.Series,
-        dev_priming_data: Optional[pd.Series],
+        train_priming_data: Iterable[str],
+        dev_priming_data: Optional[Iterable[str]],
         encoded_target_values: torch.Tensor,
     ):
         """
