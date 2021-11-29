@@ -29,7 +29,7 @@ class SkTime(BaseMixer):
     def __init__(
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             n_ts_predictions: int, ts_analysis: Dict, model_path: str = 'arima.AutoARIMA',
-            hyperparam_search: bool = True):
+            hyperparam_search: bool = False):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
         to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
