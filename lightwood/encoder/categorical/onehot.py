@@ -80,7 +80,7 @@ class OneHotEncoder(BaseEncoder):
             for word in set(priming_data):
                 if self.target_weights is not None:
                     self.index_weights[self._lang.word2index[str(word)]] = \
-                        self.target_weights[word] / np.max(self.target_weights.values())
+                        self.target_weights[word] / np.max(list(self.target_weights.values()))
 
             self.index_weights = torch.Tensor(self.index_weights)
 
