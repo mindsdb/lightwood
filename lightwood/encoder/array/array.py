@@ -44,8 +44,12 @@ class ArrayEncoder(BaseEncoder):
             array = array[:self.output_size]
         return array
 
-    def prepare(self, train_priming_data, dev_priming_data):
+    def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable]):
         """
+        Prepare the array encoder for sequence data.
+
+        :param train_priming_data: Training data of sequences
+        :param dev_priming_data: Dev data of sequences
         """
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         priming_data = priming_data.values
@@ -73,11 +77,12 @@ class ArrayEncoder(BaseEncoder):
         self.output_size *= self._normalizer.output_size
         self.is_prepared = True
 
-    def encode(self, column_data: Union[list, np.ndarray, torch.Tensor]) -> torch.Tensor:
+    def encode(self, column_data: Iterable[Iterable]) -> torch.Tensor:
         """
+        Encode the properties of a sequence-of-sequence representation
 
-        :param column_data:
-        :returns:
+        :param column_data: Input column data to be encoded
+        :returns: a torch-tensor representing the encoded sequence
         """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
@@ -96,12 +101,12 @@ class ArrayEncoder(BaseEncoder):
 
         return data
 
-    def decode(self, data) -> List[Union[list, np.ndarray, torch.Tensor]]:
+    def decode(self, data: torch.Tensor) -> List[Iterable]:
         """
         Converts data as a list of arrays.
 
-        :param data:
-        :returns:
+        :param data: Encoded data prepared by this array encoder
+        :returns: A list of iterable sequences in the original data space
         """
         decoded = data.tolist()
         return decoded
