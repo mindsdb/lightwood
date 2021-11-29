@@ -43,11 +43,11 @@ class TestBinary(unittest.TestCase):
                         [
                             1.0,
                             0.0,
-                        ],  # category 3
+                        ],  # category 1
                         [
                             0.0,
                             1.0,
-                        ],  # category 4
+                        ],  # category 2
                         [
                             0.0,
                             0.0,
@@ -55,11 +55,11 @@ class TestBinary(unittest.TestCase):
                         [
                             1.0,
                             0.0,
-                        ],  # category 3
+                        ],  # category 1
                         [
                             0.0,
                             1.0,
-                        ],  # category 3
+                        ],  # category 2
                     ]
                 )
             ).all()
@@ -113,7 +113,7 @@ class TestBinary(unittest.TestCase):
 
     def test_distro_nonzeroweights(self):
         """
-        Tests if target wts do not sum to 1 properly handled.
+        Tests if target weights do not sum to 1 properly handled.
 
         This handles cases where people may choose 1/class_size for weights
         """
