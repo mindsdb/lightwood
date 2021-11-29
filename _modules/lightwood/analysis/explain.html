@@ -218,6 +218,11 @@
     <span class="n">global_insights</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span>
 
+    <span class="k">if</span> <span class="n">target_name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;truth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">target_name</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;truth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">])</span>
+
     <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>

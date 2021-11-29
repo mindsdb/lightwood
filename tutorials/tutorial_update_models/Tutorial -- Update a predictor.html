@@ -489,7 +489,7 @@ Test dataframe shape: (206, 10)
 <p>Note that we have three different data splits.</p>
 <p>We will use the <code class="docutils literal notranslate"><span class="pre">training</span></code> split for the initial model training. As you can see, it’s only a 20% of the total data we have. The <code class="docutils literal notranslate"><span class="pre">update</span></code> split will be used as training data to adjust/update our model. Finally, the held out <code class="docutils literal notranslate"><span class="pre">test</span></code> set will give us a rough idea of the impact our updating procedure has on the model’s predictive capabilities.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -527,172 +527,151 @@ Test dataframe shape: (206, 10)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2498:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Analyzing a sample of 979</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:from a total population of 1030, this is equivalent to 95.0% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column id has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: cement</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column cement has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: slag</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column slag has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: flyAsh</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column flyAsh has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: water</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column water has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: superPlasticizer</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column superPlasticizer has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: coarseAggregate</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column coarseAggregate has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: fineAggregate</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column fineAggregate has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: age</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column age has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Infering type for: concrete_strength</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Column concrete_strength has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Unable to import black formatter, predictor code might be a bit ugly.</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Splitting the data into train/test</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Preparing the encoders</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 2</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 3</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 4</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 5</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 6</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 7</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 8</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 9</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Encoder prepping dict length of: 10</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: concrete_strength</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: cement</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: slag</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: flyAsh</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: water</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: superPlasticizer</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: coarseAggregate</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: fineAggregate</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Done running for: age</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Featurizing the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Training the mixers</span>
-/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:115: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
-  warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:
+<span class="ansi-green-fg">INFO:lightwood-91181:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Analyzing a sample of 979</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:from a total population of 1030, this is equivalent to 95.0% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Using 15 processes to deduct types.</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Splitting the data into train/test</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Preparing the encoders</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 1</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 2</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 3</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 4</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 5</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 6</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 7</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 8</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 9</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Encoder prepping dict length of: 10</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: concrete_strength</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: id</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: cement</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: slag</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: flyAsh</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: water</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: superPlasticizer</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: coarseAggregate</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: fineAggregate</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Done running for: age</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Training the mixers</span>
+torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+This overload of addcmul_ is deprecated:
         addcmul_(Number value, Tensor tensor1, Tensor tensor2)
 Consider using one of the following signatures instead:
-        addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at  ../torch/csrc/utils/python_arg_parser.cpp:1025.)
-  exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss of 7.6965460777282715 with learning rate 0.0001</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss of 6.121406555175781 with learning rate 0.00014</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss of 5.7169036865234375 with learning rate 0.00019599999999999997</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss of 4.907417297363281 with learning rate 0.00027439999999999995</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss of 3.7602124214172363 with learning rate 0.0003841599999999999</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss of 1.8155415058135986 with learning rate 0.0005378239999999999</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss of 3.7833189964294434 with learning rate 0.0007529535999999998</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss of 8.216030359268188 with learning rate 0.0010541350399999995</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Found learning rate of: 0.0005378239999999999</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 1: 0.7302287817001343</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 2: 0.9203718900680542</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 3: 0.8405624032020569</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 4: 0.7608697414398193</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 5: 0.682328462600708</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 6: 0.6068087220191956</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 7: 0.4470987617969513</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 8: 0.39335447549819946</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 9: 0.34977608919143677</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 10: 0.3151412010192871</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 11: 0.28799620270729065</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 12: 0.2667107582092285</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 13: 0.2335403561592102</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 14: 0.21926473081111908</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 15: 0.20496903359889984</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 16: 0.190594881772995</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 17: 0.17612507939338684</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 18: 0.16138313710689545</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 19: 0.12839831411838531</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 20: 0.11621233820915222</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 21: 0.10669230669736862</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 22: 0.0995490625500679</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 23: 0.09420689940452576</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 24: 0.09003914892673492</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 25: 0.08349904417991638</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 26: 0.08220995217561722</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 27: 0.08120816200971603</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 28: 0.08048582822084427</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 29: 0.07996374368667603</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 30: 0.07936406880617142</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 31: 0.07869087904691696</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 32: 0.07849358767271042</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 33: 0.07820076495409012</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 34: 0.07790302485227585</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 35: 0.07746117562055588</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 36: 0.0766073614358902</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 37: 0.07440942525863647</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 38: 0.07304741442203522</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 39: 0.07175708562135696</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 40: 0.0706695094704628</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 41: 0.06960801780223846</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 42: 0.06830630451440811</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 43: 0.06553896516561508</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 44: 0.06447521597146988</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 45: 0.06355088204145432</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 46: 0.06285690516233444</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 47: 0.0621829479932785</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 48: 0.061278343200683594</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 49: 0.05949181690812111</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 50: 0.058798898011446</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 51: 0.058218952268362045</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 52: 0.057854726910591125</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 53: 0.05746406316757202</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 54: 0.05683555826544762</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 55: 0.055697664618492126</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 56: 0.05525225028395653</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 57: 0.0549074150621891</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 58: 0.05476728081703186</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 59: 0.054551925510168076</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 60: 0.05409771949052811</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 61: 0.05336079001426697</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 62: 0.05306011438369751</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 63: 0.052854686975479126</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 64: 0.052855443209409714</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 65: 0.05273968353867531</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 66: 0.05239949747920036</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 67: 0.05194813385605812</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 68: 0.05178629979491234</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 69: 0.051711175590753555</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 70: 0.051842063665390015</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 71: 0.05181187018752098</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 72: 0.05157443508505821</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 73: 0.05137108266353607</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 74: 0.05131782591342926</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 75: 0.05133718252182007</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 76: 0.05156173184514046</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Mixer: Neural got accuracy: 0.5960596686591051</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Picked best mixer: Neural</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Analyzing the ensemble of mixers</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:The block ICP is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:The block AccStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Adjustment on validation requested.</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Updating the mixers</span>
-/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:115: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
-  warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 1: 0.06780618578195571</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 2: 0.07079223617911339</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 3: 0.07359219342470169</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 4: 0.07052805125713349</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 5: 0.07367645800113679</span>
+        addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at  ../torch/csrc/utils/python_arg_parser.cpp:1005.)
+<span class="ansi-green-fg">INFO:lightwood-91181:Loss of 7.69654655456543 with learning rate 0.0001</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Loss of 6.121406078338623 with learning rate 0.00014</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Loss of 5.7169036865234375 with learning rate 0.00019599999999999997</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Loss of 4.907417297363281 with learning rate 0.00027439999999999995</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Loss of 3.7602126598358154 with learning rate 0.0003841599999999999</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Loss of 1.8155415058135986 with learning rate 0.0005378239999999999</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Loss of 3.7833187580108643 with learning rate 0.0007529535999999998</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Loss of 8.216030836105347 with learning rate 0.0010541350399999995</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Found learning rate of: 0.0005378239999999999</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 1: 0.7302289009094238</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 2: 0.9203720092773438</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 3: 0.8405624628067017</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 4: 0.7608699202537537</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 5: 0.6823285222053528</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 6: 0.606808602809906</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 7: 0.4470987617969513</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 8: 0.3933545649051666</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 9: 0.3497759997844696</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 10: 0.3151411712169647</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 11: 0.2879962623119354</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 12: 0.2667108178138733</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 13: 0.23354031145572662</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 14: 0.21926474571228027</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 15: 0.20496906340122223</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 16: 0.19059491157531738</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 17: 0.17612512409687042</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 18: 0.161383256316185</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 19: 0.12839828431606293</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 20: 0.1162123903632164</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 21: 0.10669219493865967</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 22: 0.09954904764890671</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 23: 0.09420691430568695</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 24: 0.0900391936302185</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 25: 0.08349908888339996</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 26: 0.0822099968791008</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 27: 0.08120812475681305</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 28: 0.0804857686161995</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 29: 0.07996372133493423</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 30: 0.07936403155326843</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 31: 0.07869081199169159</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 32: 0.07849359512329102</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 33: 0.07820077985525131</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 34: 0.07790301740169525</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 35: 0.07746117562055588</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 36: 0.0766073539853096</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 37: 0.07440945506095886</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 38: 0.07304742932319641</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 39: 0.07175709307193756</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 40: 0.0706694945693016</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 41: 0.06960804760456085</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 42: 0.0683063194155693</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 43: 0.06553898006677628</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 44: 0.06447519361972809</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 45: 0.06355087459087372</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 46: 0.06285689026117325</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 47: 0.0621829479932785</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 48: 0.06127836927771568</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 49: 0.05949181318283081</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 50: 0.058798886835575104</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 51: 0.058218929916620255</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 52: 0.057854749262332916</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 53: 0.05746406316757202</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 54: 0.056835610419511795</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 55: 0.05569766089320183</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 56: 0.05525219812989235</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 57: 0.05490746721625328</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 58: 0.054767243564128876</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 59: 0.05455196276307106</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 60: 0.0540977418422699</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 61: 0.05336076393723488</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 62: 0.053060129284858704</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 63: 0.05285469442605972</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 64: 0.0528554692864418</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 65: 0.05273965373635292</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 66: 0.05239948257803917</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 67: 0.05194811150431633</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 68: 0.05178629234433174</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 69: 0.05171119421720505</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 70: 0.05184203386306763</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 71: 0.05181184783577919</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 72: 0.05157444253563881</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 73: 0.05137106031179428</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 74: 0.05131785199046135</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 75: 0.05133713781833649</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 76: 0.05156172439455986</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Mixer: Neural got accuracy: 0.5960601553597429</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Picked best mixer: Neural</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Analyzing the ensemble of mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block GlobalFeatureImportance is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Adjustment on validation requested.</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Updating the mixers</span>
+torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 1: 0.06892643496394157</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 2: 0.06978078782558442</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 3: 0.06783530339598656</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 4: 0.07201590612530709</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 5: 0.0718848429620266</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -707,16 +686,18 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2498:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Featurizing the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block GlobalFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:GlobalFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -739,6 +720,7 @@ Consider using one of the following signatures instead:
     <tr style="text-align: right;">
       <th></th>
       <th>prediction</th>
+      <th>truth</th>
       <th>confidence</th>
       <th>lower</th>
       <th>upper</th>
@@ -747,38 +729,43 @@ Consider using one of the following signatures instead:
   <tbody>
     <tr>
       <th>0</th>
-      <td>52.993881</td>
+      <td>51.193603</td>
+      <td>71.30</td>
       <td>0.9991</td>
-      <td>32.340706</td>
-      <td>73.647056</td>
+      <td>30.540443</td>
+      <td>71.846764</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>27.877298</td>
+      <td>28.503390</td>
+      <td>39.60</td>
       <td>0.9991</td>
-      <td>7.224123</td>
-      <td>48.530473</td>
+      <td>7.850229</td>
+      <td>49.156551</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>18.540179</td>
+      <td>18.356139</td>
+      <td>10.79</td>
       <td>0.9991</td>
       <td>0.000000</td>
-      <td>39.193354</td>
+      <td>39.009300</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>16.238102</td>
+      <td>16.062094</td>
+      <td>4.83</td>
       <td>0.9991</td>
       <td>0.000000</td>
-      <td>36.891276</td>
+      <td>36.715254</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>32.959752</td>
+      <td>32.623629</td>
+      <td>47.71</td>
       <td>0.9991</td>
-      <td>12.306577</td>
-      <td>53.612927</td>
+      <td>11.970469</td>
+      <td>53.276790</td>
     </tr>
     <tr>
       <th>...</th>
@@ -786,45 +773,51 @@ Consider using one of the following signatures instead:
       <td>...</td>
       <td>...</td>
       <td>...</td>
+      <td>...</td>
     </tr>
     <tr>
       <th>201</th>
-      <td>47.220826</td>
+      <td>45.633811</td>
+      <td>40.93</td>
       <td>0.9991</td>
-      <td>26.567652</td>
-      <td>67.874001</td>
+      <td>24.980650</td>
+      <td>66.286972</td>
     </tr>
     <tr>
       <th>202</th>
-      <td>42.638142</td>
+      <td>41.613209</td>
+      <td>52.82</td>
       <td>0.9991</td>
-      <td>21.984967</td>
-      <td>63.291317</td>
+      <td>20.960048</td>
+      <td>62.266369</td>
     </tr>
     <tr>
       <th>203</th>
-      <td>31.631880</td>
+      <td>31.297044</td>
+      <td>39.66</td>
       <td>0.9991</td>
-      <td>10.978705</td>
-      <td>52.285054</td>
+      <td>10.643883</td>
+      <td>51.950204</td>
     </tr>
     <tr>
       <th>204</th>
-      <td>29.147330</td>
+      <td>29.409258</td>
+      <td>13.29</td>
       <td>0.9991</td>
-      <td>8.494156</td>
-      <td>49.800505</td>
+      <td>8.756097</td>
+      <td>50.062418</td>
     </tr>
     <tr>
       <th>205</th>
-      <td>38.615127</td>
+      <td>37.712138</td>
+      <td>17.84</td>
       <td>0.9991</td>
-      <td>17.961952</td>
-      <td>59.268302</td>
+      <td>17.058977</td>
+      <td>58.365298</td>
     </tr>
   </tbody>
 </table>
-<p>206 rows × 4 columns</p>
+<p>206 rows × 5 columns</p>
 </div></div>
 </div>
 <div class="section" id="Updating-the-predictor">
@@ -833,7 +826,7 @@ Consider using one of the following signatures instead:
 <p>For both of these methods, two encoded datasources are needed as input (for <code class="docutils literal notranslate"><span class="pre">adjust</span></code> you need to wrap them in a dictionary with ‘old’ and ‘new’ keys).</p>
 <p>Let’s <code class="docutils literal notranslate"><span class="pre">adjust</span></code> our predictor:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -851,23 +844,20 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2498:Updating the mixers</span>
-/opt/hostedtoolcache/Python/3.9.8/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:115: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
-  warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 1: 0.06395960412919521</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 2: 0.0760517530143261</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 3: 0.06467204913496971</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 4: 0.0686721174667279</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 5: 0.059960046162207924</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 6: 0.05878346599638462</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 7: 0.059159028654297195</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 8: 0.05405611855288347</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 9: 0.054099527498086296</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Loss @ epoch 10: 0.05619463324546814</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Updating the mixers</span>
+torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 1: 0.06545061928530534</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 2: 0.0679960281898578</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 3: 0.07171888339022796</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 4: 0.07307156516859929</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 5: 0.06360626469055812</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 6: 0.06457449619968732</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 7: 0.057915804286797844</span>
+<span class="ansi-white-fg">DEBUG:lightwood-91181:Loss @ epoch 8: 0.06492673171063264</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -881,16 +871,18 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2498:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:Featurizing the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2498:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:The block GlobalFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-91181:GlobalFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -913,6 +905,7 @@ Consider using one of the following signatures instead:
     <tr style="text-align: right;">
       <th></th>
       <th>prediction</th>
+      <th>truth</th>
       <th>confidence</th>
       <th>lower</th>
       <th>upper</th>
@@ -921,38 +914,43 @@ Consider using one of the following signatures instead:
   <tbody>
     <tr>
       <th>0</th>
-      <td>54.147115</td>
+      <td>53.392253</td>
+      <td>71.30</td>
       <td>0.9991</td>
-      <td>33.493941</td>
-      <td>74.800290</td>
+      <td>32.739093</td>
+      <td>74.045414</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>29.181826</td>
+      <td>27.886292</td>
+      <td>39.60</td>
       <td>0.9991</td>
-      <td>8.528651</td>
-      <td>49.835001</td>
+      <td>7.233132</td>
+      <td>48.539453</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>16.265376</td>
+      <td>16.301788</td>
+      <td>10.79</td>
       <td>0.9991</td>
       <td>0.000000</td>
-      <td>36.918551</td>
+      <td>36.954948</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>13.720440</td>
+      <td>13.862827</td>
+      <td>4.83</td>
       <td>0.9991</td>
       <td>0.000000</td>
-      <td>34.373615</td>
+      <td>34.515988</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>32.030441</td>
+      <td>31.421035</td>
+      <td>47.71</td>
       <td>0.9991</td>
-      <td>11.377266</td>
-      <td>52.683616</td>
+      <td>10.767875</td>
+      <td>52.074196</td>
     </tr>
     <tr>
       <th>...</th>
@@ -960,58 +958,63 @@ Consider using one of the following signatures instead:
       <td>...</td>
       <td>...</td>
       <td>...</td>
+      <td>...</td>
     </tr>
     <tr>
       <th>201</th>
-      <td>42.245359</td>
+      <td>42.631037</td>
+      <td>40.93</td>
       <td>0.9991</td>
-      <td>21.592184</td>
-      <td>62.898534</td>
+      <td>21.977876</td>
+      <td>63.284197</td>
     </tr>
     <tr>
       <th>202</th>
-      <td>37.356423</td>
+      <td>37.502444</td>
+      <td>52.82</td>
       <td>0.9991</td>
-      <td>16.703248</td>
-      <td>58.009598</td>
+      <td>16.849283</td>
+      <td>58.155604</td>
     </tr>
     <tr>
       <th>203</th>
-      <td>29.892014</td>
+      <td>29.491487</td>
+      <td>39.66</td>
       <td>0.9991</td>
-      <td>9.238839</td>
-      <td>50.545189</td>
+      <td>8.838326</td>
+      <td>50.144647</td>
     </tr>
     <tr>
       <th>204</th>
-      <td>28.064979</td>
+      <td>28.013570</td>
+      <td>13.29</td>
       <td>0.9991</td>
-      <td>7.411804</td>
-      <td>48.718153</td>
+      <td>7.360410</td>
+      <td>48.666731</td>
     </tr>
     <tr>
       <th>205</th>
-      <td>35.456562</td>
+      <td>35.336043</td>
+      <td>17.84</td>
       <td>0.9991</td>
-      <td>14.803388</td>
-      <td>56.109737</td>
+      <td>14.682883</td>
+      <td>55.989204</td>
     </tr>
   </tbody>
 </table>
-<p>206 rows × 4 columns</p>
+<p>206 rows × 5 columns</p>
 </div></div>
 </div>
 <p>Nice! Our predictor was updated, and new predictions are looking good. Let’s compare the old and new accuracies:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">old_acc</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;concrete_strength&#39;</span><span class="p">],</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">])</span>
-<span class="n">new_acc</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;concrete_strength&#39;</span><span class="p">],</span> <span class="n">new_predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">])</span>
+<span class="n">old_acc</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;truth&#39;</span><span class="p">],</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">])</span>
+<span class="n">new_acc</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">new_predictions</span><span class="p">[</span><span class="s1">&#39;truth&#39;</span><span class="p">],</span> <span class="n">new_predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">])</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Old Accuracy: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">old_acc</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">New Accuracy: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">new_acc</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
@@ -1022,8 +1025,8 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Old Accuracy: 0.589
-New Accuracy: 0.632
+Old Accuracy: 0.583
+New Accuracy: 0.624
 </pre></div></div>
 </div>
 <p>After updating, we see an increase in the R2 score of predictions for the held out test set.</p>

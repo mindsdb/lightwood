@@ -185,7 +185,7 @@
 
 <span class="c1"># For custom modules, we create a module loader with necessary imports below</span>
 <span class="n">IMPORT_EXTERNAL_DIRS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">for import_dir in [os.path.join(os.path.expanduser(&#39;~/lightwood_modules&#39;), lightwood_version.replace(&#39;.&#39;, &#39;_&#39;)), os.path.join(&#39;/etc/lightwood_modules&#39;, lightwood_version.replace(&#39;.&#39;, &#39;_&#39;))]:</span>
+<span class="s2">for import_dir in [os.path.expanduser(&#39;~/lightwood_modules&#39;), &#39;/etc/lightwood_modules&#39;]:</span>
 <span class="s2">    if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):</span>
 <span class="s2">        for file_name in list(os.walk(import_dir))[0][2]:</span>
 <span class="s2">            if file_name[-3:] != &#39;.py&#39;:</span>
@@ -197,11 +197,10 @@
 <span class="s2">            loader.exec_module(module)</span>
 <span class="s2">            sys.modules[mod_name] = module</span>
 <span class="s2">            exec(f&#39;import </span><span class="si">{mod_name}</span><span class="s2">&#39;)</span>
-<span class="s2">&quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="s2">&quot;&quot;&quot;</span>
 
 <span class="n">IMPORTS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">import lightwood</span>
-<span class="s2">from lightwood import __version__ as lightwood_version</span>
 <span class="s2">from lightwood.analysis import *</span>
 <span class="s2">from lightwood.api import *</span>
 <span class="s2">from lightwood.data import *</span>
@@ -1148,8 +1147,8 @@
 <span class="s2"># Extract data</span>
 <span class="s2"># --------------- #</span>
 <span class="s2"># Extract the featurized data</span>
-<span class="s2">encoded_old_data = new_data[&#39;old&#39;]</span>
-<span class="s2">encoded_new_data = new_data[&#39;new&#39;]</span>
+<span class="s2">encoded_old_data = old_data if old_data is not None else pd.DataFrame()</span>
+<span class="s2">encoded_new_data = new_data</span>
 
 <span class="s2"># --------------- #</span>
 <span class="s2"># Adjust (Update) Mixers</span>
@@ -1166,7 +1165,7 @@
     <span class="c1"># Learn Body</span>
     <span class="c1"># ----------------- #</span>
 
-    <span class="n">learn_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">learn_body</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">self.mode = &#39;train&#39;</span>
 
 <span class="s2"># Perform stats analysis</span>
@@ -1199,9 +1198,7 @@
 <span class="s2">if self.problem_definition.fit_on_all:</span>
 
 <span class="s2">    log.info(&quot;Adjustment on validation requested.&quot;)</span>
-<span class="s2">    update_data = </span><span class="se">{{</span><span class="s2">&quot;new&quot;: enc_train_test[&quot;test&quot;], &quot;old&quot;: ConcatedEncodedDs([enc_train_test[&quot;train&quot;], enc_train_test[&quot;dev&quot;]])</span><span class="se">}}</span><span class="s2">  # noqa</span>
-
-<span class="s2">    self.adjust(update_data)</span>
+<span class="s2">    self.adjust(enc_train_test[&quot;test&quot;], ConcatedEncodedDs([enc_train_test[&quot;train&quot;], enc_train_test[&quot;dev&quot;]]))</span>
 
 <span class="s2">&quot;&quot;&quot;</span>
     <span class="n">learn_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">learn_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -1210,9 +1207,8 @@
     <span class="c1"># ----------------- #</span>
 
     <span class="n">predict_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">self.mode = &#39;predict&#39;</span>
-
 <span class="s2"># Remove columns that user specifies to ignore</span>
+<span class="s2">self.mode = &#39;predict&#39;</span>
 <span class="s2">log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
 <span class="s2">data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
 <span class="s2">for col in self.input_cols:</span>
@@ -1300,7 +1296,7 @@
 <span class="s2">        data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
 <span class="si">{</span><span class="n">learn_body</span><span class="si">}</span><span class="s2"></span>
 
-<span class="s2">    def adjust(self, new_data: Dict[str, pd.DataFrame]) -&gt; None:</span>
+<span class="s2">    def adjust(self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None) -&gt; None:</span>
 <span class="s2">        # Update mixers with new information</span>
 <span class="si">{</span><span class="n">adjust_body</span><span class="si">}</span><span class="s2"></span>
 

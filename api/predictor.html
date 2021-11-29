@@ -251,7 +251,7 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> is created via J{ai}son’s custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.adjust">
-<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.adjust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.adjust" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.adjust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.adjust" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adjusts a previously trained model on new data. Adopts the same process as <code class="docutils literal notranslate"><span class="pre">learn</span></code> but with the exception that the <cite>adjust</cite> function expects the best model to have been already trained.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -259,7 +259,10 @@
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – New data used to adjust a previously trained model. Keys must reference “old” and “new” referencing to the old and new datasets. In some situations, the old data is still required to train a model (i.e. Regression) to ensure the new data doesn’t entirely override it.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – New data used to adjust a previously trained model.</p></li>
+<li><p><strong>old_data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – In some situations, the old data is still required to train a model (i.e. Regression mixer) to ensure the new data doesn’t entirely override it.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
