@@ -12,6 +12,7 @@ import pandas as pd
 try:
     from nltk.corpus import opinion_lexicon
 except LookupError:
+    import nltk
     nltk.download('opinion_lexicon')
     from nltk.corpus import opinion_lexicon
 

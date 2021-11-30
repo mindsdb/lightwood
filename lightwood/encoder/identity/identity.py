@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Iterable
+from typing import List, Iterable, Union
 import torch
 from lightwood.encoder.base import BaseEncoder
 
