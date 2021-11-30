@@ -6,7 +6,7 @@ from lightwood.encoder.categorical.binary import (
     BinaryEncoder,
 )
 
-from lightwood.helpers.constants import _UNCOMMON_WORD, _UNCOMMON_TOKEN
+from lightwood.helpers.constants import _UNCOMMON_WORD
 
 
 class TestBinary(unittest.TestCase):
@@ -133,7 +133,9 @@ class TestBinary(unittest.TestCase):
         self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
 
     def test_distro_zero(self):
-        """ Tests edge cause where target weights have a 0 weight which is unacceptable for downstream processing (inverse weights will 1/0) """
+        """
+        Tests edge cause where target weights have a 0 weight which is unacceptable for downstream processing (inverse weights will 1/0)
+        """ # noqa
         data = ["apple", "apple", "orange", "apple", "apple", "orange"]
 
         # Arbitrary weights (ex: number of examples)

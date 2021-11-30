@@ -6,7 +6,7 @@ from lightwood.encoder.categorical.onehot import (
     OneHotEncoder,
 )
 
-from lightwood.helpers.constants import _UNCOMMON_WORD, _UNCOMMON_TOKEN
+from lightwood.helpers.constants import _UNCOMMON_WORD
 
 
 class TestOnehot(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestOnehot(unittest.TestCase):
 
     NOTE, this is sensitive to the mapping of enc.map. If your unit-tests are failing, check to see if the enc.map order matches what the encoded_data should be; this is based on the mapped-place. Using np.unique() inadvertently sorts the data neatly, hence allowing an intuitive place of which order each category is.
 
-    """
+    """ # noqa
 
     def test_encode_and_decode_with_unknown_token(self):
         """
@@ -25,7 +25,7 @@ class TestOnehot(unittest.TestCase):
         (1) UNKS are handled by "1" in the first index
         (2) Nones or unrecognized categories are both handled
         (3) The decode/encode map order is the same
-        """
+        """ # noqa
         data = ['category 1', 'category 3', 'category 4', None, 'category 3']
         test_data = ['CATEGORY 1', 'category 2', 'category 1', 'category 3', None]
 
@@ -62,20 +62,6 @@ class TestOnehot(unittest.TestCase):
         for i in range(len(ytest)):
             self.assertTrue(decoded_data[i] == ytest[i])
 
-    def test_check_probs_with_unknown(self):
-        """ Check probability calculation """
-        data = ['category 1', 'category 3', 'category 4', None, 'category 3']
-
-        enc = OneHotEncoder(use_unknown=True)
-        enc.prepare(data)
-
-        # Make data to represent random weights that do not sum to 1
-        torch.manual_seed(1)
-        wt_vec = torch.rand(size=(len(data), len(enc.map)))
-
-        _, probs, _ = enc.decode_probabilities(wt_vec)
-        self.assertTrue(np.all([np.isclose(sum(i), 1) for i in probs]))
-
     def test_encode_and_decode_with_return_zeros(self):
         """
         Tests the case where `use_unknown` is False; this means that the OHE vector is N categories, where a vector of all 0s represents the unknown token
@@ -84,7 +70,7 @@ class TestOnehot(unittest.TestCase):
         (1) UNKS are handled by a 0 vector returned
         (2) Nones or unrecognized categories are both handled
         (3) The decode/encode map order is the same
-        """
+        """ # noqa
 
         data = ['category 1', 'category 3', 'category 4', None]
         test_data = ['category 2', 'category 1', 'category 3', None]
@@ -118,7 +104,7 @@ class TestOnehot(unittest.TestCase):
         )
 
     def test_check_probs_with_unknown(self):
-        """ Check probability calculation where `use_unknown=False` """
+        """ Check probability calculation where `use_unknown=False` """ # noqa
         data = ['category 1', 'category 3', 'category 4', None, 'category 3']
 
         enc = OneHotEncoder(use_unknown=False)
@@ -134,7 +120,7 @@ class TestOnehot(unittest.TestCase):
     def test_target_distro_scaled_to_1(self):
         """
         Check whether target distribution passed and handled properly
-        """
+        """ # noqa
         data = ["apple", "apple", "banana", "apple", "apple", "orange"]
 
         # Scaled weights (sum to 1)
@@ -166,7 +152,7 @@ class TestOnehot(unittest.TestCase):
         for key, value in tweights.items():  # accounts for order
             iweights[enc.map[key]] = value
 
-        iweights[0] = min(iweights[1:]) #assign the smallest weight
+        iweights[0] = min(iweights[1:])  # assign the smallest weight
 
         # Check inverse weights correct
         self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
@@ -178,7 +164,7 @@ class TestOnehot(unittest.TestCase):
         This handles cases where people may choose something like 1/class_size for weights.
 
         Index-weight order is sensitive to the mapping
-        """
+        """ # noqa
 
         data = ["apple", "apple", "banana", "apple", "apple", "orange"]
         tweights = {"apple": 100, "orange": 5000, "banana": 4}
@@ -198,7 +184,9 @@ class TestOnehot(unittest.TestCase):
         self.assertTrue(np.all(((enc.index_weights - iweights) == 0).tolist()))
 
     def test_distro_zero(self):
-        """ Tests edge cause where target weights have a 0 weight which is unacceptable for downstream processing (inverse weights will 1/0) """
+        """
+        Tests edge cause where target weights have a 0 weight which is unacceptable for downstream processing (inverse weights will 1/0)
+        """  # noqa
         data = ["apple", "apple", "banana", "apple", "apple", "orange"]
 
         # Arbitrary weights (ex: number of examples)
