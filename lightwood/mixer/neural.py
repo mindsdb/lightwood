@@ -337,8 +337,7 @@ class Neural(BaseMixer):
                     kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
 
                 if args.predict_proba and self.supports_proba:
-                    kwargs['return_raw'] = True
-                    decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
+                    decoded_prediction, probs, rev_map = self.target_encoder.decode_probabilities(Yh, **kwargs)
                     all_probs.append(probs)
                 else:
                     decoded_prediction = self.target_encoder.decode(Yh, **kwargs)
