@@ -20,6 +20,7 @@ from lightwood.api.high_level import (
     code_from_json_ai,
     json_ai_from_problem,
     predictor_from_state,
+    load_custom_module,
 )
 
 __all__ = [
@@ -42,4 +43,5 @@ __all__ = [
     "PredictorInterface",
     "dtype",
     "predictor_from_state",
+    "load_custom_module",
 ]
