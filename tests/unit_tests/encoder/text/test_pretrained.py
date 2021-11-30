@@ -9,13 +9,16 @@ from lightwood.encoder.text import PretrainedLangEncoder
 from lightwood.api.dtype import dtype
 import pandas as pd
 
-try:
-    from nltk.corpus import opinion_lexicon
-except LookupError:
-    import nltk
-    nltk.download('opinion_lexicon')
-    from nltk.corpus import opinion_lexicon
-
+import os
+import pathlib
+# Lexicon is from NLTK; issue with github actions downloading.
+#try:
+#    from nltk.corpus import opinion_lexicon
+#except LookupError:
+#    import nltk
+#    nltk.download('opinion_lexicon')
+#    from nltk.corpus import opinion_lexicon
+#
 
 def create_synthetic_data(n, ptrain=0.7):
     """
@@ -27,9 +30,20 @@ def create_synthetic_data(n, ptrain=0.7):
 
     :param n: the maximum character (n-1) in the string
     """ # noqa
+
+    textdir = str(pathlib.Path(__file__).parent.resolve())
+
     # Pick positive/negative words
-    pos_list = list(opinion_lexicon.positive())
-    neg_list = list(opinion_lexicon.negative())
+    with open(os.path.join(textdir, "pos.txt"), "r") as f:
+        pos_list = f.readlines()
+        pos_list = [i.strip("\n") for i in pos_list]
+
+    with open(os.path.join(textdir, "neg.txt"), "r") as f:
+        neg_list = f.readlines()
+        neg_list = [i.strip("\n") for i in neg_list]
+
+    #pos_list = list(opinion_lexicon.positive())
+    #neg_list = list(opinion_lexicon.negative())
 
     data = []
     label = []
