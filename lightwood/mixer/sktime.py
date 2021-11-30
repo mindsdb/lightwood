@@ -153,7 +153,7 @@ class SkTime(BaseMixer):
 
                 # if data is huge, filter out old records for quicker fitting
                 if self.auto_size:
-                    cutoff = min(len(series), max(500, kwargs['sp'] * self.cutoff_factor))
+                    cutoff = min(len(series), max(500, options['sp'] * self.cutoff_factor))
                     series = series.iloc[-cutoff:]
                 try:
                     self.models[group].fit(series, fh=self.fh)
