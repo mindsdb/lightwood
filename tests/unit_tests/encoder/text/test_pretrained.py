@@ -8,7 +8,12 @@ from lightwood.encoder import BinaryEncoder, NumericEncoder
 from lightwood.encoder.text import PretrainedLangEncoder
 from lightwood.api.dtype import dtype
 import pandas as pd
-from nltk.corpus import opinion_lexicon
+
+try:
+    from nltk.corpus import opinion_lexicon
+except LookupError:
+    nltk.download('opinion_lexicon')
+    from nltk.corpus import opinion_lexicon
 
 
 def create_synthetic_data(n, ptrain=0.7):
