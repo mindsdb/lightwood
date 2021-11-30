@@ -52,9 +52,9 @@ class TestTimeseries(unittest.TestCase):
 
     def calculate_duration(self, predictor, train, time_aim_expected):
 
-        start = time.process_time()
+        start = time.time()
         predictor.learn(train)
-        time_aim_actual = (time.process_time() - start)
+        time_aim_actual = (time.time() - start)
         if((time_aim_expected * 10) < time_aim_actual):
             error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
             raise ValueError(error)

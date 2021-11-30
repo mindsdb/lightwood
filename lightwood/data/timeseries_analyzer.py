@@ -52,7 +52,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
                        tss.order_by)
 
     # detect period
-    periods = detect_period(deltas, tss)
+    periods, freqs = detect_period(deltas, tss)
 
     return {'target_normalizers': new_data['target_normalizers'],
             'deltas': deltas,
@@ -60,7 +60,8 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
             'group_combinations': new_data['group_combinations'],
             'ts_naive_residuals': naive_forecast_residuals,
             'ts_naive_mae': scale_factor,
-            'periods': periods
+            'periods': periods,
+            'sample_freqs': freqs
             }
 
 
@@ -138,7 +139,7 @@ def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[D
     return group_residuals, group_scale_factors
 
 
-def detect_period(deltas: dict, tss: TimeseriesSettings) -> Dict[str, float]:
+def detect_period(deltas: dict, tss: TimeseriesSettings) -> (Dict[str, float], Dict[str, str]):
     """
     Helper method that, based on the most popular interval for a time series, determines its seasonal peridiocity (sp).
     This bit of information can be crucial for good modelling with methods like ARIMA.
@@ -160,7 +161,7 @@ def detect_period(deltas: dict, tss: TimeseriesSettings) -> Dict[str, float]:
     :param deltas: output of `get_delta`, has the most popular interval for each time series.
     :param tss: timeseries settings.
 
-    :return: dictionary with sp for all time series.
+    :return: for all time series 1) a dictionary with its sp and 2) a dictionary with the detected sampling frequency
     """  # noqa
     interval_to_period = {interval: period for (interval, period) in tss.interval_periods}
     secs_to_interval = {
@@ -182,11 +183,13 @@ def detect_period(deltas: dict, tss: TimeseriesSettings) -> Dict[str, float]:
             interval_to_period[tag] = period
 
     periods = {}
+    freqs = {}
     order_col_idx = 0
     for group in deltas.keys():
         delta = deltas[group][tss.order_by[order_col_idx]]
         diffs = [(tag, abs(delta - secs)) for tag, secs in secs_to_interval.items()]
         min_tag, min_diff = sorted(diffs, key=lambda x: x[1])[0]
         periods[group] = interval_to_period.get(min_tag, 1)
+        freqs[group] = min_tag
 
-    return periods
+    return periods, freqs
