@@ -1,5 +1,6 @@
-from typing import List, Iterable, Union
+from typing import List, Iterable
 import torch
+
 
 class BaseEncoder:
     """
@@ -43,7 +44,7 @@ class BaseEncoder:
         Given 'priming_data' (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.
 
         :param priming_data: An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.
-        """
+        """ # noqa
         self.is_prepared = True
 
     def encode(self, column_data: Iterable[object]) -> torch.Tensor:
@@ -55,7 +56,7 @@ class BaseEncoder:
         :param column_data: An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.
 
         :returns: The encoded representation of data, per column
-        """
+        """ # noqa
         raise NotImplementedError
 
     def decode(self, encoded_data: torch.Tensor) -> List[object]:
@@ -65,7 +66,7 @@ class BaseEncoder:
         :param encoded_data: The input representation in encoded format
 
         :returns: The decoded representation of data, per column, in the original data-type presented.
-        """
+        """ # noqa
         raise NotImplementedError
 
     # TODO Should work for all torch-based encoders, but custom behavior may have to be implemented for weird models

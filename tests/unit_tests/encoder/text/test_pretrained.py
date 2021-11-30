@@ -8,8 +8,8 @@ from lightwood.encoder import BinaryEncoder, NumericEncoder
 from lightwood.encoder.text import PretrainedLangEncoder
 from lightwood.api.dtype import dtype
 import pandas as pd
-
 from nltk.corpus import opinion_lexicon
+
 
 def create_synthetic_data(n, ptrain=0.7):
     """
@@ -20,16 +20,15 @@ def create_synthetic_data(n, ptrain=0.7):
     Creates a nonsense string of positive/negative words with some random subset of them.
 
     :param n: the maximum character (n-1) in the string
-    """
+    """ # noqa
     # Pick positive/negative words
-    pos_list=list(opinion_lexicon.positive())
-    neg_list=list(opinion_lexicon.negative())
+    pos_list = list(opinion_lexicon.positive())
+    neg_list = list(opinion_lexicon.negative())
 
     data = []
     label = []
 
     for i in range(n):
-        
         y = random.randint(0, 1)
 
         # Negative words
@@ -42,7 +41,7 @@ def create_synthetic_data(n, ptrain=0.7):
         data.append(word)
         label.append(y)
 
-    Ntrain = int(n*ptrain)
+    Ntrain = int(n * ptrain)
     train = pd.DataFrame([data[:Ntrain], label[:Ntrain]]).T
     test = pd.DataFrame([data[Ntrain:], label[Ntrain:]]).T
 
@@ -57,7 +56,7 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         Test end-to-end training of values. 
 
         Uses labeled data with positive/negative sentiment. Model outputs logits, since embed_mode is false. Should be better than random, as transformer language models may actually capture semantics (This is a hypothesis from priming lit.)
-        """
+        """ # noqa
         seed = 2
 
         np.random.seed(seed)
@@ -74,21 +73,20 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         enc = PretrainedLangEncoder(stop_after=10, embed_mode=False, output_type=dtype.binary)
         enc.prepare(train["text"], None, encoded_target_values=encoded_target_values)
 
-
         test_labels = test["label"].tolist()
-        pred_labels = softmax(enc.encode(test["text"]),dim=1).argmax(dim=1).tolist()
+        pred_labels = softmax(enc.encode(test["text"]), dim=1).argmax(dim=1).tolist()
 
         encoder_accuracy = accuracy_score(test_labels, pred_labels)
 
         print(f'Categorial encoder accuracy for: {encoder_accuracy} on testing dataset')
-        
-        assert(encoder_accuracy > 0.5) # Should be non-random since models have primed associations to sentiment
+
+        assert(encoder_accuracy > 0.5)  # Should be non-random since models have primed associations to sentiment
 
     def test_embed_mode(self):
         """
         Test if embed-mode is triggered when flagged.
         Checks if returned embeddings are of size N_rows x N_embed_dim
-        """
+        """ # noqa
         seed = 2
 
         np.random.seed(seed)
@@ -106,7 +104,7 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         enc.prepare(train["text"], None, encoded_target_values=encoded_target_values)
 
         # Embeddings of size N_vocab x N_embed_dim for most models (assumes distilbert)
-        N_embed_dim = enc._model.base_model.embeddings.word_embeddings.weight.shape[-1] 
+        N_embed_dim = enc._model.base_model.embeddings.word_embeddings.weight.shape[-1]
         embeddings = enc.encode(test["text"])
         assert(embeddings.shape[0] == test.shape[0])
         assert(embeddings.shape[1] == N_embed_dim)
@@ -121,13 +119,13 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         - does not train the transformer
         - flips transformer to 'embed_mode'
         - returns embedding size N_rows x N_embed_dim
-        """
+        """ # noqa
         seed = 5
 
         np.random.seed(seed)
         torch.manual_seed(seed)
         random.seed(seed)
-        
+
         # Make priming data:
         train, test = create_synthetic_data(2000)
         output_enc = NumericEncoder(is_target=True)
@@ -139,7 +137,7 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         enc.prepare(train["text"], None, encoded_target_values=encoded_target_values)
 
         # Embeddings of size N_vocab x N_embed_dim for most models (assumes distilbert)
-        N_embed_dim = enc._model.base_model.embeddings.word_embeddings.weight.shape[-1] 
+        N_embed_dim = enc._model.base_model.embeddings.word_embeddings.weight.shape[-1]
         embeddings = enc.encode(test["text"])
         assert(enc.embed_mode)
         assert(embeddings.shape[0] == test.shape[0])

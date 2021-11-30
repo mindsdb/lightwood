@@ -5,8 +5,8 @@ from lightwood.encoder.base import BaseEncoder
 from lightwood.api import dtype
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 from lightwood.helpers.general import is_none
+from typing import List, Iterable
 
-from typing import List, Iterable, Union
 
 class ArrayEncoder(BaseEncoder):
     """
