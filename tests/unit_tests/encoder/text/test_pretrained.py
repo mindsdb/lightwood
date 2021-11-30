@@ -8,17 +8,9 @@ from lightwood.encoder import BinaryEncoder, NumericEncoder
 from lightwood.encoder.text import PretrainedLangEncoder
 from lightwood.api.dtype import dtype
 import pandas as pd
-
 import os
 import pathlib
-# Lexicon is from NLTK; issue with github actions downloading.
-#try:
-#    from nltk.corpus import opinion_lexicon
-#except LookupError:
-#    import nltk
-#    nltk.download('opinion_lexicon')
-#    from nltk.corpus import opinion_lexicon
-#
+
 
 def create_synthetic_data(n, ptrain=0.7):
     """
@@ -41,9 +33,6 @@ def create_synthetic_data(n, ptrain=0.7):
     with open(os.path.join(textdir, "neg.txt"), "r") as f:
         neg_list = f.readlines()
         neg_list = [i.strip("\n") for i in neg_list]
-
-    #pos_list = list(opinion_lexicon.positive())
-    #neg_list = list(opinion_lexicon.negative())
 
     data = []
     label = []
