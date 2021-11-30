@@ -45,7 +45,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         self.onehot_encoder.prepare(priming_data)
 
-        input_len = self.onehot_encoder._lang.n_words
+        input_len = self.onehot_encoder.output_size
 
         if self.is_target:
             log.warning('You are trying to use an autoencoder for the target value! \
