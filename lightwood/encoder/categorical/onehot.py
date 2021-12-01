@@ -3,7 +3,7 @@ import numpy as np
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
-from copy import deepcopy as dc
+from copy import deepcopy
 
 from typing import Dict, List, Iterable
 
@@ -52,7 +52,7 @@ class OneHotEncoder(BaseEncoder):
         self.target_weights = None
         self.index_weights = None  # vector-weights, mapped by class id
         if self.is_target:
-            self.target_weights = dc(target_weights)
+            self.target_weights = deepcopy(target_weights)
 
     def prepare(self, priming_data: Iterable[str]):
         """
@@ -148,7 +148,7 @@ class OneHotEncoder(BaseEncoder):
 
         return ret
 
-    def decode_probabilities(self, encoded_data: torch.Tensor):
+    def decode_probabilities(self, encoded_data: torch.Tensor)-> Tuple[ List[str], List[List[float]], Dict[int, str]]:
         """
         Provides decoded answers, as well as a probability assignment to each data point.
 

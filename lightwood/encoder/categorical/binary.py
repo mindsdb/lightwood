@@ -4,7 +4,7 @@ from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
 from copy import deepcopy as dc
 
-from typing import Dict, List, Iterable
+from typing import Dict, List, Iterable, Tuple
 
 
 class BinaryEncoder(BaseEncoder):
@@ -132,7 +132,7 @@ class BinaryEncoder(BaseEncoder):
 
         return ret
 
-    def decode_probabilities(self, encoded_data: torch.Tensor):
+    def decode_probabilities(self, encoded_data: torch.Tensor) -> Tuple[ List[str], List[List[float]], Dict[int, str]]:
         """
         Provides decoded answers, as well as a probability assignment to each data point.
 
