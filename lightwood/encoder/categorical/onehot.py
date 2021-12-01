@@ -5,7 +5,7 @@ from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
 from copy import deepcopy
 
-from typing import Dict, List, Iterable
+from typing import Dict, List, Iterable, Tuple
 
 
 class OneHotEncoder(BaseEncoder):
