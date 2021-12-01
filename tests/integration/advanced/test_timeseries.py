@@ -8,7 +8,7 @@ from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.arima import AutoARIMA
 
 from lightwood.api.types import ProblemDefinition
-from lightwood.api.high_level import predictor_from_problem
+from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 from lightwood.mixer.sktime import SkTime
 
 np.random.seed(0)
@@ -70,18 +70,36 @@ class TestTimeseries(unittest.TestCase):
         order_by = 'T'
         nr_preds = 2
         window = 5
-        pred = predictor_from_problem(train,
-                                      ProblemDefinition.from_dict({'target': target,
-                                                                   'time_aim': time_aim_expected,
-                                                                   'anomaly_detection': True,
-                                                                   'timeseries_settings': {
-                                                                       'use_previous_target': True,
-                                                                       'allow_incomplete_history': True,
-                                                                       'group_by': ['Country'],
-                                                                       'nr_predictions': nr_preds,
-                                                                       'order_by': [order_by],
-                                                                       'window': window
-                                                                   }}))
+        jai = json_ai_from_problem(train,
+                                   ProblemDefinition.from_dict({'target': target,
+                                                                'time_aim': time_aim_expected,
+                                                                'anomaly_detection': True,
+                                                                'timeseries_settings': {
+                                                                    'use_previous_target': True,
+                                                                    'allow_incomplete_history': True,
+                                                                    'group_by': ['Country'],
+                                                                    'nr_predictions': nr_preds,
+                                                                    'order_by': [order_by],
+                                                                    'period_intervals': (('daily', 7),),
+                                                                    'window': window
+                                                                }}))
+        for i, mixer in enumerate(jai.outputs[target].mixers):
+            if mixer["module"] == 'SkTime':
+                sktime_mixer_idx = i
+
+        jai.outputs[target].mixers[sktime_mixer_idx] = {
+            "module": "SkTime",
+            "args": {
+                "stop_after": "$problem_definition.seconds_per_mixer",
+                "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                "model_path": "'trend.TrendForecaster'",  # use a cheap forecasater
+                "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
+            },
+        }
+
+        code = code_from_json_ai(jai)
+        pred = predictor_from_code(code)
+
         pred = self.calculate_duration(pred, train, time_aim_expected)
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
