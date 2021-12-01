@@ -88,7 +88,7 @@ class PretrainedLangEncoder(BaseEncoder):
     def prepare(
         self,
         train_priming_data: Iterable[str],
-        dev_priming_data: Optional[Iterable[str]],
+        dev_priming_data: Iterable[str],
         encoded_target_values: torch.Tensor,
     ):
         """
@@ -99,7 +99,7 @@ class PretrainedLangEncoder(BaseEncoder):
         Train + Dev are concatenated together and a transformer is then fine tuned with weight-decay applied on the transformer parameters. The option to freeze the underlying transformer and only train a linear layer exists if `frozen=True`. This trains faster, with the exception that the performance is often lower than fine-tuning on internal benchmarks.
 
         :param train_priming_data: Text data in the train set
-        :param dev_priming_data: Text data in the dev set (not currently supported)
+        :param dev_priming_data: Text data in the dev set (not currently supported; can be empty)
         :param encoded_target_values: Encoded target labels in Nrows x N_output_dimension
         """ # noqa
         if self.is_prepared:
@@ -108,7 +108,7 @@ class PretrainedLangEncoder(BaseEncoder):
         os.environ['TOKENIZERS_PARALLELISM'] = 'true'
 
         # TODO -> we shouldn't be concatenating these together
-        if dev_priming_data is not None:
+        if len(dev_priming_data) > 0:
             priming_data = pd.concat([train_priming_data, dev_priming_data]).values
         else:
             priming_data = train_priming_data.tolist()
