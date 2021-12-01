@@ -22,9 +22,9 @@ class BinaryEncoder(BaseEncoder):
 
     An encoder can represent a feature column or target column; in this case it represents a target, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes. 
 
-    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/15 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
+    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/20 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
 
-    target_weights = {"class1": 0.8, "class2": 0.15}
+    target_weights = {"class1": 0.8, "class2": 0.2}
 
     Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
     """ # noqa
