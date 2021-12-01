@@ -143,7 +143,7 @@ class TestPretrainedLangEncoder(unittest.TestCase):
 
         # Prepare the language encoder
         enc = PretrainedLangEncoder(stop_after=10, embed_mode=False, output_type=dtype.float)
-        enc.prepare(train["text"],  pd.DataFrame(), encoded_target_values=encoded_target_values)
+        enc.prepare(train["text"], pd.DataFrame(), encoded_target_values=encoded_target_values)
 
         # Embeddings of size N_vocab x N_embed_dim for most models (assumes distilbert)
         N_embed_dim = enc._model.base_model.embeddings.word_embeddings.weight.shape[-1]

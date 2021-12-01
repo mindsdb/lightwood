@@ -148,7 +148,7 @@ class OneHotEncoder(BaseEncoder):
 
         return ret
 
-    def decode_probabilities(self, encoded_data: torch.Tensor)-> Tuple[ List[str], List[List[float]], Dict[int, str]]:
+    def decode_probabilities(self, encoded_data: torch.Tensor) -> Tuple[List[str], List[List[float]], Dict[int, str]]:
         """
         Provides decoded answers, as well as a probability assignment to each data point.
 

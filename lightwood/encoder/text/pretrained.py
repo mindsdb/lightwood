@@ -19,7 +19,7 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 from lightwood.helpers.general import is_none
-from typing import Iterable, Optional
+from typing import Iterable
 
 
 class PretrainedLangEncoder(BaseEncoder):
