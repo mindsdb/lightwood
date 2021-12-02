@@ -7,6 +7,7 @@ on:
       - stable
       - staging
 
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -49,6 +50,7 @@ jobs:
         python -m flake8 .
     - name: Test with unittest
       run: |
+        # Run all the "standard" tests
         python -m unittest discover tests
 
   deploy:

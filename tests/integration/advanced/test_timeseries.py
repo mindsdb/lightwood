@@ -29,9 +29,6 @@ class TestTimeseries(unittest.TestCase):
             for t in range(nr_preds):
                 assert lower[t] <= prediction[t] <= upper[t]
 
-            if row.get('anomaly', False):
-                assert not (lower[0] <= row['truth'] <= upper[0])
-
     def split_arrivals(self, data: pd.DataFrame, grouped: bool) -> (pd.DataFrame, pd.DataFrame):
         train_ratio = 0.8
 
@@ -236,7 +233,7 @@ class TestTimeseries(unittest.TestCase):
 
         predictor.learn(train)
         ps = predictor.predict(test)
-        assert r2_score(ps['truth'].values, ps['prediction'].iloc[0]) >= 0.95
+        assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.95
 
         # test historical columns asserts
         test[f'{target}_2x'].iloc[0] = np.nan
