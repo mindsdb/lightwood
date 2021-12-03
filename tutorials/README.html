@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Overview: module code &mdash; lightwood 1.8.0 documentation</title>
+  <title>How to make a tutorial notebook? &mdash; lightwood 1.8.0 documentation</title>
   
 
   
@@ -148,10 +148,14 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Overview: module code</li>
+      <li>How to make a tutorial notebook?</li>
     
     
       <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/tutorials/README.md.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -163,52 +167,49 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="api/dtype.html">api.dtype</a></li>
-<li><a href="api/high_level.html">api.high_level</a></li>
-<li><a href="api/json_ai.html">api.json_ai</a></li>
-<li><a href="api/predictor.html">api.predictor</a></li>
-<li><a href="api/types.html">api.types</a></li>
-<li><a href="lightwood/analysis/analyze.html">lightwood.analysis.analyze</a></li>
-<li><a href="lightwood/analysis/base.html">lightwood.analysis.base</a></li>
-<li><a href="lightwood/analysis/explain.html">lightwood.analysis.explain</a></li>
-<li><a href="lightwood/analysis/helpers/acc_stats.html">lightwood.analysis.helpers.acc_stats</a></li>
-<li><a href="lightwood/analysis/helpers/feature_importance.html">lightwood.analysis.helpers.feature_importance</a></li>
-<li><a href="lightwood/analysis/nc/calibrate.html">lightwood.analysis.nc.calibrate</a></li>
-<li><a href="lightwood/data/cleaner.html">lightwood.data.cleaner</a></li>
-<li><a href="lightwood/data/encoded_ds.html">lightwood.data.encoded_ds</a></li>
-<li><a href="lightwood/data/splitter.html">lightwood.data.splitter</a></li>
-<li><a href="lightwood/data/timeseries_analyzer.html">lightwood.data.timeseries_analyzer</a></li>
-<li><a href="lightwood/data/timeseries_transform.html">lightwood.data.timeseries_transform</a></li>
-<li><a href="lightwood/encoder/array/array.html">lightwood.encoder.array.array</a></li>
-<li><a href="lightwood/encoder/base.html">lightwood.encoder.base</a></li>
-<li><a href="lightwood/encoder/categorical/autoencoder.html">lightwood.encoder.categorical.autoencoder</a></li>
-<li><a href="lightwood/encoder/categorical/binary.html">lightwood.encoder.categorical.binary</a></li>
-<li><a href="lightwood/encoder/categorical/multihot.html">lightwood.encoder.categorical.multihot</a></li>
-<li><a href="lightwood/encoder/categorical/onehot.html">lightwood.encoder.categorical.onehot</a></li>
-<li><a href="lightwood/encoder/datetime/datetime.html">lightwood.encoder.datetime.datetime</a></li>
-<li><a href="lightwood/encoder/datetime/datetime_sin_normalizer.html">lightwood.encoder.datetime.datetime_sin_normalizer</a></li>
-<li><a href="lightwood/encoder/image/img_2_vec.html">lightwood.encoder.image.img_2_vec</a></li>
-<li><a href="lightwood/encoder/numeric/numeric.html">lightwood.encoder.numeric.numeric</a></li>
-<li><a href="lightwood/encoder/numeric/ts_array_numeric.html">lightwood.encoder.numeric.ts_array_numeric</a></li>
-<li><a href="lightwood/encoder/numeric/ts_numeric.html">lightwood.encoder.numeric.ts_numeric</a></li>
-<li><a href="lightwood/encoder/text/pretrained.html">lightwood.encoder.text.pretrained</a></li>
-<li><a href="lightwood/encoder/text/short.html">lightwood.encoder.text.short</a></li>
-<li><a href="lightwood/encoder/text/vocab.html">lightwood.encoder.text.vocab</a></li>
-<li><a href="lightwood/encoder/time_series/rnn.html">lightwood.encoder.time_series.rnn</a></li>
-<li><a href="lightwood/ensemble/base.html">lightwood.ensemble.base</a></li>
-<li><a href="lightwood/ensemble/best_of.html">lightwood.ensemble.best_of</a></li>
-<li><a href="lightwood/ensemble/mean_ensemble.html">lightwood.ensemble.mean_ensemble</a></li>
-<li><a href="lightwood/ensemble/mode_ensemble.html">lightwood.ensemble.mode_ensemble</a></li>
-<li><a href="lightwood/ensemble/weighted_mean_ensemble.html">lightwood.ensemble.weighted_mean_ensemble</a></li>
-<li><a href="lightwood/mixer/base.html">lightwood.mixer.base</a></li>
-<li><a href="lightwood/mixer/lightgbm.html">lightwood.mixer.lightgbm</a></li>
-<li><a href="lightwood/mixer/lightgbm_array.html">lightwood.mixer.lightgbm_array</a></li>
-<li><a href="lightwood/mixer/neural.html">lightwood.mixer.neural</a></li>
-<li><a href="lightwood/mixer/regression.html">lightwood.mixer.regression</a></li>
-<li><a href="lightwood/mixer/sktime.html">lightwood.mixer.sktime</a></li>
-<li><a href="lightwood/mixer/unit.html">lightwood.mixer.unit</a></li>
-</ul>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="how-to-make-a-tutorial-notebook">
+<h1>How to make a tutorial notebook?<a class="headerlink" href="#how-to-make-a-tutorial-notebook" title="Permalink to this headline">¶</a></h1>
+<p>We use some of our tutorial notebooks as unit-tests to ensure that our pipeline is up-to-date, and to keep our examples relevant.</p>
+<p>In order to preserve our (and the reader’s) sanity these need to behave so that they can:</p>
+<ol class="simple">
+<li><p>Run via the CI tools</p></li>
+<li><p>Execute locally by a user</p></li>
+</ol>
+<p>To make things easier, the Lightwood team has proposed a general set of rules for tutorials:</p>
+<ol class="simple">
+<li><p>If you are using an external dataset, please ensure there is a URL that links to it (i.e.: load it in a dataframe using <code class="docutils literal notranslate"><span class="pre">pd.read_csv('{link}')</span></code>). Exceptions can be made for custom data types if the download dataset link is provided. We try to avoid hosting large datasets via Github, but please contact us if you believe it should be in our benchmarking suite.</p></li>
+<li><p>Show any <strong>custom code within the notebook</strong>. If you need to export it to a file (e.g. in order to load it as a lightwood module), use <code class="docutils literal notranslate"><span class="pre">%%writefile</span> <span class="pre">my_file.py</span></code> at the top of the jupyter codeblock, this will write the code into a file.</p></li>
+<li><p>Please do not save any extra files within the notebook (<code class="docutils literal notranslate"><span class="pre">.json</span></code> files may be ok); if your tutorial really requires saving extra files, please contact us and we can help.</p></li>
+<li><p>Please edit json-ai within the notebook as opposed to externally (i.e. generate a default, then make changes based on the key you need). You can show the difference between default and custom json-ai via a <code class="docutils literal notranslate"><span class="pre">print</span></code> statement.</p></li>
+<li><p>The notebook must not have any code metadata, otherwise github actions will fail to run them (in the json representation, grep for <code class="docutils literal notranslate"><span class="pre">kernel</span></code> and you will find the global <code class="docutils literal notranslate"><span class="pre">metadata</span></code> key, set that to <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+</ol>
+<p>If your tutorial is anything more than a single <code class="docutils literal notranslate"><span class="pre">.ipynb</span></code> notebook and some accompanying .png or .jpg files, it may be rejected automatically. We would be more than happy to work with you to help adapt them to fit our automated notebooks.</p>
+</div>
+
 
            </div>
            

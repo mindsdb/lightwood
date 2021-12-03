@@ -560,7 +560,7 @@ div.rendered_html tbody tr:hover {
 <p>Lightwood provides an abstraction called <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> to specify the target column of a dataset, along with other important parameters that you might want to define (for a complete list, check the documentation).</p>
 <p>We will create a simple one:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -572,7 +572,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -583,7 +583,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -596,8 +596,8 @@ div.rendered_html tbody tr:hover {
  &#39;time_aim&#39;: None,
  &#39;target_weights&#39;: None,
  &#39;positive_domain&#39;: False,
- &#39;timeseries_settings&#39;: TimeseriesSettings(is_timeseries=False, order_by=None, window=None, group_by=None, use_previous_target=True, nr_predictions=None, historical_columns=None, target_type=&#39;&#39;, allow_incomplete_history=False),
- &#39;anomaly_detection&#39;: True,
+ &#39;timeseries_settings&#39;: TimeseriesSettings(is_timeseries=False, order_by=None, window=None, group_by=None, use_previous_target=True, nr_predictions=None, historical_columns=None, target_type=&#39;&#39;, allow_incomplete_history=False, eval_cold_start=True, interval_periods=()),
+ &#39;anomaly_detection&#39;: False,
  &#39;ignore_features&#39;: [],
  &#39;fit_on_all&#39;: True,
  &#39;strict_mode&#39;: True,
@@ -607,7 +607,7 @@ div.rendered_html tbody tr:hover {
 <p>Notice how, even though we only defined what the <code class="docutils literal notranslate"><span class="pre">target</span></code> was, there are a bunch of additional parameters that have been assigned a default value. That is fine for our purposes, but remember that you can set any of these according to your own predictive needs.</p>
 <p>We also need to infer the type of each column. There is a method for this, <code class="docutils literal notranslate"><span class="pre">infer_types</span></code>, that we can use:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -625,13 +625,26 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-42831:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:lightwood-42831:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-42831:Using 15 processes to deduct types.</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -641,7 +654,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>We can now check the inferred types:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -650,7 +663,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -672,7 +685,7 @@ div.rendered_html tbody tr:hover {
 <p>Afterwards, you would make modifications to the Json AI as needed (for some examples, check out the other tutorials in <code class="docutils literal notranslate"><span class="pre">lightwood/examples/json_ai</span></code>), and finally generate a predictor object to learn and predict the task.</p>
 <p>In this case though, we will call it directly:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -691,8 +704,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-42831:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-42831:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2497:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>
@@ -700,7 +713,7 @@ div.rendered_html tbody tr:hover {
 <h2>Step 3: Peeking inside<a class="headerlink" href="#Step-3:-Peeking-inside" title="Permalink to this headline">¶</a></h2>
 <p>Now that our analysis is complete, we can check what Lightwood thinks of this dataset:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -709,7 +722,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -717,20 +730,21 @@ div.rendered_html tbody tr:hover {
 {&#39;avg_words_per_sentence&#39;,
  &#39;bias&#39;,
  &#39;buckets&#39;,
- &#39;df_std_dev&#39;,
+ &#39;df_target_stddev&#39;,
  &#39;distinct&#39;,
  &#39;histograms&#39;,
  &#39;missing&#39;,
  &#39;nr_rows&#39;,
  &#39;positive_domain&#39;,
  &#39;target_class_distribution&#39;,
+ &#39;target_weights&#39;,
  &#39;train_observed_classes&#39;}
 </pre></div></div>
 </div>
 <p>Some of these fields aren’t really applicable nor useful for this dataset, so let’s only check the ones that are.</p>
 <p>We can start with a very basic question: how many rows does the dataset have?</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -739,7 +753,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -752,7 +766,7 @@ div.rendered_html tbody tr:hover {
 <h3>Amount of missing information<a class="headerlink" href="#Amount-of-missing-information" title="Permalink to this headline">¶</a></h3>
 <p>Is there missing information in the dataset?</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -761,7 +775,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -783,7 +797,7 @@ div.rendered_html tbody tr:hover {
 <p>Each categorical column gets a bucket per each observed class.</p>
 <p>Let’s check an example for one of each:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -792,7 +806,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -801,7 +815,7 @@ div.rendered_html tbody tr:hover {
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -810,7 +824,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -872,7 +886,7 @@ div.rendered_html tbody tr:hover {
 <h3>Bias per column<a class="headerlink" href="#Bias-per-column" title="Permalink to this headline">¶</a></h3>
 <p>We can also check whether each column has buckets of data that exhibit some degree of bias:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -915,7 +929,7 @@ Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
 <h3>Column histograms<a class="headerlink" href="#Column-histograms" title="Permalink to this headline">¶</a></h3>
 <p>Finally, let’s plot histograms for some columns:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>

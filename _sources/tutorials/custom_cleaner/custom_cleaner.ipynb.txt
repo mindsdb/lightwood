@@ -29,7 +29,14 @@
    "cell_type": "code",
    "execution_count": 1,
    "id": "happy-wheat",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:27:16.359751Z",
+     "iopub.status.busy": "2021-12-03T17:27:16.355109Z",
+     "iopub.status.idle": "2021-12-03T17:27:18.819533Z",
+     "shell.execute_reply": "2021-12-03T17:27:18.818664Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import numpy as np\n",
@@ -63,7 +70,14 @@
    "cell_type": "code",
    "execution_count": 2,
    "id": "recognized-parish",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:27:18.827857Z",
+     "iopub.status.busy": "2021-12-03T17:27:18.827410Z",
+     "iopub.status.idle": "2021-12-03T17:27:20.185465Z",
+     "shell.execute_reply": "2021-12-03T17:27:20.185076Z"
+    }
+   },
    "outputs": [
     {
      "data": {
@@ -167,10 +181,7 @@
    ],
    "source": [
     "# Load the data\n",
-    "ddir = \"data/\"\n",
-    "filename = os.path.join(ddir, \"train.csv.zip\")\n",
-    "\n",
-    "data = pd.read_csv(filename)\n",
+    "data = pd.read_csv(\"https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/jupyter/train.csv.zip\")\n",
     "data.head()"
    ]
   },
@@ -193,36 +204,32 @@
    "cell_type": "code",
    "execution_count": 3,
    "id": "chicken-truth",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:27:20.189999Z",
+     "iopub.status.busy": "2021-12-03T17:27:20.189495Z",
+     "iopub.status.idle": "2021-12-03T17:28:03.075997Z",
+     "shell.execute_reply": "2021-12-03T17:28:03.075372Z"
+    }
+   },
    "outputs": [
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "INFO:lightwood-50752:Dropping features: ['url_legal', 'license', 'standard_error']\n",
-      "INFO:lightwood-50752:Analyzing a sample of 2478\n",
-      "INFO:lightwood-50752:from a total population of 2834, this is equivalent to 87.4% of your data.\n",
-      "INFO:lightwood-50752:Using 15 processes to deduct types.\n",
-      "INFO:lightwood-50752:Infering type for: id\n",
-      "INFO:lightwood-50752:Infering type for: target\n",
-      "INFO:lightwood-50752:Infering type for: excerpt\n",
-      "INFO:lightwood-50752:Column target has data type float\n",
-      "INFO:lightwood-50752:Doing text detection for column: id\n",
-      "INFO:lightwood-50752:Doing text detection for column: excerpt\n",
-      "INFO:lightwood-50752:Column id has data type categorical\n",
-      "WARNING:lightwood-50752:Column id is an identifier of type \"Hash-like identifier\"\n",
-      "INFO:lightwood-50752:Starting statistical analysis\n",
-      "INFO:lightwood-50752:Finished statistical analysis\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "MyCustomCleaner.py\n",
-      "MyCustomCleaner\n",
-      "MyCustomSplitter.py\n",
-      "MyCustomSplitter\n"
+      "\u001b[32mINFO:lightwood-2408:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Analyzing a sample of 2478\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Infering type for: id\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Doing text detection for column: id\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Column id has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Infering type for: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Doing text detection for column: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Infering type for: target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Column target has data type float\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2408:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -234,7 +241,7 @@
     "}\n",
     "\n",
     "# Generate the j{ai}son syntax\n",
-    "default_json = json_ai_from_problem(data, problem_definition)\n"
+    "json_ai = json_ai_from_problem(data, problem_definition)\n"
    ]
   },
   {
@@ -257,7 +264,14 @@
    "cell_type": "code",
    "execution_count": 4,
    "id": "designed-condition",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:28:03.082077Z",
+     "iopub.status.busy": "2021-12-03T17:28:03.081353Z",
+     "iopub.status.idle": "2021-12-03T17:28:03.083666Z",
+     "shell.execute_reply": "2021-12-03T17:28:03.084011Z"
+    }
+   },
    "outputs": [
     {
      "name": "stdout",
@@ -267,19 +281,20 @@
       "    \"features\": {\n",
       "        \"excerpt\": {\n",
       "            \"encoder\": {\n",
-      "                \"module\": \"Rich_Text.PretrainedLangEncoder\",\n",
+      "                \"module\": \"PretrainedLangEncoder\",\n",
       "                \"args\": {\n",
       "                    \"output_type\": \"$dtype_dict[$target]\",\n",
       "                    \"stop_after\": \"$problem_definition.seconds_per_encoder\"\n",
       "                }\n",
-      "            }\n",
+      "            },\n",
+      "            \"data_dtype\": \"rich_text\"\n",
       "        }\n",
       "    },\n",
       "    \"outputs\": {\n",
       "        \"target\": {\n",
       "            \"data_dtype\": \"float\",\n",
       "            \"encoder\": {\n",
-      "                \"module\": \"Float.NumericEncoder\",\n",
+      "                \"module\": \"NumericEncoder\",\n",
       "                \"args\": {\n",
       "                    \"is_target\": \"True\",\n",
       "                    \"positive_domain\": \"$statistical_analysis.positive_domain\"\n",
@@ -336,9 +351,11 @@
       "            \"nr_predictions\": null,\n",
       "            \"historical_columns\": null,\n",
       "            \"target_type\": \"\",\n",
-      "            \"allow_incomplete_history\": false\n",
+      "            \"allow_incomplete_history\": false,\n",
+      "            \"eval_cold_start\": true,\n",
+      "            \"interval_periods\": []\n",
       "        },\n",
-      "        \"anomaly_detection\": true,\n",
+      "        \"anomaly_detection\": false,\n",
       "        \"ignore_features\": [\n",
       "            \"url_legal\",\n",
       "            \"license\",\n",
@@ -359,7 +376,7 @@
     }
    ],
    "source": [
-    "print(default_json.to_json())"
+    "print(json_ai.to_json())"
    ]
   },
   {
@@ -370,17 +387,6 @@
     "The above shows the minimal syntax required to create a functional JSON-AI object. For each feature you consider in the dataset, we specify the name of the feature, the type of encoder (feature-engineering method) to process the feature, and key word arguments to process the encoder. For the output, we perform a similar operation, but specify the types of mixers, or algorithms used in making a predictor that can estimate the target. Lastly, we populate the \"problem_definition\" key with the ingredients for our ML pipeline.\n",
     "\n",
     "These are the only elements required to get off the ground with JSON-AI. However, we're interested in making a *custom* approach. So, let's make this syntax a file, and introduce our own changes."
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 5,
-   "id": "damaged-fluid",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "with open(\"default.json\", \"w\") as fp:\n",
-    "   fp.write(default_json.to_json())"
    ]
   },
   {
@@ -407,34 +413,42 @@
    ]
   },
   {
-   "cell_type": "markdown",
-   "id": "front-preview",
-   "metadata": {},
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "325d8f1b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:28:03.090567Z",
+     "iopub.status.busy": "2021-12-03T17:28:03.089809Z",
+     "iopub.status.idle": "2021-12-03T17:28:03.092084Z",
+     "shell.execute_reply": "2021-12-03T17:28:03.092438Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Writing MyCustomCleaner.py\n"
+     ]
+    }
+   ],
    "source": [
-    "```\n",
-    "import re\n",
-    "from copy import deepcopy\n",
+    "%%writefile MyCustomCleaner.py\n",
     "\n",
     "import numpy as np\n",
     "import pandas as pd\n",
-    "\n",
-    "# For time-series\n",
-    "import datetime\n",
-    "from dateutil.parser import parse as parse_dt\n",
     "\n",
     "from lightwood.api.dtype import dtype\n",
     "from lightwood.helpers import text\n",
     "from lightwood.helpers.log import log\n",
     "from lightwood.api.types import TimeseriesSettings\n",
-    "from lightwood.helpers.numeric import can_be_nan_numeric\n",
     "\n",
-    "# Import NLTK for stopwords\n",
-    "import nltk\n",
     "from nltk.corpus import stopwords\n",
     "\n",
     "stop_words = set(stopwords.words(\"english\"))\n",
     "\n",
-    "from typing import Dict, List, Optional, Tuple, Callable, Union\n",
+    "from typing import Dict\n",
     "\n",
     "# Borrow functions from Lightwood's cleaner\n",
     "from lightwood.data.cleaner import (\n",
@@ -511,8 +525,7 @@
     "            to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None\n",
     "        )\n",
     "\n",
-    "    return data\n",
-    "```"
+    "    return data\n"
    ]
   },
   {
@@ -520,9 +533,29 @@
    "id": "radical-armenia",
    "metadata": {},
    "source": [
-    "#### Place your custom module in `~/lightwood_modules`\n",
+    "#### Place your custom module in `~/lightwood_modules` or `/etc/lightwood_modules`\n",
     "\n",
-    "We automatically search for custom scripts in your `~/lightwood_modules` path. Place your file there. Later, you'll see when we autogenerate code, that you can change your import location if you choose."
+    "We automatically search for custom scripts in your `~/lightwood_modules` and `/etc/lightwood_modules` path. Place your file there. Later, you'll see when we autogenerate code, that you can change your import location if you choose."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "f030f8ca",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:28:03.095832Z",
+     "iopub.status.busy": "2021-12-03T17:28:03.095392Z",
+     "iopub.status.idle": "2021-12-03T17:28:03.097365Z",
+     "shell.execute_reply": "2021-12-03T17:28:03.096975Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from lightwood import load_custom_module\n",
+    "\n",
+    "# Lightwood automatically does this for us if we want\n",
+    "load_custom_module('MyCustomCleaner.py')"
    ]
   },
   {
@@ -572,19 +605,30 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 7,
    "id": "floating-patent",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:28:03.102214Z",
+     "iopub.status.busy": "2021-12-03T17:28:03.101778Z",
+     "iopub.status.idle": "2021-12-03T17:28:03.333664Z",
+     "shell.execute_reply": "2021-12-03T17:28:03.334039Z"
+    }
+   },
    "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2408:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+     ]
+    },
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "MyCustomCleaner.py\n",
-      "MyCustomCleaner\n",
-      "MyCustomSplitter.py\n",
-      "MyCustomSplitter\n",
       "import lightwood\n",
+      "from lightwood import __version__ as lightwood_version\n",
       "from lightwood.analysis import *\n",
       "from lightwood.api import *\n",
       "from lightwood.data import *\n",
@@ -607,14 +651,17 @@
       "import sys\n",
       "\n",
       "\n",
-      "for import_dir in [os.path.expanduser(\"~/lightwood_modules\"), \"/etc/lightwood_modules\"]:\n",
+      "for import_dir in [\n",
+      "    os.path.join(\n",
+      "        os.path.expanduser(\"~/lightwood_modules\"), lightwood_version.replace(\".\", \"_\")\n",
+      "    ),\n",
+      "    os.path.join(\"/etc/lightwood_modules\", lightwood_version.replace(\".\", \"_\")),\n",
+      "]:\n",
       "    if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):\n",
       "        for file_name in list(os.walk(import_dir))[0][2]:\n",
-      "            print(file_name)\n",
       "            if file_name[-3:] != \".py\":\n",
       "                continue\n",
       "            mod_name = file_name[:-3]\n",
-      "            print(mod_name)\n",
       "            loader = importlib.machinery.SourceFileLoader(\n",
       "                mod_name, os.path.join(import_dir, file_name)\n",
       "            )\n",
@@ -655,8 +702,10 @@
       "                    \"historical_columns\": None,\n",
       "                    \"target_type\": \"\",\n",
       "                    \"allow_incomplete_history\": False,\n",
+      "                    \"eval_cold_start\": True,\n",
+      "                    \"interval_periods\": [],\n",
       "                },\n",
-      "                \"anomaly_detection\": True,\n",
+      "                \"anomaly_detection\": False,\n",
       "                \"ignore_features\": [\"url_legal\", \"license\", \"standard_error\"],\n",
       "                \"fit_on_all\": True,\n",
       "                \"strict_mode\": True,\n",
@@ -694,7 +743,6 @@
       "                positive_domain=self.statistical_analysis.positive_domain,\n",
       "            ),\n",
       "            AccStats(deps=[\"ICP\"]),\n",
-      "            GlobalFeatureImportance(disable_column_importance=False),\n",
       "        ]\n",
       "\n",
       "    def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:\n",
@@ -722,9 +770,9 @@
       "        train_test_data = splitter(\n",
       "            data=data,\n",
       "            seed=1,\n",
-      "            pct_train=80,\n",
-      "            pct_dev=10,\n",
-      "            pct_test=10,\n",
+      "            pct_train=0.8,\n",
+      "            pct_dev=0.1,\n",
+      "            pct_test=0.1,\n",
       "            tss=self.problem_definition.timeseries_settings,\n",
       "            target=self.target,\n",
       "            dtype_dict=self.dtype_dict,\n",
@@ -742,12 +790,12 @@
       "\n",
       "        # Column to encoder mapping\n",
       "        self.encoders = {\n",
-      "            \"target\": Float.NumericEncoder(\n",
+      "            \"target\": NumericEncoder(\n",
       "                is_target=True,\n",
       "                positive_domain=self.statistical_analysis.positive_domain,\n",
       "            ),\n",
-      "            \"excerpt\": Rich_Text.PretrainedLangEncoder(\n",
-      "                output_type=False,\n",
+      "            \"excerpt\": PretrainedLangEncoder(\n",
+      "                output_type=self.dtype_dict[self.target],\n",
       "                stop_after=self.problem_definition.seconds_per_encoder,\n",
       "            ),\n",
       "        }\n",
@@ -814,10 +862,12 @@
       "        # Featurize data into numerical representations for models\n",
       "\n",
       "        log.info(\"Featurizing the data\")\n",
-      "        feature_data = {key: None for key in split_data.keys()}\n",
       "\n",
-      "        for key, data in split_data.items():\n",
-      "            feature_data[key] = EncodedDs(self.encoders, data, self.target)\n",
+      "        feature_data = {\n",
+      "            key: EncodedDs(self.encoders, data, self.target)\n",
+      "            for key, data in split_data.items()\n",
+      "            if key != \"stratified_on\"\n",
+      "        }\n",
       "\n",
       "        return feature_data\n",
       "\n",
@@ -849,15 +899,16 @@
       "                target_encoder=self.encoders[self.target],\n",
       "                target=self.target,\n",
       "                dtype_dict=self.dtype_dict,\n",
-      "                input_cols=self.input_cols,\n",
       "                timeseries_settings=self.problem_definition.timeseries_settings,\n",
       "            ),\n",
       "            LightGBM(\n",
       "                fit_on_dev=True,\n",
+      "                use_optuna=True,\n",
       "                stop_after=self.problem_definition.seconds_per_mixer,\n",
       "                target=self.target,\n",
       "                dtype_dict=self.dtype_dict,\n",
       "                input_cols=self.input_cols,\n",
+      "                target_encoder=self.encoders[self.target],\n",
       "            ),\n",
       "            Regression(\n",
       "                stop_after=self.problem_definition.seconds_per_mixer,\n",
@@ -890,6 +941,7 @@
       "        self.ensemble = BestOf(\n",
       "            ts_analysis=None,\n",
       "            data=encoded_test_data,\n",
+      "            args=self.pred_args,\n",
       "            accuracy_functions=self.accuracy_functions,\n",
       "            target=self.target,\n",
       "            mixers=self.mixers,\n",
@@ -915,7 +967,7 @@
       "            data=encoded_test_data,\n",
       "            train_data=encoded_train_data,\n",
       "            stats_info=self.statistical_analysis,\n",
-      "            ts_cfg=self.problem_definition.timeseries_settings,\n",
+      "            tss=self.problem_definition.timeseries_settings,\n",
       "            accuracy_functions=self.accuracy_functions,\n",
       "            predictor=self.ensemble,\n",
       "            target=self.target,\n",
@@ -935,10 +987,10 @@
       "        self.analyze_data(data)\n",
       "\n",
       "        # Pre-process the data\n",
-      "        clean_data = self.preprocess(data)\n",
+      "        data = self.preprocess(data)\n",
       "\n",
       "        # Create train/test (dev) split\n",
-      "        train_dev_test = self.split(clean_data)\n",
+      "        train_dev_test = self.split(data)\n",
       "\n",
       "        # Prepare encoders\n",
       "        self.prepare(train_dev_test)\n",
@@ -961,16 +1013,14 @@
       "        if self.problem_definition.fit_on_all:\n",
       "\n",
       "            log.info(\"Adjustment on validation requested.\")\n",
-      "            update_data = {\n",
-      "                \"new\": enc_train_test[\"test\"],\n",
-      "                \"old\": ConcatedEncodedDs(\n",
-      "                    [enc_train_test[\"train\"], enc_train_test[\"dev\"]]\n",
-      "                ),\n",
-      "            }  # noqa\n",
+      "            self.adjust(\n",
+      "                enc_train_test[\"test\"],\n",
+      "                ConcatedEncodedDs([enc_train_test[\"train\"], enc_train_test[\"dev\"]]),\n",
+      "            )\n",
       "\n",
-      "            self.adjust(update_data)\n",
-      "\n",
-      "    def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:\n",
+      "    def adjust(\n",
+      "        self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None\n",
+      "    ) -> None:\n",
       "        # Update mixers with new information\n",
       "\n",
       "        self.mode = \"train\"\n",
@@ -979,8 +1029,8 @@
       "        # Extract data\n",
       "        # --------------- #\n",
       "        # Extract the featurized data\n",
-      "        encoded_old_data = new_data[\"old\"]\n",
-      "        encoded_new_data = new_data[\"new\"]\n",
+      "        encoded_old_data = old_data if old_data is not None else pd.DataFrame()\n",
+      "        encoded_new_data = new_data\n",
       "\n",
       "        # --------------- #\n",
       "        # Adjust (Update) Mixers\n",
@@ -992,6 +1042,8 @@
       "\n",
       "    def predict(self, data: pd.DataFrame, args: Dict = {}) -> pd.DataFrame:\n",
       "\n",
+      "        self.mode = \"predict\"\n",
+      "\n",
       "        # Remove columns that user specifies to ignore\n",
       "        log.info(f\"Dropping features: {self.problem_definition.ignore_features}\")\n",
       "        data = data.drop(\n",
@@ -1001,21 +1053,11 @@
       "            if col not in data.columns:\n",
       "                data[col] = [None] * len(data)\n",
       "\n",
-      "        # Clean the data\n",
-      "        self.mode = \"predict\"\n",
-      "        log.info(\"Cleaning the data\")\n",
-      "        data = MyCustomCleaner.cleaner(\n",
-      "            data=data,\n",
-      "            identifiers=self.identifiers,\n",
-      "            dtype_dict=self.dtype_dict,\n",
-      "            target=self.target,\n",
-      "            mode=self.mode,\n",
-      "            timeseries_settings=self.problem_definition.timeseries_settings,\n",
-      "            anomaly_detection=self.problem_definition.anomaly_detection,\n",
-      "        )\n",
+      "        # Pre-process the data\n",
+      "        data = self.preprocess(data)\n",
       "\n",
       "        # Featurize the data\n",
-      "        encoded_ds = EncodedDs(self.encoders, data, self.target)\n",
+      "        encoded_ds = self.featurize({\"predict_data\": data})[\"predict_data\"]\n",
       "        encoded_data = encoded_ds.get_encoded_data(include_target=False)\n",
       "\n",
       "        self.pred_args = PredictionArguments.from_dict(args)\n",
@@ -1046,12 +1088,22 @@
     }
    ],
    "source": [
-    "# Make changes to your JSON-file and load the custom version\n",
-    "with open('custom.json', 'r') as fp:\n",
-    "   modified_json = JsonAI.from_json(fp.read())\n",
+    "# Make changes to your JSON-AI\n",
+    "json_ai.cleaner = {\n",
+    "        \"module\": \"MyCustomCleaner.cleaner\",\n",
+    "        \"args\": {\n",
+    "            \"identifiers\": \"$identifiers\",\n",
+    "            \"data\": \"data\",\n",
+    "            \"dtype_dict\": \"$dtype_dict\",\n",
+    "            \"target\": \"$target\",\n",
+    "            \"mode\": \"$mode\",\n",
+    "            \"timeseries_settings\": \"$problem_definition.timeseries_settings\",\n",
+    "            \"anomaly_detection\": \"$problem_definition.anomaly_detection\"\n",
+    "        }\n",
+    "}\n",
     "\n",
     "#Generate python code that fills in your pipeline\n",
-    "code = code_from_json_ai(modified_json)\n",
+    "code = code_from_json_ai(json_ai)\n",
     "\n",
     "print(code)\n",
     "\n",
@@ -1097,21 +1149,17 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": 8,
    "id": "violent-guard",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "MyCustomCleaner.py\n",
-      "MyCustomCleaner\n",
-      "MyCustomSplitter.py\n",
-      "MyCustomSplitter\n"
-     ]
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:28:03.337479Z",
+     "iopub.status.busy": "2021-12-03T17:28:03.336991Z",
+     "iopub.status.idle": "2021-12-03T17:28:03.343259Z",
+     "shell.execute_reply": "2021-12-03T17:28:03.342896Z"
     }
-   ],
+   },
+   "outputs": [],
    "source": [
     "# Turn the code above into a predictor object\n",
     "predictor = predictor_from_code(code)"
@@ -1119,18 +1167,28 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
+   "execution_count": 9,
    "id": "closing-episode",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:28:03.347679Z",
+     "iopub.status.busy": "2021-12-03T17:28:03.346760Z",
+     "iopub.status.idle": "2021-12-03T17:28:03.503971Z",
+     "shell.execute_reply": "2021-12-03T17:28:03.504339Z"
+    }
+   },
    "outputs": [
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "INFO:lightwood-50752:Cleaning the data\n",
-      "INFO:lightwood-50752:Cleaning column =target\n",
-      "INFO:lightwood-50752:Converted target into strictly non-negative\n",
-      "INFO:lightwood-50752:Cleaning column =excerpt\n"
+      "\u001b[32mINFO:lightwood-2408:Performing statistical analysis on data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Finished statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Cleaning column =target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Converted target into strictly non-negative\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2408:Cleaning column =excerpt\u001b[0m\n"
      ]
     },
     {
@@ -1197,12 +1255,17 @@
        "4  Once upon time Three Bears lived together hous...  0.247197"
       ]
      },
-     "execution_count": 8,
+     "execution_count": 9,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
+    "predictor.mode = \"train\"\n",
+    "\n",
+    "# Perform stats analysis\n",
+    "predictor.analyze_data(data)\n",
+    "\n",
     "# Pre-process the data\n",
     "cleaned_data = predictor.preprocess(data)\n",
     "\n",
@@ -1211,9 +1274,16 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
+   "execution_count": 10,
    "id": "major-stake",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-12-03T17:28:03.510450Z",
+     "iopub.status.busy": "2021-12-03T17:28:03.509990Z",
+     "iopub.status.idle": "2021-12-03T17:28:03.512189Z",
+     "shell.execute_reply": "2021-12-03T17:28:03.512536Z"
+    }
+   },
    "outputs": [
     {
      "name": "stdout",
@@ -1267,10 +1337,12 @@
   }
  ],
  "metadata": {
+  "interpreter": {
+   "hash": "31f2aee4e71d21fbe5cf8b01ff0e069b9275f58929596ceb00d14d90e3e16cd6"
+  },
   "kernelspec": {
-   "display_name": "mdb",
-   "language": "python",
-   "name": "mdb"
+   "display_name": "Python 3.8.10 64-bit",
+   "name": "python3"
   },
   "language_info": {
    "codemirror_mode": {
@@ -1282,7 +1354,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.10"
+   "version": "3.9.9"
   }
  },
  "nbformat": 4,

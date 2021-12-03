@@ -171,10 +171,12 @@
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">import</span> <span class="nn">optuna</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sktime.forecasting.ets</span> <span class="kn">import</span> <span class="n">AutoETS</span>
 <span class="kn">from</span> <span class="nn">sktime.forecasting.base</span> <span class="kn">import</span> <span class="n">ForecastingHorizon</span><span class="p">,</span> <span class="n">BaseForecaster</span>
-<span class="kn">from</span> <span class="nn">sktime.forecasting.arima</span> <span class="kn">import</span> <span class="n">AutoARIMA</span>
+<span class="kn">from</span> <span class="nn">sktime.performance_metrics.forecasting</span> <span class="kn">import</span> <span class="n">MeanAbsolutePercentageError</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
@@ -189,23 +191,28 @@
     <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">model_path</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-            <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;arima.AutoARIMA&#39;</span><span class="p">):</span>
+            <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;arima.AutoARIMA&#39;</span><span class="p">,</span> <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared</span>
 <span class="sd">        to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with</span>
 <span class="sd">        respect to the last seen data point at training time.</span>
 <span class="sd">        </span>
-<span class="sd">        Due to this, the mixer is forced to &quot;fit_on_all&quot; and so the latest point in the validation split given by the</span>
-<span class="sd">        mixer marks the difference between training data and where forecasts will start. This effectively means that for</span>
-<span class="sd">        correct forecasts, you need to specify how much time has passed since the aforementioned timestamp. By default,</span>
-<span class="sd">        it assumes predictions are for the very next timestamp post-training.</span>
+<span class="sd">        Due to this, the mixer tries to &quot;fit_on_all&quot; so that the latest point in the validation split marks the </span>
+<span class="sd">        difference between training data and where forecasts will start. In practice, you need to specify how much </span>
+<span class="sd">        time has passed since the aforementioned timestamp for correct forecasts. By default, it is assumed that</span>
+<span class="sd">         predictions are for the very next timestamp post-training.</span>
 <span class="sd">        </span>
 <span class="sd">        If the task has groups (i.e. &#39;TimeseriesSettings.group_by&#39; is not empty), the mixer will spawn one forecaster </span>
 <span class="sd">        object per each different group observed at training time, plus an additional default forecaster fit with all data.</span>
+<span class="sd">        </span>
+<span class="sd">        There is an optuna-based automatic hyperparameter search. For now, it considers selecting the forecaster type</span>
+<span class="sd">        based on the global SMAPE error across all groups.</span>
 <span class="sd">        </span>
 <span class="sd">        :param stop_after: time budget in seconds.</span>
 <span class="sd">        :param target: column to forecast.</span>
@@ -213,54 +220,92 @@
 <span class="sd">        :param n_ts_predictions: length of forecasted horizon.</span>
 <span class="sd">        :param ts_analysis: dictionary with miscellaneous time series info, as generated by &#39;lightwood.data.timeseries_analyzer&#39;.</span>
 <span class="sd">        :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format &quot;$module.$class&#39; where &#39;$module&#39; is inside `sktime.forecasting`. Default is &#39;arima.AutoARIMA&#39;.</span>
+<span class="sd">        :param hyperparam_search: bool that indicates whether to perform the hyperparameter tuning or not.</span>
+<span class="sd">        :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
-        <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span> <span class="o">=</span> <span class="n">n_ts_predictions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">ts_analysis</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">ts_analysis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span> <span class="o">=</span> <span class="n">n_ts_predictions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_size</span> <span class="o">=</span> <span class="n">auto_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_factor</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># times the detected maximum seasonal period</span>
+
+        <span class="c1"># optuna hyperparameter tuning</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_search</span> <span class="o">=</span> <span class="n">hyperparam_search</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_error_fn</span> <span class="o">=</span> <span class="n">MeanAbsolutePercentageError</span><span class="p">(</span><span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ets.AutoETS&#39;</span><span class="p">,</span> <span class="s1">&#39;theta.ThetaForecaster&#39;</span><span class="p">,</span> <span class="s1">&#39;arima.AutoARIMA&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span><span class="p">)</span>
 
         <span class="c1"># sktime forecast horizon object is made relative to the end of the latest data point seen at training time</span>
         <span class="c1"># the default assumption is to forecast the next `self.n_ts_predictions` after said data point</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fh</span> <span class="o">=</span> <span class="n">ForecastingHorizon</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">is_relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="c1"># load sktime forecaster</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span>
-        <span class="n">sktime_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;sktime&#39;</span><span class="p">,</span> <span class="s1">&#39;forecasting&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]))</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sktime_module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find specified method </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="si">}</span><span class="s2">. Using AutoARIMA instead...&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span> <span class="o">=</span> <span class="n">AutoARIMA</span>
-
 <div class="viewcode-block" id="SkTime.fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.SkTime.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fits a set of sktime forecasters. The number of models depends on how many groups are observed at training time.</span>
 
-<span class="sd">        Forecaster type can be specified by providing the `model_class` argument in `__init__()`.</span>
+<span class="sd">        Forecaster type can be specified by providing the `model_class` argument in `__init__()`. It can also be determined by hyperparameter optimization based on dev data validation error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Started fitting sktime forecaster for array prediction&#39;</span><span class="p">)</span>
 
-        <span class="n">all_subsets</span> <span class="o">=</span> <span class="n">ConcatedEncodedDs</span><span class="p">([</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">])</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">all_subsets</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;__mdb_original_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s2">&quot;tss&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">order_by</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_search</span><span class="p">:</span>
+            <span class="n">search_space</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">GridSampler</span><span class="p">(</span><span class="n">search_space</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="k">lambda</span> <span class="n">trial</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_best_model</span><span class="p">(</span><span class="n">trial</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">),</span> <span class="n">n_trials</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">ConcatedEncodedDs</span><span class="p">([</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">ConcatedEncodedDs</span><span class="p">([</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Internal method that fits forecasters to a given dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;__mdb_original_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s2">&quot;tss&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">order_by</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">],</span>
                 <span class="s1">&#39;group_info&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="n">gcol</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                                <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">}</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="p">{}}</span>
 
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_search</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">:</span>
+            <span class="n">module_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">finished_study</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">is_finished</span><span class="p">())</span> <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">trials</span><span class="p">])</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span>
+            <span class="k">if</span> <span class="n">finished_study</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Selected best model: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">best_params</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">module_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">best_params</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">module_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_dict</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span>  <span class="c1"># select active optuna choice</span>
 
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;sp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">],</span>
-                <span class="s1">&#39;error_action&#39;</span><span class="p">:</span> <span class="s1">&#39;raise&#39;</span><span class="p">,</span>
+        <span class="n">sktime_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;sktime&#39;</span><span class="p">,</span> <span class="s1">&#39;forecasting&#39;</span><span class="p">,</span> <span class="n">module_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sktime_module</span><span class="p">,</span> <span class="n">module_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">model_class</span> <span class="o">=</span> <span class="n">AutoETS</span>  <span class="c1"># use AutoETS when the provided class does not exist</span>
+
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;sp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">],</span>  <span class="c1"># seasonality period</span>
+                <span class="s1">&#39;suppress_warnings&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                 <span class="c1"># ignore warnings if possible</span>
+                <span class="s1">&#39;error_action&#39;</span><span class="p">:</span> <span class="s1">&#39;raise&#39;</span><span class="p">,</span>                   <span class="c1"># raise errors instead of fit() failing silently</span>
             <span class="p">}</span>
-            <span class="k">if</span> <span class="s1">&#39;suppress_warnings&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;suppress_warnings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># ignore warnings if possible</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_forecaster_kwarg</span><span class="p">(</span><span class="n">model_class</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]:</span>
                 <span class="n">series_idxs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
@@ -273,11 +318,16 @@
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>  <span class="c1"># remove NaN  # @TODO: benchmark imputation vs this?</span>
+
+                <span class="c1"># if data is huge, filter out old records for quicker fitting</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_size</span><span class="p">:</span>
+                    <span class="n">cutoff</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_factor</span><span class="p">))</span>
+                    <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="n">cutoff</span><span class="p">:]</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span><span class="n">seasonal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span></div>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_class</span><span class="p">()</span>  <span class="c1"># with default options (i.e. no seasonality, among others)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SkTime.partial_fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.SkTime.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -290,6 +340,7 @@
 <span class="sd">        :param dev_data: original `test` split (used to validate and select model if ensemble is `BestOf`).</span>
 <span class="sd">        :param train_data: concatenated original `train` and `dev` splits.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_search</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dev_data</span><span class="p">,</span> <span class="n">train_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
@@ -358,7 +409,38 @@
             <span class="n">end_idx</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span>
             <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">original_index</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_idx</span><span class="p">,</span> <span class="n">end_idx</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">ydf</span></div>
+        <span class="k">return</span> <span class="n">ydf</span>
+
+    <span class="k">def</span> <span class="nf">_get_best_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">test_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function for Optuna hyperparameter optimization.</span>
+<span class="sd">        For now, it uses dev data split to find the best model out of the list specified in self.possible_models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Starting trial with hyperparameters: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_dict</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span>
+            <span class="n">y_true</span> <span class="o">=</span> <span class="n">test_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span><span class="p">]</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">test_data</span><span class="p">)[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)]</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_error_fn</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Trial got error: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">error</span>
+
+    <span class="k">def</span> <span class="nf">_add_forecaster_kwarg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forecaster</span><span class="p">:</span> <span class="n">BaseForecaster</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds arguments to the `kwargs` dictionary if the key-value pair is valid for the `forecaster` class signature.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">forecaster</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">kwargs</span></div>
 </pre></div>
 
            </div>
