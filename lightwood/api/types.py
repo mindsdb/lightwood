@@ -304,6 +304,7 @@ class ProblemDefinition:
     :param seconds_per_mixer: Number of seconds maximum to spend PER mixer trained in the list of possible mixers.
     :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \
     learn a representation.
+    :param expected_additional_time: Time budget for non-encoder/mixer tasks
     :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \
         encoders and models.
     :param target_weights: indicates to the accuracy functions how much to weight every target class.
