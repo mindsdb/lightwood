@@ -357,7 +357,7 @@ class ProblemDefinition:
 
         time_aim = obj.get('time_aim', None)
         if time_aim is not None and time_aim < 10:
-            log.warning(f'Your specified time aim of {time_aim} is too sort. Setting it to 10 seconds.')
+            log.warning(f'Your specified time aim of {time_aim} is too short. Setting it to 10 seconds.')
 
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
