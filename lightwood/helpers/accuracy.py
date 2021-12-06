@@ -15,11 +15,9 @@ def to_binary(y: Iterable) -> List[int]:
                 y_binarized.append(0)
             else:
                 y_binarized.append(int(ele))
-        print(y_binarized)
-        exit()
-        assert len(set(y)) < 3
-        assert 1 in y
-        assert 0 in y
+
+        assert len(set(y_binarized)) < 3
+        assert 1 in y_binarized or 0 in y_binarized
     except Exception:
         raise Exception('To use precision, recall or f1 please make sure your target consists only of 1s and 0s')
     return y_binarized
