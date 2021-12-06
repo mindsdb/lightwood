@@ -13,6 +13,7 @@ def to_binary(y: Iterable) -> List[int]:
         assert 0 in y
     except Exception:
         raise Exception('To use precision, recall or f1 please make sure your target consists only of 1s and 0s')
+    return y
 
 
 def f1_score(y_true, y_pred) -> float:
