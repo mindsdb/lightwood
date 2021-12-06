@@ -2,10 +2,20 @@ import unittest
 import numpy as np
 import pandas as pd
 from typing import List
+<<<<<<< HEAD
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import predictor_from_problem
 from tests.utils.timing import train_and_check_time_aim
 
+=======
+
+from sktime.forecasting.base import ForecastingHorizon
+from sktime.forecasting.arima import AutoARIMA
+
+from lightwood.api.types import ProblemDefinition
+from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
+from lightwood.mixer.sktime import SkTime
+>>>>>>> staging
 
 np.random.seed(0)
 
@@ -25,9 +35,6 @@ class TestTimeseries(unittest.TestCase):
             for t in range(nr_preds):
                 assert lower[t] <= prediction[t] <= upper[t]
 
-            if row.get('anomaly', False):
-                assert not (lower[0] <= row['truth'] <= upper[0])
-
     def split_arrivals(self, data: pd.DataFrame, grouped: bool) -> (pd.DataFrame, pd.DataFrame):
         train_ratio = 0.8
 
@@ -46,6 +53,20 @@ class TestTimeseries(unittest.TestCase):
 
         return train, test
 
+<<<<<<< HEAD
+=======
+    def calculate_duration(self, predictor, train, time_aim_expected):
+
+        start = time.time()
+        predictor.learn(train)
+        time_aim_actual = (time.time() - start)
+        if((time_aim_expected * 10) < time_aim_actual):
+            error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
+            raise ValueError(error)
+        assert (time_aim_expected * 10) >= time_aim_actual
+        return predictor
+
+>>>>>>> staging
     def test_0_time_series_grouped_regression(self):
         """Test grouped numerical predictions, with anomalies and forecast horizon > 1 """
         data = pd.read_csv('tests/data/arrivals.csv')
@@ -55,6 +76,7 @@ class TestTimeseries(unittest.TestCase):
         order_by = 'T'
         nr_preds = 2
         window = 5
+<<<<<<< HEAD
         pred = predictor_from_problem(train,
                                       ProblemDefinition.from_dict({'target': target,
                                                                    'time_aim': time_aim_expected,
@@ -68,6 +90,39 @@ class TestTimeseries(unittest.TestCase):
                                                                        'window': window
                                                                    }}))
         train_and_check_time_aim(pred, train)
+=======
+        jai = json_ai_from_problem(train,
+                                   ProblemDefinition.from_dict({'target': target,
+                                                                'time_aim': time_aim_expected,
+                                                                'anomaly_detection': True,
+                                                                'timeseries_settings': {
+                                                                    'use_previous_target': True,
+                                                                    'allow_incomplete_history': True,
+                                                                    'group_by': ['Country'],
+                                                                    'nr_predictions': nr_preds,
+                                                                    'order_by': [order_by],
+                                                                    'period_intervals': (('daily', 7),),
+                                                                    'window': window
+                                                                }}))
+        for i, mixer in enumerate(jai.outputs[target].mixers):
+            if mixer["module"] == 'SkTime':
+                sktime_mixer_idx = i
+
+        jai.outputs[target].mixers[sktime_mixer_idx] = {
+            "module": "SkTime",
+            "args": {
+                "stop_after": "$problem_definition.seconds_per_mixer",
+                "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                "model_path": "'trend.TrendForecaster'",  # use a cheap forecasater
+                "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
+            },
+        }
+
+        code = code_from_json_ai(jai)
+        pred = predictor_from_code(code)
+
+        pred = self.calculate_duration(pred, train, time_aim_expected)
+>>>>>>> staging
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
@@ -150,10 +205,12 @@ class TestTimeseries(unittest.TestCase):
 
     def test_3_time_series_sktime_mixer(self):
         """
-        Tests `sktime` mixer individually, as it has a special notion of absolute
-        temporal timestamps that we need to ensure are being used correctly. In
+        Tests `sktime` mixer individually, as it has a special notion of
+        timestamps that we need to ensure are being used correctly. In
         particular, given a train-dev-test split, any forecasts coming from a sktime
         mixer should start from the latest observed data in the entire dataset.
+        
+        This test also compares against manual use of sktime to ensure equal results.
         """  # noqa
 
         from sklearn.metrics import r2_score
@@ -168,12 +225,13 @@ class TestTimeseries(unittest.TestCase):
         # synth square wave
         tsteps = 100
         target = 'Value'
+        n_preds = 20
         t = np.linspace(0, 1, tsteps, endpoint=False)
-        ts = signal.sawtooth(2 * np.pi * 5 * t, width=0.5)
+        ts = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * t, width=0.5))]
         df = pd.DataFrame(columns=['Time', target])
         df['Time'] = t
         df[target] = ts
-        df[f'{target}_2x'] = 2 * ts
+        df[f'{target}_2x'] = [2 * elt for elt in ts]
 
         train = df[:int(len(df) * 0.8)]
         test = df[int(len(df) * 0.8):]
@@ -183,7 +241,7 @@ class TestTimeseries(unittest.TestCase):
                                             'timeseries_settings': {
                                                 'order_by': ['Time'],
                                                 'window': 5,
-                                                'nr_predictions': 20,
+                                                'nr_predictions': n_preds,
                                                 'historical_columns': [f'{target}_2x']
                                             }})
 
@@ -200,7 +258,7 @@ class TestTimeseries(unittest.TestCase):
 
         train_and_check_time_aim(predictor, train)
         ps = predictor.predict(test)
-        assert r2_score(ps['truth'].values, ps['prediction'].iloc[0]) >= 0.95
+        assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.95
 
         # test historical columns asserts
         test[f'{target}_2x'].iloc[0] = np.nan
@@ -208,3 +266,12 @@ class TestTimeseries(unittest.TestCase):
 
         test.pop(f'{target}_2x')
         self.assertRaises(Exception, predictor.predict, test)
+
+        # compare vs sktime manual usage
+        if isinstance(predictor.ensemble.mixers[predictor.ensemble.best_index], SkTime):
+            forecaster = AutoARIMA()
+            fh = ForecastingHorizon([i for i in range(int(tsteps * 0.8))], is_relative=True)
+            forecaster.fit(train[target], fh=fh)
+            manual_preds = forecaster.predict(fh[1:n_preds + 1]).tolist()
+            lw_preds = [p[0] for p in ps['prediction']]
+            assert np.allclose(manual_preds, lw_preds, atol=1)

@@ -38,7 +38,7 @@ class ICP(BaseAnalysisBlock):
         data_type = ns.dtype_dict[ns.target]
         output = {'icp': {'__mdb_active': False}}
 
-        fit_params = {'nr_preds': ns.ts_cfg.nr_predictions or 0, 'columns_to_ignore': []}
+        fit_params = {'nr_preds': ns.tss.nr_predictions or 0, 'columns_to_ignore': []}
         fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
 
         if ns.is_classification:
@@ -106,10 +106,10 @@ class ICP(BaseAnalysisBlock):
                 output['df_target_stddev'] = {'__default': ns.stats_info.df_target_stddev}
 
             # fit additional ICPs in time series tasks with grouped columns
-            if ns.ts_cfg.is_timeseries and ns.ts_cfg.group_by:
+            if ns.tss.is_timeseries and ns.tss.group_by:
 
                 # create an ICP for each possible group
-                group_info = ns.data[ns.ts_cfg.group_by].to_dict('list')
+                group_info = ns.data[ns.tss.group_by].to_dict('list')
                 all_group_combinations = list(product(*[set(x) for x in group_info.values()]))
                 output['icp']['__mdb_groups'] = all_group_combinations
                 output['icp']['__mdb_group_keys'] = [x for x in group_info.keys()]
@@ -137,7 +137,7 @@ class ICP(BaseAnalysisBlock):
             result_df.loc[icp_df.index, 'confidence'] = conf
 
             # calibrate additional grouped ICPs
-            if ns.ts_cfg.is_timeseries and ns.ts_cfg.group_by:
+            if ns.tss.is_timeseries and ns.tss.group_by:
                 icps = output['icp']
                 group_keys = icps['__mdb_group_keys']
 

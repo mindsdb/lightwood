@@ -1,29 +1,25 @@
-from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code
+from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, load_custom_module
 from lightwood.api.types import JsonAI, ProblemDefinition
 import unittest
 import os
+<<<<<<< HEAD
 import shutil
 from tests.utils.timing import train_and_check_time_aim
 import pandas as pd
+=======
+>>>>>>> staging
 
 
 test_err_message = 'This ! Is ! A ! Testing ! Error !'
 mdir = os.path.expanduser('~/lightwood_modules')
 
 
-def create_custom_module(mpath, mcode):
-    try:
-        shutil.rmtree(mpath)
-    except Exception:
-        pass
+def create_custom_module(module_name, module_code):
+    with open(module_name, 'w') as fp:
+        fp.write(module_code)
 
-    try:
-        os.mkdir(mdir)
-    except Exception:
-        pass
-
-    with open(mpath, 'w') as fp:
-        fp.write(mcode)
+    load_custom_module(module_name)
+    os.remove(module_name)
 
 
 class TestBasic(unittest.TestCase):
@@ -35,7 +31,7 @@ def throwing_cleaner(data: pd.DataFrame, err_msg: str):
     assert isinstance(data, pd.DataFrame)
     raise Exception(err_msg)
 """
-        create_custom_module(os.path.join(mdir, 'custom_cleaners.py'), module_code)
+        create_custom_module('custom_cleaners.py', module_code)
 
         # Create base json ai
         df = pd.read_csv('tests/data/hdi.csv').iloc[0:400]
@@ -82,7 +78,7 @@ class {cname}(BaseAnalysisBlock):
         row_insights['test'] = 'test'
         return row_insights, global_insights
 """
-        create_custom_module(os.path.join(mdir, f'{mname}.py'), module_code)
+        create_custom_module(f'{mname}.py', module_code)
 
         # Create base json ai
         df = pd.read_csv('tests/data/hdi.csv').iloc[0:400]

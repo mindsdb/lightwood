@@ -17,7 +17,7 @@ from lightwood.helpers.log import log
 
 # For custom modules, we create a module loader with necessary imports below
 IMPORT_EXTERNAL_DIRS = """
-for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
+for import_dir in [os.path.join(os.path.expanduser('~/lightwood_modules'), lightwood_version.replace('.', '_')), os.path.join('/etc/lightwood_modules', lightwood_version.replace('.', '_'))]:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
         for file_name in list(os.walk(import_dir))[0][2]:
             if file_name[-3:] != '.py':
@@ -29,10 +29,11 @@ for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_mo
             loader.exec_module(module)
             sys.modules[mod_name] = module
             exec(f'import {mod_name}')
-"""
+""" # noqa
 
 IMPORTS = """
 import lightwood
+from lightwood import __version__ as lightwood_version
 from lightwood.analysis import *
 from lightwood.api import *
 from lightwood.data import *
@@ -120,7 +121,7 @@ def lookup_encoder(
             if problem_defintion.unbias_target:
                 encoder_dict["args"][
                     "target_weights"
-                ] = "$statistical_analysis.target_class_distribution"
+                ] = "$statistical_analysis.target_weights"
             if problem_defintion.target_weights is not None:
                 encoder_dict["args"][
                     "target_weights"
@@ -186,15 +187,18 @@ def generate_json_ai(
     exec(IMPORT_EXTERNAL_DIRS, globals())
     target = problem_definition.target
     input_cols = []
+    tss = problem_definition.timeseries_settings
+
     for col_name, col_dtype in type_information.dtypes.items():
         if (
-            col_name not in type_information.identifiers
-            and col_dtype not in (dtype.invalid, dtype.empty)
-            and col_name != target
+                (col_name not in type_information.identifiers
+                 and col_dtype not in (dtype.invalid, dtype.empty)
+                 and col_name != target)
+                or
+                (tss.group_by is not None and col_name in tss.group_by)
         ):
             input_cols.append(col_name)
 
-    tss = problem_definition.timeseries_settings
     is_target_predicting_encoder = False
     is_ts = problem_definition.timeseries_settings.is_timeseries
     # Single text column classification
@@ -356,34 +360,12 @@ def generate_json_ai(
         if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
             accuracy_functions = ["evaluate_array_accuracy"]
 
-    if problem_definition.time_aim is None and (
-        problem_definition.seconds_per_mixer is None
-        or problem_definition.seconds_per_encoder is None
-    ):
-        problem_definition.time_aim = (
-            1000
-            + np.log(statistical_analysis.nr_rows / 10 + 1)
-            * np.sum(
-                [
-                    4
-                    if x
-                    in [
-                        dtype.rich_text,
-                        dtype.short_text,
-                        dtype.array,
-                        dtype.tsarray,
-                        dtype.video,
-                        dtype.audio,
-                        dtype.image,
-                    ]
-                    else 1
-                    for x in type_information.dtypes.values()
-                ]
-            )
-            * 200
-        )
+    if problem_definition.time_aim is None:
+        # 5 days
+        problem_definition.time_aim = 3 * 24 * 3600
 
-    if problem_definition.time_aim is not None:
+    # Encoders are assigned 1/3 of the time unless a user overrides this (equal time per encoder)
+    if problem_definition.seconds_per_encoder is None:
         nr_trainable_encoders = len(
             [
                 x
@@ -391,22 +373,12 @@ def generate_json_ai(
                 if eval(x.encoder["module"]).is_trainable_encoder
             ]
         )
-        nr_mixers = len(list(outputs.values())[0].mixers)
-        encoder_time_budget_pct = (2 + np.log(nr_trainable_encoders + 2)) / 5
-        if encoder_time_budget_pct > 4 / 5:
-            encoder_time_budget_pct = 4 / 5
+        problem_definition.seconds_per_encoder = problem_definition.time_aim / (nr_trainable_encoders * 3)
 
-        if nr_trainable_encoders == 0:
-            problem_definition.seconds_per_encoder = 0
-        else:
-            problem_definition.seconds_per_encoder = int(
-                (problem_definition.time_aim - problem_definition.expected_additional_time)
-                * (encoder_time_budget_pct / nr_trainable_encoders)
-            )
-        problem_definition.seconds_per_mixer = int(
-            (problem_definition.time_aim - problem_definition.expected_additional_time)
-            * (1 - encoder_time_budget_pct) / nr_mixers
-        )
+    # Mixers are assigned 1/3 of the time aim unless a user overrides this (equal time per mixer)
+    if problem_definition.seconds_per_mixer is None:
+        nr_mixers = len(list(outputs.values())[0].mixers)
+        problem_definition.seconds_per_mixer = problem_definition.time_aim / (nr_mixers * 3)
 
     return JsonAI(
         cleaner=None,
@@ -570,6 +542,8 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
+            # enforce fit_on_all if this mixer is specified
+            problem_definition.fit_on_all = True
 
     ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
     ensemble["args"]["target"] = ensemble["args"].get("target", "$target")
@@ -612,7 +586,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             "module": "model_analyzer",
             "args": {
                 "stats_info": "$statistical_analysis",
-                "ts_cfg": "$problem_definition.timeseries_settings",
+                "tss": "$problem_definition.timeseries_settings",
                 "accuracy_functions": "$accuracy_functions",
                 "predictor": "$ensemble",
                 "data": "encoded_test_data",
@@ -981,8 +955,8 @@ self.mode = 'train'
 # Extract data
 # --------------- #
 # Extract the featurized data
-encoded_old_data = new_data['old']
-encoded_new_data = new_data['new']
+encoded_old_data = old_data if old_data is not None else pd.DataFrame()
+encoded_new_data = new_data
 
 # --------------- #
 # Adjust (Update) Mixers
@@ -999,7 +973,7 @@ for mixer in self.mixers:
     # Learn Body
     # ----------------- #
 
-    learn_body = f"""
+    learn_body = """
 self.mode = 'train'
 
 # Perform stats analysis
@@ -1032,9 +1006,7 @@ self.analyze_ensemble(enc_train_test)
 if self.problem_definition.fit_on_all:
 
     log.info("Adjustment on validation requested.")
-    update_data = {{"new": enc_train_test["test"], "old": ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]])}}  # noqa
-
-    self.adjust(update_data)
+    self.adjust(enc_train_test["test"], ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]]))
 
 """
     learn_body = align(learn_body, 2)
@@ -1043,8 +1015,9 @@ if self.problem_definition.fit_on_all:
     # ----------------- #
 
     predict_body = f"""
-# Remove columns that user specifies to ignore
 self.mode = 'predict'
+
+# Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:
@@ -1132,7 +1105,7 @@ class Predictor(PredictorInterface):
         data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
-    def adjust(self, new_data: Dict[str, pd.DataFrame]) -> None:
+    def adjust(self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None) -> None:
         # Update mixers with new information
 {adjust_body}
 

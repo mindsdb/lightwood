@@ -24,7 +24,6 @@ class TestBasic(unittest.TestCase):
 
                 predictor.ensemble.best_index = i
                 predictions = predictor.predict(test)
-                assert 'truth' in predictions.columns
                 assert 'prediction' in predictions.columns
                 assert 'confidence' in predictions.columns
 
