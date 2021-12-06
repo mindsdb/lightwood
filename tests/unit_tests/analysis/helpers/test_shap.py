@@ -1,7 +1,6 @@
 import unittest
 import pandas as pd
 from lightwood.analysis import ShapleyValues
-from tests.utils.timing import train_and_check_time_aim
 from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
 from lightwood.api.high_level import code_from_json_ai, predictor_from_code
 
@@ -26,7 +25,7 @@ class TestBasic(unittest.TestCase):
         code = code_from_json_ai(json_ai)
         predictor = predictor_from_code(code)
 
-        train_and_check_time_aim(predictor, df)
+        predictor.learn(df)
         predictions = predictor.predict(df.head())
 
         self.assertIn('shap_explainer', predictor.runtime_analyzer)

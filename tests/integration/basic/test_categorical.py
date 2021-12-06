@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 import pandas as pd
 from sklearn.metrics import balanced_accuracy_score
-from tests.utils.timing import train_and_check_time_aim
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import predictor_from_problem
 np.random.seed(42)
@@ -17,7 +16,7 @@ class TestBasic(unittest.TestCase):
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict(
             {'target': target, 'time_aim': 20, 'unbias_target': False}))
 
-        train_and_check_time_aim(predictor, train)
+        predictor.learn(train)
 
         if hasattr(predictor, 'ensemble'):
             for i, mixer in enumerate(predictor.ensemble.mixers):

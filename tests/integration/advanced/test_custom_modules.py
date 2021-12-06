@@ -2,12 +2,7 @@ from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, pr
 from lightwood.api.types import JsonAI, ProblemDefinition
 import unittest
 import os
-<<<<<<< HEAD
-import shutil
-from tests.utils.timing import train_and_check_time_aim
 import pandas as pd
-=======
->>>>>>> staging
 
 
 test_err_message = 'This ! Is ! A ! Testing ! Error !'
@@ -52,7 +47,7 @@ def throwing_cleaner(data: pd.DataFrame, err_msg: str):
         code = code_from_json_ai(json_ai)
         predictor = predictor_from_code(code)
         try:
-            train_and_check_time_aim(predictor, df)
+            predictor.learn(df)
         except Exception as e:
             assert str(e) == test_err_message
             return
@@ -96,7 +91,7 @@ class {cname}(BaseAnalysisBlock):
         # create a predictor from it
         code = code_from_json_ai(json_ai)
         predictor = predictor_from_code(code)
-        train_and_check_time_aim(predictor, df)
+        predictor.learn(df)
         row_insights = predictor.predict(df)
 
         assert predictor.runtime_analyzer['test'] == 'test'
