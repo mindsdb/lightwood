@@ -15,7 +15,8 @@ def to_binary(y: Iterable) -> List[int]:
                 y_binarized.append(0)
             else:
                 y_binarized.append(int(ele))
-
+        print(y_binarized)
+        exit()
         assert len(set(y)) < 3
         assert 1 in y
         assert 0 in y
