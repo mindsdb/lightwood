@@ -283,7 +283,7 @@ class Neural(BaseMixer):
         optimizer = self._select_optimizer()
         criterion = self._select_criterion()
         scaler = GradScaler()
-        
+
         # Only 0.8 of the remaining time budget is used to allow some time for the final tuning and partial fit
         self.model, epoch_to_best_model, _ = self._max_fit(
             train_dl, dev_dl, criterion, optimizer, scaler, (self.stop_after - (time.time() - self.started)) * 0.8,
