@@ -363,7 +363,7 @@ def generate_json_ai(
     if problem_definition.time_aim is None:
         # 5 days
         problem_definition.time_aim = 3 * 24 * 3600
-
+        
     # Encoders are assigned 1/3 of the time unless a user overrides this (equal time per encoder)
     if problem_definition.seconds_per_encoder is None:
         nr_trainable_encoders = len(
