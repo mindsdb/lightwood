@@ -363,7 +363,7 @@ def generate_json_ai(
     if problem_definition.time_aim is None:
         # 5 days
         problem_definition.time_aim = 3 * 24 * 3600
-        
+
     # Encoders are assigned 1/3 of the time unless a user overrides this (equal time per encoder)
     if problem_definition.seconds_per_encoder is None:
         nr_trainable_encoders = len(
@@ -373,12 +373,17 @@ def generate_json_ai(
                 if eval(x.encoder["module"]).is_trainable_encoder
             ]
         )
-        problem_definition.seconds_per_encoder = problem_definition.time_aim / (nr_trainable_encoders * 3)
+        if nr_trainable_encoders > 0:
+            problem_definition.seconds_per_encoder = 0.33 * problem_definition.time_aim / nr_trainable_encoders
 
-    # Mixers are assigned 1/3 of the time aim unless a user overrides this (equal time per mixer)
+    # Mixers are assigned 1/3 of the time aim (or 2/3 if there are no trainable encoders )\
+    # unless a user overrides this (equal time per mixer)
     if problem_definition.seconds_per_mixer is None:
         nr_mixers = len(list(outputs.values())[0].mixers)
-        problem_definition.seconds_per_mixer = problem_definition.time_aim / (nr_mixers * 3)
+        if problem_definition.seconds_per_encoder is None:
+            problem_definition.seconds_per_mixer = 0.66 * problem_definition.time_aim / nr_mixers
+        else:
+            problem_definition.seconds_per_mixer = 0.33 * problem_definition.time_aim / nr_mixers
 
     return JsonAI(
         cleaner=None,
