@@ -16,7 +16,6 @@ class TestText(unittest.TestCase):
         for x in predictions['prediction']:
             assert x is not None
 
-    
     # Comment back in when we can reduce the time for these more, for now this is impossible
     # Datasource building for LGBM /w text just takes too long
     def test_1_train_and_predict_model(self):

@@ -2,7 +2,6 @@
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 from lightwood.api import dtype
-import numpy as np
 from lightwood.api.types import (
     JsonAI,
     TypeInformation,

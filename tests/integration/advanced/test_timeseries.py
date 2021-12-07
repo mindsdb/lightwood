@@ -7,7 +7,6 @@ from lightwood.api.high_level import predictor_from_problem
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.arima import AutoARIMA
-from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 from lightwood.mixer.sktime import SkTime
 
