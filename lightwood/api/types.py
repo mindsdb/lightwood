@@ -313,6 +313,8 @@ class ProblemDefinition:
     :param seconds_per_mixer: Number of seconds maximum to spend PER mixer trained in the list of possible mixers.
     :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \
     learn a representation.
+    :param expected_additional_time: Time budget for non-encoder/mixer tasks \
+    (ex: data analysis, pre-processing, model ensembling or model analysis)
     :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \
         encoders and models.
     :param target_weights: indicates to the accuracy functions how much to weight every target class.
@@ -365,7 +367,7 @@ class ProblemDefinition:
 
         time_aim = obj.get('time_aim', None)
         if time_aim is not None and time_aim < 10:
-            log.warning(f'Your specified time aim of {time_aim} is too sort. Setting it to 10 seconds.')
+            log.warning(f'Your specified time aim of {time_aim} is too short. Setting it to 10 seconds.')
 
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
