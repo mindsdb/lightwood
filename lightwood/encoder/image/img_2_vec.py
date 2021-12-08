@@ -45,8 +45,8 @@ class Img2VecEncoder(BaseEncoder):
         ])
         self.stop_after = stop_after
 
-        #pil_logger = logging.getLogger('PIL')
-        #pil_logger.setLevel(logging.ERROR)
+        # pil_logger = logging.getLogger('PIL')
+        # pil_logger.setLevel(logging.ERROR)
 
     def prepare(self, train_priming_data: pd.Series, dev_priming_data: pd.Series):
         # @TODO: finetune here? depending on time aim
