@@ -213,8 +213,8 @@
         <span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span> <span class="o">=</span> <span class="n">stop_after</span>
 
-        <span class="n">pil_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PIL&#39;</span><span class="p">)</span>
-        <span class="n">pil_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="c1"># pil_logger = logging.getLogger(&#39;PIL&#39;)  # noqa</span>
+        <span class="c1"># pil_logger.setLevel(logging.ERROR)  # noqa</span>
 
 <div class="viewcode-block" id="Img2VecEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.Img2VecEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
         <span class="c1"># @TODO: finetune here? depending on time aim</span>

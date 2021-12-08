@@ -31,10 +31,10 @@
    "id": "happy-wheat",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:23:36.405732Z",
-     "iopub.status.busy": "2021-12-08T18:23:36.404819Z",
-     "iopub.status.idle": "2021-12-08T18:23:39.222548Z",
-     "shell.execute_reply": "2021-12-08T18:23:39.223068Z"
+     "iopub.execute_input": "2021-12-08T19:25:36.539412Z",
+     "iopub.status.busy": "2021-12-08T19:25:36.538859Z",
+     "iopub.status.idle": "2021-12-08T19:25:39.151106Z",
+     "shell.execute_reply": "2021-12-08T19:25:39.150096Z"
     }
    },
    "outputs": [
@@ -42,8 +42,8 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2823:No torchvision detected, image encoder not supported\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2588:No torchvision detected, image helpers not supported.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -81,10 +81,10 @@
    "id": "recognized-parish",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:23:39.231205Z",
-     "iopub.status.busy": "2021-12-08T18:23:39.225658Z",
-     "iopub.status.idle": "2021-12-08T18:23:40.156991Z",
-     "shell.execute_reply": "2021-12-08T18:23:40.157600Z"
+     "iopub.execute_input": "2021-12-08T19:25:39.159972Z",
+     "iopub.status.busy": "2021-12-08T19:25:39.159487Z",
+     "iopub.status.idle": "2021-12-08T19:25:40.144786Z",
+     "shell.execute_reply": "2021-12-08T19:25:40.145484Z"
     }
    },
    "outputs": [
@@ -215,10 +215,10 @@
    "id": "chicken-truth",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:23:40.160574Z",
-     "iopub.status.busy": "2021-12-08T18:23:40.160012Z",
-     "iopub.status.idle": "2021-12-08T18:24:27.574305Z",
-     "shell.execute_reply": "2021-12-08T18:24:27.574822Z"
+     "iopub.execute_input": "2021-12-08T19:25:40.149982Z",
+     "iopub.status.busy": "2021-12-08T19:25:40.149500Z",
+     "iopub.status.idle": "2021-12-08T19:26:27.636982Z",
+     "shell.execute_reply": "2021-12-08T19:26:27.636221Z"
     }
    },
    "outputs": [
@@ -226,19 +226,19 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2823:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Analyzing a sample of 2478\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Infering type for: id\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Doing text detection for column: id\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Column id has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Infering type for: excerpt\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Doing text detection for column: excerpt\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Infering type for: target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Column target has data type float\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2823:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2588:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Analyzing a sample of 2478\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Infering type for: id\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Doing text detection for column: id\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Column id has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Infering type for: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Doing text detection for column: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Infering type for: target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Column target has data type float\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2588:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -275,10 +275,10 @@
    "id": "designed-condition",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:24:27.583007Z",
-     "iopub.status.busy": "2021-12-08T18:24:27.581715Z",
-     "iopub.status.idle": "2021-12-08T18:24:27.585126Z",
-     "shell.execute_reply": "2021-12-08T18:24:27.584649Z"
+     "iopub.execute_input": "2021-12-08T19:26:27.642994Z",
+     "iopub.status.busy": "2021-12-08T19:26:27.642506Z",
+     "iopub.status.idle": "2021-12-08T19:26:27.645461Z",
+     "shell.execute_reply": "2021-12-08T19:26:27.645897Z"
     }
    },
    "outputs": [
@@ -427,10 +427,10 @@
    "id": "325d8f1b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:24:27.591465Z",
-     "iopub.status.busy": "2021-12-08T18:24:27.590801Z",
-     "iopub.status.idle": "2021-12-08T18:24:27.593371Z",
-     "shell.execute_reply": "2021-12-08T18:24:27.593838Z"
+     "iopub.execute_input": "2021-12-08T19:26:27.652036Z",
+     "iopub.status.busy": "2021-12-08T19:26:27.651206Z",
+     "iopub.status.idle": "2021-12-08T19:26:27.655885Z",
+     "shell.execute_reply": "2021-12-08T19:26:27.655497Z"
     }
    },
    "outputs": [
@@ -553,10 +553,10 @@
    "id": "f030f8ca",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:24:27.597544Z",
-     "iopub.status.busy": "2021-12-08T18:24:27.595838Z",
-     "iopub.status.idle": "2021-12-08T18:24:27.600076Z",
-     "shell.execute_reply": "2021-12-08T18:24:27.599571Z"
+     "iopub.execute_input": "2021-12-08T19:26:27.659634Z",
+     "iopub.status.busy": "2021-12-08T19:26:27.659151Z",
+     "iopub.status.idle": "2021-12-08T19:26:27.662946Z",
+     "shell.execute_reply": "2021-12-08T19:26:27.662573Z"
     }
    },
    "outputs": [],
@@ -618,10 +618,10 @@
    "id": "floating-patent",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:24:27.605579Z",
-     "iopub.status.busy": "2021-12-08T18:24:27.605022Z",
-     "iopub.status.idle": "2021-12-08T18:24:27.861481Z",
-     "shell.execute_reply": "2021-12-08T18:24:27.861934Z"
+     "iopub.execute_input": "2021-12-08T19:26:27.667891Z",
+     "iopub.status.busy": "2021-12-08T19:26:27.667414Z",
+     "iopub.status.idle": "2021-12-08T19:26:27.889460Z",
+     "shell.execute_reply": "2021-12-08T19:26:27.888966Z"
     }
    },
    "outputs": [
@@ -629,7 +629,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2823:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2588:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
      ]
     },
     {
@@ -1162,10 +1162,10 @@
    "id": "violent-guard",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:24:27.865741Z",
-     "iopub.status.busy": "2021-12-08T18:24:27.864584Z",
-     "iopub.status.idle": "2021-12-08T18:24:27.872981Z",
-     "shell.execute_reply": "2021-12-08T18:24:27.873417Z"
+     "iopub.execute_input": "2021-12-08T19:26:27.895148Z",
+     "iopub.status.busy": "2021-12-08T19:26:27.892590Z",
+     "iopub.status.idle": "2021-12-08T19:26:27.900093Z",
+     "shell.execute_reply": "2021-12-08T19:26:27.899441Z"
     }
    },
    "outputs": [],
@@ -1180,10 +1180,10 @@
    "id": "closing-episode",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:24:27.879818Z",
-     "iopub.status.busy": "2021-12-08T18:24:27.879136Z",
-     "iopub.status.idle": "2021-12-08T18:24:28.033997Z",
-     "shell.execute_reply": "2021-12-08T18:24:28.034464Z"
+     "iopub.execute_input": "2021-12-08T19:26:27.904063Z",
+     "iopub.status.busy": "2021-12-08T19:26:27.903607Z",
+     "iopub.status.idle": "2021-12-08T19:26:28.063026Z",
+     "shell.execute_reply": "2021-12-08T19:26:28.062590Z"
     }
    },
    "outputs": [
@@ -1191,13 +1191,13 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2823:Performing statistical analysis on data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Finished statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Cleaning column =target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Converted target into strictly non-negative\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2823:Cleaning column =excerpt\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2588:Performing statistical analysis on data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Finished statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Cleaning column =target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Converted target into strictly non-negative\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2588:Cleaning column =excerpt\u001b[0m\n"
      ]
     },
     {
@@ -1287,10 +1287,10 @@
    "id": "major-stake",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-08T18:24:28.043627Z",
-     "iopub.status.busy": "2021-12-08T18:24:28.042167Z",
-     "iopub.status.idle": "2021-12-08T18:24:28.045624Z",
-     "shell.execute_reply": "2021-12-08T18:24:28.045146Z"
+     "iopub.execute_input": "2021-12-08T19:26:28.069078Z",
+     "iopub.status.busy": "2021-12-08T19:26:28.068576Z",
+     "iopub.status.idle": "2021-12-08T19:26:28.070685Z",
+     "shell.execute_reply": "2021-12-08T19:26:28.071059Z"
     }
    },
    "outputs": [
