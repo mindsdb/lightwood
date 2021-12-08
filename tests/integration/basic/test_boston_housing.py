@@ -2,7 +2,6 @@ from lightwood.api.dtype import dtype
 import unittest
 import pandas as pd
 from sklearn.metrics import r2_score
-
 from lightwood.api.types import ProblemDefinition
 
 
@@ -19,7 +18,7 @@ class TestBasic(unittest.TestCase):
 
         # Make this a quantity
         df[target] = [f'{x}$' for x in df[target]]
-        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 200})
+        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
 
         predictor = predictor_from_problem(df, pdef)
         predictor.learn(df)

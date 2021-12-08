@@ -50,11 +50,6 @@ def explain(data: pd.DataFrame,
     global_insights = {}
     row_insights['prediction'] = predictions['prediction']
 
-    if target_name in data.columns:
-        row_insights['truth'] = data[target_name]
-    else:
-        row_insights['truth'] = [None] * len(predictions['prediction'])
-
     if timeseries_settings.is_timeseries:
         if timeseries_settings.group_by:
             for col in timeseries_settings.group_by:

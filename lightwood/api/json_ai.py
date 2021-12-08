@@ -2,7 +2,6 @@
 from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 from lightwood.api import dtype
-import numpy as np
 from lightwood.api.types import (
     JsonAI,
     TypeInformation,
@@ -17,7 +16,7 @@ from lightwood.helpers.log import log
 
 # For custom modules, we create a module loader with necessary imports below
 IMPORT_EXTERNAL_DIRS = """
-for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_modules']:
+for import_dir in [os.path.join(os.path.expanduser('~/lightwood_modules'), lightwood_version.replace('.', '_')), os.path.join('/etc/lightwood_modules', lightwood_version.replace('.', '_'))]:
     if os.path.exists(import_dir) and os.access(import_dir, os.R_OK):
         for file_name in list(os.walk(import_dir))[0][2]:
             if file_name[-3:] != '.py':
@@ -29,10 +28,11 @@ for import_dir in [os.path.expanduser('~/lightwood_modules'), '/etc/lightwood_mo
             loader.exec_module(module)
             sys.modules[mod_name] = module
             exec(f'import {mod_name}')
-"""
+""" # noqa
 
 IMPORTS = """
 import lightwood
+from lightwood import __version__ as lightwood_version
 from lightwood.analysis import *
 from lightwood.api import *
 from lightwood.data import *
@@ -53,6 +53,7 @@ import os
 from types import ModuleType
 import importlib.machinery
 import sys
+import time
 """
 
 
@@ -358,34 +359,12 @@ def generate_json_ai(
         if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
             accuracy_functions = ["evaluate_array_accuracy"]
 
-    if problem_definition.time_aim is None and (
-        problem_definition.seconds_per_mixer is None
-        or problem_definition.seconds_per_encoder is None
-    ):
-        problem_definition.time_aim = (
-            1000
-            + np.log(statistical_analysis.nr_rows / 10 + 1)
-            * np.sum(
-                [
-                    4
-                    if x
-                    in [
-                        dtype.rich_text,
-                        dtype.short_text,
-                        dtype.array,
-                        dtype.tsarray,
-                        dtype.video,
-                        dtype.audio,
-                        dtype.image,
-                    ]
-                    else 1
-                    for x in type_information.dtypes.values()
-                ]
-            )
-            * 200
-        )
+    if problem_definition.time_aim is None:
+        # 5 days
+        problem_definition.time_aim = 3 * 24 * 3600
 
-    if problem_definition.time_aim is not None:
+    # Encoders are assigned 1/3 of the time unless a user overrides this (equal time per encoder)
+    if problem_definition.seconds_per_encoder is None:
         nr_trainable_encoders = len(
             [
                 x
@@ -393,21 +372,17 @@ def generate_json_ai(
                 if eval(x.encoder["module"]).is_trainable_encoder
             ]
         )
-        nr_mixers = len(list(outputs.values())[0].mixers)
-        encoder_time_budget_pct = max(
-            3.3 / 5, 1.5 + np.log(nr_trainable_encoders + 1) / 5
-        )
+        if nr_trainable_encoders > 0:
+            problem_definition.seconds_per_encoder = 0.33 * problem_definition.time_aim / nr_trainable_encoders
 
-        if nr_trainable_encoders == 0:
-            problem_definition.seconds_per_encoder = 0
+    # Mixers are assigned 1/3 of the time aim (or 2/3 if there are no trainable encoders )\
+    # unless a user overrides this (equal time per mixer)
+    if problem_definition.seconds_per_mixer is None:
+        nr_mixers = len(list(outputs.values())[0].mixers)
+        if problem_definition.seconds_per_encoder is None:
+            problem_definition.seconds_per_mixer = 0.66 * problem_definition.time_aim / nr_mixers
         else:
-            problem_definition.seconds_per_encoder = int(
-                problem_definition.time_aim
-                * (encoder_time_budget_pct / nr_trainable_encoders)
-            )
-        problem_definition.seconds_per_mixer = int(
-            problem_definition.time_aim * ((1 / encoder_time_budget_pct) / nr_mixers)
-        )
+            problem_definition.seconds_per_mixer = 0.33 * problem_definition.time_aim / nr_mixers
 
     return JsonAI(
         cleaner=None,
@@ -1044,8 +1019,9 @@ if self.problem_definition.fit_on_all:
     # ----------------- #
 
     predict_body = f"""
-# Remove columns that user specifies to ignore
 self.mode = 'predict'
+
+# Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:

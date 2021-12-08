@@ -1,13 +1,12 @@
 import unittest
 import numpy as np
 import pandas as pd
-import time
 from typing import List
-
+from lightwood.api.types import ProblemDefinition
+from lightwood.api.high_level import predictor_from_problem
+from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.arima import AutoARIMA
-
-from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 from lightwood.mixer.sktime import SkTime
 
@@ -29,9 +28,6 @@ class TestTimeseries(unittest.TestCase):
             for t in range(nr_preds):
                 assert lower[t] <= prediction[t] <= upper[t]
 
-            if row.get('anomaly', False):
-                assert not (lower[0] <= row['truth'] <= upper[0])
-
     def split_arrivals(self, data: pd.DataFrame, grouped: bool) -> (pd.DataFrame, pd.DataFrame):
         train_ratio = 0.8
 
@@ -50,29 +46,17 @@ class TestTimeseries(unittest.TestCase):
 
         return train, test
 
-    def calculate_duration(self, predictor, train, time_aim_expected):
-
-        start = time.time()
-        predictor.learn(train)
-        time_aim_actual = (time.time() - start)
-        if((time_aim_expected * 10) < time_aim_actual):
-            error = 'time_aim is set to {} seconds, however learning took {}'.format(time_aim_expected, time_aim_actual)
-            raise ValueError(error)
-        assert (time_aim_expected * 10) >= time_aim_actual
-        return predictor
-
     def test_0_time_series_grouped_regression(self):
         """Test grouped numerical predictions, with anomalies and forecast horizon > 1 """
         data = pd.read_csv('tests/data/arrivals.csv')
         train, test = self.split_arrivals(data, grouped=True)
         target = 'Traffic'
-        time_aim_expected = 30
         order_by = 'T'
         nr_preds = 2
         window = 5
         jai = json_ai_from_problem(train,
                                    ProblemDefinition.from_dict({'target': target,
-                                                                'time_aim': time_aim_expected,
+                                                                'time_aim': 30,
                                                                 'anomaly_detection': True,
                                                                 'timeseries_settings': {
                                                                     'use_previous_target': True,
@@ -100,7 +84,8 @@ class TestTimeseries(unittest.TestCase):
         code = code_from_json_ai(jai)
         pred = predictor_from_code(code)
 
-        pred = self.calculate_duration(pred, train, time_aim_expected)
+        # Test with a short time aim
+        train_and_check_time_aim(pred, train)
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
@@ -128,7 +113,7 @@ class TestTimeseries(unittest.TestCase):
 
     def test_1_time_series_regression(self):
         data = pd.read_csv('tests/data/arrivals.csv')
-        train, test = self.split_arrivals(data, grouped=False)
+        train_df, test_df = self.split_arrivals(data, grouped=False)
         target = 'Traffic'
         order_by = 'T'
         nr_preds = 2
@@ -143,16 +128,16 @@ class TestTimeseries(unittest.TestCase):
                                                                        'order_by': [order_by],
                                                                        'window': window}
                                                                    }))
-        pred.learn(data)
+        pred.learn(train_df)
         preds = pred.predict(data[0:10])
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # test incomplete history, should not be possible
-        self.assertRaises(Exception, pred.predict, test[:window - 1])
+        self.assertRaises(Exception, pred.predict, test_df[:window - 1])
 
         # test inferring mode
-        test['__mdb_make_predictions'] = False
-        preds = pred.predict(test)
+        test_df['__mdb_make_predictions'] = False
+        preds = pred.predict(test_df)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
     def test_2_time_series_classification(self):
@@ -160,7 +145,6 @@ class TestTimeseries(unittest.TestCase):
 
         df = pd.read_csv('tests/data/arrivals.csv')
         target = 'Traffic'
-        time_aim_expected = 30
         df[target] = df[target] > 100000
 
         train_idxs = np.random.rand(len(df)) < 0.8
@@ -169,7 +153,7 @@ class TestTimeseries(unittest.TestCase):
 
         predictor = predictor_from_problem(df,
                                            ProblemDefinition.from_dict({'target': target,
-                                                                        'time_aim': time_aim_expected,
+                                                                        'time_aim': 80,
                                                                         'anomaly_detection': False,
                                                                         'timeseries_settings': {
                                                                             'order_by': ['T'],
@@ -178,7 +162,7 @@ class TestTimeseries(unittest.TestCase):
                                                                         },
                                                                         }))
 
-        predictor = self.calculate_duration(predictor, train, time_aim_expected)
+        predictor.learn(train)
         predictor.predict(test)
 
     def test_3_time_series_sktime_mixer(self):
@@ -215,7 +199,7 @@ class TestTimeseries(unittest.TestCase):
         test = df[int(len(df) * 0.8):]
 
         pdef = ProblemDefinition.from_dict({'target': target,
-                                            'time_aim': 10,
+                                            'time_aim': 200,
                                             'timeseries_settings': {
                                                 'order_by': ['Time'],
                                                 'window': 5,
@@ -234,9 +218,10 @@ class TestTimeseries(unittest.TestCase):
         code = code_from_json_ai(json_ai)
         predictor = predictor_from_code(code)
 
-        predictor.learn(train)
+        # Test with a longer time aim
+        train_and_check_time_aim(predictor, train)
         ps = predictor.predict(test)
-        assert r2_score(ps['truth'].values, ps['prediction'].iloc[0]) >= 0.95
+        assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.95
 
         # test historical columns asserts
         test[f'{target}_2x'].iloc[0] = np.nan
