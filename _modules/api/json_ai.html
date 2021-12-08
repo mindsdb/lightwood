@@ -170,7 +170,6 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.templating</span> <span class="kn">import</span> <span class="n">call</span><span class="p">,</span> <span class="n">inline_dict</span><span class="p">,</span> <span class="n">align</span>
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">JsonAI</span><span class="p">,</span>
     <span class="n">TypeInformation</span><span class="p">,</span>
@@ -222,6 +221,7 @@
 <span class="s2">from types import ModuleType</span>
 <span class="s2">import importlib.machinery</span>
 <span class="s2">import sys</span>
+<span class="s2">import time</span>
 <span class="s2">&quot;&quot;&quot;</span>
 
 
@@ -527,34 +527,12 @@
         <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">]:</span>
             <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_array_accuracy&quot;</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
-        <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_mixer</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="ow">or</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="ow">is</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="mi">1000</span>
-            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">statistical_analysis</span><span class="o">.</span><span class="n">nr_rows</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="mi">4</span>
-                    <span class="k">if</span> <span class="n">x</span>
-                    <span class="ow">in</span> <span class="p">[</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">video</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">audio</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
-                    <span class="p">]</span>
-                    <span class="k">else</span> <span class="mi">1</span>
-                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-            <span class="o">*</span> <span class="mi">200</span>
-        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># 5 days</span>
+        <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
 
-    <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># Encoders are assigned 1/3 of the time unless a user overrides this (equal time per encoder)</span>
+    <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nr_trainable_encoders</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">x</span>
@@ -562,21 +540,17 @@
                 <span class="k">if</span> <span class="nb">eval</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">is_trainable_encoder</span>
             <span class="p">]</span>
         <span class="p">)</span>
-        <span class="n">nr_mixers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mixers</span><span class="p">)</span>
-        <span class="n">encoder_time_budget_pct</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
-            <span class="mf">3.3</span> <span class="o">/</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">1.5</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nr_trainable_encoders</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">nr_trainable_encoders</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="o">=</span> <span class="mf">0.33</span> <span class="o">*</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">/</span> <span class="n">nr_trainable_encoders</span>
 
-        <span class="k">if</span> <span class="n">nr_trainable_encoders</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># Mixers are assigned 1/3 of the time aim (or 2/3 if there are no trainable encoders )\</span>
+    <span class="c1"># unless a user overrides this (equal time per mixer)</span>
+    <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_mixer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nr_mixers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mixers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_mixer</span> <span class="o">=</span> <span class="mf">0.66</span> <span class="o">*</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">/</span> <span class="n">nr_mixers</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_encoder</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-                <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">encoder_time_budget_pct</span> <span class="o">/</span> <span class="n">nr_trainable_encoders</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_mixer</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-            <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">encoder_time_budget_pct</span><span class="p">)</span> <span class="o">/</span> <span class="n">nr_mixers</span><span class="p">)</span>
-        <span class="p">)</span>
+            <span class="n">problem_definition</span><span class="o">.</span><span class="n">seconds_per_mixer</span> <span class="o">=</span> <span class="mf">0.33</span> <span class="o">*</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="o">/</span> <span class="n">nr_mixers</span>
 
     <span class="k">return</span> <span class="n">JsonAI</span><span class="p">(</span>
         <span class="n">cleaner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

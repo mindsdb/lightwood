@@ -481,6 +481,8 @@
 <span class="sd">    :param seconds_per_mixer: Number of seconds maximum to spend PER mixer trained in the list of possible mixers.</span>
 <span class="sd">    :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \</span>
 <span class="sd">    learn a representation.</span>
+<span class="sd">    :param expected_additional_time: Time budget for non-encoder/mixer tasks \</span>
+<span class="sd">    (ex: data analysis, pre-processing, model ensembling or model analysis)</span>
 <span class="sd">    :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \</span>
 <span class="sd">        encoders and models.</span>
 <span class="sd">    :param target_weights: indicates to the accuracy functions how much to weight every target class.</span>
@@ -501,10 +503,11 @@
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">pct_invalid</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">unbias_target</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">seconds_per_mixer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-    <span class="n">seconds_per_encoder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-    <span class="n">time_aim</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-    <span class="n">target_weights</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">seconds_per_mixer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="n">seconds_per_encoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="n">expected_additional_time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="n">time_aim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="n">target_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
     <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
     <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span>
@@ -528,7 +531,12 @@
         <span class="n">unbias_target</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;unbias_target&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">seconds_per_mixer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seconds_per_mixer&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">seconds_per_encoder</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seconds_per_encoder&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">expected_additional_time</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;expected_additional_time&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
         <span class="n">time_aim</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;time_aim&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">time_aim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">time_aim</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Your specified time aim of </span><span class="si">{</span><span class="n">time_aim</span><span class="si">}</span><span class="s1"> is too short. Setting it to 10 seconds.&#39;</span><span class="p">)</span>
+
         <span class="n">target_weights</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_weights&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">positive_domain</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;positive_domain&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">timeseries_settings</span> <span class="o">=</span> <span class="n">TimeseriesSettings</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timeseries_settings&#39;</span><span class="p">,</span> <span class="p">{}))</span>
@@ -543,6 +551,7 @@
             <span class="n">unbias_target</span><span class="o">=</span><span class="n">unbias_target</span><span class="p">,</span>
             <span class="n">seconds_per_mixer</span><span class="o">=</span><span class="n">seconds_per_mixer</span><span class="p">,</span>
             <span class="n">seconds_per_encoder</span><span class="o">=</span><span class="n">seconds_per_encoder</span><span class="p">,</span>
+            <span class="n">expected_additional_time</span><span class="o">=</span><span class="n">expected_additional_time</span><span class="p">,</span>
             <span class="n">time_aim</span><span class="o">=</span><span class="n">time_aim</span><span class="p">,</span>
             <span class="n">target_weights</span><span class="o">=</span><span class="n">target_weights</span><span class="p">,</span>
             <span class="n">positive_domain</span><span class="o">=</span><span class="n">positive_domain</span><span class="p">,</span>

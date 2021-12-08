@@ -336,7 +336,6 @@
         <span class="k">return</span> <span class="n">lr</span><span class="p">,</span> <span class="n">best_model</span>
 
     <span class="k">def</span> <span class="nf">_max_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_dl</span><span class="p">,</span> <span class="n">dev_dl</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scaler</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">,</span> <span class="n">return_model_after</span><span class="p">):</span>
-        <span class="n">started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="n">epochs_to_best</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">best_dev_error</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
         <span class="n">running_errors</span> <span class="o">=</span> <span class="p">[]</span>
@@ -361,6 +360,8 @@
                         <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
                 <span class="n">running_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">stop_after</span><span class="p">:</span>
+                    <span class="k">break</span>
 
             <span class="n">train_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">running_losses</span><span class="p">)</span>
             <span class="n">epoch_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="n">dev_dl</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
@@ -389,7 +390,7 @@
                                             <span class="n">weights</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)])</span>
                     <span class="k">if</span> <span class="n">delta_mean</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="k">break</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">started</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">stop_after</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">stop_after</span><span class="p">:</span>
                     <span class="k">break</span>
                 <span class="k">elif</span> <span class="n">running_errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0001</span> <span class="ow">or</span> <span class="n">train_error</span> <span class="o">&lt;</span> <span class="mf">0.0001</span><span class="p">:</span>
                     <span class="k">break</span>
@@ -431,6 +432,7 @@
 <span class="sd">        :param dev_data: Data used for early stopping and hyperparameter determination</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># ConcatedEncodedDs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
 
@@ -450,8 +452,10 @@
         <span class="n">criterion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_criterion</span><span class="p">()</span>
         <span class="n">scaler</span> <span class="o">=</span> <span class="n">GradScaler</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">epoch_to_best_model</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_fit</span><span class="p">(</span>
-            <span class="n">train_dl</span><span class="p">,</span> <span class="n">dev_dl</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">,</span> <span class="n">return_model_after</span><span class="o">=</span><span class="mi">20000</span><span class="p">)</span>
+        <span class="c1"># Only 0.8 of the remaining time budget is used to allow some time for the final tuning and partial fit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">epoch_to_best_model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_fit</span><span class="p">(</span>
+            <span class="n">train_dl</span><span class="p">,</span> <span class="n">dev_dl</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scaler</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span> <span class="o">-</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">,</span>
+            <span class="n">return_model_after</span><span class="o">=</span><span class="mi">20000</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs_to_best</span> <span class="o">+=</span> <span class="n">epoch_to_best_model</span>
 
@@ -470,6 +474,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly # noqa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="n">train_dl</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">dev_dl</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dev_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_optimizer</span><span class="p">()</span>
@@ -477,7 +482,7 @@
         <span class="n">scaler</span> <span class="o">=</span> <span class="n">GradScaler</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_fit</span><span class="p">(</span><span class="n">train_dl</span><span class="p">,</span> <span class="n">dev_dl</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scaler</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs_to_best</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)))</span></div>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs_to_best</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)))</span></div>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
