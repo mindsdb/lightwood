@@ -45,7 +45,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         self.onehot_encoder.prepare(priming_data)
 
-        input_len = self.onehot_encoder._lang.n_words
+        input_len = self.onehot_encoder.output_size
 
         if self.is_target:
             log.warning('You are trying to use an autoencoder for the target value! \
@@ -87,7 +87,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.decoder = torch.nn.Sequential(*modules[2:3]).eval()
         log.info('Categorical autoencoder ready')
 
-        self.output_size = self.onehot_encoder._lang.n_words
+        self.output_size = self.onehot_encoder.output_size
         self.output_size = self.max_encoded_length
         self.is_prepared = True
 
