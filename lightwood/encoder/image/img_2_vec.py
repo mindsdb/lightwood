@@ -1,13 +1,7 @@
 from typing import List, Tuple, Iterable
-import logging
 import torch
-from PIL import Image
-from typing import List
-import torch
-import pandas as pd
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
 from lightwood.encoder.base import BaseEncoder
-
 from lightwood.helpers.log import log
 
 try:
