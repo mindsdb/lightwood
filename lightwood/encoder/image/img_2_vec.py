@@ -1,11 +1,16 @@
 from typing import List
-import logging
 import torch
-import torchvision.transforms as transforms
-from PIL import Image
 import pandas as pd
 from lightwood.encoder.image.helpers.img_to_vec import Img2Vec
 from lightwood.encoder.base import BaseEncoder
+
+from lightwood.helpers.log import log
+
+try:
+    import torchvision.transforms as transforms
+    from PIL import Image
+except ModuleNotFoundError:
+    log.info("No torchvision/pillow detected, image encoder not supported")
 
 
 class Img2VecEncoder(BaseEncoder):
@@ -40,8 +45,8 @@ class Img2VecEncoder(BaseEncoder):
         ])
         self.stop_after = stop_after
 
-        pil_logger = logging.getLogger('PIL')
-        pil_logger.setLevel(logging.ERROR)
+        # pil_logger = logging.getLogger('PIL')  # noqa
+        # pil_logger.setLevel(logging.ERROR)  # noqa
 
     def prepare(self, train_priming_data: pd.Series, dev_priming_data: pd.Series):
         # @TODO: finetune here? depending on time aim
