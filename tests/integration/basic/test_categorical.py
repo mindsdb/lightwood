@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 import pandas as pd
 from sklearn.metrics import balanced_accuracy_score
-
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import predictor_from_problem
 np.random.seed(42)

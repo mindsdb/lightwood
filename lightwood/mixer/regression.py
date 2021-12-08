@@ -36,6 +36,7 @@ class Regression(BaseMixer):
         super().__init__(stop_after)
         self.target_encoder = target_encoder
         self.target_dtype = dtype_dict[target]
+        self.dtype_dict = dtype_dict
         self.supports_proba = self.target_dtype in [dtype.binary, dtype.categorical]
         self.label_map = {}
         self.stable = False
@@ -49,6 +50,10 @@ class Regression(BaseMixer):
         """
         if self.target_dtype not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(f'Unspported {self.target_dtype} type for regression')
+
+        if self.stop_after < len(train_data) * len(self.dtype_dict) / pow(10, 3):
+            raise Exception(f'Insufficient time ({self.stop_after} seconds) to fit a linear regression on the data!')
+
         log.info('Fitting Linear Regression model')
         X = []
         Y = []

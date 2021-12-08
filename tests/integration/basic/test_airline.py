@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 from sklearn.metrics import accuracy_score
-
+from tests.utils.timing import train_and_check_time_aim
 from lightwood.api.types import ProblemDefinition
 
 
@@ -14,7 +14,7 @@ class TestBasic(unittest.TestCase):
         target = 'airline_sentiment'
 
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 80}))
-        predictor.learn(df)
+        train_and_check_time_aim(predictor, df)
         predictions = predictor.predict(df)
 
         # sanity checks
