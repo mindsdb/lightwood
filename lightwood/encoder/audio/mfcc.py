@@ -1,10 +1,14 @@
-import librosa
 import torch
 import warnings
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.io import read_from_path_or_url
 import pandas as pd
 from lightwood.helpers.log import log
+
+try:
+    import librosa
+except ModuleNotFoundError:
+    log.info("No librosa detected, audio encoder not supported")
 
 
 class MFCCEncoder(BaseEncoder):
