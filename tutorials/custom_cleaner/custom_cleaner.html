@@ -449,7 +449,7 @@ div.rendered_html tbody tr:hover {
 <p>In this tutorial, we’re going to focus on making changes to 2 columns: (1) <strong>excerpt</strong>, a text column, and ensuring we remove stop words using NLTK. (2) <strong>target</strong>, the goal to predict; we will make this explicitly non-negative.</p>
 <p>Note, for this ACTUAL challenge, negative and positive are meaningful. We are using this as an example dataset to demonstrate how you can make changes to your underlying dataset and proceed to building powerful predictors.</p>
 <p>Let’s get started!</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -471,6 +471,15 @@ div.rendered_html tbody tr:hover {
                       <span class="n">predictor_from_code</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+<span class="ansi-green-fg">INFO:lightwood-2823:No torchvision detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:No torchvision/pillow detected, image encoder not supported</span>
+</pre></div></div>
 </div>
 <div class="section" id="1)-Load-your-data">
 <h3>1) Load your data<a class="headerlink" href="#1)-Load-your-data" title="Permalink to this headline">¶</a></h3>
@@ -596,19 +605,19 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2408:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2408:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2823:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -933,7 +942,7 @@ Writing MyCustomCleaner.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2408:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1450,13 +1459,13 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2408:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Converted target into strictly non-negative</span>
-<span class="ansi-green-fg">INFO:lightwood-2408:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Converted target into strictly non-negative</span>
+<span class="ansi-green-fg">INFO:lightwood-2823:Cleaning column =excerpt</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

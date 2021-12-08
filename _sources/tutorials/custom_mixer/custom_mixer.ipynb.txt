@@ -46,10 +46,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-03T17:16:12.066199Z",
-     "iopub.status.busy": "2021-12-03T17:16:12.065717Z",
-     "iopub.status.idle": "2021-12-03T17:16:12.075923Z",
-     "shell.execute_reply": "2021-12-03T17:16:12.076284Z"
+     "iopub.execute_input": "2021-12-08T18:08:02.783787Z",
+     "iopub.status.busy": "2021-12-08T18:08:02.780775Z",
+     "iopub.status.idle": "2021-12-08T18:08:02.793634Z",
+     "shell.execute_reply": "2021-12-08T18:08:02.794125Z"
     }
    },
    "outputs": [
@@ -133,10 +133,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-03T17:16:12.081099Z",
-     "iopub.status.busy": "2021-12-03T17:16:12.080613Z",
-     "iopub.status.idle": "2021-12-03T17:16:17.393174Z",
-     "shell.execute_reply": "2021-12-03T17:16:17.392745Z"
+     "iopub.execute_input": "2021-12-08T18:08:02.797797Z",
+     "iopub.status.busy": "2021-12-08T18:08:02.797207Z",
+     "iopub.status.idle": "2021-12-08T18:08:07.372819Z",
+     "shell.execute_reply": "2021-12-08T18:08:07.373323Z"
     }
    },
    "outputs": [
@@ -146,39 +146,41 @@
      "text": [
       "[nltk_data] Downloading package punkt to /home/runner/nltk_data...\n",
       "[nltk_data]   Unzipping tokenizers/punkt.zip.\n",
-      "\u001b[32mINFO:lightwood-1941:Dropping features: []\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Analyzing a sample of 298\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:from a total population of 303, this is equivalent to 98.3% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: age\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column age has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: sex\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column sex has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: cp\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column cp has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: trestbps\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column trestbps has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: chol\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column chol has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: fbs\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column fbs has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: restecg\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column restecg has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: thalach\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column thalach has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: exang\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column exang has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: oldpeak\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column oldpeak has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: slope\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column slope has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: ca\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column ca has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: thal\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column thal has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Infering type for: target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Column target has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2109:No torchvision detected, image encoder not supported\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:No torchvision/pillow detected, image encoder not supported\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Dropping features: []\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Analyzing a sample of 298\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:from a total population of 303, this is equivalent to 98.3% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: age\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column age has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: sex\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column sex has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: cp\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column cp has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: trestbps\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column trestbps has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: chol\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column chol has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: fbs\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column fbs has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: restecg\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column restecg has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: thalach\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column thalach has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: exang\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column exang has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: oldpeak\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column oldpeak has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: slope\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column slope has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: ca\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column ca has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: thal\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column thal has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Infering type for: target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Column target has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Finished statistical analysis\u001b[0m\n"
      ]
     },
     {
@@ -392,10 +394,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-03T17:16:17.401372Z",
-     "iopub.status.busy": "2021-12-03T17:16:17.400458Z",
-     "iopub.status.idle": "2021-12-03T17:16:17.401866Z",
-     "shell.execute_reply": "2021-12-03T17:16:17.402208Z"
+     "iopub.execute_input": "2021-12-08T18:08:07.381650Z",
+     "iopub.status.busy": "2021-12-08T18:08:07.380701Z",
+     "iopub.status.idle": "2021-12-08T18:08:07.384592Z",
+     "shell.execute_reply": "2021-12-08T18:08:07.385062Z"
     }
    },
    "outputs": [],
@@ -424,10 +426,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-03T17:16:17.406412Z",
-     "iopub.status.busy": "2021-12-03T17:16:17.405990Z",
-     "iopub.status.idle": "2021-12-03T17:16:17.653989Z",
-     "shell.execute_reply": "2021-12-03T17:16:17.653588Z"
+     "iopub.execute_input": "2021-12-08T18:08:07.389894Z",
+     "iopub.status.busy": "2021-12-08T18:08:07.389292Z",
+     "iopub.status.idle": "2021-12-08T18:08:07.651415Z",
+     "shell.execute_reply": "2021-12-08T18:08:07.650881Z"
     }
    },
    "outputs": [
@@ -435,7 +437,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-1941:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2109:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
      ]
     }
    ],
@@ -451,10 +453,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-03T17:16:17.657431Z",
-     "iopub.status.busy": "2021-12-03T17:16:17.656978Z",
-     "iopub.status.idle": "2021-12-03T17:16:20.274409Z",
-     "shell.execute_reply": "2021-12-03T17:16:20.274978Z"
+     "iopub.execute_input": "2021-12-08T18:08:07.655700Z",
+     "iopub.status.busy": "2021-12-08T18:08:07.655145Z",
+     "iopub.status.idle": "2021-12-08T18:08:11.468847Z",
+     "shell.execute_reply": "2021-12-08T18:08:11.469263Z"
     }
    },
    "outputs": [
@@ -462,51 +464,51 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-1941:Dropping features: []\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Performing statistical analysis on data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Finished statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Splitting the data into train/test\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Preparing the encoders\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 2\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 3\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 4\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 5\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 6\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 7\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 8\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 9\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 10\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 11\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 12\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 13\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Encoder prepping dict length of: 14\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: age\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: sex\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: cp\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: trestbps\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: chol\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: fbs\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: restecg\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: thalach\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: exang\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: oldpeak\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: slope\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: ca\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Done running for: thal\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Featurizing the data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Training the mixers\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Ensembling the mixer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Mixer: RandomForestMixer got accuracy: 0.8705357142857143\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Picked best mixer: RandomForestMixer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Analyzing the ensemble of mixers\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:The block ICP is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:The block AccStats is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Adjustment on validation requested.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Updating the mixers\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2109:Dropping features: []\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Performing statistical analysis on data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Finished statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Splitting the data into train/test\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Preparing the encoders\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 1\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 2\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 3\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 4\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 5\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 6\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 7\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 8\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 9\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 10\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 11\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 12\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 13\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Encoder prepping dict length of: 14\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: age\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: sex\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: cp\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: trestbps\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: chol\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: fbs\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: restecg\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: thalach\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: exang\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: oldpeak\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: slope\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: ca\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Done running for: thal\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Featurizing the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Training the mixers\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Ensembling the mixer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Mixer: RandomForestMixer got accuracy: 0.8705357142857143\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Picked best mixer: RandomForestMixer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Analyzing the ensemble of mixers\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:The block ICP is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:The block AccStats is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Adjustment on validation requested.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Updating the mixers\u001b[0m\n"
      ]
     }
    ],
@@ -526,10 +528,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-12-03T17:16:20.280500Z",
-     "iopub.status.busy": "2021-12-03T17:16:20.279821Z",
-     "iopub.status.idle": "2021-12-03T17:16:20.396363Z",
-     "shell.execute_reply": "2021-12-03T17:16:20.396707Z"
+     "iopub.execute_input": "2021-12-08T18:08:11.475823Z",
+     "iopub.status.busy": "2021-12-08T18:08:11.475262Z",
+     "iopub.status.idle": "2021-12-08T18:08:11.627904Z",
+     "shell.execute_reply": "2021-12-08T18:08:11.628412Z"
     }
    },
    "outputs": [
@@ -537,12 +539,12 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-1941:Dropping features: []\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:Featurizing the data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:The block ICP is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:The block AccStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-1941:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2109:Dropping features: []\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:Featurizing the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:The block ICP is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:The block AccStats is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2109:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
      ]
     },
     {

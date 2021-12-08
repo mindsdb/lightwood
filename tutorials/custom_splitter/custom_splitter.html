@@ -450,7 +450,7 @@ as a final pass to see what models perform best.</p>
 <p>In the following problem, we shall work with a Kaggle dataset around credit card fraud (found <a class="reference external" href="https://www.kaggle.com/mlg-ulb/creditcardfraud">here</a>). Fraud detection is difficult because the events we are interested in catching are thankfully rare events. Because of that, there is a large <strong>imbalance of classes</strong> (in fact, in this dataset, less than 1% of the data are the rare-event).</p>
 <p>In a supervised technique, we may want to ensure our training data sees the rare event of interest. A random shuffle could potentially miss rare events. We will implement <strong>SMOTE</strong> to increase the number of positive classes in our training data.</p>
 <p>Let’s get started!</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -475,6 +475,15 @@ as a final pass to see what models perform best.</p>
 <span class="kn">import</span> <span class="nn">imblearn</span> <span class="c1"># Vers 0.5.0 minimum requirement</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+<span class="ansi-green-fg">INFO:lightwood-2699:No torchvision detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:No torchvision/pillow detected, image encoder not supported</span>
+</pre></div></div>
 </div>
 <div class="section" id="1)-Load-your-data">
 <h3>1) Load your data<a class="headerlink" href="#1)-Load-your-data" title="Permalink to this headline">¶</a></h3>
@@ -723,73 +732,73 @@ Text(0.5, 1.0, &#39;Distribution of Classes&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2287:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Analyzing a sample of 18424</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:from a total population of 284807, this is equivalent to 6.5% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: Time</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column Time has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V1</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V1 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V2</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V2 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V3</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V3 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V4</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V4 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V5</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V5 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V6</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V6 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V7</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V7 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V8</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V8 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V9</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V9 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V10</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V10 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V11</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V11 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V12</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V12 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V13</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V13 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V14</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V14 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V15</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V15 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V16</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V16 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V17</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V17 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V18</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V18 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V19</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V19 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V20</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V20 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V21</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V21 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V22</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V22 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V23</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V23 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V24</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V24 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V25</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V25 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V26</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V26 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V27</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V27 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: V28</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column V28 has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: Amount</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column Amount has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Infering type for: Class</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Column Class has data type binary</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Analyzing a sample of 18424</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:from a total population of 284807, this is equivalent to 6.5% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: Time</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column Time has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V1</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V1 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V2</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V2 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V3</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V3 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V4</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V4 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V5</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V5 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V6</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V6 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V7</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V7 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V8</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V8 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V9</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V9 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V10</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V10 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V11</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V11 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V12</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V12 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V13</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V13 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V14</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V14 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V15</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V15 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V16</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V16 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V17</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V17 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V18</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V18 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V19</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V19 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V20</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V20 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V21</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V21 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V22</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V22 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V23</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V23 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V24</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V24 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V25</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V25 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V26</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V26 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V27</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V27 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: V28</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column V28 has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: Amount</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column Amount has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Infering type for: Class</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Column Class has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood looks at each of the many columns and indicates they are mostly float, with exception of “<strong>Class</strong>” which is binary.</p>
@@ -950,7 +959,7 @@ Writing MyCustomSplitter.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2287:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1571,8 +1580,8 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2287:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2287:Splitting the data into train/test</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2699:Splitting the data into train/test</span>
 /home/runner/lightwood_modules/1_8_0/MyCustomSplitter.py:57: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
