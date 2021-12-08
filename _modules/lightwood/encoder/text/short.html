@@ -217,7 +217,7 @@
     <span class="k">def</span> <span class="nf">_combine_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vecs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">average_vectors</span><span class="p">(</span><span class="n">vecs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
+<div class="viewcode-block" id="ShortTextEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.ShortTextEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
         <span class="n">no_null_sentences</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">priming_data</span><span class="p">)</span>
         <span class="n">unique_tokens</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="n">max_words_per_sent</span> <span class="o">=</span> <span class="mi">0</span>
@@ -239,9 +239,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">encoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="n">priming_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="ShortTextEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.ShortTextEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="n">no_null_sentences</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">column_data</span><span class="p">)</span>
         <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">no_null_sentences</span><span class="p">:</span>
@@ -250,9 +250,9 @@
             <span class="n">encoded_sent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_fn</span><span class="p">(</span><span class="n">encoded_words</span><span class="p">)</span>
             <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">encoded_sent</span><span class="p">))</span>
         <span class="n">output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">output</span>
+        <span class="k">return</span> <span class="n">output</span></div>
 
-    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vectors</span><span class="p">):</span>
+<div class="viewcode-block" id="ShortTextEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.ShortTextEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vectors</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s1">&#39;concat&#39;</span><span class="p">:</span>
 
             <span class="n">vec_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cae</span><span class="o">.</span><span class="n">max_encoded_length</span>
@@ -280,7 +280,7 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;decode is only defined for mode=&quot;concat&quot;&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_unexpected_mode</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unexpected_mode</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>

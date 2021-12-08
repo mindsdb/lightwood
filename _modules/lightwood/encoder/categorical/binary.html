@@ -168,79 +168,169 @@
   <h1>Source code for lightwood.encoder.categorical.binary</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">softmax</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.constants</span> <span class="kn">import</span> <span class="n">_UNCOMMON_WORD</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span> <span class="k">as</span> <span class="n">dc</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Tuple</span>
 
 
-<span class="c1"># Exists mainly for datasets with loads of binary flags where OHE can be too slow to fit</span>
 <div class="viewcode-block" id="BinaryEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.BinaryEncoder">[docs]</a><span class="k">class</span> <span class="nc">BinaryEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Creates a one-hot-encoding for binary class data. Assume two arbitrary categories :math:`A` and :math:`B`; representation for them will be as such:</span>
 
-<span class="sd">    Why are we handling target weighting inside encoders? Simple: we&#39;d otherwise have to compute per-index weighting inside the mixers, rather than having that code unified inside 2x encoders. So moving this to the mixer will still involve having to pass the target encoder to the mixer, but will add the additional complexity of having to pass a weighting map to the mixer and adding class-to-index translation boilerplate + weight setting for each mixer</span>
+<span class="sd">    .. math::</span>
+
+<span class="sd">       A &amp;= [1, 0] \\</span>
+<span class="sd">       B &amp;= [0, 1]</span>
+
+<span class="sd">    This encoder is a specialized case of one-hot encoding (OHE); unknown categories are explicitly handled as [0, 0]. Unknowns may only be reported if the input row value is NULL (or python `None` type) or if new data, after the encoder is prepared, has examples outside the feature map.</span>
+
+<span class="sd">    When data is typed with Lightwood, this class is only deployed if an input data type is explicitly recognized as binary (i.e. the column has only 2 unique values like True/False). If future data shows a new category (thus the data is no longer truly binary), this encoder will no longer be appropriate unless you are comfortable mapping ALL new classes as [0, 0].</span>
+
+<span class="sd">    An encoder can represent a feature column or target column; in this case it represents a target, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes. </span>
+
+<span class="sd">    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/20 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::</span>
+
+<span class="sd">    target_weights = {&quot;class1&quot;: 0.8, &quot;class2&quot;: 0.2}</span>
+
+<span class="sd">    Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.</span>
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">target_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">target_weights</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param is_target: Whether encoder featurizes target column</span>
+<span class="sd">        :param target_weights: Percentage of total population represented by each category (from [0, 1]), as a dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># category name -&gt; index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># index -&gt; category name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder_class_type</span> <span class="o">=</span> <span class="nb">str</span>
+
+        <span class="c1"># Weight-balance info if encoder represents target</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="n">target_weights</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="n">dc</span><span class="p">(</span><span class="n">target_weights</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.BinaryEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given priming data, create a map/inverse-map corresponding category name to index (and vice versa).</span>
+
+<span class="sd">        :param priming_data: Binary data to encode</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">priming_data</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">)]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">unq_cats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">priming_data</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">break</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{</span><span class="n">cat</span><span class="p">:</span> <span class="n">indx</span> <span class="k">for</span> <span class="n">indx</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unq_cats</span><span class="p">)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">indx</span><span class="p">:</span> <span class="n">cat</span> <span class="k">for</span> <span class="n">cat</span><span class="p">,</span> <span class="n">indx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
+        <span class="c1"># Enforce only binary; map must have exactly 2 classes.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Issue with dtype; data has &gt; 2 classes.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># For target-only, report on relative weights of classes</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">word</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">word</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1"># Equally wt. both classes</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># If target weights provided, weight by inverse</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">):</span>
+                <span class="c1"># Check target weights properly specified</span>
+                <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Target weights cannot be 0&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Ensure all classes are specified in the weights criteria</span>
+                <span class="k">assert</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+                <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">cat</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">[</span><span class="n">cat</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="BinaryEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.BinaryEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encodes categories as OHE binary. Unknown/unrecognized classes return [0,0].</span>
+
+<span class="sd">        :param column_data: Pre-processed data to encode</span>
+<span class="sd">        :returns Encoded data of form :math:`N_{rows} x 2`</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">column_data</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column_data</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BinaryEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.BinaryEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given encoded data, return in form of original category labels.</span>
+<span class="sd">        The input to `decode` makes no presumption on whether the data is already in OHE form OR not, as it some models may output a set of probabilities of weights assigned to each class. The decoded value will always be the argmax of such a vector.</span>
+
+<span class="sd">        In the case that the vector is all 0s, the output is decoded as &quot;UNKNOWN&quot;</span>
+
+<span class="sd">        :param encoded_data: the output of a mixer model</span>
+
+<span class="sd">        :returns: Decoded values for each data point</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="n">encoded_data_list</span> <span class="o">=</span> <span class="n">encoded_data</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">column_data</span><span class="p">:</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">ret</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="n">encoded_data_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">vector</span><span class="p">):</span>  <span class="c1"># Vector of all 0s -&gt; unknown category</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_UNCOMMON_WORD</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)])</span>
 
-    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">,</span> <span class="n">return_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="BinaryEncoder.decode_probabilities"><a class="viewcode-back" href="../../../../encoder.html#encoder.BinaryEncoder.decode_probabilities">[docs]</a>    <span class="k">def</span> <span class="nf">decode_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides decoded answers, as well as a probability assignment to each data point.</span>
+
+<span class="sd">        :param encoded_data: the output of a mixer model</span>
+
+<span class="sd">        :returns: Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">encoded_data_list</span> <span class="o">=</span> <span class="n">encoded_data</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">probs</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="n">encoded_data_list</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">vector</span><span class="p">):</span>  <span class="c1"># Vector of all 0s -&gt; unknown category</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_UNCOMMON_WORD</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)])</span>
 
-            <span class="k">if</span> <span class="n">return_raw</span><span class="p">:</span>
-                <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">softmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_norm_vec</span><span class="p">(</span><span class="n">vector</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">return_raw</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ret</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ret</span></div>
+        <span class="k">return</span> <span class="n">ret</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_norm_vec</span><span class="p">(</span><span class="n">vec</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a vector, normalizes so that the sum of elements is 1.</span>
+
+<span class="sd">        :param vec: Assigned weights for each category</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="o">/</span> <span class="n">total</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">]</span></div>
 </pre></div>
 
            </div>

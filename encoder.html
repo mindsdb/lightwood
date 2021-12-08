@@ -38,6 +38,8 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -197,7 +199,8 @@
 <span class="target" id="module-encoder"></span><dl class="py class">
 <dt class="sig sig-object py" id="encoder.ArrayEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">ArrayEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#ArrayEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.ArrayEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fits a normalizer for array data. To encode, <cite>ArrayEncoder</cite> returns a normalized window of previous data.
+<dd><p>Fits a normalizer for array data.</p>
+<p>To encode, <cite>ArrayEncoder</cite> returns a normalized window of previous data.
 It can be used for generic arrays, as well as for handling historical target values in time series tasks.</p>
 <p>Currently supported normalizing strategies are minmax for numerical arrays, and a simple one-hot for categorical arrays. See <cite>lightwood.encoder.helpers</cite> for more details on each approach.</p>
 <dl class="field-list simple">
@@ -209,6 +212,54 @@ It can be used for generic arrays, as well as for handling historical target val
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.ArrayEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#ArrayEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.ArrayEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts data as a list of arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Encoded data prepared by this array encoder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of iterable sequences in the original data space</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.ArrayEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#ArrayEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.ArrayEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode the properties of a sequence-of-sequence representation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]) – Input column data to be encoded</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a torch-tensor representing the encoded sequence</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.ArrayEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#ArrayEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.ArrayEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare the array encoder for sequence data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]) – Training data of sequences</p></li>
+<li><p><strong>dev_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]) – Dev data of sequences</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -234,24 +285,199 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 - is_nn_encoder: Whether the encoder is neural network-based.
 - dependencies: list of additional columns that the encoder might need to encode.
 - output_size: length of each encoding tensor for a single data point.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.BaseEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/base.html#BaseEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.BaseEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – The input representation in encoded format</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.BaseEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/base.html#BaseEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.BaseEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the approach defined in <cite>prepare()</cite>, encodes column data into a numerical representation to form part of the feature vector.</p>
+<p>After all columns are featurized, each encoded vector is concatenated to form a feature vector per row in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The encoded representation of data, per column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.BaseEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/base.html#BaseEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.BaseEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.BinaryEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">BinaryEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/binary.html#BinaryEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.BinaryEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Why are we handling target weighting inside encoders? Simple: we’d otherwise have to compute per-index weighting inside the mixers, rather than having that code unified inside 2x encoders. So moving this to the mixer will still involve having to pass the target encoder to the mixer, but will add the additional complexity of having to pass a weighting map to the mixer and adding class-to-index translation boilerplate + weight setting for each mixer</p>
+<dd><p>Creates a one-hot-encoding for binary class data. Assume two arbitrary categories <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span>; representation for them will be as such:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[A &amp;= [1, 0] \
+B &amp;= [0, 1]\]</div>
+<p>This encoder is a specialized case of one-hot encoding (OHE); unknown categories are explicitly handled as [0, 0]. Unknowns may only be reported if the input row value is NULL (or python <cite>None</cite> type) or if new data, after the encoder is prepared, has examples outside the feature map.</p>
+<p>When data is typed with Lightwood, this class is only deployed if an input data type is explicitly recognized as binary (i.e. the column has only 2 unique values like True/False). If future data shows a new category (thus the data is no longer truly binary), this encoder will no longer be appropriate unless you are comfortable mapping ALL new classes as [0, 0].</p>
+<p>An encoder can represent a feature column or target column; in this case it represents a target, <cite>is_target</cite> is <cite>True</cite>, and <cite>target_weights</cite>. The <cite>target_weights</cite> parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.</p>
+<p>By default, the <cite>StatisticalAnalysis</cite> phase will provide <cite>target_weights</cite> as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/20 imbalanced representation across 3 different classes - <cite>target_weights</cite> will be a vector as such:</p>
+<p>target_weights = {“class1”: 0.8, “class2”: 0.2}</p>
+<p>Users should note that models will be presented with the inverse of the target weights, <cite>inv_target_weights</cite>, which will perform the 1/target_value_per_class operation. <strong>This means large values will result in small weights for the model</strong>.</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.BinaryEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/binary.html#BinaryEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.BinaryEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given encoded data, return in form of original category labels.
+The input to <cite>decode</cite> makes no presumption on whether the data is already in OHE form OR not, as it some models may output a set of probabilities of weights assigned to each class. The decoded value will always be the argmax of such a vector.</p>
+<p>In the case that the vector is all 0s, the output is decoded as “UNKNOWN”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – the output of a mixer model</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Decoded values for each data point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.BinaryEncoder.decode_probabilities">
+<span class="sig-name descname"><span class="pre">decode_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/binary.html#BinaryEncoder.decode_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.BinaryEncoder.decode_probabilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides decoded answers, as well as a probability assignment to each data point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – the output of a mixer model</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.BinaryEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/binary.html#BinaryEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.BinaryEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes categories as OHE binary. Unknown/unrecognized classes return [0,0].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Pre-processed data to encode</p>
+</dd>
+</dl>
+<p>:returns Encoded data of form <span class="math notranslate nohighlight">\(N_{rows} x 2\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.BinaryEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/binary.html#BinaryEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.BinaryEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given priming data, create a map/inverse-map corresponding category name to index (and vice versa).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Binary data to encode</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">CategoricalAutoEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_encoded_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> – The input representation in encoded format</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the approach defined in <cite>prepare()</cite>, encodes column data into a numerical representation to form part of the feature vector.</p>
+<p>After all columns are featurized, each encoded vector is concatenated to form a feature vector per row in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The encoded representation of data, per column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.DatetimeEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">DatetimeEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime.html#DatetimeEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>This encoder produces an encoded representation for timestamps.</p>
 <p>The approach consists on decomposing the timestamp objects into its constituent units (e.g. day-of-week, month, year, etc), and describing each of those with a single value that represents the magnitude in a sensible cycle length.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.DatetimeEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_as_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime.html#DatetimeEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> – The input representation in encoded format</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.DatetimeEncoder.encode">
 <span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime.html#DatetimeEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeEncoder.encode" title="Permalink to this definition">¶</a></dt>
@@ -273,12 +499,37 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 :return: a list of vectors</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.DatetimeEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime.html#DatetimeEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.DatetimeNormalizerEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">DatetimeNormalizerEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sinusoidal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime_sin_normalizer.html#DatetimeNormalizerEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeNormalizerEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
+<dt class="sig sig-object py" id="encoder.DatetimeNormalizerEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_as_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime_sin_normalizer.html#DatetimeNormalizerEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeNormalizerEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> – The input representation in encoded format</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="encoder.DatetimeNormalizerEncoder.encode">
 <span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime_sin_normalizer.html#DatetimeNormalizerEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeNormalizerEncoder.encode" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -299,23 +550,43 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 :return: a list of vectors</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.DatetimeNormalizerEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime_sin_normalizer.html#DatetimeNormalizerEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeNormalizerEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.Img2VecEncoder">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">Img2VecEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>This encoder generates encoded representations for images using a pre-trained deep neural network.</p>
-<p>All input images are rescaled to a standard size of 224x224, and normalized using the mean and standard deviation of the ImageNet dataset (as it was used to train the underlying NN).</p>
-<p>Note that this encoder does not have a .decode() method yet. As such, models that predict images as output are not supported at this time.</p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">Img2VecEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(224,</span> <span class="pre">224)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.485,</span> <span class="pre">0.456,</span> <span class="pre">0.406]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.229,</span> <span class="pre">0.224,</span> <span class="pre">0.225]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates encoded representations for images using a pre-trained deep neural network. Inputs must be str-based location of the data.</p>
+<p>Without user-specified details, all input images are rescaled to a standard size of 224x224, and normalized using the mean and standard deviation of the ImageNet dataset (as it was used to train the underlying NN).</p>
+<p>This encoder currently does not support a <cite>decode()</cite> call; models with an image output will not work.</p>
 <p>For more information about the neural network this encoder uses, refer to the <cite>lightwood.encoder.image.helpers.img_to_vec.Img2Vec</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget, in seconds.</p></li>
-<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether the encoder corresponds to the target column. This is not currently possible for Img2VecEncoder.</p></li>
+<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether encoder represents target or not</p></li>
+<li><p><strong>scale</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Resize scale of image (x, y)</p></li>
+<li><p><strong>mean</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Mean of pixel values</p></li>
+<li><p><strong>std</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Standard deviation of pixel values</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.Img2VecEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values_tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Currently not supported</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.Img2VecEncoder.encode">
 <span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder.encode" title="Permalink to this definition">¶</a></dt>
@@ -336,13 +607,13 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.Img2VecEncoder.prepare">
 <span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder.prepare" title="Permalink to this definition">¶</a></dt>
-<dd><p>Instances an <cite>Img2Vec</cite> object and sets the expected size for encoded representations.</p>
+<dd><p>Sets an <cite>Img2Vec</cite> object (model) and sets the expected size for encoded representations.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.Img2VecEncoder.to">
 <span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_devices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/image/img_2_vec.html#Img2VecEncoder.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.Img2VecEncoder.to" title="Permalink to this definition">¶</a></dt>
-<dd><p>Moves the model to-and-from CPU and GPU.</p>
+<dd><p>Changes device of model to support CPU/GPU</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -361,7 +632,47 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.MultiHotEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">MultiHotEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/multihot.html#MultiHotEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.MultiHotEncoder" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="encoder.MultiHotEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vectors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/multihot.html#MultiHotEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.MultiHotEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> – The input representation in encoded format</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.MultiHotEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/multihot.html#MultiHotEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.MultiHotEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the approach defined in <cite>prepare()</cite>, encodes column data into a numerical representation to form part of the feature vector.</p>
+<p>After all columns are featurized, each encoded vector is concatenated to form a feature vector per row in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The encoded representation of data, per column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.MultiHotEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/multihot.html#MultiHotEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.MultiHotEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.NumericEncoder">
@@ -427,48 +738,165 @@ The procedure for this is defined inside the <cite>encode()</cite> method.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.OneHotEncoder">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">OneHotEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handle_unknown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown_token'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/onehot.html#OneHotEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.OneHotEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Why are we handling target weighting inside encoders? Simple: we’d otherwise have to compute per-index weighting inside the mixers, rather than having that code unified inside 2x encoders. So moving this to the mixer will still involve having to pass the target encoder to the mixer, but will add the additional complexity of having to pass a weighting map to the mixer and adding class-to-index translation boilerplate + weight setting for each mixer</p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">OneHotEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_unknown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/onehot.html#OneHotEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.OneHotEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a one-hot encoding (OHE) for categorical data. One-hot encoding represents categorical information as a vector where each individual dimension corresponds to a category. A category has a 1:1 mapping between dimension indicated by a “1” in that position. For example, imagine 3 categories, <span class="math notranslate nohighlight">\(A\)</span>, <span class="math notranslate nohighlight">\(B\)</span>, and <span class="math notranslate nohighlight">\(C\)</span>; these can be represented as follows:</p>
+<div class="math notranslate nohighlight">
+\[A &amp;= [1, 0, 0] \
+B &amp;= [0, 1, 0] \
+C &amp;= [0, 0, 1]\]</div>
+<dl class="simple">
+<dt>The OHE encoder operates in 2 modes:</dt><dd><ol class="arabic simple">
+<li><p>“use_unknown=True”: Makes an <span class="math notranslate nohighlight">\(N+1\)</span> length vector for <span class="math notranslate nohighlight">\(N\)</span> categories, the first index always corresponds to the unknown category.</p></li>
+<li><p>“use_unknown=False”: Makes an <span class="math notranslate nohighlight">\(N\)</span> length vector for <span class="math notranslate nohighlight">\(N\)</span> categories, where an empty vector of 0s indicates an unknown/missing category.</p></li>
+</ol>
+</dd>
+</dl>
+<p>An encoder can represent a feature column or target column; in this case it represents a target, <cite>is_target</cite> is <cite>True</cite>, and <cite>target_weights</cite>. The <cite>target_weights</cite> parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.</p>
+<p>By default, the <cite>StatisticalAnalysis</cite> phase will provide <cite>target_weights</cite> as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/05/15 imbalanced representation across 3 different classes - <cite>target_weights</cite> will be a vector as such:</p>
+<p>target_weights = {“class1”: 0.8, “class2”: 0.05, “class3”: 0.15}</p>
+<p>Users should note that models will be presented with the inverse of the target weights, <cite>inv_target_weights</cite>, which will perform the 1/target_value_per_class operation. <strong>This means large values will result in small weights for the model</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – True if this encoder featurizes the target column</p></li>
+<li><p><strong>target_weights</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – Percentage of total population represented by each category (between [0, 1]).</p></li>
+<li><p><strong>mode</strong> – True uses an extra dimension to account for unknown/out-of-distribution categories</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.OneHotEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/onehot.html#OneHotEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.OneHotEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes OHE mapping into the original categories. Since this approach uses an argmax, decoding flexibly works either on logits or an explicitly OHE vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>encoded_data:</p>
+</dd>
+</dl>
+<p>:returns Returns the original category names for encoded data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.OneHotEncoder.decode_probabilities">
+<span class="sig-name descname"><span class="pre">decode_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/onehot.html#OneHotEncoder.decode_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.OneHotEncoder.decode_probabilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides decoded answers, as well as a probability assignment to each data point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – the output of a mixer model</p>
+</dd>
+</dl>
+<p>:returns Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.OneHotEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/onehot.html#OneHotEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.OneHotEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes pre-processed data into OHE. Unknown/unrecognized classes vector of all 0s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Pre-processed data to encode</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Encoded data of form <span class="math notranslate nohighlight">\(N_{rows} x N_{categories}\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.OneHotEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/onehot.html#OneHotEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.OneHotEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares the OHE Encoder by creating a dictionary mapping.</p>
+<p>Unknown categories must be explicitly handled as python <cite>None</cite> types.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.PretrainedLangEncoder">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">PretrainedLangEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'distilbert'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_tokenizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_position_embeddings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/pretrained.html#PretrainedLangEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.PretrainedLangEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">PretrainedLangEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_position_embeddings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/pretrained.html#PretrainedLangEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.PretrainedLangEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether this encoder represents the target. NOT functional for text generation yet.</p></li>
+<li><p><strong>batch_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of batch while fine-tuning</p></li>
+<li><p><strong>max_position_embeddings</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – max sequence length of input text</p></li>
+<li><p><strong>custom_train</strong> – If True, trains model on target procided</p></li>
+<li><p><strong>frozen</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True, freezes transformer layers during training.</p></li>
+<li><p><strong>epochs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – number of epochs to train model with</p></li>
+<li><p><strong>output_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Data dtype of the target; if categorical/binary, the option to return logits is possible.</p></li>
+<li><p><strong>embed_mode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True, assumes the output of the encode() step is the CLS embedding (this can be trained or not). If False, returns the logits of the tuned task.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.PretrainedLangEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values_tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/pretrained.html#PretrainedLangEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.PretrainedLangEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text generation via decoding is not supported.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="encoder.PretrainedLangEncoder.encode">
 <span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/pretrained.html#PretrainedLangEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.PretrainedLangEncoder.encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>TODO: Maybe batch the text up; may take too long
-Given column data, encode the dataset.</p>
-<p>Currently, returns the embedding of the pre-classifier layer.</p>
-<p>Args:
-column_data:: [list[str]] list of text data in str form</p>
-<p>Returns:
-encoded_representation:: [torch.Tensor] N_sentences x Nembed_dim</p>
+<dd><p>Converts each text example in a column into encoded state. This can be either a vector embedding of the [CLS] token (represents the full text input) OR the logits prediction of the output.</p>
+<p>The transformer model is of form:
+transformer base + pre-classifier linear layer + classifier layer</p>
+<p>The embedding returned is of the [CLS] token after the pre-classifier layer; from internal testing, we found the latent space most highly separated across classes.</p>
+<p>If the encoder represents the logits in classification, returns a soft-maxed output of the class vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – List of text data as strings</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Embedded vector N_rows x Nembed_dim OR logits vector N_rows x N_classes depending on if <cite>embed_mode</cite> is True or not.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="encoder.PretrainedLangEncoder.is_trainable_encoder">
 <span class="sig-name descname"><span class="pre">is_trainable_encoder</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#encoder.PretrainedLangEncoder.is_trainable_encoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pretrained language models.
-Option to train on a target encoding of choice.</p>
-<p>Args:
-is_target ::Bool; data column is the target of ML.
-model_name ::str; name of pre-trained model
-custom_tokenizer ::function; custom tokenizing function
-batch_size  ::int; size of batch
-max_position_embeddings ::int; max sequence length of input text
-custom_train ::Bool; If true, trains model on target procided
-frozen ::Bool; If true, freezes transformer layers during training.
-epochs ::int; number of epochs to train model with
-embed_mode ::Bool; If true, assumes the output of the encode() step is the CLS embedding.</p>
+<dd><p>//arxiv.org/abs/1910.01108).</p>
+<p>In certain text tasks, this model can use a transformer to automatically fine-tune on a class of interest (providing there is a 2 column dataset, where the input column is text).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Creates a contextualized embedding to represent input text via the [CLS] token vector from DistilBERT (transformers) (Sanh et al. 2019 - https</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.PretrainedLangEncoder.prepare">
 <span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoded_target_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/pretrained.html#PretrainedLangEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.PretrainedLangEncoder.prepare" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prepare the encoder by training on the target.</p>
-<p>Training data must be a dict with “targets” avail.
-Automatically assumes this.</p>
+<dd><p>Fine-tunes a transformer on the priming data.</p>
+<p>CURRENTLY WIP; train + dev are placeholders for a validation-based approach.</p>
+<p>Train + Dev are concatenated together and a transformer is then fine tuned with weight-decay applied on the transformer parameters. The option to freeze the underlying transformer and only train a linear layer exists if <cite>frozen=True</cite>. This trains faster, with the exception that the performance is often lower than fine-tuning on internal benchmarks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Text data in the train set</p></li>
+<li><p><strong>dev_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Text data in the dev set (not currently supported; can be empty)</p></li>
+<li><p><strong>encoded_target_values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Encoded target labels in Nrows x N_output_dimension</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.PretrainedLangEncoder.to">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_devices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/pretrained.html#PretrainedLangEncoder.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.PretrainedLangEncoder.to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts encoder models to device specified (CPU/GPU)</p>
+<p>Transformers are LARGE models, please run on GPU for fastest implementation.</p>
 </dd></dl>
 
 </dd></dl>
@@ -487,6 +915,49 @@ When None, it will be set automatically based on is_target:
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.ShortTextEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vectors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/short.html#ShortTextEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.ShortTextEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> – The input representation in encoded format</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.ShortTextEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/short.html#ShortTextEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.ShortTextEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the approach defined in <cite>prepare()</cite>, encodes column data into a numerical representation to form part of the feature vector.</p>
+<p>After all columns are featurized, each encoded vector is concatenated to form a feature vector per row in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The encoded representation of data, per column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.ShortTextEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/short.html#ShortTextEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.ShortTextEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py attribute">
@@ -528,7 +999,7 @@ If None, encoder will output the largest length encountered during training.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TimeSeriesEncoder.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-2672</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-2815</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -697,7 +1168,47 @@ If None, encoder will output the largest length encountered during training.
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.VocabularyEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">VocabularyEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/vocab.html#VocabularyEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.VocabularyEncoder" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="encoder.VocabularyEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values_tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/vocab.html#VocabularyEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.VocabularyEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> – The input representation in encoded format</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.VocabularyEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/vocab.html#VocabularyEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.VocabularyEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the approach defined in <cite>prepare()</cite>, encodes column data into a numerical representation to form part of the feature vector.</p>
+<p>After all columns are featurized, each encoded vector is concatenated to form a feature vector per row in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>column_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The encoded representation of data, per column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.VocabularyEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/vocab.html#VocabularyEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.VocabularyEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 </div>
 

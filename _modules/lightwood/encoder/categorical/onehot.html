@@ -168,144 +168,185 @@
   <h1>Source code for lightwood.encoder.categorical.onehot</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">softmax</span>
-<span class="kn">from</span> <span class="nn">lightwood.encoder.text.helpers.rnn_helpers</span> <span class="kn">import</span> <span class="n">Lang</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.constants</span> <span class="kn">import</span> <span class="n">_UNCOMMON_WORD</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
-<span class="n">UNCOMMON_WORD</span> <span class="o">=</span> <span class="s1">&#39;__mdb_unknown_cat&#39;</span>
-<span class="n">UNCOMMON_TOKEN</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Tuple</span>
 
 
 <div class="viewcode-block" id="OneHotEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.OneHotEncoder">[docs]</a><span class="k">class</span> <span class="nc">OneHotEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a one-hot encoding (OHE) for categorical data. One-hot encoding represents categorical information as a vector where each individual dimension corresponds to a category. A category has a 1:1 mapping between dimension indicated by a &quot;1&quot; in that position. For example, imagine 3 categories, :math:`A`, :math:`B`, and :math:`C`; these can be represented as follows:</span>
 
-<span class="sd">    Why are we handling target weighting inside encoders? Simple: we&#39;d otherwise have to compute per-index weighting inside the mixers, rather than having that code unified inside 2x encoders. So moving this to the mixer will still involve having to pass the target encoder to the mixer, but will add the additional complexity of having to pass a weighting map to the mixer and adding class-to-index translation boilerplate + weight setting for each mixer</span>
+<span class="sd">    .. math::</span>
+
+<span class="sd">       A &amp;= [1, 0, 0] \\</span>
+<span class="sd">       B &amp;= [0, 1, 0] \\</span>
+<span class="sd">       C &amp;= [0, 0, 1]</span>
+<span class="sd">    </span>
+<span class="sd">    The OHE encoder operates in 2 modes:</span>
+<span class="sd">        (1) &quot;use_unknown=True&quot;: Makes an :math:`N+1` length vector for :math:`N` categories, the first index always corresponds to the unknown category.</span>
+
+<span class="sd">        (2) &quot;use_unknown=False&quot;: Makes an :math:`N` length vector for :math:`N` categories, where an empty vector of 0s indicates an unknown/missing category.</span>
+
+<span class="sd">    An encoder can represent a feature column or target column; in this case it represents a target, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.</span>
+
+<span class="sd">    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/05/15 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::</span>
+
+<span class="sd">    target_weights = {&quot;class1&quot;: 0.8, &quot;class2&quot;: 0.05, &quot;class3&quot;: 0.15}</span>
+
+<span class="sd">    Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.</span>
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">target_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">handle_unknown</span><span class="o">=</span><span class="s1">&#39;unknown_token&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">target_weights</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_unknown</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param is_target: True if this encoder featurizes the target column</span>
+<span class="sd">        :param target_weights: Percentage of total population represented by each category (between [0, 1]).</span>
+<span class="sd">        :param mode: True uses an extra dimension to account for unknown/out-of-distribution categories</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># category name -&gt; index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># index -&gt; category name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_unknown</span> <span class="o">=</span> <span class="n">use_unknown</span>
 
-        <span class="k">if</span> <span class="n">handle_unknown</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;unknown_token&quot;</span><span class="p">,</span> <span class="s2">&quot;return_zeros&quot;</span><span class="p">}:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;handle_unknown should be either &#39;unknown_token&#39; or &#39;return_zeros&#39;, got </span><span class="si">{</span><span class="n">handle_unknown</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">=</span> <span class="n">handle_unknown</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">!=</span> <span class="s1">&#39;unknown_token&#39;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;One Hot Encoders used for target encoding can only be used with `handle_unknown` </span><span class="se">\</span>
-<span class="s1">                                   set to `unknown_token`. The option: &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span><span class="si">}</span><span class="s1">&quot; is not supported!&#39;</span><span class="p">)</span>
-
+        <span class="c1"># Weight-balance info if encoder represents target</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># vector-weights, mapped by class id</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="n">target_weights</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">target_weights</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">,</span> <span class="n">max_dimensions</span><span class="o">=</span><span class="mi">20000</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHotEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.OneHotEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepares the OHE Encoder by creating a dictionary mapping.</span>
+
+<span class="sd">        Unknown categories must be explicitly handled as python `None` types.</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span> <span class="o">=</span> <span class="n">Lang</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">==</span> <span class="s2">&quot;return_zeros&quot;</span><span class="p">:</span>
-            <span class="n">priming_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">priming_data</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">index2word</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">word2index</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">n_words</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">==</span> <span class="s2">&quot;unknown_token&quot;</span><span class="p">:</span>
-            <span class="n">priming_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">UNCOMMON_WORD</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">priming_data</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">index2word</span> <span class="o">=</span> <span class="p">{</span><span class="n">UNCOMMON_TOKEN</span><span class="p">:</span> <span class="n">UNCOMMON_WORD</span><span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">word2index</span> <span class="o">=</span> <span class="p">{</span><span class="n">UNCOMMON_WORD</span><span class="p">:</span> <span class="n">UNCOMMON_TOKEN</span><span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">word2count</span><span class="p">[</span><span class="n">UNCOMMON_WORD</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">n_words</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">unq_cats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">priming_data</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">priming_data</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">category</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">addWord</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_unknown</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Encoding UNKNOWN categories as index 0&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{</span><span class="n">cat</span><span class="p">:</span> <span class="n">indx</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">indx</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unq_cats</span><span class="p">)}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">_UNCOMMON_WORD</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">indx</span><span class="p">:</span> <span class="n">cat</span> <span class="k">for</span> <span class="n">cat</span><span class="p">,</span> <span class="n">indx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Encoding UNKNOWN categories as vector of all 0s&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{</span><span class="n">cat</span><span class="p">:</span> <span class="n">indx</span> <span class="k">for</span> <span class="n">indx</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unq_cats</span><span class="p">)}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">indx</span><span class="p">:</span> <span class="n">cat</span> <span class="k">for</span> <span class="n">cat</span><span class="p">,</span> <span class="n">indx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
-        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">n_words</span> <span class="o">&gt;</span> <span class="n">max_dimensions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">==</span> <span class="s2">&quot;return_zeros&quot;</span><span class="p">:</span>
-                <span class="n">necessary_words</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">==</span> <span class="s2">&quot;unknown_token&quot;</span><span class="p">:</span>
-                <span class="n">necessary_words</span> <span class="o">=</span> <span class="p">[</span><span class="n">UNCOMMON_WORD</span><span class="p">]</span>
-            <span class="n">least_occuring_words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">getLeastOccurring</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">necessary_words</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Set the length of output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
 
-            <span class="n">word_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">least_occuring_words</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">necessary_words</span><span class="p">:</span>
-                    <span class="n">word_to_remove</span> <span class="o">=</span> <span class="n">word</span>
-                    <span class="k">break</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">removeWord</span><span class="p">(</span><span class="n">word_to_remove</span><span class="p">)</span>
-
-        <span class="c1"># Note: Is target assume that we are operating in &quot;unknown_token&quot; mode</span>
+        <span class="c1"># For target-only, report on relative weights of classes</span>
+        <span class="c1"># Each dimension of the inv_target_weights respects `map`</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">n_words</span>
+
+            <span class="c1"># Equally wt. all classes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">,))</span>
+
+            <span class="c1"># If imbalanced detected, weight by inverse</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">uncommon_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">uncommon_weight</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">[</span><span class="n">UNCOMMON_WORD</span><span class="p">]</span> <span class="o">=</span> <span class="n">uncommon_weight</span>
-            <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">priming_data</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">word2index</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">word</span><span class="p">)]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">)</span>
+                <span class="c1"># Check target weights properly specified</span>
+                <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Target weights cannot be 0&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">n_words</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">index2word</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">cat</span> <span class="o">!=</span> <span class="n">_UNCOMMON_WORD</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">cat</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">[</span><span class="n">cat</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">):</span>
+                <span class="c1"># If using an unknown category, set to smallest possible value</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_unknown</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">[</span><span class="n">_UNCOMMON_WORD</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">[</span><span class="n">_UNCOMMON_WORD</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="OneHotEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.OneHotEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encodes pre-processed data into OHE. Unknown/unrecognized classes vector of all 0s.</span>
+
+<span class="sd">        :param column_data: Pre-processed data to encode</span>
+<span class="sd">        :returns: Encoded data of form :math:`N_{rows} x N_{categories}`</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span>
+            <span class="p">)</span>
 
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">column_data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column_data</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_unknown</span> <span class="ow">and</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OneHotEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.OneHotEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decodes OHE mapping into the original categories. Since this approach uses an argmax, decoding flexibly works either on logits or an explicitly OHE vector.</span>
+
+<span class="sd">        :param: encoded_data:</span>
+<span class="sd">        :returns Returns the original category names for encoded data.</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+        <span class="n">encoded_data_list</span> <span class="o">=</span> <span class="n">encoded_data</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">v_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">n_words</span>
 
-        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">column_data</span><span class="p">:</span>
-            <span class="n">encoded_word</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">v_len</span>
-            <span class="k">if</span> <span class="n">word</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">word</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">==</span> <span class="s2">&quot;return_zeros&quot;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">word2index</span><span class="p">:</span>
-                        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">word2index</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
-                        <span class="n">encoded_word</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="c1"># Encoding an unknown value will result in a vector of zeros</span>
-                        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Trying to encode a value never seen before, returning vector of zeros&#39;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>  <span class="c1"># self.handle_unknown == &quot;unknown_token&quot;</span>
-                    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">word2index</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">word2index</span> <span class="k">else</span> <span class="n">UNCOMMON_TOKEN</span>
-                    <span class="n">encoded_word</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="n">encoded_data_list</span><span class="p">:</span>
 
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">encoded_word</span><span class="p">)</span>
+            <span class="n">all_zeros</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_unknown</span> <span class="ow">and</span> <span class="n">all_zeros</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_UNCOMMON_WORD</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)])</span>
 
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
 
-    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">,</span> <span class="n">return_raw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="OneHotEncoder.decode_probabilities"><a class="viewcode-back" href="../../../../encoder.html#encoder.OneHotEncoder.decode_probabilities">[docs]</a>    <span class="k">def</span> <span class="nf">decode_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides decoded answers, as well as a probability assignment to each data point.</span>
+
+<span class="sd">        :param encoded_data: the output of a mixer model</span>
+
+<span class="sd">        :returns Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name</span>
+<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="n">encoded_data_list</span> <span class="o">=</span> <span class="n">encoded_data</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">probs</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="n">encoded_data_list</span><span class="p">:</span>
-            <span class="c1"># Logits and onehots are not the same in definition</span>
-            <span class="c1"># But this explicitly operates on logits; it will take care of</span>
-            <span class="c1"># the one hot (so you can pass something in the softmax logit space)</span>
-            <span class="c1"># But will not affect something that is already OHE.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">vector</span><span class="p">):</span>  <span class="c1"># Vector of all 0s -&gt; unknown category</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_UNCOMMON_WORD</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)])</span>
 
-            <span class="n">all_zeros</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">==</span> <span class="s2">&quot;return_zeros&quot;</span> <span class="ow">and</span> <span class="n">all_zeros</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">UNCOMMON_WORD</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>  <span class="c1"># self.handle_unknown == &quot;unknown_token&quot;</span>
-                <span class="n">ohe_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lang</span><span class="o">.</span><span class="n">index2word</span><span class="p">[</span><span class="n">ohe_index</span><span class="p">])</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_norm_vec</span><span class="p">(</span><span class="n">vector</span><span class="p">))</span>
 
-            <span class="k">if</span> <span class="n">return_raw</span><span class="p">:</span>
-                <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">softmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">ret</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span></div>
 
-        <span class="k">if</span> <span class="n">return_raw</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ret</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ret</span></div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_norm_vec</span><span class="p">(</span><span class="n">vec</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a vector, normalizes so that the sum of elements is 1.</span>
+
+<span class="sd">        :param vec: Assigned weights for each category</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="o">/</span> <span class="n">total</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">]</span></div>
 </pre></div>
 
            </div>

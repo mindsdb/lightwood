@@ -166,31 +166,36 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.encoder.array.array</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.helpers</span> <span class="kn">import</span> <span class="n">MinMaxNormalizer</span><span class="p">,</span> <span class="n">CatNormalizer</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.general</span> <span class="kn">import</span> <span class="n">is_none</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Iterable</span>
 
 
 <div class="viewcode-block" id="ArrayEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.ArrayEncoder">[docs]</a><span class="k">class</span> <span class="nc">ArrayEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Fits a normalizer for array data. To encode, `ArrayEncoder` returns a normalized window of previous data.</span>
+<span class="sd">    Fits a normalizer for array data.</span>
+
+<span class="sd">    To encode, `ArrayEncoder` returns a normalized window of previous data.</span>
 <span class="sd">    It can be used for generic arrays, as well as for handling historical target values in time series tasks.</span>
 
 <span class="sd">    Currently supported normalizing strategies are minmax for numerical arrays, and a simple one-hot for categorical arrays. See `lightwood.encoder.helpers` for more details on each approach.</span>
 
-<span class="sd">    :param stop_after: time budget in seconds.</span>
-<span class="sd">    :param window: expected length of array data.</span>
-<span class="sd">    :param original_dtype: element-wise data type</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="n">is_trainable_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">original_type</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param stop_after: time budget in seconds.</span>
+<span class="sd">        :param window: expected length of array data.</span>
+<span class="sd">        :param original_dtype: element-wise data type</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span> <span class="o">=</span> <span class="n">stop_after</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">original_type</span> <span class="o">=</span> <span class="n">original_type</span>
@@ -207,7 +212,13 @@
             <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">array</span>
 
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">):</span>
+<div class="viewcode-block" id="ArrayEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.ArrayEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">],</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare the array encoder for sequence data.</span>
+
+<span class="sd">        :param train_priming_data: Training data of sequences</span>
+<span class="sd">        :param dev_priming_data: Dev data of sequences</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">priming_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">])</span>
         <span class="n">priming_data</span> <span class="o">=</span> <span class="n">priming_data</span><span class="o">.</span><span class="n">values</span>
 
@@ -232,9 +243,15 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_normalizer</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalizer</span><span class="o">.</span><span class="n">output_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="ArrayEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.ArrayEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encode the properties of a sequence-of-sequence representation</span>
+
+<span class="sd">        :param column_data: Input column data to be encoded</span>
+<span class="sd">        :returns: a torch-tensor representing the encoded sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span><span class="p">)</span>
 
@@ -250,11 +267,17 @@
         <span class="n">data</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">data</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="ArrayEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.ArrayEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts data as a list of arrays.</span>
+
+<span class="sd">        :param data: Encoded data prepared by this array encoder</span>
+<span class="sd">        :returns: A list of iterable sequences in the original data space</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">decoded</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">decoded</span></div>
+        <span class="k">return</span> <span class="n">decoded</span></div></div>
 </pre></div>
 
            </div>
