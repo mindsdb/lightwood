@@ -65,8 +65,8 @@ class BinaryEncoder(BaseEncoder):
         self.rev_map = {indx: cat for cat, indx in self.map.items()}
 
         # Enforce only binary; map must have exactly 2 classes.
-        if len(self.map) != 2:
-            raise ValueError('Issue with dtype; data has > 2 classes.')
+        if len(self.map) > 2:
+            raise ValueError(f'Issue with dtype; data has > 2 classes. All classes are: {self.map}')
 
         # For target-only, report on relative weights of classes
         if self.is_target:
@@ -162,4 +162,6 @@ class BinaryEncoder(BaseEncoder):
         :param vec: Assigned weights for each category
         """  # noqa
         total = sum(vec)
+        if total == 0:
+            return vec
         return [i / total for i in vec]

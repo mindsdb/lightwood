@@ -178,4 +178,6 @@ class OneHotEncoder(BaseEncoder):
         :param vec: Assigned weights for each category
         """
         total = sum(vec)
+        if total == 0:
+            return vec
         return [i / total for i in vec]
