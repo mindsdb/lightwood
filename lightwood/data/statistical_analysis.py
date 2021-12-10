@@ -133,8 +133,12 @@ def statistical_analysis(data: pd.DataFrame,
 
     # get observed classes, used in analysis
     target_class_distribution = None
+    target_weights = None
     if dtypes[target] in (dtype.categorical, dtype.binary):
         target_class_distribution = dict(df[target].value_counts().apply(lambda x: x / len(df[target])))
+        target_weights = {}
+        for k in target_class_distribution:
+            target_weights[k] = 1 / target_class_distribution[k]
         train_observed_classes = list(target_class_distribution.keys())
     elif dtypes[target] == dtype.tags:
         train_observed_classes = None  # @TODO: pending call to tags logic -> get all possible tags
@@ -167,6 +171,7 @@ def statistical_analysis(data: pd.DataFrame,
         df_target_stddev=df_std,
         train_observed_classes=train_observed_classes,
         target_class_distribution=target_class_distribution,
+        target_weights=target_weights,
         positive_domain=positive_domain,
         histograms=histograms,
         buckets=buckets,

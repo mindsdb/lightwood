@@ -15,7 +15,7 @@ def model_analyzer(
     train_data: EncodedDs,
     stats_info: StatisticalAnalysis,
     target: str,
-    ts_cfg: TimeseriesSettings,
+    tss: TimeseriesSettings,
     dtype_dict: Dict[str, str],
     accuracy_functions,
     analysis_blocks: Optional[List[BaseAnalysisBlock]] = []
@@ -46,7 +46,7 @@ def model_analyzer(
     # predictive task
     is_numerical = data_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity)
     is_classification = data_type in (dtype.categorical, dtype.binary)
-    is_multi_ts = ts_cfg.is_timeseries and ts_cfg.nr_predictions > 1
+    is_multi_ts = tss.is_timeseries and tss.nr_predictions > 1
     has_pretrained_text_enc = any([isinstance(enc, PretrainedLangEncoder)
                                    for enc in encoded_train_data.encoders.values()])
 
@@ -71,7 +71,7 @@ def model_analyzer(
         'is_numerical': is_numerical,
         'is_multi_ts': is_multi_ts,
         'stats_info': stats_info,
-        'ts_cfg': ts_cfg,
+        'tss': tss,
         'accuracy_functions': accuracy_functions,
         'has_pretrained_text_enc': has_pretrained_text_enc
     }

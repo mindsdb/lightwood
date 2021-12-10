@@ -161,6 +161,7 @@ class StatisticalAnalysis:
     :param df_target_stddev: The standard deviation of the target of the dataset
     :param train_observed_classes:
     :param target_class_distribution:
+    :param target_weights: What weight the analysis suggests to assign each class by in the case of classification problems. Note: target_weights in the problem definition overides this
     :param histograms:
     :param buckets:
     :param missing:
@@ -168,12 +169,13 @@ class StatisticalAnalysis:
     :param bias:
     :param avg_words_per_sentence:
     :param positive_domain:
-    """
+    """ # noqa
 
     nr_rows: int
     df_target_stddev: Optional[float]
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
+    target_weights: object  # Dict[str, float]
     histograms: object  # Dict[str, Dict[str, List[object]]]
     buckets: object  # Dict[str, Dict[str, List[object]]]
     missing: object
@@ -214,7 +216,10 @@ class TimeseriesSettings:
             considering their change through time.
     :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).
     :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
-    """
+    :param allow_incomplete_history: whether predictions can be made for rows with incomplete historical context (i.e. less than `window` rows have been observed for the datetime that has to be forecasted).
+    :param eval_cold_start: whether to include predictions with incomplete history (thus part of the cold start region for certain mixers) when evaluating mixer scores with the validation dataset.
+    :param interval_periods: tuple of tuples with user-provided period lengths for time intervals. Default values will be added for intervals left unspecified. For interval options, check the `timeseries_analyzer.detect_period()` method documentation. e.g.: (('daily', 7),).
+    """  # noqa
 
     is_timeseries: bool
     order_by: List[str] = None
@@ -228,6 +233,8 @@ class TimeseriesSettings:
         # @TODO: George: No, I don't think it is, we need to pass this some other way
     )
     allow_incomplete_history: bool = False
+    eval_cold_start: bool = True
+    interval_periods: tuple = tuple()
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -252,7 +259,9 @@ class TimeseriesSettings:
                 use_previous_target=obj.get("use_previous_target", True),
                 historical_columns=[],
                 nr_predictions=obj.get("nr_predictions", 1),
-                allow_incomplete_history=obj.get('allow_incomplete_history', False)
+                allow_incomplete_history=obj.get('allow_incomplete_history', False),
+                eval_cold_start=obj.get('eval_cold_start', True),
+                interval_periods=obj.get('interval_periods', tuple(tuple()))
             )
             for setting in obj:
                 timeseries_settings.__setattr__(setting, obj[setting])
@@ -304,6 +313,8 @@ class ProblemDefinition:
     :param seconds_per_mixer: Number of seconds maximum to spend PER mixer trained in the list of possible mixers.
     :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \
     learn a representation.
+    :param expected_additional_time: Time budget for non-encoder/mixer tasks \
+    (ex: data analysis, pre-processing, model ensembling or model analysis)
     :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \
         encoders and models.
     :param target_weights: indicates to the accuracy functions how much to weight every target class.
@@ -324,10 +335,11 @@ class ProblemDefinition:
     target: str
     pct_invalid: float
     unbias_target: bool
-    seconds_per_mixer: Union[int, None]
-    seconds_per_encoder: Union[int, None]
-    time_aim: Union[float, None]
-    target_weights: Union[List[float], None]
+    seconds_per_mixer: Optional[int]
+    seconds_per_encoder: Optional[int]
+    expected_additional_time: Optional[int]
+    time_aim: Optional[float]
+    target_weights: Optional[List[float]]
     positive_domain: bool
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
@@ -351,7 +363,12 @@ class ProblemDefinition:
         unbias_target = obj.get('unbias_target', True)
         seconds_per_mixer = obj.get('seconds_per_mixer', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
+        expected_additional_time = obj.get('expected_additional_time', None)
+
         time_aim = obj.get('time_aim', None)
+        if time_aim is not None and time_aim < 10:
+            log.warning(f'Your specified time aim of {time_aim} is too short. Setting it to 10 seconds.')
+
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
@@ -366,6 +383,7 @@ class ProblemDefinition:
             unbias_target=unbias_target,
             seconds_per_mixer=seconds_per_mixer,
             seconds_per_encoder=seconds_per_encoder,
+            expected_additional_time=expected_additional_time,
             time_aim=time_aim,
             target_weights=target_weights,
             positive_domain=positive_domain,
@@ -561,6 +579,7 @@ class PredictionArguments:
     fixed_confidence: Union[int, float, None] = None
     anomaly_error_rate: Union[float, None] = None
     anomaly_cooldown: int = 1
+    forecast_offset: int = 0
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -578,6 +597,7 @@ class PredictionArguments:
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
         anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
+        forecast_offset = obj.get('forecast_offset', PredictionArguments.forecast_offset)
 
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
@@ -585,6 +605,7 @@ class PredictionArguments:
             fixed_confidence=fixed_confidence,
             anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,
+            forecast_offset=forecast_offset,
         )
 
         return pred_args

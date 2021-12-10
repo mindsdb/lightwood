@@ -17,6 +17,19 @@ import string
 import gc
 import time
 from lightwood.helpers.log import log
+from shutil import copyfile
+
+
+def load_custom_module(file_path: str):
+    from lightwood import __version__ as lightwood_version
+    modules_dir = os.path.join(os.path.expanduser('~/lightwood_modules'), lightwood_version.replace('.', '_'))
+    custom_module_path = os.path.join(modules_dir, os.path.split(file_path)[-1])
+    if not os.path.exists(modules_dir):
+        os.makedirs(modules_dir)
+    if os.path.exists(custom_module_path):
+        os.remove(custom_module_path)
+
+    copyfile(file_path, custom_module_path)
 
 
 def predictor_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> PredictorInterface:
@@ -50,12 +63,24 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
+    started = time.time()
+
     log.info(f'Dropping features: {problem_definition.ignore_features}')
     df = df.drop(columns=problem_definition.ignore_features)
 
     type_information = infer_types(df, problem_definition.pct_invalid)
     stats = statistical_analysis(
         df, type_information.dtypes, type_information.identifiers, problem_definition)
+
+    duration = time.time() - started
+    if problem_definition.time_aim is not None:
+        problem_definition.time_aim -= duration
+        if problem_definition.time_aim < 10:
+            problem_definition.time_aim = 10
+
+    # Assume that the stuff besides encoder and mixers takes about as long as analyzing did... bad, but let's see
+    if problem_definition.expected_additional_time is None:
+        problem_definition.expected_additional_time = duration
     json_ai = generate_json_ai(
         type_information=type_information, statistical_analysis=stats,
         problem_definition=problem_definition)

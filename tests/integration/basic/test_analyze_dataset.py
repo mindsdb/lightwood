@@ -1,4 +1,3 @@
-from mindsdb_datasources import FileDS
 from lightwood import analyze_dataset
 from lightwood.api import dtype
 import unittest
@@ -17,10 +16,10 @@ from tests.utils.data_generation import (
 
 class TestInferTypes(unittest.TestCase):
     def test_analyze_home_rentlas(self):
-        datasource = FileDS(
+        df = pd.read_csv(
             "https://raw.githubusercontent.com/mindsdb/mindsdb-examples/master/classics/home_rentals/dataset/train.csv"
         )
-        type_information = analyze_dataset(datasource.df).type_information
+        type_information = analyze_dataset(df).type_information
 
         self.assertTrue(
             type_information.dtypes["number_of_rooms"] == dtype.categorical)
@@ -114,6 +113,8 @@ class TestInferTypes(unittest.TestCase):
 
 
 '''
+    # These are native tests, we should adapt them to the new lightwood at some point.
+    # Not critical since we removed a bunch of these capacities, other are well tested in the new test above.
     def test_deduce_foreign_key(self):
         """Tests that basic cases of type deduction work correctly"""
         predictor = Predictor(name='test_deduce_foreign_key')

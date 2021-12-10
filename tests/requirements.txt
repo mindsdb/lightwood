@@ -1,1 +1,0 @@
-mindsdb_datasources >= 1.1.0

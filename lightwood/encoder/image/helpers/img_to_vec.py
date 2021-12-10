@@ -1,8 +1,14 @@
 import torch
 import torch.nn as nn
-import torchvision.models as models
 from lightwood.helpers.device import get_devices
 from lightwood.helpers.torch import LightwoodAutocast
+
+from lightwood.helpers.log import log
+
+try:
+    import torchvision.models as models
+except ModuleNotFoundError:
+    log.info("No torchvision detected, image helpers not supported.")
 
 
 class ChannelPoolAdaptiveAvg1d(torch.nn.AdaptiveAvgPool1d):
