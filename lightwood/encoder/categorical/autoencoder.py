@@ -15,9 +15,9 @@ from typing import Iterable, Tuple, List
 
 class CategoricalAutoEncoder(BaseEncoder):
     """
-    Trains an autoencoder (AE) to represent categorical information with over 100 categories. This is used to ensure the one-hot encoded vector is not extensively large.
+    Trains an autoencoder (AE) to represent categorical information with over 100 categories. This is used to ensure that feature vectors for categorical data with many categories are not excessively large.
 
-    The AE defaults to a vector sized 100 but can be adjusted to user preference. It is highly advised NOT to use this encoder to feature engineer your target.
+    The AE defaults to a vector sized 100 but can be adjusted to user preference. It is highly advised NOT to use this encoder to feature engineer your target, as reconstruction accuracy will determine your AE's ability to decode properly.
 
     """  # noqa
 
