@@ -8,6 +8,7 @@ import pandas as pd
 from lightwood.helpers.log import log
 import torch
 
+
 class TestAutoencoder(unittest.TestCase):
     def test_autoencoder(self):
         torch.manual_seed(2)
