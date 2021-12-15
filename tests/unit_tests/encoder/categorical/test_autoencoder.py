@@ -11,6 +11,9 @@ import torch
 
 class TestAutoencoder(unittest.TestCase):
     def test_autoencoder(self):
+        """
+        Checks reconstruction accuracy above 70% for a set of categories, length 8, for up to 500 unique categories (actual around 468).
+        """  # noqa
         torch.manual_seed(2)
         log.setLevel(logging.DEBUG)
 
