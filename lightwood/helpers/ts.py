@@ -37,7 +37,7 @@ def add_tn_conf_bounds(data: pd.DataFrame, tss_args: TimeseriesSettings):
         data[col] = data[col].astype(object)
 
     for idx, row in data.iterrows():
-        error_increase = [row['confidence']] + [row['confidence'] * np.log(np.e + t)
+        error_increase = [row['confidence']] + [row['confidence'] * np.log(np.e + t/2)
                                                 for t in range(1, tss_args.nr_predictions)]
         data['confidence'].iloc[idx] = [row['confidence'] for _ in range(tss_args.nr_predictions)]
 

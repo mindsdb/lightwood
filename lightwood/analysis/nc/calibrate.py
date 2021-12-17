@@ -371,20 +371,36 @@ class ICP(BaseAnalysisBlock):
             if ns.tss.is_timeseries and ns.tss.nr_predictions > 1 and is_numerical:
                 row_insights = add_tn_conf_bounds(row_insights, ns.tss)
 
+            # clip bounds if necessary
+            if is_numerical:
+                lower_limit = 0.0 if ns.positive_domain else -pow(2, 62)
+                upper_limit = pow(2, 62)
+                if not (ns.tss.is_timeseries and ns.tss.nr_predictions > 1):
+                    row_insights['upper'] = row_insights['upper'].clip(lower_limit, upper_limit)
+                    row_insights['lower'] = row_insights['lower'].clip(lower_limit, upper_limit)
+                else:
+                    row_insights['upper'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
+                                             for row in row_insights['upper']]
+                    row_insights['lower'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
+                                             for row in row_insights['lower']]
+
             # Make sure the target and real values are of an appropriate type
             if ns.tss.is_timeseries and ns.tss.nr_predictions > 1:
                 # Array output that are not of type <array> originally are odd and I'm not sure how to handle them
                 # Or if they even need handling yet
                 pass
             elif ns.target_dtype in (dtype.integer):
-                row_insights['prediction'] = row_insights['prediction'].clip(-pow(2, 62), pow(2, 62)).astype(int)
-                row_insights['upper'] = row_insights['upper'].clip(-pow(2, 62), pow(2, 62)).astype(int)
-                row_insights['lower'] = row_insights['lower'].clip(-pow(2, 62), pow(2, 62)).astype(int)
+                row_insights['prediction'] = row_insights['prediction'].astype(int)
+                row_insights['upper'] = row_insights['upper'].astype(int)
+                row_insights['lower'] = row_insights['lower'].astype(int)
+
             elif ns.target_dtype in (dtype.float, dtype.quantity):
                 row_insights['prediction'] = row_insights['prediction'].astype(float)
                 row_insights['upper'] = row_insights['upper'].astype(float)
                 row_insights['lower'] = row_insights['lower'].astype(float)
+
             elif ns.target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
                 row_insights['prediction'] = row_insights['prediction'].astype(str)
+
 
         return row_insights, global_insights
