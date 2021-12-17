@@ -402,5 +402,4 @@ class ICP(BaseAnalysisBlock):
             elif ns.target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
                 row_insights['prediction'] = row_insights['prediction'].astype(str)
 
-
         return row_insights, global_insights
