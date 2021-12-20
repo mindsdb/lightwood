@@ -1,6 +1,5 @@
 from typing import Union
 
-import torch
 import numpy as np
 import pandas as pd
 from scipy.stats import entropy
@@ -37,7 +36,7 @@ class Normalizer(BaseMixer):
         self.target_dtype = fit_params['dtype_dict'][fit_params['target']]
         self.multi_ts_task = fit_params['is_multi_ts']
 
-        self.model = Ridge()  # @TODO: enable underlying model selection from JsonAI
+        self.model = Ridge()  # TODO: enable underlying model selection from JsonAI
         self.prepared = False
         self.prediction_cache = None
         self.bounds = (0.5, 1.5)
@@ -45,7 +44,7 @@ class Normalizer(BaseMixer):
 
     def fit(self, data: EncodedDs) -> None:
         try:
-            data = ConcatedEncodedDs(data)
+            data = ConcatedEncodedDs([data])
             preds = self.base_predictor(data, args=PredictionArguments.from_dict({'predict_proba': True}))
             truths = data.data_frame[self.target]
             labels = self.get_labels(preds, truths.values, data.encoders[self.target])
@@ -55,14 +54,15 @@ class Normalizer(BaseMixer):
         except Exception:
             pass
 
-    def __call__(self, ds: Union[ConcatedEncodedDs, torch.Tensor], args: PredictionArguments) -> np.ndarray:
-        if isinstance(ds, ConcatedEncodedDs):
-            ds = ds.get_encoded_data(include_target=False)
+    def __call__(self, ds: Union[ConcatedEncodedDs, EncodedDs, np.ndarray], args: PredictionArguments) \
+            -> np.ndarray:
+        if isinstance(ds, EncodedDs) or isinstance(ds, ConcatedEncodedDs):
+            ds = ds.get_encoded_data(include_target=False).numpy()  # TODO: set upper limit for speed
 
         if self.prepared:
-            raw = self.model.predict(ds.numpy())
-            scores = np.clip(raw, 0.1, 1e4)  # set limit deviations (@TODO: benchmark stability)
-            # smoothed = clipped / clipped.mean()
+            raw = self.model.predict(ds)
+            scores = np.clip(raw, 0.1, 1e4)  # set limit deviations (TODO: benchmark stability)
+            # scores = scores / scores.mean()  # smoothed
         else:
             scores = np.ones(ds.shape[0])
 
@@ -83,7 +83,7 @@ class Normalizer(BaseMixer):
             if not self.multi_ts_task:
                 preds = preds.values.squeeze()
             else:
-                preds = [p[0] for p in preds.values.squeeze()]
+                preds = pd.Series([p[0] for p in preds.values.squeeze()]).values
             preds = preds.astype(float)
             labels = self.compute_numerical_labels(preds, truths, self.bounds)
 

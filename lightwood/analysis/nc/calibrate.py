@@ -8,8 +8,10 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api.dtype import dtype
+from lightwood.api.types import PredictionArguments
 from lightwood.helpers.ts import add_tn_conf_bounds
 
+from lightwood.data import EncodedDs
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.analysis.nc.norm import Normalizer
 from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
@@ -77,7 +79,7 @@ class ICP(BaseAnalysisBlock):
             if self.confidence_normalizer:
                 normalizer = Normalizer(fit_params=norm_params)
                 normalizer.fit(ns.train_data)
-                normalizer.prediction_cache = normalizer(ns.encoded_val_data)
+                normalizer.prediction_cache = normalizer(ns.encoded_val_data, args=PredictionArguments())
             else:
                 normalizer = None
 
@@ -150,12 +152,18 @@ class ICP(BaseAnalysisBlock):
 
                 for group in icps['__mdb_groups']:
                     icp_df = icps_df
-                    if icps[frozenset(group)].nc_function.normalizer is not None:
-                        icp_df[f'__norm_{ns.target}'] = icps[frozenset(group)].nc_function.normalizer.prediction_cache
 
                     # filter irrelevant rows for each group combination
+                    icp_df['__mdb_norm_index'] = np.arange(len(icp_df))
                     for key, val in zip(group_keys, group):
                         icp_df = icp_df[icp_df[key] == val]
+
+                    if icps[frozenset(group)].nc_function.normalizer is not None:
+                        group_normalizer = icps[frozenset(group)].nc_function.normalizer
+                        norm_input_df = ns.encoded_val_data.data_frame.iloc[icp_df.pop('__mdb_norm_index')]
+                        norm_input = EncodedDs(ns.encoded_val_data.encoders, norm_input_df, ns.target)
+                        norm_cache = group_normalizer(norm_input, args=PredictionArguments())
+                        icp_df[f'__norm_{ns.target}'] = norm_cache
 
                     # save relevant predictions in the caches, then calibrate the ICP
                     pred_cache = icp_df.pop(f'__predicted_{ns.target}').values
@@ -230,7 +238,7 @@ class ICP(BaseAnalysisBlock):
                 # only one normalizer, even if it's a grouped time series task
                 normalizer = ns.analysis['icp']['__default'].nc_function.normalizer
                 if normalizer:
-                    normalizer.prediction_cache = normalizer(ns.encoded_data)
+                    normalizer.prediction_cache = normalizer(ns.encoded_data, args=PredictionArguments)
                     icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
 
                 # get ICP predictions
@@ -363,19 +371,34 @@ class ICP(BaseAnalysisBlock):
             if ns.tss.is_timeseries and ns.tss.nr_predictions > 1 and is_numerical:
                 row_insights = add_tn_conf_bounds(row_insights, ns.tss)
 
+            # clip bounds if necessary
+            if is_numerical:
+                lower_limit = 0.0 if ns.positive_domain else -pow(2, 62)
+                upper_limit = pow(2, 62)
+                if not (ns.tss.is_timeseries and ns.tss.nr_predictions > 1):
+                    row_insights['upper'] = row_insights['upper'].clip(lower_limit, upper_limit)
+                    row_insights['lower'] = row_insights['lower'].clip(lower_limit, upper_limit)
+                else:
+                    row_insights['upper'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
+                                             for row in row_insights['upper']]
+                    row_insights['lower'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
+                                             for row in row_insights['lower']]
+
             # Make sure the target and real values are of an appropriate type
             if ns.tss.is_timeseries and ns.tss.nr_predictions > 1:
                 # Array output that are not of type <array> originally are odd and I'm not sure how to handle them
                 # Or if they even need handling yet
                 pass
             elif ns.target_dtype in (dtype.integer):
-                row_insights['prediction'] = row_insights['prediction'].clip(-pow(2, 62), pow(2, 62)).astype(int)
-                row_insights['upper'] = row_insights['upper'].clip(-pow(2, 62), pow(2, 62)).astype(int)
-                row_insights['lower'] = row_insights['lower'].clip(-pow(2, 62), pow(2, 62)).astype(int)
+                row_insights['prediction'] = row_insights['prediction'].astype(int)
+                row_insights['upper'] = row_insights['upper'].astype(int)
+                row_insights['lower'] = row_insights['lower'].astype(int)
+
             elif ns.target_dtype in (dtype.float, dtype.quantity):
                 row_insights['prediction'] = row_insights['prediction'].astype(float)
                 row_insights['upper'] = row_insights['upper'].astype(float)
                 row_insights['lower'] = row_insights['lower'].astype(float)
+
             elif ns.target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
                 row_insights['prediction'] = row_insights['prediction'].astype(str)
 
