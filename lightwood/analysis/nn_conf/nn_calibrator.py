@@ -1,12 +1,12 @@
 from types import SimpleNamespace
 from typing import Dict, Tuple
 
-import numpy as np
+# import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 
 from lightwood.analysis.nn_conf.platt import PlattCalibrator
-from lightwood.api.dtype import dtype
+# from lightwood.api.dtype import dtype
 from lightwood.analysis.base import BaseAnalysisBlock
 
 
@@ -23,7 +23,7 @@ class NNRegressionCalibrator(BaseAnalysisBlock):
                 you get a min/max bound.
     2) quantile regression over the residuals!
 
-    """
+    """  # noqa
 
     def __init__(self):
         super().__init__()
@@ -59,7 +59,7 @@ class NNClassificationCalibrator(BaseAnalysisBlock):
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
         possible_labels = ns.stats_info.train_observed_classes
-        self.ordenc.fit([[l] for l in possible_labels])
+        self.ordenc.fit([[label] for label in possible_labels])
 
         true = ns.data[ns.target].values.reshape(-1, 1).astype(float)
         pred = ns.normal_predictions['prediction'].values.reshape(-1, 1).astype(float)

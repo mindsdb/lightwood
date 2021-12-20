@@ -3,9 +3,9 @@ from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OrdinalEncoder
+# from sklearn.preprocessing import OrdinalEncoder
 
-from lightwood.api.dtype import dtype
+# from lightwood.api.dtype import dtype
 from lightwood.analysis.base import BaseAnalysisBlock
 
 
@@ -29,15 +29,15 @@ class ConfStats(BaseAnalysisBlock):
         sorted_inp['__mdb_confidence'] = sorted_val['confidence']
         pairs = []
         for i in range(1, self.ece_bins):
-            interval = sorted_inp.iloc[len(sorted_inp)*(i-1)/self.ece_bins:i*len(sorted_inp)/self.ece_bins]
-            pos = (1/len(interval))*sum(sorted_inp[ns.target])
-            prb = (1/len(interval))*sum(sorted_inp['__mdb_confidence'])
+            interval = sorted_inp.iloc[len(sorted_inp) * (i - 1) / self.ece_bins:i * len(sorted_inp) / self.ece_bins]
+            pos = (1 / len(interval)) * sum(sorted_inp[ns.target])
+            prb = (1 / len(interval)) * sum(sorted_inp['__mdb_confidence'])
             pairs.append((pos, prb))
 
         total_ece = 0
         for i in range(1, self.ece_bins):
             interval = sorted_inp.iloc[len(sorted_inp) * (i - 1) / self.ece_bins:i * len(sorted_inp) / self.ece_bins]
-            ece = (len(interval)/len(sorted_inp))*((pairs[i-1][1] - pairs[i-1][0])**2)
+            ece = (len(interval) / len(sorted_inp)) * ((pairs[i - 1][1] - pairs[i - 1][0]) ** 2)
             total_ece += ece
 
         return np.sqrt(total_ece)
