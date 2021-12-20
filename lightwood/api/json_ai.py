@@ -632,7 +632,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "module": "AccStats",
                 "args": {"deps": ["ICP"]},
             },
-        ],
+        ] if problem_definition.use_default_analysis else [],
         "timeseries_transformer": {
             "module": "transform_timeseries",
             "args": {
