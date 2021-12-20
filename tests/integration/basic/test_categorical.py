@@ -53,3 +53,15 @@ class TestBasic(unittest.TestCase):
         # test predict all mixers with some data
         predictions = predictor.predict(df[:10], args={'all_mixers': True})
         assert '__mdb_mixer_Neural' in predictions.columns
+
+    def test_2_binary_no_analysis(self):
+        df = pd.read_csv('tests/data/ionosphere.csv')[:100]
+        mask = np.random.rand(len(df)) < 0.8
+        train = df[mask]
+        test = df[~mask]
+        predictor = predictor_from_problem(df, ProblemDefinition.from_dict(
+            {'target': 'target', 'time_aim': 20, 'use_default_analysis': False}))
+        predictor.learn(train)
+        predictions = predictor.predict(test)
+        self.assertTrue(balanced_accuracy_score(test['target'], predictions['prediction']) > 0.5)
+        self.assertTrue('confidence' not in predictions.columns)
