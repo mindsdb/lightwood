@@ -195,12 +195,12 @@
 <h1>How to make a tutorial notebook?<a class="headerlink" href="#how-to-make-a-tutorial-notebook" title="Permalink to this headline">¶</a></h1>
 <p>We use some of our tutorial notebooks as unit-tests to ensure that our pipeline is up-to-date, and to keep our examples relevant.</p>
 <p>In order to preserve our (and the reader’s) sanity these need to behave so that they can:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Run via the CI tools</p></li>
 <li><p>Execute locally by a user</p></li>
 </ol>
 <p>To make things easier, the Lightwood team has proposed a general set of rules for tutorials:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>If you are using an external dataset, please ensure there is a URL that links to it (i.e.: load it in a dataframe using <code class="docutils literal notranslate"><span class="pre">pd.read_csv('{link}')</span></code>). Exceptions can be made for custom data types if the download dataset link is provided. We try to avoid hosting large datasets via Github, but please contact us if you believe it should be in our benchmarking suite.</p></li>
 <li><p>Show any <strong>custom code within the notebook</strong>. If you need to export it to a file (e.g. in order to load it as a lightwood module), use <code class="docutils literal notranslate"><span class="pre">%%writefile</span> <span class="pre">my_file.py</span></code> at the top of the jupyter codeblock, this will write the code into a file.</p></li>
 <li><p>Please do not save any extra files within the notebook (<code class="docutils literal notranslate"><span class="pre">.json</span></code> files may be ok); if your tutorial really requires saving extra files, please contact us and we can help.</p></li>
