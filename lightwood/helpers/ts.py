@@ -31,14 +31,15 @@ def add_tn_conf_bounds(data: pd.DataFrame, tss_args: TimeseriesSettings):
     """
     Add confidence (and bounds if applicable) to t+n predictions, for n>1
     TODO: active research question: how to guarantee 1-e coverage for t+n, n>1
-    For now, conservative approach is to increase width by the confidence times the log of the time step.
+    For now, (conservatively) increases width by the confidence times the log of the time step (and a scaling factor).
     """
     for col in ['confidence', 'lower', 'upper']:
         data[col] = data[col].astype(object)
 
     for idx, row in data.iterrows():
-        error_increase = [row['confidence']] + [row['confidence'] * np.log(np.e + t / 2)
-                                                for t in range(1, tss_args.nr_predictions)]
+        error_increase = [row['confidence']] + \
+                         [row['confidence'] * np.log(np.e + t / 2)  # offset by e so that y intercept is 1
+                          for t in range(1, tss_args.nr_predictions)]
         data['confidence'].iloc[idx] = [row['confidence'] for _ in range(tss_args.nr_predictions)]
 
         preds = row['prediction']
