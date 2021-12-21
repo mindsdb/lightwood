@@ -137,8 +137,15 @@ class TestTimeseries(unittest.TestCase):
 
         # test inferring mode
         test_df['__mdb_make_predictions'] = False
+        test_df = test_df.sample(frac=1)  # shuffle to test internal ordering logic
         preds = pred.predict(test_df)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
+
+        # Additionally, check timestamps are further into the future than test dates
+        latest_timestamp = pd.to_datetime(test_df[order_by]).max().timestamp()
+        for idx, row in preds.iterrows():
+            for timestamp in row[f'order_{order_by}']:
+                assert timestamp > latest_timestamp
 
     def test_2_time_series_classification(self):
         from lightwood.api.high_level import predictor_from_problem
