@@ -1,9 +1,9 @@
 from types import SimpleNamespace
 from typing import Dict, Tuple
 
-import numpy as np
+# import numpy as np
 import pandas as pd
-# from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OrdinalEncoder
 
 # from lightwood.api.dtype import dtype
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -15,35 +15,39 @@ class ConfStats(BaseAnalysisBlock):
     def __init__(self, deps=('ICP',), ece_bins: int = 10):
         super().__init__(deps=deps)
         self.ece_bins = ece_bins
+        self.ordenc = OrdinalEncoder()
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
-        print(f"ECE is: {self.ece(ns)}")
+        # if ns.categorical # TODO regression
+        possible_labels = ns.stats_info.train_observed_classes
+        self.ordenc.fit([[label] for label in possible_labels])
+        ces, ece, mce = self.ce(info['result_df'], ns.normal_predictions, ns.data, ns.target)
+        print(f"CEs are: {ces}")
+        print(f"ECE is: {ece}")
+        print(f"MCE is: {mce}")
+        info['CE'] = ces
+        info['ECE'] = ece
+        info['MCE'] = mce
 
         return info
 
-    def ece(self, ns):
-        """ Computes expected calibration error. """
-        sorted_val = ns.normal_predictions.sort_values(by='confidence')
-        sorted_inp = ns.data.reindex(sorted_val.index)
+    def ce(self, confs, preds, data, target):
+        """ Computes expected and maximum calibration error. """
+        sorted_val = confs.sort_values(by='confidence', kind='stable')
+        sorted_preds = preds.reindex(sorted_val.index)
+        sorted_inp = data.reindex(sorted_val.index)
         sorted_inp['__mdb_confidence'] = sorted_val['confidence']
-        pairs = []
+        mce = 0
+        ces = []
+        partial_ece = 0
         for i in range(1, self.ece_bins):
-            interval = sorted_inp.iloc[len(sorted_inp) * (i - 1) / self.ece_bins:i * len(sorted_inp) / self.ece_bins]
-            pos = (1 / len(interval)) * sum(sorted_inp[ns.target])
-            prb = (1 / len(interval)) * sum(sorted_inp['__mdb_confidence'])
-            pairs.append((pos, prb))
-
-        total_ece = 0
-        for i in range(1, self.ece_bins):
-            interval = sorted_inp.iloc[len(sorted_inp) * (i - 1) / self.ece_bins:i * len(sorted_inp) / self.ece_bins]
-            ece = (len(interval) / len(sorted_inp)) * ((pairs[i - 1][1] - pairs[i - 1][0]) ** 2)
-            total_ece += ece
-
-        return np.sqrt(total_ece)
-
-    def explain(self,
-                row_insights: pd.DataFrame,
-                global_insights: Dict[str, object], **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
-        return row_insights, global_insights
-
+            interval = sorted_inp.iloc[int(len(sorted_inp) * (i - 1) / self.ece_bins):int(i * len(sorted_inp) / self.ece_bins)]  # noqa
+            acc = (1 / len(interval)) * sum(sorted_inp[target] == sorted_preds['prediction'])
+            conf = (1 / len(interval)) * sum(sorted_inp['__mdb_confidence'])
+            ce = (abs(acc - conf))
+            ces.append(ce)
+            partial_ece += ce * len(interval)
+            mce = abs(acc - conf) if abs(acc - conf) > mce else mce
+        ece = partial_ece / self.ece_bins
+        return ces, ece, mce
