@@ -82,6 +82,7 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
     # get default delta for all data
     for col in order_cols:
         series = pd.Series([x[-1] for x in df[col]])
+        series = series.drop_duplicates()  # by this point df is ordered so duplicate timestamps are either because of non-handled groups or repeated data that, for mode delta estimation, should be ignored  # noqa
         rolling_diff = series.rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
         delta = rolling_diff.value_counts(ascending=False).keys()[0]  # pick most popular
         deltas["__default"][col] = delta
