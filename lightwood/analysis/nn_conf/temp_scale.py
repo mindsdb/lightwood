@@ -84,7 +84,6 @@ class TempScaler(BaseAnalysisBlock):
                 row_insights: pd.DataFrame,
                 global_insights: Dict[str, object], **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         """ Perform temperature scaling on logits """
-        ns = SimpleNamespace(**kwargs)
         conf_cols = [col for col in row_insights.columns
                      if '__mdb_proba' in col and
                      '__mdb_unknown_cat' not in col]

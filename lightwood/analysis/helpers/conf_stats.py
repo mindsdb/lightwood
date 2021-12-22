@@ -1,8 +1,8 @@
 from types import SimpleNamespace
-from typing import Dict, Tuple
+from typing import Dict  # , Tuple
 
 # import numpy as np
-import pandas as pd
+# import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 
 # from lightwood.api.dtype import dtype
