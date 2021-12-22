@@ -47,6 +47,7 @@ class OneHotEncoder(BaseEncoder):
         self.map = None  # category name -> index
         self.rev_map = None  # index -> category name
         self.use_unknown = use_unknown
+        self.normed = False  # whether to normalize scores when decoding probabilities
 
         # Weight-balance info if encoder represents target
         self.target_weights = None
@@ -166,7 +167,8 @@ class OneHotEncoder(BaseEncoder):
             else:
                 ret.append(self.rev_map[np.argmax(vector)])
 
-            probs.append(self._norm_vec(vector))
+            vector = self._norm_vec(vector) if self.normed else vector
+            probs.append(vector)
 
         return ret, probs, self.rev_map
 

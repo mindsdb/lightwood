@@ -43,6 +43,7 @@ class BinaryEncoder(BaseEncoder):
         self.rev_map = {}  # index -> category name
         self.output_size = 2
         self.encoder_class_type = str
+        self.normed = False  # whether to normalize scores when decoding probabilities
 
         # Weight-balance info if encoder represents target
         self.target_weights = None
@@ -150,7 +151,8 @@ class BinaryEncoder(BaseEncoder):
             else:
                 ret.append(self.rev_map[np.argmax(vector)])
 
-            probs.append(self._norm_vec(vector))
+            vector = self._norm_vec(vector) if self.normed else vector
+            probs.append(vector)
 
         return ret, probs, self.rev_map
 
