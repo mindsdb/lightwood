@@ -48,6 +48,7 @@ def explain(data: pd.DataFrame,
 
     row_insights = pd.DataFrame()
     global_insights = {}
+    row_insights['original_index'] = data['__mdb_original_index']
     row_insights['prediction'] = predictions['prediction']
 
     if timeseries_settings.is_timeseries:
