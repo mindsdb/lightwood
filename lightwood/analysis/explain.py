@@ -3,7 +3,7 @@ import torch
 import pandas as pd
 
 from lightwood.helpers.log import log
-from lightwood.api.types import TimeseriesSettings
+from lightwood.api.types import TimeseriesSettings, PredictionArguments
 from lightwood.helpers.ts import get_inferred_timestamps
 from lightwood.analysis.base import BaseAnalysisBlock
 
@@ -17,16 +17,8 @@ def explain(data: pd.DataFrame,
             target_dtype: str,
 
             positive_domain: bool,  # @TODO: pass inside a {} with params for each block to avoid signature overload
-            fixed_confidence: float,
             anomaly_detection: bool,
-
-            # forces specific confidence level in ICP
-            anomaly_error_rate: float,
-
-            # ignores anomaly detection for N steps after an
-            # initial anomaly triggers the cooldown period;
-            # implicitly assumes series are regularly spaced
-            anomaly_cooldown: int,
+            pred_args: PredictionArguments,
 
             explainer_blocks: Optional[List[BaseAnalysisBlock]] = [],
             ts_analysis: Optional[Dict] = {}
@@ -50,6 +42,11 @@ def explain(data: pd.DataFrame,
     global_insights = {}
     row_insights['prediction'] = predictions['prediction']
 
+    if pred_args.predict_proba:
+        for col in predictions.columns:
+            if '__mdb_proba' in col:
+                row_insights[col] = predictions[col]
+
     if timeseries_settings.is_timeseries:
         if timeseries_settings.group_by:
             for col in timeseries_settings.group_by:
@@ -71,10 +68,8 @@ def explain(data: pd.DataFrame,
         'target_dtype': target_dtype,
         'tss': timeseries_settings,
         'positive_domain': positive_domain,
-        'fixed_confidence': fixed_confidence,
         'anomaly_detection': anomaly_detection,
-        'anomaly_error_rate': anomaly_error_rate,
-        'anomaly_cooldown': anomaly_cooldown
+        'pred_args': pred_args
     }
 
     # ------------------------- #
