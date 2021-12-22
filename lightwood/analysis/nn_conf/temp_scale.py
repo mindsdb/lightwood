@@ -7,8 +7,9 @@ from torch import nn, optim
 from torch.nn import functional as F
 from sklearn.preprocessing import OrdinalEncoder
 
-from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.helpers.log import log
+from lightwood.mixer import Neural
+from lightwood.analysis.base import BaseAnalysisBlock
 
 
 class TempScaler(BaseAnalysisBlock):
@@ -21,6 +22,7 @@ class TempScaler(BaseAnalysisBlock):
         self.temperature = nn.Parameter(torch.ones(1))
         self.ordenc = OrdinalEncoder()
         self.softmax = torch.nn.Softmax()
+        self.active = False
 
     def temperature_scale(self, logits):
         temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))  # expand & match logits size
@@ -31,45 +33,50 @@ class TempScaler(BaseAnalysisBlock):
         Tune and set the temperature of a neural model optimizing NLL using validation set logits.
         """
         ns = SimpleNamespace(**kwargs)
-        self.n_cls = len(ns.stats_info.train_observed_classes)
-        nll_criterion = nn.CrossEntropyLoss()
-        ece_criterion = _ECELoss()
-        self.ordenc.fit([[val] for val in ns.stats_info.train_observed_classes])
 
-        # collect logits and labels for the validation set
-        logits_list = []
-        labels_list = []
-        with torch.no_grad():
-            prob_cols = [col for col in ns.normal_predictions.columns
-                         if '__mdb_proba' in col and
-                         '__mdb_unknown_cat' not in col]
-            for logits, label in zip(ns.normal_predictions[prob_cols].values, ns.data[ns.target]):
-                logits_list.append(logits.tolist())
-                labels_list.append(int(self.ordenc.transform([[label]]).flatten()[0]))
-            logits = torch.tensor(logits_list)
-            labels = torch.tensor(labels_list).long()
+        if isinstance(ns.predictor.mixers[ns.predictor.indexes_by_accuracy[0]], Neural):
+            self.n_cls = len(ns.stats_info.train_observed_classes)
+            nll_criterion = nn.CrossEntropyLoss()
+            ece_criterion = _ECELoss()
+            self.ordenc.fit([[val] for val in ns.stats_info.train_observed_classes])
 
-        # NLL and ECE before temp scaling
-        before_temperature_nll = nll_criterion(logits, labels).item()
-        before_temperature_ece = ece_criterion(logits, labels).item()
-        log.info('Before calibration - NLL: %.3f, ECE: %.3f' % (before_temperature_nll, before_temperature_ece))
+            # collect logits and labels for the validation set
+            logits_list = []
+            labels_list = []
+            with torch.no_grad():
+                prob_cols = [col for col in ns.normal_predictions.columns
+                             if '__mdb_proba' in col and
+                             '__mdb_unknown_cat' not in col]
+                if not prob_cols:
+                    return info  # early stop if no proba info is available
+                for logits, label in zip(ns.normal_predictions[prob_cols].values, ns.data[ns.target]):
+                    logits_list.append(logits.tolist())
+                    labels_list.append(int(self.ordenc.transform([[label]]).flatten()[0]))
+                logits = torch.tensor(logits_list)
+                labels = torch.tensor(labels_list).long()
 
-        # optimize w.r.t. NLL
-        optimizer = optim.LBFGS([self.temperature], lr=0.001, max_iter=1000)
+            # NLL and ECE before temp scaling
+            before_temperature_nll = nll_criterion(logits, labels).item()
+            before_temperature_ece = ece_criterion(logits, labels).item()
+            log.info('Before calibration - NLL: %.3f, ECE: %.3f' % (before_temperature_nll, before_temperature_ece))
 
-        def eval_loss():
-            optimizer.zero_grad()
-            loss = nll_criterion(self.temperature_scale(logits), labels)
-            loss.backward()
-            return loss
+            # optimize w.r.t. NLL
+            optimizer = optim.LBFGS([self.temperature], lr=0.001, max_iter=1000)
 
-        optimizer.step(eval_loss)
+            def eval_loss():
+                optimizer.zero_grad()
+                loss = nll_criterion(self.temperature_scale(logits), labels)
+                loss.backward()
+                return loss
 
-        # NLL and ECE after temp scaling
-        after_temperature_nll = nll_criterion(self.temperature_scale(logits), labels).item()
-        after_temperature_ece = ece_criterion(self.temperature_scale(logits), labels).item()
-        log.info('Optimal temperature: %.3f' % self.temperature.item())
-        log.info('After calibration - NLL: %.3f, ECE: %.3f' % (after_temperature_nll, after_temperature_ece))
+            optimizer.step(eval_loss)
+
+            # NLL and ECE after temp scaling
+            after_temperature_nll = nll_criterion(self.temperature_scale(logits), labels).item()
+            after_temperature_ece = ece_criterion(self.temperature_scale(logits), labels).item()
+            log.info('Optimal temperature: %.3f' % self.temperature.item())
+            log.info('After calibration - NLL: %.3f, ECE: %.3f' % (after_temperature_nll, after_temperature_ece))
+            self.active = True
 
         return info
 
@@ -81,10 +88,14 @@ class TempScaler(BaseAnalysisBlock):
         conf_cols = [col for col in row_insights.columns
                      if '__mdb_proba' in col and
                      '__mdb_unknown_cat' not in col]
-        logits = torch.tensor(row_insights[conf_cols].values)
-        scaled = logits / self.temperature
-        confs = self.softmax(scaled)
-        row_insights['confidence'] = torch.max(confs, axis=1).values.detach().numpy().reshape(-1, 1)
+        if self.active and conf_cols:
+            logits = torch.tensor(row_insights[conf_cols].values)
+            scaled = logits / self.temperature
+            confs = self.softmax(scaled)
+            row_insights['confidence'] = torch.max(confs, axis=1).values.detach().numpy().reshape(-1, 1)
+        else:
+            row_insights['confidence'] = torch.max(
+                torch.tensor(row_insights[conf_cols].values), axis=1).values.detach().numpy().reshape(-1, 1)
         return row_insights, global_insights
 
 
