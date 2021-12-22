@@ -257,7 +257,7 @@
         <span class="n">accuracy_samples</span><span class="o">=</span><span class="n">runtime_analyzer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;acc_samples&#39;</span><span class="p">,</span> <span class="p">{}),</span>
         <span class="n">train_sample_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">encoded_train_data</span><span class="p">),</span>
         <span class="n">test_sample_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">encoded_val_data</span><span class="p">),</span>
-        <span class="n">confusion_matrix</span><span class="o">=</span><span class="n">runtime_analyzer</span><span class="p">[</span><span class="s1">&#39;cm&#39;</span><span class="p">],</span>
+        <span class="n">confusion_matrix</span><span class="o">=</span><span class="n">runtime_analyzer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="p">[]),</span>
         <span class="n">column_importances</span><span class="o">=</span><span class="n">runtime_analyzer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;column_importances&#39;</span><span class="p">,</span> <span class="p">{}),</span>
         <span class="n">histograms</span><span class="o">=</span><span class="n">stats_info</span><span class="o">.</span><span class="n">histograms</span><span class="p">,</span>
         <span class="n">dtypes</span><span class="o">=</span><span class="n">dtype_dict</span>

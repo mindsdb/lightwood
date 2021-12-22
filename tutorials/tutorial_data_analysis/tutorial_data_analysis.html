@@ -577,8 +577,8 @@ div.rendered_html tbody tr:hover {
 <div class="highlight"><pre>
 [nltk_data] Downloading package punkt to /home/runner/nltk_data...
 [nltk_data]   Unzipping tokenizers/punkt.zip.
-<span class="ansi-green-fg">INFO:lightwood-1991:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
@@ -610,6 +610,7 @@ div.rendered_html tbody tr:hover {
  &#39;positive_domain&#39;: False,
  &#39;timeseries_settings&#39;: TimeseriesSettings(is_timeseries=False, order_by=None, window=None, group_by=None, use_previous_target=True, nr_predictions=None, historical_columns=None, target_type=&#39;&#39;, allow_incomplete_history=False, eval_cold_start=True, interval_periods=()),
  &#39;anomaly_detection&#39;: False,
+ &#39;use_default_analysis&#39;: True,
  &#39;ignore_features&#39;: [],
  &#39;fit_on_all&#39;: True,
  &#39;strict_mode&#39;: True,
@@ -637,22 +638,22 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-1991:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Infering type for: Population</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Column Population has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Infering type for: Area (sq. mi.)</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Column Area (sq. mi.) has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Infering type for: Pop. Density </span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Column Pop. Density  has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Infering type for: GDP ($ per capita)</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Column GDP ($ per capita) has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Infering type for: Literacy (%)</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Column Literacy (%) has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Infering type for: Infant mortality </span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Column Infant mortality  has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Infering type for: Development Index</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Column Development Index has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -716,8 +717,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-1991:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-1991:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2019:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>

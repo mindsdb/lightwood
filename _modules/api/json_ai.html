@@ -800,7 +800,7 @@
                 <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;AccStats&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;deps&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ICP&quot;</span><span class="p">]},</span>
             <span class="p">},</span>
-        <span class="p">],</span>
+        <span class="p">]</span> <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">use_default_analysis</span> <span class="k">else</span> <span class="p">[],</span>
         <span class="s2">&quot;timeseries_transformer&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;transform_timeseries&quot;</span><span class="p">,</span>
             <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>

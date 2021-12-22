@@ -493,6 +493,7 @@
 <span class="sd">        series.</span>
 <span class="sd">    :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \</span>
 <span class="sd">        found in this list will be automatically removed from subsequent steps in the ML pipeline.</span>
+<span class="sd">    :param use_default_analysis: whether default analysis blocks are enabled.</span>
 <span class="sd">    :param fit_on_all: Whether to fit the model on the held-out validation data. Validation data is strictly \</span>
 <span class="sd">        used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new \</span>
 <span class="sd">            incoming data over time, the user may train the model further using the entire dataset.</span>
@@ -511,6 +512,7 @@
     <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
     <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">use_default_analysis</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">ignore_features</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">fit_on_all</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">strict_mode</span><span class="p">:</span> <span class="nb">bool</span>
@@ -543,6 +545,7 @@
         <span class="n">anomaly_detection</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_detection&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">ignore_features</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ignore_features&#39;</span><span class="p">,</span> <span class="p">[])</span>
         <span class="n">fit_on_all</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fit_on_all&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">use_default_analysis</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;use_default_analysis&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">strict_mode</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strict_mode&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">seed_nr</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seed_nr&#39;</span><span class="p">,</span> <span class="mi">420</span><span class="p">)</span>
         <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="p">(</span>
@@ -558,6 +561,7 @@
             <span class="n">timeseries_settings</span><span class="o">=</span><span class="n">timeseries_settings</span><span class="p">,</span>
             <span class="n">anomaly_detection</span><span class="o">=</span><span class="n">anomaly_detection</span><span class="p">,</span>
             <span class="n">ignore_features</span><span class="o">=</span><span class="n">ignore_features</span><span class="p">,</span>
+            <span class="n">use_default_analysis</span><span class="o">=</span><span class="n">use_default_analysis</span><span class="p">,</span>
             <span class="n">fit_on_all</span><span class="o">=</span><span class="n">fit_on_all</span><span class="p">,</span>
             <span class="n">strict_mode</span><span class="o">=</span><span class="n">strict_mode</span><span class="p">,</span>
             <span class="n">seed_nr</span><span class="o">=</span><span class="n">seed_nr</span>
