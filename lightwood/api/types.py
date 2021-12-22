@@ -325,6 +325,7 @@ class ProblemDefinition:
         series.
     :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
         found in this list will be automatically removed from subsequent steps in the ML pipeline.
+    :param use_default_analysis: whether default analysis blocks are enabled.
     :param fit_on_all: Whether to fit the model on the held-out validation data. Validation data is strictly \
         used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new \
             incoming data over time, the user may train the model further using the entire dataset.
@@ -343,6 +344,7 @@ class ProblemDefinition:
     positive_domain: bool
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
+    use_default_analysis: bool
     ignore_features: List[str]
     fit_on_all: bool
     strict_mode: bool
@@ -375,6 +377,7 @@ class ProblemDefinition:
         anomaly_detection = obj.get('anomaly_detection', False)
         ignore_features = obj.get('ignore_features', [])
         fit_on_all = obj.get('fit_on_all', True)
+        use_default_analysis = obj.get('use_default_analysis', True)
         strict_mode = obj.get('strict_mode', True)
         seed_nr = obj.get('seed_nr', 420)
         problem_definition = ProblemDefinition(
@@ -390,6 +393,7 @@ class ProblemDefinition:
             timeseries_settings=timeseries_settings,
             anomaly_detection=anomaly_detection,
             ignore_features=ignore_features,
+            use_default_analysis=use_default_analysis,
             fit_on_all=fit_on_all,
             strict_mode=strict_mode,
             seed_nr=seed_nr
