@@ -76,7 +76,7 @@ class TestTimeseries(unittest.TestCase):
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
                 "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
-                "model_path": "'trend.TrendForecaster'",  # use a cheap forecasater
+                "model_path": "'trend.TrendForecaster'",  # use a cheap forecaster
                 "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
             },
         }
@@ -129,7 +129,8 @@ class TestTimeseries(unittest.TestCase):
                                                                        'window': window}
                                                                    }))
         pred.learn(train_df)
-        preds = pred.predict(data[0:10])
+        preds = pred.predict(data.sample(frac=1)[0:10])
+        self.assertTrue('original_index' in preds.columns)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # test incomplete history, should not be possible
