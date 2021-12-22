@@ -614,9 +614,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "target_name": "$target",
                 "target_dtype": "$dtype_dict[self.target]",
                 "explainer_blocks": "$analysis_blocks",
-                "fixed_confidence": "$pred_args.fixed_confidence",
-                "anomaly_error_rate": "$pred_args.anomaly_error_rate",
-                "anomaly_cooldown": "$pred_args.anomaly_cooldown",
+                "pred_args": "$pred_args",
             },
         },
         "analysis_blocks": [

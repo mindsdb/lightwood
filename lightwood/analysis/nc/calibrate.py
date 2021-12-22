@@ -283,11 +283,11 @@ class ICP(BaseAnalysisBlock):
 
                 # convert (B, 2, 99) into (B, 2) given width or error rate constraints
                 if is_numerical:
-                    significances = ns.fixed_confidence
+                    significances = ns.pred_args.fixed_confidence
                     if significances is not None:
                         confs = all_confs[:, :, int(100 * (1 - significances)) - 1]
                     else:
-                        error_rate = ns.anomaly_error_rate if is_anomaly_task else None
+                        error_rate = ns.pred_args.anomaly_error_rate if is_anomaly_task else None
                         significances, confs = get_numeric_conf_range(all_confs,
                                                                       df_target_stddev=ns.analysis['df_target_stddev'],
                                                                       positive_domain=self.positive_domain,
@@ -325,7 +325,7 @@ class ICP(BaseAnalysisBlock):
                                 # predict and get confidence level given width or error rate constraints
                                 if is_numerical:
                                     all_confs = icp.predict(X.values)
-                                    error_rate = ns.anomaly_error_rate if is_anomaly_task else None
+                                    error_rate = ns.pred_args.anomaly_error_rate if is_anomaly_task else None
                                     significances, confs = get_numeric_conf_range(
                                         all_confs,
                                         df_target_stddev=ns.analysis['df_target_stddev'],
@@ -365,7 +365,7 @@ class ICP(BaseAnalysisBlock):
                 if is_anomaly_task:
                     anomalies = get_anomalies(row_insights,
                                               ns.data[ns.target_name],
-                                              cooldown=ns.anomaly_cooldown)
+                                              cooldown=ns.pred_args.anomaly_cooldown)
                     row_insights['anomaly'] = anomalies
 
             if ns.tss.is_timeseries and ns.tss.nr_predictions > 1 and is_numerical:
