@@ -216,6 +216,7 @@
 
     <span class="n">row_insights</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
     <span class="n">global_insights</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;__mdb_original_index&#39;</span><span class="p">]</span>
     <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
