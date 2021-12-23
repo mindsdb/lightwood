@@ -18,9 +18,10 @@ class BaseIcp(BaseEstimator):
     """Base class for inductive conformal predictors.
     """
 
-    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None):
+    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None, cal_size: int = None):
         self.cal_x, self.cal_y = None, None
         self.nc_function = nc_function
+        self.cal_size = cal_size  # if specified, defines size of calibration set
 
         # Check if condition-parameter is the default function (i.e.,
         # lambda x: 0). This is so we can safely clone the object without
@@ -101,6 +102,12 @@ class BaseIcp(BaseEstimator):
             cal_scores = self.nc_function.score(self.cal_x, self.cal_y)
             self.cal_scores = {0: np.sort(cal_scores)[::-1]}
 
+        if self.cal_size:
+            self.cal_scores = self._reduce_scores()
+
+    def _reduce_scores(self):
+        return {k: cs[::int(len(cs)/self.cal_size)+1] for k, cs in self.cal_scores.items()}
+
     def _update_calibration_set(self, x: np.array, y: np.array, increment: bool) -> None:
         if increment and self.cal_x is not None and self.cal_y is not None:
             self.cal_x = np.vstack([self.cal_x, x])
@@ -154,9 +161,9 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
         842-851.
     """
 
-    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None,
+    def __init__(self, nc_function: FunctionType, condition: Union[bool, FunctionType] = None, cal_size: int = None,
                  smoothing: bool = True) -> None:
-        super(IcpClassifier, self).__init__(nc_function, condition)
+        super(IcpClassifier, self).__init__(nc_function, condition, cal_size)
         self.classes = None
         self.smoothing = smoothing
 
@@ -206,14 +213,8 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
             for j, nc in enumerate(test_nc_scores):
                 cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
                 n_cal = cal_scores.size
-
-                n_eq = 0
-                n_gt = 0
-                for cal_score in cal_scores:
-                    if cal_score == nc:
-                        n_eq += 1
-                    elif nc < cal_score:
-                        n_gt += 1
+                n_eq = sum(np.where(cal_scores == nc, 1, 0))
+                n_gt = sum(np.where(cal_scores > nc, 1, 0))
 
                 if self.smoothing:
                     p[j, i] = (n_gt + n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
@@ -291,8 +292,8 @@ class IcpRegressor(BaseIcp, RegressorMixin):
         842-851.
     """
 
-    def __init__(self, nc_function: FunctionType, condition: bool = None) -> None:
-        super(IcpRegressor, self).__init__(nc_function, condition)
+    def __init__(self, nc_function: FunctionType, condition: bool = None, cal_size: int = None) -> None:
+        super(IcpRegressor, self).__init__(nc_function, condition, cal_size)
 
     def predict(self, x: np.array, significance: bool = None) -> np.array:
         """Predict the output values for a set of input patterns.

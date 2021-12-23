@@ -33,6 +33,7 @@ class ICP(BaseAnalysisBlock):
         self.fixed_significance = fixed_significance
         self.positive_domain = positive_domain
         self.confidence_normalizer = confidence_normalizer
+        self.validation_size = 100  # determines size of nonconformity score arrays (has sizable impact in runtime)
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
@@ -45,7 +46,8 @@ class ICP(BaseAnalysisBlock):
 
         if ns.is_classification:
             if ns.predictor.supports_proba:
-                all_cat_cols = [col for col in ns.normal_predictions.columns if '__mdb_proba' in col]
+                all_cat_cols = [col for col in ns.normal_predictions.columns
+                                if '__mdb_proba' in col and '__mdb_unknown_cat' not in col]
                 all_classes = np.array([col.replace('__mdb_proba_', '') for col in all_cat_cols])
             else:
                 class_keys = sorted(ns.encoded_val_data.encoders[ns.target].rev_map.keys())
@@ -85,7 +87,7 @@ class ICP(BaseAnalysisBlock):
 
             # instance the ICP
             nc = nc_class(model, nc_function, normalizer=normalizer)
-            icp = icp_class(nc)
+            icp = icp_class(nc, cal_size=self.validation_size)
 
             output['icp']['__default'] = icp
 
@@ -229,14 +231,14 @@ class ICP(BaseAnalysisBlock):
             is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
 
             if (is_numerical or is_categorical) and ns.analysis['icp'].get('__mdb_active', False):
-
+                base_icp = ns.analysis['icp']['__default']
                 # reorder DF index
-                index = ns.analysis['icp']['__default'].index.values
+                index = base_icp.index.values
                 index = np.append(index, ns.target_name) if ns.target_name not in index else index
                 icp_X = icp_X.reindex(columns=index)  # important, else bounds can be invalid
 
                 # only one normalizer, even if it's a grouped time series task
-                normalizer = ns.analysis['icp']['__default'].nc_function.normalizer
+                normalizer = base_icp.nc_function.normalizer
                 if normalizer:
                     normalizer.prediction_cache = normalizer(ns.encoded_data, args=PredictionArguments)
                     icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
@@ -254,13 +256,13 @@ class ICP(BaseAnalysisBlock):
                 if ns.tss.is_timeseries and ns.tss.nr_predictions > 1 and is_numerical:
 
                     # bounds in time series are only given for the first forecast
-                    ns.analysis['icp']['__default'].nc_function.model.prediction_cache = \
+                    base_icp.nc_function.model.prediction_cache = \
                         [p[0] for p in ns.predictions['prediction']]
-                    all_confs = ns.analysis['icp']['__default'].predict(icp_values)
+                    all_confs = base_icp.predict(icp_values)
 
                 elif is_numerical:
-                    ns.analysis['icp']['__default'].nc_function.model.prediction_cache = ns.predictions['prediction']
-                    all_confs = ns.analysis['icp']['__default'].predict(icp_values)
+                    base_icp.nc_function.model.prediction_cache = ns.predictions['prediction']
+                    all_confs = base_icp.predict(icp_values)
 
                 # categorical
                 else:
@@ -273,12 +275,10 @@ class ICP(BaseAnalysisBlock):
                     else:
                         class_dists = pd.get_dummies(ns.predictions['prediction']).values
 
-                    ns.analysis['icp']['__default'].nc_function.model.prediction_cache = class_dists
+                    base_icp.nc_function.model.prediction_cache = class_dists
 
                     conf_candidates = list(range(20)) + list(range(20, 100, 10))
-                    all_ranges = np.array(
-                        [ns.analysis['icp']['__default'].predict(icp_values, significance=s / 100)
-                         for s in conf_candidates])
+                    all_ranges = np.array([base_icp.predict(icp_values)])
                     all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
 
                 # convert (B, 2, 99) into (B, 2) given width or error rate constraints
@@ -295,8 +295,7 @@ class ICP(BaseAnalysisBlock):
                     result.loc[X.index, 'lower'] = confs[:, 0]
                     result.loc[X.index, 'upper'] = confs[:, 1]
                 else:
-                    conf_candidates = list(range(20)) + list(range(20, 100, 10))
-                    significances = get_categorical_conf(all_confs, conf_candidates)
+                    significances = get_categorical_conf(all_confs.squeeze(), len(base_icp.classes))
 
                 result.loc[X.index, 'significance'] = significances
 
@@ -348,9 +347,7 @@ class ICP(BaseAnalysisBlock):
 
                                 else:
                                     conf_candidates = list(range(20)) + list(range(20, 100, 10))
-                                    all_ranges = np.array(
-                                        [icp.predict(X.values, significance=s / 100)
-                                         for s in conf_candidates])
+                                    all_ranges = np.array([icp.predict(X.values)])
                                     all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
                                     significances = get_categorical_conf(all_confs, conf_candidates)
                                     result.loc[X.index, 'significance'] = significances
