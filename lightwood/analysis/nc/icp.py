@@ -106,7 +106,7 @@ class BaseIcp(BaseEstimator):
             self.cal_scores = self._reduce_scores()
 
     def _reduce_scores(self):
-        return {k: cs[::int(len(cs)/self.cal_size)+1] for k, cs in self.cal_scores.items()}
+        return {k: cs[::int(len(cs) / self.cal_size) + 1] for k, cs in self.cal_scores.items()}
 
     def _update_calibration_set(self, x: np.array, y: np.array, increment: bool) -> None:
         if increment and self.cal_x is not None and self.cal_y is not None:

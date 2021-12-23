@@ -166,8 +166,8 @@ def get_categorical_conf(raw_confs: np.ndarray, n_classes: int):
 
     :return: confidence for each data instance
     """
-    base_conf = 1/n_classes
-    confs = base_conf + np.max(raw_confs, axis=1)/n_classes
+    base_conf = 1 / n_classes
+    confs = base_conf + np.max(raw_confs, axis=1) / n_classes
     return confs
 
 
