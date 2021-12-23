@@ -171,7 +171,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">PredictionArguments</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_inferred_timestamps</span>
 <span class="kn">from</span> <span class="nn">lightwood.analysis.base</span> <span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
 
@@ -185,16 +185,8 @@
             <span class="n">target_dtype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 
             <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>  <span class="c1"># @TODO: pass inside a {} with params for each block to avoid signature overload</span>
-            <span class="n">fixed_confidence</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-
-            <span class="c1"># forces specific confidence level in ICP</span>
-            <span class="n">anomaly_error_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-
-            <span class="c1"># ignores anomaly detection for N steps after an</span>
-            <span class="c1"># initial anomaly triggers the cooldown period;</span>
-            <span class="c1"># implicitly assumes series are regularly spaced</span>
-            <span class="n">anomaly_cooldown</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">pred_args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">,</span>
 
             <span class="n">explainer_blocks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BaseAnalysisBlock</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
             <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -219,6 +211,11 @@
     <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;__mdb_original_index&#39;</span><span class="p">]</span>
     <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span>
 
+    <span class="k">if</span> <span class="n">pred_args</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">predictions</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;__mdb_proba&#39;</span> <span class="ow">in</span> <span class="n">col</span><span class="p">:</span>
+                <span class="n">row_insights</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
@@ -240,10 +237,8 @@
         <span class="s1">&#39;target_dtype&#39;</span><span class="p">:</span> <span class="n">target_dtype</span><span class="p">,</span>
         <span class="s1">&#39;tss&#39;</span><span class="p">:</span> <span class="n">timeseries_settings</span><span class="p">,</span>
         <span class="s1">&#39;positive_domain&#39;</span><span class="p">:</span> <span class="n">positive_domain</span><span class="p">,</span>
-        <span class="s1">&#39;fixed_confidence&#39;</span><span class="p">:</span> <span class="n">fixed_confidence</span><span class="p">,</span>
         <span class="s1">&#39;anomaly_detection&#39;</span><span class="p">:</span> <span class="n">anomaly_detection</span><span class="p">,</span>
-        <span class="s1">&#39;anomaly_error_rate&#39;</span><span class="p">:</span> <span class="n">anomaly_error_rate</span><span class="p">,</span>
-        <span class="s1">&#39;anomaly_cooldown&#39;</span><span class="p">:</span> <span class="n">anomaly_cooldown</span>
+        <span class="s1">&#39;pred_args&#39;</span><span class="p">:</span> <span class="n">pred_args</span>
     <span class="p">}</span>
 
     <span class="c1"># ------------------------- #</span>
