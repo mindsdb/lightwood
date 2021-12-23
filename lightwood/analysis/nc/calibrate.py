@@ -335,7 +335,7 @@ class ICP(BaseAnalysisBlock):
                                     )
 
                                     # only replace where grouped ICP is more informative (i.e. tighter)
-                                    if ns.fixed_confidence is None:
+                                    if ns.pred_args.fixed_confidence is None:
                                         default_widths = result.loc[X.index, 'upper'] - result.loc[X.index, 'lower']
                                         grouped_widths = np.subtract(confs[:, 1], confs[:, 0])
                                         insert_index = (default_widths > grouped_widths)[lambda x: x.isin([True])].index
