@@ -346,10 +346,9 @@ class ICP(BaseAnalysisBlock):
                                         result.loc[insert_index, 'significance'] = significances[conf_index]
 
                                 else:
-                                    conf_candidates = list(range(20)) + list(range(20, 100, 10))
                                     all_ranges = np.array([icp.predict(X.values)])
                                     all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
-                                    significances = get_categorical_conf(all_confs, conf_candidates)
+                                    significances = get_categorical_conf(all_confs, len(base_icp.classes))
                                     result.loc[X.index, 'significance'] = significances
 
                 row_insights['confidence'] = result['significance'].astype(float).tolist()
