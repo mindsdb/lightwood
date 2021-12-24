@@ -578,7 +578,7 @@ class PredictionArguments:
         detector.
     """  # noqa
 
-    predict_proba: bool = False
+    predict_proba: bool = True
     all_mixers: bool = False
     fixed_confidence: Union[int, float, None] = None
     anomaly_error_rate: Union[float, None] = None

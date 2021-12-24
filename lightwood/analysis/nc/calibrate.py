@@ -268,7 +268,8 @@ class ICP(BaseAnalysisBlock):
                 else:
                     predicted_proba = True if any(['__mdb_proba' in col for col in ns.predictions.columns]) else False
                     if predicted_proba:
-                        all_cat_cols = [col for col in ns.predictions.columns if '__mdb_proba' in col]
+                        all_cat_cols = [col for col in ns.predictions.columns
+                                        if '__mdb_proba' in col and '__mdb_unknown_cat' not in col]
                         class_dists = ns.predictions[all_cat_cols].values
                         for icol, cat_col in enumerate(all_cat_cols):
                             row_insights.loc[X.index, cat_col] = class_dists[:, icol]
@@ -294,7 +295,7 @@ class ICP(BaseAnalysisBlock):
                     result.loc[X.index, 'lower'] = confs[:, 0]
                     result.loc[X.index, 'upper'] = confs[:, 1]
                 else:
-                    significances = get_categorical_conf(all_confs.squeeze(), len(base_icp.classes))
+                    significances = get_categorical_conf(all_confs.squeeze())
 
                 result.loc[X.index, 'significance'] = significances
 
@@ -347,7 +348,7 @@ class ICP(BaseAnalysisBlock):
                                 else:
                                     all_ranges = np.array([icp.predict(X.values)])
                                     all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
-                                    significances = get_categorical_conf(all_confs, len(icp.classes))
+                                    significances = get_categorical_conf(all_confs)
                                     result.loc[X.index, 'significance'] = significances
 
                 row_insights['confidence'] = result['significance'].astype(float).tolist()
