@@ -87,7 +87,7 @@ def set_conf_range(
     # categorical
     elif target_type in (dtype.binary, dtype.categorical):
         pvals = icp.predict(X.values)  # p-values at which each class is included in the predicted set
-        conf = np.subtract(1, pvals.min(axis=1))
+        conf = get_categorical_conf(pvals)
         return conf, pvals
 
     # default
@@ -154,27 +154,16 @@ def get_numeric_conf_range(
     return np.array(significances), conf_ranges
 
 
-def get_categorical_conf(all_confs: np.ndarray, conf_candidates: list):
+def get_categorical_conf(raw_confs: np.ndarray):
     """
-    Gets ICP confidence estimation for categorical targets.
-    Prediction set is always unitary and includes only the predicted label.
-
-    :param all_confs: all possible label sets depending on confidence level
-    :param conf_candidates: includes preset confidence levels to check
-
+    Gets ICP confidence estimation for categorical targets from raw p-values per class.
+    :param all_confs: p-value for each class per data point
     :return: confidence for each data instance
     """
-    significances = []
-    for sample_idx in range(all_confs.shape[0]):
-        sample = all_confs[sample_idx, :, :]
-        for idx in range(sample.shape[1]):
-            conf = (99 - conf_candidates[idx]) / 100
-            if np.sum(sample[:, idx]) == 1:
-                significances.append(conf)
-                break
-        else:
-            significances.append(0.005)  # default: not confident label is the predicted one
-    return significances
+    # one minus 2nd best p-value yields confidence for predicted label
+    second_best = np.sort(raw_confs, axis=1)[:, -2]
+    confs = np.clip(np.subtract(1, second_best), 0.0001, 0.9999)
+    return confs
 
 
 def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list], cooldown: int = 1):
