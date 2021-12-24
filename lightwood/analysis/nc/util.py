@@ -87,10 +87,7 @@ def set_conf_range(
     # categorical
     elif target_type in (dtype.binary, dtype.categorical):
         pvals = icp.predict(X.values)  # p-values at which each class is included in the predicted set
-
-        # one minus 2nd best p-value yields confidence for predicted label
-        second_best = np.sort(pvals, axis=1)[:, -2]
-        conf = np.clip(np.subtract(1, second_best), 0.0001, 0.9999)
+        conf = get_categorical_conf(pvals)
         return conf, pvals
 
     # default
@@ -157,17 +154,15 @@ def get_numeric_conf_range(
     return np.array(significances), conf_ranges
 
 
-def get_categorical_conf(raw_confs: np.ndarray, n_classes: int):
+def get_categorical_conf(raw_confs: np.ndarray):
     """
     Gets ICP confidence estimation for categorical targets from raw p-values per class.
-
     :param all_confs: p-value for each class per data point
-    :param n_classes: amount of classes
-
     :return: confidence for each data instance
     """
-    base_conf = 1 / n_classes
-    confs = base_conf + np.max(raw_confs, axis=1) / n_classes
+    # one minus 2nd best p-value yields confidence for predicted label
+    second_best = np.sort(raw_confs, axis=1)[:, -2]
+    confs = np.clip(np.subtract(1, second_best), 0.0001, 0.9999)
     return confs
 
 

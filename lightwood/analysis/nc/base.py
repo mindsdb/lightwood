@@ -134,7 +134,7 @@ class CachedClassifierAdapter(ClassifierAdapter):
     def __init__(self, model, fit_params=None):
         super(CachedClassifierAdapter, self).__init__(model, fit_params)
         self.prediction_cache = None
-        self.tempscale = False
+        self.tempscale = True
 
     def fit(self, x=None, y=None):
         """ At this point, the predictor has already been trained, but this
