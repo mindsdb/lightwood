@@ -277,7 +277,6 @@ class ICP(BaseAnalysisBlock):
 
                     base_icp.nc_function.model.prediction_cache = class_dists
 
-                    conf_candidates = list(range(20)) + list(range(20, 100, 10))
                     all_ranges = np.array([base_icp.predict(icp_values)])
                     all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
 
