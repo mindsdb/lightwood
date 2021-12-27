@@ -156,13 +156,15 @@ def get_numeric_conf_range(
 
 def get_categorical_conf(raw_confs: np.ndarray):
     """
-    Gets ICP confidence estimation for categorical targets from raw p-values per class.
+    ICP confidence estimation for categorical targets from raw p-values:
+        1.0 minus 2nd highest p-value yields confidence for predicted label.
     :param all_confs: p-value for each class per data point
-    :return: confidence for each data instance
+    :return: confidence for each data point
     """
-    # one minus 2nd best p-value yields confidence for predicted label
-    second_best = np.sort(raw_confs, axis=1)[:, -2]
-    confs = np.clip(np.subtract(1, second_best), 0.0001, 0.9999)
+    if len(raw_confs.shape) == 1:
+        raw_confs = np.expand_dims(raw_confs, axis=0)
+    second_p = np.sort(raw_confs, axis=1)[:, -2]
+    confs = np.clip(np.subtract(1, second_p), 0.0001, 0.9999)
     return confs
 
 
