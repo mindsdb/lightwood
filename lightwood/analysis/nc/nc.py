@@ -128,6 +128,7 @@ class MarginErrFunc(ClassificationErrFunc):
         super(MarginErrFunc, self).__init__()
 
     def apply(self, prediction, y):
+        prediction = deepcopy(prediction).astype(float)
         prob = np.zeros(y.size, dtype=np.float32)
         for i, y_ in enumerate(y):
             if y_ >= prediction.shape[1]:

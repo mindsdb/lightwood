@@ -76,7 +76,7 @@ class TestTimeseries(unittest.TestCase):
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
                 "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
-                "model_path": "'trend.TrendForecaster'",  # use a cheap forecasater
+                "model_path": "'trend.TrendForecaster'",  # use a cheap forecaster
                 "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
             },
         }
@@ -129,7 +129,8 @@ class TestTimeseries(unittest.TestCase):
                                                                        'window': window}
                                                                    }))
         pred.learn(train_df)
-        preds = pred.predict(data[0:10])
+        preds = pred.predict(data.sample(frac=1)[0:10])
+        self.assertTrue('original_index' in preds.columns)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
 
         # test incomplete history, should not be possible
@@ -137,8 +138,15 @@ class TestTimeseries(unittest.TestCase):
 
         # test inferring mode
         test_df['__mdb_make_predictions'] = False
+        test_df = test_df.sample(frac=1)  # shuffle to test internal ordering logic
         preds = pred.predict(test_df)
         self.check_ts_prediction_df(preds, nr_preds, [order_by])
+
+        # Additionally, check timestamps are further into the future than test dates
+        latest_timestamp = pd.to_datetime(test_df[order_by]).max().timestamp()
+        for idx, row in preds.iterrows():
+            for timestamp in row[f'order_{order_by}']:
+                assert timestamp > latest_timestamp
 
     def test_2_time_series_classification(self):
         from lightwood.api.high_level import predictor_from_problem

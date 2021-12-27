@@ -89,7 +89,7 @@ def model_analyzer(
         accuracy_samples=runtime_analyzer.get('acc_samples', {}),
         train_sample_size=len(encoded_train_data),
         test_sample_size=len(encoded_val_data),
-        confusion_matrix=runtime_analyzer['cm'],
+        confusion_matrix=runtime_analyzer.get('cm', []),
         column_importances=runtime_analyzer.get('column_importances', {}),
         histograms=stats_info.histograms,
         dtypes=dtype_dict

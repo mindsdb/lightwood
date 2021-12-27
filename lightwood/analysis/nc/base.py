@@ -134,6 +134,7 @@ class CachedClassifierAdapter(ClassifierAdapter):
     def __init__(self, model, fit_params=None):
         super(CachedClassifierAdapter, self).__init__(model, fit_params)
         self.prediction_cache = None
+        self.tempscale = True
 
     def fit(self, x=None, y=None):
         """ At this point, the predictor has already been trained, but this
@@ -143,4 +144,7 @@ class CachedClassifierAdapter(ClassifierAdapter):
     def predict(self, x=None):
         """ Same as in .fit()
         :return: np.array (n_test, n_classes) with class probability estimates """
-        return t_softmax(self.prediction_cache, t=0.5)
+        if self.tempscale:
+            return t_softmax(self.prediction_cache, t=0.5)
+        else:
+            return self.prediction_cache
