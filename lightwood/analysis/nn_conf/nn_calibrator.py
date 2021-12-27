@@ -69,6 +69,6 @@ class NNClassificationCalibrator(BaseAnalysisBlock):
     def explain(self,
                 row_insights: pd.DataFrame,
                 global_insights: Dict[str, object], **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
-        row_insights['confidence'] = self.calibrator.predict(self.ordenc.transform(
-            row_insights['prediction'].values.reshape(-1, 1)))
+        transformed = self.ordenc.transform(row_insights['prediction'].values.reshape(-1, 1))
+        row_insights['confidence'] = self.calibrator.predict(transformed).max(axis=1)
         return row_insights, global_insights

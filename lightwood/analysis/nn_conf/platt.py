@@ -66,7 +66,7 @@ class PlattCalibrator(BaseEstimator):
         return output
 
     def _transform(self, y_prob: np.ndarray) -> np.ndarray:
-        output = y_prob * self.coef_[0] + self.intercept_
+        output = y_prob * self.coef_.T + self.intercept_
         output = 1 / (1 + np.exp(-output))
         return output
 
@@ -90,7 +90,7 @@ class PlattCalibrator(BaseEstimator):
         # the class expects 2d ndarray as input features
         logistic = LogisticRegression(C=1e10, solver='lbfgs')
         logistic.fit(y_prob.reshape(-1, 1), y_true)
-        self.coef_ = logistic.coef_[0]
+        self.coef_ = logistic.coef_
         self.intercept_ = logistic.intercept_
 
         y_calibrated_prob = self._transform(y_prob)
