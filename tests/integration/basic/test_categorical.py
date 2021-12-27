@@ -54,6 +54,9 @@ class TestBasic(unittest.TestCase):
         predictions = predictor.predict(df[:10], args={'all_mixers': True})
         assert '__mdb_mixer_Neural' in predictions.columns
 
+        # predict single sample
+        predictor.predict(df.iloc[[0]])
+
     def test_2_binary_no_analysis(self):
         df = pd.read_csv('tests/data/ionosphere.csv')[:100]
         mask = np.random.rand(len(df)) < 0.8
