@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Dict, Tuple
 from types import SimpleNamespace
 
@@ -21,12 +22,16 @@ class TempScaler(BaseAnalysisBlock):
         super().__init__()
         self.temperature = nn.Parameter(torch.ones(1))
         self.ordenc = OrdinalEncoder()
-        self.softmax = torch.nn.Softmax()
+        self._softmax = torch.nn.Softmax(dim=1)
         self.active = False
 
     def temperature_scale(self, logits):
         temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))  # expand & match logits size
         return logits / temperature
+
+    def softmax(self, logits):
+        temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))  # expand & match logits size
+        return self._softmax(logits / temperature)
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         """
@@ -34,7 +39,7 @@ class TempScaler(BaseAnalysisBlock):
         """
         ns = SimpleNamespace(**kwargs)
 
-        if isinstance(ns.predictor.mixers[ns.predictor.indexes_by_accuracy[0]], Neural):
+        if ns.predictor.mixers[ns.predictor.indexes_by_accuracy[0]].supports_proba:
             self.n_cls = len(ns.stats_info.train_observed_classes)
             nll_criterion = nn.CrossEntropyLoss()
             ece_criterion = _ECELoss()
@@ -72,12 +77,16 @@ class TempScaler(BaseAnalysisBlock):
             optimizer.step(eval_loss)
 
             # NLL and ECE after temp scaling
+            # self.temperature = nn.Parameter(torch.ones(1))  # short circuiting
             after_temperature_nll = nll_criterion(self.temperature_scale(logits), labels).item()
             after_temperature_ece = ece_criterion(self.temperature_scale(logits), labels).item()
             log.info('Optimal temperature: %.3f' % self.temperature.item())
             log.info('After calibration - NLL: %.3f, ECE: %.3f' % (after_temperature_nll, after_temperature_ece))
-            self.active = True
 
+            output = deepcopy(ns.normal_predictions)
+            output['confidence'] = torch.max(self.softmax(logits), dim=1).values.detach().numpy()
+            info['result_df'] = output
+        self.active = True
         return info
 
     def explain(self,
@@ -89,12 +98,11 @@ class TempScaler(BaseAnalysisBlock):
                      '__mdb_unknown_cat' not in col]
         if self.active and conf_cols:
             logits = torch.tensor(row_insights[conf_cols].values)
-            scaled = logits / self.temperature
-            confs = self.softmax(scaled)
-            row_insights['confidence'] = torch.max(confs, axis=1).values.detach().numpy().reshape(-1, 1)
+            confs = self.softmax(logits)
+            row_insights['confidence'] = torch.max(confs, dim=1).values.detach().numpy().reshape(-1, 1)
         else:
             row_insights['confidence'] = torch.max(
-                torch.tensor(row_insights[conf_cols].values), axis=1).values.detach().numpy().reshape(-1, 1)
+                torch.tensor(row_insights[conf_cols].values), dim=1).values.detach().numpy().reshape(-1, 1)
         return row_insights, global_insights
 
 

@@ -1,12 +1,11 @@
 from types import SimpleNamespace
 from typing import Dict, Tuple
 
-# import numpy as np
+import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 
 from lightwood.analysis.nn_conf.platt import PlattCalibrator
-# from lightwood.api.dtype import dtype
 from lightwood.analysis.base import BaseAnalysisBlock
 
 
@@ -64,6 +63,10 @@ class NNClassificationCalibrator(BaseAnalysisBlock):
         true = ns.data[ns.target].values.reshape(-1, 1).astype(float)
         pred = ns.normal_predictions['prediction'].values.reshape(-1, 1).astype(float)
         self.calibrator.fit(pred, true)
+
+        transformed = self.ordenc.transform(ns.normal_predictions['prediction'].values.reshape(-1, 1))
+        info['result_df'] = ns.normal_predictions
+        info['result_df']['confidence'] = self.calibrator.predict(transformed)#.max(axis=1)
         return info
 
     def explain(self,

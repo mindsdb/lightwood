@@ -5,7 +5,7 @@ from typing import Dict  # , Tuple
 # import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 
-# from lightwood.api.dtype import dtype
+from lightwood.helpers.log import log
 from lightwood.analysis.base import BaseAnalysisBlock
 
 
@@ -23,9 +23,8 @@ class ConfStats(BaseAnalysisBlock):
         possible_labels = ns.stats_info.train_observed_classes
         self.ordenc.fit([[label] for label in possible_labels])
         ces, ece, mce = self.ce(info['result_df'], ns.normal_predictions, ns.data, ns.target)
-        print(f"CEs are: {ces}")
-        print(f"ECE is: {ece}")
-        print(f"MCE is: {mce}")
+        log.info(f"ECE - {round(ece, 4)}")
+        log.info(f"MCE - {round(mce, 4)}")
         info['CE'] = ces
         info['ECE'] = ece
         info['MCE'] = mce
@@ -38,16 +37,18 @@ class ConfStats(BaseAnalysisBlock):
         sorted_preds = preds.reindex(sorted_val.index)
         sorted_inp = data.reindex(sorted_val.index)
         sorted_inp['__mdb_confidence'] = sorted_val['confidence']
+        sorted_inp['__mdb_prediction'] = sorted_preds['prediction']
         mce = 0
         ces = []
         partial_ece = 0
         for i in range(1, self.ece_bins):
-            interval = sorted_inp.iloc[int(len(sorted_inp) * (i - 1) / self.ece_bins):int(i * len(sorted_inp) / self.ece_bins)]  # noqa
-            acc = (1 / len(interval)) * sum(sorted_inp[target] == sorted_preds['prediction'])
-            conf = (1 / len(interval)) * sum(sorted_inp['__mdb_confidence'])
+            size = round(len(sorted_inp) / self.ece_bins)
+            bin = sorted_inp.iloc[size * (i - 1):i * size]
+            acc = (1 / size) * sum(bin[target] == bin['__mdb_prediction'])
+            conf = (1 / size) * sum(bin['__mdb_confidence'])
             ce = (abs(acc - conf))
             ces.append(ce)
-            partial_ece += ce * len(interval)
+            partial_ece += ce * size
             mce = abs(acc - conf) if abs(acc - conf) > mce else mce
         ece = partial_ece / self.ece_bins
         return ces, ece, mce

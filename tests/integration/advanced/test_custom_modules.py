@@ -107,7 +107,7 @@ class {cname}(BaseAnalysisBlock):
 
         # modify it
         json_ai_dump = json_ai.to_dict()
-        json_ai_dump['analysis_blocks'] = [{'module': 'NNClassificationCalibrator', 'args': {}}]
+        json_ai_dump['analysis_blocks'] = [{'module': 'TempScaler', 'args': {}}]
         json_ai = JsonAI.from_dict(json_ai_dump)
 
         # create a predictor from it
