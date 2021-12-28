@@ -83,7 +83,7 @@ class TestBinary(unittest.TestCase):
         np.random.seed(1)
         data = np.random.rand(10) > 0.5
 
-        enc = BinaryEncoder()
+        enc = BinaryEncoder(normalized_output=True)
         enc.prepare(data)
 
         # Make data to represent random weights that do not sum to 1

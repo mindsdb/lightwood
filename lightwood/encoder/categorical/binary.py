@@ -32,18 +32,20 @@ class BinaryEncoder(BaseEncoder):
         self,
         is_target: bool = False,
         target_weights: Dict[str, float] = None,
+        normalized_output: bool = False
     ):
         super().__init__(is_target)
         """
-        :param is_target: Whether encoder featurizes target column
+        :param is_target: Whether encoder featurizes target column.
         :param target_weights: Percentage of total population represented by each category (from [0, 1]), as a dictionary.
+        :param normalized_output: Whether to normalize scores when decoding probabilities.
         """  # noqa
 
         self.map = {}  # category name -> index
         self.rev_map = {}  # index -> category name
         self.output_size = 2
         self.encoder_class_type = str
-        self.normed = False  # whether to normalize scores when decoding probabilities
+        self.normed = normalized_output
 
         # Weight-balance info if encoder represents target
         self.target_weights = None
