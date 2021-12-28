@@ -9,14 +9,13 @@ from torch.nn import functional as F
 from sklearn.preprocessing import OrdinalEncoder
 
 from lightwood.helpers.log import log
-from lightwood.mixer import Neural
 from lightwood.analysis.base import BaseAnalysisBlock
 
 
 class TempScaler(BaseAnalysisBlock):
     """
     Original reference (MIT Licensed): https://github.com/gpleiss/temperature_scaling
-    NB: Output of the neural network should be the classification logits, NOT the softmax (or log softmax)!
+    NB: Output of the neural network should be the classification logits, NOT the softmax (or log softmax)! TODO
     """
     def __init__(self):
         super().__init__()
@@ -26,11 +25,11 @@ class TempScaler(BaseAnalysisBlock):
         self.active = False
 
     def temperature_scale(self, logits):
-        temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))  # expand & match logits size
+        temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))
         return logits / temperature
 
     def softmax(self, logits):
-        temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))  # expand & match logits size
+        temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))
         return self._softmax(logits / temperature)
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
@@ -77,7 +76,6 @@ class TempScaler(BaseAnalysisBlock):
             optimizer.step(eval_loss)
 
             # NLL and ECE after temp scaling
-            # self.temperature = nn.Parameter(torch.ones(1))  # short circuiting
             after_temperature_nll = nll_criterion(self.temperature_scale(logits), labels).item()
             after_temperature_ece = ece_criterion(self.temperature_scale(logits), labels).item()
             log.info('Optimal temperature: %.3f' % self.temperature.item())
@@ -125,7 +123,7 @@ class _ECELoss(nn.Module):
     "Obtaining Well Calibrated Probabilities Using Bayesian Binning." AAAI.
     2015.
     """
-    def __init__(self, n_bins=15):
+    def __init__(self, n_bins=10):
         """
         n_bins (int): number of confidence interval bins
         """

@@ -1,8 +1,6 @@
 from types import SimpleNamespace
-from typing import Dict  # , Tuple
+from typing import Dict
 
-# import numpy as np
-# import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 
 from lightwood.helpers.log import log
@@ -10,7 +8,11 @@ from lightwood.analysis.base import BaseAnalysisBlock
 
 
 class ConfStats(BaseAnalysisBlock):
-    """ Computes confidence-related statistics on the held-out validation dataset. """
+    """
+    Computes confidence-related statistics on the held-out validation dataset.
+
+    Pending TODO: regression & forecasting tasks
+    """
 
     def __init__(self, deps=('ICP',), ece_bins: int = 10):
         super().__init__(deps=deps)
@@ -19,7 +21,6 @@ class ConfStats(BaseAnalysisBlock):
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
-        # if ns.categorical # TODO regression
         possible_labels = ns.stats_info.train_observed_classes
         self.ordenc.fit([[label] for label in possible_labels])
         ces, ece, mce = self.ce(info['result_df'], ns.normal_predictions, ns.data, ns.target)
