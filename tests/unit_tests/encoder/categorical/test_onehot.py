@@ -107,7 +107,7 @@ class TestOnehot(unittest.TestCase):
         """ Check probability calculation where `use_unknown=False` """ # noqa
         data = ['category 1', 'category 3', 'category 4', None, 'category 3']
 
-        enc = OneHotEncoder(use_unknown=False, normalized_output=True)
+        enc = OneHotEncoder(use_unknown=False)
         enc.prepare(data)
 
         # Make data to represent random weights that do not sum to 1

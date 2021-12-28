@@ -36,20 +36,17 @@ class OneHotEncoder(BaseEncoder):
         is_target: bool = False,
         target_weights: Dict[str, float] = None,
         use_unknown: bool = True,
-        normalized_output: bool = False
     ):
         """
         :param is_target: True if this encoder featurizes the target column
         :param target_weights: Percentage of total population represented by each category (between [0, 1]).
-        :param use_unknown: True uses an extra dimension to account for unknown/out-of-distribution categories
-        :param normalized_output: whether to normalize scores when decoding probabilities.
+        :param mode: True uses an extra dimension to account for unknown/out-of-distribution categories
         """  # noqa
 
         super().__init__(is_target)
         self.map = None  # category name -> index
         self.rev_map = None  # index -> category name
         self.use_unknown = use_unknown
-        self.normed = normalized_output
 
         # Weight-balance info if encoder represents target
         self.target_weights = None
@@ -169,8 +166,7 @@ class OneHotEncoder(BaseEncoder):
             else:
                 ret.append(self.rev_map[np.argmax(vector)])
 
-            vector = self._norm_vec(vector) if self.normed else vector
-            probs.append(vector)
+            probs.append(self._norm_vec(vector))
 
         return ret, probs, self.rev_map
 
