@@ -96,23 +96,3 @@ class {cname}(BaseAnalysisBlock):
 
         assert predictor.runtime_analyzer['test'] == 'test'
         assert row_insights['test'].iloc[0] == 'test'
-
-    def test_2_test_tempscale_analysis(self):
-        # Create base json ai
-        df = pd.read_csv('tests/data/hdi.csv').iloc[0:400]
-        pdef = ProblemDefinition.from_dict({'target': 'Development Index',
-                                            'time_aim': 20,
-                                            'use_default_analysis': False})
-        json_ai = json_ai_from_problem(df, pdef)
-
-        # modify it
-        json_ai_dump = json_ai.to_dict()
-        json_ai_dump['analysis_blocks'] = [{'module': 'TempScaler', 'args': {}}]
-        json_ai = JsonAI.from_dict(json_ai_dump)
-
-        # create a predictor from it
-        code = code_from_json_ai(json_ai)
-        predictor = predictor_from_code(code)
-        predictor.learn(df)
-        row_insights = predictor.predict(df)
-        assert 'confidence' in row_insights.columns

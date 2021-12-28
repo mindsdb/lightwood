@@ -1,5 +1,5 @@
-from types import SimpleNamespace
 from typing import Dict
+from types import SimpleNamespace
 
 from sklearn.preprocessing import OrdinalEncoder
 
@@ -11,7 +11,7 @@ class ConfStats(BaseAnalysisBlock):
     """
     Computes confidence-related statistics on the held-out validation dataset.
 
-    Pending TODO: regression & forecasting tasks
+    TODO: regression & forecasting tasks
     """
 
     def __init__(self, deps=('ICP',), ece_bins: int = 10):
@@ -21,35 +21,61 @@ class ConfStats(BaseAnalysisBlock):
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
-        possible_labels = ns.stats_info.train_observed_classes
-        self.ordenc.fit([[label] for label in possible_labels])
-        ces, ece, mce = self.ce(info['result_df'], ns.normal_predictions, ns.data, ns.target)
-        log.info(f"ECE - {round(ece, 4)}")
-        log.info(f"MCE - {round(mce, 4)}")
-        info['CE'] = ces
-        info['ECE'] = ece
-        info['MCE'] = mce
+
+        if ns.is_classification:
+            possible_labels = ns.stats_info.train_observed_classes
+            self.ordenc.fit([[label] for label in possible_labels])
+
+            ces, ece, mce, gscore = self._get_ece_stats(info['result_df'], ns.normal_predictions, ns.data, ns.target)
+            info['maximum_calibration_error'] = mce
+            info['expected_calibration_error'] = ece
+            info['binned_conf_acc_difference'] = ces
+            info['global_calibration_score'] = gscore
+            log.info(f'Global calibration score - {round(gscore, 4)}')
+            log.info(f"Expected calibration error ({self.ece_bins} bins) - {round(ece, 4)}")
+            log.info(f"Maximum calibration error ({self.ece_bins} bins) - {round(mce, 4)}")
+
+        elif ns.is_numerical or ns.is_multi_ts:
+            pass
 
         return info
 
-    def ce(self, confs, preds, data, target):
-        """ Computes expected and maximum calibration error. """
+    def _get_ece_stats(self, confs, preds, data, target):
+        """
+        Computes expected and maximum calibration error for classification tasks.
+
+        Amount of bins is specified by `self.ece_bins`. Data is sorted by increasing confidence prior to binning.
+
+        :return:
+        bins: bin-wise absolute difference between estimated confidence and true accuracy.
+        ece: weighted average of all bins.
+        mce: maximum value in `bins`.
+        global_score: 1.0 minus absolute difference between accuracy and confidence over the entire validation set.
+        """
+
         sorted_val = confs.sort_values(by='confidence', kind='stable')
         sorted_preds = preds.reindex(sorted_val.index)
         sorted_inp = data.reindex(sorted_val.index)
         sorted_inp['__mdb_confidence'] = sorted_val['confidence']
         sorted_inp['__mdb_prediction'] = sorted_preds['prediction']
-        mce = 0
-        ces = []
-        partial_ece = 0
+
+        size = round(len(sorted_inp) / self.ece_bins)
+        bins = []
+        ece = 0
+
         for i in range(1, self.ece_bins):
-            size = round(len(sorted_inp) / self.ece_bins)
-            bin = sorted_inp.iloc[size * (i - 1):i * size]
-            acc = (1 / size) * sum(bin[target] == bin['__mdb_prediction'])
-            conf = (1 / size) * sum(bin['__mdb_confidence'])
-            ce = (abs(acc - conf))
-            ces.append(ce)
-            partial_ece += ce * size
-            mce = abs(acc - conf) if abs(acc - conf) > mce else mce
-        ece = partial_ece / self.ece_bins
-        return ces, ece, mce
+            bin = sorted_inp.iloc[(i - 1) * size:i * size]
+            acc = sum(bin[target] == bin['__mdb_prediction']) / size
+            conf = sum(bin['__mdb_confidence']) / size
+            gap = abs(acc - conf)
+            bins.append(gap)
+            ece += gap
+
+        ece /= self.ece_bins
+        mce = max(bins) if bins else 0
+
+        global_acc = (sum(sorted_inp[target] == sorted_inp['__mdb_prediction']) / len(sorted_inp))
+        global_conf = sorted_inp['__mdb_confidence'].mean()
+        global_score = 1.0 - abs(global_acc - global_conf)
+
+        return bins, ece, mce, global_score
