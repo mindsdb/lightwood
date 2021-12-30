@@ -84,15 +84,16 @@ class ConfStats(BaseAnalysisBlock):
         for i in range(1, self.ece_bins):
             bin = sorted_inp.iloc[(i - 1) * size:i * size]
 
-            if task_type == 'categorical':
-                acc = sum(bin[target] == bin['__mdb_prediction']) / size
-            else:
-                acc = sum(bin['__mdb_hits'].astype(int)) / len(bin)
+            if len(bin) > 0:
+                if task_type == 'categorical':
+                    acc = sum(bin[target] == bin['__mdb_prediction']) / size
+                else:
+                    acc = sum(bin['__mdb_hits'].astype(int)) / len(bin)
 
-            conf = sum(bin['__mdb_confidence']) / size
-            gap = abs(acc - conf)
-            bins.append(gap)
-            ece += gap
+                conf = sum(bin['__mdb_confidence']) / size
+                gap = abs(acc - conf)
+                bins.append(gap)
+                ece += gap
 
         ece /= self.ece_bins
         mce = max(bins) if bins else 0
