@@ -30,7 +30,12 @@ class TestBasic(unittest.TestCase):
             {
                 "module": "AccStats",
                 "args": {"deps": ["ICP"]}
-        }]
+            },
+            {
+                "module": "ConfStats",
+                "args": {"deps": ["ICP"]}
+            }
+        ]
 
         predictor = predictor_from_json_ai(jai)
         predictor.learn(df)

@@ -25,22 +25,29 @@ class ConfStats(BaseAnalysisBlock):
         if ns.is_classification:
             possible_labels = ns.stats_info.train_observed_classes
             self.ordenc.fit([[label] for label in possible_labels])
+            task_type = 'categorical'
+        elif ns.is_numerical:
+            task_type = 'numerical'
+        elif ns.is_multi_ts:
+            task_type = 'multi_ts'
 
-            ces, ece, mce, gscore = self._get_ece_stats(info['result_df'], ns.normal_predictions, ns.data, ns.target)
-            info['maximum_calibration_error'] = mce
-            info['expected_calibration_error'] = ece
-            info['binned_conf_acc_difference'] = ces
-            info['global_calibration_score'] = gscore
-            log.info(f'Global calibration score - {round(gscore, 4)}')
-            log.info(f"Expected calibration error ({self.ece_bins} bins) - {round(ece, 4)}")
-            log.info(f"Maximum calibration error ({self.ece_bins} bins) - {round(mce, 4)}")
+        ces, ece, mce, gscore = self._get_stats(info['result_df'],
+                                                ns.normal_predictions,
+                                                ns.data,
+                                                ns.target,
+                                                task_type)
+        info['maximum_calibration_error'] = mce
+        info['expected_calibration_error'] = ece
+        info['binned_conf_acc_difference'] = ces
+        info['global_calibration_score'] = gscore
 
-        elif ns.is_numerical or ns.is_multi_ts:
-            pass
+        log.info(f'Global calibration score - {round(gscore, 4)}')
+        log.info(f"Expected calibration error ({self.ece_bins} bins) - {round(ece, 4)}")
+        log.info(f"Maximum calibration error ({self.ece_bins} bins) - {round(mce, 4)}")
 
         return info
 
-    def _get_ece_stats(self, confs, preds, data, target):
+    def _get_stats(self, confs, preds, data, target, task_type='categorical'):
         """
         Computes expected and maximum calibration error for classification tasks.
 
@@ -57,7 +64,18 @@ class ConfStats(BaseAnalysisBlock):
         sorted_preds = preds.reindex(sorted_val.index)
         sorted_inp = data.reindex(sorted_val.index)
         sorted_inp['__mdb_confidence'] = sorted_val['confidence']
-        sorted_inp['__mdb_prediction'] = sorted_preds['prediction']
+
+        if task_type == 'categorical':
+            sorted_inp['__mdb_prediction'] = sorted_preds['prediction']
+        else:
+            sorted_inp['__mdb_lower'] = confs['lower']
+            sorted_inp['__mdb_upper'] = confs['upper']
+            if task_type == 'numerical':
+                sorted_inp['__mdb_hits'] = (sorted_inp['__mdb_lower'] <= sorted_inp[target]) & \
+                                           (sorted_inp[target] <= sorted_inp['__mdb_upper'])
+            elif task_type == 'multi_ts':
+                sorted_inp['__mdb_hits'] = (sorted_inp['__mdb_lower'][0] <= sorted_inp[target]) & \
+                                           (sorted_inp[target] <= sorted_inp['__mdb_upper'][0])
 
         size = round(len(sorted_inp) / self.ece_bins)
         bins = []
@@ -65,7 +83,12 @@ class ConfStats(BaseAnalysisBlock):
 
         for i in range(1, self.ece_bins):
             bin = sorted_inp.iloc[(i - 1) * size:i * size]
-            acc = sum(bin[target] == bin['__mdb_prediction']) / size
+
+            if task_type == 'categorical':
+                acc = sum(bin[target] == bin['__mdb_prediction']) / size
+            else:
+                acc = sum(bin['__mdb_hits'].astype(int)) / len(bin)
+
             conf = sum(bin['__mdb_confidence']) / size
             gap = abs(acc - conf)
             bins.append(gap)
@@ -74,7 +97,10 @@ class ConfStats(BaseAnalysisBlock):
         ece /= self.ece_bins
         mce = max(bins) if bins else 0
 
-        global_acc = (sum(sorted_inp[target] == sorted_inp['__mdb_prediction']) / len(sorted_inp))
+        if task_type == 'categorical':
+            global_acc = sum(sorted_inp[target] == sorted_inp['__mdb_prediction']) / len(sorted_inp)
+        else:
+            global_acc = sum(sorted_inp['__mdb_hits'].astype(int)) / len(sorted_inp)
         global_conf = sorted_inp['__mdb_confidence'].mean()
         global_score = 1.0 - abs(global_acc - global_conf)
 
