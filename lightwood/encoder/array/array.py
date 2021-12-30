@@ -1,4 +1,3 @@
-from typing import List, Union
 import torch
 import pandas as pd
 import numpy as np
@@ -6,23 +5,29 @@ from lightwood.encoder.base import BaseEncoder
 from lightwood.api import dtype
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 from lightwood.helpers.general import is_none
+from typing import List, Iterable
 
 
 class ArrayEncoder(BaseEncoder):
     """
-    Fits a normalizer for array data. To encode, `ArrayEncoder` returns a normalized window of previous data.
+    Fits a normalizer for array data.
+
+    To encode, `ArrayEncoder` returns a normalized window of previous data.
     It can be used for generic arrays, as well as for handling historical target values in time series tasks.
 
     Currently supported normalizing strategies are minmax for numerical arrays, and a simple one-hot for categorical arrays. See `lightwood.encoder.helpers` for more details on each approach.
 
-    :param stop_after: time budget in seconds.
-    :param window: expected length of array data.
-    :param original_dtype: element-wise data type
     """  # noqa
 
     is_trainable_encoder: bool = True
 
     def __init__(self, stop_after: float, window: int = None, is_target: bool = False, original_type: dtype = None):
+        """
+        :param stop_after: time budget in seconds.
+        :param window: expected length of array data.
+        :param original_dtype: element-wise data type
+        """  # noqa
+
         super().__init__(is_target)
         self.stop_after = stop_after
         self.original_type = original_type
@@ -39,7 +44,13 @@ class ArrayEncoder(BaseEncoder):
             array = array[:self.output_size]
         return array
 
-    def prepare(self, train_priming_data, dev_priming_data):
+    def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable]):
+        """
+        Prepare the array encoder for sequence data.
+
+        :param train_priming_data: Training data of sequences
+        :param dev_priming_data: Dev data of sequences
+        """
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         priming_data = priming_data.values
 
@@ -66,7 +77,13 @@ class ArrayEncoder(BaseEncoder):
         self.output_size *= self._normalizer.output_size
         self.is_prepared = True
 
-    def encode(self, column_data: Union[list, np.ndarray, torch.Tensor]) -> torch.Tensor:
+    def encode(self, column_data: Iterable[Iterable]) -> torch.Tensor:
+        """
+        Encode the properties of a sequence-of-sequence representation
+
+        :param column_data: Input column data to be encoded
+        :returns: a torch-tensor representing the encoded sequence
+        """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
@@ -84,6 +101,12 @@ class ArrayEncoder(BaseEncoder):
 
         return data
 
-    def decode(self, data) -> torch.tensor:
+    def decode(self, data: torch.Tensor) -> List[Iterable]:
+        """
+        Converts data as a list of arrays.
+
+        :param data: Encoded data prepared by this array encoder
+        :returns: A list of iterable sequences in the original data space
+        """
         decoded = data.tolist()
         return decoded

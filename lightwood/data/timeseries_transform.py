@@ -106,7 +106,7 @@ def transform_timeseries(
             df_arr.append(df.sort_values(by=ob_arr))
             group_lengths.append(len(df))
     else:
-        df_arr = [original_df]
+        df_arr = [original_df.sort_values(by=ob_arr)]
         group_lengths.append(len(original_df))
 
     n_groups = len(df_arr)

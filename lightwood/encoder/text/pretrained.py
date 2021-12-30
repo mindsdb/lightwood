@@ -1,57 +1,4 @@
 """
-2021.07.16
-Adding flag "embedmode".
-
-Embed-mode is made for when text is one of many columns in the model.
-IF the model is direct (text) -> output, then it's worth just using
-the fine-tuned encoder as the "mixer" persay; thus, turn embed-mode OFF.
-
-This means there are 3 possible modes:
-
-(1) Classification
-    -> Fine tuned, output of encoder is [CLS] embedding
-    -> Fine tuned, output of encoder is the class value
-(2) Regression
-    -> Untrained; output of encoder is [CLS] embedding
-
-Training with regression is WIP; seems like quantile-binning is the best approach
-but using MSE loss while fine-tuning did not demonstrate decent results. Particularly
-because the mixer seems to address this.
-
-2021.03.18
-
-## Padding changes the answer slightly in the model.
-
-The following text encoder uses huggingface's
-Distilbert. Internal benchmarks suggest
-1 epoch of fine tuning is ideal [classification].
-Training ONLY occurs for classification. Regression problems
-are not trained, embeddings are directly generated.
-
-See: https://huggingface.co/transformers/training.html
-for further details.
-
-Currently the model supports only distilbert.
-
-When instantiating the DistilBertForSeq.Class object,
-num_labels indicates whether you use classification or regression.
-
-See: https://huggingface.co/transformers/model_doc/distilbert.html#distilbertforsequenceclassification
-under the 'labels' command
-
-For classification - we use num_labels = 1 + num_classes ***
-
-If you do num_classes + 1, we reserve the LAST label
-as the "unknown" label; this is different from the original
-distilbert model. (prior to 2021.03)
-
-TODOs:
-+ Regression
-+ Batch encodes() tokenization step
-+ Look into auto-encoding lower dimensional representations
-of the output embedding
-+ Look into regression tuning (will require grad. clipping)
-+ Look into tuning to the encoded space of output.
 """
 import time
 import torch
@@ -72,45 +19,44 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 from lightwood.helpers.general import is_none
+from typing import Iterable
 
 
 class PretrainedLangEncoder(BaseEncoder):
     is_trainable_encoder: bool = True
 
     """
-    Pretrained language models.
-    Option to train on a target encoding of choice.
+    Creates a contextualized embedding to represent input text via the [CLS] token vector from DistilBERT (transformers). (Sanh et al. 2019 - https://arxiv.org/abs/1910.01108).
 
-    Args:
-    is_target ::Bool; data column is the target of ML.
-    model_name ::str; name of pre-trained model
-    custom_tokenizer ::function; custom tokenizing function
-    batch_size  ::int; size of batch
-    max_position_embeddings ::int; max sequence length of input text
-    custom_train ::Bool; If true, trains model on target procided
-    frozen ::Bool; If true, freezes transformer layers during training.
-    epochs ::int; number of epochs to train model with
-    embed_mode ::Bool; If true, assumes the output of the encode() step is the CLS embedding.
-    """
+    In certain text tasks, this model can use a transformer to automatically fine-tune on a class of interest (providing there is a 2 column dataset, where the input column is text).
+
+    """ # noqa
 
     def __init__(
         self,
         stop_after: float,
-        is_target=False,
-        model_name="distilbert",
-        custom_tokenizer=None,
-        batch_size=10,
-        max_position_embeddings=None,
-        frozen=False,
-        epochs=1,
-        output_type=None,
-        embed_mode=True,
+        is_target: bool = False,
+        batch_size: int = 10,
+        max_position_embeddings: int = None,
+        frozen: bool = False,
+        epochs: int = 1,
+        output_type: str = None,
+        embed_mode: bool = True,
     ):
+        """
+        :param is_target: Whether this encoder represents the target. NOT functional for text generation yet.
+        :param batch_size: size of batch while fine-tuning
+        :param max_position_embeddings: max sequence length of input text
+        :param custom_train: If True, trains model on target procided
+        :param frozen: If True, freezes transformer layers during training.
+        :param epochs: number of epochs to train model with
+        :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.
+        :param embed_mode: If True, assumes the output of the encode() step is the CLS embedding (this can be trained or not). If False, returns the logits of the tuned task.
+        """ # noqa
         super().__init__(is_target)
 
         self.output_type = output_type
-        self.name = model_name + " text encoder"
-        log.info(self.name)
+        self.name = "distilbert text encoder"
 
         self._max_len = max_position_embeddings
         self._frozen = frozen
@@ -118,15 +64,14 @@ class PretrainedLangEncoder(BaseEncoder):
         self._epochs = epochs
 
         # Model setup
-        self._tokenizer = custom_tokenizer
         self._model = None
         self.model_type = None
 
         # TODO: Other LMs; Distilbert is a good balance of speed/performance
         self._classifier_model_class = DistilBertForSequenceClassification
         self._embeddings_model_class = DistilBertModel
-        self._tokenizer_class = DistilBertTokenizerFast
         self._pretrained_model_name = "distilbert-base-uncased"
+        self._tokenizer = DistilBertTokenizerFast.from_pretrained(self._pretrained_model_name)
 
         self.device, _ = get_devices()
         self.stop_after = stop_after
@@ -135,35 +80,43 @@ class PretrainedLangEncoder(BaseEncoder):
         self.uses_target = True
         self.output_size = None
 
-        # DEBUGGING!!!
         if self.embed_mode:
             log.info("Embedding mode on. [CLS] embedding dim output of encode()")
         else:
             log.info("Embedding mode off. Logits are output of encode()")
 
-    def prepare(self, train_priming_data: pd.Series, dev_priming_data: pd.Series, encoded_target_values: torch.Tensor):
+    def prepare(
+        self,
+        train_priming_data: Iterable[str],
+        dev_priming_data: Iterable[str],
+        encoded_target_values: torch.Tensor,
+    ):
         """
-        Prepare the encoder by training on the target.
+        Fine-tunes a transformer on the priming data.
 
-        Training data must be a dict with "targets" avail.
-        Automatically assumes this.
-        """
-        os.environ['TOKENIZERS_PARALLELISM'] = 'true'
-        priming_data = pd.concat([train_priming_data, dev_priming_data])
-        priming_data = priming_data.values
+        CURRENTLY WIP; train + dev are placeholders for a validation-based approach. 
+
+        Train + Dev are concatenated together and a transformer is then fine tuned with weight-decay applied on the transformer parameters. The option to freeze the underlying transformer and only train a linear layer exists if `frozen=True`. This trains faster, with the exception that the performance is often lower than fine-tuning on internal benchmarks.
+
+        :param train_priming_data: Text data in the train set
+        :param dev_priming_data: Text data in the dev set (not currently supported; can be empty)
+        :param encoded_target_values: Encoded target labels in Nrows x N_output_dimension
+        """ # noqa
         if self.is_prepared:
             raise Exception("Encoder is already prepared.")
 
-        # TODO: Make tokenizer custom with partial function; feed custom->model
-        if self._tokenizer is None:
-            self._tokenizer = self._tokenizer_class.from_pretrained(self._pretrained_model_name)
+        os.environ['TOKENIZERS_PARALLELISM'] = 'true'
+
+        # TODO -> we shouldn't be concatenating these together
+        if len(dev_priming_data) > 0:
+            priming_data = pd.concat([train_priming_data, dev_priming_data]).values
+        else:
+            priming_data = train_priming_data.tolist()
 
         # Replaces empty strings with ''
         priming_data = [x if x is not None else "" for x in priming_data]
 
-        # Checks training data details
-        # TODO: Regression flag; currently training supported for categorical only
-
+        # If classification, then fine-tune
         if (self.output_type in (dtype.categorical, dtype.binary)):
             log.info("Training model.")
 
@@ -172,19 +125,20 @@ class PretrainedLangEncoder(BaseEncoder):
 
             log.info("\tOutput trained is categorical")
 
+            # Label encode the OHE/binary output for classification
             labels = encoded_target_values.argmax(dim=1)
 
             # Construct the model
             self._model = self._classifier_model_class.from_pretrained(
                 self._pretrained_model_name,
-                num_labels=len(encoded_target_values[0]),
+                num_labels=len(encoded_target_values[0]),  # max classes to test
             ).to(self.device)
 
             # Construct the dataset for training
             xinp = TextEmbed(text, labels)
             dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
 
-            # If max length not set, adjust
+            # Set max length of input string; affects input to the model
             if self._max_len is None:
                 self._max_len = self._model.config.max_position_embeddings
 
@@ -273,7 +227,7 @@ class PretrainedLangEncoder(BaseEncoder):
         scheduler - scheduling params
         n_epochs - number of epochs to train
 
-        """
+        """ # noqa
         self._model.train()
 
         if optim is None:
@@ -290,8 +244,6 @@ class PretrainedLangEncoder(BaseEncoder):
         started = time.time()
         for epoch in range(n_epochs):
             total_loss = 0
-            if time.time() - started > self.stop_after:
-                break
 
             for batch in dataset:
                 optim.zero_grad()
@@ -309,25 +261,30 @@ class PretrainedLangEncoder(BaseEncoder):
                 optim.step()
                 if scheduler is not None:
                     scheduler.step()
+                if time.time() - started > self.stop_after:
+                    break
 
+            if time.time() - started > self.stop_after:
+                break
             self._train_callback(epoch, total_loss / len(dataset))
 
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
 
-    def encode(self, column_data):
+    def encode(self, column_data: Iterable[str]) -> torch.Tensor:
         """
-        TODO: Maybe batch the text up; may take too long
-        Given column data, encode the dataset.
+        Converts each text example in a column into encoded state. This can be either a vector embedding of the [CLS] token (represents the full text input) OR the logits prediction of the output.
 
-        Currently, returns the embedding of the pre-classifier layer.
+        The transformer model is of form:
+        transformer base + pre-classifier linear layer + classifier layer
 
-        Args:
-        column_data:: [list[str]] list of text data in str form
+        The embedding returned is of the [CLS] token after the pre-classifier layer; from internal testing, we found the latent space most highly separated across classes. 
 
-        Returns:
-        encoded_representation:: [torch.Tensor] N_sentences x Nembed_dim
-        """
+        If the encoder represents the logits in classification, returns a soft-maxed output of the class vector.
+
+        :param column_data: List of text data as strings
+        :returns: Embedded vector N_rows x Nembed_dim OR logits vector N_rows x N_classes depending on if `embed_mode` is True or not.
+        """ # noqa
         if self.is_prepared is False:
             raise Exception("You need to first prepare the encoder.")
 
@@ -364,9 +321,17 @@ class PretrainedLangEncoder(BaseEncoder):
         return torch.stack(encoded_representation).squeeze(1).to('cpu')
 
     def decode(self, encoded_values_tensor, max_length=100):
+        """
+        Text generation via decoding is not supported.
+        """ # noqa
         raise Exception("Decoder not implemented.")
 
     def to(self, device, available_devices):
+        """
+        Converts encoder models to device specified (CPU/GPU)
+
+        Transformers are LARGE models, please run on GPU for fastest implementation.
+        """ # noqa
         for v in vars(self):
             attr = getattr(self, v)
             if isinstance(attr, torch.nn.Module):
