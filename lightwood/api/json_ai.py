@@ -1112,7 +1112,8 @@ class Predictor(PredictorInterface):
         data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
-    def adjust(self, new_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame], old_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -> None:
+    def adjust(self, new_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
+        old_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -> None:
         # Update mixers with new information
 {adjust_body}
 
