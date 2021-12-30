@@ -5,7 +5,6 @@ from types import SimpleNamespace
 import torch
 import pandas as pd
 from torch import nn, optim
-from torch.nn import functional as F
 from sklearn.preprocessing import OrdinalEncoder
 
 from lightwood.helpers.log import log
@@ -29,8 +28,7 @@ class TempScaler(BaseAnalysisBlock):
         return logits / temperature
 
     def softmax(self, logits):
-        temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))
-        return self._softmax(logits / temperature)
+        return self._softmax(self.temperature_scale(logits))
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         """
@@ -41,7 +39,6 @@ class TempScaler(BaseAnalysisBlock):
         if ns.predictor.mixers[ns.predictor.indexes_by_accuracy[0]].supports_proba:
             self.n_cls = len(ns.stats_info.train_observed_classes)
             nll_criterion = nn.CrossEntropyLoss()
-            ece_criterion = _ECELoss()
             self.ordenc.fit([[val] for val in ns.stats_info.train_observed_classes])
 
             # collect logits and labels for the validation set
@@ -61,8 +58,7 @@ class TempScaler(BaseAnalysisBlock):
 
             # NLL and ECE before temp scaling
             before_temperature_nll = nll_criterion(logits, labels).item()
-            before_temperature_ece = ece_criterion(logits, labels).item()
-            log.info('Before calibration - NLL: %.3f, ECE: %.3f' % (before_temperature_nll, before_temperature_ece))
+            log.info(f'Before calibration - NLL: {round(before_temperature_nll, 3)}')
 
             # optimize w.r.t. NLL
             optimizer = optim.LBFGS([self.temperature], lr=0.001, max_iter=1000)
@@ -77,9 +73,8 @@ class TempScaler(BaseAnalysisBlock):
 
             # NLL and ECE after temp scaling
             after_temperature_nll = nll_criterion(self.temperature_scale(logits), labels).item()
-            after_temperature_ece = ece_criterion(self.temperature_scale(logits), labels).item()
-            log.info('Optimal temperature: %.3f' % self.temperature.item())
-            log.info('After calibration - NLL: %.3f, ECE: %.3f' % (after_temperature_nll, after_temperature_ece))
+            log.info(f'Optimal temperature: {round(self.temperature.item(), 3)}')
+            log.info(f'After calibration - NLL: {round(after_temperature_nll, 3)}')
 
             output = deepcopy(ns.normal_predictions)
             output['confidence'] = torch.max(self.softmax(logits), dim=1).values.detach().numpy()
@@ -103,48 +98,3 @@ class TempScaler(BaseAnalysisBlock):
                 torch.tensor(row_insights[conf_cols].values), dim=1).values.detach().numpy().reshape(-1, 1)
         return row_insights, global_insights
 
-
-class _ECELoss(nn.Module):
-    """
-    Calculates the Expected Calibration Error of a model.
-    (This isn't necessary for temperature scaling, just a cool metric).
-
-    The input to this loss is the logits of a model, NOT the softmax scores.
-
-    This divides the confidence outputs into equally-sized interval bins.
-    In each bin, we compute the confidence gap:
-
-    bin_gap = | avg_confidence_in_bin - accuracy_in_bin |
-
-    We then return a weighted average of the gaps, based on the number
-    of samples in each bin
-
-    See: Naeini, Mahdi Pakdaman, Gregory F. Cooper, and Milos Hauskrecht.
-    "Obtaining Well Calibrated Probabilities Using Bayesian Binning." AAAI.
-    2015.
-    """
-    def __init__(self, n_bins=10):
-        """
-        n_bins (int): number of confidence interval bins
-        """
-        super(_ECELoss, self).__init__()
-        bin_boundaries = torch.linspace(0, 1, n_bins + 1)
-        self.bin_lowers = bin_boundaries[:-1]
-        self.bin_uppers = bin_boundaries[1:]
-
-    def forward(self, logits, labels):
-        softmaxes = F.softmax(logits, dim=1)
-        confidences, predictions = torch.max(softmaxes, 1)
-        accuracies = predictions.eq(labels)
-
-        ece = torch.zeros(1, device=logits.device)
-        for bin_lower, bin_upper in zip(self.bin_lowers, self.bin_uppers):
-            # Calculated |confidence - accuracy| in each bin
-            in_bin = confidences.gt(bin_lower.item()) * confidences.le(bin_upper.item())
-            prop_in_bin = in_bin.float().mean()
-            if prop_in_bin.item() > 0:
-                accuracy_in_bin = accuracies[in_bin].float().mean()
-                avg_confidence_in_bin = confidences[in_bin].mean()
-                ece += torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
-
-        return ece
