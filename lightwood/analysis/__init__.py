@@ -8,6 +8,7 @@ from lightwood.analysis.nc.calibrate import ICP
 from lightwood.analysis.helpers.acc_stats import AccStats
 from lightwood.analysis.helpers.conf_stats import ConfStats
 from lightwood.analysis.helpers.feature_importance import GlobalFeatureImportance
+from lightwood.analysis.nn_conf.plinear import PLinearWrapper
 
 try:
     from lightwood.analysis.helpers.shap import ShapleyValues
@@ -15,5 +16,5 @@ except Exception:
     ShapleyValues = None
 
 
-__all__ = ['model_analyzer', 'explain', 'BaseAnalysisBlock',
+__all__ = ['model_analyzer', 'explain', 'BaseAnalysisBlock', 'PLinearWrapper',
            'ICP', 'AccStats', 'ConfStats', 'GlobalFeatureImportance', 'ShapleyValues']

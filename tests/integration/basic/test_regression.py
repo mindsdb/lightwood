@@ -20,13 +20,26 @@ class TestBasic(unittest.TestCase):
         df[target] = [f'{x}$' for x in df[target]]
         pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
         jai = json_ai_from_problem(df, pdef)
-        jai.analysis_blocks = [{
+        # jai.outputs[target].mixers = [
+        #     {
+        #         "module": "Neural",
+        #         "args": {
+        #             "fit_on_dev": True,
+        #             "stop_after": "$problem_definition.seconds_per_mixer",
+        #             "search_hyperparameters": True,
+        #             "net": "'PNet'"
+        #         },
+        #     }
+        # ]
+        jai.analysis_blocks = [
+            {
             "module": "ICP",
             "args": {
                 "fixed_significance": None,
                 "confidence_normalizer": True,  # explicitly test the ICP normalizer in an integration test
                 "positive_domain": "$statistical_analysis.positive_domain",
-            }},
+            }
+        },
             {
                 "module": "AccStats",
                 "args": {"deps": ["ICP"]}
@@ -34,7 +47,12 @@ class TestBasic(unittest.TestCase):
             {
                 "module": "ConfStats",
                 "args": {"deps": ["ICP"]}
-        }]
+        },
+            {
+                "module": "PLinearWrapper",
+                "args": {}
+        },
+        ]
 
         predictor = predictor_from_json_ai(jai)
         predictor.learn(df)

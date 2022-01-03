@@ -20,6 +20,7 @@ from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.helpers.ar_net import ArNet
+from lightwood.mixer.helpers.p_net import PNet
 from lightwood.mixer.helpers.default_net import DefaultNet
 from lightwood.api.types import TimeseriesSettings, PredictionArguments
 from lightwood.mixer.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
@@ -32,6 +33,11 @@ class Neural(BaseMixer):
     epochs_to_best: int
     fit_on_dev: bool
     supports_proba: bool
+    net_dispatch = {
+        "DefaultNet": DefaultNet,
+        "ArNet": ArNet,
+        "PNet": PNet,
+    }
 
     def __init__(
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
@@ -58,7 +64,7 @@ class Neural(BaseMixer):
         self.epochs_to_best = 0
         self.n_epochs = n_epochs
         self.fit_on_dev = fit_on_dev
-        self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
+        self.net_class = Neural.net_dispatch.get(net, 'DefaultNet')
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
         self.search_hyperparameters = search_hyperparameters
         self.stable = True
@@ -103,8 +109,6 @@ class Neural(BaseMixer):
         return criterion
 
     def _select_optimizer(self) -> Optimizer:
-        # ad_optim.Ranger
-        # torch.optim.AdamW
         if self.timeseries_settings.is_timeseries:
             optimizer = ad_optim.Ranger(self.model.parameters(), lr=self.lr)
         else:
