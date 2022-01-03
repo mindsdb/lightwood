@@ -30,6 +30,7 @@ class PLinearWrapper(BaseAnalysisBlock):
         self.trainer = None
         self.optimizer = None
         self.time_budget = 30
+        self.n_samples = 100  # 100 is the minimum for arbitrary quantiles at 0.01 resolution
         self.device, _ = get_devices()
         self.pct_train = 0.8
         self.pct_test = 1 - self.pct_train
@@ -43,7 +44,7 @@ class PLinearWrapper(BaseAnalysisBlock):
         y = torch.tensor(ns.encoded_val_data.get_column_original_data(ns.target).values).unsqueeze(1)
         yh = torch.tensor(ns.normal_predictions['prediction'].values).unsqueeze(1)
         r = (y - yh).float()
-        # TODO: append to X tensor
+        X = torch.hstack([X, yh]).float()  # predicted value is the most important prior
 
         mask = torch.rand((len(y),)) < 0.8
         train_X = X[mask, :]
@@ -68,7 +69,7 @@ class PLinearWrapper(BaseAnalysisBlock):
 
         self.trainer.fit(train_data_loader, test_data_loader,
                          desired_error=0.01,
-                         max_time=1e6, #  self.time_budget,
+                         max_time=self.time_budget,
                          callback=self.callback)
 
         return info
@@ -76,6 +77,28 @@ class PLinearWrapper(BaseAnalysisBlock):
     def explain(self,
                 row_insights: pd.DataFrame,
                 global_insights: Dict[str, object], **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
+
+        ns = SimpleNamespace(**kwargs)
+        conf_level = kwargs.get('fixed_confidence', 0.95)
+
+        X = ns.encoded_data
+        yh = torch.tensor(ns.predictions['prediction'].values).unsqueeze(1)
+        X = torch.hstack([X, yh]).float()
+
+        samples = []
+        for _ in range(self.n_samples):
+            samples.append(self.model.forward(X))
+
+        samples = torch.stack(samples).squeeze()
+        sorted_samples = torch.sort(samples, dim=0).values
+        sorted_samples = sorted_samples - sorted_samples.median(dim=0).values  # rescale so that median is null
+        min_bound = sorted_samples[round(samples.shape[0] * (1.0 - conf_level)), :]
+        max_bound = sorted_samples[round(samples.shape[0] * conf_level), :]
+
+        row_insights['confidence'] = conf_level
+        row_insights['lower'] = row_insights['prediction'] + min_bound.detach().numpy()
+        row_insights['upper'] = row_insights['prediction'] + max_bound.detach().numpy()
+
         return row_insights, global_insights
 
 
@@ -90,7 +113,6 @@ class PLinear(torch.nn.Module):
         self.out_features = out_features
 
         self.sigma = Parameter(torch.Tensor(out_features, in_features))
-        self.mean = Parameter(torch.Tensor(out_features, in_features))
 
         # there can be various distributions & ways to sample, we stick with discrete normal as it is way faster
         self.w_sampler = self.w_discrete_normal
@@ -104,14 +126,12 @@ class PLinear(torch.nn.Module):
 
         # make sure that we tell the graph that these two need to be optimized
         self.sigma.requiresGrad = True
-        self.mean.requiresGrad = True
 
     def reset_parameters(self):
-        torch.nn.init.kaiming_uniform_(self.mean, a=math.sqrt(5))
         torch.nn.init.uniform_(self.sigma, a=0.05, b=0.2)
 
         if self.bias is not None:
-            fan_in, _ = torch.nn.init._calculate_fan_in_and_fan_out(self.mean)
+            fan_in, _ = torch.nn.init._calculate_fan_in_and_fan_out(self.sigma)
             bound = 1 / math.sqrt(fan_in)
             torch.nn.init.uniform_(self.bias, -bound, bound)
 
@@ -130,13 +150,12 @@ class PLinear(torch.nn.Module):
         device = torch.device(device_str)
         w.to(device)
 
-        # make sure that they are evently distributed between -1, 1
+        # make sure that they are evenly distributed between -1, 1
         torch.nn.init.uniform_(w, a=-1, b=1)
 
         # adjust based on sigma
-        w = self.mean * (1 + w * torch.abs(self.sigma) * sigma_multiplier / 2)
+        w = 1 + w * torch.abs(self.sigma) * sigma_multiplier
 
-        # print(torch.mean(self.sigma))  # you can see how the average sigma changes over trainings
         return w
 
     def forward(self, input):
