@@ -79,7 +79,9 @@ class PLinearWrapper(BaseAnalysisBlock):
                 global_insights: Dict[str, object], **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
 
         ns = SimpleNamespace(**kwargs)
-        conf_level = kwargs.get('fixed_confidence', 0.95)
+        conf_level = ns.pred_args.fixed_confidence
+        if conf_level is None:
+            conf_level = 0.95
 
         X = ns.encoded_data
         yh = torch.tensor(ns.predictions['prediction'].values).unsqueeze(1)
