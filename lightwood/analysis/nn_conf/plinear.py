@@ -10,6 +10,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.nn.parameter import Parameter
 
+from lightwood.helpers.log import log
 from lightwood.helpers.device import get_devices
 from lightwood.encoder.categorical.gym import Gym
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -32,7 +33,7 @@ class PLinearWrapper(BaseAnalysisBlock):
         self.device, _ = get_devices()
         self.pct_train = 0.8
         self.pct_test = 1 - self.pct_train
-        self.callback = lambda err, y, z: print(f'PLinear error is {err}')
+        self.callback = lambda err, y, z: log.debug(f'PLinear error is {err}')
         assert self.pct_train + self.pct_test == 1.0
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:

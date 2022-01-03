@@ -20,7 +20,6 @@ from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.helpers.ar_net import ArNet
-from lightwood.mixer.helpers.p_net import PNet
 from lightwood.mixer.helpers.default_net import DefaultNet
 from lightwood.api.types import TimeseriesSettings, PredictionArguments
 from lightwood.mixer.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
@@ -36,7 +35,6 @@ class Neural(BaseMixer):
     net_dispatch = {
         "DefaultNet": DefaultNet,
         "ArNet": ArNet,
-        "PNet": PNet,
     }
 
     def __init__(
