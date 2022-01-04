@@ -4,7 +4,7 @@ from lightwood.api.types import TimeseriesSettings
 
 
 def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: TimeseriesSettings) -> pd.DataFrame:
-    nr_predictions = tss.nr_predictions
+    nr_predictions = tss.horizon
     if tss.group_by:
         gby = [f'group_{g}' for g in tss.group_by]
 
@@ -20,7 +20,7 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
             series_delta = deltas['__default'][col]
         timestamps = [last + t * series_delta for t in range(nr_predictions)]
 
-        if tss.nr_predictions == 1:
+        if tss.horizon == 1:
             timestamps = timestamps[0]  # preserves original input format if nr_predictions == 1
 
         df[f'order_{col}'].iloc[idx] = timestamps

@@ -131,7 +131,7 @@ def transform_timeseries(
                 _ts_add_previous_rows, order_cols=ob_arr + tss.historical_columns, window=window),
             df_arr)
 
-        df_arr = pool.map(partial(_ts_add_future_target, target=target, nr_predictions=tss.nr_predictions,
+        df_arr = pool.map(partial(_ts_add_future_target, target=target, nr_predictions=tss.horizon,
                                   data_dtype=tss.target_type, mode=mode),
                           df_arr)
 
@@ -147,7 +147,7 @@ def transform_timeseries(
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], order_cols=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
                                               order_cols=ob_arr + tss.historical_columns, window=window)
-            df_arr[i] = _ts_add_future_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions,
+            df_arr[i] = _ts_add_future_target(df_arr[i], target=target, nr_predictions=tss.horizon,
                                               data_dtype=tss.target_type, mode=mode)
             if tss.use_previous_target:
                 df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window)
