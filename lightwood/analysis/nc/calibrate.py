@@ -41,8 +41,8 @@ class ICP(BaseAnalysisBlock):
         data_type = ns.dtype_dict[ns.target]
         output = {'icp': {'__mdb_active': False}}
 
-        fit_params = {'nr_preds': ns.tss.horizon or 0, 'columns_to_ignore': []}
-        fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
+        fit_params = {'horizon': ns.tss.horizon or 0, 'columns_to_ignore': []}
+        fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['horizon'])])
 
         if ns.is_classification:
             if ns.predictor.supports_proba:

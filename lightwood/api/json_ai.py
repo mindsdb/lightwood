@@ -256,7 +256,7 @@ def generate_json_ai(
                         "args": {
                             "fit_on_dev": True,
                             "stop_after": "$problem_definition.seconds_per_mixer",
-                            "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                            "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
                         },
                     }
                 ]
@@ -269,7 +269,7 @@ def generate_json_ai(
                             "module": "SkTime",
                             "args": {
                                 "stop_after": "$problem_definition.seconds_per_mixer",
-                                "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
                             },
                         }
                     ]
