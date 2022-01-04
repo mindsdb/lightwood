@@ -62,7 +62,7 @@ class TestTimeseries(unittest.TestCase):
                                                                     'use_previous_target': True,
                                                                     'allow_incomplete_history': True,
                                                                     'group_by': ['Country'],
-                                                                    'horizons': horizon,
+                                                                    'horizon': horizon,
                                                                     'order_by': [order_by],
                                                                     'period_intervals': (('daily', 7),),
                                                                     'window': window
