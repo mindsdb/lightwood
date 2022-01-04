@@ -147,9 +147,9 @@ def lookup_encoder(
             if col_dtype in [dtype.float]:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["module"] = "TsNumericEncoder"
-            if tss.nr_predictions > 1:
+            if tss.horizon > 1:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
-                encoder_dict["args"]["timesteps"] = f"{tss.nr_predictions}"
+                encoder_dict["args"]["timesteps"] = f"{tss.horizon}"
                 encoder_dict["module"] = "TsArrayNumericEncoder"
         if "__mdb_ts_previous" in col_name:
             encoder_dict["module"] = "ArrayEncoder"
@@ -230,7 +230,7 @@ def generate_json_ai(
             }
         ]
 
-        if not tss.is_timeseries or tss.nr_predictions == 1:
+        if not tss.is_timeseries or tss.horizon == 1:
             mixers.extend(
                 [
                     {
@@ -248,7 +248,7 @@ def generate_json_ai(
                     },
                 ]
             )
-        elif tss.nr_predictions > 1:
+        elif tss.horizon > 1:
             mixers.extend(
                 [
                     {
@@ -256,7 +256,7 @@ def generate_json_ai(
                         "args": {
                             "fit_on_dev": True,
                             "stop_after": "$problem_definition.seconds_per_mixer",
-                            "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                            "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
                         },
                     }
                 ]
@@ -269,7 +269,7 @@ def generate_json_ai(
                             "module": "SkTime",
                             "args": {
                                 "stop_after": "$problem_definition.seconds_per_mixer",
-                                "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
                             },
                         }
                     ]
@@ -291,7 +291,7 @@ def generate_json_ai(
         )
     }
 
-    if tss.is_timeseries and tss.nr_predictions > 1:
+    if tss.is_timeseries and tss.horizon > 1:
         list(outputs.values())[0].data_dtype = dtype.tsarray
 
     list(outputs.values())[0].encoder = lookup_encoder(

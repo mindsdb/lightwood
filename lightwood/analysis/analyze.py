@@ -46,7 +46,7 @@ def model_analyzer(
     # predictive task
     is_numerical = data_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity)
     is_classification = data_type in (dtype.categorical, dtype.binary)
-    is_multi_ts = tss.is_timeseries and tss.nr_predictions > 1
+    is_multi_ts = tss.is_timeseries and tss.horizon > 1
     has_pretrained_text_enc = any([isinstance(enc, PretrainedLangEncoder)
                                    for enc in encoded_train_data.encoders.values()])
 

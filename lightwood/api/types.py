@@ -209,7 +209,7 @@ class TimeseriesSettings:
          for these columns will yield a different series.
     :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a\
          prediction, after the rows are ordered by order_by columns and split into groups if applicable.
-    :param nr_predictions: The number of points in the future that predictions should be made for, defaults to 1. Once \
+    :param horizon: The number of points in the future that predictions should be made for, defaults to 1. Once \
         trained, the model will be able to predict up to this many points into the future.
     :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the \
         time series predictor. Note that a non-historical column shall still be used to forecast, but without \
@@ -226,7 +226,7 @@ class TimeseriesSettings:
     window: int = None
     group_by: List[str] = None
     use_previous_target: bool = True
-    nr_predictions: int = None
+    horizon: int = None
     historical_columns: List[str] = None
     target_type: str = (
         ""  # @TODO: is the current setter (outside of initialization) a sane option?
@@ -258,7 +258,7 @@ class TimeseriesSettings:
                 window=obj["window"],
                 use_previous_target=obj.get("use_previous_target", True),
                 historical_columns=[],
-                nr_predictions=obj.get("nr_predictions", 1),
+                horizon=obj.get("horizon", 1),
                 allow_incomplete_history=obj.get('allow_incomplete_history', False),
                 eval_cold_start=obj.get('eval_cold_start', True),
                 interval_periods=obj.get('interval_periods', tuple(tuple()))
