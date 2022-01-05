@@ -3,6 +3,7 @@ from typing import List, Optional
 import torch
 from torch import nn
 from torch.optim import SGD
+import numpy as np
 import pandas as pd
 
 from lightwood.mixer.base import BaseMixer
@@ -51,7 +52,7 @@ class TsStackedEnsemble(StackedEnsemble):
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         assert self.prepared
         output = pd.DataFrame()
-        predictions = torch.tensor(self.predict(ds, args)).squeeze().reshape(-1, self.horizon, len(self.mixers))
+        predictions = torch.tensor(np.stack(self.predict(ds, args), axis=2).squeeze())
         predictions = (predictions * self.mixer_weights).sum(axis=self.agg_dim)
         output['prediction'] = predictions.detach().numpy().tolist()
         return output
