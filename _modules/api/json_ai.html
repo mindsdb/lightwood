@@ -315,9 +315,9 @@
             <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">]:</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gby</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TsNumericEncoder&quot;</span>
-            <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gby</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;timesteps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">nr_predictions</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;timesteps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TsArrayNumericEncoder&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;__mdb_ts_previous&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="p">:</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ArrayEncoder&quot;</span>
@@ -398,7 +398,7 @@
             <span class="p">}</span>
         <span class="p">]</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> <span class="n">tss</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">mixers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">{</span>
@@ -416,7 +416,7 @@
                     <span class="p">},</span>
                 <span class="p">]</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">tss</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">mixers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">{</span>
@@ -424,7 +424,7 @@
                         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
                             <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                             <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;n_ts_predictions&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.nr_predictions&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;n_ts_predictions&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
                         <span class="p">},</span>
                     <span class="p">}</span>
                 <span class="p">]</span>
@@ -437,7 +437,7 @@
                             <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;SkTime&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
                                 <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;n_ts_predictions&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.nr_predictions&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;n_ts_predictions&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
                             <span class="p">},</span>
                         <span class="p">}</span>
                     <span class="p">]</span>
@@ -459,7 +459,7 @@
         <span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">nr_predictions</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span>
 
     <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">lookup_encoder</span><span class="p">(</span>
@@ -1321,7 +1321,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2021, MindsDB.
+        &#169; Copyright 2017-2022, MindsDB.
 
     </p>
   </div>

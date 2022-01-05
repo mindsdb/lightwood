@@ -379,7 +379,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -460,8 +460,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="c1"># Lightwood modules</span>
 <span class="kn">import</span> <span class="nn">lightwood</span> <span class="k">as</span> <span class="nn">lw</span>
@@ -478,8 +477,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2851:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 </div>
@@ -490,8 +489,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/used_car_price/data.csv&#39;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/used_car_price/data.csv&#39;</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -612,8 +610,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Create the Problem Definition</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the Problem Definition</span>
 <span class="n">pdef</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
     <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="c1"># column you want to predict</span>
     <span class="c1">#&#39;ignore_features&#39;: [&#39;year&#39;, &#39;mileage&#39;, &#39;tax&#39;, &#39;mpg&#39;, &#39;engineSize&#39;]</span>
@@ -629,29 +626,29 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2851:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -659,8 +656,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -777,7 +773,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 57024.0,
         &#34;seconds_per_encoder&#34;: null,
-        &#34;expected_additional_time&#34;: 2.2322444915771484,
+        &#34;expected_additional_time&#34;: 1.71958327293396,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -787,7 +783,7 @@ div.rendered_html tbody tr:hover {
             &#34;window&#34;: null,
             &#34;group_by&#34;: null,
             &#34;use_previous_target&#34;: true,
-            &#34;nr_predictions&#34;: null,
+            &#34;horizon&#34;: null,
             &#34;historical_columns&#34;: null,
             &#34;target_type&#34;: &#34;&#34;,
             &#34;allow_incomplete_history&#34;: false,
@@ -852,8 +848,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">%%writefile</span> LabelEncoder.py
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> LabelEncoder.py
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">2021.10.13</span>
@@ -941,8 +936,7 @@ div.rendered_html tbody tr:hover {
 <span class="sd">        :param encoded_data: Encoded data in the form of a torch.Tensor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ilabel_dict</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">()]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">encoded_data</span><span class="p">]</span>
-
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -959,8 +953,7 @@ Writing LabelEncoder.py
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
 <span class="n">load_custom_module</span><span class="p">(</span><span class="s1">&#39;LabelEncoder.py&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -995,8 +988,7 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">for</span> <span class="n">ft</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;transmission&quot;</span><span class="p">,</span> <span class="s2">&quot;fuelType&quot;</span><span class="p">]:</span> <span class="c1"># Features you want to replace</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">ft</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;transmission&quot;</span><span class="p">,</span> <span class="s2">&quot;fuelType&quot;</span><span class="p">]:</span> <span class="c1"># Features you want to replace</span>
     <span class="c1"># Set each feature to the custom encoder</span>
     <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">ft</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
 </pre></div>
@@ -1010,8 +1002,7 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">#Generate python code that fills in your pipeline</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Generate python code that fills in your pipeline</span>
 <span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
 
 <span class="c1"># Turn the code above into a predictor object</span>
@@ -1024,7 +1015,7 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2851:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <p>Now, let’s run our pipeline. To do so, let’s first:</p>
@@ -1038,8 +1029,7 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Perform Stats Analysis</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Perform Stats Analysis</span>
 <span class="n">predictor</span><span class="o">.</span><span class="n">analyze_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
 <span class="c1"># Pre-process the data</span>
@@ -1061,34 +1051,34 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2851:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Splitting the data into train/test</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Preparing the encoders</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 2</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 3</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 4</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 5</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 6</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 7</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 8</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Encoder prepping dict length of: 9</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: price</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Done running for: engineSize</span>
-<span class="ansi-green-fg">INFO:lightwood-2851:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Splitting the data into train/test</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Preparing the encoders</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 2</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 3</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 4</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 5</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 6</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 7</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 8</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Encoder prepping dict length of: 9</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: price</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Done running for: engineSize</span>
+<span class="ansi-green-fg">INFO:lightwood-2629:Featurizing the data</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
@@ -1096,8 +1086,7 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Pick a categorical column name</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pick a categorical column name</span>
 <span class="n">col_name</span> <span class="o">=</span> <span class="s2">&quot;fuelType&quot;</span>
 
 <span class="c1"># Get the encoded feature data</span>
@@ -1174,8 +1163,7 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Label Name -&gt; Label Number</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Label Name -&gt; Label Number</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">label_dict</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1202,7 +1190,7 @@ assignments for a data type</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2021, MindsDB.
+        &#169; Copyright 2017-2022, MindsDB.
 
     </p>
   </div>

@@ -379,7 +379,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -453,8 +453,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">nltk</span>
@@ -477,8 +476,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2233:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="section" id="1)-Load-your-data">
@@ -488,8 +487,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Load the data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the data</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/jupyter/train.csv.zip&quot;</span><span class="p">)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -587,8 +585,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Setup the problem definition</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup the problem definition</span>
 <span class="n">problem_definition</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span>
     <span class="s2">&quot;ignore_features&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;url_legal&quot;</span><span class="p">,</span> <span class="s2">&quot;license&quot;</span><span class="p">,</span> <span class="s2">&quot;standard_error&quot;</span><span class="p">]</span>
@@ -596,8 +593,7 @@ div.rendered_html tbody tr:hover {
 
 <span class="c1"># Generate the j{ai}son syntax</span>
 <span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
-
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -605,19 +601,19 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2233:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2233:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2154:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -633,8 +629,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -705,7 +700,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 28512.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 54.51949620246887,
+        &#34;expected_additional_time&#34;: 44.30533313751221,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -715,7 +710,7 @@ div.rendered_html tbody tr:hover {
             &#34;window&#34;: null,
             &#34;group_by&#34;: null,
             &#34;use_previous_target&#34;: true,
-            &#34;nr_predictions&#34;: null,
+            &#34;horizon&#34;: null,
             &#34;historical_columns&#34;: null,
             &#34;target_type&#34;: &#34;&#34;,
             &#34;allow_incomplete_history&#34;: false,
@@ -762,8 +757,7 @@ ingredients for our ML pipeline.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">%%writefile</span> MyCustomCleaner.py
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> MyCustomCleaner.py
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -855,8 +849,7 @@ ingredients for our ML pipeline.</p>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span>
-
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -876,8 +869,7 @@ Writing MyCustomCleaner.py
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
 
 <span class="c1"># Lightwood automatically does this for us if we want</span>
 <span class="n">load_custom_module</span><span class="p">(</span><span class="s1">&#39;MyCustomCleaner.py&#39;</span><span class="p">)</span>
@@ -913,8 +905,7 @@ Writing MyCustomCleaner.py
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Make changes to your JSON-AI</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make changes to your JSON-AI</span>
 <span class="n">json_ai</span><span class="o">.</span><span class="n">cleaner</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;MyCustomCleaner.cleaner&quot;</span><span class="p">,</span>
         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -944,7 +935,7 @@ Writing MyCustomCleaner.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2233:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1015,7 +1006,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 28512.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 54.51949620246887,
+                &#34;expected_additional_time&#34;: 44.30533313751221,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1025,7 +1016,7 @@ class Predictor(PredictorInterface):
                     &#34;window&#34;: None,
                     &#34;group_by&#34;: None,
                     &#34;use_previous_target&#34;: True,
-                    &#34;nr_predictions&#34;: None,
+                    &#34;horizon&#34;: None,
                     &#34;historical_columns&#34;: None,
                     &#34;target_type&#34;: &#34;&#34;,
                     &#34;allow_incomplete_history&#34;: False,
@@ -1434,8 +1425,7 @@ class Predictor(PredictorInterface):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Turn the code above into a predictor object</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Turn the code above into a predictor object</span>
 <span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1444,8 +1434,7 @@ class Predictor(PredictorInterface):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">predictor</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictor</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
 
 <span class="c1"># Perform stats analysis</span>
 <span class="n">predictor</span><span class="o">.</span><span class="n">analyze_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1462,13 +1451,13 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2233:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Converted target into strictly non-negative</span>
-<span class="ansi-green-fg">INFO:lightwood-2233:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Converted target into strictly non-negative</span>
+<span class="ansi-green-fg">INFO:lightwood-2154:Cleaning column =excerpt</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1532,8 +1521,7 @@ class Predictor(PredictorInterface):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;Original Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;Original Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
 
@@ -1588,7 +1576,7 @@ Target:
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2021, MindsDB.
+        &#169; Copyright 2017-2022, MindsDB.
 
     </p>
   </div>

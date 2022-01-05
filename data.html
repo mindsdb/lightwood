@@ -445,7 +445,7 @@
 <dt>The main transformations performed by this block are:</dt><dd><ul class="simple">
 <li><p>Type casting (e.g. to numerical for <cite>order_by</cite> columns).</p></li>
 <li><p>Windowing functions for historical context based on <cite>TimeseriesSettings.window</cite> parameter.</p></li>
-<li><p>Explicitly add target columns according to the <cite>TimeseriesSettings.nr_predictions</cite> parameter.</p></li>
+<li><p>Explicitly add target columns according to the <cite>TimeseriesSettings.horizon</cite> parameter.</p></li>
 <li><p>Flag all rows that are “predictable” based on all <cite>TimeseriesSettings</cite>.</p></li>
 <li><p>Plus, handle all logic for the streaming use case (where forecasts are only emitted for the last observed data point).</p></li>
 </ul>
@@ -485,7 +485,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2021, MindsDB.
+        &#169; Copyright 2017-2022, MindsDB.
 
     </p>
   </div>

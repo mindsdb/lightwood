@@ -189,7 +189,7 @@
 <span class="sd">    The main transformations performed by this block are:</span>
 <span class="sd">      - Type casting (e.g. to numerical for `order_by` columns).</span>
 <span class="sd">      - Windowing functions for historical context based on `TimeseriesSettings.window` parameter.</span>
-<span class="sd">      - Explicitly add target columns according to the `TimeseriesSettings.nr_predictions` parameter.</span>
+<span class="sd">      - Explicitly add target columns according to the `TimeseriesSettings.horizon` parameter.</span>
 <span class="sd">      - Flag all rows that are &quot;predictable&quot; based on all `TimeseriesSettings`.</span>
 <span class="sd">      - Plus, handle all logic for the streaming use case (where forecasts are only emitted for the last observed data point).</span>
 <span class="sd">    </span>
@@ -299,7 +299,7 @@
                 <span class="n">_ts_add_previous_rows</span><span class="p">,</span> <span class="n">order_cols</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">),</span>
             <span class="n">df_arr</span><span class="p">)</span>
 
-        <span class="n">df_arr</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_ts_add_future_target</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">nr_predictions</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">nr_predictions</span><span class="p">,</span>
+        <span class="n">df_arr</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_ts_add_future_target</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">horizon</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span><span class="p">,</span>
                                   <span class="n">data_dtype</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">),</span>
                           <span class="n">df_arr</span><span class="p">)</span>
 
@@ -315,7 +315,7 @@
             <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_order_col_to_cell_lists</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">order_cols</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">)</span>
             <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_add_previous_rows</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                               <span class="n">order_cols</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
-            <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_add_future_target</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">nr_predictions</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">nr_predictions</span><span class="p">,</span>
+            <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_add_future_target</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">horizon</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span><span class="p">,</span>
                                               <span class="n">data_dtype</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
                 <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_add_previous_target</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
@@ -484,24 +484,24 @@
     <span class="k">return</span> <span class="n">df</span>
 
 
-<span class="k">def</span> <span class="nf">_ts_add_future_target</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">nr_predictions</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_ts_add_future_target</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Adds as many columns to the input dataframe as the forecasting horizon asks for (as determined by `TimeseriesSettings.nr_predictions`).</span>
+<span class="sd">    Adds as many columns to the input dataframe as the forecasting horizon asks for (as determined by `TimeseriesSettings.horizon`).</span>
 
 <span class="sd">    :param df: Input dataframe.</span>
 <span class="sd">    :param target: target column name.</span>
-<span class="sd">    :param nr_predictions: value of `TimeseriesSettings.nr_predictions` parameter.</span>
+<span class="sd">    :param horizon: value of `TimeseriesSettings.horizon` parameter.</span>
 <span class="sd">    :param data_dtype: dictionary with types of all input columns</span>
 <span class="sd">    :param mode: either &quot;train&quot; or &quot;predict&quot;. `Train` will drop rows with incomplet target info. `Predict` has no effect, for now.</span>
 
-<span class="sd">    :return: Dataframe with new `{target}_timestep_{i}&#39;` columns that contains target labels at timestep `i` of a total `TimeseriesSettings.nr_predictions`.</span>
+<span class="sd">    :return: Dataframe with new `{target}_timestep_{i}&#39;` columns that contains target labels at timestep `i` of a total `TimeseriesSettings.horizon`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
     <span class="k">if</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">df</span>
     <span class="k">if</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span><span class="p">):</span>
         <span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">timestep_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nr_predictions</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">timestep_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">horizon</span><span class="p">):</span>
         <span class="n">next_target_value_arr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">del_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">timestep_index</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">next_target_value_arr</span><span class="p">))):</span>
             <span class="k">del</span> <span class="n">next_target_value_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -522,7 +522,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2021, MindsDB.
+        &#169; Copyright 2017-2022, MindsDB.
 
     </p>
   </div>

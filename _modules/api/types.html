@@ -377,7 +377,7 @@
 <span class="sd">         for these columns will yield a different series.</span>
 <span class="sd">    :param window: The temporal horizon (number of rows) that a model intakes to &quot;look back&quot; into when making a\</span>
 <span class="sd">         prediction, after the rows are ordered by order_by columns and split into groups if applicable.</span>
-<span class="sd">    :param nr_predictions: The number of points in the future that predictions should be made for, defaults to 1. Once \</span>
+<span class="sd">    :param horizon: The number of points in the future that predictions should be made for, defaults to 1. Once \</span>
 <span class="sd">        trained, the model will be able to predict up to this many points into the future.</span>
 <span class="sd">    :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the \</span>
 <span class="sd">        time series predictor. Note that a non-historical column shall still be used to forecast, but without \</span>
@@ -394,7 +394,7 @@
     <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">group_by</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">use_previous_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">nr_predictions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">historical_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">target_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s2">&quot;&quot;</span>  <span class="c1"># @TODO: is the current setter (outside of initialization) a sane option?</span>
@@ -426,7 +426,7 @@
                 <span class="n">window</span><span class="o">=</span><span class="n">obj</span><span class="p">[</span><span class="s2">&quot;window&quot;</span><span class="p">],</span>
                 <span class="n">use_previous_target</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_previous_target&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                 <span class="n">historical_columns</span><span class="o">=</span><span class="p">[],</span>
-                <span class="n">nr_predictions</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nr_predictions&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">horizon</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;horizon&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                 <span class="n">allow_incomplete_history</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;allow_incomplete_history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
                 <span class="n">eval_cold_start</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;eval_cold_start&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                 <span class="n">interval_periods</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;interval_periods&#39;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">()))</span>
@@ -800,7 +800,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2021, MindsDB.
+        &#169; Copyright 2017-2022, MindsDB.
 
     </p>
   </div>

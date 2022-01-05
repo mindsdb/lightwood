@@ -379,7 +379,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -459,8 +459,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/hdi.csv&#39;</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -563,8 +562,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span>
 
 <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Development Index&#39;</span><span class="p">})</span>
 </pre></div>
@@ -577,8 +575,8 @@ div.rendered_html tbody tr:hover {
 <div class="highlight"><pre>
 [nltk_data] Downloading package punkt to /home/runner/nltk_data...
 [nltk_data]   Unzipping tokenizers/punkt.zip.
-<span class="ansi-green-fg">INFO:lightwood-2141:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
@@ -586,8 +584,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">fields</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">fields</span>
 
 <span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">ProblemDefinition</span><span class="p">)}</span>
 </pre></div>
@@ -608,7 +605,7 @@ div.rendered_html tbody tr:hover {
  &#39;time_aim&#39;: None,
  &#39;target_weights&#39;: None,
  &#39;positive_domain&#39;: False,
- &#39;timeseries_settings&#39;: TimeseriesSettings(is_timeseries=False, order_by=None, window=None, group_by=None, use_previous_target=True, nr_predictions=None, historical_columns=None, target_type=&#39;&#39;, allow_incomplete_history=False, eval_cold_start=True, interval_periods=()),
+ &#39;timeseries_settings&#39;: TimeseriesSettings(is_timeseries=False, order_by=None, window=None, group_by=None, use_previous_target=True, horizon=None, historical_columns=None, target_type=&#39;&#39;, allow_incomplete_history=False, eval_cold_start=True, interval_periods=()),
  &#39;anomaly_detection&#39;: False,
  &#39;use_default_analysis&#39;: True,
  &#39;ignore_features&#39;: [],
@@ -623,8 +620,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">lightwood.data</span> <span class="kn">import</span> <span class="n">infer_types</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.data</span> <span class="kn">import</span> <span class="n">infer_types</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
 
 <span class="n">type_information</span> <span class="o">=</span> <span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">)</span>
@@ -638,22 +634,22 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2141:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Infering type for: Population</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Column Population has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Infering type for: Area (sq. mi.)</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Column Area (sq. mi.) has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Infering type for: Pop. Density </span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Column Pop. Density  has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Infering type for: GDP ($ per capita)</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Column GDP ($ per capita) has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Infering type for: Literacy (%)</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Column Literacy (%) has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Infering type for: Infant mortality </span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Column Infant mortality  has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Infering type for: Development Index</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Column Development Index has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -670,8 +666,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span>
 </pre></div>
 </div>
 </div>
@@ -701,8 +696,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">StatisticalAnalysis</span>  <span class="c1"># the class where everything is stored</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">StatisticalAnalysis</span>  <span class="c1"># the class where everything is stored</span>
 <span class="kn">from</span> <span class="nn">lightwood.data</span> <span class="kn">import</span> <span class="n">statistical_analysis</span>      <span class="c1"># generates an instance of the class</span>
 
 <span class="n">stan</span> <span class="o">=</span> <span class="n">statistical_analysis</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
@@ -717,8 +711,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2141:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2141:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2064:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>
@@ -729,8 +723,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">StatisticalAnalysis</span><span class="p">)}</span>  <span class="c1"># show the fields this dataclass has</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">StatisticalAnalysis</span><span class="p">)}</span>  <span class="c1"># show the fields this dataclass has</span>
 </pre></div>
 </div>
 </div>
@@ -760,8 +753,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">stan</span><span class="o">.</span><span class="n">nr_rows</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stan</span><span class="o">.</span><span class="n">nr_rows</span>
 </pre></div>
 </div>
 </div>
@@ -782,8 +774,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">stan</span><span class="o">.</span><span class="n">missing</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stan</span><span class="o">.</span><span class="n">missing</span>
 </pre></div>
 </div>
 </div>
@@ -813,8 +804,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">stan</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="s1">&#39;Development Index&#39;</span><span class="p">]</span>  <span class="c1"># categorical</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stan</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="s1">&#39;Development Index&#39;</span><span class="p">]</span>  <span class="c1"># categorical</span>
 </pre></div>
 </div>
 </div>
@@ -831,8 +821,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">stan</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="s1">&#39;GDP ($ per capita)&#39;</span><span class="p">]</span>  <span class="c1"># numerical</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stan</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="s1">&#39;GDP ($ per capita)&#39;</span><span class="p">]</span>  <span class="c1"># numerical</span>
 </pre></div>
 </div>
 </div>
@@ -902,8 +891,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">for</span> <span class="n">colname</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">stan</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">colname</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">stan</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">colname</span><span class="si">}</span><span class="s2">&#39; entropy: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="s1">&#39;entropy&#39;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Biased buckets: </span><span class="si">{</span><span class="n">col</span><span class="p">[</span><span class="s1">&#39;biased_buckets&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="s1">&#39;biased_buckets&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
@@ -945,8 +933,7 @@ Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="c1"># generate color map</span>
@@ -1028,8 +1015,7 @@ Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
@@ -1045,7 +1031,7 @@ Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2021, MindsDB.
+        &#169; Copyright 2017-2022, MindsDB.
 
     </p>
   </div>
