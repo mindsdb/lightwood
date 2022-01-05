@@ -3,12 +3,11 @@ import unittest
 import pandas as pd
 from sklearn.metrics import r2_score
 from lightwood.api.types import ProblemDefinition
+from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai
 
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
-        from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai
-
         df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
         # Mess with the names to also test if lightwood can deal /w weird names
         df = df.rename(columns={df.columns[1]: f'\'{df.columns[1]}\''})
@@ -49,3 +48,21 @@ class TestBasic(unittest.TestCase):
         fixed_predictions = predictor.predict(df, {'fixed_confidence': fixed_conf})
 
         assert all([v == fixed_conf for v in fixed_predictions['confidence'].values])
+
+    def test_1_stacked_ensemble(self):
+        df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
+        target = 'concrete_strength'
+
+        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
+        jai = json_ai_from_problem(df, pdef)
+        jai.outputs[target].ensemble = {
+            "module": "StackedEnsemble",
+            "args": {
+                'dtype_dict': '$dtype_dict',
+                'pred_args': '$pred_args',
+            }
+        }
+
+        predictor = predictor_from_json_ai(jai)
+        predictor.learn(df)
+        predictor.predict(df)
