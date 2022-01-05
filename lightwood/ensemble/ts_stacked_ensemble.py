@@ -3,6 +3,7 @@ from typing import List, Optional
 import torch
 from torch import nn
 from torch.optim import SGD
+import pandas as pd
 
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.stacked_ensemble import StackedEnsemble
@@ -22,25 +23,35 @@ class TsStackedEnsemble(StackedEnsemble):
         self.horizon = horizon
         self.target_cols = [target] + [f'{target}_timestep_{t+1}' for t in range(self.horizon - 1)]
         self.agg_dim = 2
+        self.opt_max_iter = 1000
 
         if fit:
             all_preds = torch.tensor(self.predict(data, pred_args)).squeeze().reshape(-1, self.horizon, len(mixers))
             actual = torch.tensor(data.data_frame[self.target_cols].values)
             nan_mask = actual != actual
             actual[nan_mask] = 0
-            all_preds[nan_mask] = 0
+            all_preds[nan_mask, :] = 0
 
             criterion = nn.MSELoss()
             optimizer = SGD([self.mixer_weights], lr=0.01)
 
             def _eval_loss():
                 optimizer.zero_grad()
-                weighted = torch.sum(all_preds * self.softmax(self.mixer_weights), dim=2)
+                weighted = torch.sum(all_preds * self.softmax(self.mixer_weights), dim=self.agg_dim)
                 loss = criterion(weighted, actual)
                 loss.backward()
                 return loss
 
-            optimizer.step(_eval_loss)
+            for _ in range(self.opt_max_iter):
+                optimizer.step(_eval_loss)
             self.mixer_weights = self.softmax(self.mixer_weights)
             log.info(f'Optimal stacking weights: {self.mixer_weights.detach().tolist()}')
             self.prepared = True
+
+    def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
+        assert self.prepared
+        output = pd.DataFrame()
+        predictions = torch.tensor(self.predict(ds, args)).squeeze().reshape(-1, self.horizon, len(self.mixers))
+        predictions = (predictions * self.mixer_weights).sum(axis=self.agg_dim)
+        output['prediction'] = predictions.detach().numpy().tolist()
+        return output
