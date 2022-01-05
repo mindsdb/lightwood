@@ -57,3 +57,9 @@ class StackedEnsemble(MeanEnsemble):
         predictions = (predictions * self.mixer_weights).sum(axis=1)
         output['prediction'] = predictions.detach().numpy().tolist()
         return output
+
+    def set_weights(self, weights: List):
+        if len(weights) != len(self.mixers):
+            raise Exception(f"Expected weight vector to have {len(self.mixers)} entries, got {len(weights)} instead.")
+
+        self.mixer_weights = torch.tensor(weights)

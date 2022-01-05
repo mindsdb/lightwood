@@ -3,12 +3,13 @@ import numpy as np
 import pandas as pd
 from typing import List
 from lightwood.api.types import ProblemDefinition
-from lightwood.api.high_level import predictor_from_problem
+from lightwood.api.high_level import predictor_from_json_ai
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.arima import AutoARIMA
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 from lightwood.mixer.sktime import SkTime
+from lightwood.data.encoded_ds import EncodedDs
 
 np.random.seed(0)
 
@@ -246,3 +247,37 @@ class TestTimeseries(unittest.TestCase):
             manual_preds = forecaster.predict(fh[1:horizon + 1]).tolist()
             lw_preds = [p[0] for p in ps['prediction']]
             assert np.allclose(manual_preds, lw_preds, atol=1)
+
+    def test_4_time_series_stacked_ensemble(self):
+        data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'] == 'UK']
+        train_df, test_df = self.split_arrivals(data, grouped=False)
+        target = 'Traffic'
+        order_by = 'T'
+        horizon = 2
+        json_ai = json_ai_from_problem(data,
+                                       ProblemDefinition.from_dict({'target': target,
+                                                                    'timeseries_settings': {
+                                                                        'horizon': horizon,
+                                                                        'order_by': [order_by],
+                                                                        'window': 5}
+                                                                    }))
+        json_ai.outputs[target].ensemble = {
+            "module": "TsStackedEnsemble",
+            "args": {
+                'dtype_dict': '$dtype_dict',
+                'pred_args': 'self.pred_args',
+                'horizon': 'self.problem_definition.timeseries_settings.horizon'
+            }
+        }
+        pred = predictor_from_json_ai(json_ai)
+        pred.learn(train_df)
+        preds = pred.predict(data.sample(frac=1)[0:10])
+        self.check_ts_prediction_df(preds, horizon, [order_by])
+
+        # test weight bypassing
+        pred.ensemble.set_weights([0 for _ in range(len(pred.ensemble.mixers))])
+        self.assertEqual(
+            0,
+            sum([sum(row) for row in pred.predict(data.iloc[0:10])['prediction'].tolist()])
+        )
