@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -10,8 +10,9 @@ from lightwood import dtype
 
 
 class MeanEnsemble(BaseEnsemble):
-    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict) -> None:
-        super().__init__(target, mixers, data)
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,
+                 fit: Optional[bool] = True) -> None:
+        super().__init__(target, mixers, data, fit=False)
         if dtype_dict[target] not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(
                 f'This ensemble can only be used regression problems! Got target dtype {dtype_dict[target]} instead!')

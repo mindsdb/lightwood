@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -26,8 +26,9 @@ class BaseEnsemble:
     mixers: List[BaseMixer]
     best_index: int  # @TODO: maybe only applicable to BestOf
     supports_proba: bool
+    prepared: bool
 
-    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs) -> None:
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, fit: Optional[bool] = True) -> None:
         self.data = data
         self.mixers = mixers
         self.best_index = 0

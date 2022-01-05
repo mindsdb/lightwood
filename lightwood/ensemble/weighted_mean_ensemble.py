@@ -14,6 +14,7 @@ from lightwood import dtype
 
 
 class WeightedMeanEnsemble(BaseEnsemble):
+    # @TODO: remove this one BUT rename then move stacked source into it to maintain contributors
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, args: PredictionArguments,
                  dtype_dict: dict, accuracy_functions, ts_analysis: Optional[dict] = None) -> None:
         super().__init__(target, mixers, data)
