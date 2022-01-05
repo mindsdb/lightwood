@@ -216,7 +216,7 @@
 <span class="s2">from lightwood.helpers.torch import *</span>
 <span class="s2">from lightwood.mixer import *</span>
 <span class="s2">import pandas as pd</span>
-<span class="s2">from typing import Dict, List</span>
+<span class="s2">from typing import Dict, List, Union</span>
 <span class="s2">import os</span>
 <span class="s2">from types import ModuleType</span>
 <span class="s2">import importlib.machinery</span>
@@ -1122,19 +1122,24 @@
 <span class="s2">self.mode = &#39;train&#39;</span>
 
 <span class="s2"># --------------- #</span>
-<span class="s2"># Extract data</span>
+<span class="s2"># Prepare data</span>
 <span class="s2"># --------------- #</span>
-<span class="s2"># Extract the featurized data</span>
-<span class="s2">encoded_old_data = old_data if old_data is not None else pd.DataFrame()</span>
-<span class="s2">encoded_new_data = new_data</span>
+<span class="s2">if old_data is None:</span>
+<span class="s2">    old_data = pd.DataFrame()</span>
+
+<span class="s2">if isinstance(old_data, pd.DataFrame):</span>
+<span class="s2">    old_data = EncodedDs(self.encoders, old_data, self.target)</span>
+
+<span class="s2">if isinstance(new_data, pd.DataFrame):</span>
+<span class="s2">    new_data = EncodedDs(self.encoders, new_data, self.target)</span>
 
 <span class="s2"># --------------- #</span>
-<span class="s2"># Adjust (Update) Mixers</span>
+<span class="s2"># Update/Adjust Mixers</span>
 <span class="s2"># --------------- #</span>
 <span class="s2">log.info(&#39;Updating the mixers&#39;)</span>
 
 <span class="s2">for mixer in self.mixers:</span>
-<span class="s2">    mixer.partial_fit(encoded_new_data, encoded_old_data)</span>
+<span class="s2">    mixer.partial_fit(new_data, old_data)</span>
 <span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="n">adjust_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">adjust_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -1275,7 +1280,8 @@
 <span class="s2">        data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
 <span class="si">{</span><span class="n">learn_body</span><span class="si">}</span><span class="s2"></span>
 
-<span class="s2">    def adjust(self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None) -&gt; None:</span>
+<span class="s2">    def adjust(self, new_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],</span>
+<span class="s2">        old_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -&gt; None:</span>
 <span class="s2">        # Update mixers with new information</span>
 <span class="si">{</span><span class="n">adjust_body</span><span class="si">}</span><span class="s2"></span>
 
