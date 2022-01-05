@@ -9,7 +9,6 @@ from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.arima import AutoARIMA
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 from lightwood.mixer.sktime import SkTime
-from lightwood.data.encoded_ds import EncodedDs
 
 np.random.seed(0)
 
