@@ -95,7 +95,7 @@ def lookup_encoder(
         dtype.rich_text: "PretrainedLangEncoder",
         dtype.short_text: "CategoricalAutoEncoder",
         dtype.array: "ArrayEncoder",
-        dtype.tsarray: "TimeSeriesEncoder",
+        dtype.tsarray: "ArrayEncoder",
         dtype.quantity: "NumericEncoder",
         dtype.audio: "MFCCEncoder"
     }
@@ -135,10 +135,9 @@ def lookup_encoder(
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
         if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict["module"] = "TimeSeriesEncoder"
-            encoder_dict["args"]["original_type"] = f'"{col_dtype}"'
-            encoder_dict["args"]["target"] = "self.target"
-            encoder_dict["args"]["grouped_by"] = f"{gby}"
+            encoder_dict["module"] = "ArrayEncoder"
+            encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
+            encoder_dict["args"]["window"] = f"{tss.window}"
 
         if is_target:
             if col_dtype in [dtype.integer]:
