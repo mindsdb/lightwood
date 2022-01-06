@@ -256,6 +256,7 @@ def generate_json_ai(
                             "fit_on_dev": True,
                             "stop_after": "$problem_definition.seconds_per_mixer",
                             "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                            "ts_analysis": "self.ts_analysis"
                         },
                     }
                 ]

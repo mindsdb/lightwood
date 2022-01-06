@@ -82,7 +82,10 @@ class LightGBM(BaseMixer):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
-        self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
+        self.cls_dtypes = [dtype.categorical, dtype.binary]
+        self.float_dtypes = [dtype.float, dtype.quantity]
+        self.num_dtypes = [dtype.integer] + self.float_dtypes
+        self.supports_proba = dtype_dict[target] in self.cls_dtypes
         self.stable = True
         self.target_encoder = target_encoder
 
@@ -122,7 +125,7 @@ class LightGBM(BaseMixer):
             label_data = data[subset_name]['ds'].get_column_original_data(self.target)
 
             data[subset_name]['weights'] = None
-            if output_dtype in (dtype.categorical, dtype.binary):
+            if output_dtype in self.cls_dtypes:
                 if subset_name == 'train':
                     self.ordinal_encoder = OrdinalEncoder()
                     self.label_set = set(label_data)
@@ -135,7 +138,7 @@ class LightGBM(BaseMixer):
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype == dtype.integer:
                 label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
-            elif output_dtype in (dtype.float, dtype.quantity):
+            elif output_dtype in self.float_dtypes:
                 label_data = label_data.astype(float)
 
             data[subset_name]['label_data'] = label_data
@@ -163,12 +166,12 @@ class LightGBM(BaseMixer):
 
         data = self._to_dataset(data, output_dtype)
 
-        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary, dtype.quantity):
+        if output_dtype not in self.cls_dtypes + self.num_dtypes:
             log.error(f'Lightgbm mixer not supported for type: {output_dtype}')
             raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
-            objective = 'regression' if output_dtype in (dtype.integer, dtype.float, dtype.quantity) else 'multiclass'
-            metric = 'l2' if output_dtype in (dtype.integer, dtype.float, dtype.quantity) else 'multi_logloss'
+            objective = 'regression' if output_dtype in self.num_dtypes else 'multiclass'
+            metric = 'l2' if output_dtype in self.num_dtypes else 'multi_logloss'
 
         self.params = {
             'objective': objective,
