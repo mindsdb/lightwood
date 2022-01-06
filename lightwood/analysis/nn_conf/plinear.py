@@ -22,10 +22,15 @@ class PLinearWrapper(BaseAnalysisBlock):
     true and predicted values. Confidence score and bounds can be extracted based on repeated
     sampling / bootstraping.
 
-    Given (X, yhat) -> learn param distributions to model residuals |y - yhat|
+    Given (X, yhat) -> learn param distributions to model residuals |y - yhat|.
+
+    Two inference modes are provided:
+        - quantile: sort sampled predictions and pick bounds based on the i-th sample given confidence level `i`
+        - normal: derive symmetric bounds assuming a normal distribution and point predictions as mean response
     """
-    def __init__(self):
+    def __init__(self, mode='quantile'):
         super().__init__()
+        self.mode = mode
         self.model = None
         self.trainer = None
         self.optimizer = None
@@ -92,14 +97,22 @@ class PLinearWrapper(BaseAnalysisBlock):
             samples.append(self.model.forward(X))
 
         samples = torch.stack(samples).squeeze()
-        sorted_samples = torch.sort(samples, dim=0).values
-        sorted_samples = sorted_samples - sorted_samples.median(dim=0).values  # rescale so that median is null
-        min_bound = sorted_samples[round(samples.shape[0] * (1.0 - conf_level)), :]
-        max_bound = sorted_samples[round(samples.shape[0] * conf_level), :]
+        if self.mode == 'quantile':
+            sorted_samples = torch.sort(samples, dim=0).values
+            sorted_samples = sorted_samples - sorted_samples.median(dim=0).values  # rescale so that median is null
+            min_bound = sorted_samples[round(samples.shape[0] * (1.0 - conf_level)), :]
+            max_bound = sorted_samples[round(samples.shape[0] * conf_level), :]
+            row_insights['lower'] = row_insights['prediction'] + min_bound.detach().numpy()
+            row_insights['upper'] = row_insights['prediction'] + max_bound.detach().numpy()
+        else:
+            stds = torch.std(samples, dim=0)
+            mean = torch.tensor(row_insights['prediction'])
+            min_bound = mean - ((conf_level / 2 * stds) / np.sqrt(len(samples)))
+            max_bound = mean + ((conf_level / 2 * stds) / np.sqrt(len(samples)))
+            row_insights['lower'] = min_bound.detach().numpy()
+            row_insights['upper'] = max_bound.detach().numpy()
 
         row_insights['confidence'] = conf_level
-        row_insights['lower'] = row_insights['prediction'] + min_bound.detach().numpy()
-        row_insights['upper'] = row_insights['prediction'] + max_bound.detach().numpy()
 
         return row_insights, global_insights
 
