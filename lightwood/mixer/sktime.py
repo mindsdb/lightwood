@@ -129,9 +129,9 @@ class SkTime(BaseMixer):
         for group in self.ts_analysis['group_combinations']:
             kwargs = {}
             options = {
-                'sp': self.ts_analysis['periods'][group],  # seasonality period
-                'suppress_warnings': True,                 # ignore warnings if possible
-                'error_action': 'raise',                   # raise errors instead of fit() failing silently
+                'sp': self.ts_analysis['periods'].get(group, '__default'),  # seasonality period
+                'suppress_warnings': True,                                  # ignore warnings if possible
+                'error_action': 'raise',                                    # avoids fit() failing silently
             }
 
             for k, v in options.items():
