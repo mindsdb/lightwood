@@ -3,6 +3,7 @@ from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
+import lightgbm
 
 from lightwood.api import dtype
 from lightwood.helpers.log import log
@@ -55,6 +56,33 @@ class LightGBMArray(LightGBM):
                 temp_ds = new_ds
 
             self.use_optuna = use_optuna
+
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        This mixer uses ALL data to re-fit, instead of the normal version that uses
+        new data as training data, and old data as validation data (which would be
+        incorrect in this case).
+        """
+        # pct_of_original = len(train_data) / self.fit_data_len
+        iterations = max(1, int(self.num_iterations))  # * pct_of_original ? TODO
+
+        data = {'retrain': {'ds': ConcatedEncodedDs([train_data, dev_data]), 'data': None, 'label_data': {}}}
+        output_dtype = self.dtype_dict[self.target]
+        data = self._to_dataset(data, output_dtype)
+
+        train_dataset = lightgbm.Dataset(data['retrain']['data'],
+                                         label=data['retrain']['label_data'],
+                                         weight=data['retrain']['weights'])
+
+        log.info(f'Updating lightgbm model with {iterations} iterations')
+        self.params['num_iterations'] = int(iterations)
+        self.model = lightgbm.train(
+            self.params, train_dataset,
+            valid_sets=[train_dataset],
+            valid_names=['retrain'],
+            verbose_eval=False,
+            init_model=self.model)
+        log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:

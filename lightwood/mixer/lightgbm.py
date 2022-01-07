@@ -274,8 +274,6 @@ class LightGBM(BaseMixer):
                                        weight=data['dev']['weights'])
 
         log.info(f'Updating lightgbm model with {iterations} iterations')
-        if iterations < 1:
-            iterations = 1
         self.params['num_iterations'] = int(iterations)
         self.model = lightgbm.train(
             self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
