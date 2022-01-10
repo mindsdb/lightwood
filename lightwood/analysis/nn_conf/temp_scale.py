@@ -86,15 +86,15 @@ class TempScaler(BaseAnalysisBlock):
                 row_insights: pd.DataFrame,
                 global_insights: Dict[str, object], **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         """ Perform temperature scaling on logits """
-        conf_cols = [col for col in row_insights.columns
+        prob_cols = [col for col in row_insights.columns
                      if '__mdb_proba' in col and
                      '__mdb_unknown_cat' not in col]
-        if self.active and conf_cols:
-            logits = torch.tensor(row_insights[conf_cols].values)
+        if self.active and prob_cols:
+            logits = torch.tensor(row_insights[prob_cols].values)
             confs = self.softmax(logits)
             row_insights['confidence'] = torch.max(confs, dim=1).values.detach().numpy().reshape(-1, 1)
         else:
             row_insights['confidence'] = torch.max(
-                torch.tensor(row_insights[conf_cols].values), dim=1).values.detach().numpy().reshape(-1, 1)
+                torch.tensor(row_insights[prob_cols].values), dim=1).values.detach().numpy().reshape(-1, 1)
         return row_insights, global_insights
 
