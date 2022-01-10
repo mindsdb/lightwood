@@ -230,14 +230,20 @@ class SkTime(BaseMixer):
         """
         Inner method that calls a `sktime.BaseForecaster`.
 
-        :param offset: indicates relative offset to the latest data point seen during model training.
-        """
+        :param offset: indicates relative offset to the latest data point seen during model training. Cannot be less than the number of training data points + the amount of diffences applied internally by the model.
+        """  # noqa
         original_index = series.index
         series = series.reset_index(drop=True)
 
+        if hasattr(model, '_cutoff') and hasattr(model, 'd'):
+            model_d = 0 if model.d is None else model.d
+            min_offset = -model._cutoff + model_d + 1
+        else:
+            min_offset = -np.inf
+
         for idx, _ in enumerate(series.iteritems()):
             # displace by 1 according to sktime ForecastHorizon usage
-            start_idx = 1 + idx + offset
+            start_idx = max(1 + idx + offset, min_offset)
             end_idx = 1 + idx + offset + self.n_ts_predictions
             ydf['prediction'].iloc[original_index[idx]] = model.predict(np.arange(start_idx, end_idx)).tolist()
 

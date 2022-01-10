@@ -40,11 +40,6 @@ class ConfStats(BaseAnalysisBlock):
         info['expected_calibration_error'] = ece
         info['binned_conf_acc_difference'] = ces
         info['global_calibration_score'] = gscore
-
-        log.info(f'Global calibration score - {round(gscore, 4)}')
-        log.info(f"Expected calibration error ({self.ece_bins} bins) - {round(ece, 4)}")
-        log.info(f"Maximum calibration error ({self.ece_bins} bins) - {round(mce, 4)}")
-
         return info
 
     def _get_stats(self, confs, preds, data, target, task_type='categorical'):

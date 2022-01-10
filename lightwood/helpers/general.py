@@ -56,9 +56,9 @@ def evaluate_accuracy(data: pd.DataFrame,
 
     for accuracy_function_str in accuracy_functions:
         if accuracy_function_str == 'evaluate_array_accuracy':
-            nr_predictions = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
+            horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
             gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
-            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, nr_predictions)] + gby
+            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
             true_values = data[cols]
             predictions = predictions.apply(pd.Series)
             score_dict[accuracy_function_str] = evaluate_array_accuracy(true_values,
@@ -119,7 +119,7 @@ def evaluate_array_accuracy(
     Defaults to mean absolute scaled error (MASE) if in-sample residuals are available.
     If this is not the case, R2 score is computed instead.
 
-    Scores are computed for each timestep (as determined by `timeseries_settings.nr_predictions`),
+    Scores are computed for each timestep (as determined by `timeseries_settings.horizon`),
     and the final accuracy is the reciprocal of the average score through all timesteps.
     """
     ts_analysis = kwargs.get('ts_analysis', {})
@@ -151,7 +151,7 @@ def evaluate_array_accuracy(
 
             # add MASE score for each group (__default only considered if the task is non-grouped)
             if len(ts_analysis['group_combinations']) == 1 or group != '__default':
-                mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].nr_predictions))
+                mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].horizon))
 
     return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
 
@@ -172,7 +172,7 @@ def evaluate_array_r2_accuracy(
     true_values = np.nan_to_num(true_values, 0.0)
 
     fh = kwargs.get('ts_analysis', {}).get('tss', None)
-    fh = fh.nr_predictions if fh is not None else 1
+    fh = fh.horizon if fh is not None else 1
 
     if kwargs.get('ts_analysis', {}).get('tss', False) and not kwargs['ts_analysis']['tss'].eval_cold_start:
         # only evaluate accuracy for rows with complete historical context

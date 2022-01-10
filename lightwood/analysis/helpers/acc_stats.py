@@ -24,8 +24,6 @@ class AccStats(BaseAnalysisBlock):
         info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
                                                ns.target, ns.accuracy_functions, ts_analysis={'tss': ns.tss})
         info['normal_accuracy'] = np.mean(list(info['score_dict'].values()))
-        log.info(f'Validation accuracy: {info["normal_accuracy"]}')
-
         self.fit(ns, info['result_df'])
         info['val_overall_acc'], info['acc_histogram'], info['cm'], info['acc_samples'] = self.get_accuracy_stats()
         return info
