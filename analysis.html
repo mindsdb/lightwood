@@ -401,6 +401,35 @@ For the former, return a data frame with any new insights. For the latter, a dic
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="analysis.TempScaler">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">TempScaler</span></span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Original reference (MIT Licensed): <a class="reference external" href="https://github.com/gpleiss/temperature_scaling">https://github.com/gpleiss/temperature_scaling</a>
+NB: Output of the neural network should be the classification logits, NOT the softmax (or log softmax)! TODO</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="analysis.TempScaler.analyze">
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler.analyze" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tune and set the temperature of a neural model optimizing NLL using validation set logits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analysis.TempScaler.explain">
+<span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_insights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_insights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler.explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler.explain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform temperature scaling on logits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="analysis.explain">
 <span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explainer_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/explain.html#explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.explain" title="Permalink to this definition">¶</a></dt>
