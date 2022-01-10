@@ -41,8 +41,8 @@ class ICP(BaseAnalysisBlock):
         data_type = ns.dtype_dict[ns.target]
         output = {'icp': {'__mdb_active': False}}
 
-        fit_params = {'nr_preds': ns.tss.nr_predictions or 0, 'columns_to_ignore': []}
-        fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['nr_preds'])])
+        fit_params = {'horizon': ns.tss.horizon or 0, 'columns_to_ignore': []}
+        fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['horizon'])])
 
         if ns.is_classification:
             if ns.predictor.supports_proba:
@@ -216,10 +216,10 @@ class ICP(BaseAnalysisBlock):
 
             # replace observed data w/predictions
             preds = ns.predictions['prediction']
-            if ns.tss.is_timeseries and ns.tss.nr_predictions > 1:
+            if ns.tss.is_timeseries and ns.tss.horizon > 1:
                 preds = [p[0] for p in preds]
 
-                for col in [f'timestep_{i}' for i in range(1, ns.tss.nr_predictions)]:
+                for col in [f'timestep_{i}' for i in range(1, ns.tss.horizon)]:
                     if col in icp_X.columns:
                         icp_X.pop(col)  # erase ignorable columns
 
@@ -253,7 +253,7 @@ class ICP(BaseAnalysisBlock):
                 icp_values = X.values
 
                 # get all possible ranges
-                if ns.tss.is_timeseries and ns.tss.nr_predictions > 1 and is_numerical:
+                if ns.tss.is_timeseries and ns.tss.horizon > 1 and is_numerical:
 
                     # bounds in time series are only given for the first forecast
                     base_icp.nc_function.model.prediction_cache = \
@@ -364,14 +364,14 @@ class ICP(BaseAnalysisBlock):
                                               cooldown=ns.pred_args.anomaly_cooldown)
                     row_insights['anomaly'] = anomalies
 
-            if ns.tss.is_timeseries and ns.tss.nr_predictions > 1 and is_numerical:
+            if ns.tss.is_timeseries and ns.tss.horizon > 1 and is_numerical:
                 row_insights = add_tn_conf_bounds(row_insights, ns.tss)
 
             # clip bounds if necessary
             if is_numerical:
                 lower_limit = 0.0 if ns.positive_domain else -pow(2, 62)
                 upper_limit = pow(2, 62)
-                if not (ns.tss.is_timeseries and ns.tss.nr_predictions > 1):
+                if not (ns.tss.is_timeseries and ns.tss.horizon > 1):
                     row_insights['upper'] = row_insights['upper'].clip(lower_limit, upper_limit)
                     row_insights['lower'] = row_insights['lower'].clip(lower_limit, upper_limit)
                 else:
@@ -381,7 +381,7 @@ class ICP(BaseAnalysisBlock):
                                              for row in row_insights['lower']]
 
             # Make sure the target and real values are of an appropriate type
-            if ns.tss.is_timeseries and ns.tss.nr_predictions > 1:
+            if ns.tss.is_timeseries and ns.tss.horizon > 1:
                 # Array output that are not of type <array> originally are odd and I'm not sure how to handle them
                 # Or if they even need handling yet
                 pass
