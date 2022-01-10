@@ -101,7 +101,10 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
                             window=2).apply(
                             lambda x: x.iloc[1] - x.iloc[0])
                         delta = rolling_diff.value_counts(ascending=False).keys()[0]
-                        deltas[group] = {col: delta}
+                        if group in deltas:
+                            deltas[group][col] = delta
+                        else:
+                            deltas[group] = {col: delta}
         ts_info['data'] = original_data
 
     return deltas
