@@ -95,7 +95,7 @@ def lookup_encoder(
         dtype.rich_text: "PretrainedLangEncoder",
         dtype.short_text: "CategoricalAutoEncoder",
         dtype.array: "ArrayEncoder",
-        dtype.tsarray: "ArrayEncoder",
+        dtype.tsarray: "TimeSeriesEncoder",
         dtype.quantity: "NumericEncoder",
         dtype.audio: "MFCCEncoder"
     }
@@ -134,7 +134,7 @@ def lookup_encoder(
     # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
-        if col_name in tss.order_by + tss.historical_columns:
+        if col_name in tss.order_by:
             encoder_dict["module"] = "ArrayEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
             encoder_dict["args"]["window"] = f"{tss.window}"
@@ -150,8 +150,9 @@ def lookup_encoder(
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["args"]["timesteps"] = f"{tss.horizon}"
                 encoder_dict["module"] = "TsArrayNumericEncoder"
-        if "__mdb_ts_previous" in col_name:
-            encoder_dict["module"] = "ArrayEncoder"
+
+        if "__mdb_ts_previous" in col_name or col_name in tss.historical_columns:
+            encoder_dict["module"] = "TimeSeriesEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
             encoder_dict["args"]["window"] = f"{tss.window}"
 
