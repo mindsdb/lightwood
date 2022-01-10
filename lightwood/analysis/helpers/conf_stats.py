@@ -3,7 +3,6 @@ from types import SimpleNamespace
 
 from sklearn.preprocessing import OrdinalEncoder
 
-from lightwood.helpers.log import log
 from lightwood.analysis.base import BaseAnalysisBlock
 
 
