@@ -22,7 +22,7 @@ class TimeSeriesEncoder(ArrayEncoder):
         self.max_mavg_offset = self.output_size
         self.output_size += self.max_mavg_offset
 
-    def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable]):
+    def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable], **kwargs):
         """
         Prepare the time series encoder for sequence data.
 
