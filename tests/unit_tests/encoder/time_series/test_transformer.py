@@ -8,6 +8,7 @@ import pandas as pd
 
 
 class TestTransformerEncoder(unittest.TestCase):
+    @unittest.skip
     def test_get_chunk(self):
         # dimensions: (batch_size, sequence_length, feature_dimension)
         start, step = 0, 2
@@ -34,6 +35,7 @@ class TestTransformerEncoder(unittest.TestCase):
         assert data.shape == (batch_size, chunk_size, feat_dim)
         assert target.shape == (batch_size, chunk_size, feat_dim)
 
+    @unittest.skip
     def test_mask(self):
         series = [1, 3, 2, 4]
         target = [
@@ -51,6 +53,7 @@ class TestTransformerEncoder(unittest.TestCase):
         result = len_to_mask(series, zeros=True)
         self.assertTrue((result == target).all())
 
+    @unittest.skip
     def test_overfit(self):
         logging.basicConfig(level=logging.DEBUG)
 
