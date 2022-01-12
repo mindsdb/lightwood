@@ -7,8 +7,7 @@ import pandas as pd
 
 
 class TestRnnEncoder(unittest.TestCase):
-    
-    @unittest.skip
+
     def test_minmax_normalizer(self):
         data = [[-100.0, -5.0, 0.0, 5.0, 100.0],
                 [-1000.0, -50.0, 0.0, 50.0, 1000.0],
@@ -20,7 +19,6 @@ class TestRnnEncoder(unittest.TestCase):
         reconstructed = normalizer.decode(normalizer.encode(data))
         self.assertTrue(np.allclose(data, reconstructed, atol=0.1))
 
-    @unittest.skip
     def test_cat_normalizer(self):
         data = [['a', 'b', 'c'],
                 ['c', 'b', 'b'],
@@ -37,7 +35,6 @@ class TestRnnEncoder(unittest.TestCase):
         dec[-1][-1] = None
         self.assertTrue(data == dec)
 
-    @unittest.skip
     def test_overfit(self):
         series = [[1, 2, 3, 4, 5, 6],
                   [2, 3, 4, 5, 6, 7],
