@@ -224,7 +224,6 @@ Other Links
 .. toctree::
    :maxdepth: 8
 
-   lightwood_philosophy
    tutorials
    api
    data
@@ -233,3 +232,4 @@ Other Links
    ensemble
    analysis
    helpers
+   lightwood_philosophy

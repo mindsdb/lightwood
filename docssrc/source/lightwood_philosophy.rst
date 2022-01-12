@@ -1,4 +1,4 @@
-:mod:`Lightwood Philosophy`
+:mod:`Philosophy`
 ================================
 
 Lightwood abstracts the ML pipeline into 3 core steps:
