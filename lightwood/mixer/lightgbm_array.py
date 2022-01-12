@@ -35,10 +35,9 @@ class LightGBMArray(LightGBM):
         self.stable = True
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
-        # @TODO: ensure deepcopying so that DF stays intact!
         log.info('Started fitting LGBM mixer for array prediction')
         log.info(f'Exhaustive mode: {"enabled" if self.exhaustive_fitting else "disabled"}')
-        super().fit(train_data, dev_data)  # fit as normal
+        super().fit(train_data, dev_data)  # fit T+1 as normal
 
         if self.exhaustive_fitting:
             use_optuna = self.use_optuna
@@ -63,9 +62,7 @@ class LightGBMArray(LightGBM):
         new data as training data, and old data as validation data (which would be
         incorrect in this case).
         """
-        # pct_of_original = len(train_data) / self.fit_data_len
-        iterations = max(1, int(self.num_iterations))  # * pct_of_original ? TODO
-
+        iterations = max(1, int(self.num_iterations))
         data = {'retrain': {'ds': ConcatedEncodedDs([train_data, dev_data]), 'data': None, 'label_data': {}}}
         output_dtype = self.dtype_dict[self.target]
         data = self._to_dataset(data, output_dtype)
@@ -136,7 +133,6 @@ class LightGBMArray(LightGBM):
         # change target if training
         if f'{self.target}_timestep_{timestep}' in data.data_frame.columns:
             data.data_frame[self.target] = data.data_frame[f'{self.target}_timestep_{timestep}']
-            # data.data_frame = data.data_frame[~data.data_frame[self.target].isna()]
 
         data.data_frame.pop('__mdb_predictions')  # drop temporal column
         return data

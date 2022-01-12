@@ -12,12 +12,11 @@ class TimeSeriesEncoder(ArrayEncoder):
 
     def __init__(self, stop_after: float, window: int = None, is_target: bool = False, original_type: dtype = None):
         """
-        Time series encoder. This module will pass the normalized series values, along with some smoothed variations of the series.
+        Time series encoder. This module will pass the normalized series values, along with moving averages taken from the series' last `window` values.
         :param stop_after: time budget in seconds.
         :param window: expected length of array data.
         :param original_type: element-wise data type
         """  # noqa
-        # @TODO: what about group cutoffs? check array encoder as well...
         super().__init__(stop_after, window, is_target, original_type)
         self.max_mavg_offset = self.output_size
         self.output_size += self.max_mavg_offset
