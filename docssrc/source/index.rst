@@ -5,7 +5,7 @@
    contain the root ``toctree`` directive.
 
 ****************************************
-Welcome to Lightwood's Documentation!
+Lightwood
 ****************************************
 
 :Release: |release|
@@ -26,7 +26,6 @@ Quick Guide
 - :ref:`Installation <Installation>`
 - :ref:`Example Use Cases <Example Use Cases>`
 - :ref:`Contribute to Lightwood <Contribute to Lightwood>`
-- :ref:`Hacktoberfest 2021 <Hacktoberfest 2021>`
 
 Installation
 ============
@@ -229,3 +228,8 @@ Other Links
    tutorials
    api
    data
+   encoder
+   mixer
+   ensemble
+   analysis
+   helpers
