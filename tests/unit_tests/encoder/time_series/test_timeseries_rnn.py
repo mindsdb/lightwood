@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import torch
-from lightwood.encoder.time_series import TimeSeriesEncoder
+from lightwood.encoder.time_series.rnn import TimeSeriesEncoder
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 import pandas as pd
 
