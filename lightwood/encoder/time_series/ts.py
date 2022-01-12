@@ -21,14 +21,6 @@ class TimeSeriesEncoder(ArrayEncoder):
         self.max_mavg_offset = self.output_size
         self.output_size += self.max_mavg_offset
 
-    def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable], **kwargs):
-        """
-        Prepare the time series encoder for sequence data.
-
-        :param priming_data: time series data to train the encoder.
-        """
-        super().prepare(train_priming_data, dev_priming_data)
-
     def encode(self, column_data: Iterable[Iterable]) -> torch.Tensor:
         """
         Encodes time series data.
