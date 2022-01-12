@@ -317,17 +317,6 @@ def generate_json_ai(
             statistical_analysis,
         )
 
-        if (
-            tss.is_timeseries
-            and eval(encoder["module"]).is_timeseries_encoder
-        ):
-            if tss.group_by is not None:
-                for group in tss.group_by:
-                    dependency.append(group)
-
-            if tss.use_previous_target:
-                dependency.append(f"__mdb_ts_previous_{target}")
-
         if len(dependency) > 0:
             feature = Feature(
                 encoder=encoder, dependency=dependency, data_dtype=col_dtype
