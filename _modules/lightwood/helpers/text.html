@@ -1,0 +1,511 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>lightwood.helpers.text &mdash; lightwood 1.9.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.9.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">lightwood</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>lightwood.helpers.text</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for lightwood.helpers.text</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">*******************************************************</span>
+<span class="sd"> * Copyright (C) 2017 MindsDB Inc. &lt;copyright@mindsdb.com&gt;</span>
+<span class="sd"> *</span>
+<span class="sd"> * This file is part of MindsDB Server.</span>
+<span class="sd"> *</span>
+<span class="sd"> * MindsDB Server can not be copied and/or distributed without the express</span>
+<span class="sd"> * permission of MindsDB Inc</span>
+<span class="sd"> *******************************************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">st</span>
+<span class="kn">import</span> <span class="nn">langdetect</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nltk</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;tokenizers/punkt&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">LookupError</span><span class="p">:</span>
+    <span class="n">nltk</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;punkt&#39;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">nltk.corpus</span> <span class="kn">import</span> <span class="n">stopwords</span>
+    <span class="n">stopwords</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="s1">&#39;english&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">LookupError</span><span class="p">:</span>
+    <span class="n">nltk</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;stopwords&#39;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_language_dist</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">langdetect</span><span class="o">.</span><span class="n">DetectorFactory</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">lang_dist</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">lang_dist</span><span class="p">[</span><span class="s1">&#39;Unknown&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">lang_probs_cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">text</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lang_probs_cache</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">lang_probs</span> <span class="o">=</span> <span class="n">langdetect</span><span class="o">.</span><span class="n">detect_langs</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">langdetect</span><span class="o">.</span><span class="n">lang_detect_exception</span><span class="o">.</span><span class="n">LangDetectException</span><span class="p">:</span>
+                <span class="n">lang_probs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">lang_probs_cache</span><span class="p">[</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">lang_probs</span>
+
+        <span class="n">lang_probs</span> <span class="o">=</span> <span class="n">lang_probs_cache</span><span class="p">[</span><span class="n">text</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lang_probs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">lang_probs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">prob</span> <span class="o">&gt;</span> <span class="mf">0.90</span><span class="p">:</span>
+            <span class="n">lang_dist</span><span class="p">[</span><span class="n">lang_probs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lang</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lang_dist</span><span class="p">[</span><span class="s1">&#39;Unknown&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lang_dist</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="analyze_sentences"><a class="viewcode-back" href="../../../helpers.html#helpers.analyze_sentences">[docs]</a><span class="k">def</span> <span class="nf">analyze_sentences</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param data: list of str</span>
+
+<span class="sd">    :returns:</span>
+<span class="sd">    tuple(</span>
+<span class="sd">        int: nr words total,</span>
+<span class="sd">        dict: word_dist,</span>
+<span class="sd">        dict: nr_words_dist</span>
+<span class="sd">    )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nr_words</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">word_dist</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">nr_words_dist</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">stop_words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">stopwords</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="s1">&#39;english&#39;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokenize_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">tokens_no_stop</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tokens</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stop_words</span><span class="p">]</span>
+        <span class="n">nr_words_dist</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nr_words</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">tokens_no_stop</span><span class="p">:</span>
+            <span class="n">word_dist</span><span class="p">[</span><span class="n">tok</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">nr_words</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">word_dist</span><span class="p">),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nr_words_dist</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">word_tokenize</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="n">sep_tag</span> <span class="o">=</span> <span class="s1">&#39;{#SEP#}&#39;</span>
+    <span class="k">for</span> <span class="n">separator</span> <span class="ow">in</span> <span class="n">WORD_SEPARATORS</span><span class="p">:</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">string</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">separator</span><span class="p">,</span> <span class="n">sep_tag</span><span class="p">)</span>
+
+    <span class="n">words_split</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep_tag</span><span class="p">)</span>
+    <span class="n">num_words</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words_split</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">and</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">num_words</span>
+
+
+<span class="k">def</span> <span class="nf">clean_float</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">val</span>
+
+    <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;nan&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="gen_chars"><a class="viewcode-back" href="../../../helpers.html#helpers.gen_chars">[docs]</a><span class="k">def</span> <span class="nf">gen_chars</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">character</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # lambda to Generates a string consisting of `length` consiting of repeating `character`</span>
+<span class="sd">    :param length:</span>
+<span class="sd">    :param character:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">character</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span></div>
+
+
+<div class="viewcode-block" id="cast_string_to_python_type"><a class="viewcode-back" href="../../../helpers.html#helpers.cast_string_to_python_type">[docs]</a><span class="k">def</span> <span class="nf">cast_string_to_python_type</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Returns None, an integer, float or a string from a string&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">string</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">string</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">string</span><span class="o">.</span><span class="n">isnumeric</span><span class="p">():</span>
+        <span class="c1"># Did you know you can write fractions in unicode, and they are numeric but can&#39;t be cast to integers !?</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">clean_float</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">string</span></div>
+
+
+<span class="k">def</span> <span class="nf">splitRecursive</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">word</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">:</span>
+        <span class="n">new_split</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+            <span class="n">new_split</span> <span class="o">+=</span> <span class="n">word</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="n">words</span> <span class="o">=</span> <span class="n">new_split</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">words</span>
+
+
+<span class="k">def</span> <span class="nf">hashtext</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_is_foreign_key_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">endings</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Id&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">add</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">add</span> <span class="o">+</span> <span class="n">endings</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">endings</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Id&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">endings</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">_is_identifier_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;account&#39;</span><span class="p">,</span> <span class="s1">&#39;uuid&#39;</span><span class="p">,</span> <span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="s1">&#39;user&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="isascii"><a class="viewcode-back" href="../../../helpers.html#helpers.isascii">[docs]</a><span class="k">def</span> <span class="nf">isascii</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used instead of str.isascii because python 3.6 doesn&#39;t have that</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">string</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">extract_digits</span><span class="p">(</span><span class="n">point</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">char</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="k">if</span> <span class="n">char</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()])</span>
+
+
+<span class="k">def</span> <span class="nf">get_pct_auto_increment</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">int_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="p">[</span><span class="n">extract_digits</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">int_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="n">int_data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">int_data</span><span class="p">)</span>
+    <span class="n">prev_nr</span> <span class="o">=</span> <span class="n">int_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">increase_by_one</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">nr</span> <span class="ow">in</span> <span class="n">int_data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">nr</span> <span class="o">-</span> <span class="n">prev_nr</span>
+        <span class="k">if</span> <span class="n">diff</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">increase_by_one</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">prev_nr</span> <span class="o">=</span> <span class="n">nr</span>
+
+    <span class="k">return</span> <span class="n">increase_by_one</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_identifier_description_mp</span><span class="p">(</span><span class="n">arg_tup</span><span class="p">):</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">data_dtype</span> <span class="o">=</span> <span class="n">arg_tup</span>
+    <span class="k">return</span> <span class="n">get_identifier_description</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_identifier_description</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">:</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">nr_unique</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">nr_unique</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;No Information&#39;</span>
+
+    <span class="n">unique_pct</span> <span class="o">=</span> <span class="n">nr_unique</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">spaces</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+    <span class="n">mean_spaces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">spaces</span><span class="p">)</span>
+
+    <span class="c1"># Detect auto incrementing index</span>
+    <span class="c1"># -- some cases where I guess people do want to use this for learning, so ignoring this check for now...</span>
+    <span class="c1"># if data_dtype == dtype.integer:</span>
+    <span class="c1">#    if get_pct_auto_increment(data) &gt; 0.98 and unique_pct &gt; 0.99:</span>
+    <span class="c1">#        return &#39;Auto-incrementing identifier&#39;</span>
+
+    <span class="c1"># Detect hash</span>
+    <span class="n">all_same_length</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">uuid_charset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="s1">&#39;0123456789abcdefABCDEF-&#39;</span><span class="p">)</span>
+    <span class="n">all_uuid_charset</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">uuid_charset</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">is_uuid</span> <span class="o">=</span> <span class="n">all_uuid_charset</span> <span class="ow">and</span> <span class="n">all_same_length</span>
+
+    <span class="k">if</span> <span class="n">all_same_length</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="ow">and</span> <span class="n">data_dtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">):</span>
+        <span class="n">str_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+        <span class="n">randomness_per_index</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">str_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">str_data</span><span class="p">))</span>
+            <span class="n">S</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">entropy</span><span class="p">([</span><span class="o">*</span><span class="n">Counter</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">str_data</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+            <span class="n">randomness_per_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">randomness_per_index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.95</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;Hash-like identifier&#39;</span>
+
+    <span class="c1"># Detect foreign key</span>
+    <span class="k">if</span> <span class="n">data_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_is_foreign_key_name</span><span class="p">(</span><span class="n">column_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;Foreign key&#39;</span>
+
+    <span class="k">if</span> <span class="n">_is_identifier_name</span><span class="p">(</span><span class="n">column_name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">unique_pct</span> <span class="o">&gt;</span> <span class="mf">0.98</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_uuid</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;UUID&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;Unknown identifier&#39;</span>
+
+    <span class="c1"># Everything is unique and it&#39;s too short to be rich text</span>
+    <span class="k">if</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="n">unique_pct</span> <span class="o">&gt;</span> <span class="mf">0.99999</span> <span class="ow">and</span> <span class="n">mean_spaces</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;Unknown identifier&#39;</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">contains_alnum</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">decontracted</span><span class="p">(</span><span class="n">phrase</span><span class="p">):</span>
+    <span class="c1"># specific</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;won\&#39;t&quot;</span><span class="p">,</span> <span class="s2">&quot;will not&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;can\&#39;t&quot;</span><span class="p">,</span> <span class="s2">&quot;can not&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+
+    <span class="c1"># general</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;n\&#39;t&quot;</span><span class="p">,</span> <span class="s2">&quot; not&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;re&quot;</span><span class="p">,</span> <span class="s2">&quot; are&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;s&quot;</span><span class="p">,</span> <span class="s2">&quot; is&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;d&quot;</span><span class="p">,</span> <span class="s2">&quot; would&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;ll&quot;</span><span class="p">,</span> <span class="s2">&quot; will&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;t&quot;</span><span class="p">,</span> <span class="s2">&quot; not&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;ve&quot;</span><span class="p">,</span> <span class="s2">&quot; have&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;m&quot;</span><span class="p">,</span> <span class="s2">&quot; am&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">phrase</span>
+
+
+<span class="k">def</span> <span class="nf">tokenize_text</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="n">decontracted</span><span class="p">(</span><span class="n">text</span><span class="p">))</span> <span class="k">if</span> <span class="n">contains_alnum</span><span class="p">(</span><span class="n">t</span><span class="p">)]</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2017-2022, MindsDB.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

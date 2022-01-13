@@ -96,10 +96,15 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
             
@@ -186,7 +191,7 @@
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
 
 
-<div class="viewcode-block" id="SkTime"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.SkTime">[docs]</a><span class="k">class</span> <span class="nc">SkTime</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
+<div class="viewcode-block" id="SkTime"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime">[docs]</a><span class="k">class</span> <span class="nc">SkTime</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
     <span class="n">forecaster</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
@@ -250,7 +255,7 @@
         <span class="c1"># the default assumption is to forecast the next `self.n_ts_predictions` after said data point</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fh</span> <span class="o">=</span> <span class="n">ForecastingHorizon</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ts_predictions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">is_relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SkTime.fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.SkTime.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SkTime.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fits a set of sktime forecasters. The number of models depends on how many groups are observed at training time.</span>
 
@@ -329,7 +334,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_class</span><span class="p">()</span>  <span class="c1"># with default options (i.e. no seasonality, among others)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SkTime.partial_fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.SkTime.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SkTime.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Note: sktime asks for &quot;specification of the time points for which forecasts are requested&quot;, and this mixer complies by assuming forecasts will start immediately after the last observed value.</span>
 

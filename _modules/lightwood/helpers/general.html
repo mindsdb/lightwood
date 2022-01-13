@@ -1,0 +1,456 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>lightwood.helpers.general &mdash; lightwood 1.9.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.9.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">lightwood</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>lightwood.helpers.general</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for lightwood.helpers.general</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">mean_absolute_error</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.numeric</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
+
+
+<div class="viewcode-block" id="get_group_matches"><a class="viewcode-back" href="../../../helpers.html#helpers.get_group_matches">[docs]</a><span class="k">def</span> <span class="nf">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">combination</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a grouped-by combination, return rows of the data that match belong to it. Params:</span>
+<span class="sd">    data: dict with data to filter and group-by columns info.</span>
+<span class="sd">    combination: tuple with values to filter by</span>
+<span class="sd">    return: indexes for rows to normalize, data to normalize</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;group_info&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>  <span class="c1"># which column does each combination value belong to</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">combination</span> <span class="o">==</span> <span class="s1">&#39;__default&#39;</span><span class="p">:</span>
+        <span class="n">idxs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">idxs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])[</span><span class="n">idxs</span><span class="p">,</span> <span class="p">:]]</span>  <span class="c1"># return all data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">all_sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">combination</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+            <span class="n">all_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">elt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;group_info&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span> <span class="k">if</span> <span class="n">elt</span> <span class="o">==</span> <span class="n">val</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">all_sets</span><span class="p">:</span>
+            <span class="n">idxs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="o">*</span><span class="n">all_sets</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">idxs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])[</span><span class="n">idxs</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+
+
+<span class="c1"># ------------------------- #</span>
+<span class="c1"># Accuracy metrics</span>
+<span class="c1"># ------------------------- #</span>
+<div class="viewcode-block" id="evaluate_accuracy"><a class="viewcode-back" href="../../../helpers.html#helpers.evaluate_accuracy">[docs]</a><span class="k">def</span> <span class="nf">evaluate_accuracy</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                      <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+                      <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">accuracy_functions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                      <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dispatcher for accuracy evaluation.</span>
+<span class="sd">    </span>
+<span class="sd">    :param data: original dataframe.</span>
+<span class="sd">    :param predictions: output of a lightwood predictor for the input `data`.</span>
+<span class="sd">    :param target: target column name.</span>
+<span class="sd">    :param accuracy_functions: list of accuracy function names. Support currently exists for `scikit-learn`&#39;s `metrics` module, plus any custom methods that Lightwood exposes.</span>
+<span class="sd">    :param ts_analysis: `lightwood.data.timeseries_analyzer` output, used to compute time series task accuracy.</span>
+<span class="sd">    :return: accuracy metric for a dataset and predictions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    <span class="n">score_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">accuracy_function_str</span> <span class="ow">in</span> <span class="n">accuracy_functions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">accuracy_function_str</span> <span class="o">==</span> <span class="s1">&#39;evaluate_array_accuracy&#39;</span><span class="p">:</span>
+            <span class="n">horizon</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">gby</span> <span class="o">=</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="p">[]</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1">_timestep_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">horizon</span><span class="p">)]</span> <span class="o">+</span> <span class="n">gby</span>
+            <span class="n">true_values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span>
+            <span class="n">score_dict</span><span class="p">[</span><span class="n">accuracy_function_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluate_array_accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span>
+                                                                        <span class="n">predictions</span><span class="p">,</span>
+                                                                        <span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">],</span>
+                                                                        <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">true_values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;lightwood.helpers.accuracy&#39;</span><span class="p">),</span> <span class="n">accuracy_function_str</span><span class="p">):</span>
+                <span class="n">accuracy_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;lightwood.helpers.accuracy&#39;</span><span class="p">),</span>
+                                            <span class="n">accuracy_function_str</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">accuracy_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;sklearn.metrics&#39;</span><span class="p">),</span> <span class="n">accuracy_function_str</span><span class="p">)</span>
+            <span class="n">score_dict</span><span class="p">[</span><span class="n">accuracy_function_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">accuracy_function</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">true_values</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">predictions</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">score_dict</span></div>
+
+
+<div class="viewcode-block" id="evaluate_regression_accuracy"><a class="viewcode-back" href="../../../helpers.html#helpers.evaluate_regression_accuracy">[docs]</a><span class="k">def</span> <span class="nf">evaluate_regression_accuracy</span><span class="p">(</span>
+        <span class="n">true_values</span><span class="p">,</span>
+        <span class="n">predictions</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluates accuracy for regression tasks.</span>
+<span class="sd">    If predictions have a lower and upper bound, then `within-bound` accuracy is computed: whether the ground truth value falls within the predicted region.</span>
+<span class="sd">    If not, then a (positive bounded) R2 score is returned instead.</span>
+<span class="sd">    </span>
+<span class="sd">    :return: accuracy score as defined above. </span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    <span class="k">if</span> <span class="s1">&#39;lower&#39;</span> <span class="ow">and</span> <span class="s1">&#39;upper&#39;</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">:</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">true_values</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">within</span> <span class="o">=</span> <span class="p">((</span><span class="n">Y</span> <span class="o">&gt;=</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">Y</span> <span class="o">&lt;=</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">within</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">within</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="evaluate_multilabel_accuracy"><a class="viewcode-back" href="../../../helpers.html#helpers.evaluate_multilabel_accuracy">[docs]</a><span class="k">def</span> <span class="nf">evaluate_multilabel_accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluates accuracy for multilabel/tag prediction.</span>
+
+<span class="sd">    :return: weighted f1 score of predictions and ground truths.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pred_values</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">pred_values</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;weighted&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="evaluate_array_accuracy"><a class="viewcode-back" href="../../../helpers.html#helpers.evaluate_array_accuracy">[docs]</a><span class="k">def</span> <span class="nf">evaluate_array_accuracy</span><span class="p">(</span>
+        <span class="n">true_values</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate accuracy in numerical time series forecasting tasks.</span>
+<span class="sd">    Defaults to mean absolute scaled error (MASE) if in-sample residuals are available.</span>
+<span class="sd">    If this is not the case, R2 score is computed instead.</span>
+
+<span class="sd">    Scores are computed for each timestep (as determined by `timeseries_settings.horizon`),</span>
+<span class="sd">    and the final accuracy is the reciprocal of the average score through all timesteps.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">naive_errors</span> <span class="o">=</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">wrapped_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s1">&#39;group_info&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">gcol</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                       <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span><span class="p">}</span> <span class="k">if</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
+        <span class="p">[</span><span class="n">true_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">gby_col</span><span class="p">)</span> <span class="k">for</span> <span class="n">gby_col</span> <span class="ow">in</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span><span class="p">]</span>
+
+    <span class="n">true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">true_values</span><span class="p">)</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">naive_errors</span><span class="p">:</span>
+        <span class="c1"># use mean R2 method if naive errors are not available</span>
+        <span class="k">return</span> <span class="n">evaluate_array_r2_accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span><span class="p">)</span>
+
+    <span class="n">mases</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
+        <span class="n">g_idxs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">wrapped_data</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+
+        <span class="c1"># only evaluate populated groups</span>
+        <span class="k">if</span> <span class="n">g_idxs</span><span class="p">:</span>
+            <span class="n">trues</span> <span class="o">=</span> <span class="n">true_values</span><span class="p">[</span><span class="n">g_idxs</span><span class="p">]</span>
+            <span class="n">preds</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="n">g_idxs</span><span class="p">]</span>
+
+            <span class="c1"># add MASE score for each group (__default only considered if the task is non-grouped)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">group</span> <span class="o">!=</span> <span class="s1">&#39;__default&#39;</span><span class="p">:</span>
+                <span class="n">mases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mase</span><span class="p">(</span><span class="n">trues</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">],</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">horizon</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mases</span><span class="p">),</span> <span class="mf">1e-4</span><span class="p">)</span>  <span class="c1"># reciprocal to respect &quot;larger -&gt; better&quot; convention</span></div>
+
+
+<div class="viewcode-block" id="evaluate_array_r2_accuracy"><a class="viewcode-back" href="../../../helpers.html#helpers.evaluate_array_r2_accuracy">[docs]</a><span class="k">def</span> <span class="nf">evaluate_array_r2_accuracy</span><span class="p">(</span>
+        <span class="n">true_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Default time series forecasting accuracy method.</span>
+<span class="sd">    Returns mean R2 score over all timesteps in the forecasting horizon.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base_acc_fn</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;base_acc_fn&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">)))</span>
+
+    <span class="n">nan_mask</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">true_values</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">predictions</span> <span class="o">*=</span> <span class="n">nan_mask</span>
+    <span class="n">true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">fh</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">fh</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">horizon</span> <span class="k">if</span> <span class="n">fh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">][</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">eval_cold_start</span><span class="p">:</span>
+        <span class="c1"># only evaluate accuracy for rows with complete historical context</span>
+        <span class="n">true_values</span> <span class="o">=</span> <span class="n">true_values</span><span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">][</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">window</span><span class="p">:]</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">][</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">window</span><span class="p">:]</span>
+
+    <span class="n">aggregate</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fh</span><span class="p">):</span>
+        <span class="n">aggregate</span> <span class="o">+=</span> <span class="n">base_acc_fn</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">true_values</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">aggregate</span> <span class="o">/</span> <span class="n">fh</span></div>
+
+
+<span class="c1"># ------------------------- #</span>
+<span class="c1"># Helpers</span>
+<span class="c1"># ------------------------- #</span>
+<div class="viewcode-block" id="mase"><a class="viewcode-back" href="../../../helpers.html#helpers.mase">[docs]</a><span class="k">def</span> <span class="nf">mase</span><span class="p">(</span><span class="n">trues</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">scale_error</span><span class="p">,</span> <span class="n">fh</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes mean absolute scaled error.</span>
+<span class="sd">    The scale corrective factor is the mean in-sample residual from the naive forecasting method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">scale_error</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">scale_error</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># cover (rare) case where series is constant</span>
+
+    <span class="n">nan_mask</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">trues</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">preds</span> <span class="o">*=</span> <span class="n">nan_mask</span>
+    <span class="n">trues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">trues</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">agg</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fh</span><span class="p">):</span>
+        <span class="n">true</span> <span class="o">=</span> <span class="n">trues</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">agg</span> <span class="o">+=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">agg</span> <span class="o">/</span> <span class="n">fh</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale_error</span></div>
+
+
+<div class="viewcode-block" id="is_none"><a class="viewcode-back" href="../../../helpers.html#helpers.is_none">[docs]</a><span class="k">def</span> <span class="nf">is_none</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    We use pandas :(</span>
+<span class="sd">    Pandas has no way to guarantee &quot;stability&quot; for the type of a column, it choses to arbitrarily change it based on the values.</span>
+<span class="sd">    Pandas also change the values in the columns based on the types.</span>
+<span class="sd">    Lightwood relies on having ``None`` values for a cells that represent &quot;missing&quot; or &quot;corrupt&quot;.</span>
+<span class="sd">    </span>
+<span class="sd">    When we assign ``None`` to a cell in a dataframe this might get turned to `nan` or other values, this function checks if a cell is ``None`` or any other values a pd.DataFrame might convert ``None`` to.</span>
+
+<span class="sd">    It also check some extra values (like ``&#39;&#39;``) that pandas never converts ``None`` to (hopefully). But lightwood would still consider those values &quot;None values&quot;, and this will allow for more generic use later.</span>
+<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">is_nan_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;np.nan&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2017-2022, MindsDB.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

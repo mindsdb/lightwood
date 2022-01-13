@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>lightwood.helpers.torch &mdash; lightwood 1.9.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.9.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">lightwood</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>lightwood.helpers.torch</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for lightwood.helpers.torch</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.nn.functional</span> <span class="kn">import</span> <span class="n">pad</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.device</span> <span class="kn">import</span> <span class="n">get_devices</span>
+
+
+<span class="k">def</span> <span class="nf">concat_vectors_and_pad</span><span class="p">(</span><span class="n">vec_list</span><span class="p">,</span> <span class="n">max_</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec_list</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_</span>
+    <span class="k">assert</span> <span class="n">max_</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+    <span class="n">cat_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">vec_list</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">pad_size</span> <span class="o">=</span> <span class="n">max_</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec_list</span><span class="p">)</span>
+    <span class="n">padding</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pad_size</span> <span class="o">*</span> <span class="n">vec_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">padded</span> <span class="o">=</span> <span class="n">pad</span><span class="p">(</span><span class="n">cat_vec</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span> <span class="n">padding</span><span class="p">,</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">padded</span>
+
+
+<span class="k">def</span> <span class="nf">average_vectors</span><span class="p">(</span><span class="n">vec_list</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">emb</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="k">for</span> <span class="n">emb</span> <span class="ow">in</span> <span class="n">vec_list</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LightwoodAutocast"><a class="viewcode-back" href="../../../helpers.html#helpers.LightwoodAutocast">[docs]</a><span class="k">class</span> <span class="nc">LightwoodAutocast</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Equivalent to torch.cuda.amp.autocast, but checks device compute capability</span>
+<span class="sd">    to activate the feature only when the GPU has tensor cores to leverage AMP.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">major</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># GPU major version</span>
+        <span class="n">torch_version</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">enabled</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="ow">or</span> <span class="n">torch_version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">torch_version</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">device</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_devices</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;cuda&#39;</span><span class="p">:</span>
+                <span class="c1"># tensor cores only exist from 7 onwards</span>
+                <span class="c1"># if this is not the case, then AMP is unnecessary overhead</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">major</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_capability</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span> <span class="o">=</span> <span class="n">enabled</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;</span> <span class="mi">6</span> <span class="k">else</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># gpu is available but cpu is forced</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">prev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span>  <span class="c1"># necessary reference to exit</span>
+        <span class="n">LightwoodAutocast</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prev</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_autocast_enabled</span><span class="p">()</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">set_autocast_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span><span class="p">)</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">autocast_increment_nesting</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span><span class="p">:</span>
+            <span class="c1"># Drop the cache when we exit to a nesting level that&#39;s outside any instance of autocast</span>
+            <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast_decrement_nesting</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">clear_autocast_cache</span><span class="p">()</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">set_autocast_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prev</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">decorate_autocast</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">decorate_autocast</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2017-2022, MindsDB.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

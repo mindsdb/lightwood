@@ -96,10 +96,15 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
             
@@ -228,6 +233,8 @@
 </li>
       <li><a href="api/predictor.html#api.predictor.PredictorInterface.analyze_ensemble">analyze_ensemble() (api.predictor.PredictorInterface method)</a>
 </li>
+      <li><a href="helpers.html#helpers.analyze_sentences">analyze_sentences() (in module helpers)</a>
+</li>
       <li>
     api.high_level
 
@@ -272,7 +279,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.BaseMixer">BaseMixer (class in mixer)</a>
+      <li><a href="mixer.html#mixer.BaseMixer">BaseMixer (class in mixer)</a>
 </li>
       <li><a href="ensemble.html#ensemble.BestOf">BestOf (class in ensemble)</a>
 </li>
@@ -284,6 +291,8 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="helpers.html#helpers.cast_string_to_python_type">cast_string_to_python_type() (in module helpers)</a>
+</li>
       <li><a href="encoder.html#encoder.CategoricalAutoEncoder">CategoricalAutoEncoder (class in encoder)</a>
 </li>
       <li><a href="data.html#data.cleaner">cleaner() (in module data)</a>
@@ -373,13 +382,7 @@
         <li><a href="encoder.html#encoder.OneHotEncoder.decode_probabilities">(encoder.OneHotEncoder method)</a>
 </li>
       </ul></li>
-      <li><a href="mixer/mixer.html#mixer.LightGBM.device">device (mixer.LightGBM attribute)</a>
-</li>
-      <li><a href="mixer/mixer.html#mixer.LightGBM.device_str">device_str (mixer.LightGBM attribute)</a>
-</li>
       <li><a href="api/dtype.html#api.dtype.dtype">dtype (class in api.dtype)</a>
-</li>
-      <li><a href="mixer/mixer.html#mixer.Neural.dtype_dict">dtype_dict (mixer.Neural attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -447,7 +450,15 @@
         <li><a href="ensemble.html#module-ensemble">module</a>
 </li>
       </ul></li>
-      <li><a href="mixer/mixer.html#mixer.Neural.epochs_to_best">epochs_to_best (mixer.Neural attribute)</a>
+      <li><a href="helpers.html#helpers.evaluate_accuracy">evaluate_accuracy() (in module helpers)</a>
+</li>
+      <li><a href="helpers.html#helpers.evaluate_array_accuracy">evaluate_array_accuracy() (in module helpers)</a>
+</li>
+      <li><a href="helpers.html#helpers.evaluate_array_r2_accuracy">evaluate_array_r2_accuracy() (in module helpers)</a>
+</li>
+      <li><a href="helpers.html#helpers.evaluate_multilabel_accuracy">evaluate_multilabel_accuracy() (in module helpers)</a>
+</li>
+      <li><a href="helpers.html#helpers.evaluate_regression_accuracy">evaluate_regression_accuracy() (in module helpers)</a>
 </li>
       <li><a href="analysis.html#analysis.BaseAnalysisBlock.explain">explain() (analysis.BaseAnalysisBlock method)</a>
 
@@ -472,33 +483,23 @@
       <li><a href="api/predictor.html#api.predictor.PredictorInterface.fit">fit() (api.predictor.PredictorInterface method)</a>
 
       <ul>
-        <li><a href="mixer/mixer.html#mixer.BaseMixer.fit">(mixer.BaseMixer method)</a>
+        <li><a href="mixer.html#mixer.BaseMixer.fit">(mixer.BaseMixer method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.LightGBM.fit">(mixer.LightGBM method)</a>
+        <li><a href="mixer.html#mixer.LightGBM.fit">(mixer.LightGBM method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.LightGBMArray.fit">(mixer.LightGBMArray method)</a>
+        <li><a href="mixer.html#mixer.LightGBMArray.fit">(mixer.LightGBMArray method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.Neural.fit">(mixer.Neural method)</a>
+        <li><a href="mixer.html#mixer.Neural.fit">(mixer.Neural method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.Regression.fit">(mixer.Regression method)</a>
+        <li><a href="mixer.html#mixer.Regression.fit">(mixer.Regression method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.SkTime.fit">(mixer.SkTime method)</a>
+        <li><a href="mixer.html#mixer.SkTime.fit">(mixer.SkTime method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.Unit.fit">(mixer.Unit method)</a>
-</li>
-      </ul></li>
-      <li><a href="mixer/mixer.html#mixer.BaseMixer.fit_data_len">fit_data_len (mixer.BaseMixer attribute)</a>
-
-      <ul>
-        <li><a href="mixer/mixer.html#mixer.Unit.fit_data_len">(mixer.Unit attribute)</a>
+        <li><a href="mixer.html#mixer.Unit.fit">(mixer.Unit method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.Neural.fit_on_dev">fit_on_dev (mixer.Neural attribute)</a>
-</li>
-      <li><a href="mixer/mixer.html#mixer.SkTime.forecaster">forecaster (mixer.SkTime attribute)</a>
-</li>
       <li><a href="api/types.html#api.types.Feature.from_dict">from_dict() (api.types.Feature static method)</a>
 
       <ul>
@@ -527,6 +528,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="helpers.html#helpers.gen_chars">gen_chars() (in module helpers)</a>
+</li>
       <li><a href="api/json_ai.html#api.json_ai.generate_json_ai">generate_json_ai() (in module api.json_ai)</a>
 </li>
       <li><a href="data.html#data.ConcatedEncodedDs.get_column_original_data">get_column_original_data() (data.ConcatedEncodedDs method)</a>
@@ -545,6 +548,8 @@
       </ul></li>
       <li><a href="data.html#data.EncodedDs.get_encoded_data">get_encoded_data() (data.EncodedDs method)</a>
 </li>
+      <li><a href="helpers.html#helpers.get_group_matches">get_group_matches() (in module helpers)</a>
+</li>
       <li><a href="analysis.html#analysis.GlobalFeatureImportance">GlobalFeatureImportance (class in analysis)</a>
 </li>
   </ul></td>
@@ -561,10 +566,6 @@
 </li>
       </ul></li>
   </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.SkTime.hyperparam_search">hyperparam_search (mixer.SkTime attribute)</a>
-</li>
-  </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
@@ -572,11 +573,17 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="analysis.html#analysis.ICP">ICP (class in analysis)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="encoder.html#encoder.Img2VecEncoder">Img2VecEncoder (class in encoder)</a>
 </li>
+      <li><a href="helpers.html#helpers.is_nan_numeric">is_nan_numeric() (in module helpers)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="helpers.html#helpers.is_none">is_none() (in module helpers)</a>
+</li>
       <li><a href="encoder.html#encoder.PretrainedLangEncoder.is_trainable_encoder">is_trainable_encoder (encoder.PretrainedLangEncoder attribute)</a>
+</li>
+      <li><a href="helpers.html#helpers.isascii">isascii() (in module helpers)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -596,17 +603,15 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.Regression.label_map">label_map (mixer.Regression attribute)</a>
-</li>
-      <li><a href="mixer/mixer.html#mixer.LightGBM.label_set">label_set (mixer.LightGBM attribute)</a>
-</li>
       <li><a href="api/predictor.html#api.predictor.PredictorInterface.learn">learn() (api.predictor.PredictorInterface method)</a>
+</li>
+      <li><a href="mixer.html#mixer.LightGBM">LightGBM (class in mixer)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.LightGBM">LightGBM (class in mixer)</a>
+      <li><a href="mixer.html#mixer.LightGBMArray">LightGBMArray (class in mixer)</a>
 </li>
-      <li><a href="mixer/mixer.html#mixer.LightGBMArray">LightGBMArray (class in mixer)</a>
+      <li><a href="helpers.html#helpers.LightwoodAutocast">LightwoodAutocast (class in helpers)</a>
 </li>
       <li><a href="api/json_ai.html#api.json_ai.lookup_encoder">lookup_encoder() (in module api.json_ai)</a>
 </li>
@@ -616,7 +621,7 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.LightGBM.max_bin">max_bin (mixer.LightGBM attribute)</a>
+      <li><a href="helpers.html#helpers.mase">mase() (in module helpers)</a>
 </li>
       <li><a href="ensemble.html#ensemble.MeanEnsemble">MeanEnsemble (class in ensemble)</a>
 </li>
@@ -624,29 +629,15 @@
     mixer
 
       <ul>
-        <li><a href="mixer/mixer.html#module-mixer">module</a>
+        <li><a href="mixer.html#module-mixer">module</a>
 </li>
       </ul></li>
       <li><a href="ensemble.html#ensemble.ModeEnsemble">ModeEnsemble (class in ensemble)</a>
 </li>
-      <li><a href="mixer/mixer.html#mixer.LightGBM.model">model (mixer.LightGBM attribute)</a>
-
-      <ul>
-        <li><a href="mixer/mixer.html#mixer.Neural.model">(mixer.Neural attribute)</a>
-</li>
-        <li><a href="mixer/mixer.html#mixer.Regression.model">(mixer.Regression attribute)</a>
-</li>
-      </ul></li>
       <li><a href="analysis.html#analysis.model_analyzer">model_analyzer() (in module analysis)</a>
-</li>
-      <li><a href="mixer/mixer.html#mixer.SkTime.model_path">model_path (mixer.SkTime attribute)</a>
 </li>
       <li><a href="api/types.html#api.types.ModelAnalysis">ModelAnalysis (class in api.types)</a>
 </li>
-      <li><a href="mixer/mixer.html#mixer.LightGBMArray.models">models (mixer.LightGBMArray attribute)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
@@ -669,9 +660,11 @@
 </li>
         <li><a href="helpers.html#module-helpers">helpers</a>
 </li>
-        <li><a href="mixer/mixer.html#module-mixer">mixer</a>
+        <li><a href="mixer.html#module-mixer">mixer</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/types.html#api.types.Module">Module (class in api.types)</a>
 </li>
       <li><a href="encoder.html#encoder.MultiHotEncoder">MultiHotEncoder (class in encoder)</a>
@@ -682,18 +675,10 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.LightGBMArray.n_ts_predictions">n_ts_predictions (mixer.LightGBMArray attribute)</a>
-
-      <ul>
-        <li><a href="mixer/mixer.html#mixer.SkTime.n_ts_predictions">(mixer.SkTime attribute)</a>
+      <li><a href="mixer.html#mixer.Neural">Neural (class in mixer)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.Neural">Neural (class in mixer)</a>
-</li>
-      <li><a href="mixer/mixer.html#mixer.LightGBM.num_iterations">num_iterations (mixer.LightGBM attribute)</a>
-</li>
       <li><a href="encoder.html#encoder.NumericEncoder">NumericEncoder (class in encoder)</a>
 </li>
   </ul></td>
@@ -706,8 +691,6 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.LightGBM.ordinal_encoder">ordinal_encoder (mixer.LightGBM attribute)</a>
-</li>
       <li><a href="api/types.html#api.types.Output">Output (class in api.types)</a>
 </li>
   </ul></td>
@@ -716,20 +699,20 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.BaseMixer.partial_fit">partial_fit() (mixer.BaseMixer method)</a>
+      <li><a href="mixer.html#mixer.BaseMixer.partial_fit">partial_fit() (mixer.BaseMixer method)</a>
 
       <ul>
-        <li><a href="mixer/mixer.html#mixer.LightGBM.partial_fit">(mixer.LightGBM method)</a>
+        <li><a href="mixer.html#mixer.LightGBM.partial_fit">(mixer.LightGBM method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.LightGBMArray.partial_fit">(mixer.LightGBMArray method)</a>
+        <li><a href="mixer.html#mixer.LightGBMArray.partial_fit">(mixer.LightGBMArray method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.Neural.partial_fit">(mixer.Neural method)</a>
+        <li><a href="mixer.html#mixer.Neural.partial_fit">(mixer.Neural method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.Regression.partial_fit">(mixer.Regression method)</a>
+        <li><a href="mixer.html#mixer.Regression.partial_fit">(mixer.Regression method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.SkTime.partial_fit">(mixer.SkTime method)</a>
+        <li><a href="mixer.html#mixer.SkTime.partial_fit">(mixer.SkTime method)</a>
 </li>
-        <li><a href="mixer/mixer.html#mixer.Unit.partial_fit">(mixer.Unit method)</a>
+        <li><a href="mixer.html#mixer.Unit.partial_fit">(mixer.Unit method)</a>
 </li>
       </ul></li>
       <li><a href="api/predictor.html#api.predictor.PredictorInterface.predict">predict() (api.predictor.PredictorInterface method)</a>
@@ -794,7 +777,11 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.Regression">Regression (class in mixer)</a>
+      <li><a href="helpers.html#helpers.r2_score">r2_score() (in module helpers)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mixer.html#mixer.Regression">Regression (class in mixer)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -808,54 +795,24 @@
 </li>
       <li><a href="encoder.html#encoder.ShortTextEncoder">ShortTextEncoder (class in encoder)</a>
 </li>
-      <li><a href="mixer/mixer.html#mixer.SkTime">SkTime (class in mixer)</a>
+      <li><a href="mixer.html#mixer.SkTime">SkTime (class in mixer)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/predictor.html#api.predictor.PredictorInterface.split">split() (api.predictor.PredictorInterface method)</a>
 </li>
       <li><a href="data.html#data.splitter">splitter() (in module data)</a>
 </li>
-      <li><a href="mixer/mixer.html#mixer.BaseMixer.stable">stable (mixer.BaseMixer attribute)</a>
-
-      <ul>
-        <li><a href="mixer/mixer.html#mixer.Unit.stable">(mixer.Unit attribute)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/types.html#api.types.StatisticalAnalysis">StatisticalAnalysis (class in api.types)</a>
 </li>
-      <li><a href="mixer/mixer.html#mixer.LightGBMArray.submodel_stop_after">submodel_stop_after (mixer.LightGBMArray attribute)</a>
+      <li><a href="mixer.html#mixer.LightGBM.supports_proba">supports_proba (mixer.LightGBM attribute)</a>
 </li>
-      <li><a href="mixer/mixer.html#mixer.BaseMixer.supports_proba">supports_proba (mixer.BaseMixer attribute)</a>
-
-      <ul>
-        <li><a href="mixer/mixer.html#mixer.LightGBM.supports_proba">(mixer.LightGBM attribute)</a>
-</li>
-        <li><a href="mixer/mixer.html#mixer.LightGBMArray.supports_proba">(mixer.LightGBMArray attribute)</a>
-</li>
-        <li><a href="mixer/mixer.html#mixer.Neural.supports_proba">(mixer.Neural attribute)</a>
-</li>
-        <li><a href="mixer/mixer.html#mixer.Regression.supports_proba">(mixer.Regression attribute)</a>
-</li>
-        <li><a href="mixer/mixer.html#mixer.SkTime.supports_proba">(mixer.SkTime attribute)</a>
-</li>
-        <li><a href="mixer/mixer.html#mixer.Unit.supports_proba">(mixer.Unit attribute)</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.LightGBMArray.target">target (mixer.LightGBMArray attribute)</a>
-
-      <ul>
-        <li><a href="mixer/mixer.html#mixer.Neural.target">(mixer.Neural attribute)</a>
-</li>
-        <li><a href="mixer/mixer.html#mixer.SkTime.target">(mixer.SkTime attribute)</a>
-</li>
-      </ul></li>
       <li><a href="analysis.html#analysis.TempScaler">TempScaler (class in analysis)</a>
 </li>
       <li><a href="encoder.html#encoder.TextRnnEncoder">TextRnnEncoder (in module encoder)</a>
@@ -910,11 +867,7 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.Unit">Unit (class in mixer)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixer/mixer.html#mixer.LightGBM.use_optuna">use_optuna (mixer.LightGBM attribute)</a>
+      <li><a href="mixer.html#mixer.Unit">Unit (class in mixer)</a>
 </li>
   </ul></td>
 </tr></table>

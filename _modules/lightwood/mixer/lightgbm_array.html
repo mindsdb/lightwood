@@ -96,10 +96,15 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
             
@@ -181,7 +186,7 @@
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
 
 
-<div class="viewcode-block" id="LightGBMArray"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.LightGBMArray">[docs]</a><span class="k">class</span> <span class="nc">LightGBMArray</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
+<div class="viewcode-block" id="LightGBMArray"><a class="viewcode-back" href="../../../mixer.html#mixer.LightGBMArray">[docs]</a><span class="k">class</span> <span class="nc">LightGBMArray</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;LightGBM-based model, intended for usage in time series tasks.&quot;&quot;&quot;</span>
     <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LightGBM</span><span class="p">]</span>
     <span class="n">n_ts_predictions</span><span class="p">:</span> <span class="nb">int</span>
@@ -204,7 +209,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="LightGBMArray.fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.LightGBMArray.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="LightGBMArray.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.LightGBMArray.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Started fitting LGBM models for array prediction&#39;</span><span class="p">)</span>
         <span class="n">original_target_train</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">train_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
         <span class="n">original_target_dev</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dev_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
@@ -220,7 +225,7 @@
         <span class="n">train_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_target_train</span>
         <span class="n">dev_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_target_dev</span></div>
 
-<div class="viewcode-block" id="LightGBMArray.partial_fit"><a class="viewcode-back" href="../../../mixer/mixer.html#mixer.LightGBMArray.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="LightGBMArray.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.LightGBMArray.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Updating array of LGBM models...&#39;</span><span class="p">)</span>
         <span class="n">original_target_train</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">train_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
         <span class="n">original_target_dev</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dev_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>

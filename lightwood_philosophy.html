@@ -44,8 +44,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorials" href="tutorials.html" />
-    <link rel="prev" title="Welcome to Lightwood’s Documentation!" href="index.html" /> 
+    <link rel="prev" title="Helpers" href="helpers.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -98,15 +97,25 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#i-pre-processing-and-cleaning">i) Pre-processing and cleaning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ii-feature-engineering">ii) Feature Engineering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#iii-model-building-and-training">iii) Model Building and Training</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#i-pre-processing-and-cleaning">i) Pre-processing and cleaning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ii-feature-engineering">ii) Feature Engineering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iii-model-building-and-training">iii) Model Building and Training</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#strengths-and-drawbacks">Strengths and drawbacks</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -200,6 +209,15 @@
 </style>
 <div class="section" id="lightwood-philosophy">
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code><a class="headerlink" href="#lightwood-philosophy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Lightwood works by generating code for <cite>Predictor</cite> objects out of structured data (e.g. a data frame) and a problem definition. The simplest possible definition being the column to predict.</p>
+<p>The data can be anything. It can contain numbers, dates, categories, text (in any language, but English is currently the primary focus), quantities, arrays, matrices, images, audio, or video. The last three as paths to the file system or URLs, since storing them as binary data can be cumbersome.</p>
+<p>The generated <cite>Predictor</cite> object can be fitted by calling a learn method, or through a lower level step-by-step API. It can then make predictions on similar data (same columns except for the target) by calling a predict method. That’s the gist of it.</p>
+<p>There’s an intermediate representation that gets turned into the final <cite>Python</cite> code, called <cite>JsonAI</cite>. This provides an easy way to edit the <cite>Predictor</cite> being generated from the original data and problem specifications. It also enables prototyping custom code without modifying the library itself, or even having a “development” version of the library installed.</p>
+</div>
+<div class="section" id="pipeline">
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
 <p>Lightwood abstracts the ML pipeline into 3 core steps:</p>
 <ol class="arabic simple">
 <li><p>Pre-processing and data cleaning</p></li>
@@ -207,22 +225,34 @@
 <li><p>Model building and training</p></li>
 </ol>
 <img alt="Lightwood &quot;under-the-hood&quot;" class="align-center" src="_images/lightwood.png" />
+<p>By default, each of them entails:</p>
 <div class="section" id="i-pre-processing-and-cleaning">
-<h2>i) Pre-processing and cleaning<a class="headerlink" href="#i-pre-processing-and-cleaning" title="Permalink to this headline">¶</a></h2>
-<p>For each column in your dataset, Lightwood will identify the suspected data type (numeric, categorical, etc.) via a brief statistical analysis. From this, it will generate a JSON-AI syntax.</p>
-<p>If the user keeps default behavior, Lightwood will perform a brief pre-processing approach to clean each column according to its identified data type. From there, it will split the data into train/dev/test splits.</p>
+<h3>i) Pre-processing and cleaning<a class="headerlink" href="#i-pre-processing-and-cleaning" title="Permalink to this headline">¶</a></h3>
+<p>For each column in your dataset, Lightwood will infer the suspected data type (numeric, categorical, etc.) via a brief statistical analysis. From this, it will generate a JsonAI object.</p>
+<p>Lightwood will perform a brief pre-processing approach to clean each column according to its identified data type (e.g. dates represented as a mix of string formats and timestamp floats are converted to datetime objects). From there, it will split the data into train/dev/test splits.</p>
 <p>The <cite>cleaner</cite> and <cite>splitter</cite> objects respectively refer to the pre-processing and the data splitting functions.</p>
 </div>
 <div class="section" id="ii-feature-engineering">
-<h2>ii) Feature Engineering<a class="headerlink" href="#ii-feature-engineering" title="Permalink to this headline">¶</a></h2>
-<p>Data can be converted into features via “encoders”. Encoders represent the rules for transforming pre-processed data into a numerical representations that a model can be used.</p>
+<h3>ii) Feature Engineering<a class="headerlink" href="#ii-feature-engineering" title="Permalink to this headline">¶</a></h3>
+<p>Data can be converted into features via “encoders”. Encoders represent the rules for transforming pre-processed data into a numerical representation that a model can use.</p>
 <p>Encoders can be <strong>rule-based</strong> or <strong>learned</strong>. A rule-based encoder transforms data per a specific set of instructions (ex: normalized numerical data) whereas a learned encoder produces a representation of the data after training (ex: a “[CLS]” token in a language model).</p>
-<p>Encoders are assigned to each column of data based on the data type; users can override this assignment either at the column-based level or at the data-type based level. Encoders inherit from the <cite>BaseEncoder</cite> class.</p>
+<p>Encoders are assigned to each column of data based on the data type, and depending on the type there can be inter-column dependencies (e.g. time series). Users can override this assignment either at the column-based level or at the datatype-based level. Encoders inherit from the <cite>BaseEncoder</cite> class.</p>
 </div>
 <div class="section" id="iii-model-building-and-training">
-<h2>iii) Model Building and Training<a class="headerlink" href="#iii-model-building-and-training" title="Permalink to this headline">¶</a></h2>
+<h3>iii) Model Building and Training<a class="headerlink" href="#iii-model-building-and-training" title="Permalink to this headline">¶</a></h3>
 <p>We call a predictive model that intakes <em>encoded</em> feature data and outputs a prediction for the target of interest a <cite>mixer</cite> model. Users can either use Lightwood’s default mixers or create their own approaches inherited from the <cite>BaseMixer</cite> class.</p>
 <p>We predominantly use PyTorch based approaches, but can support other models.</p>
+<p>Multiple mixers can be trained for any given <cite>Predictor</cite>. After mixer training, an ensemble is created (and potentially trained) to decide which mixers to use and how to combine their predictions.</p>
+<p>Finally, a “model analysis” step looks at the whole ensemble and extracts some stats about it, in addition to building confidence models that allow us to output a confidence and prediction intervals for each prediction. We also use this step to generate some explanations about model behavior.</p>
+<p>Predicting is very similar: data is cleaned and encoded, then mixers make their predictions and they get ensembled. Finally, explainer modules determine things like confidence, prediction bounds, and column importances.</p>
+</div>
+</div>
+<div class="section" id="strengths-and-drawbacks">
+<h2>Strengths and drawbacks<a class="headerlink" href="#strengths-and-drawbacks" title="Permalink to this headline">¶</a></h2>
+<p>The main benefit of lightwood’s architecture is that it is very easy to extend. Full understanding (or even any understanding) of the pipeline is not required to improve a specific component. Users can still easily integrate their custom code with minimal hassle, even if PRs are not accepted, while still pulling everything else from upstream. This works well with the open-source nature of the project.</p>
+<p>The second advantage this provides is that it is relatively trivial to parallelize since most tasks are done per-feature. The bits which are done on all the data (mixer training and model analysis) are made up of multiple blocks with similar APIs which can themselves be run in parallel.</p>
+<p>Finally, most of lightwood is built on PyTorch, and PyTorch mixers and encoders are first-class citizens in so far as the data format makes it easiest to work with them. In that sense performance on specialized hardware and continued compatibility is taken care of for us, which frees up time to work on other things.</p>
+<p>The main drawback, however, is that the pipeline separation doesn’t allow for phases to wield great influence on each other or run in a joint fashion. This both means you can’t easily have stuff like mixer gradients propagating through and training encoders, nor analysis blocks looking at the model and deciding the data cleaning procedure should change. Granted, there’s no hard limit on this, but any such implementation would be rather unwieldy in terms of code complexity.</p>
 </div>
 </div>
 
@@ -232,8 +262,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="tutorials.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Lightwood’s Documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="helpers.html" class="btn btn-neutral float-left" title="Helpers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
