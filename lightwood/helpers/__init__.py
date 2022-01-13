@@ -20,4 +20,4 @@ __all__ = ['to_binary', 'f1_score', 'recall_score', 'precision_score', 'r2_score
            'get_identifier_description', 'get_identifier_description_mp', 'get_pct_auto_increment',
            'extract_digits', 'isascii',
            'hashtext', 'splitRecursive', 'cast_string_to_python_type', 'gen_chars', 'clean_float', 'word_tokenize',
-           'get_language_dist', 'average_vectors', 'concat_vectors_and_pad', 'LightwoodAutocast', 'is_nan_numeric', 'filter_nan_and_none', 'seed']
+           'get_language_dist', 'average_vectors', 'concat_vectors_and_pad', 'LightwoodAutocast', 'is_nan_numeric', 'filter_nan_and_none', 'seed']  # noqa
