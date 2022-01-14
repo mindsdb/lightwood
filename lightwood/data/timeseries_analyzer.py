@@ -92,7 +92,6 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
         original_data = ts_info['data']
         for group in group_combinations:
             if group != "__default":
-                deltas[group] = {}
                 for col in order_cols:
                     ts_info['data'] = pd.Series([x[-1] for x in df[col]])
                     _, subset = get_group_matches(ts_info, group)
@@ -102,7 +101,10 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
                             window=2).apply(
                             lambda x: x.iloc[1] - x.iloc[0])
                         delta = rolling_diff.value_counts(ascending=False).keys()[0]
-                        deltas[group][col] = delta
+                        if group in deltas:
+                            deltas[group][col] = delta
+                        else:
+                            deltas[group] = {col: delta}
         ts_info['data'] = original_data
 
     return deltas

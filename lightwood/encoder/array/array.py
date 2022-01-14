@@ -25,7 +25,7 @@ class ArrayEncoder(BaseEncoder):
         """
         :param stop_after: time budget in seconds.
         :param window: expected length of array data.
-        :param original_dtype: element-wise data type
+        :param original_type: element-wise data type
         """  # noqa
 
         super().__init__(is_target)
@@ -47,10 +47,12 @@ class ArrayEncoder(BaseEncoder):
     def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable]):
         """
         Prepare the array encoder for sequence data.
-
         :param train_priming_data: Training data of sequences
         :param dev_priming_data: Dev data of sequences
         """
+        if self.is_prepared:
+            raise Exception('You can only call "prepare" once for a given encoder.')
+
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         priming_data = priming_data.values
 
@@ -59,9 +61,6 @@ class ArrayEncoder(BaseEncoder):
         for i in range(len(priming_data)):
             if is_none(priming_data[i]):
                 priming_data[i] = [0] * self.output_size
-
-        if self.is_prepared:
-            raise Exception('You can only call "prepare" once for a given encoder.')
 
         if self.original_type in (dtype.categorical, dtype.binary):
             self._normalizer = CatNormalizer(encoder_class='ordinal')

@@ -134,11 +134,10 @@ def lookup_encoder(
     # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
-        if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict["module"] = "TimeSeriesEncoder"
-            encoder_dict["args"]["original_type"] = f'"{col_dtype}"'
-            encoder_dict["args"]["target"] = "self.target"
-            encoder_dict["args"]["grouped_by"] = f"{gby}"
+        if col_name in tss.order_by:
+            encoder_dict["module"] = "ArrayEncoder"
+            encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
+            encoder_dict["args"]["window"] = f"{tss.window}"
 
         if is_target:
             if col_dtype in [dtype.integer]:
@@ -151,8 +150,9 @@ def lookup_encoder(
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["args"]["timesteps"] = f"{tss.horizon}"
                 encoder_dict["module"] = "TsArrayNumericEncoder"
-        if "__mdb_ts_previous" in col_name:
-            encoder_dict["module"] = "ArrayEncoder"
+
+        if "__mdb_ts_previous" in col_name or col_name in tss.historical_columns:
+            encoder_dict["module"] = "TimeSeriesEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
             encoder_dict["args"]["window"] = f"{tss.window}"
 
@@ -315,17 +315,6 @@ def generate_json_ai(
             is_target_predicting_encoder,
             statistical_analysis,
         )
-
-        if (
-            tss.is_timeseries
-            and eval(encoder["module"]).is_timeseries_encoder
-        ):
-            if tss.group_by is not None:
-                for group in tss.group_by:
-                    dependency.append(group)
-
-            if tss.use_previous_target:
-                dependency.append(f"__mdb_ts_previous_{target}")
 
         if len(dependency) > 0:
             feature = Feature(

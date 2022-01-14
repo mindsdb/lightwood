@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from typing import List
 from lightwood.api.types import ProblemDefinition
-from lightwood.api.high_level import predictor_from_problem
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.arima import AutoARIMA
@@ -149,8 +148,6 @@ class TestTimeseries(unittest.TestCase):
                 assert timestamp > latest_timestamp
 
     def test_2_time_series_classification(self):
-        from lightwood.api.high_level import predictor_from_problem
-
         df = pd.read_csv('tests/data/arrivals.csv')
         target = 'Traffic'
         df[target] = df[target] > 100000
