@@ -307,11 +307,10 @@
     <span class="c1"># Time-series representations require more advanced flags</span>
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
         <span class="n">gby</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">:</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TimeSeriesEncoder&quot;</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;original_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">col_dtype</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;self.target&quot;</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gby</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">:</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ArrayEncoder&quot;</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;original_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">target_type</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;window&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">window</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">if</span> <span class="n">is_target</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">]:</span>
@@ -324,8 +323,9 @@
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gby</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;timesteps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TsArrayNumericEncoder&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;__mdb_ts_previous&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="p">:</span>
-            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ArrayEncoder&quot;</span>
+
+        <span class="k">if</span> <span class="s2">&quot;__mdb_ts_previous&quot;</span> <span class="ow">in</span> <span class="n">col_name</span> <span class="ow">or</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">:</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TimeSeriesEncoder&quot;</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;original_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">target_type</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;window&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">window</span><span class="si">}</span><span class="s2">&quot;</span>
 
@@ -488,17 +488,6 @@
             <span class="n">is_target_predicting_encoder</span><span class="p">,</span>
             <span class="n">statistical_analysis</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span>
-            <span class="ow">and</span> <span class="nb">eval</span><span class="p">(</span><span class="n">encoder</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">is_timeseries_encoder</span>
-        <span class="p">):</span>
-            <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
-                    <span class="n">dependency</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
-                <span class="n">dependency</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;__mdb_ts_previous_</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dependency</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">feature</span> <span class="o">=</span> <span class="n">Feature</span><span class="p">(</span>

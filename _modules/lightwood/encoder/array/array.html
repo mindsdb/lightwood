@@ -198,7 +198,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param stop_after: time budget in seconds.</span>
 <span class="sd">        :param window: expected length of array data.</span>
-<span class="sd">        :param original_dtype: element-wise data type</span>
+<span class="sd">        :param original_type: element-wise data type</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
@@ -220,10 +220,12 @@
 <div class="viewcode-block" id="ArrayEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.ArrayEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">],</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare the array encoder for sequence data.</span>
-
 <span class="sd">        :param train_priming_data: Training data of sequences</span>
 <span class="sd">        :param dev_priming_data: Dev data of sequences</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
+
         <span class="n">priming_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">])</span>
         <span class="n">priming_data</span> <span class="o">=</span> <span class="n">priming_data</span><span class="o">.</span><span class="n">values</span>
 
@@ -232,9 +234,6 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">is_none</span><span class="p">(</span><span class="n">priming_data</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
                 <span class="n">priming_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_normalizer</span> <span class="o">=</span> <span class="n">CatNormalizer</span><span class="p">(</span><span class="n">encoder_class</span><span class="o">=</span><span class="s1">&#39;ordinal&#39;</span><span class="p">)</span>

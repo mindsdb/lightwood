@@ -187,8 +187,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#encoder.TimeSeriesEncoder">TimeSeriesEncoder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.TimeSeriesEncoder.decode">decode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.TimeSeriesEncoder.encode">encode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#encoder.TimeSeriesEncoder.prepare">prepare</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#encoder.TimeSeriesEncoder.setup_nn">setup_nn</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#encoder.TsArrayNumericEncoder">TsArrayNumericEncoder</a><ul>
@@ -323,7 +321,7 @@ It can be used for generic arrays, as well as for handling historical target val
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
 <li><p><strong>window</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – expected length of array data.</p></li>
-<li><p><strong>original_dtype</strong> – element-wise data type</p></li>
+<li><p><strong>original_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]) – element-wise data type</p></li>
 </ul>
 </dd>
 </dl>
@@ -364,15 +362,11 @@ It can be used for generic arrays, as well as for handling historical target val
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.ArrayEncoder.prepare">
 <span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#ArrayEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.ArrayEncoder.prepare" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prepare the array encoder for sequence data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>train_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]) – Training data of sequences</p></li>
-<li><p><strong>dev_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]) – Dev data of sequences</p></li>
-</ul>
-</dd>
-</dl>
+<dd><p>Prepare the array encoder for sequence data.
+:type train_priming_data: <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]
+:param train_priming_data: Training data of sequences
+:type dev_priming_data: <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]
+:param dev_priming_data: Dev data of sequences</p>
 </dd></dl>
 
 </dd></dl>
@@ -1083,55 +1077,46 @@ When None, it will be set automatically based on is_target:
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.TimeSeriesEncoder">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">TimeSeriesEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouped_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rnn'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Time series encoder. This module can learn features for any <cite>order_by</cite> temporal column, both with and without accompanying target data.</p>
-<p>The backbone of this encoder is either a recurrent neural network or a transformer; both structured in an encoder-decoder fashion.</p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">TimeSeriesEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/ts.html#TimeSeriesEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time series encoder. This module will pass the normalized series values, along with moving averages taken from the series’ last <cite>window</cite> values.
+:type stop_after: <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>
+:param stop_after: time budget in seconds.
+:type window: <code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]
+:param window: expected length of array data.
+:type original_type: <code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]
+:param original_type: element-wise data type</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TimeSeriesEncoder.decode">
-<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.decode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decode a list of embedded multidimensional time series
-:param encoded_data: a list of embeddings [ e1, e2, …] to be decoded into time series
-:param steps: fixed number of timesteps to reconstruct from each embedding.
-If None, encoder will output the largest length encountered during training.
-:return: a list of reconstructed time series</p>
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/ts.html#TimeSeriesEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts data as a list of arrays. Removes all encoded moving average information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Encoded data prepared by this array encoder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of iterable sequences in the original data space</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TimeSeriesEncoder.encode">
-<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_next_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Encode a list of time series data
-:param column_data: a list of (self._n_dims)-dimensional time series [[dim1_data], …] to encode
-:param get_next_count: default None, but you can pass a number X and it will return the X following predictions</p>
-<blockquote>
-<div><p>on the series for each ts_data_point in column_data</p>
-</div></blockquote>
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/ts.html#TimeSeriesEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes time series data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a list of encoded time series or if get_next_count !=0 two lists (encoded_values, projected_numbers)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="encoder.TimeSeriesEncoder.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">train_priming_data</span></em>, <em class="sig-param"><span class="pre">dev_priming_data</span></em>, <em class="sig-param"><span class="pre">dependency_data={}</span></em>, <em class="sig-param"><span class="pre">ts_analysis=None</span></em>, <em class="sig-param"><span class="pre">feedback_hoop_function=&lt;bound</span> <span class="pre">method</span> <span class="pre">Logger.info</span> <span class="pre">of</span> <span class="pre">&lt;Logger</span> <span class="pre">lightwood-2762</span> <span class="pre">(DEBUG)&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">batch_size=256</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.prepare" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>priming_data</strong> – a list of (self._n_dims)-dimensional time series [[dim1_data], …]</p></li>
-<li><p><strong>dependency_data</strong> – raw data from other columns</p></li>
-<li><p><strong>ts_analysis</strong> – dictionary with time analysis info (e.g. normalizers for each target group)</p></li>
-<li><p><strong>feedback_hoop_function</strong> – method to use if you want to get feedback on the training process</p></li>
-</ul>
+<dd class="field-odd"><p><strong>column_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]) – Input column data to be encoded</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a torch tensor representing the encoded time series.</p>
 </dd>
 </dl>
-<p>:param batch_size</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="encoder.TimeSeriesEncoder.setup_nn">
-<span class="sig-name descname"><span class="pre">setup_nn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/time_series/rnn.html#TimeSeriesEncoder.setup_nn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TimeSeriesEncoder.setup_nn" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method must be executed after initializing, else types are unassigned</p>
 </dd></dl>
 
 </dd></dl>
