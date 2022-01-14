@@ -6,7 +6,12 @@ from typing import Dict, Union
 import optuna
 import numpy as np
 import pandas as pd
-from sktime.forecasting.ets import AutoETS
+from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.trend import PolynomialTrendForecaster
+# from sktime.forecasting.compose import ForecastingPipeline
+from sktime.forecasting.compose import TransformedTargetForecaster
+from sktime.transformations.series.detrend import ConditionalDeseasonalizer
+from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
 from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
 
@@ -124,7 +129,7 @@ class SkTime(BaseMixer):
         try:
             model_class = getattr(sktime_module, module_name.split(".")[1])
         except AttributeError:
-            model_class = AutoETS  # use AutoETS when the provided class does not exist
+            model_class = AutoARIMA  # use AutoARIMA when the provided class does not exist
 
         for group in self.ts_analysis['group_combinations']:
             kwargs = {}
@@ -137,7 +142,13 @@ class SkTime(BaseMixer):
             for k, v in options.items():
                 kwargs = self._add_forecaster_kwarg(model_class, kwargs, k, v)
 
-            self.models[group] = model_class(**kwargs)
+            self.models[group] = TransformedTargetForecaster([
+                ("detrender", Detrender(forecaster=PolynomialTrendForecaster(degree=2))),
+                ("deseasonalizer", ConditionalDeseasonalizer(
+                    model='additive',  # 'multiplicative',
+                    sp=options['sp']
+                )),
+                ("forecaster", model_class(**kwargs))])
 
             if self.grouped_by == ['__default']:
                 series_idxs = data['data'].index
@@ -235,9 +246,14 @@ class SkTime(BaseMixer):
         original_index = series.index
         series = series.reset_index(drop=True)
 
-        if hasattr(model, '_cutoff') and hasattr(model, 'd'):
-            model_d = 0 if model.d is None else model.d
-            min_offset = -model._cutoff + model_d + 1
+        if isinstance(model, TransformedTargetForecaster):
+            submodel = model.steps_[-1][-1]
+        else:
+            submodel = model
+
+        if hasattr(submodel, '_cutoff') and hasattr(submodel, 'd'):
+            model_d = 0 if submodel.d is None else submodel.d
+            min_offset = -submodel._cutoff + model_d + 1
         else:
             min_offset = -np.inf
 
