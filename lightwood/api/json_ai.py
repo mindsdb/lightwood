@@ -1017,6 +1017,9 @@ if self.problem_definition.fit_on_all:
     predict_body = f"""
 self.mode = 'predict'
 
+if len(data) == 0:
+    raise Exception("Empty input, aborting prediction. Please try again with some input data.")
+
 # Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
