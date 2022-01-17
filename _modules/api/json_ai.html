@@ -1190,6 +1190,9 @@
     <span class="n">predict_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">self.mode = &#39;predict&#39;</span>
 
+<span class="s2">if len(data) == 0:</span>
+<span class="s2">    raise Exception(&quot;Empty input, aborting prediction. Please try again with some input data.&quot;)</span>
+
 <span class="s2"># Remove columns that user specifies to ignore</span>
 <span class="s2">log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
 <span class="s2">data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
