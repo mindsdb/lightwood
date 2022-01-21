@@ -58,7 +58,7 @@ class SkTime(BaseMixer):
         :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format "$module.$class' where '$module' is inside `sktime.forecasting`. Default is 'arima.AutoARIMA'.
         :param hyperparam_search: bool that indicates whether to perform the hyperparameter tuning or not.
         :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.
-        :param target_transforms: arguments for target transformation. Currently supported format: {'detrender': int, 'deseasonalizer': 'add' | 'mul' }. 'detrender' forces a particular type of polynomial to fit as trend curve for the series, while 'deseasonalizer' specifies additive or multiplicative seasonality decomposition (only applied if a seasonality test is triggered). By default, linear trend and additive seasonality are selected.
+        :param target_transforms: arguments for target transformation. Currently supported format: {'detrender': int, 'deseasonalizer': 'add' | 'mul' }. 'detrender' forces a particular type of polynomial to fit as trend curve for the series, while 'deseasonalizer' specifies additive or multiplicative seasonality decomposition (only applied if a seasonality test is triggered). By default, both are disabled.
         """  # noqa
         super().__init__(stop_after)
         self.stable = True
@@ -73,8 +73,8 @@ class SkTime(BaseMixer):
         self.auto_size = auto_size
         self.cutoff_factor = 4  # times the detected maximum seasonal period
         self.target_transforms = {
-            'detrender': 1,          # degree of detrender polynomial (0: disabled)
-            'deseasonalizer': 'add'  # seasonality decomposition: 'add'itive or 'mul'tiplicative (else, disabled)
+            'detrender': 0,          # degree of detrender polynomial (0: disabled)
+            'deseasonalizer': ''  # seasonality decomposition: 'add'itive or 'mul'tiplicative (else, disabled)
         }
         self.target_transforms.update(target_transforms)
 
