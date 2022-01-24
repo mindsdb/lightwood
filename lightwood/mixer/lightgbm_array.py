@@ -1,10 +1,12 @@
-import numpy as np
-import pandas as pd
+from copy import deepcopy
 from typing import Dict, List, Union
 
+import numpy as np
+import pandas as pd
+
 from lightwood.api import dtype
-from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
+from lightwood.encoder.base import BaseEncoder
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.lightgbm import LightGBM
 from lightwood.api.types import PredictionArguments
@@ -28,7 +30,7 @@ class LightGBMArray(BaseMixer):
         self.target = target
         dtype_dict[target] = dtype.float
         self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev,
-                       False, target_encoder)
+                                False, target_encoder)
                        for _ in range(n_ts_predictions)]
         self.n_ts_predictions = n_ts_predictions  # for time series tasks, how long is the forecast horizon
         self.supports_proba = False
@@ -36,6 +38,8 @@ class LightGBMArray(BaseMixer):
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Started fitting LGBM models for array prediction')
+        original_target_train = deepcopy(train_data.data_frame[self.target])
+        original_target_dev = deepcopy(dev_data.data_frame[self.target])
 
         for timestep in range(self.n_ts_predictions):
             if timestep > 0:
@@ -44,8 +48,14 @@ class LightGBMArray(BaseMixer):
 
             self.models[timestep].fit(train_data, dev_data)  # @TODO: this call could be parallelized
 
+        # restore target
+        train_data.data_frame[self.target] = original_target_train
+        dev_data.data_frame[self.target] = original_target_dev
+
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Updating array of LGBM models...')
+        original_target_train = deepcopy(train_data.data_frame[self.target])
+        original_target_dev = deepcopy(dev_data.data_frame[self.target])
 
         for timestep in range(self.n_ts_predictions):
             if timestep > 0:
@@ -53,6 +63,10 @@ class LightGBMArray(BaseMixer):
                 dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
 
             self.models[timestep].partial_fit(train_data, dev_data)  # @TODO: this call could be parallelized
+
+        # restore target
+        train_data.data_frame[self.target] = original_target_train
+        dev_data.data_frame[self.target] = original_target_dev
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:

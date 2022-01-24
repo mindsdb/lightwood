@@ -12,11 +12,10 @@ from lightwood.encoder.text.rnn import RnnEncoder as TextRnnEncoder
 from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.encoder.categorical.binary import BinaryEncoder
 from lightwood.encoder.categorical.autoencoder import CategoricalAutoEncoder
-from lightwood.encoder.time_series.rnn import TimeSeriesEncoder
+from lightwood.encoder.time_series.ts import TimeSeriesEncoder
 from lightwood.encoder.array.array import ArrayEncoder
 from lightwood.encoder.categorical.multihot import MultiHotEncoder
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
-
 from lightwood.encoder.audio import MFCCEncoder
 
 

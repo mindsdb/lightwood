@@ -1,7 +1,6 @@
 import unittest
 import pandas as pd
 from lightwood.analysis import ShapleyValues
-
 from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
 from lightwood.api.high_level import code_from_json_ai, predictor_from_code
 
@@ -15,7 +14,7 @@ class TestBasic(unittest.TestCase):
         df = pd.read_csv('tests/data/hdi.csv')
         target = 'Development Index'
 
-        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 5})
+        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 40})
         json_ai = json_ai_from_problem(df, problem_definition=pdef)
 
         json_ai.analysis_blocks = [{

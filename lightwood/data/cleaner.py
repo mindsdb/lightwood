@@ -1,9 +1,11 @@
 import re
-from copy import deepcopy
-
-import pandas as pd
 import datetime
+from copy import deepcopy
 from dateutil.parser import parse as parse_dt
+from typing import Dict, List, Optional, Tuple, Callable, Union
+
+import numpy as np
+import pandas as pd
 
 from lightwood.api.dtype import dtype
 from lightwood.helpers import text
@@ -11,8 +13,6 @@ from lightwood.helpers.log import log
 from lightwood.helpers.imputers import NumericalImputer, CategoricalImputer
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import is_nan_numeric
-
-from typing import Dict, List, Optional, Tuple, Callable, Union
 
 
 def cleaner(
@@ -45,6 +45,8 @@ def cleaner(
 
     data = _remove_columns(data, identifiers, target, mode, timeseries_settings,
                            anomaly_detection, dtype_dict)
+
+    data['__mdb_original_index'] = np.arange(len(data))
 
     for col in _get_columns_to_clean(data, dtype_dict, mode, target):
 
@@ -294,8 +296,12 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
     data = deepcopy(data)
     to_drop = [*[x for x in identifiers.keys() if x != target],
                *[x for x in data.columns if x in dtype_dict and dtype_dict[x] == dtype.invalid]]
+
     exceptions = ["__mdb_make_predictions"]
-    to_drop = [x for x in to_drop if x in data.columns]
+    if timeseries_settings.group_by is not None:
+        exceptions += timeseries_settings.group_by
+
+    to_drop = [x for x in to_drop if x in data.columns and x not in exceptions]
     data = data.drop(columns=to_drop)
 
     if mode == "train":
@@ -312,7 +318,6 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
     for name in list(data.columns):
         if name not in dtype_dict and name not in exceptions:
             data = data.drop(columns=[name])
-
     return data
 
 

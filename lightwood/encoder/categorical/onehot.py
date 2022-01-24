@@ -1,140 +1,183 @@
 import torch
 import numpy as np
-from scipy.special import softmax
-from lightwood.encoder.text.helpers.rnn_helpers import Lang
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.constants import _UNCOMMON_WORD
+from copy import deepcopy
 
-UNCOMMON_WORD = '__mdb_unknown_cat'
-UNCOMMON_TOKEN = 0
+from typing import Dict, List, Iterable, Tuple
 
 
 class OneHotEncoder(BaseEncoder):
     """
+    Creates a one-hot encoding (OHE) for categorical data. One-hot encoding represents categorical information as a vector where each individual dimension corresponds to a category. A category has a 1:1 mapping between dimension indicated by a "1" in that position. For example, imagine 3 categories, :math:`A`, :math:`B`, and :math:`C`; these can be represented as follows:
 
-    Why are we handling target weighting inside encoders? Simple: we'd otherwise have to compute per-index weighting inside the mixers, rather than having that code unified inside 2x encoders. So moving this to the mixer will still involve having to pass the target encoder to the mixer, but will add the additional complexity of having to pass a weighting map to the mixer and adding class-to-index translation boilerplate + weight setting for each mixer
+    .. math::
+
+       A &= [1, 0, 0] \\
+       B &= [0, 1, 0] \\
+       C &= [0, 0, 1]
+    
+    The OHE encoder operates in 2 modes:
+        (1) "use_unknown=True": Makes an :math:`N+1` length vector for :math:`N` categories, the first index always corresponds to the unknown category.
+
+        (2) "use_unknown=False": Makes an :math:`N` length vector for :math:`N` categories, where an empty vector of 0s indicates an unknown/missing category.
+
+    An encoder can represent a feature column or target column; in this case it represents a target, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.
+
+    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/05/15 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
+
+    target_weights = {"class1": 0.8, "class2": 0.05, "class3": 0.15}
+
+    Users should note that models will be presented with the inverse of the target weights, `inv_target_weights`, which will perform the 1/target_value_per_class operation. **This means large values will result in small weights for the model**.
     """ # noqa
-    def __init__(self, is_target=False, target_weights=None, handle_unknown='unknown_token'):
+    def __init__(
+        self,
+        is_target: bool = False,
+        target_weights: Dict[str, float] = None,
+        use_unknown: bool = True,
+    ):
+        """
+        :param is_target: True if this encoder featurizes the target column
+        :param target_weights: Percentage of total population represented by each category (between [0, 1]).
+        :param mode: True uses an extra dimension to account for unknown/out-of-distribution categories
+        """  # noqa
+
         super().__init__(is_target)
-        self._lang = None
-        self.rev_map = {}
+        self.map = None  # category name -> index
+        self.rev_map = None  # index -> category name
+        self.use_unknown = use_unknown
 
-        if handle_unknown not in {"unknown_token", "return_zeros"}:
-            raise ValueError(f"handle_unknown should be either 'unknown_token' or 'return_zeros', got {handle_unknown}")
-        else:
-            self.handle_unknown = handle_unknown
-
-        if self.is_target:
-            if self.handle_unknown != 'unknown_token':
-                raise ValueError(f'One Hot Encoders used for target encoding can only be used with `handle_unknown` \
-                                   set to `unknown_token`. The option: "{self.handle_unknown}" is not supported!')
-
+        # Weight-balance info if encoder represents target
         self.target_weights = None
-        self.index_weights = None
+        self.index_weights = None  # vector-weights, mapped by class id
         if self.is_target:
-            self.target_weights = target_weights
+            self.target_weights = deepcopy(target_weights)
 
-    def prepare(self, priming_data, max_dimensions=20000):
+    def prepare(self, priming_data: Iterable[str]):
+        """
+        Prepares the OHE Encoder by creating a dictionary mapping.
+
+        Unknown categories must be explicitly handled as python `None` types.
+        """ # noqa
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        self._lang = Lang('default')
-        if self.handle_unknown == "return_zeros":
-            priming_data = [x for x in priming_data if x is not None]
-            self._lang.index2word = {}
-            self._lang.word2index = {}
-            self._lang.n_words = 0
-        elif self.handle_unknown == "unknown_token":
-            priming_data = [x if x is not None else UNCOMMON_WORD for x in priming_data]
-            self._lang.index2word = {UNCOMMON_TOKEN: UNCOMMON_WORD}
-            self._lang.word2index = {UNCOMMON_WORD: UNCOMMON_TOKEN}
-            self._lang.word2count[UNCOMMON_WORD] = 0
-            self._lang.n_words = 1
+        unq_cats = np.unique([i for i in priming_data if i is not None]).tolist()
 
-        for category in priming_data:
-            if category is not None:
-                self._lang.addWord(str(category))
+        if self.use_unknown:
+            log.info("Encoding UNKNOWN categories as index 0")
+            self.map = {cat: indx + 1 for indx, cat in enumerate(unq_cats)}
+            self.map.update({_UNCOMMON_WORD: 0})
+            self.rev_map = {indx: cat for cat, indx in self.map.items()}
+        else:
+            log.info("Encoding UNKNOWN categories as vector of all 0s")
+            self.map = {cat: indx for indx, cat in enumerate(unq_cats)}
+            self.rev_map = {indx: cat for cat, indx in self.map.items()}
 
-        while self._lang.n_words > max_dimensions:
-            if self.handle_unknown == "return_zeros":
-                necessary_words = []
-            elif self.handle_unknown == "unknown_token":
-                necessary_words = [UNCOMMON_WORD]
-            least_occuring_words = self._lang.getLeastOccurring(n=len(necessary_words) + 1)
+        # Set the length of output
+        self.output_size = len(self.map)
 
-            word_to_remove = None
-            for word in least_occuring_words:
-                if word not in necessary_words:
-                    word_to_remove = word
-                    break
-
-            self._lang.removeWord(word_to_remove)
-
-        # Note: Is target assume that we are operating in "unknown_token" mode
+        # For target-only, report on relative weights of classes
+        # Each dimension of the inv_target_weights respects `map`
         if self.is_target:
-            self.index_weights = [1] * self._lang.n_words
+
+            # Equally wt. all classes
+            self.index_weights = torch.ones(size=(self.output_size,))
+
+            # If imbalanced detected, weight by inverse
             if self.target_weights is not None:
-                uncommon_weight = np.min(list(self.target_weights.values()))
-                self.index_weights[0] = uncommon_weight
-                self.target_weights[UNCOMMON_WORD] = uncommon_weight
-            for word in set(priming_data):
-                if self.target_weights is not None:
-                    self.index_weights[self._lang.word2index[str(word)]] = 1 / self.target_weights[word]
 
-            self.index_weights = torch.Tensor(self.index_weights)
+                # Check target weights properly specified
+                if sum([np.isclose(i, 0) for i in self.target_weights.values()]) > 0:
+                    raise ValueError('Target weights cannot be 0')
 
-        self.output_size = self._lang.n_words
-        self.rev_map = self._lang.index2word
+                for cat in self.map.keys():
+                    if cat != _UNCOMMON_WORD:
+                        self.index_weights[self.map[cat]] = self.target_weights[cat]
+
+                # If using an unknown category, set to smallest possible value
+                if self.use_unknown:
+                    self.target_weights[_UNCOMMON_WORD] = np.min(list(self.target_weights.values()))
+                    self.index_weights[0] = self.target_weights[_UNCOMMON_WORD]
+
         self.is_prepared = True
 
-    def encode(self, column_data):
+    def encode(self, column_data: Iterable[str]) -> torch.Tensor:
+        """
+        Encodes pre-processed data into OHE. Unknown/unrecognized classes vector of all 0s.
+
+        :param column_data: Pre-processed data to encode
+        :returns: Encoded data of form :math:`N_{rows} x N_{categories}`
+        """ # noqa
         if not self.is_prepared:
-            raise Exception('You need to call "prepare" before calling "encode" or "decode".')
+            raise Exception(
+                'You need to call "prepare" before calling "encode" or "decode".'
+            )
 
-        ret = []
-        v_len = self._lang.n_words
+        ret = torch.zeros(size=(len(column_data), self.output_size))
 
-        for word in column_data:
-            encoded_word = [0] * v_len
-            if word is not None:
-                word = str(word)
-                if self.handle_unknown == "return_zeros":
-                    if word in self._lang.word2index:
-                        index = self._lang.word2index[word]
-                        encoded_word[index] = 1
-                    else:
-                        # Encoding an unknown value will result in a vector of zeros
-                        log.warning('Trying to encode a value never seen before, returning vector of zeros')
-                else:  # self.handle_unknown == "unknown_token"
-                    index = self._lang.word2index[word] if word in self._lang.word2index else UNCOMMON_TOKEN
-                    encoded_word[index] = 1
+        for idx, word in enumerate(column_data):
+            index = self.map.get(word, None)
 
-            ret.append(encoded_word)
+            if index is not None:
+                ret[idx, index] = 1
+
+            if self.use_unknown and index is None:
+                ret[idx, 0] = 1
 
         return torch.Tensor(ret)
 
-    def decode(self, encoded_data, return_raw=False):
+    def decode(self, encoded_data: torch.Tensor):
+        """
+        Decodes OHE mapping into the original categories. Since this approach uses an argmax, decoding flexibly works either on logits or an explicitly OHE vector.
+
+        :param: encoded_data:
+        :returns Returns the original category names for encoded data.
+        """ # noqa
+        encoded_data_list = encoded_data.tolist()
+        ret = []
+
+        for vector in encoded_data_list:
+
+            all_zeros = not np.any(vector)
+            if not self.use_unknown and all_zeros:
+                ret.append(_UNCOMMON_WORD)
+            else:
+                ret.append(self.rev_map[np.argmax(vector)])
+
+        return ret
+
+    def decode_probabilities(self, encoded_data: torch.Tensor) -> Tuple[List[str], List[List[float]], Dict[int, str]]:
+        """
+        Provides decoded answers, as well as a probability assignment to each data point.
+
+        :param encoded_data: the output of a mixer model
+
+        :returns Decoded values for each data point, Probability vector for each category, and the reverse map of dimension to category name
+        """ # noqa
         encoded_data_list = encoded_data.tolist()
         ret = []
         probs = []
 
         for vector in encoded_data_list:
-            # Logits and onehots are not the same in definition
-            # But this explicitly operates on logits; it will take care of
-            # the one hot (so you can pass something in the softmax logit space)
-            # But will not affect something that is already OHE.
+            if not np.any(vector):  # Vector of all 0s -> unknown category
+                ret.append(_UNCOMMON_WORD)
+            else:
+                ret.append(self.rev_map[np.argmax(vector)])
 
-            all_zeros = not np.any(vector)
-            if self.handle_unknown == "return_zeros" and all_zeros:
-                ret.append(UNCOMMON_WORD)
-            else:  # self.handle_unknown == "unknown_token"
-                ohe_index = np.argmax(vector)
-                ret.append(self._lang.index2word[ohe_index])
+            probs.append(self._norm_vec(vector))
 
-            if return_raw:
-                probs.append(softmax(vector).tolist())
+        return ret, probs, self.rev_map
 
-        if return_raw:
-            return ret, probs, self.rev_map
-        else:
-            return ret
+    @staticmethod
+    def _norm_vec(vec: List[float]):
+        """
+        Given a vector, normalizes so that the sum of elements is 1.
+
+        :param vec: Assigned weights for each category
+        """
+        total = sum(vec)
+        if total == 0:
+            return vec
+        return [i / total for i in vec]

@@ -168,7 +168,6 @@ class Neural(BaseMixer):
         return lr, best_model
 
     def _max_fit(self, train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after):
-        started = time.time()
         epochs_to_best = 0
         best_dev_error = pow(2, 32)
         running_errors = []
@@ -193,6 +192,8 @@ class Neural(BaseMixer):
                         optimizer.step()
 
                 running_losses.append(loss.item())
+                if (time.time() - self.started) > stop_after:
+                    break
 
             train_error = np.mean(running_losses)
             epoch_error = self._error(dev_dl, criterion)
@@ -221,7 +222,7 @@ class Neural(BaseMixer):
                                             weights=[(1 / 2)**i for i in range(1, 5)])
                     if delta_mean <= 0:
                         break
-                elif (time.time() - started) > stop_after:
+                elif (time.time() - self.started) > stop_after:
                     break
                 elif running_errors[-1] < 0.0001 or train_error < 0.0001:
                     break
@@ -263,6 +264,7 @@ class Neural(BaseMixer):
         :param dev_data: Data used for early stopping and hyperparameter determination
         """
         # ConcatedEncodedDs
+        self.started = time.time()
         self.batch_size = min(200, int(len(train_data) / 10))
         self.batch_size = max(40, self.batch_size)
 
@@ -282,8 +284,10 @@ class Neural(BaseMixer):
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        self.model, epoch_to_best_model, err = self._max_fit(
-            train_dl, dev_dl, criterion, optimizer, scaler, self.stop_after, return_model_after=20000)
+        # Only 0.8 of the remaining time budget is used to allow some time for the final tuning and partial fit
+        self.model, epoch_to_best_model, _ = self._max_fit(
+            train_dl, dev_dl, criterion, optimizer, scaler, (self.stop_after - (time.time() - self.started)) * 0.8,
+            return_model_after=20000)
 
         self.epochs_to_best += epoch_to_best_model
 
@@ -302,6 +306,7 @@ class Neural(BaseMixer):
         """
 
         # Based this on how long the initial training loop took, at a low learning rate as to not mock anything up tooo badly # noqa
+        self.started = time.time()
         train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
         dev_dl = DataLoader(dev_data, batch_size=self.batch_size, shuffle=True)
         optimizer = self._select_optimizer()
@@ -309,7 +314,7 @@ class Neural(BaseMixer):
         scaler = GradScaler()
 
         self.model, _, _ = self._max_fit(train_dl, dev_dl, criterion, optimizer, scaler,
-                                         self.stop_after, max(1, int(self.epochs_to_best / 3)))
+                                         self.stop_after * 0.1, max(1, int(self.epochs_to_best / 3)))
 
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
@@ -337,8 +342,7 @@ class Neural(BaseMixer):
                     kwargs['dependency_data'] = {dep: ds.data_frame.iloc[idx][[dep]].values}
 
                 if args.predict_proba and self.supports_proba:
-                    kwargs['return_raw'] = True
-                    decoded_prediction, probs, rev_map = self.target_encoder.decode(Yh, **kwargs)
+                    decoded_prediction, probs, rev_map = self.target_encoder.decode_probabilities(Yh, **kwargs)
                     all_probs.append(probs)
                 else:
                     decoded_prediction = self.target_encoder.decode(Yh, **kwargs)

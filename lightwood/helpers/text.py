@@ -257,7 +257,7 @@ def get_identifier_description(data: Iterable, column_name: str, data_dtype: dty
                 return 'Unknown identifier'
 
     # Everything is unique and it's too short to be rich text
-    if data_dtype in (dtype.categorical, dtype.short_text, dtype.rich_text) and \
+    if data_dtype in (dtype.categorical, dtype.binary, dtype.short_text, dtype.rich_text) and \
             unique_pct > 0.99999 and mean_spaces < 1:
         return 'Unknown identifier'
 

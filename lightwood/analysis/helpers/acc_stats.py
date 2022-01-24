@@ -21,9 +21,8 @@ class AccStats(BaseAnalysisBlock):
 
         # @TODO: maybe pass ts_analysis to trigger group-wise MASE instead of R2 mean, though it wouldn't be 0-1 bounded
         info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
-                                               ns.target, ns.accuracy_functions)
+                                               ns.target, ns.accuracy_functions, ts_analysis={'tss': ns.tss})
         info['normal_accuracy'] = np.mean(list(info['score_dict'].values()))
-
         self.fit(ns, info['result_df'])
         info['val_overall_acc'], info['acc_histogram'], info['cm'], info['acc_samples'] = self.get_accuracy_stats()
         return info

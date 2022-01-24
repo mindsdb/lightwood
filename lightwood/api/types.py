@@ -164,6 +164,7 @@ class StatisticalAnalysis:
     :param df_target_stddev: The standard deviation of the target of the dataset
     :param train_observed_classes:
     :param target_class_distribution:
+    :param target_weights: What weight the analysis suggests to assign each class by in the case of classification problems. Note: target_weights in the problem definition overides this
     :param histograms:
     :param buckets:
     :param missing:
@@ -171,12 +172,13 @@ class StatisticalAnalysis:
     :param bias:
     :param avg_words_per_sentence:
     :param positive_domain:
-    """
+    """ # noqa
 
     nr_rows: int
     df_target_stddev: Optional[float]
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
+    target_weights: object  # Dict[str, float]
     histograms: object  # Dict[str, Dict[str, List[object]]]
     buckets: object  # Dict[str, Dict[str, List[object]]]
     missing: object
@@ -210,27 +212,32 @@ class TimeseriesSettings:
          for these columns will yield a different series.
     :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a\
          prediction, after the rows are ordered by order_by columns and split into groups if applicable.
-    :param nr_predictions: The number of points in the future that predictions should be made for, defaults to 1. Once \
+    :param horizon: The number of points in the future that predictions should be made for, defaults to 1. Once \
         trained, the model will be able to predict up to this many points into the future.
     :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the \
         time series predictor. Note that a non-historical column shall still be used to forecast, but without \
             considering their change through time.
     :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).
     :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
-    """
+    :param allow_incomplete_history: whether predictions can be made for rows with incomplete historical context (i.e. less than `window` rows have been observed for the datetime that has to be forecasted).
+    :param eval_cold_start: whether to include predictions with incomplete history (thus part of the cold start region for certain mixers) when evaluating mixer scores with the validation dataset.
+    :param interval_periods: tuple of tuples with user-provided period lengths for time intervals. Default values will be added for intervals left unspecified. For interval options, check the `timeseries_analyzer.detect_period()` method documentation. e.g.: (('daily', 7),).
+    """  # noqa
 
     is_timeseries: bool
     order_by: List[str] = None
     window: int = None
     group_by: List[str] = None
     use_previous_target: bool = True
-    nr_predictions: int = None
+    horizon: int = None
     historical_columns: List[str] = None
     target_type: str = (
         ""  # @TODO: is the current setter (outside of initialization) a sane option?
         # @TODO: George: No, I don't think it is, we need to pass this some other way
     )
     allow_incomplete_history: bool = False
+    eval_cold_start: bool = True
+    interval_periods: tuple = tuple()
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -254,8 +261,10 @@ class TimeseriesSettings:
                 window=obj["window"],
                 use_previous_target=obj.get("use_previous_target", True),
                 historical_columns=[],
-                nr_predictions=obj.get("nr_predictions", 1),
-                allow_incomplete_history=obj.get('allow_incomplete_history', False)
+                horizon=obj.get("horizon", 1),
+                allow_incomplete_history=obj.get('allow_incomplete_history', False),
+                eval_cold_start=obj.get('eval_cold_start', True),
+                interval_periods=obj.get('interval_periods', tuple(tuple()))
             )
             for setting in obj:
                 timeseries_settings.__setattr__(setting, obj[setting])
@@ -307,6 +316,8 @@ class ProblemDefinition:
     :param seconds_per_mixer: Number of seconds maximum to spend PER mixer trained in the list of possible mixers.
     :param seconds_per_encoder: Number of seconds maximum to spend when training an encoder that requires data to \
     learn a representation.
+    :param expected_additional_time: Time budget for non-encoder/mixer tasks \
+    (ex: data analysis, pre-processing, model ensembling or model analysis)
     :param time_aim: Time budget (in seconds) to train all needed components for the predictive tasks, including \
         encoders and models.
     :param target_weights: indicates to the accuracy functions how much to weight every target class.
@@ -317,6 +328,7 @@ class ProblemDefinition:
         series.
     :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
         found in this list will be automatically removed from subsequent steps in the ML pipeline.
+    :param use_default_analysis: whether default analysis blocks are enabled.
     :param fit_on_all: Whether to fit the model on the held-out validation data. Validation data is strictly \
         used to evaluate how well a model is doing and is NEVER trained. However, in cases where users anticipate new \
             incoming data over time, the user may train the model further using the entire dataset.
@@ -327,13 +339,15 @@ class ProblemDefinition:
     target: str
     pct_invalid: float
     unbias_target: bool
-    seconds_per_mixer: Union[int, None]
-    seconds_per_encoder: Union[int, None]
-    time_aim: Union[float, None]
-    target_weights: Union[List[float], None]
+    seconds_per_mixer: Optional[int]
+    seconds_per_encoder: Optional[int]
+    expected_additional_time: Optional[int]
+    time_aim: Optional[float]
+    target_weights: Optional[List[float]]
     positive_domain: bool
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
+    use_default_analysis: bool
     ignore_features: List[str]
     fit_on_all: bool
     strict_mode: bool
@@ -354,13 +368,19 @@ class ProblemDefinition:
         unbias_target = obj.get('unbias_target', True)
         seconds_per_mixer = obj.get('seconds_per_mixer', None)
         seconds_per_encoder = obj.get('seconds_per_encoder', None)
+        expected_additional_time = obj.get('expected_additional_time', None)
+
         time_aim = obj.get('time_aim', None)
+        if time_aim is not None and time_aim < 10:
+            log.warning(f'Your specified time aim of {time_aim} is too short. Setting it to 10 seconds.')
+
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         anomaly_detection = obj.get('anomaly_detection', False)
         ignore_features = obj.get('ignore_features', [])
         fit_on_all = obj.get('fit_on_all', True)
+        use_default_analysis = obj.get('use_default_analysis', True)
         strict_mode = obj.get('strict_mode', True)
         seed_nr = obj.get('seed_nr', 420)
         problem_definition = ProblemDefinition(
@@ -369,12 +389,14 @@ class ProblemDefinition:
             unbias_target=unbias_target,
             seconds_per_mixer=seconds_per_mixer,
             seconds_per_encoder=seconds_per_encoder,
+            expected_additional_time=expected_additional_time,
             time_aim=time_aim,
             target_weights=target_weights,
             positive_domain=positive_domain,
             timeseries_settings=timeseries_settings,
             anomaly_detection=anomaly_detection,
             ignore_features=ignore_features,
+            use_default_analysis=use_default_analysis,
             fit_on_all=fit_on_all,
             strict_mode=strict_mode,
             seed_nr=seed_nr
@@ -559,11 +581,12 @@ class PredictionArguments:
         detector.
     """  # noqa
 
-    predict_proba: bool = False
+    predict_proba: bool = True
     all_mixers: bool = False
     fixed_confidence: Union[int, float, None] = None
     anomaly_error_rate: Union[float, None] = None
     anomaly_cooldown: int = 1
+    forecast_offset: int = 0
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -581,6 +604,7 @@ class PredictionArguments:
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
         anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
+        forecast_offset = obj.get('forecast_offset', PredictionArguments.forecast_offset)
 
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
@@ -588,6 +612,7 @@ class PredictionArguments:
             fixed_confidence=fixed_confidence,
             anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,
+            forecast_offset=forecast_offset,
         )
 
         return pred_args

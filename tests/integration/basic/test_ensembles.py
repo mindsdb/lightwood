@@ -1,7 +1,6 @@
 import unittest
 import pandas as pd
 from sklearn.metrics import r2_score, accuracy_score
-
 from lightwood.api.high_level import code_from_json_ai, json_ai_from_problem, predictor_from_code
 from lightwood.api.types import ProblemDefinition
 
