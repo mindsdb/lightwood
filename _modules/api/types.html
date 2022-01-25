@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.types &mdash; lightwood 2.1.4.0 documentation</title>
+  <title>api.types &mdash; lightwood 22.1.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                2.1.4.0
+                22.1.4.0
               </div>
             
           
@@ -405,7 +405,7 @@
         <span class="s2">&quot;&quot;</span>  <span class="c1"># @TODO: is the current setter (outside of initialization) a sane option?</span>
         <span class="c1"># @TODO: George: No, I don&#39;t think it is, we need to pass this some other way</span>
     <span class="p">)</span>
-    <span class="n">allow_incomplete_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">allow_incomplete_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">eval_cold_start</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">interval_periods</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
 
@@ -432,7 +432,7 @@
                 <span class="n">use_previous_target</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_previous_target&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                 <span class="n">historical_columns</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">horizon</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;horizon&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-                <span class="n">allow_incomplete_history</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;allow_incomplete_history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                <span class="n">allow_incomplete_history</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;allow_incomplete_history&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                 <span class="n">eval_cold_start</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;eval_cold_start&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                 <span class="n">interval_periods</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;interval_periods&#39;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">()))</span>
             <span class="p">)</span>
