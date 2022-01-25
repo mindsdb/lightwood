@@ -1,20 +1,23 @@
 from copy import deepcopy
+from typing import List
 
 import pandas as pd
 
 
 class BaseImputer:
-    def __init__(self, target_col: str, value: str = 'zero', force_typecast: str = None):
+    def __init__(self, target_col: str, dependencies: List[str] = [], value: str = 'zero', force_typecast: str = None):
         """
         Lightwood imputers can modify a subset of columns (typically, a single column) after the raw data has been cleaned.
         
         The single method to implement, `impute` is where the logic for missing values in all relevant columns has to be specified. The recommendation is to deepcopy the data frame prior to imputing.
         
         :param target_col: Column that the imputer will handle. 
+        :param dependencies: Columns that the imputer additionally needs to impute the target column.
         :param value: Specifies the imputation value.
         :param force_typecast: Setting this flag to something other than 'None' will force the column to be casted into either 'int' or 'float' 
         """  # noqa
         self.target_col = target_col
+        self.depedencies = dependencies
         self.value = value
         self.force_typecast = force_typecast
 
@@ -23,7 +26,7 @@ class BaseImputer:
 
 
 class NumericalImputer(BaseImputer):
-    def __init__(self, target_col: str, value: str = 'zero', force_typecast: str = None):
+    def __init__(self, target_col: str, dependencies: List[str] = [], value: str = 'zero', force_typecast: str = None):
         """
         Imputer for numerical columns. Supports a handful of different approaches to define the imputation value.
         
@@ -31,7 +34,7 @@ class NumericalImputer(BaseImputer):
         
         :param value: One of 'mean', 'median', 'zero', 'mode'.
         """  # noqa
-        super().__init__(target_col, value, force_typecast)
+        super().__init__(target_col, dependencies, value, force_typecast)
 
     def impute(self, data: pd.DataFrame) -> pd.DataFrame:
         data = deepcopy(data)
@@ -61,7 +64,7 @@ class NumericalImputer(BaseImputer):
 
 
 class CategoricalImputer(BaseImputer):
-    def __init__(self, target_col: str, value: str = 'zero', **kwargs):
+    def __init__(self, target_col: str, dependencies: List[str] = [], value: str = 'zero', **kwargs):
         """
         Imputer for categorical columns.
         
@@ -69,7 +72,7 @@ class CategoricalImputer(BaseImputer):
         
         :param value: One of 'mode', 'unk'. The former replaces missing data with the most common label, and the latter with an "UNK" string.
         """  # noqa
-        super().__init__(target_col, value)
+        super().__init__(target_col, dependencies, value, **kwargs)
 
     def impute(self, data: pd.DataFrame) -> pd.DataFrame:
         data = deepcopy(data)

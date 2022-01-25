@@ -547,11 +547,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         if json_ai.features[name].dependency is None:
             json_ai.features[name].dependency = []
 
-    imputers = {}
-    for col, feat in json_ai.features.items():
-        if feat.imputer is not None:
-            imputers[col] = feat.imputer
-
     # Add "hidden" fields
     hidden_fields = {
         "cleaner": {
@@ -563,7 +558,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
-                "imputers": imputers,
+                "imputers": "imputers",
                 "timeseries_settings": "$problem_definition.timeseries_settings",
                 "anomaly_detection": "$problem_definition.anomaly_detection",
             },

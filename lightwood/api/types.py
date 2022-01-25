@@ -38,12 +38,10 @@ class Feature:
     :param data_dtype: The type of information within this column (ex.: numerical, categorical, etc.)
     :param dependency: Any custom attributes for this feature that may require non-standard processing. This highly\
     depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
-    :param imputer: specifies what imputer class should handle missing values. Format: "type.strategy" (e.g. "numerical.mean"). For all possible strategies, see the imputers documentation.
     """  # noqa
 
     encoder: Module
     data_dtype: str
-    imputer: str = None
     dependency: List[str] = None
 
     @staticmethod

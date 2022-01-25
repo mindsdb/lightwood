@@ -36,20 +36,26 @@ class TestCleaner(unittest.TestCase):
         cat_mode_target_value = df[cat_mode_impute_col].iloc[1:].mode().iloc[0]
         cat_unk_target_value = 'UNK'
 
-        jai.features[num_mean_impute_col].imputer = 'numerical.mean'
-        jai.features[num_mode_impute_col].imputer = 'numerical.mode'
-        jai.features[num_median_impute_col].imputer = 'numerical.median'
-        jai.features[num_zero_impute_col].imputer = 'numerical.zero'
-        jai.features[cat_mode_impute_col].imputer = 'categorical.mode'
-        jai.features[cat_unk_impute_col].imputer = 'categorical.unk'
+        jai.cleaner = {
+            "module": "cleaner",
+            "args": {
+                "imputers": {
+                    num_mean_impute_col: {"module": "NumericalImputer", "args": {"mode": "mean"}},
+                    num_mode_impute_col: {"module": "NumericalImputer", "args": {"mode": "mode"}},
+                    num_median_impute_col: {"module": "NumericalImputer", "args": {"mode": "median"}},
+                    num_zero_impute_col: {"module": "NumericalImputer", "args": {"mode": "zero"}},
+                    cat_mode_impute_col: {"module": "CategoricalImputer", "args": {"mode": "mode"}},
+                    cat_unk_impute_col: {"module": "CategoricalImputer", "args": {"mode": "unk"}},
+            }}
+        }
         predictor = predictor_from_json_ai(jai)
         cleaned_data = predictor.preprocess(df)
 
         # check cleaner was assigned imputers
         assert jai.cleaner['args']['imputers'][num_mean_impute_col] == 'numerical.mean'
         assert jai.cleaner['args']['imputers'][num_mode_impute_col] == 'numerical.mode'
-        assert jai.cleaner['args']['imputers'][num_zero_impute_col] == 'numerical.zero'
         assert jai.cleaner['args']['imputers'][num_median_impute_col] == 'numerical.median'
+        assert jai.cleaner['args']['imputers'][num_zero_impute_col] == 'numerical.zero'
         assert jai.cleaner['args']['imputers'][cat_mode_impute_col] == 'categorical.mode'
         assert jai.cleaner['args']['imputers'][cat_unk_impute_col] == 'categorical.unk'
 
