@@ -232,7 +232,7 @@ class TimeseriesSettings:
         ""  # @TODO: is the current setter (outside of initialization) a sane option?
         # @TODO: George: No, I don't think it is, we need to pass this some other way
     )
-    allow_incomplete_history: bool = False
+    allow_incomplete_history: bool = True
     eval_cold_start: bool = True
     interval_periods: tuple = tuple()
 
@@ -259,7 +259,7 @@ class TimeseriesSettings:
                 use_previous_target=obj.get("use_previous_target", True),
                 historical_columns=[],
                 horizon=obj.get("horizon", 1),
-                allow_incomplete_history=obj.get('allow_incomplete_history', False),
+                allow_incomplete_history=obj.get('allow_incomplete_history', True),
                 eval_cold_start=obj.get('eval_cold_start', True),
                 interval_periods=obj.get('interval_periods', tuple(tuple()))
             )
