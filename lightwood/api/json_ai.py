@@ -48,7 +48,7 @@ from lightwood.helpers.text import *
 from lightwood.helpers.torch import *
 from lightwood.mixer import *
 import pandas as pd
-from typing import Dict, List
+from typing import Dict, List, Union
 import os
 from types import ModuleType
 import importlib.machinery
@@ -134,11 +134,10 @@ def lookup_encoder(
     # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
-        if col_name in tss.order_by + tss.historical_columns:
-            encoder_dict["module"] = "TimeSeriesEncoder"
-            encoder_dict["args"]["original_type"] = f'"{col_dtype}"'
-            encoder_dict["args"]["target"] = "self.target"
-            encoder_dict["args"]["grouped_by"] = f"{gby}"
+        if col_name in tss.order_by:
+            encoder_dict["module"] = "ArrayEncoder"
+            encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
+            encoder_dict["args"]["window"] = f"{tss.window}"
 
         if is_target:
             if col_dtype in [dtype.integer]:
@@ -147,12 +146,13 @@ def lookup_encoder(
             if col_dtype in [dtype.float]:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["module"] = "TsNumericEncoder"
-            if tss.nr_predictions > 1:
+            if tss.horizon > 1:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
-                encoder_dict["args"]["timesteps"] = f"{tss.nr_predictions}"
+                encoder_dict["args"]["timesteps"] = f"{tss.horizon}"
                 encoder_dict["module"] = "TsArrayNumericEncoder"
-        if "__mdb_ts_previous" in col_name:
-            encoder_dict["module"] = "ArrayEncoder"
+
+        if "__mdb_ts_previous" in col_name or col_name in tss.historical_columns:
+            encoder_dict["module"] = "TimeSeriesEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
             encoder_dict["args"]["window"] = f"{tss.window}"
 
@@ -230,7 +230,7 @@ def generate_json_ai(
             }
         ]
 
-        if not tss.is_timeseries or tss.nr_predictions == 1:
+        if not tss.is_timeseries or tss.horizon == 1:
             mixers.extend(
                 [
                     {
@@ -248,7 +248,7 @@ def generate_json_ai(
                     },
                 ]
             )
-        elif tss.nr_predictions > 1:
+        elif tss.horizon > 1:
             mixers.extend(
                 [
                     {
@@ -256,7 +256,7 @@ def generate_json_ai(
                         "args": {
                             "fit_on_dev": True,
                             "stop_after": "$problem_definition.seconds_per_mixer",
-                            "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                            "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
                         },
                     }
                 ]
@@ -269,7 +269,7 @@ def generate_json_ai(
                             "module": "SkTime",
                             "args": {
                                 "stop_after": "$problem_definition.seconds_per_mixer",
-                                "n_ts_predictions": "$problem_definition.timeseries_settings.nr_predictions",
+                                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
                             },
                         }
                     ]
@@ -291,7 +291,7 @@ def generate_json_ai(
         )
     }
 
-    if tss.is_timeseries and tss.nr_predictions > 1:
+    if tss.is_timeseries and tss.horizon > 1:
         list(outputs.values())[0].data_dtype = dtype.tsarray
 
     list(outputs.values())[0].encoder = lookup_encoder(
@@ -315,17 +315,6 @@ def generate_json_ai(
             is_target_predicting_encoder,
             statistical_analysis,
         )
-
-        if (
-            tss.is_timeseries
-            and eval(encoder["module"]).is_timeseries_encoder
-        ):
-            if tss.group_by is not None:
-                for group in tss.group_by:
-                    dependency.append(group)
-
-            if tss.use_previous_target:
-                dependency.append(f"__mdb_ts_previous_{target}")
 
         if len(dependency) > 0:
             feature = Feature(
@@ -628,6 +617,10 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             },
             {
                 "module": "AccStats",
+                "args": {"deps": ["ICP"]},
+            },
+            {
+                "module": "ConfStats",
                 "args": {"deps": ["ICP"]},
             },
         ] if problem_definition.use_default_analysis else [],
@@ -954,19 +947,24 @@ self.model_analysis, self.runtime_analyzer = {call(json_ai.analyzer)}
 self.mode = 'train'
 
 # --------------- #
-# Extract data
+# Prepare data
 # --------------- #
-# Extract the featurized data
-encoded_old_data = old_data if old_data is not None else pd.DataFrame()
-encoded_new_data = new_data
+if old_data is None:
+    old_data = pd.DataFrame()
+
+if isinstance(old_data, pd.DataFrame):
+    old_data = EncodedDs(self.encoders, old_data, self.target)
+
+if isinstance(new_data, pd.DataFrame):
+    new_data = EncodedDs(self.encoders, new_data, self.target)
 
 # --------------- #
-# Adjust (Update) Mixers
+# Update/Adjust Mixers
 # --------------- #
 log.info('Updating the mixers')
 
 for mixer in self.mixers:
-    mixer.partial_fit(encoded_new_data, encoded_old_data)
+    mixer.partial_fit(new_data, old_data)
 """  # noqa
 
     adjust_body = align(adjust_body, 2)
@@ -1018,6 +1016,9 @@ if self.problem_definition.fit_on_all:
 
     predict_body = f"""
 self.mode = 'predict'
+
+if len(data) == 0:
+    raise Exception("Empty input, aborting prediction. Please try again with some input data.")
 
 # Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
@@ -1107,7 +1108,8 @@ class Predictor(PredictorInterface):
         data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
-    def adjust(self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None) -> None:
+    def adjust(self, new_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
+        old_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -> None:
         # Update mixers with new information
 {adjust_body}
 

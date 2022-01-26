@@ -30,6 +30,10 @@ class TestBasic(unittest.TestCase):
             {
                 "module": "AccStats",
                 "args": {"deps": ["ICP"]}
+        },
+            {
+                "module": "ConfStats",
+                "args": {"deps": ["ICP"]}
         }]
 
         predictor = predictor_from_json_ai(jai)
@@ -49,3 +53,8 @@ class TestBasic(unittest.TestCase):
         fixed_predictions = predictor.predict(df, {'fixed_confidence': fixed_conf})
 
         assert all([v == fixed_conf for v in fixed_predictions['confidence'].values])
+
+        # test empty dataframe handling
+        with self.assertRaises(Exception) as ctx:
+            predictor.predict(pd.DataFrame())
+        self.assertTrue('Empty input' in str(ctx.exception))
