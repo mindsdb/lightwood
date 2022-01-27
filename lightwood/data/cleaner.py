@@ -40,6 +40,9 @@ def cleaner(
     :returns: The cleaned data
     """ # noqa
 
+    if '__lw_preprocessed' in data.columns and data['__lw_preprocessed'].all():
+        return data
+
     data = _remove_columns(data, identifiers, target, mode, timeseries_settings,
                            anomaly_detection, dtype_dict)
 

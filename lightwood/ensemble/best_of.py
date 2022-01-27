@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Dict, Optional
 
 import numpy as np
 import pandas as pd
@@ -42,6 +42,7 @@ class BestOf(BaseEnsemble):
 
             score_list.append(avg_score)
 
+        self.store_context(data.data_frame, ts_analysis)
         self.indexes_by_accuracy = list(reversed(np.array(score_list).argsort()))
         self.supports_proba = self.mixers[self.indexes_by_accuracy[0]].supports_proba
         log.info(f'Picked best mixer: {type(self.mixers[self.indexes_by_accuracy[0]]).__name__}')
@@ -64,9 +65,24 @@ class BestOf(BaseEnsemble):
                         log.warning(f'Unstable mixer {type(mixer).__name__} failed with exception: {e}.\
                         Trying next best')
 
-    def get_latest_context(self) -> pd.DataFrame:
-        print("Test.")
+    def store_context(self, data: pd.DataFrame, ts_analysis: Dict[str, str]):
         if self.dtype_dict[self.target] == 'tsarray':
+            context = pd.DataFrame()
+            groups = [g for g in ts_analysis['group_combinations'] if g != '__default']
+            for group in groups:
+                col_map = {col: group for col, group in zip(ts_analysis['tss'].group_by, group)}
+                for col, group in col_map.items():
+                    filtered = data
+                    filtered = filtered[filtered[col] == group]
+                    context = context.append(filtered.iloc[-1])
+            self.context = context
+        else:
+            self.context = pd.DataFrame()
+
+    def get_context(self) -> pd.DataFrame:
+        if self.dtype_dict[self.target] == 'tsarray':
+            self.context['__mdb_make_predictions'] = False  # trigger infer mode
+            self.context['__lw_preprocessed'] = True  # mark as preprocessed
             return self.context
         else:
             return self.context

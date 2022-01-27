@@ -34,6 +34,9 @@ def transform_timeseries(
     :return: A dataframe with all the transformations applied.
     """  # noqa
 
+    if '__lw_preprocessed' in data.columns and data['__lw_preprocessed'].all():
+        return data
+
     tss = timeseries_settings
     original_df = copy.deepcopy(data)
     gb_arr = tss.group_by if tss.group_by is not None else []

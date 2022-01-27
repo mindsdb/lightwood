@@ -1028,10 +1028,10 @@ if len(data) == 0:
     else:
         predict_body += """
 if len(data) == 0:
-    data = self.ensemble.get_latest_context()
+    data = self.ensemble.get_context()
 """
 
-    predict_body += """
+    predict_body += f"""
 # Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')

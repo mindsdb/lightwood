@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 import pandas as pd
 
@@ -46,9 +46,16 @@ class BaseEnsemble:
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         raise NotImplementedError()
 
-    def get_latest_context(self) -> pd.DataFrame:
+    def store_context(self, data: pd.DataFrame, ts_analysis: Optional[Dict] = {}) -> None:
+        """
+        This method gets called during ensembling for time series tasks.
+        It should store the latest `window` data points seen during training time (including any validation data) so that, by default, predictions will be made for the inmmediate next horizon without needing any input.
+        """  # noqa
+        pass
+
+    def get_context(self) -> pd.DataFrame:
         """
         This method gets called during inference in time series tasks if no input is passed.
-        It should retrieve the latest window data points seen at training so that by default predictions will be made for inmmediate next timesteps without needing any input.
+        It should retrieve data saved in self.store_context().
         """  # noqa
         return self.context
