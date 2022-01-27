@@ -66,23 +66,26 @@ class BestOf(BaseEnsemble):
                         Trying next best')
 
     def store_context(self, data: pd.DataFrame, ts_analysis: Dict[str, str]):
-        if self.dtype_dict[self.target] == 'tsarray':
+        if ts_analysis['tss'].is_timeseries:
             context = pd.DataFrame()
-            groups = [g for g in ts_analysis['group_combinations'] if g != '__default']
-            for group in groups:
-                col_map = {col: group for col, group in zip(ts_analysis['tss'].group_by, group)}
+            gby = ts_analysis['tss'].group_by
+            if gby:
+                gcombs = [g for g in ts_analysis['group_combinations'] if g != '__default']
+            else:
+                gcombs = gby = ['__default']
+
+            for gcomb in gcombs:
+                col_map = {col: group for col, group in zip(gby, gcomb)}
                 for col, group in col_map.items():
                     filtered = data
-                    filtered = filtered[filtered[col] == group]
+                    if gcomb != '__default':
+                        filtered = filtered[filtered[col] == group]
                     context = context.append(filtered.iloc[-1])
+            context['__mdb_make_predictions'] = False  # trigger infer mode
+            context['__lw_preprocessed'] = True  # mark as preprocessed
             self.context = context
         else:
             self.context = pd.DataFrame()
 
     def get_context(self) -> pd.DataFrame:
-        if self.dtype_dict[self.target] == 'tsarray':
-            self.context['__mdb_make_predictions'] = False  # trigger infer mode
-            self.context['__lw_preprocessed'] = True  # mark as preprocessed
-            return self.context
-        else:
-            return self.context
+        return self.context
