@@ -27,6 +27,13 @@ class TestTimeseries(unittest.TestCase):
             for t in range(horizon):
                 assert lower[t] <= prediction[t] <= upper[t]
 
+    def check_inferred_timestamp(self, preds: pd.DataFrame, data: pd.DataFrame, col: str):
+        """ Check timestamps are further into the future than dates in the data """
+        latest = pd.to_datetime(data.sort_values(by=col)[col]).max().timestamp()
+        for idx, row in preds.iterrows():
+            for timestamp in row[f'order_{col}']:
+                assert timestamp > latest
+
     def split_arrivals(self, data: pd.DataFrame, grouped: bool) -> (pd.DataFrame, pd.DataFrame):
         train_ratio = 0.8
 
@@ -96,12 +103,8 @@ class TestTimeseries(unittest.TestCase):
         test['__mdb_make_predictions'] = False
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, horizon, [order_by])
-
-        # Additionally, check timestamps are further into the future than test dates
-        latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
-        for idx, row in preds.iterrows():
-            for timestamp in row[f'order_{order_by}']:
-                assert timestamp > latest_timestamp
+        for group in test['Country'].unique():
+            self.check_inferred_timestamp(preds[preds[f'group_Country'] == group], train[train['Country'] == group], 'T')
 
         # Check custom ICP params
         test.pop('__mdb_make_predictions')
@@ -109,6 +112,12 @@ class TestTimeseries(unittest.TestCase):
         assert all([all([v == 0.01 for v in f]) for f in preds['confidence'].values])
         assert pred.pred_args.anomaly_error_rate == 1
         assert pred.pred_args.anomaly_cooldown == 100
+
+        # Check empty-input forecast
+        preds = pred.predict(pd.DataFrame())
+        self.check_ts_prediction_df(preds, horizon, [order_by])
+        for group in data['Country'].unique():
+            self.check_inferred_timestamp(preds[preds['group_Country'] == group], train[train['Country'] == group], 'T')
 
     def test_1_time_series_regression(self):
         data = pd.read_csv('tests/data/arrivals.csv')
@@ -140,12 +149,12 @@ class TestTimeseries(unittest.TestCase):
         test_df = test_df.sample(frac=1)  # shuffle to test internal ordering logic
         preds = pred.predict(test_df)
         self.check_ts_prediction_df(preds, horizon, [order_by])
+        self.check_inferred_timestamp(preds, test_df, order_by)
 
-        # Additionally, check timestamps are further into the future than test dates
-        latest_timestamp = pd.to_datetime(test_df[order_by]).max().timestamp()
-        for idx, row in preds.iterrows():
-            for timestamp in row[f'order_{order_by}']:
-                assert timestamp > latest_timestamp
+        # Check empty-input forecast
+        preds = pred.predict(pd.DataFrame())
+        self.check_ts_prediction_df(preds, horizon, [order_by])
+        self.check_inferred_timestamp(preds, data, order_by)
 
     def test_2_time_series_classification(self):
         df = pd.read_csv('tests/data/arrivals.csv')
@@ -234,6 +243,10 @@ class TestTimeseries(unittest.TestCase):
 
         test.pop(f'{target}_2x')
         self.assertRaises(Exception, predictor.predict, test)
+
+        # Check empty-input forecast
+        preds = predictor.predict(pd.DataFrame())
+        self.check_ts_prediction_df(preds, horizon, ['Time'])
 
         # compare vs sktime manual usage
         if isinstance(predictor.ensemble.mixers[predictor.ensemble.best_index], SkTime):
