@@ -286,6 +286,8 @@ def generate_json_ai(
                     "args": "$pred_args",
                     "accuracy_functions": "$accuracy_functions",
                     "ts_analysis": "self.ts_analysis" if is_ts else None,
+                    "dtype_dict": "$dtype_dict",
+                    "target": "$target",
                 },
             },
         )
@@ -1014,12 +1016,22 @@ if self.problem_definition.fit_on_all:
     # Predict Body
     # ----------------- #
 
-    predict_body = f"""
+    predict_body = """
 self.mode = 'predict'
+"""
 
+    if not json_ai.problem_definition.timeseries_settings.is_timeseries:
+        predict_body += """
 if len(data) == 0:
     raise Exception("Empty input, aborting prediction. Please try again with some input data.")
+"""
+    else:
+        predict_body += """
+if len(data) == 0:
+    data = self.ensemble.get_latest_context()
+"""
 
+    predict_body += """
 # Remove columns that user specifies to ignore
 log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
 data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')

@@ -19,9 +19,9 @@ class BestOf(BaseEnsemble):
     """  # noqa
     indexes_by_accuracy: List[float]
 
-    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict, accuracy_functions,
                  args: PredictionArguments, ts_analysis: Optional[dict] = None) -> None:
-        super().__init__(target, mixers, data)
+        super().__init__(target, mixers, data, dtype_dict)
 
         score_list = []
         for _, mixer in enumerate(mixers):
@@ -63,3 +63,10 @@ class BestOf(BaseEnsemble):
                     else:
                         log.warning(f'Unstable mixer {type(mixer).__name__} failed with exception: {e}.\
                         Trying next best')
+
+    def get_latest_context(self) -> pd.DataFrame:
+        print("Test.")
+        if self.dtype_dict[self.target] == 'tsarray':
+            return self.context
+        else:
+            return self.context

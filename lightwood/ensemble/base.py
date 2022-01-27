@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 import pandas as pd
 
@@ -15,23 +15,40 @@ class BaseEnsemble:
     
     There are two important methods for any ensemble to work:
         1. `__init__()` should prepare all mixers and internal ensemble logic.
-        2. `__call__()` applies any aggregation rules to generate final predictions based on the output of each mixer. 
+        2. `__call__()` applies any aggregation rules to generate final predictions based on the output of each mixer.
 
-    Class Attributes:
+    Notable class attributes:
     - mixers: List of mixers the ensemble will use.
-    - supports_proba: For classification tasks, whether the ensemble supports yielding per-class scores rather than only returning the predicted label. 
+    - supports_proba: For classification tasks, whether the ensemble supports yielding per-class scores rather than only returning the predicted label.
 
+    For time series specific ensembles, a few additional steps need to be implemented:
+     - Store the latest `window` rows of data used when training in `self.context`.
+     - Override the `get_latest_context()` method to use the data stored in the step above.
     """  # noqa
+
     data: EncodedDs
     mixers: List[BaseMixer]
+    dtype_dict: Dict[str, str]
+    target: str
     best_index: int  # @TODO: maybe only applicable to BestOf
     supports_proba: bool
+    context: pd.DataFrame
 
-    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs) -> None:
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: Dict[str, str]) -> None:
         self.data = data
         self.mixers = mixers
         self.best_index = 0
         self.supports_proba = False
+        self.target = target
+        self.dtype_dict = dtype_dict
+        self.context = pd.DataFrame()
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         raise NotImplementedError()
+
+    def get_latest_context(self) -> pd.DataFrame:
+        """
+        This method gets called during inference in time series tasks if no input is passed.
+        It should retrieve the latest window data points seen at training so that by default predictions will be made for inmmediate next timesteps without needing any input.
+        """  # noqa
+        return self.context
