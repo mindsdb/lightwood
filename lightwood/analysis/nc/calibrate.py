@@ -286,7 +286,7 @@ class ICP(BaseAnalysisBlock):
                     significances, confs = get_numeric_conf_range(all_confs,
                                                                   df_target_stddev=ns.analysis['df_target_stddev'],
                                                                   positive_domain=self.positive_domain,
-                                                                  error_rate=ns.pred_args.fixed_confidence)
+                                                                  fixed_conf=ns.pred_args.fixed_confidence)
                     result.loc[X.index, 'lower'] = confs[:, 0]
                     result.loc[X.index, 'upper'] = confs[:, 1]
                 else:
@@ -325,7 +325,7 @@ class ICP(BaseAnalysisBlock):
                                         df_target_stddev=ns.analysis['df_target_stddev'],
                                         positive_domain=self.positive_domain,
                                         group=frozenset(group),
-                                        error_rate=error_rate
+                                        fixed_conf=error_rate
                                     )
 
                                     # only replace where grouped ICP is more informative (i.e. tighter)
