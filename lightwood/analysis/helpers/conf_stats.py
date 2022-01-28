@@ -74,6 +74,7 @@ class ConfStats(BaseAnalysisBlock):
         size = round(len(sorted_inp) / self.ece_bins)
         bins = []
         ece = 0
+        
 
         for i in range(1, self.ece_bins):
             bin = sorted_inp.iloc[(i - 1) * size:i * size]
