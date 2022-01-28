@@ -18,7 +18,7 @@ class ModeEnsemble(BaseEnsemble):
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,
                  accuracy_functions, args: PredictionArguments, ts_analysis: Optional[dict] = None) -> None:
-        super().__init__(target, mixers, data)
+        super().__init__(target, mixers, data, dtype_dict)
         self.mixer_scores = {}
 
         if dtype_dict[target] not in (dtype.binary, dtype.categorical, dtype.tags):

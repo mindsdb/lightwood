@@ -16,7 +16,7 @@ from lightwood import dtype
 class WeightedMeanEnsemble(BaseEnsemble):
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, args: PredictionArguments,
                  dtype_dict: dict, accuracy_functions, ts_analysis: Optional[dict] = None) -> None:
-        super().__init__(target, mixers, data)
+        super().__init__(target, mixers, data, dtype_dict)
         if dtype_dict[target] not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(
                 f'This ensemble can only be used regression problems! Got target dtype {dtype_dict[target]} instead!')

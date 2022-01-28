@@ -65,8 +65,8 @@ class BestOf(BaseEnsemble):
                         log.warning(f'Unstable mixer {type(mixer).__name__} failed with exception: {e}.\
                         Trying next best')
 
-    def store_context(self, data: pd.DataFrame, ts_analysis: Dict[str, str]):
-        if ts_analysis['tss'].is_timeseries:
+    def store_context(self, data: pd.DataFrame, ts_analysis: Optional[Dict[str, str]] = None):
+        if ts_analysis and ts_analysis['tss'].is_timeseries:
             context = pd.DataFrame()
             gby = ts_analysis['tss'].group_by
             if gby:
