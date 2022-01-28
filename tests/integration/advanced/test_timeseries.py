@@ -104,7 +104,7 @@ class TestTimeseries(unittest.TestCase):
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, horizon, [order_by])
         for group in test['Country'].unique():
-            self.check_inferred_timestamp(preds[preds[f'group_Country'] == group], train[train['Country'] == group], 'T')
+            self.check_inferred_timestamp(preds[preds['group_Country'] == group], train[train['Country'] == group], 'T')
 
         # Check custom ICP params
         test.pop('__mdb_make_predictions')
@@ -117,7 +117,9 @@ class TestTimeseries(unittest.TestCase):
         preds = pred.predict(pd.DataFrame())
         self.check_ts_prediction_df(preds, horizon, [order_by])
         for group in data['Country'].unique():
-            self.check_inferred_timestamp(preds[preds['group_Country'] == group], train[train['Country'] == group], 'T')
+            self.check_inferred_timestamp(preds[preds['group_Country'] == group],
+                                          train[train['Country'] == group],
+                                          'T')
 
     def test_1_time_series_regression(self):
         data = pd.read_csv('tests/data/arrivals.csv')
