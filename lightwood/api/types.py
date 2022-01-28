@@ -570,10 +570,7 @@ class PredictionArguments:
     instead of returning only the predicted class, the output additionally includes the assigned probability for
     each class.   
     :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers. 
-    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
-        that predictions, in average, are correct `alpha` percent of the time.
-    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
-        (respectively implies wider and tighter bounds, all other parameters being equal).
+    :param fixed_confidence: Used in the ICP analyzer module, specifies an `alpha` fixed confidence so that predictions, in average, are correct `alpha` percent of the time. For unsupervised anomaly detection, this also translates into the expected error rate. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).
     :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
         detector.
     """  # noqa
@@ -581,7 +578,6 @@ class PredictionArguments:
     predict_proba: bool = True
     all_mixers: bool = False
     fixed_confidence: Union[int, float, None] = None
-    anomaly_error_rate: Union[float, None] = None
     anomaly_cooldown: int = 1
     forecast_offset: int = 0
 
@@ -599,7 +595,6 @@ class PredictionArguments:
         predict_proba = obj.get('predict_proba', PredictionArguments.predict_proba)
         all_mixers = obj.get('all_mixers', PredictionArguments.all_mixers)
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
-        anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
         forecast_offset = obj.get('forecast_offset', PredictionArguments.forecast_offset)
 
@@ -607,7 +602,6 @@ class PredictionArguments:
             predict_proba=predict_proba,
             all_mixers=all_mixers,
             fixed_confidence=fixed_confidence,
-            anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,
             forecast_offset=forecast_offset,
         )
