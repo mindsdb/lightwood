@@ -1073,46 +1073,56 @@ class Predictor(PredictorInterface):
 
         # Initial stats analysis
         self.statistical_analysis = None
+        self.runtime_log = dict()
 
-
+    @timed
     def analyze_data(self, data: pd.DataFrame) -> None:
         # Perform a statistical analysis on the unprocessed data
 {analyze_data_body}
 
+    @timed
     def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
         # Preprocess and clean data
 {clean_body}
 
+    @timed
     def split(self, data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
         # Split the data into training/testing splits
 {split_body}
 
+    @timed
     def prepare(self, data: Dict[str, pd.DataFrame]) -> None:
         # Prepare encoders to featurize data
 {prepare_body}
 
+    @timed
     def featurize(self, split_data: Dict[str, pd.DataFrame]):
         # Featurize data into numerical representations for models
 {feature_body}
 
+    @timed
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Fit predictors to estimate target
 {fit_body}
 
+    @timed
     def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Evaluate quality of fit for the ensemble of mixers
 {analyze_ensemble}
 
+    @timed
     def learn(self, data: pd.DataFrame) -> None:
         log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
         data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
+    @timed
     def adjust(self, new_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
         old_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -> None:
         # Update mixers with new information
 {adjust_body}
 
+    @timed
     def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_body}
 """
