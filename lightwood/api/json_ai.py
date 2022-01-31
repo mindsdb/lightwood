@@ -306,7 +306,7 @@ def generate_json_ai(
         encoders[col] = lookup_encoder(
             dtype_dict[col],
             col,
-            True,
+            False,
             problem_definition,
             False,
             statistical_analysis,
