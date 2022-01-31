@@ -36,7 +36,6 @@ def transform_timeseries(
     
     :return: A dataframe with all the transformations applied.
     """  # noqa
-
     tss = timeseries_settings
     original_df = copy.deepcopy(data)
     gb_arr = tss.group_by if tss.group_by is not None else []
@@ -129,11 +128,10 @@ def transform_timeseries(
                 last_index += 1
 
     if len(original_df) > mp_row_cutoff:
-        # @TODO: restore possibility to override this cutoff with args
         nr_procs = get_nr_procs(original_df)
         log.info(f'Using {nr_procs} processes to reshape.')
 
-        if use_dask:
+        if use_dask and len(original_df) > 50000:  # @TODO either add another arg or rm this
             log.info("Dask active.")
             df = dd.from_pandas(pd.concat(df_arr), npartitions=nr_procs)
             df_1 = dask.delayed(_ts_to_obj)(df, historical_columns=ob_arr + tss.historical_columns)
