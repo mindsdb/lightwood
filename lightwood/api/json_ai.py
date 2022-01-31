@@ -188,7 +188,7 @@ def generate_json_ai(
     for k in type_information.identifiers:
         del dtype_dict[k]
     dependency_dict = {}
-    
+
     for col_name, col_dtype in dtype_dict.items():
         if (
                 (col_name not in type_information.identifiers
@@ -197,7 +197,8 @@ def generate_json_ai(
                 or
                 (tss.group_by is not None and col_name in tss.group_by)
         ):
-            input_cols.append(col_name)
+            if col_name != problem_definition.target:
+                input_cols.append(col_name)
 
     is_target_predicting_encoder = False
     is_ts = problem_definition.timeseries_settings.is_timeseries
