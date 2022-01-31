@@ -1073,7 +1073,7 @@ class Predictor(PredictorInterface):
 
         # Initial stats analysis
         self.statistical_analysis = None
-        self.phase_times = dict()
+        self.runtime_log = dict()
 
     @timed
     def analyze_data(self, data: pd.DataFrame) -> None:

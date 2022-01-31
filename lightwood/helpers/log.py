@@ -5,8 +5,6 @@ from time import time
 from datetime import datetime
 from functools import wraps
 
-from lightwood.api.predictor import PredictorInterface
-
 
 def initialize_log():
     pid = os.getpid()
@@ -28,12 +26,11 @@ def timed(f):
     """
     @wraps(f)
     def wrap(predictor, *args, **kw):
-        assert isinstance(predictor, PredictorInterface)
         ts = time()
         result = f(predictor, *args, **kw)
         te = time()
         log.debug(f' `{f.__name__}` runtime: {round(te - ts, 2)} seconds')
-        predictor.phase_times[(f.__name__, datetime.fromtimestamp(ts))] = te - ts
+        predictor.runtime_log[(f.__name__, datetime.fromtimestamp(ts))] = te - ts
         return result
     return wrap
 
