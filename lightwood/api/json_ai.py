@@ -686,7 +686,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     # ----------------- #
 
-    input_cols = [x.replace("'", "\\'").replace('"', '\\"') for x in json_ai.encoders 
+    input_cols = [x.replace("'", "\\'").replace('"', '\\"') for x in json_ai.encoders
                   if x != json_ai.problem_definition.target]
     input_cols = ",".join([f"""'{name}'""" for name in input_cols])
 
