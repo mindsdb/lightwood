@@ -665,11 +665,11 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     tss = json_ai.problem_definition.timeseries_settings
     if tss.is_timeseries and tss.use_previous_target:
         col_name = f"__mdb_ts_previous_{json_ai.problem_definition.target}"
-        json_ai.problem_definition.timeseries_settings.target_type =\
-        json_ai.dtype_dict[json_ai.problem_definition.target]
+        target_type = json_ai.dtype_dict[json_ai.problem_definition.target]
+        json_ai.problem_definition.timeseries_settings.target_type = target_type
         encoder_dict[col_name] = call(
             lookup_encoder(
-                json_ai.dtype_dict[json_ai.problem_definition.target],
+                target_type,
                 col_name,
                 False,
                 json_ai.problem_definition,
@@ -678,10 +678,10 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
             )
         )
 
-        dtype_dict[col_name] = f"""'{json_ai.dtype_dict[json_ai.problem_definition.target]}'"""
+        dtype_dict[col_name] = f"""'{target_type}'"""
         # @TODO: Is populating the json_ai at this stage even necessary?
         json_ai.encoders[col_name] = encoder_dict[col_name]
-        json_ai.dtype_dict[col_name] = json_ai.dtype_dict[json_ai.problem_definition.target]
+        json_ai.dtype_dict[col_name] = target_type
         json_ai.dependency_dict[col_name] = []
 
     # ----------------- #
