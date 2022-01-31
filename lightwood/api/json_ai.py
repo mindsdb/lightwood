@@ -185,6 +185,8 @@ def generate_json_ai(
     input_cols = []
     tss = problem_definition.timeseries_settings
     dtype_dict = type_information.dtypes
+    for k in type_information.identifiers:
+        del dtype_dict[k]
     dependency_dict = {}
     
     for col_name, col_dtype in dtype_dict.items():
