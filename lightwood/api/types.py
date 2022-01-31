@@ -378,7 +378,7 @@ class JsonAI:
         """
         encoders = obj["encoders"]
         dtype_dict = obj["dtype_dict"]
-        dependency_dict = obj.get('dependency_dict', None)
+        dependency_dict = obj["dependency_dict"]
         model = obj["model"]
         problem_definition = ProblemDefinition.from_dict(obj["problem_definition"])
         identifiers = obj["identifiers"]
