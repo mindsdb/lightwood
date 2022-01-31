@@ -1246,46 +1246,56 @@
 
 <span class="s2">        # Initial stats analysis</span>
 <span class="s2">        self.statistical_analysis = None</span>
+<span class="s2">        self.runtime_log = dict()</span>
 
-
+<span class="s2">    @timed</span>
 <span class="s2">    def analyze_data(self, data: pd.DataFrame) -&gt; None:</span>
 <span class="s2">        # Perform a statistical analysis on the unprocessed data</span>
 <span class="si">{</span><span class="n">analyze_data_body</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def preprocess(self, data: pd.DataFrame) -&gt; pd.DataFrame:</span>
 <span class="s2">        # Preprocess and clean data</span>
 <span class="si">{</span><span class="n">clean_body</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def split(self, data: pd.DataFrame) -&gt; Dict[str, pd.DataFrame]:</span>
 <span class="s2">        # Split the data into training/testing splits</span>
 <span class="si">{</span><span class="n">split_body</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def prepare(self, data: Dict[str, pd.DataFrame]) -&gt; None:</span>
 <span class="s2">        # Prepare encoders to featurize data</span>
 <span class="si">{</span><span class="n">prepare_body</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def featurize(self, split_data: Dict[str, pd.DataFrame]):</span>
 <span class="s2">        # Featurize data into numerical representations for models</span>
 <span class="si">{</span><span class="n">feature_body</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def fit(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:</span>
 <span class="s2">        # Fit predictors to estimate target</span>
 <span class="si">{</span><span class="n">fit_body</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:</span>
 <span class="s2">        # Evaluate quality of fit for the ensemble of mixers</span>
 <span class="si">{</span><span class="n">analyze_ensemble</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def learn(self, data: pd.DataFrame) -&gt; None:</span>
 <span class="s2">        log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
 <span class="s2">        data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
 <span class="si">{</span><span class="n">learn_body</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def adjust(self, new_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],</span>
 <span class="s2">        old_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -&gt; None:</span>
 <span class="s2">        # Update mixers with new information</span>
 <span class="si">{</span><span class="n">adjust_body</span><span class="si">}</span><span class="s2"></span>
 
+<span class="s2">    @timed</span>
 <span class="s2">    def predict(self, data: pd.DataFrame, args: Dict = </span><span class="se">{{}}</span><span class="s2">) -&gt; pd.DataFrame:</span>
 <span class="si">{</span><span class="n">predict_body</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">&quot;&quot;&quot;</span>
