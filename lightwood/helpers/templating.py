@@ -1,5 +1,4 @@
-
-
+from lightwood.api.dtype import dtype
 '''
 def is_allowed(v):
     if v is None:
@@ -68,6 +67,10 @@ def is_allowed(v):
 
 
 def call(entity: dict) -> str:
+    # Special behavior for ensemble
+    if 'submodels' in entity['args']:
+        del entity['args']['submodels']
+        
     for k, v in entity['args'].items():
         if not str(v).startswith('$'):
             if not is_allowed(v):
@@ -87,6 +90,8 @@ def call(entity: dict) -> str:
 def inline_dict(obj: dict) -> str:
     arr = []
     for k, v in obj.items():
+        if str(v) in list(dtype.__dict__.keys()):
+            v = f"'{v}'"
         k = k.replace("'", "\\'").replace('"', '\\"')
         arr.append(f"""'{k}': {v}""")
 

@@ -1,13 +1,10 @@
 # TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
-from typing import Dict
 from lightwood.helpers.templating import call, inline_dict, align
 from lightwood.api import dtype
 from lightwood.api.types import (
     JsonAI,
     TypeInformation,
     StatisticalAnalysis,
-    Feature,
-    Output,
     ProblemDefinition,
 )
 import inspect
@@ -187,8 +184,10 @@ def generate_json_ai(
     target = problem_definition.target
     input_cols = []
     tss = problem_definition.timeseries_settings
-
-    for col_name, col_dtype in type_information.dtypes.items():
+    dtype_dict = type_information.dtypes
+    dependency_dict = {}
+    
+    for col_name, col_dtype in dtype_dict.items():
         if (
                 (col_name not in type_information.identifiers
                  and col_dtype not in (dtype.invalid, dtype.empty)
@@ -200,6 +199,7 @@ def generate_json_ai(
 
     is_target_predicting_encoder = False
     is_ts = problem_definition.timeseries_settings.is_timeseries
+
     # Single text column classification
     if (
         len(input_cols) == 1
@@ -209,7 +209,7 @@ def generate_json_ai(
         is_target_predicting_encoder = True
 
     if is_target_predicting_encoder:
-        mixers = [
+        submodels = [
             {
                 "module": "Unit",
                 "args": {
@@ -219,7 +219,7 @@ def generate_json_ai(
             }
         ]
     else:
-        mixers = [
+        submodels = [
             {
                 "module": "Neural",
                 "args": {
@@ -231,7 +231,7 @@ def generate_json_ai(
         ]
 
         if not tss.is_timeseries or tss.horizon == 1:
-            mixers.extend(
+            submodels.extend(
                 [
                     {
                         "module": "LightGBM",
@@ -249,7 +249,7 @@ def generate_json_ai(
                 ]
             )
         elif tss.horizon > 1:
-            mixers.extend(
+            submodels.extend(
                 [
                     {
                         "module": "LightGBMArray",
@@ -263,7 +263,7 @@ def generate_json_ai(
             )
 
             if tss.use_previous_target:
-                mixers.extend(
+                submodels.extend(
                     [
                         {
                             "module": "SkTime",
@@ -275,57 +275,42 @@ def generate_json_ai(
                     ]
                 )
 
-    outputs = {
-        target: Output(
-            data_dtype=type_information.dtypes[target],
-            encoder=None,
-            mixers=mixers,
-            ensemble={
-                "module": "BestOf",
-                "args": {
-                    "args": "$pred_args",
-                    "accuracy_functions": "$accuracy_functions",
-                    "ts_analysis": "self.ts_analysis" if is_ts else None,
-                },
-            },
-        )
+    model = {
+        "module": "BestOf",
+        "args": {
+            "submodels": submodels,
+            "args": "$pred_args",
+            "accuracy_functions": "$accuracy_functions",
+            "ts_analysis": "self.ts_analysis" if is_ts else None,
+        }
     }
 
     if tss.is_timeseries and tss.horizon > 1:
-        list(outputs.values())[0].data_dtype = dtype.tsarray
+        dtype_dict[target] = dtype.tsarray
 
-    list(outputs.values())[0].encoder = lookup_encoder(
-        type_information.dtypes[target],
-        target,
-        True,
-        problem_definition,
-        False,
-        statistical_analysis,
-    )
-
-    features: Dict[str, Feature] = {}
-    for col_name in input_cols:
-        col_dtype = type_information.dtypes[col_name]
-        dependency = []
-        encoder = lookup_encoder(
-            col_dtype,
-            col_name,
-            False,
+    encoders = {
+        target: lookup_encoder(
+            dtype_dict[target],
+            target,
+            True,
             problem_definition,
-            is_target_predicting_encoder,
+            False,
+            statistical_analysis,
+        )
+    }
+
+    for col in input_cols:
+        encoders[col] = lookup_encoder(
+            dtype_dict[col],
+            col,
+            True,
+            problem_definition,
+            False,
             statistical_analysis,
         )
 
-        if len(dependency) > 0:
-            feature = Feature(
-                encoder=encoder, dependency=dependency, data_dtype=col_dtype
-            )
-        else:
-            feature = Feature(encoder=encoder, data_dtype=col_dtype)
-        features[col_name] = feature
-
     # Decide on the accuracy functions to use
-    output_dtype = list(outputs.values())[0].data_dtype
+    output_dtype = dtype_dict[target]
     if output_dtype in [
         dtype.integer,
         dtype.float,
@@ -345,7 +330,7 @@ def generate_json_ai(
 
     # special dispatch for t+1 time series forecasters
     if is_ts:
-        if list(outputs.values())[0].data_dtype in [dtype.integer, dtype.float]:
+        if output_dtype in [dtype.integer, dtype.float]:
             accuracy_functions = ["evaluate_array_accuracy"]
 
     if problem_definition.time_aim is None:
@@ -357,8 +342,8 @@ def generate_json_ai(
         nr_trainable_encoders = len(
             [
                 x
-                for x in features.values()
-                if eval(x.encoder["module"]).is_trainable_encoder
+                for x in encoders.values()
+                if eval(x["module"]).is_trainable_encoder
             ]
         )
         if nr_trainable_encoders > 0:
@@ -367,19 +352,20 @@ def generate_json_ai(
     # Mixers are assigned 1/3 of the time aim (or 2/3 if there are no trainable encoders )\
     # unless a user overrides this (equal time per mixer)
     if problem_definition.seconds_per_mixer is None:
-        nr_mixers = len(list(outputs.values())[0].mixers)
         if problem_definition.seconds_per_encoder is None:
-            problem_definition.seconds_per_mixer = 0.66 * problem_definition.time_aim / nr_mixers
+            problem_definition.seconds_per_mixer = 0.66 * problem_definition.time_aim / len(model['args']['submodels'])
         else:
-            problem_definition.seconds_per_mixer = 0.33 * problem_definition.time_aim / nr_mixers
+            problem_definition.seconds_per_mixer = 0.33 * problem_definition.time_aim / len(model['args']['submodels'])
 
     return JsonAI(
         cleaner=None,
         splitter=None,
         analyzer=None,
         explainer=None,
-        features=features,
-        outputs=outputs,
+        encoders=encoders,
+        dtype_dict=dtype_dict,
+        dependency_dict=dependency_dict,
+        model=model,
         problem_definition=problem_definition,
         identifiers=type_information.identifiers,
         timeseries_transformer=None,
@@ -474,7 +460,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
     # Add implicit arguments
     # @TODO: Consider removing once we have a proper editor in studio
-    mixers = json_ai.outputs[json_ai.problem_definition.target].mixers
+    mixers = json_ai.model['args']['submodels']
     for i in range(len(mixers)):
         if mixers[i]["module"] == "Unit":
             pass
@@ -538,14 +524,13 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             # enforce fit_on_all if this mixer is specified
             problem_definition.fit_on_all = True
 
-    ensemble = json_ai.outputs[json_ai.problem_definition.target].ensemble
-    ensemble["args"]["target"] = ensemble["args"].get("target", "$target")
-    ensemble["args"]["data"] = ensemble["args"].get("data", "encoded_test_data")
-    ensemble["args"]["mixers"] = ensemble["args"].get("mixers", "$mixers")
+    json_ai.model["args"]["target"] = json_ai.model["args"].get("target", "$target")
+    json_ai.model["args"]["data"] = json_ai.model["args"].get("data", "encoded_test_data")
+    json_ai.model["args"]["mixers"] = json_ai.model["args"].get("mixers", "$mixers")
 
-    for name in json_ai.features:
-        if json_ai.features[name].dependency is None:
-            json_ai.features[name].dependency = []
+    for name in json_ai.encoders:
+        if name not in json_ai.dependency_dict:
+            json_ai.dependency_dict[name] = []
 
     # Add "hidden" fields
     hidden_fields = {
@@ -664,35 +649,24 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     json_ai = _add_implicit_values(json_ai)
 
     # ----------------- #
-    # Instantiate encoders
-    encoder_dict = {
-        json_ai.problem_definition.target: call(
-            list(json_ai.outputs.values())[0].encoder
-        )
-    }
 
-    # Instantiate Depedencies
-    dependency_dict = {}
-    dtype_dict = {
-        json_ai.problem_definition.target: f"""'{list(json_ai.outputs.values())[0].data_dtype}'"""
-    }
+    # Instantiate data types
+    dtype_dict = json_ai.dtype_dict
 
-    # Populate features and their data-types
-    for col_name, feature in json_ai.features.items():
-        encoder_dict[col_name] = call(feature.encoder)
-        dependency_dict[col_name] = feature.dependency
-        dtype_dict[col_name] = f"""'{feature.data_dtype}'"""
+    # Populate encoders
+    encoder_dict = {}
+    for col_name, encoder in json_ai.encoders.items():
+        encoder_dict[col_name] = call(encoder)
 
     # Populate time-series specific details
     tss = json_ai.problem_definition.timeseries_settings
     if tss.is_timeseries and tss.use_previous_target:
         col_name = f"__mdb_ts_previous_{json_ai.problem_definition.target}"
-        json_ai.problem_definition.timeseries_settings.target_type = list(
-            json_ai.outputs.values()
-        )[0].data_dtype
+        json_ai.problem_definition.timeseries_settings.target_type =\
+        json_ai.dtype_dict[json_ai.problem_definition.target]
         encoder_dict[col_name] = call(
             lookup_encoder(
-                list(json_ai.outputs.values())[0].data_dtype,
+                json_ai.dtype_dict[json_ai.problem_definition.target],
                 col_name,
                 False,
                 json_ai.problem_definition,
@@ -700,14 +674,16 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
                 None,
             )
         )
-        dependency_dict[col_name] = []
-        data_dtype = list(json_ai.outputs.values())[0].data_dtype
-        dtype_dict[col_name] = f"""'{data_dtype}'"""
-        json_ai.features[col_name] = Feature(encoder=encoder_dict[col_name], data_dtype=data_dtype)
+
+        dtype_dict[col_name] = f"""'{json_ai.dtype_dict[json_ai.problem_definition.target]}'"""
+        # @TODO: Is populating the json_ai at this stage even necessary?
+        json_ai.encoders[col_name] = encoder_dict[col_name]
+        json_ai.dtype_dict[col_name] = json_ai.dtype_dict[json_ai.problem_definition.target]
+        json_ai.dependency_dict[col_name] = []
 
     # ----------------- #
 
-    input_cols = [x.replace("'", "\\'").replace('"', '\\"') for x in json_ai.features]
+    input_cols = [x.replace("'", "\\'").replace('"', '\\"') for x in json_ai.encoders]
     input_cols = ",".join([f"""'{name}'""" for name in input_cols])
 
     # ----------------- #
@@ -890,7 +866,7 @@ log.info('Training the mixers')
 # Fit Models
 # --------------- #
 # Assign list of mixers
-self.mixers = [{', '.join([call(x) for x in list(json_ai.outputs.values())[0].mixers])}]
+self.mixers = [{', '.join([call(x) for x in json_ai.model["args"]["submodels"]])}]
 
 # Train mixers
 trained_mixers = []
@@ -912,7 +888,8 @@ self.mixers = trained_mixers
 log.info('Ensembling the mixer')
 # Create an ensemble of mixers to identify best performing model
 self.pred_args = PredictionArguments()
-self.ensemble = {call(list(json_ai.outputs.values())[0].ensemble)}
+# Dirty hack
+self.ensemble = {call(json_ai.model)}
 self.supports_proba = self.ensemble.supports_proba
 """
     fit_body = align(fit_body, 2)
@@ -1064,10 +1041,10 @@ class Predictor(PredictorInterface):
         self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
         self.accuracy_functions = {json_ai.accuracy_functions}
         self.identifiers = {json_ai.identifiers}
-        self.dtype_dict = {inline_dict(dtype_dict)}
+        self.dtype_dict = {inline_dict(json_ai.dtype_dict)}
 
         # Any feature-column dependencies
-        self.dependencies = {inline_dict(dependency_dict)}
+        self.dependencies = {inline_dict(json_ai.dependency_dict)}
 
         self.input_cols = [{input_cols}]
 
