@@ -340,9 +340,9 @@ class JsonAI:
     recipe of how to pre-process data, construct features, and train on the target column. To do so, the following \
     specifications are required internally.
 
-    :param encoders: The encoders corresponding to each column
-    :param dtype_dict: The dictionary of types associated to each column
-    :param dependency_dict: The dictionary of dependencies associated to each column
+    :param encoders: A dictionary of the form: `column_name -> encoder module`
+    :param dtype_dict: A dictionary of the form: `column_name -> data type`
+    :param dependency_dict: A dictionary of the form: `column_name -> list of columns it depends on`
     :param model: The ensemble and it's submodels
     :param problem_definition: The ``ProblemDefinition`` criteria.
     :param identifiers: A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.
