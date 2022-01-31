@@ -14,7 +14,8 @@ from lightwood.api import dtype
 
 def transform_timeseries(
         data: pd.DataFrame, dtype_dict: Dict[str, str],
-        timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
+        timeseries_settings: TimeseriesSettings, target: str, mode: str,
+        use_dask: bool = True, mp_row_cutoff: int = 500) -> pd.DataFrame:
     """
     Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.
     
@@ -30,6 +31,8 @@ def transform_timeseries(
     :param timeseries_settings: A `TimeseriesSettings` object.
     :param target: The name of the target column to forecast.
     :param mode: Either "train" or "predict", depending on what phase is calling this procedure.
+    :param use_dask: If `True` and Dask is installed, lightwood will use Dask to compute the transformations.
+    :param mp_row_cutoff: if dataset size is bigger than this amount, parallel compute procedures will be used.
     
     :return: A dataframe with all the transformations applied.
     """  # noqa
@@ -39,6 +42,14 @@ def transform_timeseries(
     gb_arr = tss.group_by if tss.group_by is not None else []
     ob_arr = tss.order_by
     window = tss.window
+
+    if use_dask:
+        try:
+            import dask
+            import dask.dataframe as dd
+        except ImportError:
+            use_dask = False
+            log.warning("Could not import Dask, reverting to default multiprocessing mode...")
 
     if tss.use_previous_target and target not in data.columns:
         raise Exception(f"Cannot transform. Missing historical values for target column {target} (`use_previous_target` is set to True).")  # noqa
@@ -117,30 +128,48 @@ def transform_timeseries(
                 df_arr[i] = _ts_infer_next_row(subdf, ob_arr, last_index)
                 last_index += 1
 
-    if len(original_df) > 500:
-        # @TODO: restore possibility to override this with args
+    if len(original_df) > mp_row_cutoff:
+        # @TODO: restore possibility to override this cutoff with args
         nr_procs = get_nr_procs(original_df)
         log.info(f'Using {nr_procs} processes to reshape.')
-        pool = mp.Pool(processes=nr_procs)
-        # Make type `object` so that dataframe cells can be python lists
-        df_arr = pool.map(partial(_ts_to_obj, historical_columns=ob_arr + tss.historical_columns), df_arr)
-        df_arr = pool.map(partial(_ts_order_col_to_cell_lists,
-                          order_cols=ob_arr + tss.historical_columns), df_arr)
-        df_arr = pool.map(
-            partial(
-                _ts_add_previous_rows, order_cols=ob_arr + tss.historical_columns, window=window),
-            df_arr)
 
-        df_arr = pool.map(partial(_ts_add_future_target, target=target, horizon=tss.horizon,
-                                  data_dtype=tss.target_type, mode=mode),
-                          df_arr)
+        if use_dask:
+            log.info("Dask active.")
+            df = dd.from_pandas(pd.concat(df_arr), npartitions=nr_procs)
+            df_1 = dask.delayed(_ts_to_obj)(df, historical_columns=ob_arr + tss.historical_columns)
+            df_2 = dask.delayed(_ts_order_col_to_cell_lists)(df_1, order_cols=ob_arr + tss.historical_columns)
+            df_3 = dask.delayed(_ts_add_previous_rows)(df_2, order_cols=ob_arr + tss.historical_columns, window=window)
+            df_4 = dask.delayed(_ts_add_future_target)(df_3,
+                                                       target=target, horizon=tss.horizon,
+                                                       data_dtype=tss.target_type, mode=mode)
+            if tss.use_previous_target:
+                df_5 = dask.delayed(_ts_add_previous_target)(df_4, target=target, window=tss.window)
+                combined_df = dask.compute(df_5)[0]
+            else:
+                combined_df = dask.compute(df_4)[0]
 
-        if tss.use_previous_target:
+        else:
+            pool = mp.Pool(processes=nr_procs)
+            # Make type `object` so that dataframe cells can be python lists
+            df_arr = pool.map(partial(_ts_to_obj, historical_columns=ob_arr + tss.historical_columns), df_arr)
+            df_arr = pool.map(partial(_ts_order_col_to_cell_lists,
+                              order_cols=ob_arr + tss.historical_columns), df_arr)
             df_arr = pool.map(
-                partial(_ts_add_previous_target, target=target, window=tss.window),
+                partial(
+                    _ts_add_previous_rows, order_cols=ob_arr + tss.historical_columns, window=window),
                 df_arr)
-        pool.close()
-        pool.join()
+
+            df_arr = pool.map(partial(_ts_add_future_target, target=target, horizon=tss.horizon,
+                                      data_dtype=tss.target_type, mode=mode),
+                              df_arr)
+
+            if tss.use_previous_target:
+                df_arr = pool.map(
+                    partial(_ts_add_previous_target, target=target, window=tss.window),
+                    df_arr)
+            pool.close()
+            pool.join()
+            combined_df = pd.concat(df_arr)
     else:
         for i in range(n_groups):
             df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
@@ -152,7 +181,7 @@ def transform_timeseries(
             if tss.use_previous_target:
                 df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window)
 
-    combined_df = pd.concat(df_arr)
+        combined_df = pd.concat(df_arr)
 
     if '__mdb_make_predictions' in combined_df.columns:
         combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool).isin([True])])
