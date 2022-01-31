@@ -343,7 +343,7 @@ class JsonAI:
     :param encoders: A dictionary of the form: `column_name -> encoder module`
     :param dtype_dict: A dictionary of the form: `column_name -> data type`
     :param dependency_dict: A dictionary of the form: `column_name -> list of columns it depends on`
-    :param model: The ensemble and it's submodels
+    :param model: The ensemble and its submodels
     :param problem_definition: The ``ProblemDefinition`` criteria.
     :param identifiers: A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.
     :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, "None" suggests Lightwood's default approach in ``data.cleaner``.
