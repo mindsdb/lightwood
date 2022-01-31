@@ -66,11 +66,11 @@ class TestTimeseries(unittest.TestCase):
                                                                     'period_intervals': (('daily', 7),),
                                                                     'window': window
                                                                 }}))
-        for i, mixer in enumerate(jai.outputs[target].mixers):
+        for i, mixer in enumerate(jai.model['args']['submodels']):
             if mixer["module"] == 'SkTime':
                 sktime_mixer_idx = i
 
-        jai.outputs[target].mixers[sktime_mixer_idx] = {
+        jai.model['args']['submodels'][sktime_mixer_idx] = {
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
@@ -213,7 +213,7 @@ class TestTimeseries(unittest.TestCase):
                                             }})
 
         json_ai = json_ai_from_problem(df, problem_definition=pdef)
-        json_ai.outputs[target].mixers = [{
+        json_ai.model['args']['submodels'] = [{
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
