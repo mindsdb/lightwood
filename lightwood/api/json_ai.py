@@ -308,7 +308,7 @@ def generate_json_ai(
             col,
             False,
             problem_definition,
-            False,
+            is_target_predicting_encoder,
             statistical_analysis,
         )
 
