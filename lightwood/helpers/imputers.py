@@ -5,43 +5,44 @@ import pandas as pd
 
 
 class BaseImputer:
-    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero', force_typecast: str = None):
+    def __init__(self, target: str, dependencies: List[str] = []):
         """
-        Lightwood imputers can modify a subset of columns (typically, a single column) after the raw data has been cleaned.
+        Lightwood imputers will fill in missing values in any given column.
         
-        The single method to implement, `impute` is where the logic for missing values in all relevant columns has to be specified. The recommendation is to deepcopy the data frame prior to imputing.
+        The single method to implement, `impute`, is where the logic for filling in missing values has to be specified.
         
-        :param target: Column that the imputer will handle. 
-        :param dependencies: Columns that the imputer additionally needs to impute the target column.
-        :param value: Specifies the imputation value.
-        :param force_typecast: Setting this flag to something other than 'None' will force the column to be casted into either 'int' or 'float' 
+        Note that if access to other columns is required, this can be specified with the `dependencies` parameter.
+
+        :param target: Column that the imputer will modify.
+        :param dependencies: Any additional columns (other than the target) that will be needed inside `impute()`.
         """  # noqa
         self.target = target
         self.dependencies = dependencies
-        self.value = value
-        self.force_typecast = force_typecast
 
     def impute(self, data: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError("Please implement your custom imputing logic in a module that inherits this class.")
 
 
 class NumericalImputer(BaseImputer):
-    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero', force_typecast: str = None):
+    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero', typecast: str = None):
         """
         Imputer for numerical columns. Supports a handful of different approaches to define the imputation value.
         
-        String to invoke this class from the cleaner is "numerical.$value", with "value" one of the valid options defined below:
+        String to invoke this class from the cleaner is "numerical.$value", with "value" one of the valid options defined below.
         
-        :param value: One of 'mean', 'median', 'zero', 'mode'.
+        :param value: The value to impute. One of 'mean', 'median', 'zero', 'mode'.
+        :param typecast: Used to cast the column into either 'int' or 'float' (`None` skips forced casting).
         """  # noqa
-        super().__init__(target, dependencies, value, force_typecast)
+        self.value = value
+        self.typecast = typecast
+        super().__init__(target, dependencies)
 
     def impute(self, data: pd.DataFrame) -> pd.DataFrame:
         data = deepcopy(data)
         col = self.target
 
         if data[col].dtype not in (int, float):
-            if self.force_typecast:
+            if self.typecast:
                 try:
                     data[col] = data[col].astype(float)
                 except ValueError:
@@ -64,7 +65,7 @@ class NumericalImputer(BaseImputer):
 
 
 class CategoricalImputer(BaseImputer):
-    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero', **kwargs):
+    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero'):
         """
         Imputer for categorical columns.
         
@@ -72,7 +73,8 @@ class CategoricalImputer(BaseImputer):
         
         :param value: One of 'mode', 'unk'. The former replaces missing data with the most common label, and the latter with an "UNK" string.
         """  # noqa
-        super().__init__(target, dependencies, value, **kwargs)
+        self.value = value
+        super().__init__(target, dependencies)
 
     def impute(self, data: pd.DataFrame) -> pd.DataFrame:
         data = deepcopy(data)

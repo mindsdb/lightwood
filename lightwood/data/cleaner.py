@@ -10,7 +10,7 @@ import pandas as pd
 from lightwood.api.dtype import dtype
 from lightwood.helpers import text
 from lightwood.helpers.log import log
-from lightwood.api.types import Module
+from lightwood.helpers.imputers import BaseImputer
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import is_nan_numeric
 
@@ -24,7 +24,7 @@ def cleaner(
     mode: str,
     timeseries_settings: TimeseriesSettings,
     anomaly_detection: bool,
-    imputers: Dict[str, Module] = {},
+    imputers: Dict[str, BaseImputer] = {},
     custom_cleaning_functions: Dict[str, str] = {}
 ) -> pd.DataFrame:
     """
@@ -36,7 +36,7 @@ def cleaner(
     :param identifiers: A dict containing all identifier typed columns
     :param target: The target columns
     :param mode: Can be "predict" or "train"
-    :param imputers: Dictionary where keys are input columns, and values the respective imputer objects to use, formatted as JsonAI modules. For module options and their respective parameters, refer to imputer documentation.
+    :param imputers: The key corresponds to the single input column that will be imputed by the object. Refer to the imputer documentation for more details.
     :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
     :param anomaly_detection: Are we detecting anomalies with this predictor?
 
