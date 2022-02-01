@@ -11,8 +11,6 @@ from lightwood.api.dtype import dtype
 from lightwood.helpers import text
 from lightwood.helpers.log import log
 from lightwood.api.types import Module
-from lightwood.helpers.imputers import BaseImputer
-from lightwood.helpers.templating import call
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import is_nan_numeric
 
